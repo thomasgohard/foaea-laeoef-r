@@ -1,0 +1,182 @@
+﻿@using FOAEA3.Data.Base;
+@using FOAEA3.Resources.Helpers;
+
+@model FOAEA3.ViewModels.TracingDataEntryViewModel
+
+@{
+    bool isCreateMode = (string.IsNullOrEmpty(Model.Tracing.Appl_CtrlCd));
+
+    bool canEditCore = Model.CanEditCore;
+    bool canEditCommentsAndRef = Model.CanEditCommentsAndRef;
+
+    bool coreDisabled = false;
+    bool commentsDisabled = false;
+    bool refDisabled = false;
+    bool applCtrlDisabled = !(Model.IsCreate);
+
+    if (!canEditCore)
+    {
+        coreDisabled = true;
+    }
+    if (!canEditCommentsAndRef)
+    {
+        commentsDisabled = true;
+        refDisabled = true;
+    }
+
+    Dictionary<string, string> genderChoices = new Dictionary<string, string>();
+    foreach (var gender in ReferenceData.Instance().Genders)
+    {
+        genderChoices.Add(gender.Key, gender.Value.Description);
+    }
+
+    bool optRoleReason1 = false;
+    bool optRoleReason2 = false;
+    bool optRoleReason4 = false;
+    bool optRoleReason5 = false;
+
+    if (!string.IsNullOrEmpty(Model.Tracing.AppReas_Cd))
+        switch (Model.Tracing.AppReas_Cd.Trim())
+        {
+            case "1": optRoleReason1 = true; break;
+            case "2": optRoleReason2 = true; break;
+            case "4": optRoleReason4 = true; break;
+            case "5": optRoleReason5 = true; break;
+        }
+
+    string legalDate;
+    if (Model.Tracing.Appl_Lgl_Dte.HasValue)
+    {
+        legalDate = Model.Tracing.Appl_Lgl_Dte.Value.ToString(DateTimeHelper.YYYY_MM_DD);
+    }
+    else
+    {
+        legalDate = DateTime.Now.ToString(DateTimeHelper.YYYY_MM_DD);
+    }
+
+    ViewBag.CourtValue = Model.CourtValue;
+    ViewBag.ApplCtrlDisabled = applCtrlDisabled;
+    ViewBag.RefDisabled = refDisabled;
+
+    ViewBag.GenderChoices = genderChoices;
+    ViewBag.CoreDisabled = coreDisabled;
+
+    ViewBag.CommentsDisabled = commentsDisabled;
+    ViewBag.IsCreateMode = isCreateMode;
+    ViewBag.Declarant = Model.Declarant;
+    ViewBag.LegalDate = legalDate;
+
+    ViewBag.TablePrefix = "Tracing";
+
+}
+
+<input type="hidden" asp-for="Tracing.Appl_EnfSrv_Cd" />
+@if (applCtrlDisabled)
+{
+    <input type="hidden" asp-for="Tracing.Appl_CtrlCd" />
+}
+
+<div class=" row mt-1">
+    <div class="col">T01</div>
+</div>
+<div class="row mb-2 text-info">
+    <div class="col">APPLICATION: RELEASE OF INFORMATION UNDER PART I OF THE <i>FAMILY ORDERS AND AGREEMENTS ENFORCEMENT ASSISTANCE ACT</i>.</div>
+</div>
+<div class="row mt-6 text-primary">
+    <div class="col">(*indicates a required field)</div>
+</div>
+
+<partial name="_ApplicantIdentificationCore" model="Model.Tracing" />
+
+<hr />
+
+<div class="row mt-2">
+    <div class="col">PART 2</div>
+</div>
+<div class="row text-info">
+    <div class="col">INFORMATION ON PERSON TO BE LOCATED</div>
+</div>
+<div class="row mb-4 text-info">
+    <div class="col">The name of the person to be located must correspond to the name on the affidavit in support of this application</div>
+</div>
+
+<partial name="_DebtorInformationCore" model="Model.Tracing" />
+
+<hr />
+
+<div class="row mt-2">
+    <div class="col">PART 3</div>
+</div>
+<div class="row mb-4 text-info">
+    <div class="col">REASON FOR APPLICATION</div>
+</div>
+<div class="form-row form-group">
+    <div class="offset-1 col-11">
+        <div id="optButtons" class="btn-group-vertical d-flex btn-group-sm btn-group-toggle" data-toggle="buttons">
+            <flas-radio asp-for="Tracing.AppReas_Cd" value="1" badge="A" active="optRoleReason1" disabled="coreDisabled">Person believed to have possession of the child or children in contravention of the custody provision</flas-radio>
+            <flas-radio asp-for="Tracing.AppReas_Cd" value="2" badge="B" active="optRoleReason2" disabled="coreDisabled">Person charged with an offence under section 282 or 283 of the Criminal Code</flas-radio>
+            <flas-radio asp-for="Tracing.AppReas_Cd" value="3" badge="C" disabled>Person in default of the support provision</flas-radio>
+            <flas-radio asp-for="Tracing.AppReas_Cd" value="4" badge="D" active="optRoleReason4" disabled="coreDisabled">Missing child</flas-radio>
+            <flas-radio asp-for="Tracing.AppReas_Cd" value="5" badge="E" active="optRoleReason5" disabled="coreDisabled">Person believed to have possession of a child or children in contravention of the access right</flas-radio>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<hr />
+
+<div class="row mt-2">
+    <div class="col">PART 4</div>
+</div>
+<div class="row mb-4 text-info">
+    <div class="col">DOCUMENTS</div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <p>All applications must be accompanied by the following documents:</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <ol class="letterBracket">
+            <li>
+                where the application is made by a judge of a court of any officer,
+                <ol class="romanBracketted">
+                    <li>a copy of the family provision to which the application relates,</li>
+                    <li>the court's authorization obtained under section 12 of the Act, and</li>
+                    <li>a copy of the affidavit submitted in support of the application for the court's authorization;</li>
+                </ol>
+            </li>
+            <li>
+                where the application is made by a provincial enforcement service, an affidavit in support of the application in accordance with subsection 14(4) of the Act,
+            </li>
+            <li>
+                where the application is made by a peace officer investigating a child abduction pursuant to section 282 or 283 of the <i>Criminal Code</i>,
+                <ol class="romanBracketted">
+                    <li>a copy of the <i>Criminal Code</i> information, and</li>
+                    <li>an affidavit in support of the application in accordance with subsection 14(5) of the Act.</li>
+                </ol>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<hr />
+<div class="row mt-2">
+    <div class="col">PART 5</div>
+</div>
+<div class="row mb-4 text-info">
+    <div class="col">DECLARATION</div>
+</div>
+<div class="row">
+    <div class="col">
+        <p>I declare that the information given in this application is true and for the purpose of applying for the release of information to assist in locating a person in accordance with the <i>Family Orders and Agreements Enforcement Assistance Act</i>.</p>
+    </div>
+</div>
+
+<partial name="_DeclarantAndComments" model="Model.Tracing" />
+
+<br />
+<br />

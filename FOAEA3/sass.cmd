@@ -1,0 +1,5 @@
+node "%APPDATA%\npm\node_modules\sass\sass.js" "Styles\foaea.scss" "wwwroot\css\foaea.css"
+node "%APPDATA%\npm\node_modules\sass\sass.js" "Styles\dev.scss" "wwwroot\css\dev.css"
+node "%APPDATA%\npm\node_modules\sass\sass.js" "Styles\prod.scss" "wwwroot\css\prod.css"
+node "%APPDATA%\npm\node_modules\sass\sass.js" "Styles\menus.scss" "wwwroot\css\menus.css"
+node "%APPDATA%\npm\node_modules\sass\sass.js" "Styles\staging.scss" "wwwroot\css\staging.css"

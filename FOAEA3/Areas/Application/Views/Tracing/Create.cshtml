@@ -1,0 +1,42 @@
+﻿@using FOAEA3.Model.Enums;
+
+@model FOAEA3.ViewModels.TracingDataEntryViewModel
+
+@{
+    ViewData["Title"] = "T01";
+}
+
+<partial name="_ErrorInfoDisplay" model="Model.Tracing" />
+
+<div class="row">
+    <div class="col-12">
+
+        <form method="post">
+
+            <input type="hidden" id="Tracing.Subm_SubmCd" name="Tracing.Subm_SubmCd" value="@Model.Tracing.Subm_SubmCd" />
+            <input type="hidden" id="Tracing.Subm_Recpt_SubmCd" name="Tracing.Subm_Recpt_SubmCd" value="@Model.Tracing.Subm_Recpt_SubmCd." />
+            <input type="hidden" id="Tracing.Medium_Cd" name="Tracing.Medium_Cd" value="@Model.Tracing.Medium_Cd" />
+
+            <partial name="_TracingData" />
+
+            <div class="form-group mt-4">
+                <button asp-controller="Tracing" asp-action="Create" asp-area="Application" class="btn btn-primary">Submit to FOAEA</button>
+                <button asp-controller="Tracing" asp-action="Index" asp-area="Application" class="btn border-primary">Clear Fields</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Create.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Create.min.js"></script>
+    </environment>
+
+}

@@ -1,0 +1,51 @@
+﻿@model FOAEA3.Model.LoginData
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<partial name="_ErrorInfoDisplay" model="Model" />
+
+<br />
+
+<form method="post">
+
+    <div class="row mt-5">
+
+        <div class="offset-4 col-8">
+
+            <flas-input asp-for="UserName" size="5" required></flas-input>
+            <flas-input asp-for="Password" size="5" required password></flas-input>
+
+        </div>
+
+    </div>
+
+    <div class="row mt-5">
+
+        <div class="offset-3 col-9 text-center">
+
+            <button asp-controller="Home" asp-action="Login" class="btn btn-success">@LanguageResource.SUBMIT_LOGIN</button>
+            <br />
+            <button asp-controller="Home" asp-action="ResetPassword" class="btn btn-secondary mt-2">@LanguageResource.RESET_PASSWORD</button>
+
+        </div>
+
+    </div>
+
+</form>
+
+<br />
+
+@section scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Home/login.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Home/login.min.js"></script>
+    </environment>
+
+}
+
+

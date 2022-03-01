@@ -1,0 +1,38 @@
+﻿@using FOAEA3.Model.Enums;
+
+@model FOAEA3.ViewModels.LicenceDenialDataEntryViewModel
+
+@{
+    ViewData["Title"] = "L01";
+}
+
+<partial name="_ErrorInfoDisplay" model="Model.LicenceDenial" />
+
+<div class="row">
+    <div class="col-12">
+
+        <form method="post">
+
+            <partial name="_LicenceDenialData" />
+
+            <div class="form-group mt-4">
+                <button asp-controller="LicenceDenial" asp-action="Create" asp-area="Application" class="btn btn-primary">Submit to FOAEA</button>
+                <button asp-controller="LicenceDenial" asp-action="Index" asp-area="Application" class="btn border-primary">Clear Fields</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Areas/Application/LicenceDenial/Create.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Areas/Application/LicenceDenial/Create.min.js"></script>
+    </environment>
+
+}

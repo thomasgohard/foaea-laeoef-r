@@ -1,0 +1,82 @@
+﻿@using FOAEA3.Data.Base;
+@using FOAEA3.Model.Enums;
+@using FOAEA3.Resources.Helpers;
+@using FOAEA3.Model;
+
+@model List<TracingApplicationData>
+
+@{
+    ViewData["Title"] = "Tracing Applications Waiting For Affidavit";
+}
+
+@section Styles {
+    <environment exclude="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    </environment>
+    <environment include="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    </environment>
+}
+
+<h1>Index</h1>
+<div class="row mb-2">
+    <div class="col text-info"><h2>Tracing Applications Waiting For Affidavits</h2></div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table id="datatablesGrid">
+            <thead>
+                <tr>
+                    <th class="nowrap">Action</th>                       <!-- Action Buttons  -->
+                    <th style="width: 70px;"></th>                       <!-- Service         -->
+                    <th style="width: 80px;"></th>                       <!-- Submitter       -->
+                    <th style="width: 80px;"></th>                       <!-- Ctrl Code       -->
+                    <th style="width: 100px;"></th>                      <!-- Date Received   -->
+                    <th style="width: 110px;"></th>                      <!-- Debtor SurName  -->
+                    <th style="width: 110px;"></th>                      <!-- Source Ref Nr   -->
+                    <th style="width: 90px;"></th>                       <!-- Justice Nr      -->
+                    <th style="width: 70px;" class="text-center"></th>   <!-- Status          -->
+                    <th style="width: 70px;" class="text-center"></th>   <!-- State           -->
+                </tr>
+            </thead>
+            <tbody id="applicationDataRows">
+                @foreach (ApplicationData data in Model)
+                {
+                    string appKey = data.Appl_EnfSrv_Cd.Trim() + "-" + data.Appl_CtrlCd.Trim();
+
+                    <tr>
+                        <td class="nowrap" style="width:50px;">
+                            <a asp-controller="Tracing" asp-action="AffidavitCreate" asp-area="Application" asp-route-id="@appKey">[Enter Affidavit]</a>
+                        </td>
+                        <td>@data.Appl_EnfSrv_Cd</td>
+                        <td>@data.Subm_SubmCd</td>
+                        <td><a id="@appKey" asp-controller="Tracing" asp-action="Edit" asp-area="Application" asp-route-id="@appKey">@data.Appl_CtrlCd</a></td>
+                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeHelper.YYYY_MM_DD)</td>
+                        <td>@data.Appl_Dbtr_SurNme</td>
+                        <td>@data.Appl_Source_RfrNr</td>
+                        <td>@data.Appl_JusticeNr</td>
+                        <td>@data.ActvSt_Cd</td>
+                        <td class="nowrap">@ReferenceData.Instance().ApplicationLifeStates[(ApplicationState)data.AppLiSt_Cd].Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/js/Shared/datatableManager.js"></script>
+        <script src="~/js/Areas/Application/Tracing/AffidavitIndex.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/js/Shared/datatableManager.min.js"></script>
+        <script src="~/js/Areas/Application/Tracing/AffidavitIndex.min.js"></script>
+    </environment>
+
+}
+
+

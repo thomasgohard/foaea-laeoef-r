@@ -1,0 +1,399 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ADD_NEW_FROM_CURRENT" xml:space="preserve">
+    <value>Nouveau a partir de celui-ci</value>
+  </data>
+  <data name="APPLICATION_MANAGER" xml:space="preserve">
+    <value>Gestionnaire de l'application</value>
+  </data>
+  <data name="APPLICATION_REFERENCE_NUMBER" xml:space="preserve">
+    <value>Application Reference Number</value>
+  </data>
+  <data name="APPL_COMMENT" xml:space="preserve">
+    <value>Commentaire</value>
+  </data>
+  <data name="CHANGE_PASSWORD_CONFIRM_LABEL" xml:space="preserve">
+    <value>Confirmation du nouveau mot de passe</value>
+  </data>
+  <data name="CHANGE_PASSWORD_FAILS_REQUIREMENTS" xml:space="preserve">
+    <value>Le nouveau mot de passe permanent doit être conforme à la norme suivante: - Minimum de 8 caractères alphanumériques; - Choisissez au moins un caractère dans au moins trois des catégories suivantes:  un chiffre, une lettre minuscule, une lettre majuscule et un caractère spécial; - Ne peut pas contenir la portion de votre nom d'utilisateur qui se retrouve avant ou après le tiret (-); - Ne devrait pas être un mot de passe déjà utilisé dans le passé</value>
+  </data>
+  <data name="CHANGE_PASSWORD_LABEL" xml:space="preserve">
+    <value>Ancien mot de passe</value>
+  </data>
+  <data name="CHANGE_PASSWORD_MATCH_ERROR" xml:space="preserve">
+    <value>Le mot de passe ne correspond pas.</value>
+  </data>
+  <data name="CHANGE_PASSWORD_NEW_LABEL" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="CHANGE_PASSWORD_SUCCESSFUL" xml:space="preserve">
+    <value>Mot de passe modifié</value>
+  </data>
+  <data name="COMMENTS" xml:space="preserve">
+    <value>Commentaires</value>
+  </data>
+  <data name="CONFIRMATION_CODE_LABEL" xml:space="preserve">
+    <value>Code de Confirmation</value>
+  </data>
+  <data name="COURT_USER" xml:space="preserve">
+    <value>Nom du tribunal</value>
+  </data>
+  <data name="DOB" xml:space="preserve">
+    <value>Date de naissance</value>
+  </data>
+  <data name="DOJ_FINANCIAL_OFFICER" xml:space="preserve">
+    <value>Agent financier Justice</value>
+  </data>
+  <data name="DUTIES" xml:space="preserve">
+    <value>Tâches</value>
+  </data>
+  <data name="EMAIL_ADDRESS" xml:space="preserve">
+    <value>Adresse courriel</value>
+  </data>
+  <data name="ENFORCEMENT_OFFICE" xml:space="preserve">
+    <value>Bureau de l'autorité provincial</value>
+  </data>
+  <data name="ENFORCEMENT_SERVICE" xml:space="preserve">
+    <value>Autorité provinciale</value>
+  </data>
+  <data name="ERROR_LABEL" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="FAX" xml:space="preserve">
+    <value>Télécopieur</value>
+  </data>
+  <data name="FINANCE" xml:space="preserve">
+    <value>Finances</value>
+  </data>
+  <data name="FIRST_NAME" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="GENDER" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="INFO_LABEL" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="INTERCEPTION" xml:space="preserve">
+    <value>Interception</value>
+  </data>
+  <data name="LANGUAGE_PREFERENCE" xml:space="preserve">
+    <value>Préférence linguistique</value>
+  </data>
+  <data name="LAST_LOGIN" xml:space="preserve">
+    <value>Dernière visite</value>
+  </data>
+  <data name="LICENSE_DENIAL" xml:space="preserve">
+    <value>Refus - autorisation de licence</value>
+  </data>
+  <data name="MENU_CHANGE_PASSWORD" xml:space="preserve">
+    <value>Modifier le mot de passe</value>
+  </data>
+  <data name="LOGOUT" xml:space="preserve">
+    <value>Déconnecter</value>
+  </data>
+  <data name="MOTHER_MAIDEN_NAME" xml:space="preserve">
+    <value>Mother's surname at her birth</value>
+  </data>
+  <data name="PASSWORD_LABEL" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="PASSWORD_USED" xml:space="preserve">
+    <value>Le mot de passe a déjà été utilisé.</value>
+  </data>
+  <data name="PROVINCE" xml:space="preserve">
+    <value>Province</value>
+  </data>
+  <data name="READ_ONLY" xml:space="preserve">
+    <value>Lisez Seulement</value>
+  </data>
+  <data name="RESET_EMAIL_SENT" xml:space="preserve">
+    <value>Courriel de réinitialisation envoyé à l'utilisateur</value>
+  </data>
+  <data name="RESET_PASSWORD" xml:space="preserve">
+    <value>Réinitialiser mot de passe/Déverrouiller le compte</value>
+  </data>
+  <data name="ROLE" xml:space="preserve">
+    <value>Rôle</value>
+  </data>
+  <data name="SAVE" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="SECOND_NAME" xml:space="preserve">
+    <value>Second prénom</value>
+  </data>
+  <data name="SEND_PASSWORD" xml:space="preserve">
+    <value>Envoyer le mot de passe</value>
+  </data>
+  <data name="SIN" xml:space="preserve">
+    <value>Numéro d'assurance social</value>
+  </data>
+  <data name="STATUS" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="SUBMITTER_CODE" xml:space="preserve">
+    <value>Code du requérant</value>
+  </data>
+  <data name="SUBMITTER_TITLE" xml:space="preserve">
+    <value>Titre du requérant</value>
+  </data>
+  <data name="SUBMIT_ENTER" xml:space="preserve">
+    <value>Soumettre</value>
+  </data>
+  <data name="SUBMIT_LOGIN" xml:space="preserve">
+    <value>Entrer dans la base de données</value>
+  </data>
+  <data name="SURNAME" xml:space="preserve">
+    <value>Nom de famille</value>
+  </data>
+  <data name="SWEARS_AFFIDAVITS" xml:space="preserve">
+    <value>Assermenter</value>
+  </data>
+  <data name="SYSTEM_MANAGER" xml:space="preserve">
+    <value>Gestionnaire de système</value>
+  </data>
+  <data name="TELEPHONE" xml:space="preserve">
+    <value>Téléphone</value>
+  </data>
+  <data name="TRACING" xml:space="preserve">
+    <value>Communication de renseignements</value>
+  </data>
+  <data name="USER_BY" xml:space="preserve">
+    <value>Utilisé par</value>
+  </data>
+  <data name="USER_NAME_LABEL" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="WARNING_LABEL" xml:space="preserve">
+    <value>Avertissement</value>
+  </data>
+  <data name="WELCOME_GREETING" xml:space="preserve">
+    <value>Bienvenue au système d'aide à l'exécution des ordonnances et des ententes familiales.</value>
+  </data>
+  <data name="ALL_LABEL" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="ASSUME_ROLE" xml:space="preserve">
+    <value>Rôle délégué</value>
+  </data>
+  <data name="SELECT_SUBMITTER" xml:space="preserve">
+    <value>Sélectionnez le requérant</value>
+  </data>
+  <data name="SUBMITTER" xml:space="preserve">
+    <value>Requérant</value>
+  </data>
+  <data name="DATA_UPDATE_SUCCESS" xml:space="preserve">
+    <value>L'information a été mise-à-jour avec succès.</value>
+  </data>
+  <data name="OK_LABEL" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="SINDATASENT" xml:space="preserve">
+    <value>Les données sont soumises, </value>
+  </data>
+  <data name="SIN_CONFIRMED" xml:space="preserve">
+    <value>Y</value>
+  </data>
+  <data name="SIN_NOTCONFIRMED" xml:space="preserve">
+    <value>N</value>
+  </data>
+  <data name="VALSTAT_CONFIRMED" xml:space="preserve">
+    <value>NAS confirmé</value>
+  </data>
+  <data name="VALSTAT__NOTCONFIRMED" xml:space="preserve">
+    <value>NAS ne peut être confirmé</value>
+  </data>
+  <data name="AMOUNT_OF_ARREARS" xml:space="preserve">
+    <value>Amount of arrears</value>
+  </data>
+  <data name="COURT_NAME" xml:space="preserve">
+    <value>Name of court</value>
+  </data>
+  <data name="DEBTOR_BIRTH_CITY" xml:space="preserve">
+    <value>City of birth</value>
+  </data>
+  <data name="DEBTOR_BIRTH_COUNTRY" xml:space="preserve">
+    <value>Country of birth</value>
+  </data>
+  <data name="DEBTOR_HEIGHT" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="DEBTOR_LAST_ADDRESS" xml:space="preserve">
+    <value>Latest known address</value>
+  </data>
+  <data name="DEBTOR_LAST_CITY" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="DEBTOR_LAST_COUNTRYCODE" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="DEBTOR_LAST_POSTALCODE" xml:space="preserve">
+    <value>Postal Code</value>
+  </data>
+  <data name="DEBTOR_LAST_PROVCODE" xml:space="preserve">
+    <value>Province/Territory/State</value>
+  </data>
+  <data name="EMPLOYER_ADDRESS1" xml:space="preserve">
+    <value>Employer address</value>
+  </data>
+  <data name="EMPLOYER_ADDRESS_CITY" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="EMPLOYER_ADDRESS_COUNTRYCODE" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="EMPLOYER_ADDRESS_POSTALCODE" xml:space="preserve">
+    <value>Postal Code</value>
+  </data>
+  <data name="EMPLOYER_ADDRESS_PROVCODE" xml:space="preserve">
+    <value>Province/Territory/State</value>
+  </data>
+  <data name="EMPLOYER_NAME" xml:space="preserve">
+    <value>Employer name</value>
+  </data>
+  <data name="EYE_COLOUR" xml:space="preserve">
+    <value>Colour of eyes</value>
+  </data>
+  <data name="IF_KNOWN" xml:space="preserve">
+    <value>if known</value>
+  </data>
+  <data name="NOTICESENTTODEBTOR_DTE" xml:space="preserve">
+    <value>Date notice sent to debtor</value>
+  </data>
+  <data name="NUMBER_PAYMENTS_IN_DEFAULT" xml:space="preserve">
+    <value>Number of payments in default</value>
+  </data>
+  <data name="PAYMENT_PERIOD_CODE" xml:space="preserve">
+    <value>Payment period code</value>
+  </data>
+  <data name="SUPPORTORDER_DTE" xml:space="preserve">
+    <value>Date of support order or provision</value>
+  </data>
+  <data name="TERM_REQ_DATE" xml:space="preserve">
+    <value>Termination date</value>
+  </data>
+  <data name="LANGUAGE_OF_CHOICE" xml:space="preserve">
+    <value>Language of choice</value>
+  </data>
+  <data name="CONTROL_CODE" xml:space="preserve">
+    <value>Code de controle</value>
+  </data>
+</root>

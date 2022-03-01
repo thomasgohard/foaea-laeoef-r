@@ -1,0 +1,56 @@
+﻿@using FOAEA3.Model.Enums;
+
+@model FOAEA3.ViewModels.TracingDataEntryViewModel
+
+@{
+    ViewData["Title"] = "T01";
+}
+
+<partial name="_ErrorInfoDisplay" model="Model.Tracing" />
+
+<div class="row">
+    <div class="col-12">
+
+        <form method="post">
+
+            <partial name="_TracingData" />
+
+            <div class="form-group mt-4">
+                @if ((Model.Tracing.AppLiSt_Cd != ApplicationState.SIN_CONFIRMATION_PENDING_3) &&
+                   (Model.Tracing.AppLiSt_Cd != ApplicationState.APPLICATION_REJECTED_9) &&
+                   (Model.Tracing.AppLiSt_Cd != ApplicationState.MANUALLY_TERMINATED_14))
+                {
+                    <button asp-controller="Tracing" asp-action="Edit" asp-area="Application" class="btn btn-primary">Submit to FOAEA</button>
+                }
+
+                @if ((Model.Tracing.AppLiSt_Cd == ApplicationState.INVALID_APPLICATION_1) ||
+                   (Model.Tracing.AppLiSt_Cd == ApplicationState.SIN_NOT_CONFIRMED_5) ||
+                   (Model.Tracing.AppLiSt_Cd == ApplicationState.FULLY_SERVICED_13))
+                {
+                    <button asp-controller="Tracing" asp-action="Index" asp-area="Application" class="btn  border-primary">Clear Fields</button>
+                }
+
+                @{ string appKey = Model.Tracing.Appl_EnfSrv_Cd + "-" + Model.Tracing.Appl_CtrlCd; }
+
+                @*<button asp-controller="Tracing" asp-action="Index" asp-area="Application" class="btn border-primary">Tracing T02</button>*@
+                <button asp-controller="Tracing" asp-action="TraceResults" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">Trace Results</button>
+                <button asp-controller="Application" asp-action="SINResults" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">SIN Results</button>
+                <button asp-controller="Application" asp-action="Events" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">View Events</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Edit.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Edit.min.js"></script>
+    </environment>
+
+}

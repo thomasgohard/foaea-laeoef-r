@@ -1,0 +1,41 @@
+﻿@page
+@model FOAEA3.Admin.Web.Pages.Tools.SimulateSinConfirmationModel
+@{
+}
+
+@{
+    if (ViewData["Message"] != null)
+    {
+        <div class="alert alert-primary">@ViewData["Message"]</div>
+    }
+    if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger">@ViewData["Error"]</div>
+    }
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SimulateSinConfirmation.EnfService" class="control-label"></label>
+                <input asp-for="SimulateSinConfirmation.EnfService" class="form-control" />
+                <span asp-validation-for="SimulateSinConfirmation.EnfService" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SimulateSinConfirmation.ControlCode" class="control-label"></label>
+                <input asp-for="SimulateSinConfirmation.ControlCode" class="form-control" />
+                <span asp-validation-for="SimulateSinConfirmation.ControlCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SimulateSinConfirmation.Sin" class="control-label"></label>
+                <input asp-for="SimulateSinConfirmation.Sin" class="form-control" />
+                <span asp-validation-for="SimulateSinConfirmation.Sin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Confirm SIN" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

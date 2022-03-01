@@ -1,0 +1,100 @@
+﻿@using FOAEA3.Data.Base;
+@using FOAEA3.Model.Enums;
+@using FOAEA3.Resources.Helpers;
+@using FOAEA3.Model;
+@using FOAEA3.Areas.Application;
+
+@model List<ApplicationSearchResultData>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+@section Styles {
+    <environment exclude="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    </environment>
+    <environment include="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    </environment>
+}
+
+<h1>Search Results</h1>
+<div class="row mb-2">
+    <div class="col text-info"><h2>Applications</h2></div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table id="datatablesGrid">
+            <thead>
+                <tr>
+                    <th class="nowrap">Action</th>                       <!-- Action Buttons  -->
+                    <th style="width: 70px;"></th>                       <!-- Category        -->
+                    <th style="width: 70px;"></th>                       <!-- Service         -->
+                    <th style="width: 80px;"></th>                       <!-- Submitter       -->
+                    <th style="width: 80px;"></th>                       <!-- Ctrl Code       -->
+                    <th style="width: 80px;"></th>                       <!-- Recipient       -->
+                    <th style="width: 100px;"></th>                      <!-- Date Received   -->
+                    <th style="width: 100px;"></th>                      <!-- Expiry Date     -->
+                    <th style="width: 110px;"></th>                      <!-- Debtor SurName  -->
+                    <th style="width: 110px;"></th>                      <!-- Source Ref Nr   -->
+                    <th style="width: 90px;"></th>                       <!-- Justice Nr      -->
+                    <th style="width: 70px;" class="text-center"></th>   <!-- Status          -->
+                    <th style="width: 70px;" class="text-center"></th>   <!-- State           -->
+                </tr>
+            </thead>
+            <tbody id="applicationDataRows">
+                @foreach (ApplicationSearchResultData data in Model)
+                {
+                    string expiryDate = string.Empty;
+                    string appKey = data.Appl_EnfSrv_Cd.Trim() + "-" + data.Appl_CtrlCd.Trim();
+                    string controller = ApplicationHelper.GetControllerForCategory(data.AppCtgy_Cd);
+                    bool showBrowseButton = (data.AppCtgy_Cd == "I01") ? true : false;
+
+                    if (data.Appl_Expiry_Dte.HasValue)
+                    {
+                        expiryDate = data.Appl_Expiry_Dte.Value.ToString(DateTimeHelper.YYYY_MM_DD);
+                    }
+                    <tr>
+                        <td class="nowrap" style="width:50px;">
+                            @if (showBrowseButton)
+                            {
+                                <a asp-controller="@controller" asp-action="Browse" asp-area="Application" asp-route-id="@appKey">[Browse]</a>
+                            }
+                            <a asp-controller="Application" asp-action="Events" asp-area="Application" asp-route-id="@appKey">[Events]</a>
+                        </td>
+                        <td>@data.AppCtgy_Cd</td>
+                        <td>@data.Appl_EnfSrv_Cd</td>
+                        <td>@data.Subm_SubmCd</td>
+                        <td><a id="@appKey" asp-controller="@controller" asp-action="Edit" asp-area="Application" asp-route-id="@appKey">@data.Appl_CtrlCd</a></td>
+                        <td>@data.Subm_Recpt_SubmCd</td>
+                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeHelper.YYYY_MM_DD)</td>
+                        <td>@expiryDate</td>
+                        <td>@data.Appl_Dbtr_SurNme</td>
+                        <td>@data.Appl_Source_RfrNr</td>
+                        <td>@data.Appl_JusticeNr</td>
+                        <td>@data.ActvSt_Cd</td>
+                        <td class="nowrap">@ReferenceData.Instance().ApplicationLifeStates[(ApplicationState)data.AppLiSt_Cd].Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/js/Shared/datatableManager.js"></script>
+        <script src="~/js/Areas/Application/ApplicationSearch/ApplicationSearchResult.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/js/Shared/datatableManager.min.js"></script>
+        <script src="~/js/Areas/Application/ApplicationSearch/ApplicationSearchResult.min.js"></script>
+    </environment>
+
+}
+
+

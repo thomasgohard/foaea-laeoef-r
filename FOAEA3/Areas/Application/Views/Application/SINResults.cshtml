@@ -1,0 +1,92 @@
+﻿@using FOAEA3.Data.Base;
+@using FOAEA3.Model;
+@using FOAEA3.Model.Base;
+@using FOAEA3.Model.Enums;
+@using FOAEA3.Resources.Helpers;
+@using FOAEA3.Areas.Application;
+
+@{
+    ViewData["Title"] = "SIN Results";
+}
+
+@model DataList<SINResultWithHistoryData>
+
+@section Styles {
+    <environment exclude="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    </environment>
+    <environment include="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    </environment>
+}
+
+<partial name="_ErrorInfoDisplay" model="Model" />
+
+<div class="row mb-2">
+    <div class="col text-info"><h2>SIN Result List</h2></div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table id="datatablesGrid">
+            <thead>
+                <tr>
+                    <th class='nowrap'>Prov</th>
+                    <th class='nowrap'>Submitter</th>
+                    <th class='nowrap'>Ctrl Code</th>
+                    <th class='nowrap'>Prov Case #</th>
+                    <th class='nowrap'>Date Received</th>
+                    <th class='nowrap'>DOB Code</th>
+                    <th class='nowrap'>First Name Code</th>
+                    <th class='nowrap'>Middle Name Code</th>
+                    <th class='nowrap'>Surname Code</th>
+                    <th class='nowrap'>Mother's Name Code</th>
+                    <th class='nowrap'>Sex Code</th>
+                    <th class='nowrap'>SIN Code</th>
+                    <th class="nowrap text-center">SIN Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (SINResultWithHistoryData data in Model.Items)
+                {
+
+                    string appKey = data.Appl_EnfSrv_Cd + "-" + data.Appl_CtrlCd;
+                    string SINcode = (data.ValStat_Cd == 0) ? LanguageResource.SIN_CONFIRMED : LanguageResource.SIN_NOTCONFIRMED;
+                    string SINstatus = LanguageResource.SINDATASENT;
+                    SINstatus += (data.ValStat_Cd == 0) ? LanguageResource.VALSTAT_CONFIRMED : LanguageResource.VALSTAT__NOTCONFIRMED;
+
+                    <tr>
+                        <td class='nowrap'>@data.Appl_EnfSrv_Cd</td>
+                        <td class='nowrap'>@data.Subm_SubmCd </td>
+                        <td class='nowrap'>@data.Appl_CtrlCd</td>
+                        <td class='nowrap'>@data.Appl_Source_RfrNr</td>
+                        <td class='nowrap'>@data.SVR_TimeStamp.ToString(DateTimeHelper.YYYY_MM_DD)</td>
+                        <td class='nowrap'>@data.SVR_DOB_TolCd</td>
+                        <td class='nowrap'>@data.SVR_GvnNme_TolCd</td>
+                        <td class='nowrap'>@data.SVR_MddlNme_TolCd</td>
+                        <td class='nowrap'>@data.SVR_SurNme_TolCd</td>
+                        <td class='nowrap'>@data.SVR_MotherNme_TolCd</td>
+                        <td class='nowrap'>@data.SVR_Gendr_TolCd</td>
+                        <td class='nowrap'>@SINcode</td>
+                        <td class='nowrap'>@SINstatus</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/js/Shared/datatableManager.js"></script>
+        <script src="~/js/Areas/Application/Application/SINResults.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/js/Shared/datatableManager.min.js"></script>
+        <script src="~/js/Areas/Application/Application/SINResults.min.js"></script>
+    </environment>
+
+}

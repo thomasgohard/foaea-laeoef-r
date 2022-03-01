@@ -1,0 +1,159 @@
+#test1 {
+  color: blue;
+  background-color: brown; }
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.4375; }
+
+span.und {
+  text-decoration: underline !important; }
+
+.pageAdjust {
+  max-width: 95% !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important; }
+
+#datatablesGrid {
+  border: 1px #009999;
+  border-collapse: collapse; }
+  #datatablesGrid th {
+    vertical-align: middle;
+    border: 1px solid #77d5f7;
+    padding: 0 14px 0 0px;
+    height: auto;
+    text-align: center;
+    font-weight: bold;
+    background: #0078ae;
+    color: white;
+    font-size: 12px; }
+  #datatablesGrid td {
+    font-size: 11px;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0 8px 0 8px;
+    border: 1px #009999 solid;
+    height: 20px; }
+  #datatablesGrid tbody tr:hover {
+    background-color: #77d5f7; }
+
+.nowrap {
+  white-space: nowrap !important; }
+
+tfoot {
+  display: table-header-group; }
+  tfoot input {
+    width: 100%; }
+
+button.dt-buttons {
+  position: relative;
+  float: right;
+  border: none;
+  background-color: transparent; }
+
+.buttons-print {
+  background-color: red;
+  border: none; }
+
+#selectEnfOff, #selectEnfServices {
+  font-family: Courier New, Courier, monospace; }
+
+/* to keep bootstrap badges from stretching */
+.input-group {
+  align-items: center !important; }
+
+a.btn-primary {
+  color: white; }
+
+.form-group {
+  margin-bottom: 0; }
+
+.btn-outline-info:hover,
+.btn-outline-info:focus {
+  color: black;
+  background-color: white;
+  border-color: orange; }
+
+.btn.active.disabled {
+  background-color: #808080 !important;
+  color: black !important; }
+
+.roundedStrong {
+  border-radius: 12px; }
+
+#Subm_Assg_Email {
+  width: 100%; }
+
+#suffixCode {
+  width: 3em; }
+
+.form-group.required .col-form-label:after, .form-group.required .control-label:after {
+  content: "*";
+  color: red; }
+
+.form-control.is-invalid {
+  padding-right: 0 !important;
+  background: none !important; }
+
+.badge-mandatory {
+  vertical-align: middle;
+  font-size: xx-small; }
+.badge-mandatory-top {
+  vertical-align: top;
+  font-size: xx-small; }
+.badge-tall {
+  line-height: 2em; }
+.badge-floating {
+  display: inline-flex;
+  line-height: 2em;
+  vertical-align: middle;
+  padding: 0 6px 0 6px; }
+
+.padding-left-sm {
+  padding-left: 2px !important; }
+
+.create-badge {
+  font-size: 22px; }
+
+/* Tooltip container */
+.errorTooltipText {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1; }
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.errorTooltip:hover .errorTooltipText {
+  visibility: visible; }
+
+ol.letterBracket {
+  /*list-style-type: lower-alpha;*/
+  counter-reset: item;
+  list-style-type: none; }
+
+ol.letterBracket li::before {
+  display: inline-block;
+  content: counter(item,lower-alpha) ")";
+  counter-increment: item;
+  width: 1.5em;
+  margin-left: -1.5em;
+  list-style-type: none; }
+
+ol.romanBracketted {
+  /*list-style-type: lower-roman;*/
+  counter-reset: item;
+  list-style-type: none; }
+
+ol.romanBracketted li::before {
+  display: inline-block;
+  content: "(" counter(item,lower-roman) ")";
+  counter-increment: item;
+  width: 1.5em;
+  margin-left: -1.5em;
+  list-style-type: none; }
+
+label[disabled] {
+  pointer-events: none; }
+
+.paragraphLineHeight {
+  line-height: normal; }

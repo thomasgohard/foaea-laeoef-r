@@ -1,0 +1,55 @@
+﻿@using FOAEA3.Model.Enums;
+
+@model FOAEA3.ViewModels.LicenceDenialDataEntryViewModel
+
+@{
+    ViewData["Title"] = "L01";
+}
+
+<partial name="_ErrorInfoDisplay" model="Model.LicenceDenial" />
+
+<div class="row">
+    <div class="col-12">
+
+        <form method="post">
+
+            <partial name="_LicenceDenialData" />
+
+            <div class="form-group mt-4">
+                @if ((Model.LicenceDenial.AppLiSt_Cd != ApplicationState.SIN_CONFIRMATION_PENDING_3) &&
+                  (Model.LicenceDenial.AppLiSt_Cd != ApplicationState.APPLICATION_REJECTED_9) &&
+                  (Model.LicenceDenial.AppLiSt_Cd != ApplicationState.MANUALLY_TERMINATED_14))
+                {
+                    <button asp-controller="LicenceDenial" asp-action="Edit" asp-area="Application" class="btn btn-primary">Submit to FOAEA</button>
+                }
+
+                @if ((Model.LicenceDenial.AppLiSt_Cd == ApplicationState.INVALID_APPLICATION_1) ||
+                  (Model.LicenceDenial.AppLiSt_Cd == ApplicationState.SIN_NOT_CONFIRMED_5) ||
+                  (Model.LicenceDenial.AppLiSt_Cd == ApplicationState.FULLY_SERVICED_13))
+                {
+                    <button asp-controller="LicenceDenial" asp-action="Index" asp-area="Application" class="btn  border-primary">Clear Fields</button>
+                }
+
+                @{ string appKey = Model.LicenceDenial.Appl_EnfSrv_Cd + "-" + Model.LicenceDenial.Appl_CtrlCd; }
+
+                <button asp-controller="LicenceDenial" asp-action="LicenceSuspensionHistory" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">Licence Suspension History</button>
+                <button asp-controller="Application" asp-action="SINResults" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">SIN Results</button>
+                <button asp-controller="Application" asp-action="Events" asp-area="Application" asp-route-id="@appKey" class="btn border-primary">View Events</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Edit.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Areas/Application/Tracing/Edit.min.js"></script>
+    </environment>
+
+}
