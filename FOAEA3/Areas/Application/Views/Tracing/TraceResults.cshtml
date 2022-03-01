@@ -1,0 +1,74 @@
+﻿@using FOAEA3.Model;
+@using FOAEA3.Model.Base;
+@using FOAEA3.Resources.Helpers;
+
+@{
+    ViewData["Title"] = "Trace Results";
+}
+
+@model DataList<TraceResponseData>
+
+@section Styles {
+    <environment exclude="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    </environment>
+    <environment include="Production,Staging">
+        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    </environment>
+}
+
+<partial name="_ErrorInfoDisplay" model="Model" />
+
+<div class="row mb-2">
+    <div class="col text-info"><h2>Trace Result List</h2></div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table id="datatablesGrid">
+            <thead>
+                <tr>
+                    <th class='nowrap'>Appl Ref Nr</th>
+                    <th class='nowrap'>Date Most Recently Received in FOAEA</th>
+                    <th class='nowrap'>Originator</th>
+                    <th class='nowrap'>Address Type (E = Employer / R = Residential)</th>
+                    <th class='nowrap'>Last Update Date by Federal Partner</th>
+                    <th class='nowrap'>Address</th>
+                    <th class='nowrap'>Cycle Number of Results (first cycle = 0, etc...)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (TraceResponseData data in Model.Items)
+                {
+
+                    string appKey = data.Appl_EnfSrv_Cd + "-" + data.Subm_SubmCd + "-" + data.Appl_CtrlCd;
+                    
+                    <tr>
+                        <td class='nowrap'>@appKey</td>
+                        <td class='nowrap'>@string.Format(DateTimeHelper.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Rcpt_Dte)</td>
+                        <td class='nowrap'>@data.Originator</td>
+                        <td class='nowrap'>@data.AddrTyp_Cd</td>
+                        <td class='nowrap'>@string.Format(DateTimeHelper.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Addr_LstUpdte)</td>
+                        <td class='nowrap'>@Html.Raw(data.Address)</td>
+                        <td class='nowrap'>@data.TrcRsp_Trace_CyclNr</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/js/Shared/datatableManager.js"></script>
+        <script src="~/js/Areas/Application/Tracing/TraceResults.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/js/Shared/datatableManager.min.js"></script>
+        <script src="~/js/Areas/Application/Tracing/TraceResults.min.js"></script>
+    </environment>
+
+}

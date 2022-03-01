@@ -1,0 +1,74 @@
+[
+  {
+    "inputFiles": [ "wwwroot/js/foaea.js", "wwwroot/js/_layout.js", "wwwroot/js/Shared/utilities.js" ],
+    "outputFileName": "wwwroot/js/root.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Home/index.js" ],
+    "outputFileName": "wwwroot/js/Home/index.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Home/login.js" ],
+    "outputFileName": "wwwroot/js/Home/login.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Home/termsofreference.js" ],
+    "outputFileName": "wwwroot/js/Home/termsofreference.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Administration/Submitter/Index.js" ],
+    "outputFileName": "wwwroot/js/Areas/Administration/Submitter/Index.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Administration/Submitter/Edit.js" ],
+    "outputFileName": "wwwroot/js/Areas/Administration/Submitter/Edit.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Administration/Submitter/Create.js" ],
+    "outputFileName": "wwwroot/js/Areas/Administration/Submitter/Create.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Administration/Submitter/Submitter.js" ],
+    "outputFileName": "wwwroot/js/Areas/Administration/Submitter/Submitter.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Application/Events.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Application/Events.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Application/SINResults.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Application/SINResults.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Tracing/AffidavitIndex.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Tracing/AffidavitIndex.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Tracing/Create.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Tracing/Create.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Tracing/Edit.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Tracing/Edit.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/Tracing/TraceResults.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/Tracing/TraceResults.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/LicenceDenial/Create.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/LicenceDenial/Create.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/LicenceDenial/Edit.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/LicenceDenial/Edit.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Shared/datatableManager.js" ],
+    "outputFileName": "wwwroot/js/Shared/datatableManager.min.js"
+  },
+  {
+    "inputFiles": [ "wwwroot/js/Areas/Application/ApplicationSearch/ApplicationSearchResult.js" ],
+    "outputFileName": "wwwroot/js/Areas/Application/ApplicationSearch/ApplicationSearchResult.min.js"
+  }
+]

@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    string lastLogin = SessionData.LastLogin?.ToString("yyyy/MM/dd hh:mm tt");
+}
+
+@{
+    string jsonSchemaTestData = ViewBag.jsonSchemaTestData;
+}
+
+<div class="row mb-1">
+    <div class="col-12 pt-1">
+        <div class="text-dark">@LanguageResource.WELCOME_GREETING</div>
+        <div class="text-dark">@LanguageResource.LAST_LOGIN : @lastLogin</div>
+    </div>
+</div>
+<br />
+@*
+    ------------------------------
+    -------- Quick Search --------
+    ------------------------------
+*@
+<div class="row mb-1">
+    <div class="col-12 ml-2">
+        <fieldset class="border p-3 border-info">
+            <legend class="ml-1 mb-1 w-auto text-info">&nbsp;Quick Search&nbsp;</legend>
+            <form method="post">
+                <div class="form-row mb-2">
+                    <div class="form-group col-2">
+                        <label>Enf. Service</label>
+                        <input name="EnfService" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group col-2">
+                        <label>Control Code</label>
+                        <input name="ControlCode" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group col-4">
+                        <label>Last Name</label>
+                        <input name="LastName" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group col-4">
+                        <label>First Name</label>
+                        <input name="FirstName" class="form-control form-control-sm" />
+                    </div>
+                </div>
+                <div class="form-row mb-3">
+                    <div class="form-group col-2">
+                        <label>Status</label>
+                        <select name="Status" class="form-control form-control-sm">
+                            <option value=""></option>
+                            <option value="A">Active</option>
+                            <option value="C">Complete</option>
+                            <option value="I">Inactive</option>
+                            <option value="R">Rejected</option>
+                            <option value="P">Processing</option>
+                            <option value="X">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-4">
+                        <label>State</label>
+                        <select name="State" class="form-control form-control-sm">
+                            <option value=""></option>
+                            <option value="1">Invalid application</option>
+                            <option value="2">Awaiting validation</option>
+                            <option value="3">SIN confirmation pending</option>
+                            <option value="4">SIN confirmed</option>
+                            <option value="5">SIN not confirmed</option>
+                            <option value="6">Pending acceptance/swearing</option>
+                            <option value="7">Valid affidavit not received</option>
+                            <option value="9">Application rejected</option>
+                            <option value="10">Application accepted</option>
+                            <option value="12">Partially serviced</option>
+                            <option value="15">Fully serviced</option>
+                            <option value="14">Manually terminated</option>
+                            <option value="15">Expired</option>
+                            <option value="19">Awaiting documents for variation</option>
+                            <option value="35">Application suspended</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label>Category</label>
+                        <select name="Category" class="form-control form-control-sm">
+                            <option value=""></option>
+                            <option value="T01">Tracing Application</option>
+                            <option value="I01">Interception Application</option>
+                            <option value="L01">Licence Denial Application</option>
+                            <option value="L03">Licence Denial Termination</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label>SIN</label>
+                        <input name="SIN" class="form-control form-control-sm" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="form-group col-4">
+                        <label>Source Reference Number</label>
+                        <input name="SourceRefNumber" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group col-3">
+                        <label>Justice Number</label>
+                        <input name="JusticeNumber" class="form-control form-control-sm" />
+                    </div>
+                    <div class="offset-3 col-2">
+                        <input type="submit" id="btnSubmit" asp-area="Application" asp-controller="ApplicationSearch" asp-action="QuickSearch" value="Search" class="btn btn-success mt-4" />
+                    </div>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+<br />
+@*
+    ------------------------------
+    --------- Quick Add ----------
+    ------------------------------
+*@
+<div class="row">
+    <div class="col-12 ml-2">
+        <fieldset class="p-3 pb-4 border border-info">
+            <legend class="ml-1 text-info w-auto">&nbsp;Submit New Application&nbsp;</legend>
+            <div class="row">
+                <div class="col-3">
+                    <a id="CreateT01" asp-area="Application" asp-controller="Tracing" asp-action="Create" class="btn pb-3 btn-block btn-primary btn-sm roundedStrong">Tracing<br />Application<br /><span class="btn btn-light mt-3 create-badge">T01</span></a>
+                </div>
+                <div class="col-3">
+                    <a id="CreateI01" asp-area="Application" asp-controller="Interception" asp-action="Create" class="btn pb-3 btn-block btn-primary btn-sm roundedStrong">Interception<br />Application<br /><span class="btn btn-light mt-3 create-badge">I01</span></a>
+                </div>
+                <div class="col-3">
+                    <a id="CreateL01" asp-area="Application" asp-controller="LicenceDenial" asp-action="Create" class="btn pb-3 btn-block btn-primary btn-sm roundedStrong">Licence Denial<br />Application<br /><span class="btn btn-light mt-3 create-badge">L01</span></a>
+                </div>
+                <div class="col-3">
+                    <a id="CreateL03" asp-area="Application" asp-controller="LicenceDenialTermination" asp-action="Create" class="btn pb-3 btn-block btn-primary btn-sm roundedStrong">Licence Denial<br />Termination<br /><span class="btn btn-light mt-3 create-badge">L03</span></a>
+                </div>
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+<br />
+
+<pre>@jsonSchemaTestData</pre>
+
+@section Scripts {
+    <script src="~/js/Home/index.js"></script>
+}
+
+

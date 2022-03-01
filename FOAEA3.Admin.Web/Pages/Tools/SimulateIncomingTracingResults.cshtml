@@ -1,0 +1,50 @@
+﻿@page
+@model FOAEA3.Admin.Web.Pages.Tools.SimulateIncomingTracingResultsModel
+@{
+}
+
+@{
+    if (ViewData["Message"] != null)
+    {
+        <div class="alert alert-primary">@ViewData["Message"]</div>
+    }
+    if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger">@ViewData["Error"]</div>
+    }
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SimulateIncomingTracingResults.EnfService" class="control-label"></label>
+                <input asp-for="SimulateIncomingTracingResults.EnfService" class="form-control" />
+                <span asp-validation-for="SimulateIncomingTracingResults.EnfService" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SimulateIncomingTracingResults.ControlCode" class="control-label"></label>
+                <input asp-for="SimulateIncomingTracingResults.ControlCode" class="form-control" />
+                <span asp-validation-for="SimulateIncomingTracingResults.ControlCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SimulateIncomingTracingResults.Cycle" class="control-label"></label>
+                <input asp-for="SimulateIncomingTracingResults.Cycle" class="form-control" />
+                <span asp-validation-for="SimulateIncomingTracingResults.ControlCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SimulateIncomingTracingResults.IncomingTraceSource" class="control-label"></label>
+                <select asp-for="SimulateIncomingTracingResults.IncomingTraceSource" class="form-control">
+                    <option value="RC3STS" selected>RC3STS (CRA Tracing)</option>
+                    <option value="HR3STS">HR3STS (EI Tracing)</option>
+                    <option value="EI3STS">EI3STS (NETP)</option>
+                </select>
+                <span asp-validation-for="SimulateIncomingTracingResults.IncomingTraceSource" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Simulate Incoming Tracing Results" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

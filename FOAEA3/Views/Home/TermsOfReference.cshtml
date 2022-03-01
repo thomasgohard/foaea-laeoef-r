@@ -1,0 +1,318 @@
+﻿@using FOAEA3.Resources.Helpers
+@using FOAEA3.Helpers
+@{
+
+    ViewBag.Title = "TermsOfReference";
+
+    bool isEnglish = LanguageHelper.IsEnglish();
+
+    bool internalUser = true;
+
+    bool showMenu = (SessionData.TermViewed == "TRUE");
+
+}
+
+@section styles {
+    <link href="~/Content/InfoPage.css" rel="stylesheet" />
+}
+
+<div class="container text-justify paragraphLineHeight small">
+
+    @if (internalUser)
+    {
+
+        if (isEnglish)
+        {
+
+            <div class="row mt-5">
+                <div class="offset-1 col-10">
+                    <h4 class="text-center">
+                            TERMS AND CONDITIONS FOR THE USE OF THE FAMILY ORDERS AND AGREEMENTS ENFORCEMENT ASSISTANCE SYSTEM<br />
+                            INTERNAL USERS
+                    </h4>
+                    <p>
+                        Internal users of the Family Orders and Agreements Enforcement Assistance (FOAEA) system of the
+                        Department of Justice Canada (Justice Canada) must read, understand and agree with the terms
+                        and conditions set out below when accessing the FOAEA system. These terms and conditions will
+                        ensure the integrity and the security of the FOAEA system.
+                    </p>
+                    <p>
+                        The information found in the FOAEA system, as a result of the administration of the <em>
+                            Family Orders
+                            and Agreements Enforcement Assistance Act
+                        </em>(FOAEAA), must at all times be protected and shared
+                        only with those authorized to obtain it in accordance with FOAEAA and its Regulations, with the
+                        <a href="http://laws-lois.justice.gc.ca/eng/acts/P-21/index.html" target="_blank"><em>Privacy Act</em></a> and with federal policies and guidelines related to protection of personal information.
+                    </p>
+                    <p>
+                        Only users that have been granted access by the administrator of the FOAEA system are authorized
+                        to connect to the FOAEA system. Authorized users must connect to the FOAEA system exclusively,
+                        and at all times, by using their own user name provided by Justice Canada and their own strong
+                        password. Users must always log out of the FOAEA system each time they are not actively using it.
+                    </p>
+                    <p>
+                        Internal users must only view data or input data in the FOAEA system that falls under their
+                        responsibility as employees of the Family Law Assistance Services (FLAS) within Justice Canada.
+                    </p>
+                    <p>
+                        Any technical problems concerning the FOAEA system must be submitted to the <a href="mailto:FLAS-IT@justice.gc.ca">FLAS-IT</a> email
+                        address only.
+                    </p>
+
+
+                    <h5 class="text-left">SYSTEM MONITORING/ SECURITY POLICY</h5>
+                    <p>
+                        Users of the FOAEA system should be aware that the FOAEA program allows the FOAEA system
+                        administrators the possibility of tracking users’ activities in the context of the FOAEA system's
+                        maintenance, integrity, and security in accordance with the <a href="http://www.tbs-sct.gc.ca/pol/doc-eng.aspx?id=16578" target="_blank">
+                            Policy on
+                            Government Security
+                        </a>. Anyone using the FOAEA system implicitly consents to such monitoring.
+                    </p>
+                    <p>
+                        Failure to meet any of the terms and conditions and/or unauthorized use by employees of Justice
+                        Canada or others may result in disciplinary action and/or criminal prosecution.
+                    </p>
+                    <p>
+                        <strong>
+                            I hereby confirm that I have read and understood the terms and conditions mentioned
+                            above and agree to comply with these terms and conditions.
+                        </strong>
+                    </p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="offset-1 col-10">
+                    <h4 class="text-center">
+                        MODALIT&Eacute;S POUR L’UTILISATION DU SYST&Egrave;ME D’AIDE &Agrave; L’&Eacute;X&Eacute;CUTION DES ORDONNANCES ET DES ENTENTES FAMILIATES<br />
+                        UTILISATEURS INTERNES
+                    </h4>
+                    <p>
+                        Les utilisateurs internes du syst&egrave;me d’Aide &agrave; l’ex&eacute;cution  des ordonnances et des ententes familiales
+                        (AEOEF) du minist&egrave;re de la Justice (Justice Canada) doivent lire, comprendre et accepter les modalit&eacute;s
+                        d’utilisation &eacute;nonc&eacute;es ci-dessous pour acc&eacute;der au syst&egrave;me AEOEF. Ces modalit&eacute;s assureront l’int&eacute;grit&eacute;
+                        et la s&eacute;curit&eacute; du syst&egrave;me AEOEF.
+                    </p>
+                    <p>
+                        Les renseignements inclus dans le syst&egrave;me AEOEF le sont en application de la <em>
+                            Loi d’aide &agrave; l’ex&eacute;cution
+                            des ordonnances et des ententes familiales
+                        </em> (LAOEF). Ils doivent en tout temps être prot&eacute;g&eacute;s et
+                        communiqu&eacute;s uniquement aux personnes autoris&eacute;es &agrave; les obtenir, conform&eacute;ment &agrave; LAOEF et &agrave; ses
+                        r&egrave;glements d’application, ainsi qu’&agrave; la <a href="http://laws-lois.justice.gc.ca/fra/lois/P-21/index.html" target="_blank"><em>Loi sur la protection des renseignements personnels</em></a>, et les
+                        politiques et lignes directrices f&eacute;d&eacute;rales en mati&egrave;re de protection des renseignements personnels.
+                    </p>
+                    <p>
+                        Seuls les utilisateurs autoris&eacute;s &agrave; se connecter au syst&egrave;me AEOEF peuvent le faire, et uniquement en
+                        utilisant en tout temps leur propre nom d’utilisateur fourni par les administrateurs du syst&egrave;me AEOEF
+                        ainsi que leur propre mot de passe fort. Les utilisateurs doivent toujours fermer leur session de travail
+                        lorsqu’ils ont termin&eacute; d’utiliser activement le syst&egrave;me AEOEF.
+                    </p>
+                    <p>
+                        Les utilisateurs internes ne sont autoris&eacute;s qu’&agrave; inscrire et qu’&agrave; consulter dans le syst&egrave;me AEOEF des
+                        renseignements qui rel&egrave;vent de leur responsabilit&eacute; comme employ&eacute; des Services d’aide au droit familial
+                        (SADF) au sein de Justice Canada.
+                    </p>
+                    <p>
+                        Tout probl&egrave;me technique concernant le syst&egrave;me AEOEF doit seulement être soumis par courriel &agrave;
+                        l’adresse courriel <a href="mailto:FLAS-IT@justice.gc.ca">FLAS-IT</a>.
+                    </p>
+                    <h5 class="text-left">Surveillance du syst&egrave;me / Politique de s&eacute;curit&eacute;</h5>
+                    <p>
+                        Les utilisateurs du syst&egrave;me AEOEF doivent savoir que le programme AEOEF donne aux administrateurs
+                        du syst&egrave;me AEOEF le droit de faire le suivi de toutes les transactions des utilisateurs pour assurer la
+                        maintenance, l’int&eacute;grit&eacute; et la s&eacute;curit&eacute; du syst&egrave;me AEOEF, comme l’exige la <a href="http://www.tbs-sct.gc.ca/pol/doc-fra.aspx?id=16578" target="_blank">
+                            Politique
+                            sur la s&eacute;curit&eacute; du gouvernement
+                        </a>. Quiconque utilise le syst&egrave;me AEOEF consent implicitement &agrave; une telle surveillance.
+                    </p>
+                    <p>
+                        Le non-respect de ces modalit&eacute;s et/ou une utilisation non-autoris&eacute;e par des employ&eacute;s de Justice Canada
+                        ou autres peut entraîner le recours &agrave; des mesures disciplinaires et/ou &agrave; des poursuites l&eacute;gales.
+                    </p>
+                    <p>
+                        <strong>
+                            Par la pr&eacute;sente, je confirme avoir lu et compris les modalit&eacute;s &eacute;nonc&eacute;es ci-dessus et
+                            j’accepte de m’y conformer.
+                        </strong>
+                    </p>
+                </div>
+            </div>
+        }
+
+    }
+
+    else // external
+    {
+
+        if (isEnglish)
+        {
+
+            <div class="row">
+                <div class="offset-1 col-10">
+                    <h4 class="text-center">
+                        TERMS AND CONDITIONS FOR THE USE OF THE FAMILY ORDERS AND AGREEMENTS ENFORCEMENT ASSISTANCE SYSTEM<br />
+                        EXTERNAL USERS
+                    </h4>
+                    <p>
+                        External users of the Family Orders and Agreements Enforcement Assistance (FOAEA) system of
+                        the Department of Justice Canada (Justice Canada) must read, understand and agree with the terms
+                        and conditions set out below when accessing the FOAEA system. These terms and conditions will
+                        ensure the integrity and security of the FOAEA system.
+                    </p>
+                    <p>
+                        The information found in the FOAEA system, as a result of the administration of the <em>
+                            Family Orders
+                            and Agreements Enforcement Assistance Act
+                        </em> (FOAEAA), must at all times be protected and shared
+                        only with those authorized to obtain it in accordance with FOAEAA and its Regulations, with the
+                        <a href="http://laws-lois.justice.gc.ca/eng/acts/P-21/index.html" target="_blank"><em>Privacy Act</em></a> and with federal policies and guidelines related to the protection of personal information.
+                    </p>
+                    <p>
+                        Only users that have been granted access by the administrator of the FOAEA system are authorized
+                        to connect to the FOAEA system. Authorized users must connect to the FOAEA system exclusively,
+                        and at all times, by using their own user name provided by Justice Canada and their own strong
+                        password. Users must always log out of the FOAEA system each time they are not actively using it.
+                    </p>
+                    <p>
+                        External users are only allowed to submit and view applications and receive results for applications
+                        submitted by them or for users under their authority.
+                    </p>
+                    <p>
+                        External users must maintain a valid electronic email address and inform the FOAEA administrators
+                        in writing at <a href="mailto:FOAEA_AEOEF@justice.gc.ca">FOAEA_AEOEF@justice.gc.ca</a> of any changes to their email. Users must also inform the
+                        FOAEA program immediately should online access no longer be required as part of their duties.
+                    </p>
+                    <p>
+                        Any operational questions concerning the FOAEA program must be addressed only by way of email
+                        to the FOAEA program at <a href="mailto:FOAEA_AEOEF@justice.gc.ca">FOAEA_AEOEF@justice.gc.ca</a>.  For any technical related questions, follow
+                        the instructions and troubleshooting tips in the document entitled “New Government of Canada
+                        Secure Gateway Connection to the Department of Justice Canada (Justice Canada) FOAEA system”.
+                    </p>
+
+                    <h5 class="text-left">SYSTEM MONITORING/ SECURITY POLICY</h5>
+                    <p>
+
+                        Users of the FOAEA system should be aware that the FOAEA program allows the FOAEA system
+                        administrators the possibility of tracking users’ activities in the context of the FOAEA system's
+                        maintenance, integrity, and security in accordance with the <a href="http://www.tbs-sct.gc.ca/pol/doc-eng.aspx?id=16578" target="_blank">
+                            Policy on
+                            Government Security
+                        </a>.  Anyone
+                        using the FOAEA system implicitly consents to such monitoring.
+                    </p>
+                    <p>
+                        Failure to meet any of the terms and conditions agreed upon by the Director on behalf of the
+                        provincial/territorial maintenance enforcement program (MEP) or its authorized representative may
+                        result in termination of online access to the FOAEA system to external users of the MEP.
+                    </p>
+                    <p>
+                        <strong>
+                            I hereby confirm that I have read and understood the terms and conditions mentioned
+                            above and agree to comply with these terms and conditions.
+                        </strong>
+                    </p>
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="offset-1 col-10">
+                    <h4 class="text-center">
+                        MODALIT&Eacute;S POUR L’UTILISATION DU SYST&Egrave;ME D’AIDE &Agrave; L’&Eacute;X&Eacute;CUTION DES ORDONNANCES ET DES ENTENTES FAMILIATES<br />
+                        UTILISATEURS EXTERNES
+                    </h4>
+                    <p>
+                        Les utilisateurs externes du syst&egrave;me d’Aide &agrave; l’ex&eacute;cution  des ordonnances et des ententes familiales
+                        (AEOEF) du minist&egrave;re de la Justice (Justice Canada) doivent lire, comprendre et accepter les modalit&eacute;s
+                        d’utilisation &eacute;nonc&eacute;es ci-dessous pour acc&eacute;der au syst&egrave;me AEOEF. Ces modalit&eacute;s assureront l’int&eacute;grit&eacute;
+                        et la s&eacute;curit&eacute; du syst&egrave;me AEOEF.
+                    </p>
+
+                    <p>
+                        Les renseignements inclus dans le syst&egrave;me AEOEF le sont en application de la <em>
+                            Loi d’aide &agrave; l’ex&eacute;cution
+                            des ordonnances et des ententes familiales
+                        </em> (LAOEF). Ils doivent en tout temps être prot&eacute;g&eacute;s et
+                        communiqu&eacute;s uniquement aux personnes autoris&eacute;es &agrave; les obtenir, conform&eacute;ment &agrave; la LAOEF et &agrave; ses
+                        r&egrave;glements d’application, ainsi qu’&agrave; la <a href="http://laws-lois.justice.gc.ca/fra/lois/P-21/index.html" target="_blank"><em>Loi sur la protection des renseignements personnels</em></a>, et les
+                        politiques et lignes directrices f&eacute;d&eacute;rales en mati&egrave;re de protection des renseignements personnels.
+                    </p>
+                    <p>
+                        Seuls les utilisateurs autoris&eacute;s &agrave; se connecter au syst&egrave;me AEOEF peuvent le faire, et uniquement en
+                        utilisant en tout temps leur propre nom d’utilisateur fourni par les administrateurs du syst&egrave;me AEOEF
+                        ainsi que leur propre mot de passe fort. Les utilisateurs doivent toujours fermer leur session de travail
+                        lorsqu’ils ont termin&eacute; d’utiliser activement le syst&egrave;me AEOEF.
+                    </p>
+                    <p>
+                        Les utilisateurs externes ne sont autoris&eacute;s qu’&agrave; inscrire ou consulter dans le syst&egrave;me AEOEF des
+                        renseignements pour les demandes soumises par eux ou par des utilisateurs dont ils sont responsables
+                        et qui rel&egrave;vent de leur comp&eacute;tence.
+                    </p>
+                    <p>
+                        Les utilisateurs externes doivent avoir en tout temps une adresse &eacute;lectronique de courriel valide et
+                        doivent informer par &eacute;crit les administrateurs du syst&egrave;me AEOEF &agrave; <a href="mailto:FOAEA_AEOEF@justice.gc.ca">FOAEA_AEOEF@justice.gc.ca</a> de tous
+                        changements de courriel. Les utilisateurs doivent &eacute;galement informer imm&eacute;diatement le programme
+                        AEOEF si l’acc&egrave;s en ligne au syst&egrave;me AEOEF n’est plus requis dans le cadre de leurs fonctions.
+                    </p>
+                    <p>
+                        Toutes questions d’ordre op&eacute;rationnel doivent être envoy&eacute;es seulement par courriel &agrave;
+                        <a href="mailto:FOAEA_AEOEF@justice.gc.ca">FOAEA_AEOEF@justice.gc.ca</a>. Pour toutes questions d’ordre techniques, suivez les instructions
+                        contenues dans le document intitul&eacute; « Nouvelle passerelle s&eacute;curis&eacute;e du gouvernement du Canada pour
+                        la connexion au syst&egrave;me AEOEF du minist&egrave;re de la Justice (Justice Canada) ».
+                    </p>
+                    <h5 class="text-left">Surveillance du syst&egrave;me / Politique de s&eacute;curit&eacute;</h5>
+                    <p>
+                        Les utilisateurs du syst&egrave;me AEOEF doivent savoir que le programme AEOEF donne aux administrateurs
+                        du syst&egrave;me AEOEF le droit de faire le suivi de toutes les transactions des utilisateurs pour assurer la
+                        maintenance, l’int&eacute;grit&eacute; et la s&eacute;curit&eacute; du syst&egrave;me AEOEF, comme l’exige la <a href="http://www.tbs-sct.gc.ca/pol/doc-fra.aspx?id=16578" target="_blank">
+                            Politique sur la
+                            s&eacute;curit&eacute; du gouvernement
+                        </a>. Quiconque utilise le syst&egrave;me AEOEF consent implicitement &agrave; une telle surveillance.
+                    </p>
+                    <p>
+                        Le non-respect des modalit&eacute;s convenues par le Directeur du Programme provincial/territorial d’ex&eacute;cution
+                        des ordonnances de pension alimentaire ou son repr&eacute;sentant autoris&eacute; peut entraîner la fin de l'acc&egrave;s en
+                        ligne au syst&egrave;me AEOEF aux utilisateurs externes du Programme.
+                    </p>
+                    <p>
+                        <strong>
+                            Par la pr&eacute;sente, je confirme avoir lu et compris les modalit&eacute;s &eacute;nonc&eacute;es ci-dessus et j’accepte
+                            de m’y conformer.
+                        </strong>
+                    </p>
+
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@if (!showMenu)
+{
+    <form method="post">
+
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <button asp-controller="Home" asp-action="TermsViewed" id="submit" class="btn btn-success">@LanguageResource.OK_LABEL</button>
+            </div>
+        </div>
+
+    </form>
+}
+
+@section scripts {
+
+    <environment exclude="Production,Staging">
+        <script src="~/js/Home/termsofreference.js"></script>
+    </environment>
+    <environment include="Production,Staging">
+        <script src="~/js/Home/termsofreference.min.js"></script>
+    </environment>
+
+}

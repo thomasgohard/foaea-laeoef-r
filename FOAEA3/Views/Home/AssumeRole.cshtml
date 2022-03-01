@@ -1,0 +1,36 @@
+﻿@model FOAEA3.Model.AssumeRoleData
+
+@using FOAEA3.Helpers
+@{
+    List<string> roles = SessionData.AssumedRoles;
+
+    Dictionary<string, string> availableRoles = new Dictionary<string, string>();
+    foreach (var role in roles)
+    {
+        availableRoles.Add(role, role);
+    }
+    Model.AssumedRole = roles[0];
+
+}
+
+<form method="post">
+
+    <div class="row mt-5">
+        <div class="offset-1 col-11 text-center">
+            <h2>@LanguageResource.ASSUME_ROLE</h2>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-12 text-center">
+            <flas-toggle asp-for="AssumedRole" values="availableRoles" single-line required size="3"></flas-toggle>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="offset-1 col-11 text-center">
+            <button asp-controller="Home" asp-action="AssumeRole" class="btn btn-success">@LanguageResource.SELECT_SUBMITTER</button>
+        </div>
+    </div>
+
+</form>
+

@@ -1,0 +1,65 @@
+﻿@model Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature
+
+@{
+    Layout = "";
+}
+
+@{
+    ViewData["Title"] = "Error";
+
+    string stackTrace = @Model.Error.StackTrace;
+
+    string firstInfo = string.Empty;
+    if (stackTrace.Length > 3)
+        firstInfo = stackTrace.Substring(3);
+    int at_pos = firstInfo.IndexOf(" at ");
+    if (at_pos > 4)
+        firstInfo = firstInfo.Substring(3, at_pos - 4);
+
+    int a = firstInfo.IndexOf(" in ");
+    int b = firstInfo.LastIndexOf(@"\");
+
+    if ((a > -1) && (b > -1))
+        firstInfo = firstInfo.Substring(0, a) + " in " + firstInfo.Substring(b + 1);
+
+}
+
+<!DOCTYPE html class="no-js" lang="en" dir="ltr" xmlns="http://www.w3.org/1999/xhtml" public>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FOAEA</title>
+
+    <link href="~/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/lib/wet/site-assets/x-bootstrap-4.css" rel="stylesheet" />
+    <link href="~/lib/jqueryui/jquery-ui.css" rel="stylesheet" />
+    <link href="~/css/dev.css" rel="stylesheet" />
+    <link href="~/css/foaea.css" rel="stylesheet" />
+    <link href="~/css/menus.css" rel="stylesheet" />
+</head>
+<body vocab="http://schema.org/" typeof="WebPage">
+    <div id="wb-bnr" class="container body-content mt-2 pageAdjust">
+
+        <main property="mainContentOfPage" typeof="WebPageElement">
+            <h2 class="text-danger">An unhandled exception occurred while processing the request.</h2>
+            <div><strong>@Model.Error.GetType().Name: @Model.Error.Message</strong></div>
+            <br />
+            <pre style="margin-left: 6px; font-family:Courier New, Courier, monospace"><b>Path:   </b>@Model.Path
+<b>Source: </b>@firstInfo</pre>
+            <p>Stack Trace:</p>
+            <pre style="font-size:small; font-family:Courier New, Courier, monospace">
+@Model.Error.StackTrace
+            </pre>
+        </main>
+
+        <script src="~/lib/jquery/jquery.js"></script>
+        <script src="~/lib/bootstrap/js/bootstrap.js"></script>
+        <script src="~/lib/jqueryui/jquery-ui.js"></script>
+        <script src="~/js/foaea.js"></script>
+        <script src="~/js/_layout.js"></script>
+
+    </div>
+
+</body>
+</html>

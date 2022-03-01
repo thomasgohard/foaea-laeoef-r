@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewBag.Title = LanguageResource.RESET_PASSWORD;
+    //var currentSession 
+    string email = ViewBag.Email;
+    //HtmlHelper.ClientValidationEnabled = false;
+
+}
+
+@section styles {
+    <style>
+        select {
+            width: 45px !important;
+        }
+    </style>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(false)
+
+    <fieldset class="rightSideBox">
+        <legend>@LanguageResource.SEND_PASSWORD</legend>
+
+        <div>
+            <table>
+                <tr>
+                    <td>Confirmation received.  Press @LanguageResource.SEND_PASSWORD to send password to</td>
+                </tr>
+                <tr>
+                    <td>Confirmation reçue. Veuillez appuyer sur @LanguageResource.SEND_PASSWORD pour envoyer le mot de passe à</td>
+                </tr>
+                <tr>
+                    <td>
+                        @email
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p class="clear">
+                            <input type="submit" value="@LanguageResource.SEND_PASSWORD" />
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </fieldset>
+}

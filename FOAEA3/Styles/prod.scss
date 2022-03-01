@@ -1,0 +1,12 @@
+﻿@import './variables';
+@import './foaea';
+@import './menus';
+
+body {
+    background-color: $bgColorProduction !important;
+}
+
+#dbInfo {
+    color: darkblue;
+    background-color: $bgColorProduction;
+}

@@ -1,0 +1,28 @@
+﻿namespace FOAEA3.Model.Enums
+{
+    public enum ApplicationState : short
+    {
+        UNDEFINED = -1,
+        INITIAL_STATE_0 = 0,
+        INVALID_APPLICATION_1 = 1,
+        AWAITING_VALIDATION_2 = 2,
+        SIN_CONFIRMATION_PENDING_3 = 3,
+        SIN_CONFIRMED_4 = 4,
+        SIN_NOT_CONFIRMED_5 = 5,
+        PENDING_ACCEPTANCE_SWEARING_6 = 6,
+        VALID_AFFIDAVIT_NOT_RECEIVED_7 = 7,
+        APPLICATION_REJECTED_9 = 9,
+        APPLICATION_ACCEPTED_10 = 10,
+        APPLICATION_REINSTATED_11 = 11, // only used for tracing event -- not for application
+        PARTIALLY_SERVICED_12 = 12,
+        FULLY_SERVICED_13 = 13,
+        MANUALLY_TERMINATED_14 = 14,
+        EXPIRED_15 = 15,
+        FINANCIAL_TERMS_VARIED_17 = 17,
+        AWAITING_DOCUMENTS_FOR_VARIATION_19 = 19,
+        APPLICATION_SUSPENDED_35 = 35,
+        INVALID_VARIATION_SOURCE_91 = 91,
+        INVALID_VARIATION_FINTERMS_92 = 92,
+        VALID_FINANCIAL_VARIATION_93 = 93
+    }
+}

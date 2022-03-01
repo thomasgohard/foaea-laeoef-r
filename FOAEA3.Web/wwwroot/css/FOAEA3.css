@@ -1,0 +1,103 @@
+﻿.interception {
+    background-color: #CDF2F6;
+}
+
+.interception-header {
+    background-color: #00DBAF;
+}
+
+.licencing {
+    background-color: #E4F5E5;
+}
+
+.licencing-header {
+    background-color: #ED45DB;
+}
+
+.tracing {
+    background-color: #F8F6ED;
+}
+
+.tracing-header {
+    background-color: #F7AC08;
+}
+
+.menuDesc {
+    display: none;
+}
+
+.multiColGroup {
+    padding-left: 3px !important;
+    white-space: nowrap;
+}
+
+.multiColCheck {
+    /*width: 16px !important;*/
+}
+
+.multiColLabel {
+    width: 110px !important;
+    font-size: small;
+}
+
+.multiColLabelLong {
+    width: 140px !important;
+    font-size: small;
+}
+
+.multiColControl {
+    width: 140px !important;
+    font-size: small;
+    padding: 1px !important;
+    min-height: 20px !important;
+}
+
+.multiColControlShort {
+    width: 100px !important;
+    font-size: small;
+    padding: 1px !important;
+    min-height: 20px !important;
+}
+
+#wb-info {
+    background: #e1e4e7;
+    position: relative;
+    z-index: 5;
+}
+
+    #wb-info .landscape {
+        background: #26374a url('https://www.canada.ca/etc/designs/canada/wet-boew/assets/landscape.png') no-repeat right bottom;
+    }
+
+    #wb-info .brand {
+        line-height: 30px;
+    }
+
+    #wb-info nav {
+        padding-bottom: 2em;
+        padding-top: 2em;
+        position: relative;
+    }
+
+    #wb-info .landscape a {
+        color: #fff;
+    }
+
+    #wb-info a {
+        font-size: .875em;
+        text-decoration: none;
+    }
+
+    #wb-info .ftr-urlt-lnk ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    #wb-info nav li {
+        margin-bottom: .75em;
+    }
+
+    #wb-info .ftr-urlt-lnk li::before {
+        content: "\2022";
+        margin-right: .7em;
+    }

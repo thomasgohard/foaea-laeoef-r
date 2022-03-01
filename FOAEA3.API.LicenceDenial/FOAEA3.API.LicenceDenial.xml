@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FOAEA3.API.LicenceDenial</name>
+    </assembly>
+    <members>
+        <member name="M:FOAEA3.API.LicenceDenial.Controllers.LicenceDenialsController.GetApplication(System.String,FOAEA3.Model.Interfaces.IRepositories)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+            <param name="repositories"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
