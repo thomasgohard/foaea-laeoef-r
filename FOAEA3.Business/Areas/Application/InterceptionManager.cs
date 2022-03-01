@@ -432,7 +432,7 @@ namespace FOAEA3.Business.Areas.Application
                                                                                                             newFixedAmountRecalcDateTime);
                 }
             }
-            else 
+            else
             {
                 // RepositoriesFinance.SummonsSummaryFixedAmountRepository.DeleteSummSmryFixedAmountRecalcDate(Appl_EnfSrv_Cd, Appl_CtrlCd);
             }
@@ -541,15 +541,15 @@ namespace FOAEA3.Business.Areas.Application
          
          */
 
-        private ActiveSummonsCoreData GetActiveSummonsForVariation(DateTime ctrlFaDtePayable, InterceptionFinancialHoldbackData intFinHdata, SummonsSummaryData summSmryData)
+        private ActiveSummonsData GetActiveSummonsForVariation(DateTime ctrlFaDtePayable, InterceptionFinancialHoldbackData intFinHdata, SummonsSummaryData summSmryData)
         {
-            ActiveSummonsCoreData activeSummons = null;
+            ActiveSummonsData activeSummons = null;
 
             var appl = InterceptionApplication;
 
             if ((ctrlFaDtePayable >= summSmryData.Start_Dte) && (ctrlFaDtePayable <= summSmryData.End_Dte))
             {
-                DateTime thisVarEnterDte;
+                DateTime thisVarEnterDte = default;
                 if (!intFinHdata.IntFinH_VarIss_Dte.HasValue)
                     if (intFinHdata.IntFinH_RcvtAffdvt_Dte.HasValue)
                         thisVarEnterDte = intFinHdata.IntFinH_RcvtAffdvt_Dte.Value;
@@ -558,129 +558,53 @@ namespace FOAEA3.Business.Areas.Application
                 if (!string.IsNullOrEmpty(intFinHdata.HldbTyp_Cd))
                     hldbTypeCode = intFinHdata.HldbTyp_Cd;
 
-                activeSummons = new ActiveSummonsCoreData
-                {
+                decimal mxmTtl_Money = intFinHdata.IntFinH_MxmTtl_Money ?? 0M;
+                decimal perPym_Money = intFinHdata.IntFinH_PerPym_Money ?? 0M;
+                byte cmlPrPym_Ind = intFinHdata.IntFinH_CmlPrPym_Ind ?? 0;
+                int defHldbPrcnt = intFinHdata.IntFinH_DefHldbPrcnt ?? 0;
+                decimal defHldbAmn_Money = intFinHdata.IntFinH_DefHldbAmn_Money ?? 0M;
+                DateTime varIss_Dte = intFinHdata.IntFinH_VarIss_Dte ?? default;
+                string pymPrCd = intFinHdata.PymPr_Cd ?? string.Empty;
+                string defHldbAmnPrCd = intFinHdata.IntFinH_DefHldbAmn_Period ?? string.Empty;
 
+                activeSummons = new ActiveSummonsData
+                {
+                    Subm_SubmCd = appl.Subm_SubmCd,
+                    Appl_JusticeNr = appl.Appl_JusticeNr,
+                    IntFinH_LmpSum_Money = intFinHdata.IntFinH_LmpSum_Money,
+                    IntFinH_PerPym_Money = perPym_Money,
+                    IntFinH_MxmTtl_Money = mxmTtl_Money,
+                    PymPr_Cd = pymPrCd,
+                    IntFinH_CmlPrPym_Ind = cmlPrPym_Ind,
+                    HldbCtg_Cd = intFinHdata.HldbCtg_Cd,
+                    IntFinH_DefHldbPrcnt = defHldbPrcnt,
+                    IntFinH_DefHldbAmn_Money = defHldbAmn_Money,
+                    IntFinH_DefHldbAmn_Period = defHldbAmnPrCd,
+                    HldbTyp_Cd = hldbTypeCode,
+                    Start_Dte = summSmryData.Start_Dte,
+                    FeeDivertedTtl_Money = summSmryData.FeeDivertedTtl_Money,
+                    LmpSumDivertedTtl_Money = summSmryData.LmpSumDivertedTtl_Money,
+                    PerPymDivertedTtl_Money = summSmryData.PerPymDivertedTtl_Money,
+                    HldbAmtTtl_Money = summSmryData.HldbAmtTtl_Money,
+                    Appl_TotalAmnt = summSmryData.Appl_TotalAmnt,
+                    IntFinH_Dte = intFinHdata.IntFinH_Dte,
+                    End_Dte = summSmryData.End_Dte,
+                    Appl_RecvAffdvt_Dte = summSmryData.Start_Dte,
+                    IntFinH_VarIss_Dte = varIss_Dte,
+                    LmpSumOwedTtl_Money = summSmryData.LmpSumOwedTtl_Money,
+                    PerPymOwedTtl_Money = summSmryData.PerPymOwedTtl_Money,
+                    Appl_EnfSrv_Cd = intFinHdata.Appl_EnfSrv_Cd,
+                    VarEnterDte = thisVarEnterDte,
+                    Appl_CtrlCd = intFinHdata.Appl_CtrlCd
                 };
+
+                if (!intFinHdata.IntFinH_VarIss_Dte.HasValue)
+                    activeSummons.IntFinH_VarIss_Dte = null;
 
             }
 
             return activeSummons;
         }
-
-        /*
-         
-    Private Function GetActiveSummonsForVariation(ByVal ctrlFaDtePayable As DateTime,
-                                                  ByVal applicationData As Common.ApplicationData,
-                                                  ByVal intFinHData As Common.DefaultHoldbackData,
-                                                  ByVal summSmryData As Common.SummSmryRecalcData) As Common.ActiveSummonsesForDebtorData
-
-        Dim activeSummons As New Common.ActiveSummonsesForDebtorData
-
-        ' ctrlFaDtePayable is between start and end date of SummSmry
-        If ctrlFaDtePayable >= summSmry.Start_Dte And ctrlFaDtePayable <= summSmry.End_Dte Then
-
-            With intFinH
-
-                Dim thisVarEnterDte As DateTime
-                If .IsIntFinH_VarIss_DteNull Then
-                    If Not .IsIntFinH_RcvtAffdvt_DteNull Then
-                        thisVarEnterDte = .IntFinH_RcvtAffdvt_Dte
-                    End If
-                End If
-
-                Dim hldbTyp_Cd As String = "T"
-                If Not .IsHldbTyp_CdNull Then
-                    hldbTyp_Cd = .HldbTyp_Cd
-                End If
-
-                Dim mxmTtl_Money As Decimal = 0
-                If Not .IsIntFinH_MxmTtl_MoneyNull Then
-                    mxmTtl_Money = .IntFinH_MxmTtl_Money
-                End If
-
-                Dim perPym_Money As Decimal = 0
-                If Not .IsIntFinH_PerPym_MoneyNull Then
-                    perPym_Money = .IntFinH_PerPym_Money
-                End If
-
-                Dim cmlPrPym_Ind As Byte = 0
-                If Not .IsIntFinH_CmlPrPym_IndNull Then
-                    cmlPrPym_Ind = .IntFinH_CmlPrPym_Ind
-                End If
-
-                Dim defHldbPrcnt As Integer = 0
-                If Not .IsIntFinH_DefHldbPrcntNull Then
-                    defHldbPrcnt = .IntFinH_DefHldbPrcnt
-                End If
-
-                Dim defHldbAmn_Money As Decimal = 0
-                If Not .IsIntFinH_DefHldbAmn_MoneyNull Then
-                    defHldbAmn_Money = .IntFinH_DefHldbAmn_Money
-                End If
-
-                Dim varIss_Dte As DateTime
-                If Not .IsIntFinH_VarIss_DteNull Then
-                    varIss_Dte = .IntFinH_VarIss_Dte
-                End If
-
-                Dim PymPrCd As String = String.Empty
-                If Not .IsPymPr_CdNull Then
-                    PymPrCd = .PymPr_Cd
-                End If
-
-                Dim defHldbAmnPrCd As String = String.Empty
-                If Not .IsIntFinH_DefHldbAmn_PeriodNull Then
-                    defHldbAmnPrCd = .IntFinH_DefHldbAmn_Period
-                End If
-
-                activeSummons.ActiveSummonsesForDebtor.AddActiveSummonsesForDebtorRow(
-                            Subm_SubmCd:=appl.Subm_SubmCd,
-                            Appl_JusticeNr:=appl.Appl_JusticeNr,
-                            IntFinH_LmpSum_Money:= .IntFinH_LmpSum_Money,
-                            IntFinH_PerPym_Money:=perPym_Money,
-                            IntFinH_MxmTtl_Money:=mxmTtl_Money,
-                            PymPr_Cd:=PymPrCd,
-                            IntFinH_CmlPrPym_Ind:=cmlPrPym_Ind,
-                            HldbCtg_Cd:= .HldbCtg_Cd,
-                            IntFinH_DefHldbPrcnt:=defHldbPrcnt,
-                            IntFinH_DefHldbAmn_Money:=defHldbAmn_Money,
-                            IntFinH_DefHldbAmn_Period:=defHldbAmnPrCd,
-                            HldbTyp_Cd:=hldbTyp_Cd,
-                            Start_Dte:=summSmry.Start_Dte,
-                            FeeDivertedTtl_Money:=summSmry.FeeDivertedTtl_Money,
-                            LmpSumDivertedTtl_Money:=summSmry.LmpSumDivertedTtl_Money,
-                            PerPymDivertedTtl_Money:=summSmry.PerPymDivertedTtl_Money,
-                            HldbAmtTtl_Money:=summSmry.HldbAmtTtl_Money,
-                            Appl_TotalAmnt:=summSmry.Appl_TotalAmnt,
-                            IntFinH_Dte:= .IntFinH_Dte,
-                            End_Dte:=summSmry.End_Dte,
-                            Appl_RecvAffdvt_Dte:=summSmry.Start_Dte,
-                            IntFinH_VarIss_Dte:=varIss_Dte,
-                            LmpSumOwedTtl_Money:=summSmry.LmpSumOwedTtl_Money,
-                            PerPymOwedTtl_Money:=summSmry.PerPymOwedTtl_Money,
-                            Appl_Enfsrv_cd:= .Appl_EnfSrv_Cd,
-                            VarEnterDte:=thisVarEnterDte,
-                            Appl_CtrlCd:= .Appl_CtrlCd
-                        )
-
-                'If (Not .IsIntFinH_VarIss_DteNull) Or (.IsIntFinH_RcvtAffdvt_DteNull) Then
-                '    activeSummons.ActiveSummonsesForDebtor.Item(0).SetVarEnterDteNull()
-                'End If
-
-                If .IsIntFinH_VarIss_DteNull Then
-                    activeSummons.ActiveSummonsesForDebtor.Item(0).SetIntFinH_VarIss_DteNull()
-                End If
-
-            End With
-
-        End If
-
-        Return activeSummons
-
-    End Function
-         
-         */
 
         private void RejectInterception()
         {
