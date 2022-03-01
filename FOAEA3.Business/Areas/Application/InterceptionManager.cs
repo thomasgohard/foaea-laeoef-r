@@ -455,7 +455,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (workActSummons is not null)
             {
-                var activeSummons = GetActiveSummonsForVariation(newFinTerms, summSmry.FirstOrDefault());
+                var activeSummons = GetActiveSummonsForVariation(ctrlFaDtePayable, newFinTerms, summSmry.FirstOrDefault());
             }
 
             return fixedAmountRecalcDate;
@@ -541,9 +541,31 @@ namespace FOAEA3.Business.Areas.Application
          
          */
 
-        private ActiveSummonsCoreData GetActiveSummonsForVariation(InterceptionFinancialHoldbackData intFinHdata, SummonsSummaryData summSmryData)
+        private ActiveSummonsCoreData GetActiveSummonsForVariation(DateTime ctrlFaDtePayable, InterceptionFinancialHoldbackData intFinHdata, SummonsSummaryData summSmryData)
         {
-            return null;
+            ActiveSummonsCoreData activeSummons = null;
+
+            var appl = InterceptionApplication;
+
+            if ((ctrlFaDtePayable >= summSmryData.Start_Dte) && (ctrlFaDtePayable <= summSmryData.End_Dte))
+            {
+                DateTime thisVarEnterDte;
+                if (!intFinHdata.IntFinH_VarIss_Dte.HasValue)
+                    if (intFinHdata.IntFinH_RcvtAffdvt_Dte.HasValue)
+                        thisVarEnterDte = intFinHdata.IntFinH_RcvtAffdvt_Dte.Value;
+
+                string hldbTypeCode = "T";
+                if (!string.IsNullOrEmpty(intFinHdata.HldbTyp_Cd))
+                    hldbTypeCode = intFinHdata.HldbTyp_Cd;
+
+                activeSummons = new ActiveSummonsCoreData
+                {
+
+                };
+
+            }
+
+            return activeSummons;
         }
 
         /*
@@ -554,24 +576,6 @@ namespace FOAEA3.Business.Areas.Application
                                                   ByVal summSmryData As Common.SummSmryRecalcData) As Common.ActiveSummonsesForDebtorData
 
         Dim activeSummons As New Common.ActiveSummonsesForDebtorData
-
-        Dim appl As Common.ApplicationData.ApplRow
-        appl = applicationData.Appl.Item(0)
-
-        Dim summSmry As Common.SummSmryRecalcData.SummSmryRow
-        summSmry = summSmryData.SummSmry.Item(0)
-
-        Dim intFinH As Common.DefaultHoldbackData.IntFinHRow = Nothing
-        ' find first active row
-        For rowIndex As Integer = 0 To intFinHData.IntFinH.Rows.Count - 1
-            If intFinHData.IntFinH.Item(rowIndex).ActvSt_Cd = "A" Then
-                intFinH = intFinHData.IntFinH.Item(rowIndex)
-                Exit For
-            End If
-        Next
-        If intFinH Is Nothing Then
-            Throw New Exception("Could not find active IntFinH row")
-        End If
 
         ' ctrlFaDtePayable is between start and end date of SummSmry
         If ctrlFaDtePayable >= summSmry.Start_Dte And ctrlFaDtePayable <= summSmry.End_Dte Then
