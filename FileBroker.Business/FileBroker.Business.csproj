@@ -16,11 +16,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
+    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
+    <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
     <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
+    <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
     <ProjectReference Include="..\FOAEA3.EmailTools\FOAEA3.EmailTools.csproj" />
+    <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
     <ProjectReference Include="..\Incoming.Common\Incoming.Common.csproj" />
   </ItemGroup>
 

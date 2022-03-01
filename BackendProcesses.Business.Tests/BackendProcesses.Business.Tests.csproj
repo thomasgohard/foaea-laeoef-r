@@ -29,8 +29,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
+    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
     <ProjectReference Include="..\FOAEA3.Business.Tests\FOAEA3.Business.Tests.csproj" />
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
+    <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
     <ProjectReference Include="..\TestData\TestData.csproj" />
   </ItemGroup>
 

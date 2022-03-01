@@ -22,6 +22,8 @@
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.API\FOAEA3.API.csproj" />
     <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
+    <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
   </ItemGroup>
 
 </Project>
