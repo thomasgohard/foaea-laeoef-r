@@ -1,11 +1,14 @@
 ﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.IO;
 
 namespace FOAEA3.API.Interception.Controllers
 {
@@ -48,6 +51,38 @@ namespace FOAEA3.API.Interception.Controllers
             }
             else
                 return NotFound();
+
+        }
+
+        [HttpPost]
+        public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories, 
+                                                                           [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var interceptionData = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if (interceptionData is null)
+                return UnprocessableEntity("Missing or invalid request body.");
+
+            var interceptionManager = new InterceptionManager(interceptionData, repositories, repositoriesFinance, config);
+            var appl = interceptionManager.InterceptionApplication;
+
+            bool isCreated = interceptionManager.CreateApplication();
+            if (isCreated)
+            {
+                var appKey = $"{appl.Appl_EnfSrv_Cd}-{appl.Appl_CtrlCd}";
+                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
+                var rootPath = "http://" + HttpContext.Request.Host.ToString();
+                var apiGetURIForNewlyCreatedTracing = new Uri(rootPath + actionPath);
+
+                return Created(apiGetURIForNewlyCreatedTracing, appl);
+            }
+            else
+            {
+                return UnprocessableEntity(appl.Messages.GetMessagesForType(MessageType.Error));
+            }
 
         }
 

@@ -1,4 +1,3 @@
-using FOAEA3.API.Filters;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
