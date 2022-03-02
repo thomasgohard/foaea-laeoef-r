@@ -132,7 +132,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 eventBFNreasonCode = EventCode.C56002_NEW_BFN_FOR_EXISTING_DEBTOR;
                 debtorID = GetDebtorID(justiceID);
-                // ProcessSummSmryBFN(debtorID, evntBFNReasCd) //'[EvntBFN], [EvntBFNDtl]
+                ProcessSummSmryBFN(debtorID, ref eventBFNreasonCode);
                 nextJusticeID_callCount = 0;
                 justiceSuffix = NextJusticeID(justiceID);
             }

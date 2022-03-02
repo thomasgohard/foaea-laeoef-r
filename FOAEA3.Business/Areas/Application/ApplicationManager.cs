@@ -84,6 +84,17 @@ namespace FOAEA3.Business.Areas.Application
             return Application.AppCtgy_Cd;
         }
 
+        protected bool IsValidCategory(string category)
+        {
+            if (Application.AppCtgy_Cd != category)
+            {
+                Application.Messages.AddError($"Invalid category type ({Application.AppCtgy_Cd}). Expected {category}.");
+                return false;
+            }
+            else
+                return true;
+        }
+
         public virtual bool LoadApplication(string enfService, string controlCode)
         {
             bool isSuccess = false;

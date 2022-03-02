@@ -62,5 +62,15 @@ namespace FOAEA3.Data.DB
             _ = MainDB.ExecProc("SummSmryFixedAmountRecalcDate_Update", parameters);
         }
 
+        public void DeleteSummSmryFixedAmountRecalcDate(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object> {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd" , appl_CtrlCd }
+            };
+
+            _ = MainDB.ExecProc("DeleteSummSmryFixedAmountRecalcDateData", parameters);
+        }
+        
     }
 }

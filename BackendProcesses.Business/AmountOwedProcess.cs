@@ -392,9 +392,11 @@ namespace BackendProcesses.Business
             return (paymentPeriodCode, fixedAmountPeriodCode);
         }
 
-        private static (int paymentPeriodCount, int fixedAmountPeriodCount) CalculateCurrentPeriodCounts(DateTime payableDate, string paymentPeriodCode,
+        private static (int paymentPeriodCount, int fixedAmountPeriodCount) CalculateCurrentPeriodCounts(DateTime payableDate, 
+                                                                                                  string paymentPeriodCode,
                                                                                                   string fixedAmountPeriodCode,
-                                                                                                  PeriodInfo periodData, DateTime calcAcceptedDateNoTime)
+                                                                                                  PeriodInfo periodData, 
+                                                                                                  DateTime calcAcceptedDateNoTime)
         {
             DateTime payableDateNoTime = payableDate.Date;
             int paymentPeriodCount = 0;
@@ -403,86 +405,87 @@ namespace BackendProcesses.Business
             switch (periodData.PeriodFrequency)
             {
                 case EPeriodFrequency.Both:
-                    paymentPeriodCount = CalculatePeriodCount(paymentPeriodCode);
-                    fixedAmountPeriodCount = CalculatePeriodCount(fixedAmountPeriodCode);
+                    paymentPeriodCount = CalculatePeriodCount(paymentPeriodCode, payableDateNoTime, calcAcceptedDateNoTime);
+                    fixedAmountPeriodCount = CalculatePeriodCount(fixedAmountPeriodCode, payableDateNoTime, calcAcceptedDateNoTime);
                     break;
                 case EPeriodFrequency.Periodic:
-                    paymentPeriodCount = CalculatePeriodCount(paymentPeriodCode);
+                    paymentPeriodCount = CalculatePeriodCount(paymentPeriodCode, payableDateNoTime, calcAcceptedDateNoTime);
                     break;
                 case EPeriodFrequency.FixedAmount:
-                    fixedAmountPeriodCount = CalculatePeriodCount(fixedAmountPeriodCode);
+                    fixedAmountPeriodCount = CalculatePeriodCount(fixedAmountPeriodCode, payableDateNoTime, calcAcceptedDateNoTime);
                     break;
                 default:
                     paymentPeriodCount = 0;
                     break;
             }
 
-            int CalculatePeriodCount(string paymentPeriodCode)
-            {
-
-                int currentPeriodCount = 0;
-                decimal days;
-
-                if (payableDateNoTime >= calcAcceptedDateNoTime)
-                {
-                    switch (paymentPeriodCode)
-                    {
-                        case PaymentPeriodicCode.WEEKLY:
-                            days = (decimal)(payableDateNoTime - calcAcceptedDateNoTime).TotalDays;
-                            currentPeriodCount = (int)Math.Floor(days / 7.0m) + 1;
-                            break;
-
-                        case PaymentPeriodicCode.BIWEEKLY:
-                            // days = DateDiff(DateInterval.Day, calcStartDateNoTime, calcFaDtePayableNoTime)
-                            // currentPeriod = Decimal.Floor(days / 14) + 1
-                            days = (decimal)(payableDateNoTime - calcAcceptedDateNoTime).TotalDays;
-                            currentPeriodCount = (int)Math.Floor(days / 14.0m) + 1;
-                            break;
-                        case PaymentPeriodicCode.MONTHLY:
-                            currentPeriodCount = DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime);
-                            if (calcAcceptedDateNoTime.Day <= payableDateNoTime.Day)
-                                currentPeriodCount++;
-                            break;
-                        case PaymentPeriodicCode.QUARTERLY:
-                            currentPeriodCount = DateTimeHelper.GetQuarters(calcAcceptedDateNoTime, payableDateNoTime);
-                            if (calcAcceptedDateNoTime.AddMonths(3 * currentPeriodCount) <= payableDateNoTime)
-                                currentPeriodCount++;
-                            break;
-                        case PaymentPeriodicCode.SEMI_ANNUALLY:
-                            currentPeriodCount = (int)Math.Floor(DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime) / 6.0);
-                            if (calcAcceptedDateNoTime.AddMonths(currentPeriodCount * 6) <= payableDateNoTime)
-                                currentPeriodCount++;
-                            break;
-                        case PaymentPeriodicCode.SEMI_MONTHLY:
-                            currentPeriodCount = DateTimeHelper.MonthDifference(calcAcceptedDateNoTime, payableDateNoTime) * 2;
-
-                            if ((calcAcceptedDateNoTime.Day < 15) && (payableDateNoTime.Day > 14))
-                                currentPeriodCount += 2;
-
-                            if ((calcAcceptedDateNoTime.Day > 14) && (payableDateNoTime.Day > 14))
-                                currentPeriodCount++;
-
-                            if ((calcAcceptedDateNoTime.Day < 15) && (payableDateNoTime.Day < 15))
-                                currentPeriodCount++;
-
-                            break;
-                        case PaymentPeriodicCode.ANNUALLY:
-                            currentPeriodCount = payableDateNoTime.Year - calcAcceptedDateNoTime.Year;
-                            if (calcAcceptedDateNoTime.AddYears(currentPeriodCount) <= payableDateNoTime)
-                                currentPeriodCount++;
-                            break;
-                        default:
-                            currentPeriodCount = 0;
-                            break;
-                    }
-                }
-
-                return currentPeriodCount;
-
-            }
-
             return (paymentPeriodCount, fixedAmountPeriodCount);
         }
+
+        public static int CalculatePeriodCount(string paymentPeriodCode, DateTime payableDateNoTime, DateTime calcAcceptedDateNoTime)
+        {
+
+            int currentPeriodCount = 0;
+            decimal days;
+
+            if (payableDateNoTime >= calcAcceptedDateNoTime)
+            {
+                switch (paymentPeriodCode)
+                {
+                    case PaymentPeriodicCode.WEEKLY:
+                        days = (decimal)(payableDateNoTime - calcAcceptedDateNoTime).TotalDays;
+                        currentPeriodCount = (int)Math.Floor(days / 7.0m) + 1;
+                        break;
+
+                    case PaymentPeriodicCode.BIWEEKLY:
+                        // days = DateDiff(DateInterval.Day, calcStartDateNoTime, calcFaDtePayableNoTime)
+                        // currentPeriod = Decimal.Floor(days / 14) + 1
+                        days = (decimal)(payableDateNoTime - calcAcceptedDateNoTime).TotalDays;
+                        currentPeriodCount = (int)Math.Floor(days / 14.0m) + 1;
+                        break;
+                    case PaymentPeriodicCode.MONTHLY:
+                        currentPeriodCount = DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime);
+                        if (calcAcceptedDateNoTime.Day <= payableDateNoTime.Day)
+                            currentPeriodCount++;
+                        break;
+                    case PaymentPeriodicCode.QUARTERLY:
+                        currentPeriodCount = DateTimeHelper.GetQuarters(calcAcceptedDateNoTime, payableDateNoTime);
+                        if (calcAcceptedDateNoTime.AddMonths(3 * currentPeriodCount) <= payableDateNoTime)
+                            currentPeriodCount++;
+                        break;
+                    case PaymentPeriodicCode.SEMI_ANNUALLY:
+                        currentPeriodCount = (int)Math.Floor(DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime) / 6.0);
+                        if (calcAcceptedDateNoTime.AddMonths(currentPeriodCount * 6) <= payableDateNoTime)
+                            currentPeriodCount++;
+                        break;
+                    case PaymentPeriodicCode.SEMI_MONTHLY:
+                        currentPeriodCount = DateTimeHelper.MonthDifference(calcAcceptedDateNoTime, payableDateNoTime) * 2;
+
+                        if ((calcAcceptedDateNoTime.Day < 15) && (payableDateNoTime.Day > 14))
+                            currentPeriodCount += 2;
+
+                        if ((calcAcceptedDateNoTime.Day > 14) && (payableDateNoTime.Day > 14))
+                            currentPeriodCount++;
+
+                        if ((calcAcceptedDateNoTime.Day < 15) && (payableDateNoTime.Day < 15))
+                            currentPeriodCount++;
+
+                        break;
+                    case PaymentPeriodicCode.ANNUALLY:
+                        currentPeriodCount = payableDateNoTime.Year - calcAcceptedDateNoTime.Year;
+                        if (calcAcceptedDateNoTime.AddYears(currentPeriodCount) <= payableDateNoTime)
+                            currentPeriodCount++;
+                        break;
+                    default:
+                        currentPeriodCount = 0;
+                        break;
+                }
+            }
+
+            return currentPeriodCount;
+
+        }
+
 
         private static (DateTime?, DateTime?) CalculateRecalcDates(DateTime acceptedDate, PeriodInfo periodData,
                                                                    string paymentPeriodCode, string fixedAmountPeriodCode,
@@ -516,7 +519,8 @@ namespace BackendProcesses.Business
             return (newRecalcDate, newFixedAmountRecalcDate);
         }
 
-        private static DateTime? CalculateRecalcDateFromStartDateForPeriodCount(string paymentPeriodCode, int currentPeriodCount, DateTime CalcAcceptedDate)
+        public static DateTime? CalculateRecalcDateFromStartDateForPeriodCount(string paymentPeriodCode, int currentPeriodCount, 
+                                                                                DateTime CalcAcceptedDate)
         {
             DateTime? summSmryRecalcDate;
 
@@ -550,7 +554,8 @@ namespace BackendProcesses.Business
 
         }
 
-        private static DateTime AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(DateTime calcAcceptedDate, DateTime acceptedDate, string periodCode)
+        public static DateTime AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(DateTime calcAcceptedDate, DateTime acceptedDate, 
+                                                                                  string periodCode)
         {
 
             DateTime newCalcAcceptedDate = acceptedDate;

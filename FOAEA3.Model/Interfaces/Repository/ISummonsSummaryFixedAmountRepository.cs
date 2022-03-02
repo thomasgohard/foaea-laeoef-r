@@ -12,6 +12,6 @@ namespace FOAEA3.Model.Interfaces
         public SummonsSummaryFixedAmountData GetSummonsSummaryFixedAmount(string appl_EnfSrv_Cd, string appl_CtrlCd);
         public void CreateSummonsSummaryFixedAmount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime fixedAmountRecalcDate);
         public void UpdateSummonsSummaryFixedAmount(SummonsSummaryFixedAmountData summSmryFixedAmount);
-
+        void DeleteSummSmryFixedAmountRecalcDate(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }
 }

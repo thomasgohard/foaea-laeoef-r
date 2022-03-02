@@ -16,6 +16,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public void DeleteSummSmryFixedAmountRecalcDate(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public SummonsSummaryFixedAmountData GetSummonsSummaryFixedAmount(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
