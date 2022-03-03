@@ -126,11 +126,17 @@ namespace FOAEA3.Business.Areas.Application
 
             if (success)
             {
+                InterceptionApplication.IntFinH.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
+                InterceptionApplication.IntFinH.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                 InterceptionApplication.IntFinH.ActvSt_Cd = "P";
                 InterceptionApplication.IntFinH.IntFinH_VarIss_Dte = null;
 
                 foreach (var sourceSpecificHoldback in InterceptionApplication.HldbCnd)
+                {
+                    sourceSpecificHoldback.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
+                    sourceSpecificHoldback.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                     sourceSpecificHoldback.ActvSt_Cd = "P";
+                }
 
                 if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.HasValue &&
                     (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.Value == 0))
@@ -148,7 +154,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 IncrementGarnSmry(isNewApplication: true);
 
-                if (config.ESDsites.Contains(Appl_EnfSrv_Cd))
+                if (config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
                     Repositories.InterceptionRepository.InsertESDrequired(Appl_EnfSrv_Cd, Appl_CtrlCd, ESDrequired.OriginalESDrequired);
 
                 EventManager.SaveEvents();

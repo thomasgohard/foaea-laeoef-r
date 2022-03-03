@@ -31,7 +31,7 @@ namespace FOAEA3.Model.Interfaces
         void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
 
-        List<InterceptionApplicationData> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, string confirmedSIN,
+        List<InterceptionApplicationData> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN,
                                                                  string activeState);
         List<ExGratiaListData> GetExGratias();
         string GetApplicationJusticeNumber(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd);

@@ -132,6 +132,11 @@ namespace FOAEA3.Business.Areas.Application
             TrimTrailingSpaces();
             MakeUpperCase();
 
+            Application.Appl_Create_Dte = DateTime.Now;
+            Application.Appl_Create_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_LastUpdate_Dte = DateTime.Now;
+            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
@@ -189,6 +194,9 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual void UpdateApplicationNoValidation()
         {
+            Application.Appl_LastUpdate_Dte = DateTime.Now;
+            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            
             Repositories.ApplicationRepository.UpdateApplication(Application);
             Repositories.SubmitterRepository.SubmitterMessageDelete(Application.Appl_LastUpdate_Usr);
 
@@ -203,6 +211,9 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Messages.AddError(ErrorResource.CANT_UPDATE_APPLICATION_DOES_NOT_EXISTS);
                 return;
             }
+
+            Application.Appl_LastUpdate_Dte = DateTime.Now;
+            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
 
             bool isCancelled = Application.ActvSt_Cd == "X";
             bool isReset = Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);

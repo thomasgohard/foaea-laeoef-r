@@ -100,7 +100,7 @@ namespace FOAEA3.Business.Areas.Application
             var applications = Repositories.InterceptionRepository.GetSameCreditorForI01(InterceptionApplication.Appl_CtrlCd, 
                                                                                          InterceptionApplication.Subm_SubmCd,
                                                                                          InterceptionApplication.Appl_Dbtr_Entrd_SIN,
-                                                                                         InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
+                                                                                         InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
                                                                                          InterceptionApplication.ActvSt_Cd);
 
             if (applications.Count > 0)
