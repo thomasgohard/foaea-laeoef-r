@@ -16,7 +16,8 @@ namespace FOAEA3.Business.Areas.Application
                                                  EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR, "A");
 
             if (events.Count == 0)
-                EventManager.AddBFEvent(EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR, effectiveTimestamp: DateTime.Now);
+                EventManager.AddBFEvent(EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR, 
+                    effectiveTimestamp: DateTime.Now, appState: ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
         }
 
@@ -375,7 +376,7 @@ namespace FOAEA3.Business.Areas.Application
 
             var interceptionDB = Repositories.InterceptionRepository;
 
-            var defaultHoldback = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, oldState);
+            var defaultHoldback = InterceptionApplication.IntFinH ?? interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, oldState);
 
             DateTime intFinH_Date = defaultHoldback.IntFinH_Dte;
 
@@ -383,7 +384,7 @@ namespace FOAEA3.Business.Areas.Application
 
             defaultHoldback.IntFinH_LiStCd = intFinH_LifeStateCode;
 
-            var sourceSpecificHoldbacks = interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd, intFinH_Date, oldState);
+            var sourceSpecificHoldbacks = InterceptionApplication.HldbCnd ?? interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd, intFinH_Date, oldState);
 
             foreach (var sourceSpecificHoldback in sourceSpecificHoldbacks)
             {
@@ -413,7 +414,7 @@ namespace FOAEA3.Business.Areas.Application
 
             var existingData = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
-            if (existingData.Any())
+            if (!existingData.Any())
                 RepositoriesFinance.SummonsSummaryRepository.CreateSummonsSummary(summSummary);
             else
                 // TODO: should we get a warning that instead of creating we are updating an existing summsmry?

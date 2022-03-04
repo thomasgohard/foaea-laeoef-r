@@ -98,11 +98,38 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
+            if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
+                return UnprocessableEntity("Key does not match body.");
+
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
             if (appManager.VaryApplication())
                 return Ok(application);
             else
                 return UnprocessableEntity(application);
+        }
+
+        [HttpPut("{key}/AcceptApplication")]
+        public ActionResult<InterceptionApplicationData> AcceptInterception([FromRoute] string key,
+                                                                            [FromServices] IRepositories repositories,
+                                                                            [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                            [FromQuery] DateTime supportingDocsReceiptDate)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
+                return UnprocessableEntity("Key does not match body.");
+            
+            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+            if (appManager.AcceptInterception(supportingDocsReceiptDate))
+                return Ok(appManager.InterceptionApplication);
+            else
+                return UnprocessableEntity(appManager.InterceptionApplication);
         }
 
         [HttpPut("{key}/SINbypass")]

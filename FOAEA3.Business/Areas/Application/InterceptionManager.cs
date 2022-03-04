@@ -18,6 +18,7 @@ namespace FOAEA3.Business.Areas.Application
         private InterceptionValidation InterceptionValidation { get; }
         private bool? AcceptedWithin30Days { get; set; } = null;
         private bool ESDReceived { get; set; } = true;
+        private DateTime? GarnisheeSummonsReceiptDate { get; set; }
 
         private int nextJusticeID_callCount = 0;
 
@@ -328,22 +329,56 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        public bool AcceptGarnishee(bool isAutoAccept = false)
+        public bool AcceptInterception(DateTime supportingDocsDate)
         {
+            // only keep changes that are allowed:
+            //   Source Reference Number, comment and address fields
+
+            string appl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            string appl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            string appl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            string appl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            string appl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            string appl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            string appl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
+            LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false);
+
+            InterceptionApplication.Appl_Source_RfrNr = appl_Source_RfrNr ?? InterceptionApplication.Appl_Source_RfrNr;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = appl_Dbtr_Addr_Ln ?? InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = appl_Dbtr_Addr_Ln1 ?? InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = appl_Dbtr_Addr_CityNme ?? InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = appl_Dbtr_Addr_PrvCd ?? InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = appl_Dbtr_Addr_CtryCd ?? InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = appl_Dbtr_Addr_PCd ?? InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
             if (!IsValidCategory("I01"))
                 return false;
-            
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
 
-            // ignore passed core information -- keep only new financials
-
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            var interceptionDB = Repositories.InterceptionRepository;
+            InterceptionApplication.IntFinH = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
+            if (InterceptionApplication.IntFinH is not null)
             {
-                return false;
+                InterceptionApplication.IntFinH.IntFinH_Affdvt_SubmCd = Repositories.CurrentSubmitter;
+                InterceptionApplication.IntFinH.IntFinH_RcvtAffdvt_Dte = supportingDocsDate;
+                InterceptionApplication.HldbCnd = interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd,
+                                                                           InterceptionApplication.IntFinH.IntFinH_Dte, "P");
             }
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            bool result = AcceptGarnishee(supportingDocsDate, isAutoAccept: false);
 
+            if (config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
+                Repositories.InterceptionRepository.UpdateESDrequired(Appl_EnfSrv_Cd, Appl_CtrlCd, supportingDocsDate);
+
+            EventManager.SaveEvents();
+
+            return result;
+        }
+
+        private bool AcceptGarnishee(DateTime supportingDocsDate, bool isAutoAccept = false)
+        {
             AcceptedWithin30Days = true;
 
             if (!isAutoAccept)
@@ -351,9 +386,13 @@ namespace FOAEA3.Business.Areas.Application
                 var interceptionDB = Repositories.InterceptionRepository;
 
                 bool isESDsite = IsESD_MEP(Appl_EnfSrv_Cd);
-                DateTime garnisheeSummonsReceiptDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
 
-                var dateDiff = garnisheeSummonsReceiptDate - interceptionCurrentlyInDB.Appl_Lgl_Dte;
+                if (!GarnisheeSummonsReceiptDate.HasValue)
+                    GarnisheeSummonsReceiptDate = supportingDocsDate;
+                else
+                    GarnisheeSummonsReceiptDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
+
+                var dateDiff = GarnisheeSummonsReceiptDate - InterceptionApplication.Appl_Lgl_Dte;
                 if (dateDiff.HasValue && dateDiff.Value.Days > 30)
                 {
                     AcceptedWithin30Days = false;
@@ -361,24 +400,21 @@ namespace FOAEA3.Business.Areas.Application
 
                     return false;
                 }
-
-                if (string.IsNullOrEmpty(InterceptionApplication.Appl_CommSubm_Text))
-                    InterceptionApplication.Appl_CommSubm_Text = interceptionCurrentlyInDB.Appl_CommSubm_Text;
-
-                InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
-                InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
-
-                SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
-
-                InterceptionApplication.Appl_Rcptfrm_Dte = garnisheeSummonsReceiptDate;
-
-                UpdateApplicationNoValidation();
-
-                EventManager.SaveEvents();
-
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
-
             }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            InterceptionApplication.Subm_Affdvt_SubmCd = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_RecvAffdvt_Dte = supportingDocsDate;
+
+            SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+
+            UpdateApplicationNoValidation();
+
+            EventManager.SaveEvents();
+
+            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
 
@@ -388,7 +424,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (!IsValidCategory("I01"))
                 return false;
-            
+
             var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
 
             if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
@@ -474,7 +510,7 @@ namespace FOAEA3.Business.Areas.Application
 
             InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
         }
-        
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;

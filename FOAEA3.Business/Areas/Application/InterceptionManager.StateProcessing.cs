@@ -71,8 +71,6 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_07_ValidAffidavitNotReceived()
         {
-            base.Process_07_ValidAffidavitNotReceived();
-
             var expectedNextState = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
 
             if (string.IsNullOrEmpty(InterceptionApplication.Subm_Affdvt_SubmCd) || (!InterceptionApplication.Appl_RecvAffdvt_Dte.HasValue))
@@ -114,6 +112,8 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_10_ApplicationAccepted()
         {
+            base.Process_10_ApplicationAccepted();
+
             var interceptionDB = Repositories.InterceptionRepository;
 
             string justiceID = interceptionDB.GetApplicationJusticeNumber(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
@@ -138,7 +138,6 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 10);
-//            ActivateDeactivateVariedTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, 10, true);
 
             bool isESDsite = IsESD_MEP(Appl_EnfSrv_Cd);
             DateTime startDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
