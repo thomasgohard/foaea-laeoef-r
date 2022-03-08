@@ -118,6 +118,8 @@ namespace FOAEA3.Business.Areas.Application
 
             string justiceID = interceptionDB.GetApplicationJusticeNumber(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
                                                                                                Appl_EnfSrv_Cd, Appl_CtrlCd);
+            justiceID = justiceID.Trim();
+
             string debtorID;
             string justiceSuffix;
             EventCode eventBFNreasonCode;
@@ -139,8 +141,7 @@ namespace FOAEA3.Business.Areas.Application
 
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 10);
 
-            bool isESDsite = IsESD_MEP(Appl_EnfSrv_Cd);
-            DateTime startDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
+            DateTime startDate = GarnisheeSummonsReceiptDate.Value.Date.AddDays(35);
 
             CreateSummonsSummary(debtorID, justiceSuffix, startDate);
 
