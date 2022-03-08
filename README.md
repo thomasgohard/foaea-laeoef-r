@@ -6,7 +6,7 @@ You can do so by going into the Windows interface for System Environment variabl
 by creating and running a batch (.cmd) file that will set them up. This file needs to run 
 with local administrator privileges. 
 
-The following variables need to be set (this example shows the code to run from command line or batch file running as a local administrator -- *the* /M *pecifies to set the variable in the system environment since the default setting is the local user's environment*):
+The following variables need to be set (this example shows the code to run from command line or batch file running as a local administrator -- *the* /M *specifies to set the variable in the system environment since the default setting is the local user's environment*):
 
     SETX ASPNETCORE_ENVIRONMENT "{your first name}" /M
 
