@@ -371,12 +371,12 @@ namespace FOAEA3.Data.DB
 
         public List<PaymentPeriodData> GetPaymentPeriods()
         {
-            return MainDB.GetAllData<PaymentPeriodData>("PymPr_Select", FillPaymentPeriodFromReader);
+            return MainDB.GetAllData<PaymentPeriodData>("PymPr", FillPaymentPeriodFromReader);
         }
 
         public List<HoldbackTypeData> GetHoldbackTypes()
         {
-            return MainDB.GetAllData<HoldbackTypeData>("HldbTyp_Select", FillHolbackTypeFromReader);
+            return MainDB.GetAllData<HoldbackTypeData>("HldbTyp", FillHolbackTypeFromReader);
         }
 
         private void FillIntFinHDataFromReader(IDBHelperReader rdr, InterceptionFinancialHoldbackData data)

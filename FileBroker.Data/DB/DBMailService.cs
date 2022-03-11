@@ -45,7 +45,6 @@ namespace FileBroker.Data.DB
 
         private int UploadAttachmentToDatabase(string attachmentPath)
         {
-
             string attachmentFileName = Path.GetFileName(attachmentPath);
             string attachmentContent = File.ReadAllText(attachmentPath);
 

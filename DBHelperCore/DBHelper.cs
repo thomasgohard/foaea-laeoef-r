@@ -46,7 +46,7 @@ namespace DBHelper
 
                         cmd.ExecuteNonQuery();
 
-                     }
+                    }
                     catch // (Exception e)
                     {
                         // string error = e.Message;
@@ -106,8 +106,8 @@ namespace DBHelper
 
 
                 var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
-                retParameter.Direction = ParameterDirection.ReturnValue; 
-                
+                retParameter.Direction = ParameterDirection.ReturnValue;
+
                 LastException = null;
                 try
                 {
@@ -246,12 +246,8 @@ namespace DBHelper
             {
                 using SqlCommand cmd = CreateCommand(procName, con);
                 if ((parameters != null) && (parameters.Count > 0))
-                {
                     foreach (var item in parameters)
-                    {
                         cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
-                    }
-                }
 
                 var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                 retParameter.Direction = ParameterDirection.ReturnValue;

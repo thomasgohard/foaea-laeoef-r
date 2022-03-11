@@ -55,18 +55,18 @@ namespace FOAEA3.API.Interception.Controllers
         }
 
         [HttpPost]
-        public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories, 
+        public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories,
                                                                            [FromServices] IRepositories_Finance repositoriesFinance)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var interceptionData = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (interceptionData is null)
-                return UnprocessableEntity("Missing or invalid request body.");
+            if (!ValidateApplication(application, null, out string error))
+                return UnprocessableEntity(error);
 
-            var interceptionManager = new InterceptionManager(interceptionData, repositories, repositoriesFinance, config);
+            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
             var appl = interceptionManager.InterceptionApplication;
 
             bool isCreated = interceptionManager.CreateApplication();
@@ -98,8 +98,8 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
-                return UnprocessableEntity("Key does not match body.");
+            if (!ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
             if (appManager.VaryApplication())
@@ -121,9 +121,9 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
-                return UnprocessableEntity("Key does not match body.");
-            
+            if (!ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
             if (appManager.AcceptInterception(supportingDocsReceiptDate))
@@ -153,6 +153,29 @@ namespace FOAEA3.API.Interception.Controllers
             sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
             return Ok(application);
+        }
+
+        private static bool ValidateApplication(InterceptionApplicationData application, ApplKey applKey, out string error)
+        {
+            error = string.Empty;
+
+            if (application is null)
+            {
+                error = "Missing or invalid request body.";
+                return false;
+            }
+
+            application.Appl_EnfSrv_Cd = application.Appl_EnfSrv_Cd.Trim();
+            application.Appl_CtrlCd = application.Appl_CtrlCd.Trim();
+
+            if (applKey is not null)
+                if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
+                {
+                    error = "Key does not match body.";
+                    return false;
+                }
+
+            return true;
         }
 
     }

@@ -190,16 +190,24 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            // ignore passed core information -- keep only new financials
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            // only keep changes that are allowed:
+            //   comment and financial terms
 
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            var newIntFinH = InterceptionApplication.IntFinH;
+            var newHldbCnd = InterceptionApplication.HldbCnd;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
                 EventManager.SaveEvents();
 
                 return false;
             }
+
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.IntFinH = newIntFinH;
+            InterceptionApplication.HldbCnd = newHldbCnd;
 
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmry.Start_Dte >= DateTime.Now)
@@ -210,7 +218,11 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!InterceptionValidation.ValidNewFinancialTerms(InterceptionApplication))
+            var currentInterceptionManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            currentInterceptionManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
+            var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
+
+            if (!InterceptionValidation.ValidNewFinancialTerms(currentInterceptionApplication))
                 return false;
 
             InterceptionApplication.IntFinH.ActvSt_Cd = "P";

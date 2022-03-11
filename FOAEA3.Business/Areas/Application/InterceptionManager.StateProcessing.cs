@@ -256,6 +256,8 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_17_FinancialTermsVaried()
         {
+            base.Process_17_FinancialTermsVaried();
+
             var currentApplicationManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
             currentApplicationManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
@@ -307,18 +309,24 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_91_InvalidVariationSource()
         {
+            base.Process_91_InvalidVariationSource();
+
             EventManager.AddEvent(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
         protected override void Process_92_InvalidVariationFinTerms()
         {
+            base.Process_92_InvalidVariationFinTerms();
+
             EventManager.AddEvent(EventCode.C55002_INVALID_FINANCIAL_TERMS);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
         protected override void Process_93_ValidFinancialVariation()
         {
+            base.Process_93_ValidFinancialVariation();
+
             EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
 
             SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
