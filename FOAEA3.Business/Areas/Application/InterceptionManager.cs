@@ -175,6 +175,11 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public void UpdateApplicationNoValidationNoFinTerms()
+        {
+            base.UpdateApplicationNoValidation();
+        }
+
         public override void UpdateApplicationNoValidation()
         {
             base.UpdateApplicationNoValidation();
@@ -182,7 +187,6 @@ namespace FOAEA3.Business.Areas.Application
             Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
 
             Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
-
         }
 
         public bool VaryApplication()
@@ -204,6 +208,9 @@ namespace FOAEA3.Business.Areas.Application
 
                 return false;
             }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
             InterceptionApplication.IntFinH = newIntFinH;
@@ -249,7 +256,10 @@ namespace FOAEA3.Business.Areas.Application
             if (InterceptionApplication.AppLiSt_Cd.NotIn(ApplicationState.INVALID_VARIATION_SOURCE_91,
                                                          ApplicationState.INVALID_VARIATION_FINTERMS_92))
             {
-                UpdateApplicationNoValidation();
+                Repositories.InterceptionRepository.CreateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+                Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
+
+                UpdateApplicationNoValidationNoFinTerms();
 
                 EventManager.SaveEvents();
 

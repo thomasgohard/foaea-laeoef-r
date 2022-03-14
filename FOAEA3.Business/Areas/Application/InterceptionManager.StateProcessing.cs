@@ -174,7 +174,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_JusticeNr = justiceID;
 
             if (eventBFNreasonCode != EventCode.UNDEFINED)
-                EventManager.AddEvent(eventBFNreasonCode, queue: EventQueue.EventBFN, activeState:"A");
+                EventManager.AddEvent(eventBFNreasonCode, queue: EventQueue.EventBFN, activeState: "A");
 
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED, eventReasonText: reasonText, activeState: "I");
 
@@ -246,9 +246,9 @@ namespace FOAEA3.Business.Areas.Application
         protected override void Process_15_Expired()
         {
             InterceptionApplication.AppLiSt_Cd = ApplicationState.EXPIRED_15;
-            
+
             EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED, activeState: "I");
-         
+
             StopBlockFunds(ApplicationState.EXPIRED_15);
 
             InterceptionApplication.ActvSt_Cd = "C";
@@ -268,7 +268,7 @@ namespace FOAEA3.Business.Areas.Application
                 case ApplicationState.APPLICATION_ACCEPTED_10:
                 case ApplicationState.PARTIALLY_SERVICED_12:
                 case ApplicationState.APPLICATION_SUSPENDED_35:
-                    
+
                     if (!InterceptionValidation.ValidVariationDefaultHoldbacks())
                         SetNewStateTo(ApplicationState.INVALID_VARIATION_FINTERMS_92);
 
@@ -327,9 +327,9 @@ namespace FOAEA3.Business.Areas.Application
         {
             base.Process_93_ValidFinancialVariation();
 
-            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
-
             SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
+
+            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, activeState: "I");
         }
 
     }
