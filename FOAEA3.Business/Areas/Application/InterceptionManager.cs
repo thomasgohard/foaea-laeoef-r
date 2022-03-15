@@ -442,32 +442,28 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public bool AcceptVariationDocument(string comments)
+        public bool AcceptVariation(DateTime supportingDocsDate, bool isAutoAccept = false)
         {
             if (!IsValidCategory("I01"))
                 return false;
 
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            string newComments = InterceptionApplication.Appl_CommSubm_Text.Trim();
 
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
                 return false;
             }
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            if (!string.IsNullOrEmpty(newComments))
+                InterceptionApplication.Appl_CommSubm_Text = newComments;
 
-            if (interceptionCurrentlyInDB.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
-            {
-                InvalidStateChange(interceptionCurrentlyInDB.AppLiSt_Cd, InterceptionApplication.AppLiSt_Cd);
-
+            if (InterceptionApplication.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+            {                
                 EventManager.SaveEvents();
 
                 return false;
             }
-
-            if (!string.IsNullOrEmpty(comments.Trim()))
-                InterceptionApplication.Appl_CommSubm_Text = comments.Trim();
 
             InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
