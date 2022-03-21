@@ -89,6 +89,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool isSuccess = base.LoadApplication(enfService, controlCode);
 
+            InterceptionApplication.IntFinH = null;
+            InterceptionApplication.HldbCnd = null;
             if (isSuccess && loadFinancials)
             {
                 var finTerms = Repositories.InterceptionRepository.GetInterceptionFinancialTerms(enfService, controlCode);
@@ -184,9 +186,11 @@ namespace FOAEA3.Business.Areas.Application
         {
             base.UpdateApplicationNoValidation();
 
-            Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+            if (InterceptionApplication.IntFinH is not null)
+                Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
 
-            Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+            if (InterceptionApplication.HldbCnd is not null)
+                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
         }
 
         public bool VaryApplication()
@@ -447,7 +451,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            string newComments = InterceptionApplication.Appl_CommSubm_Text.Trim();
+            string newComments = InterceptionApplication.Appl_CommSubm_Text?.Trim();
 
             if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
@@ -459,7 +463,7 @@ namespace FOAEA3.Business.Areas.Application
                 InterceptionApplication.Appl_CommSubm_Text = newComments;
 
             if (InterceptionApplication.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
-            {                
+            {
                 EventManager.SaveEvents();
 
                 return false;
@@ -470,6 +474,10 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
 
+            // refresh the amount owed values in SummSmry
+            var amountOwedProcess = new AmountOwedProcess(Repositories, RepositoriesFinance);
+            var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
             ChangeStateForFinancialTerms(oldState: "A", newState: "I", 12);
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 12);
 
@@ -479,11 +487,6 @@ namespace FOAEA3.Business.Areas.Application
 
             SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
-            // refresh the amount owed values in SummSmry
-
-            var amountOwedProcess = new AmountOwedProcess(Repositories, RepositoriesFinance);
-            var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(Appl_EnfSrv_Cd, Appl_CtrlCd);
-
             // update application
 
             decimal preBalance = summSmryNewData.PreBalance;
@@ -492,6 +495,8 @@ namespace FOAEA3.Business.Areas.Application
                                                                       BalanceSnapshotChangeType.VARIATION_ACCEPTED,
                                                                       intFinH_Date: activeFinTerms.IntFinH_Dte);
             UpdateApplicationNoValidation();
+
+            RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummary(summSmryNewData);
 
             if (!string.IsNullOrEmpty(activeFinTerms.IntFinH_DefHldbAmn_Period))
             {
