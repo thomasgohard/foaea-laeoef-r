@@ -76,7 +76,8 @@ namespace FOAEA3.Data.DB
             data.IntFinH_PerPym_Money = rdr["IntFinH_PerPym_Money"] as decimal?; // can be null 
             data.IntFinH_MxmTtl_Money = rdr["IntFinH_MxmTtl_Money"] as decimal?; // can be null 
             data.PymPr_Cd = rdr["PymPr_Cd"] as string; // can be null 
-            data.IntFinH_NextRecalcDate_Cd = rdr["IntFinH_NextRecalcDate_Cd"] as int?;
+            if (rdr.ColumnExists("IntFinH_NextRecalcDate_Cd"))
+                data.IntFinH_NextRecalcDate_Cd = rdr["IntFinH_NextRecalcDate_Cd"] as int?;
             data.IntFinH_CmlPrPym_Ind = rdr["IntFinH_CmlPrPym_Ind"] as byte?; // can be null 
             data.HldbCtg_Cd = rdr["HldbCtg_Cd"] as string;
             data.IntFinH_DefHldbPrcnt = rdr["IntFinH_DefHldbPrcnt"] as int?; // can be null 

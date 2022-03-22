@@ -21,12 +21,13 @@ namespace FileBroker.Data.Tests
             File.WriteAllText(@"C:\Work\MyFile.txt", attachmentContent);
 
             // act
-            string error = mailService.SendEmail(body: "This is the body", recipients: "dsarrazi@justice.gc.ca",
-                                                 subject: "This is the subject",
+            string error = mailService.SendEmail(body: "This is the body1", recipients: "dsarrazi@justice.gc.ca",
+                                                 subject: "This is the subject1",
                                                  attachmentPath: @"C:\Work\MyFile.txt");
 
             // assert
             Assert.Equal(string.Empty, error);
-        }
+        }        
+        
     }
 }

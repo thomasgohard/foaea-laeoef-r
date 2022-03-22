@@ -12,8 +12,8 @@
                 string[] values = key.Split("-");
                 if (values.Length == 2)
                 {
-                    EnfSrv = values[0];
-                    CtrlCd = values[1];
+                    EnfSrv = values[0]?.ToUpper()?.Trim();
+                    CtrlCd = values[1]?.ToUpper()?.Trim();
                 }
             }
         }

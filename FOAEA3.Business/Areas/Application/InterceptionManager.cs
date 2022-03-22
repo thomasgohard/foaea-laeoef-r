@@ -12,12 +12,14 @@ namespace FOAEA3.Business.Areas.Application
     internal partial class InterceptionManager : ApplicationManager
     {
         private const string I01_AFFITDAVIT_DOCUMENT_CODE = "IXX";
+        private const string AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION = "BFEventsProcessing Case 50896";
 
         public InterceptionApplicationData InterceptionApplication { get; }
         private IRepositories_Finance RepositoriesFinance { get; }
         private InterceptionValidation InterceptionValidation { get; }
         private bool? AcceptedWithin30Days { get; set; } = null;
         private bool ESDReceived { get; set; } = true;
+        private DateTime? GarnisheeSummonsReceiptDate { get; set; }
 
         private int nextJusticeID_callCount = 0;
 
@@ -88,6 +90,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool isSuccess = base.LoadApplication(enfService, controlCode);
 
+            InterceptionApplication.IntFinH = null;
+            InterceptionApplication.HldbCnd = null;
             if (isSuccess && loadFinancials)
             {
                 var finTerms = Repositories.InterceptionRepository.GetInterceptionFinancialTerms(enfService, controlCode);
@@ -113,11 +117,8 @@ namespace FOAEA3.Business.Areas.Application
 
         public override bool CreateApplication()
         {
-            if (InterceptionApplication.AppCtgy_Cd != "I01")
-            {
-                InterceptionApplication.Messages.AddError($"Invalid category type ({InterceptionApplication.AppCtgy_Cd}) for interception.");
+            if (!IsValidCategory("I01"))
                 return false;
-            }
 
             if (InterceptionApplication.IntFinH is null)
             {
@@ -129,11 +130,17 @@ namespace FOAEA3.Business.Areas.Application
 
             if (success)
             {
+                InterceptionApplication.IntFinH.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
+                InterceptionApplication.IntFinH.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                 InterceptionApplication.IntFinH.ActvSt_Cd = "P";
                 InterceptionApplication.IntFinH.IntFinH_VarIss_Dte = null;
 
                 foreach (var sourceSpecificHoldback in InterceptionApplication.HldbCnd)
+                {
+                    sourceSpecificHoldback.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
+                    sourceSpecificHoldback.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                     sourceSpecificHoldback.ActvSt_Cd = "P";
+                }
 
                 if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.HasValue &&
                     (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.Value == 0))
@@ -151,7 +158,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 IncrementGarnSmry(isNewApplication: true);
 
-                if (config.ESDsites.Contains(Appl_EnfSrv_Cd))
+                if (config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
                     Repositories.InterceptionRepository.InsertESDrequired(Appl_EnfSrv_Cd, Appl_CtrlCd, ESDrequired.OriginalESDrequired);
 
                 EventManager.SaveEvents();
@@ -171,28 +178,48 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public void UpdateApplicationNoValidationNoFinTerms()
+        {
+            base.UpdateApplicationNoValidation();
+        }
+
         public override void UpdateApplicationNoValidation()
         {
             base.UpdateApplicationNoValidation();
 
-            Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+            if (InterceptionApplication.IntFinH is not null)
+                Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
 
-            Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
-
+            if (InterceptionApplication.HldbCnd is not null)
+                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
         }
 
         public bool VaryApplication()
         {
-            // ignore passed core information -- keep only new financials
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            if (!IsValidCategory("I01"))
+                return false;
 
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            // only keep changes that are allowed:
+            //   comment and financial terms
+
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            var newIntFinH = InterceptionApplication.IntFinH;
+            var newHldbCnd = InterceptionApplication.HldbCnd;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
                 EventManager.SaveEvents();
 
                 return false;
             }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.IntFinH = newIntFinH;
+            InterceptionApplication.HldbCnd = newHldbCnd;
 
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmry.Start_Dte >= DateTime.Now)
@@ -203,7 +230,11 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!InterceptionValidation.ValidNewFinancialTerms(InterceptionApplication))
+            var currentInterceptionManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            currentInterceptionManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
+            var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
+
+            if (!InterceptionValidation.ValidNewFinancialTerms(currentInterceptionApplication))
                 return false;
 
             InterceptionApplication.IntFinH.ActvSt_Cd = "P";
@@ -230,7 +261,10 @@ namespace FOAEA3.Business.Areas.Application
             if (InterceptionApplication.AppLiSt_Cd.NotIn(ApplicationState.INVALID_VARIATION_SOURCE_91,
                                                          ApplicationState.INVALID_VARIATION_FINTERMS_92))
             {
-                UpdateApplicationNoValidation();
+                Repositories.InterceptionRepository.CreateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+                Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
+
+                UpdateApplicationNoValidationNoFinTerms();
 
                 EventManager.SaveEvents();
 
@@ -283,6 +317,9 @@ namespace FOAEA3.Business.Areas.Application
 
         public bool CancelApplication()
         {
+            if (!IsValidCategory("I01"))
+                return false;
+
             var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
             if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd))
             {
@@ -319,19 +356,56 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        public bool AcceptGarnishee(bool isAutoAccept = false)
+        public bool AcceptInterception(DateTime supportingDocsDate)
         {
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            // only keep changes that are allowed:
+            //   Source Reference Number, comment and address fields
 
-            // ignore passed core information -- keep only new financials
+            string appl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            string appl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            string appl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            string appl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            string appl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            string appl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            string appl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
 
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
-            {
+            LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false);
+
+            InterceptionApplication.Appl_Source_RfrNr = appl_Source_RfrNr ?? InterceptionApplication.Appl_Source_RfrNr;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = appl_Dbtr_Addr_Ln ?? InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = appl_Dbtr_Addr_Ln1 ?? InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = appl_Dbtr_Addr_CityNme ?? InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = appl_Dbtr_Addr_PrvCd ?? InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = appl_Dbtr_Addr_CtryCd ?? InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = appl_Dbtr_Addr_PCd ?? InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
+            if (!IsValidCategory("I01"))
                 return false;
+
+            var interceptionDB = Repositories.InterceptionRepository;
+            InterceptionApplication.IntFinH = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
+            if (InterceptionApplication.IntFinH is not null)
+            {
+                InterceptionApplication.IntFinH.IntFinH_Affdvt_SubmCd = Repositories.CurrentSubmitter;
+                InterceptionApplication.IntFinH.IntFinH_RcvtAffdvt_Dte = supportingDocsDate;
+                InterceptionApplication.HldbCnd = interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd,
+                                                                           InterceptionApplication.IntFinH.IntFinH_Dte, "P");
             }
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            bool result = AcceptGarnishee(supportingDocsDate, isAutoAccept: false);
 
+            if (config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
+                Repositories.InterceptionRepository.UpdateESDrequired(Appl_EnfSrv_Cd, Appl_CtrlCd, supportingDocsDate);
+
+            EventManager.SaveEvents();
+
+            return result;
+        }
+
+        private bool AcceptGarnishee(DateTime supportingDocsDate, bool isAutoAccept = false)
+        {
             AcceptedWithin30Days = true;
 
             if (!isAutoAccept)
@@ -339,9 +413,13 @@ namespace FOAEA3.Business.Areas.Application
                 var interceptionDB = Repositories.InterceptionRepository;
 
                 bool isESDsite = IsESD_MEP(Appl_EnfSrv_Cd);
-                DateTime garnisheeSummonsReceiptDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
 
-                var dateDiff = garnisheeSummonsReceiptDate - interceptionCurrentlyInDB.Appl_Lgl_Dte;
+                if (!GarnisheeSummonsReceiptDate.HasValue)
+                    GarnisheeSummonsReceiptDate = supportingDocsDate;
+                else
+                    GarnisheeSummonsReceiptDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
+
+                var dateDiff = GarnisheeSummonsReceiptDate - InterceptionApplication.Appl_Lgl_Dte;
                 if (dateDiff.HasValue && dateDiff.Value.Days > 30)
                 {
                     AcceptedWithin30Days = false;
@@ -349,56 +427,57 @@ namespace FOAEA3.Business.Areas.Application
 
                     return false;
                 }
-
-                if (string.IsNullOrEmpty(InterceptionApplication.Appl_CommSubm_Text))
-                    InterceptionApplication.Appl_CommSubm_Text = interceptionCurrentlyInDB.Appl_CommSubm_Text;
-
-                InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
-                InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
-
-                SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
-
-                InterceptionApplication.Appl_Rcptfrm_Dte = garnisheeSummonsReceiptDate;
-
-                UpdateApplicationNoValidation();
-
-                EventManager.SaveEvents();
-
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
-
             }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            InterceptionApplication.Subm_Affdvt_SubmCd = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_RecvAffdvt_Dte = supportingDocsDate;
+
+            SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+
+            UpdateApplicationNoValidation();
+
+            EventManager.SaveEvents();
+
+            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
 
         }
 
-        public bool AcceptVariationDocument(string comments)
+        public bool AcceptVariation(DateTime supportingDocsDate, bool isAutoAccept = false)
         {
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            if (!IsValidCategory("I01"))
+                return false;
 
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            string newComments = InterceptionApplication.Appl_CommSubm_Text?.Trim();
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
                 return false;
             }
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            if (!string.IsNullOrEmpty(newComments))
+                InterceptionApplication.Appl_CommSubm_Text = newComments;
 
-            if (interceptionCurrentlyInDB.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+            if (InterceptionApplication.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
             {
-                InvalidStateChange(interceptionCurrentlyInDB.AppLiSt_Cd, InterceptionApplication.AppLiSt_Cd);
-
                 EventManager.SaveEvents();
 
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(comments.Trim()))
-                InterceptionApplication.Appl_CommSubm_Text = comments.Trim();
-
             InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
+
+            // refresh the amount owed values in SummSmry
+            var amountOwedProcess = new AmountOwedProcess(Repositories, RepositoriesFinance);
+            var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             ChangeStateForFinancialTerms(oldState: "A", newState: "I", 12);
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 12);
@@ -409,18 +488,16 @@ namespace FOAEA3.Business.Areas.Application
 
             SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
-            // refresh the amount owed values in SummSmry
-
-            var amountOwedProcess = new AmountOwedProcess(Repositories, RepositoriesFinance);
-            var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(Appl_EnfSrv_Cd, Appl_CtrlCd);
-
             // update application
+
             decimal preBalance = summSmryNewData.PreBalance;
 
             Repositories.InterceptionRepository.InsertBalanceSnapshot(Appl_EnfSrv_Cd, Appl_CtrlCd, preBalance,
                                                                       BalanceSnapshotChangeType.VARIATION_ACCEPTED,
                                                                       intFinH_Date: activeFinTerms.IntFinH_Dte);
             UpdateApplicationNoValidation();
+
+            RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummary(summSmryNewData);
 
             if (!string.IsNullOrEmpty(activeFinTerms.IntFinH_DefHldbAmn_Period))
             {
@@ -433,9 +510,7 @@ namespace FOAEA3.Business.Areas.Application
                 }
             }
             else
-            {
-                // RepositoriesFinance.SummonsSummaryFixedAmountRepository.DeleteSummSmryFixedAmountRecalcDate(Appl_EnfSrv_Cd, Appl_CtrlCd);
-            }
+                RepositoriesFinance.SummonsSummaryFixedAmountRepository.DeleteSummSmryFixedAmountRecalcDate(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             EventManager.SaveEvents();
 
@@ -444,169 +519,7 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        private DateTime RecalculateFixedAmountRecalcDateAfterVariation(InterceptionFinancialHoldbackData newFinTerms, DateTime variationCalcDate)
-        {
-            DateTime fixedAmountRecalcDate = variationCalcDate;
-            DateTime currDateTime = variationCalcDate;
-            DateTime ctrlFaDtePayable = currDateTime;
-
-            var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd);
-            var workActSummons = RepositoriesFinance.ActiveSummonsRepository.GetActiveSummonsCore(ctrlFaDtePayable, Appl_EnfSrv_Cd, Appl_CtrlCd);
-
-            if (workActSummons is not null)
-            {
-                var activeSummons = GetActiveSummonsForVariation(ctrlFaDtePayable, newFinTerms, summSmry.FirstOrDefault());
-            }
-
-            return fixedAmountRecalcDate;
-
-        }
-        /*
-
-
-        If workActSummons.SummSmrySelectActSummons.Rows.Count > 0 Then
-
-            ' get most recent active summon
-
-            Dim activeSummonData As Common.ActiveSummonsesForDebtorData.ActiveSummonsesForDebtorRow = Nothing
-
-            Dim activeSummons As Common.ActiveSummonsesForDebtorData = Nothing
-            ' -- removed (need to use "in memory" intFinH): activeSummons = .GetActiveSummonsesForDebtor(Nothing, ctrlFaDtePayable, applEnfSrvCd, applCtrlCd)
-
-            activeSummons = GetActiveSummonsForVariation(ctrlFaDtePayable, applicationData, intFinH, summSmry)
-
-            If (activeSummons.ActiveSummonsesForDebtor.Rows.Count > 0) Then
-                activeSummonData = activeSummons.ActiveSummonsesForDebtor.Item(0)
-            End If
-
-            If Not activeSummonData Is Nothing Then
-
-                ' if payable date prior to variation, use system date as payable date
-
-                Dim calcFaDtePayable As DateTime
-                If (ctrlFaDtePayable > activeSummonData.Start_Dte) AndAlso
-                   (Not activeSummonData.IsIntFinH_VarIss_DteNull) AndAlso
-                   (ctrlFaDtePayable < activeSummonData.IntFinH_VarIss_Dte) Then
-                    calcFaDtePayable = currDateTime
-                Else
-                    calcFaDtePayable = ctrlFaDtePayable
-                End If
-
-                ' if summon has been varied, use variation issue date of latest variation
-                ' to determine current period
-
-                Dim calcStartDate As DateTime
-                If activeSummonData.IsIntFinH_VarIss_DteNull Then
-                    calcStartDate = activeSummonData.Start_Dte
-                Else
-                    calcStartDate = activeSummonData.IntFinH_VarIss_Dte
-                End If
-
-                Dim finTermStartDate As DateTime = activeSummonData.Start_Dte
-                Dim fixedAmountPrdFreqCd As String = String.Empty
-
-                If Not activeSummonData.IsIntFinH_DefHldbAmn_PeriodNull Then
-                    fixedAmountPrdFreqCd = activeSummonData.IntFinH_DefHldbAmn_Period
-                End If
-
-                ' DS 2011-03-25 FEAT 18
-                ' adjust calcStartDate so that it matches the SummSmry StartDate (as if the periods
-                ' had been calculated from that start date)
-                Dim acceptedDate As DateTime = applicationData.Appl.Item(0).Appl_RecvAffdvt_Dte ' finTermStartDate.AddDays(-35)
-                acceptedDate = acceptedDate.Date  ' Remove the timestamp and return only the date
-                calcStartDate = AdjustStartDateBasedOnAcceptedDate(calcStartDate, acceptedDate, fixedAmountPrdFreqCd)
-
-                ' determine current period
-
-                Dim currentPeriod As Integer = CalculatePeriod(activeSummonData, calcFaDtePayable,
-                                                               calcStartDate, fixedAmountPrdFreqCd)
-
-
-                ' calculate summsmry recalc date
-
-                FixedAmountRecalcDate = CalculateSummSmryRecalcDate(fixedAmountPrdFreqCd,
-                                                                                     currentPeriod,
-                                                                                     calcStartDate)
-
-
-            End If
-
-        End If
-
-        Return FixedAmountRecalcDate
-
-    End Function
-         
-         
-         
-         */
-
-        private ActiveSummonsData GetActiveSummonsForVariation(DateTime ctrlFaDtePayable, InterceptionFinancialHoldbackData intFinHdata, SummonsSummaryData summSmryData)
-        {
-            ActiveSummonsData activeSummons = null;
-
-            var appl = InterceptionApplication;
-
-            if ((ctrlFaDtePayable >= summSmryData.Start_Dte) && (ctrlFaDtePayable <= summSmryData.End_Dte))
-            {
-                DateTime thisVarEnterDte = default;
-                if (!intFinHdata.IntFinH_VarIss_Dte.HasValue)
-                    if (intFinHdata.IntFinH_RcvtAffdvt_Dte.HasValue)
-                        thisVarEnterDte = intFinHdata.IntFinH_RcvtAffdvt_Dte.Value;
-
-                string hldbTypeCode = "T";
-                if (!string.IsNullOrEmpty(intFinHdata.HldbTyp_Cd))
-                    hldbTypeCode = intFinHdata.HldbTyp_Cd;
-
-                decimal mxmTtl_Money = intFinHdata.IntFinH_MxmTtl_Money ?? 0M;
-                decimal perPym_Money = intFinHdata.IntFinH_PerPym_Money ?? 0M;
-                byte cmlPrPym_Ind = intFinHdata.IntFinH_CmlPrPym_Ind ?? 0;
-                int defHldbPrcnt = intFinHdata.IntFinH_DefHldbPrcnt ?? 0;
-                decimal defHldbAmn_Money = intFinHdata.IntFinH_DefHldbAmn_Money ?? 0M;
-                DateTime varIss_Dte = intFinHdata.IntFinH_VarIss_Dte ?? default;
-                string pymPrCd = intFinHdata.PymPr_Cd ?? string.Empty;
-                string defHldbAmnPrCd = intFinHdata.IntFinH_DefHldbAmn_Period ?? string.Empty;
-
-                activeSummons = new ActiveSummonsData
-                {
-                    Subm_SubmCd = appl.Subm_SubmCd,
-                    Appl_JusticeNr = appl.Appl_JusticeNr,
-                    IntFinH_LmpSum_Money = intFinHdata.IntFinH_LmpSum_Money,
-                    IntFinH_PerPym_Money = perPym_Money,
-                    IntFinH_MxmTtl_Money = mxmTtl_Money,
-                    PymPr_Cd = pymPrCd,
-                    IntFinH_CmlPrPym_Ind = cmlPrPym_Ind,
-                    HldbCtg_Cd = intFinHdata.HldbCtg_Cd,
-                    IntFinH_DefHldbPrcnt = defHldbPrcnt,
-                    IntFinH_DefHldbAmn_Money = defHldbAmn_Money,
-                    IntFinH_DefHldbAmn_Period = defHldbAmnPrCd,
-                    HldbTyp_Cd = hldbTypeCode,
-                    Start_Dte = summSmryData.Start_Dte,
-                    FeeDivertedTtl_Money = summSmryData.FeeDivertedTtl_Money,
-                    LmpSumDivertedTtl_Money = summSmryData.LmpSumDivertedTtl_Money,
-                    PerPymDivertedTtl_Money = summSmryData.PerPymDivertedTtl_Money,
-                    HldbAmtTtl_Money = summSmryData.HldbAmtTtl_Money,
-                    Appl_TotalAmnt = summSmryData.Appl_TotalAmnt,
-                    IntFinH_Dte = intFinHdata.IntFinH_Dte,
-                    End_Dte = summSmryData.End_Dte,
-                    Appl_RecvAffdvt_Dte = summSmryData.Start_Dte,
-                    IntFinH_VarIss_Dte = varIss_Dte,
-                    LmpSumOwedTtl_Money = summSmryData.LmpSumOwedTtl_Money,
-                    PerPymOwedTtl_Money = summSmryData.PerPymOwedTtl_Money,
-                    Appl_EnfSrv_Cd = intFinHdata.Appl_EnfSrv_Cd,
-                    VarEnterDte = thisVarEnterDte,
-                    Appl_CtrlCd = intFinHdata.Appl_CtrlCd
-                };
-
-                if (!intFinHdata.IntFinH_VarIss_Dte.HasValue)
-                    activeSummons.IntFinH_VarIss_Dte = null;
-
-            }
-
-            return activeSummons;
-        }
-
-        private void RejectInterception()
+        public void RejectInterception()
         {
             InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
@@ -622,220 +535,52 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
         }
 
-        private void IncrementGarnSmry(bool isNewApplication = false)
+        public bool RejectVariation(string applicationRejectReasons)
         {
+            if (!IsValidCategory("I01"))
+                return false;
 
-            var garnSmryDB = RepositoriesFinance.GarnSummaryRepository;
+            string newComments = InterceptionApplication.Appl_CommSubm_Text?.Trim();
 
-            if (isNewApplication || InterceptionApplication.AppLiSt_Cd.In(ApplicationState.SIN_NOT_CONFIRMED_5,
-                                                                          ApplicationState.APPLICATION_REJECTED_9,
-                                                                          ApplicationState.APPLICATION_SUSPENDED_35))
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
-                int fiscalMonthCounter = DateTimeHelper.GetFiscalMonth(DateTime.Now);
-                int fiscalYear = DateTimeHelper.GetFiscalYear(DateTime.Now);
-                string enfOfficeCode = InterceptionApplication.Subm_SubmCd.Substring(3, 1);
-
-                var garnSummaryData = garnSmryDB.GetGarnSummary(Appl_EnfSrv_Cd, enfOfficeCode, fiscalMonthCounter, fiscalYear);
-
-                GarnSummaryData thisGarnSmryData;
-
-                if (garnSummaryData.Count == 0)
-                {
-                    int totalActiveSummonsCount = Repositories.InterceptionRepository.GetTotalActiveSummons(Appl_EnfSrv_Cd, enfOfficeCode);
-                    thisGarnSmryData = new GarnSummaryData
-                    {
-                        EnfSrv_Cd = Appl_EnfSrv_Cd,
-                        EnfOff_Cd = enfOfficeCode,
-                        AcctYear = fiscalYear,
-                        AcctMonth = fiscalMonthCounter,
-                        Ttl_ActiveSummons_Count = totalActiveSummonsCount,
-                        Mth_ActiveSummons_Count = 0,
-                        Mth_ActionedSummons_Count = 0,
-                        Mth_LumpSumActive_Amount = 0,
-                        Mth_PeriodicActive_Amount = 0,
-                        Mth_FeesActive_Amount = 0,
-                        Mth_FeesDiverted_Amount = 0,
-                        Mth_LumpSumDiverted_Amount = 0,
-                        Mth_PeriodicDiverted_Amount = 0,
-                        Mth_FeesOwed_Amount = 0,
-                        Mth_FeesRemitted_Amount = 0,
-                        Mth_FeesCollected_Amount = 0,
-                        Mth_FeesDisbursed_Amount = 0,
-                        Mth_Uncollected_Amount = 0,
-                        Mth_FeesSatisfied_Count = 0,
-                        Mth_FeesUnsatisfied_Count = 0,
-                        Mth_Garnisheed_Amount = 0,
-                        Mth_DivertActions_Count = 0,
-                        Mth_Variation1_Count = 0,
-                        Mth_Variation2_Count = 0,
-                        Mth_Variation3_Count = 0,
-                        Mth_Variations_Count = 0,
-                        Mth_SummonsReceived_Count = 0,
-                        Mth_SummonsCancelled_Count = 0,
-                        Mth_SummonsRejected_Count = 0,
-                        Mth_SummonsSatisfied_Count = 0,
-                        Mth_SummonsExpired_Count = 0,
-                        Mth_SummonsSuspended_Count = 0,
-                        Mth_SummonsArchived_Count = 0,
-                        Mth_SummonsSIN_Count = 0,
-                        Mth_Action_Count = 0,
-                        Mth_FAAvailable_Amount = 0,
-                        Mth_FA_Count = 0,
-                        Mth_CRAction_Count = 0,
-                        Mth_CRFee_Amount = 0,
-                        Mth_CRPaid_Amount = 0
-                    };
-
-                    garnSmryDB.CreateGarnSummary(thisGarnSmryData);
-                }
-                else
-                    thisGarnSmryData = garnSummaryData.First();
-
-                if (isNewApplication)
-                {
-                    if (thisGarnSmryData.Mth_SummonsReceived_Count.HasValue)
-                        thisGarnSmryData.Mth_SummonsReceived_Count++;
-                    else
-                        thisGarnSmryData.Mth_SummonsReceived_Count = 1;
-                }
-
-                switch (InterceptionApplication.AppLiSt_Cd)
-                {
-                    case ApplicationState.SIN_NOT_CONFIRMED_5:
-                        if (thisGarnSmryData.Mth_SummonsSIN_Count.HasValue)
-                            thisGarnSmryData.Mth_SummonsSIN_Count++;
-                        else
-                            thisGarnSmryData.Mth_SummonsSIN_Count = 1;
-                        break;
-
-                    case ApplicationState.APPLICATION_REJECTED_9:
-                        if (thisGarnSmryData.Mth_SummonsRejected_Count.HasValue)
-                            thisGarnSmryData.Mth_SummonsRejected_Count++;
-                        else
-                            thisGarnSmryData.Mth_SummonsRejected_Count = 1;
-                        break;
-
-                    case ApplicationState.APPLICATION_SUSPENDED_35:
-                        if (thisGarnSmryData.Mth_SummonsSuspended_Count.HasValue)
-                            thisGarnSmryData.Mth_SummonsSuspended_Count++;
-                        else
-                            thisGarnSmryData.Mth_SummonsSuspended_Count = 1;
-                        break;
-                }
-
-                garnSmryDB.UpdateGarnSummary(thisGarnSmryData);
-
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
             }
 
-        }
+            if (!string.IsNullOrEmpty(newComments))
+                InterceptionApplication.Appl_CommSubm_Text = newComments;
 
-        private DateTime ChangeStateForFinancialTerms(string oldState, string newState, short intFinH_LifeStateCode)
-        {
-
-            var interceptionDB = Repositories.InterceptionRepository;
-
-            var defaultHoldback = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, oldState);
-
-            DateTime intFinH_Date = defaultHoldback.IntFinH_Dte;
-
-            defaultHoldback.ActvSt_Cd = newState;
-
-            defaultHoldback.IntFinH_LiStCd = intFinH_LifeStateCode;
-
-            var sourceSpecificHoldbacks = interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd, intFinH_Date, oldState);
-
-            foreach (var sourceSpecificHoldback in sourceSpecificHoldbacks)
+            if (InterceptionApplication.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
             {
-                sourceSpecificHoldback.ActvSt_Cd = newState;
-                sourceSpecificHoldback.HldbCnd_LiStCd = 2; // valid
+                EventManager.SaveEvents();
+
+                return false;
             }
 
-            interceptionDB.UpdateInterceptionFinancialTerms(defaultHoldback);
-            interceptionDB.UpdateHoldbackConditions(sourceSpecificHoldbacks);
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            return intFinH_Date;
+            if (applicationRejectReasons.Length > 80)
+                applicationRejectReasons = applicationRejectReasons?[0..79];
 
-        }
+            EventManager.AddEvent(EventCode.C51110_VARIATION_REJECTED, applicationRejectReasons);
 
-        private void CreateSummonsSummary(string debtorID, string justiceSuffix, DateTime startDate)
-        {
-            var summSummary = new SummonsSummaryData
-            {
-                Appl_EnfSrv_Cd = Appl_EnfSrv_Cd,
-                Appl_CtrlCd = Appl_CtrlCd,
-                Dbtr_Id = debtorID,
-                Appl_JusticeNrSfx = justiceSuffix,
-                Start_Dte = startDate,
-                End_Dte = startDate.AddYears(5).AddDays(-1),
-                SummSmry_Recalc_Dte = startDate
-            };
+            if (newComments == AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION)
+                EventManager.AddEvent(EventCode.C50762_VARIATION_REJECTED_BY_FOAEA_AS_VARIATION_DOCUMENT_NOT_RECEIVED_WITHIN_15_DAYS);
 
-            var existingData = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            DeletePendingFinancialTerms();
 
-            if (existingData.Any())
-                RepositoriesFinance.SummonsSummaryRepository.CreateSummonsSummary(summSummary);
-            else
-                // TODO: should we get a warning that instead of creating we are updating an existing summsmry?
-                RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummary(summSummary);
-        }
+            VariationAction = VariationDocumentAction.RejectVariationDocument;
+            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
-        private void NotifyMatchingActiveApplications(EventCode eventCode)
-        {
-            var matchedApplications = Repositories.InterceptionRepository.FindMatchingActiveApplications(Appl_EnfSrv_Cd, Appl_CtrlCd,
-                                                                                                InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
-                                                                                                InterceptionApplication.Appl_Crdtr_FrstNme,
-                                                                                                InterceptionApplication.Appl_Crdtr_SurNme);
+            UpdateApplicationNoValidation();
 
-            if (matchedApplications.Any())
-            {
-                string newApplicationKey = $"{Appl_EnfSrv_Cd}-{InterceptionApplication.Subm_SubmCd}-{Appl_CtrlCd}";
-                foreach (var matchedApplication in matchedApplications)
-                {
-                    EventManager.AddEvent(eventCode, eventReasonText: newApplicationKey, appState: matchedApplication.AppLiSt_Cd,
-                                          submCd: matchedApplication.Subm_SubmCd, recipientSubm: matchedApplication.Subm_Recpt_SubmCd,
-                                          enfSrv: matchedApplication.Appl_EnfSrv_Cd, controlCode: matchedApplication.Appl_CtrlCd);
-                }
-            }
-        }
+            EventManager.SaveEvents();
 
-        private void StopBlockFunds(ApplicationState fromState)
-        {
-            string debtorID = GetDebtorID(InterceptionApplication.Appl_JusticeNr);
-            int summSmryCount = 0;
+            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
-            var summSmryInfoForDebtor = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(debtorId: debtorID);
-
-            foreach (var summSmryInfo in summSmryInfoForDebtor)
-            {
-                if (summSmryInfo.ActualEnd_Dte.HasValue)
-                    summSmryCount++;
-            }
-
-            summSmryCount--;
-
-            if (summSmryCount <= 0)
-                EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN);
-
-            var summSmryForCurrentAppl = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
-
-            switch (fromState)
-            {
-                case ApplicationState.FULLY_SERVICED_13:
-                case ApplicationState.MANUALLY_TERMINATED_14:
-                    summSmryForCurrentAppl.ActualEnd_Dte = DateTime.Now;
-                    break;
-                case ApplicationState.EXPIRED_15:
-                    summSmryForCurrentAppl.ActualEnd_Dte = summSmryForCurrentAppl.End_Dte;
-                    break;
-                default:
-                    // Throw New Exception("Invalid State for the current application.")
-                    break;
-            }
-
-            RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummary(summSmryForCurrentAppl);
-
-            Repositories.InterceptionRepository.EISOHistoryDeleteBySIN(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
-
+            return true;            
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
@@ -867,6 +612,25 @@ namespace FOAEA3.Business.Areas.Application
                     var dbNotification = Repositories.NotificationRepository;
                     switch (bfEvent.Event_Reas_Cd)
                     {
+                        case EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION:
+                            if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+                            {
+                                DateTime lastVariationDate = GetLastVariationDate();
+                                int elapsed = Math.Abs((DateTime.Now - lastVariationDate).Days);
+
+                                if (elapsed >= 15)
+                                    RejectVariation(AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION);
+                                else
+                                {
+                                    DateTime dateForNextBF = DateTime.Now.AddDays(5);
+                                    EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
+                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, 
+                                                            effectiveTimestamp: dateForNextBF);
+                                }
+                            }
+                            break;
+
+
                         case EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR:
                             if (InterceptionApplication.Appl_Rcptfrm_Dte.AddDays(20) < DateTime.Now)
                             {

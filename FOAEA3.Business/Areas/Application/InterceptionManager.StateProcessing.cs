@@ -71,8 +71,6 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_07_ValidAffidavitNotReceived()
         {
-            base.Process_07_ValidAffidavitNotReceived();
-
             var expectedNextState = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
 
             if (string.IsNullOrEmpty(InterceptionApplication.Subm_Affdvt_SubmCd) || (!InterceptionApplication.Appl_RecvAffdvt_Dte.HasValue))
@@ -114,10 +112,14 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_10_ApplicationAccepted()
         {
+            base.Process_10_ApplicationAccepted();
+
             var interceptionDB = Repositories.InterceptionRepository;
 
             string justiceID = interceptionDB.GetApplicationJusticeNumber(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
                                                                                                Appl_EnfSrv_Cd, Appl_CtrlCd);
+            justiceID = justiceID.Trim();
+
             string debtorID;
             string justiceSuffix;
             EventCode eventBFNreasonCode;
@@ -132,16 +134,14 @@ namespace FOAEA3.Business.Areas.Application
             {
                 eventBFNreasonCode = EventCode.C56002_NEW_BFN_FOR_EXISTING_DEBTOR;
                 debtorID = GetDebtorID(justiceID);
-                // ProcessSummSmryBFN(debtorID, evntBFNReasCd) //'[EvntBFN], [EvntBFNDtl]
+                ProcessSummSmryBFN(debtorID, ref eventBFNreasonCode);
                 nextJusticeID_callCount = 0;
                 justiceSuffix = NextJusticeID(justiceID);
             }
 
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 10);
-//            ActivateDeactivateVariedTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, 10, true);
 
-            bool isESDsite = IsESD_MEP(Appl_EnfSrv_Cd);
-            DateTime startDate = interceptionDB.GetGarnisheeSummonsReceiptDate(Appl_EnfSrv_Cd, Appl_CtrlCd, isESDsite);
+            DateTime startDate = GarnisheeSummonsReceiptDate.Value.Date.AddDays(35);
 
             CreateSummonsSummary(debtorID, justiceSuffix, startDate);
 
@@ -174,7 +174,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_JusticeNr = justiceID;
 
             if (eventBFNreasonCode != EventCode.UNDEFINED)
-                EventManager.AddEvent(eventBFNreasonCode, queue: EventQueue.EventBFN, activeState:"A");
+                EventManager.AddEvent(eventBFNreasonCode, queue: EventQueue.EventBFN, activeState: "A");
 
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED, eventReasonText: reasonText, activeState: "I");
 
@@ -187,16 +187,16 @@ namespace FOAEA3.Business.Areas.Application
 
             if (currentState == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
             {
+                base.Process_12_PartiallyServiced();
+
                 if (VariationAction == VariationDocumentAction.AcceptVariationDocument)
                 {
-                    base.Process_12_PartiallyServiced();
-
                     EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
                     var interceptionDB = Repositories.InterceptionRepository;
                     if (interceptionDB.IsVariationIncrease(Appl_EnfSrv_Cd, Appl_CtrlCd))
                         EventManager.AddEvent(EventCode.C51113_VARIATION_ACCEPTED_WITH_AN_ARREARS_VALUE_SIGNIFICANTLY_GREATER_THAN_THE_PREVIOUS_ARREARS);
                 }
-                else
+                else // reject variation
                 {
                     var summonsSummaryData = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
 
@@ -246,9 +246,9 @@ namespace FOAEA3.Business.Areas.Application
         protected override void Process_15_Expired()
         {
             InterceptionApplication.AppLiSt_Cd = ApplicationState.EXPIRED_15;
-            
+
             EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED, activeState: "I");
-         
+
             StopBlockFunds(ApplicationState.EXPIRED_15);
 
             InterceptionApplication.ActvSt_Cd = "C";
@@ -256,6 +256,8 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_17_FinancialTermsVaried()
         {
+            base.Process_17_FinancialTermsVaried();
+
             var currentApplicationManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
             currentApplicationManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
@@ -266,7 +268,7 @@ namespace FOAEA3.Business.Areas.Application
                 case ApplicationState.APPLICATION_ACCEPTED_10:
                 case ApplicationState.PARTIALLY_SERVICED_12:
                 case ApplicationState.APPLICATION_SUSPENDED_35:
-                    
+
                     if (!InterceptionValidation.ValidVariationDefaultHoldbacks())
                         SetNewStateTo(ApplicationState.INVALID_VARIATION_FINTERMS_92);
 
@@ -307,21 +309,27 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_91_InvalidVariationSource()
         {
+            base.Process_91_InvalidVariationSource();
+
             EventManager.AddEvent(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
         protected override void Process_92_InvalidVariationFinTerms()
         {
+            base.Process_92_InvalidVariationFinTerms();
+
             EventManager.AddEvent(EventCode.C55002_INVALID_FINANCIAL_TERMS);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
         protected override void Process_93_ValidFinancialVariation()
         {
-            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
+            base.Process_93_ValidFinancialVariation();
 
             SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
+
+            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, activeState: "I");
         }
 
     }

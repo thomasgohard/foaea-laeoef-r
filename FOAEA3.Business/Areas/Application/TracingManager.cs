@@ -66,12 +66,8 @@ namespace FOAEA3.Business.Areas.Application
 
         public override bool CreateApplication()
         {
-
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                TracingApplication.Messages.AddError($"Invalid category type ({TracingApplication.AppCtgy_Cd}) for tracing.");
+            if (!IsValidCategory("T01"))
                 return false;
-            }
 
             bool success = base.CreateApplication();
 
@@ -140,10 +136,8 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                throw new Exception("Wrong Application Category Code!"); // todo -- fix how errors are passed to frontend
-            }
+            if (!IsValidCategory("T01"))
+                return false;
 
             TracingApplication.Appl_Reactv_Dte = ReinstateEffectiveDate;
 
@@ -171,10 +165,8 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                throw new Exception("Wrong Application Category Code!"); // todo -- fix how errors are passed to frontend
-            }
+            if (!IsValidCategory("T01"))
+                return false;
 
             SetNewStateTo(ApplicationState.APPLICATION_REJECTED_9);
 
