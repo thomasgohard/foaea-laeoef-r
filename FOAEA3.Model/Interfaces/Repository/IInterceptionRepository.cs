@@ -19,10 +19,12 @@ namespace FOAEA3.Model.Interfaces
         InterceptionFinancialHoldbackData GetInterceptionFinancialTerms(string enfService, string controlCode, string activeState = "A");
         void CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
         void UpdateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
+        void DeleteInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
         
         List<HoldbackConditionData> GetHoldbackConditions(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A");
         void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
+        void DeleteHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
 
         List<InterceptionApplicationData> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN,
                                                                  string activeState);

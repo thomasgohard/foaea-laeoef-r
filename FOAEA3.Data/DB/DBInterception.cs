@@ -91,6 +91,18 @@ namespace FOAEA3.Data.DB
             _ = MainDB.ExecProc("IntFinH_Update", parameters);
         }
 
+        public void DeleteInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", intFinH.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", intFinH.Appl_CtrlCd},
+                {"IntFinH_Dte", intFinH.IntFinH_Dte}
+            };
+
+            _ = MainDB.ExecProc("IntFinH_Delete", parameters);
+        }
+
         private static Dictionary<string, object> SetIntFinHParameters(InterceptionFinancialHoldbackData intFinH)
         {
             var parameters = new Dictionary<string, object>
@@ -183,6 +195,25 @@ namespace FOAEA3.Data.DB
             var parameters = SetHoldbackConditionParameters(holdbackCondition);
 
             _ = MainDB.ExecProc("HldbCnd_Update", parameters);
+        }
+
+        public void DeleteHoldbackConditions(List<HoldbackConditionData> holdbackConditions)
+        {
+            foreach (var holdbackCondition in holdbackConditions)
+                DeleteHoldbackCondition(holdbackCondition);
+        }
+
+        private void DeleteHoldbackCondition(HoldbackConditionData holdbackCondition)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", holdbackCondition.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", holdbackCondition.Appl_CtrlCd},
+                {"IntFinH_Dte", holdbackCondition.IntFinH_Dte},
+                {"EnfSrv_Cd", holdbackCondition.EnfSrv_Cd}
+            };
+
+            _ = MainDB.ExecProc("HldbCnd_Delete", parameters);
         }
 
         private static Dictionary<string, object> SetHoldbackConditionParameters(HoldbackConditionData holdbackCondition)

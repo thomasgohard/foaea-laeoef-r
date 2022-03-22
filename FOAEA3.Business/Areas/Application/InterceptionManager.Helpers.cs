@@ -399,6 +399,30 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        private void DeletePendingFinancialTerms()
+        {
+
+            var interceptionDB = Repositories.InterceptionRepository;
+
+            var defaultHoldback = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
+
+            DateTime intFinH_Date = defaultHoldback.IntFinH_Dte;
+
+            var sourceSpecificHoldbacks = interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd, intFinH_Date, "P");
+
+            interceptionDB.DeleteHoldbackConditions(sourceSpecificHoldbacks);
+            interceptionDB.DeleteInterceptionFinancialTerms(defaultHoldback);
+        }
+
+        private DateTime GetLastVariationDate()
+        {
+            var interceptionDB = Repositories.InterceptionRepository;
+
+            var defaultHoldback = interceptionDB.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
+
+            return defaultHoldback.IntFinH_Dte;
+        }
+
         private void CreateSummonsSummary(string debtorID, string justiceSuffix, DateTime startDate)
         {
             var summSummary = new SummonsSummaryData

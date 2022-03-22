@@ -187,16 +187,16 @@ namespace FOAEA3.Business.Areas.Application
 
             if (currentState == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
             {
+                base.Process_12_PartiallyServiced();
+
                 if (VariationAction == VariationDocumentAction.AcceptVariationDocument)
                 {
-                    base.Process_12_PartiallyServiced();
-
                     EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
                     var interceptionDB = Repositories.InterceptionRepository;
                     if (interceptionDB.IsVariationIncrease(Appl_EnfSrv_Cd, Appl_CtrlCd))
                         EventManager.AddEvent(EventCode.C51113_VARIATION_ACCEPTED_WITH_AN_ARREARS_VALUE_SIGNIFICANTLY_GREATER_THAN_THE_PREVIOUS_ARREARS);
                 }
-                else
+                else // reject variation
                 {
                     var summonsSummaryData = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
 

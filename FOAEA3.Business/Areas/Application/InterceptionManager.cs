@@ -12,6 +12,7 @@ namespace FOAEA3.Business.Areas.Application
     internal partial class InterceptionManager : ApplicationManager
     {
         private const string I01_AFFITDAVIT_DOCUMENT_CODE = "IXX";
+        private const string AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION = "BFEventsProcessing Case 50896";
 
         public InterceptionApplicationData InterceptionApplication { get; }
         private IRepositories_Finance RepositoriesFinance { get; }
@@ -534,6 +535,54 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
         }
 
+        public bool RejectVariation(string applicationRejectReasons)
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            string newComments = InterceptionApplication.Appl_CommSubm_Text?.Trim();
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(newComments))
+                InterceptionApplication.Appl_CommSubm_Text = newComments;
+
+            if (InterceptionApplication.AppLiSt_Cd != ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+            {
+                EventManager.SaveEvents();
+
+                return false;
+            }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            if (applicationRejectReasons.Length > 80)
+                applicationRejectReasons = applicationRejectReasons?[0..79];
+
+            EventManager.AddEvent(EventCode.C51110_VARIATION_REJECTED, applicationRejectReasons);
+
+            if (newComments == AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION)
+                EventManager.AddEvent(EventCode.C50762_VARIATION_REJECTED_BY_FOAEA_AS_VARIATION_DOCUMENT_NOT_RECEIVED_WITHIN_15_DAYS);
+
+            DeletePendingFinancialTerms();
+
+            VariationAction = VariationDocumentAction.RejectVariationDocument;
+            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
+            UpdateApplicationNoValidation();
+
+            EventManager.SaveEvents();
+
+            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;            
+        }
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
@@ -563,6 +612,25 @@ namespace FOAEA3.Business.Areas.Application
                     var dbNotification = Repositories.NotificationRepository;
                     switch (bfEvent.Event_Reas_Cd)
                     {
+                        case EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION:
+                            if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+                            {
+                                DateTime lastVariationDate = GetLastVariationDate();
+                                int elapsed = Math.Abs((DateTime.Now - lastVariationDate).Days);
+
+                                if (elapsed >= 15)
+                                    RejectVariation(AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION);
+                                else
+                                {
+                                    DateTime dateForNextBF = DateTime.Now.AddDays(5);
+                                    EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
+                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, 
+                                                            effectiveTimestamp: dateForNextBF);
+                                }
+                            }
+                            break;
+
+
                         case EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR:
                             if (InterceptionApplication.Appl_Rcptfrm_Dte.AddDays(20) < DateTime.Now)
                             {

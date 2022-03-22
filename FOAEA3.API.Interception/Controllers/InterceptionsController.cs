@@ -156,6 +156,30 @@ namespace FOAEA3.API.Interception.Controllers
                 return UnprocessableEntity(appManager.InterceptionApplication);
         }
 
+        [HttpPut("{key}/RejectVariation")]
+        public ActionResult<InterceptionApplicationData> RejectVariation([FromRoute] string key,
+                                                                         [FromServices] IRepositories repositories,
+                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                         [FromQuery] string applicationRejectReasons)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if (!ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+            if (appManager.RejectVariation(applicationRejectReasons))
+                return Ok(appManager.InterceptionApplication);
+            else
+                return UnprocessableEntity(appManager.InterceptionApplication);
+        }
+
         [HttpPut("{key}/SINbypass")]
         public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
                                                                    [FromServices] IRepositories repositories,
