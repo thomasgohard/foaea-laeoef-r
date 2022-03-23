@@ -10,5 +10,6 @@ namespace FOAEA3.Model.Interfaces
         public string UserId { get; set; }
 
         LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        void CreateLicenceDenialData(LicenceDenialApplicationData data);
     }
 }

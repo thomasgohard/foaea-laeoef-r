@@ -32,6 +32,69 @@ namespace FOAEA3.Data.DB
             return result; // returns null if no data found
         }
 
+        public void CreateLicenceDenialData(LicenceDenialApplicationData data)
+        {
+            var parameters = new Dictionary<string, object>
+                    {
+                        {"Appl_EnfSrv_Cd", data.Appl_EnfSrv_Cd },
+                        {"Appl_CtrlCd", data.Appl_CtrlCd },
+                        {"LicSusp_SupportOrder_Dte", data.LicSusp_SupportOrder_Dte },
+                        {"LicSusp_NoticeSentToDbtr_Dte", data.LicSusp_NoticeSentToDbtr_Dte },
+                        {"LicSusp_CourtNme", data.LicSusp_CourtNme },
+                        {"PymPr_Cd", data.PymPr_Cd },
+                        {"LicSusp_NrOfPymntsInDefault", data.LicSusp_NrOfPymntsInDefault ?? 0},
+                        {"LicSusp_AmntOfArrears", data.LicSusp_AmntOfArrears ?? 0M },
+                        {"LicSusp_Dbtr_EmplNme", data.LicSusp_Dbtr_EmplNme },
+                        {"LicSusp_Dbtr_EmplAddr_Ln", data.LicSusp_Dbtr_EmplAddr_Ln },
+                        {"LicSusp_Dbtr_EmplAddr_Ln1", data.LicSusp_Dbtr_EmplAddr_Ln1 },
+                        {"LicSusp_Dbtr_EmplAddr_CityNme", data.LicSusp_Dbtr_EmplAddr_CityNme },
+                        {"LicSusp_Dbtr_EmplAddr_PrvCd", data.LicSusp_Dbtr_EmplAddr_PrvCd },
+                        {"LicSusp_Dbtr_EmplAddr_CtryCd", data.LicSusp_Dbtr_EmplAddr_CtryCd },
+                        {"LicSusp_Dbtr_EmplAddr_PCd", data.LicSusp_Dbtr_EmplAddr_PCd },
+                        {"LicSusp_Dbtr_EyesColorCd", data.LicSusp_Dbtr_EyesColorCd },
+                        {"LicSusp_Dbtr_HeightUOMCd", data.LicSusp_Dbtr_HeightUOMCd },
+                        {"LicSusp_Dbtr_HeightQty", data.LicSusp_Dbtr_HeightQty ?? 0},
+                        {"LicSusp_Dbtr_PhoneNumber", data.LicSusp_Dbtr_PhoneNumber },
+                        {"LicSusp_Dbtr_EmailAddress", data.LicSusp_Dbtr_EmailAddress },
+                        {"LicSusp_Dbtr_Brth_CityNme", data.LicSusp_Dbtr_Brth_CityNme },
+                        {"LicSusp_Dbtr_Brth_CtryCd", data.LicSusp_Dbtr_Brth_CtryCd },
+                        {"LicSusp_Still_InEffect_Ind", data.LicSusp_Still_InEffect_Ind },
+                        {"LicSusp_AnyLicRvkd_Ind", data.LicSusp_AnyLicRvkd_Ind },
+                        {"LicSusp_AnyLicReinst_Ind", data.LicSusp_AnyLicReinst_Ind },
+                        {"LicSusp_LiStCd", data.LicSusp_LiStCd },
+                        {"LicSusp_Appl_CtrlCd", data.LicSusp_Appl_CtrlCd }
+                    };
+
+            if (data.LicSusp_TermRequestDte.HasValue)
+                parameters.Add("LicSusp_TermRequestDte", data.LicSusp_TermRequestDte.Value);
+            else
+                parameters.Add("LicSusp_TermRequestDte", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_Ln))
+                parameters.Add("LicSusp_Dbtr_LastAddr_Ln", data.LicSusp_Dbtr_LastAddr_Ln);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_Ln1))
+                parameters.Add("LicSusp_Dbtr_LastAddr_Ln1", data.LicSusp_Dbtr_LastAddr_Ln1);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_CityNme))
+                parameters.Add("LicSusp_Dbtr_LastAddr_CityNme", data.LicSusp_Dbtr_LastAddr_CityNme);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_PrvCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_PrvCd", data.LicSusp_Dbtr_LastAddr_PrvCd);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_CtryCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_CtryCd", data.LicSusp_Dbtr_LastAddr_CtryCd);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_PCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_PCd", data.LicSusp_Dbtr_LastAddr_PCd);
+
+            if (data.LicSusp_Declaration_Ind.HasValue)
+                parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
+
+            MainDB.ExecProc("LicSuspInsert", parameters);
+
+        }
+
         private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialApplicationData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;

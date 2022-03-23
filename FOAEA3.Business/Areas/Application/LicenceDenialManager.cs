@@ -4,6 +4,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using FOAEA3.Business.Security;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -51,7 +52,26 @@ namespace FOAEA3.Business.Areas.Application
 
             return isSuccess;
         }
-                
+
+        public override bool CreateApplication()
+        {
+            if (!IsValidCategory("L01"))
+                return false;
+
+            bool success = base.CreateApplication();
+
+            if (!success)
+            {
+                var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, LicenceDenialApplication);
+                failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.L01);
+            }
+
+            Repositories.LicenceDenialRepository.CreateLicenceDenialData(LicenceDenialApplication);
+
+            return success;
+        }
+
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;

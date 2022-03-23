@@ -50,6 +50,8 @@ namespace FOAEA3.Model
         public string LicSusp_Dbtr_HeightUOMCd { get; set; }
         [Display(Name = "DEBTOR_HEIGHT", ResourceType = typeof(LanguageResource))]
         public int? LicSusp_Dbtr_HeightQty { get; set; }
+        public string LicSusp_Dbtr_PhoneNumber { get; set; }
+        public string LicSusp_Dbtr_EmailAddress { get; set; }
         [Display(Name = "DEBTOR_BIRTH_CITY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_Brth_CityNme { get; set; }
         [Display(Name = "DEBTOR_BIRTH_COUNTRY", ResourceType = typeof(LanguageResource))]
@@ -73,6 +75,7 @@ namespace FOAEA3.Model
         public string LicSusp_Dbtr_LastAddr_CtryCd { get; set; }
         [Display(Name = "DEBTOR_LAST_POSTALCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_PCd { get; set; }
+        public bool? LicSusp_Declaration_Ind { get; set; }
 
         public void Merge(LicenceDenialApplicationData data)
         {
