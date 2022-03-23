@@ -8,9 +8,9 @@ namespace FOAEA3.ViewModels
 {
     public class LicenceDenialDataEntryViewModel
     {
-        private LicenceDenialData licenceDenialData;
+        private LicenceDenialApplicationData licenceDenialData;
 
-        public LicenceDenialData LicenceDenial
+        public LicenceDenialApplicationData LicenceDenial
         {
             get { return licenceDenialData; }
             set

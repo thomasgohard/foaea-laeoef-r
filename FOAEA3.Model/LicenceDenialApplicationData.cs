@@ -1,14 +1,13 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources;
+﻿using FOAEA3.Resources;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace FOAEA3.Model
 {
-    public class LicenceDenialData : ApplicationData
+    public class LicenceDenialApplicationData : ApplicationData
     {
-        public LicenceDenialData()
+        public LicenceDenialApplicationData()
         {
             AppCtgy_Cd = "L01";
         }
@@ -75,7 +74,7 @@ namespace FOAEA3.Model
         [Display(Name = "DEBTOR_LAST_POSTALCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_PCd { get; set; }
 
-        public void Merge(LicenceDenialData data)
+        public void Merge(LicenceDenialApplicationData data)
         {
             LicSusp_SupportOrder_Dte = data.LicSusp_SupportOrder_Dte;
             LicSusp_NoticeSentToDbtr_Dte = data.LicSusp_NoticeSentToDbtr_Dte;

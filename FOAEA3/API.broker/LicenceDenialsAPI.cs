@@ -9,25 +9,25 @@ namespace FOAEA3.API.broker
 {
     public class LicenceDenialsAPI : BaseAPI
     {
-        public LicenceDenialData GetApplication(string enfSrv, string ctrlCd)
+        public LicenceDenialApplicationData GetApplication(string enfSrv, string ctrlCd)
         {
-            var data = GetDataAsync<LicenceDenialData>($"api/v1/licenceDenials/{enfSrv}-{ctrlCd}", APIroot_LicenceDenial).Result;
+            var data = GetDataAsync<LicenceDenialApplicationData>($"api/v1/licenceDenials/{enfSrv}-{ctrlCd}", APIroot_LicenceDenial).Result;
             if (data.Messages is null)
                 data.Messages = new MessageDataList();
             return data;
         }
 
-        public LicenceDenialData CreateApplication(LicenceDenialData licenceDenial)
+        public LicenceDenialApplicationData CreateApplication(LicenceDenialApplicationData licenceDenial)
         {
-            var data = PostDataAsync<LicenceDenialData, LicenceDenialData>("api/v1/licenceDenials", licenceDenial, APIroot_LicenceDenial).Result;
+            var data = PostDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>("api/v1/licenceDenials", licenceDenial, APIroot_LicenceDenial).Result;
             if (data.Messages is null)
                 data.Messages = new MessageDataList();
             return data;
         }
 
-        public LicenceDenialData UpdateApplication(LicenceDenialData licenceDenial)
+        public LicenceDenialApplicationData UpdateApplication(LicenceDenialApplicationData licenceDenial)
         {
-            var data = PutDataAsync<LicenceDenialData, LicenceDenialData>("api/v1/licenceDenials", licenceDenial, APIroot_LicenceDenial).Result;
+            var data = PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>("api/v1/licenceDenials", licenceDenial, APIroot_LicenceDenial).Result;
             if (data.Messages is null)
                 data.Messages = new MessageDataList();
             return data;

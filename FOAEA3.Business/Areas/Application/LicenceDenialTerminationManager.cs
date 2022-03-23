@@ -6,16 +6,16 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialTerminationManager : ApplicationManager
     {
-        public LicenceDenialData LicenceDenialTerminationApplication { get; }
+        public LicenceDenialApplicationData LicenceDenialTerminationApplication { get; }
 
-        public LicenceDenialTerminationManager(LicenceDenialData licenceDenialTermination, IRepositories repositories, CustomConfig config) :
+        public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, CustomConfig config) :
             base(licenceDenialTermination, repositories, config)
         {
             LicenceDenialTerminationApplication = licenceDenialTermination;
         }
 
         public LicenceDenialTerminationManager(IRepositories repositories, CustomConfig config) :
-            this(new LicenceDenialData(), repositories, config)
+            this(new LicenceDenialApplicationData(), repositories, config)
         {
 
         }
@@ -28,7 +28,7 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                LicenceDenialApplicationData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
 
                 if (data != null)
                     LicenceDenialTerminationApplication.Merge(data);

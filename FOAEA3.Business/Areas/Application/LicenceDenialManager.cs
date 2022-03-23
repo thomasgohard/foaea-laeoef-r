@@ -9,9 +9,9 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialManager : ApplicationManager
     {
-        public LicenceDenialData LicenceDenialApplication { get; }
+        public LicenceDenialApplicationData LicenceDenialApplication { get; }
 
-        public LicenceDenialManager(LicenceDenialData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -28,7 +28,7 @@ namespace FOAEA3.Business.Areas.Application
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
-        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialData(), repositories, config)
+        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
 
         }
@@ -43,7 +43,7 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                LicenceDenialApplicationData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
 
                 if (data != null)
                     LicenceDenialApplication.Merge(data);

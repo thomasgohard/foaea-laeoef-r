@@ -21,7 +21,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         }
 
         [HttpGet("{key}")]
-        public ActionResult<LicenceDenialData> GetApplication([FromRoute] string key, [FromServices] IRepositories repositories)
+        public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key, [FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);

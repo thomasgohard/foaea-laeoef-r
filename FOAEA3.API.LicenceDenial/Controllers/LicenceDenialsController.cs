@@ -23,15 +23,22 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> Version()
+        {
+            return Ok("FOAEA3.API.LicenceDenial API Version 1.4");
+        }
+
         [HttpGet("{key}")]
-        public ActionResult<LicenceDenialData> GetApplication([FromRoute] string key, [FromServices] IRepositories repositories)
+        public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key, 
+                                                                         [FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
             var applKey = new ApplKey(key);
 
-            var manager = new LicenceDenialManager(new LicenceDenialData(), repositories, config);
+            var manager = new LicenceDenialManager(repositories, config);
 
             bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
             if (success)
@@ -47,54 +54,85 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         }
 
         [HttpPost]
-        public ActionResult<LicenceDenialData> CreateApplication([FromServices] IRepositories repositories)
+        public ActionResult<LicenceDenialApplicationData> CreateApplication([FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var LicenceDenialData = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialData>(Request);
+            var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
-            var LicenceDenialManager = new LicenceDenialManager(LicenceDenialData, repositories, config);
-            if (!LicenceDenialManager.LicenceDenialApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+            if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
+                return UnprocessableEntity(error);
+
+            var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
+
+            bool isCreated = licenceDenialManager.CreateApplication();
+            if (isCreated)
             {
-                LicenceDenialManager.CreateApplication();
-                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + LicenceDenialManager.LicenceDenialApplication.Appl_EnfSrv_Cd + "-" + LicenceDenialManager.LicenceDenialApplication.Appl_CtrlCd;
+                var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
+                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
                 var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-                return Created(getURI, LicenceDenialManager.LicenceDenialApplication);
+                return Created(getURI, application);
             }
             else
             {
-                return UnprocessableEntity(LicenceDenialManager.LicenceDenialApplication);
+                return UnprocessableEntity(application);
             }
 
         }
 
-        [HttpPut]
+        [HttpPut("{key}")]
         [Produces("application/json")]
-        public ActionResult<LicenceDenialData> UpdateApplication([FromServices] IRepositories repositories)
+        public ActionResult<TracingApplicationData> UpdateApplication(
+                                                        [FromRoute] string key,
+                                                        [FromQuery] string command,
+                                                        [FromQuery] string enforcementServiceCode,
+                                                        [FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var LicenceDenialData = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialData>(Request);
+            var applKey = new ApplKey(key);
+            
+            var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
-            var LicenceDenialManager = new LicenceDenialManager(LicenceDenialData, repositories, config);
-            if (!LicenceDenialManager.LicenceDenialApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
+
+            if (string.IsNullOrEmpty(command))
+                command = "";
+
+            switch (command.ToLower())
             {
-                LicenceDenialManager.UpdateApplication();
+                case "":
+                    licenceDenialManager.UpdateApplication();
+                    break;
 
-                return Ok(LicenceDenialManager.LicenceDenialApplication);
+                case "partiallyserviceapplication":
+                    // TODO: licenceDenialManager.PartiallyServiceApplication(enforcementServiceCode);
+                    break;
+
+                case "fullyserviceapplication":
+                    // TODO: licenceDenialManager.FullyServiceApplication(enforcementServiceCode);
+                    break;
+
+                default:
+                    application.Messages.AddSystemError($"Unknown command: {command}");
+                    return UnprocessableEntity(application);
             }
+
+            if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
+                return Ok(application);
             else
-            {
-                return UnprocessableEntity(LicenceDenialManager.LicenceDenialApplication);
-            }
+                return UnprocessableEntity(application);
 
         }
 
         [HttpPut("{key}/SINbypass")]
-        public ActionResult<LicenceDenialData> SINbypass([FromRoute] string key,
+        public ActionResult<LicenceDenialApplicationData> SINbypass([FromRoute] string key,
                                                          [FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
@@ -104,21 +142,18 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 
             var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
 
-            var application = new LicenceDenialData();
+            var application = new LicenceDenialApplicationData();
 
             var appManager = new LicenceDenialManager(application, repositories, config);
             appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
 
+            if (!APIHelper.ValidateApplication(appManager.LicenceDenialApplication, applKey, out string error))
+                return UnprocessableEntity(error); 
+            
             var sinManager = new ApplicationSINManager(application, appManager);
             sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
             return Ok(application);
-        }
-
-        [HttpGet("Version")]
-        public ActionResult<string> Version()
-        {
-            return Ok("FOAEA3.API.LicenceDenial API Version 1.4");
         }
     }
 }

@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public LicenceDenialData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -23,7 +23,7 @@ namespace FOAEA3.Data.DB
                         {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd}
                     };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialData>("LicSusp_Select", parameters, FillDataFromReader);
+            var data = MainDB.GetDataFromStoredProc<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
 
             //            if (!string.IsNullOrEmpty(MainDB.LastError))
 
@@ -32,7 +32,7 @@ namespace FOAEA3.Data.DB
             return result; // returns null if no data found
         }
 
-        private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialData data)
+        private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialApplicationData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;

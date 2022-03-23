@@ -63,27 +63,98 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (!ValidateApplication(application, null, out string error))
+            if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
                 return UnprocessableEntity(error);
 
             var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            var appl = interceptionManager.InterceptionApplication;
 
             bool isCreated = interceptionManager.CreateApplication();
             if (isCreated)
             {
-                var appKey = $"{appl.Appl_EnfSrv_Cd}-{appl.Appl_CtrlCd}";
+                var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
                 var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-                var rootPath = "http://" + HttpContext.Request.Host.ToString();
-                var apiGetURIForNewlyCreatedTracing = new Uri(rootPath + actionPath);
+                var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-                return Created(apiGetURIForNewlyCreatedTracing, appl);
+                return Created(getURI, application);
             }
             else
             {
-                return UnprocessableEntity(appl.Messages.GetMessagesForType(MessageType.Error));
+                return UnprocessableEntity(application);
             }
 
+        }
+
+        [HttpPut("{key}")]
+        [Produces("application/json")]
+        public ActionResult<InterceptionApplicationData> UpdateApplication(
+                                                        [FromRoute] string key,
+                                                        [FromQuery] string command,
+                                                        [FromQuery] string enforcementServiceCode,
+                                                        [FromServices] IRepositories repositories,
+                                                        [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+            if (string.IsNullOrEmpty(command))
+                command = "";
+
+            switch (command.ToLower())
+            {
+                case "":
+                    interceptionManager.UpdateApplication();
+                    break;
+
+                case "partiallyserviceapplication":
+                    // TODO: interceptionManager.PartiallyServiceApplication(enforcementServiceCode);
+                    break;
+
+                case "fullyserviceapplication":
+                    // TODO: interceptionManager.FullyServiceApplication(enforcementServiceCode);
+                    break;
+
+                default:
+                    application.Messages.AddSystemError($"Unknown command: {command}");
+                    return UnprocessableEntity(application);
+            }
+
+            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+                return Ok(application);
+            else
+                return UnprocessableEntity(application);
+
+        }
+
+        [HttpPut("{key}/SINbypass")]
+        public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
+                                                           [FromServices] IRepositories repositories,
+                                                           [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
+
+            var application = new InterceptionApplicationData();
+
+            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+            appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+
+            var sinManager = new ApplicationSINManager(application, appManager);
+            sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+
+            return Ok(application);
         }
 
         [HttpPut("{key}/Vary")]
@@ -98,7 +169,7 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (!ValidateApplication(application, applKey, out string error))
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
                 return UnprocessableEntity(error);
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
@@ -121,15 +192,15 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (!ValidateApplication(application, applKey, out string error))
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
                 return UnprocessableEntity(error);
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
             if (appManager.AcceptInterception(supportingDocsReceiptDate))
-                return Ok(appManager.InterceptionApplication);
+                return Ok(application);
             else
-                return UnprocessableEntity(appManager.InterceptionApplication);
+                return UnprocessableEntity(application);
         }
 
         [HttpPut("{key}/AcceptVariation")]
@@ -145,15 +216,15 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (!ValidateApplication(application, applKey, out string error))
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
                 return UnprocessableEntity(error);
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
             if (appManager.AcceptVariation(supportingDocsReceiptDate))
-                return Ok(appManager.InterceptionApplication);
+                return Ok(application);
             else
-                return UnprocessableEntity(appManager.InterceptionApplication);
+                return UnprocessableEntity(application);
         }
 
         [HttpPut("{key}/RejectVariation")]
@@ -169,61 +240,15 @@ namespace FOAEA3.API.Interception.Controllers
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
-            if (!ValidateApplication(application, applKey, out string error))
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
                 return UnprocessableEntity(error);
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
             if (appManager.RejectVariation(applicationRejectReasons))
-                return Ok(appManager.InterceptionApplication);
+                return Ok(application);
             else
-                return UnprocessableEntity(appManager.InterceptionApplication);
-        }
-
-        [HttpPut("{key}/SINbypass")]
-        public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
-                                                                   [FromServices] IRepositories repositories,
-                                                                   [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
-            var applKey = new ApplKey(key);
-
-            var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
-
-            var application = new InterceptionApplicationData();
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
-
-            var sinManager = new ApplicationSINManager(application, appManager);
-            sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
-
-            return Ok(application);
-        }
-
-        private static bool ValidateApplication(InterceptionApplicationData application, ApplKey applKey, out string error)
-        {
-            error = string.Empty;
-
-            if (application is null)
-            {
-                error = "Missing or invalid request body.";
-                return false;
-            }
-
-            application.Appl_EnfSrv_Cd = application.Appl_EnfSrv_Cd.Trim();
-            application.Appl_CtrlCd = application.Appl_CtrlCd.Trim();
-
-            if (applKey is not null)
-                if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
-                {
-                    error = "Key does not match body.";
-                    return false;
-                }
-
-            return true;
+                return UnprocessableEntity(application);
         }
 
     }
