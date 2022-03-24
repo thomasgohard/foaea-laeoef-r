@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace FOAEA3.API.LicenceDenial.Controllers
@@ -30,7 +31,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         }
 
         [HttpGet("{key}")]
-        public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key, 
+        public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key,
                                                                          [FromServices] IRepositories repositories)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
@@ -45,6 +46,34 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             {
                 if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
                     return Ok(manager.LicenceDenialApplication);
+                else
+                    return NotFound($"Error: requested L01 application but found {manager.LicenceDenialApplication.AppCtgy_Cd} application.");
+            }
+            else
+                return NotFound();
+
+        }
+
+        [HttpGet("{key}/LicenceSuspensionHistory")]
+        public ActionResult<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory([FromRoute] string key,
+                                                                                            [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var manager = new LicenceDenialManager(repositories, config);
+
+            bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+            if (success)
+            {
+                if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
+                {
+                    var suspensionHistory = manager.GetLicenceSuspensionHistory();
+
+                    return Ok(suspensionHistory);
+                }
                 else
                     return NotFound($"Error: requested L01 application but found {manager.LicenceDenialApplication.AppCtgy_Cd} application.");
             }
@@ -94,7 +123,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
             var applKey = new ApplKey(key);
-            
+
             var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
             if (!APIHelper.ValidateApplication(application, applKey, out string error))
@@ -148,8 +177,8 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
 
             if (!APIHelper.ValidateApplication(appManager.LicenceDenialApplication, applKey, out string error))
-                return UnprocessableEntity(error); 
-            
+                return UnprocessableEntity(error);
+
             var sinManager = new ApplicationSINManager(application, appManager);
             sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 

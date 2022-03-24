@@ -71,6 +71,10 @@ namespace FOAEA3.Business.Areas.Application
             return success;
         }
 
+        public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory()
+        {
+            return Repositories.LicenceDenialRepository.GetLicenceSuspensionHistory(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
+        }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {

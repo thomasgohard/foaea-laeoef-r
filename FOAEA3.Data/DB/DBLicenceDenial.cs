@@ -32,6 +32,19 @@ namespace FOAEA3.Data.DB
             return result; // returns null if no data found
         }
 
+        public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                    {
+                        {"ControlCode", appl_CtrlCd },
+                        {"EnforcementServiceCode", appl_EnfSrv_Cd}
+                    };
+
+            var data = MainDB.GetDataFromStoredProc<LicenceSuspensionHistoryData>("LicSuspApplGetLicenseSuspensionHist", parameters, FillSuspensionHistoryDataFromReader);
+
+            return data;
+        }
+
         public void CreateLicenceDenialData(LicenceDenialApplicationData data)
         {
             var parameters = new Dictionary<string, object>
@@ -130,5 +143,19 @@ namespace FOAEA3.Data.DB
             data.LicSusp_Dbtr_LastAddr_CtryCd = rdr["LicSusp_Dbtr_LastAddr_CtryCd"] as string; // can be null 
             data.LicSusp_Dbtr_LastAddr_PCd = rdr["LicSusp_Dbtr_LastAddr_PCd"] as string; // can be null 
         }
+
+        private void FillSuspensionHistoryDataFromReader(IDBHelperReader rdr, LicenceSuspensionHistoryData data)
+        {
+            data.EnforcementServiceCode = rdr["EnforcementServiceCode"] as string;
+            data.ControlCode = rdr["ControlCode"] as string;
+            data.FromName = rdr["FromName"] as string;
+            data.ConvertedResponseDate = rdr["ConvertedResponseDate"] as string;
+            data.ResponseDate = (DateTime)rdr["ResponseDate"];
+            data.ResponseCode = (short)rdr["ResponseCode"];
+            data.LicRspSource_RefNo = rdr["LicRspSource_RefNo"] as string;
+            data.ResponseDescription_E = rdr["ResponseDescription_E"] as string;
+            data.ResponseDescription_F = rdr["ResponseDescription_F"] as string;
+        }
+
     }
 }
