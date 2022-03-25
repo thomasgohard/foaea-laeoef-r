@@ -44,7 +44,8 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialApplicationData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                var licenceDenialDB = Repositories.LicenceDenialRepository;
+                var data = licenceDenialDB.GetLicenceDenialData(enfService, appl_L01_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialApplication.Merge(data);

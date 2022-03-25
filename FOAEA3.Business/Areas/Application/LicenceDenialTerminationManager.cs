@@ -1,6 +1,8 @@
 ﻿using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Data.Base;
+using FOAEA3.Business.Security;
+using FOAEA3.Model.Enums;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -28,7 +30,8 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialApplicationData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                var licenceDenialDB = Repositories.LicenceDenialRepository;
+                var data = licenceDenialDB.GetLicenceDenialData(enfService, appl_L03_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialTerminationApplication.Merge(data);
@@ -36,5 +39,24 @@ namespace FOAEA3.Business.Areas.Application
 
             return isSuccess;
         }
+
+        public bool CreateApplication(string controlCodeForL01)
+        {
+            if (!IsValidCategory("L03"))
+                return false;
+
+            bool success = base.CreateApplication();
+
+            if (!success)
+            {
+                var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, LicenceDenialTerminationApplication);
+                failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.L03);
+            }
+
+            Repositories.LicenceDenialRepository.CreateLicenceDenialData(LicenceDenialTerminationApplication);
+
+            return success;
+        }
+
     }
 }

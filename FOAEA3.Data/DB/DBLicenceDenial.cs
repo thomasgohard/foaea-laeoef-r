@@ -15,21 +15,26 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null , string appl_L03_CtrlCd = null)
         {
+
+
             var parameters = new Dictionary<string, object>
                     {
-                        {"Appl_CtrlCd", appl_CtrlCd },
                         {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd}
                     };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
+            if (!string.IsNullOrEmpty(appl_L01_CtrlCd))
+                parameters.Add("appl_L01_CtrlCd", appl_L01_CtrlCd);
 
-            //            if (!string.IsNullOrEmpty(MainDB.LastError))
+            if (!string.IsNullOrEmpty(appl_L03_CtrlCd))
+                parameters.Add("appl_L03_CtrlCd", appl_L03_CtrlCd);
+
+            var data = MainDB.GetDataFromStoredProc<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
 
             var result = data.FirstOrDefault();
 
-            return result; // returns null if no data found
+            return result; 
         }
 
         public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd)
