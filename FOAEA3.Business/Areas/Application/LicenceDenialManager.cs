@@ -77,6 +77,11 @@ namespace FOAEA3.Business.Areas.Application
             return Repositories.LicenceDenialRepository.GetLicenceSuspensionHistory(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
         }
 
+        public void CancelApplication()
+        {
+            // TODO CancelApplication
+        }
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;

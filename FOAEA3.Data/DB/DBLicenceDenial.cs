@@ -52,6 +52,33 @@ namespace FOAEA3.Data.DB
 
         public void CreateLicenceDenialData(LicenceDenialApplicationData data)
         {
+            var parameters = SetParameters(data);
+
+            MainDB.ExecProc("LicSuspInsert", parameters);
+
+        }
+
+        public void UpdateLicenceDenialData(LicenceDenialApplicationData data)
+        {
+            var parameters = SetParameters(data);
+
+            MainDB.ExecProc("LicSuspUpdate", parameters);
+        }
+
+        public bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "L01Appl_CtrlCd", appl_L01_CtrlCd },
+                { "L03Appl_CtrlCd", appl_L03_CtrlCd }
+            };
+
+            return MainDB.GetDataFromStoredProcViaReturnParameter<bool>("CloseSameDayLicenseEvent", parameters, "L01Event");
+        }
+
+        private Dictionary<string, object> SetParameters(LicenceDenialApplicationData data)
+        {
             var parameters = new Dictionary<string, object>
                     {
                         {"Appl_EnfSrv_Cd", data.Appl_EnfSrv_Cd },
@@ -109,8 +136,7 @@ namespace FOAEA3.Data.DB
             if (data.LicSusp_Declaration_Ind.HasValue)
                 parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
 
-            MainDB.ExecProc("LicSuspInsert", parameters);
-
+            return parameters;
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialApplicationData data)

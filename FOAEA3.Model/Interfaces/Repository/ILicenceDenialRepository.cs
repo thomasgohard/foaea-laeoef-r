@@ -13,5 +13,8 @@ namespace FOAEA3.Model.Interfaces
         List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd);
 
         void CreateLicenceDenialData(LicenceDenialApplicationData data);
+        void UpdateLicenceDenialData(LicenceDenialApplicationData data);
+
+        bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
     }
 }

@@ -47,7 +47,8 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 
         [HttpPost]
         public ActionResult<LicenceDenialApplicationData> CreateApplication([FromServices] IRepositories repositories,
-                                                                            [FromQuery] string controlCodeForL01)
+                                                                            [FromQuery] string controlCodeForL01,
+                                                                            [FromQuery] DateTime requestDate)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
@@ -59,7 +60,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 
             var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, repositories, config);
 
-            bool isCreated = licenceDenialTerminationManager.CreateApplication(controlCodeForL01);
+            bool isCreated = licenceDenialTerminationManager.CreateApplication(controlCodeForL01, requestDate);
             if (isCreated)
             {
                 var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
