@@ -110,7 +110,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             }
 
         }
-
+               
         [HttpPut("{key}")]
         [Produces("application/json")]
         public ActionResult<TracingApplicationData> UpdateApplication(
@@ -138,14 +138,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             {
                 case "":
                     licenceDenialManager.UpdateApplication();
-                    break;
-
-                case "partiallyserviceapplication":
-                    // TODO: licenceDenialManager.PartiallyServiceApplication(enforcementServiceCode);
-                    break;
-
-                case "fullyserviceapplication":
-                    // TODO: licenceDenialManager.FullyServiceApplication(enforcementServiceCode);
                     break;
 
                 default:
@@ -183,6 +175,24 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
             return Ok(application);
+        }
+
+        [HttpPut("{key}/ProcessLicenceDenialResponse")]
+        public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialResponse([FromRoute] string key,
+                                                                                       [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = new LicenceDenialApplicationData();
+
+            var appManager = new LicenceDenialManager(application, repositories, config);
+            if (appManager.ProcessLicenceDenialResponse(applKey.EnfSrv, applKey.CtrlCd))
+                return Ok(application);
+            else
+                return UnprocessableEntity(application);
         }
     }
 }

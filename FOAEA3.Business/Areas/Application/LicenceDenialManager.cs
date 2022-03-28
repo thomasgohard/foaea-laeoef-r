@@ -94,6 +94,37 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.SaveEvents();
         }
 
+        public bool ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            if (!LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
+            {
+                LicenceDenialApplication.Messages.AddError("Application not found!");
+                return false;
+            }
+
+            if (!IsValidCategory("L01"))
+                return false;
+
+            if (LicenceDenialApplication.AppLiSt_Cd.NotIn(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12))
+            {
+                LicenceDenialApplication.Messages.AddError("Invalid State for the current application.  Valid states allowed are 10 and 12.");
+                return false;
+            }
+
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
+            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
+            UpdateApplicationNoValidation();
+
+            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialApplication);
+
+            EventManager.SaveEvents();
+
+            return true;
+        }
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
