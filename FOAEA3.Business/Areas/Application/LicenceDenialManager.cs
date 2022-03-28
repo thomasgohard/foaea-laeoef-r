@@ -1,10 +1,10 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
-using FOAEA3.Business.Security;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -25,7 +25,7 @@ namespace FOAEA3.Business.Areas.Application
                             ApplicationState.MANUALLY_TERMINATED_14
                         });
 
-//            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
@@ -79,7 +79,19 @@ namespace FOAEA3.Business.Areas.Application
 
         public void CancelApplication()
         {
-            // TODO CancelApplication
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
+            SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+
+            MakeUpperCase();
+            UpdateApplicationNoValidation();
+
+            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialApplication);
+
+            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
+
+            EventManager.SaveEvents();
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
@@ -99,11 +111,12 @@ namespace FOAEA3.Business.Areas.Application
                                               EventCode.C50600_INVALID_APPLICATION)))) &&
                 ((diff.Equals(TimeSpan.Zero)) || (Math.Abs(diff.TotalHours) > 24)))
             {
-                // TODO: make BF event inactive
-                /*
-                      .UpdateEvent("EvntBF", Event_Id, 14, "I")
-                      bCloseEvent = False
-                */
+                bfEvent.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
+                bfEvent.ActvSt_Cd = "I";
+
+                EventManager.SaveEvent(bfEvent);
+
+                closeEvent = false;
             }
             else
             {
@@ -174,7 +187,10 @@ namespace FOAEA3.Business.Areas.Application
 
             if (closeEvent)
             {
-                // .UpdateEvent("EvntBF", Event_Id, AppList_Cd, "C")
+                bfEvent.AppLiSt_Cd = LicenceDenialApplication.AppLiSt_Cd;
+                bfEvent.ActvSt_Cd = "C";
+
+                EventManager.SaveEvent(bfEvent);
             }
 
             EventManager.SaveEvents();
