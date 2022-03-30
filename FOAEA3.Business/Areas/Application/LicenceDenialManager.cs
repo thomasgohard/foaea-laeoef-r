@@ -11,6 +11,7 @@ namespace FOAEA3.Business.Areas.Application
     internal partial class LicenceDenialManager : ApplicationManager
     {
         public LicenceDenialApplicationData LicenceDenialApplication { get; }
+        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
         public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
         {
@@ -33,8 +34,6 @@ namespace FOAEA3.Business.Areas.Application
         {
 
         }
-
-        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
         public override bool LoadApplication(string enfService, string controlCode)
         {

@@ -13,6 +13,12 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
+        public void InsertBulkData(List<SINResultData> resultData)
+        {
+            _ = ApiHelper.PostDataAsync<SINResultData, List<SINResultData>>("api/v1/applicationSins/bulk",
+                                                                             resultData).Result;
+        }
+
         public List<SINOutgoingFederalData> GetOutgoingFederalSins(int maxRecords, string activeState,
                                                                    int lifeState, string enfServiceCode)
         {

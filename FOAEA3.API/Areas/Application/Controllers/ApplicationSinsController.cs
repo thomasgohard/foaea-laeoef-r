@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,18 @@ namespace FOAEA3.API.Areas.Application.Controllers
             var rootPath = "http://" + HttpContext.Request.Host.ToString();
 
             return Created(rootPath, new SINResultData());
+        }
+
+        [HttpGet("RequestedEventsForFile")]
+        public ActionResult<List<ApplicationEventData>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
+                                                                                        [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var manager = new ApplicationEventManager(new ApplicationData(), repositories);
+
+            return manager.GetRequestedSINEventDataForFile("HR01", fileName).Items;
         }
 
     }

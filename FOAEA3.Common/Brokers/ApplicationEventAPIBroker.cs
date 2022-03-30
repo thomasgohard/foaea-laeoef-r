@@ -14,6 +14,12 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
+        public List<ApplicationEventData> GetRequestedSINEventDataForFile(string fileName)
+        {
+            string apiCall = $"api/v1/applicationSins/RequestedEventsForFile?fileName={fileName}";
+            return ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall).Result;
+        }
+
         public void SaveEvent(ApplicationEventData activeTraceEvent)
         {
             string apiCall = $"api/v1/applicationEvents";
@@ -34,5 +40,6 @@ namespace FOAEA3.Common.Brokers
                              $"&applicationState={appLiSt_Cd}&enfSrvCode={enfSrv_Cd}&writtenFile={writtenFile}";
             _ = ApiHelper.PutDataAsync<ApplicationEventDetailData, List<int>>(apiCall, eventIds).Result;
         }
+
     }
 }
