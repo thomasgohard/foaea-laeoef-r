@@ -34,7 +34,7 @@ namespace FOAEA3.Common.Brokers
             string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
             string baseCall = "api/v1/ApplicationSins";
             string apiCall = $"{baseCall}/{key}";
-            return ApiHelper.PostDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
+            return ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
         }
     }
 }

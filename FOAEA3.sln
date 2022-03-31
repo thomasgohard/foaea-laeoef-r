@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3", "FOAEA3\FOAEA3.csproj", "{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}"
 EndProject
@@ -102,6 +102,23 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Common", "FOAEA3.Common\FOAEA3.Common.csproj", "{F367DF99-EC46-4550-8A77-AC1F59A5BA8F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Admin.Web", "FOAEA3.Admin.Web\FOAEA3.Admin.Web.csproj", "{EA193C8E-24D3-432A-9F03-6E66DDFA96A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.SIN", "Outgoing.FileCreator.Fed.SIN\Outgoing.FileCreator.Fed.SIN.csproj", "{7F22323A-637B-43DF-86F8-07DDFAF9348D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA65889E-DE0F-4E71-B8F5-4A723BA9F69E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{743BE927-E590-4C4D-A778-2F2F6F3F78F4}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
+		documentation\Overview_ProcessingFederalSinFiles.md = documentation\Overview_ProcessingFederalSinFiles.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{941E44E5-FBB9-4A54-923F-A557A4083A34}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\images\IncomingFedSinFile.png = documentation\images\IncomingFedSinFile.png
+		documentation\images\OutgoingFedSinFile.png = documentation\images\OutgoingFedSinFile.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -745,6 +762,20 @@ Global
 		{EA193C8E-24D3-432A-9F03-6E66DDFA96A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA193C8E-24D3-432A-9F03-6E66DDFA96A4}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA193C8E-24D3-432A-9F03-6E66DDFA96A4}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -775,179 +806,10 @@ Global
 		{A566E653-F632-498E-9DD1-A03434E82A08} = {815F840C-145F-4068-BB12-113494546B5A}
 		{786D8C70-8E02-4AE9-8666-EDBDFB27D1E3} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{719D8AF0-9377-4048-A482-F1B6034D29F9} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{7F22323A-637B-43DF-86F8-07DDFAF9348D} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{941E44E5-FBB9-4A54-923F-A557A4083A34} = {743BE927-E590-4C4D-A778-2F2F6F3F78F4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 48
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://otvtfs02:8080/tfs/flas_it
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = FOAEA3.Business\\FOAEA3.Business.csproj
-		SccProjectName1 = FOAEA3.Business
-		SccLocalPath1 = FOAEA3.Business
-		SccProjectUniqueName2 = FOAEA3.Resources\\FOAEA3.Resources.csproj
-		SccProjectName2 = FOAEA3.Resources
-		SccLocalPath2 = FOAEA3.Resources
-		SccProjectUniqueName3 = Operations.CommandLine\\Operations.CommandLine.csproj
-		SccProjectName3 = Operations.CommandLine
-		SccLocalPath3 = Operations.CommandLine
-		SccProjectUniqueName4 = FOAEA3\\FOAEA3.csproj
-		SccProjectName4 = FOAEA3
-		SccLocalPath4 = FOAEA3
-		SccProjectUniqueName5 = FOAEA3.Data\\FOAEA3.Data.csproj
-		SccProjectName5 = FOAEA3.Data
-		SccLocalPath5 = FOAEA3.Data
-		SccProjectUniqueName6 = FOAEA3.Tests\\FOAEA3.Tests.csproj
-		SccProjectTopLevelParentUniqueName6 = FOAEA3.sln
-		SccProjectName6 = FOAEA3.Tests
-		SccLocalPath6 = FOAEA3.Tests
-		SccProjectUniqueName7 = FOAEA3.Business.Tests\\FOAEA3.Business.Tests.csproj
-		SccProjectTopLevelParentUniqueName7 = FOAEA3.sln
-		SccProjectName7 = FOAEA3.Business.Tests
-		SccLocalPath7 = FOAEA3.Business.Tests
-		SccProjectUniqueName8 = FOAEA3.Model\\FOAEA3.Model.csproj
-		SccProjectName8 = FOAEA3.Model
-		SccLocalPath8 = FOAEA3.Model
-		SccProjectUniqueName9 = FOAEA3.API\\FOAEA3.API.csproj
-		SccProjectName9 = FOAEA3.API
-		SccLocalPath9 = FOAEA3.API
-		SccProjectUniqueName10 = DBHelperCore\\DBHelperCore.csproj
-		SccProjectName10 = DBHelperCore
-		SccLocalPath10 = DBHelperCore
-		SccProjectUniqueName11 = BackendProcesses.CommandLine\\BackendProcesses.CommandLine.csproj
-		SccProjectName11 = BackendProcesses.CommandLine
-		SccLocalPath11 = BackendProcesses.CommandLine
-		SccProjectUniqueName12 = BackendProcesses.API\\BackendProcesses.API.csproj
-		SccProjectName12 = BackendProcesses.API
-		SccLocalPath12 = BackendProcesses.API
-		SccProjectUniqueName13 = BackendProcesses.Business\\BackendProcesses.Business.csproj
-		SccProjectName13 = BackendProcesses.Business
-		SccLocalPath13 = BackendProcesses.Business
-		SccProjectUniqueName14 = FOAEA3.Finance\\FOAEA3.Finance.csproj
-		SccProjectName14 = FOAEA3.Finance
-		SccLocalPath14 = FOAEA3.Finance
-		SccProjectUniqueName15 = FOAEA3.Maintenance.Tables\\FOAEA3.Maintenance.Tables.csproj
-		SccProjectName15 = FOAEA3.Maintenance.Tables
-		SccLocalPath15 = FOAEA3.Maintenance.Tables
-		SccProjectUniqueName16 = FOAEA3.Maintenance.Data\\FOAEA3.Maintenance.Data.csproj
-		SccProjectName16 = FOAEA3.Maintenance.Data
-		SccLocalPath16 = FOAEA3.Maintenance.Data
-		SccProjectUniqueName17 = FOAEA3.Admin.Users\\FOAEA3.Admin.Users.csproj
-		SccProjectName17 = FOAEA3.Admin.Users
-		SccLocalPath17 = FOAEA3.Admin.Users
-		SccProjectUniqueName18 = BackendProcesses.Business.Tests\\BackendProcesses.Business.Tests.csproj
-		SccProjectTopLevelParentUniqueName18 = FOAEA3.sln
-		SccProjectName18 = BackendProcesses.Business.Tests
-		SccLocalPath18 = BackendProcesses.Business.Tests
-		SccProjectUniqueName19 = TestData\\TestData.csproj
-		SccProjectTopLevelParentUniqueName19 = FOAEA3.sln
-		SccProjectName19 = TestData
-		SccLocalPath19 = TestData
-		SccProjectUniqueName20 = FOAEA3.Admin.Business\\FOAEA3.Admin.Business.csproj
-		SccProjectName20 = FOAEA3.Admin.Business
-		SccLocalPath20 = FOAEA3.Admin.Business
-		SccProjectUniqueName21 = FOAEA3.API.Tracing\\FOAEA3.API.Tracing.csproj
-		SccProjectName21 = FOAEA3.API.Tracing
-		SccLocalPath21 = FOAEA3.API.Tracing
-		SccProjectUniqueName22 = FOAEA3.API.Interception\\FOAEA3.API.Interception.csproj
-		SccProjectName22 = FOAEA3.API.Interception
-		SccLocalPath22 = FOAEA3.API.Interception
-		SccProjectUniqueName23 = FOAEA3.API.LicenceDenial\\FOAEA3.API.LicenceDenial.csproj
-		SccProjectName23 = FOAEA3.API.LicenceDenial
-		SccLocalPath23 = FOAEA3.API.LicenceDenial
-		SccProjectUniqueName24 = Incoming.API.MEP.Tracing\\Incoming.API.MEP.Tracing.csproj
-		SccProjectTopLevelParentUniqueName24 = FOAEA3.sln
-		SccProjectName24 = Incoming.API.MEP.Tracing
-		SccLocalPath24 = Incoming.API.MEP.Tracing
-		SccProjectUniqueName25 = FileBroker.Data\\FileBroker.Data.csproj
-		SccProjectTopLevelParentUniqueName25 = FOAEA3.sln
-		SccProjectName25 = FileBroker.Data
-		SccLocalPath25 = FileBroker.Data
-		SccProjectUniqueName26 = FileBroker.Model\\FileBroker.Model.csproj
-		SccProjectTopLevelParentUniqueName26 = FOAEA3.sln
-		SccProjectName26 = FileBroker.Model
-		SccLocalPath26 = FileBroker.Model
-		SccProjectUniqueName27 = Incoming.Common\\Incoming.Common.csproj
-		SccProjectTopLevelParentUniqueName27 = FOAEA3.sln
-		SccProjectName27 = Incoming.Common
-		SccLocalPath27 = Incoming.Common
-		SccProjectUniqueName28 = FileBroker.Business\\FileBroker.Business.csproj
-		SccProjectTopLevelParentUniqueName28 = FOAEA3.sln
-		SccProjectName28 = FileBroker.Business
-		SccLocalPath28 = FileBroker.Business
-		SccProjectUniqueName29 = FileBroker.Business.Tests\\FileBroker.Business.Tests.csproj
-		SccProjectTopLevelParentUniqueName29 = FOAEA3.sln
-		SccProjectName29 = FileBroker.Business.Tests
-		SccLocalPath29 = FileBroker.Business.Tests
-		SccProjectUniqueName30 = FileBroker.Common\\FileBroker.Common.csproj
-		SccProjectTopLevelParentUniqueName30 = FOAEA3.sln
-		SccProjectName30 = FileBroker.Common
-		SccLocalPath30 = FileBroker.Common
-		SccProjectUniqueName31 = Incoming.FileWatcher.Fed.Tracing\\Incoming.FileWatcher.Fed.Tracing.csproj
-		SccProjectTopLevelParentUniqueName31 = FOAEA3.sln
-		SccProjectName31 = Incoming.FileWatcher.Fed.Tracing
-		SccLocalPath31 = Incoming.FileWatcher.Fed.Tracing
-		SccProjectUniqueName32 = Incoming.FileWatcher.MEP.Ontario\\Incoming.FileWatcher.MEP.Ontario.csproj
-		SccProjectTopLevelParentUniqueName32 = FOAEA3.sln
-		SccProjectName32 = Incoming.FileWatcher.MEP.Ontario
-		SccLocalPath32 = Incoming.FileWatcher.MEP.Ontario
-		SccProjectUniqueName33 = Incoming.FileWatcher.MEP.BritishColumbia\\Incoming.FileWatcher.MEP.BritishColumbia.csproj
-		SccProjectTopLevelParentUniqueName33 = FOAEA3.sln
-		SccProjectName33 = Incoming.FileWatcher.MEP.BritishColumbia
-		SccLocalPath33 = Incoming.FileWatcher.MEP.BritishColumbia
-		SccProjectUniqueName34 = Incoming.API.Fed.Tracing\\Incoming.API.Fed.Tracing.csproj
-		SccProjectTopLevelParentUniqueName34 = FOAEA3.sln
-		SccProjectName34 = Incoming.API.Fed.Tracing
-		SccLocalPath34 = Incoming.API.Fed.Tracing
-		SccProjectUniqueName35 = Outgoing.API.Fed.Tracing\\Outgoing.API.Fed.Tracing.csproj
-		SccProjectTopLevelParentUniqueName35 = FOAEA3.sln
-		SccProjectName35 = Outgoing.API.Fed.Tracing
-		SccLocalPath35 = Outgoing.API.Fed.Tracing
-		SccProjectUniqueName36 = Outgoing.API.MEP.Tracing\\Outgoing.API.MEP.Tracing.csproj
-		SccProjectTopLevelParentUniqueName36 = FOAEA3.sln
-		SccProjectName36 = Outgoing.API.MEP.Tracing
-		SccLocalPath36 = Outgoing.API.MEP.Tracing
-		SccProjectUniqueName37 = FileBroker.Admin.Web\\FileBroker.Admin.Web.csproj
-		SccProjectTopLevelParentUniqueName37 = FOAEA3.sln
-		SccProjectName37 = FileBroker.Admin.Web
-		SccLocalPath37 = FileBroker.Admin.Web
-		SccProjectUniqueName38 = Outgoing.FileCreator.Fed.Tracing\\Outgoing.FileCreator.Fed.Tracing.csproj
-		SccProjectTopLevelParentUniqueName38 = FOAEA3.sln
-		SccProjectName38 = Outgoing.FileCreator.Fed.Tracing
-		SccLocalPath38 = Outgoing.FileCreator.Fed.Tracing
-		SccProjectUniqueName39 = Outgoing.FileCreator.MEP\\Outgoing.FileCreator.MEP.csproj
-		SccProjectTopLevelParentUniqueName39 = FOAEA3.sln
-		SccProjectName39 = Outgoing.FileCreator.MEP
-		SccLocalPath39 = Outgoing.FileCreator.MEP
-		SccProjectUniqueName40 = FOAEA3.EmailTools\\FOAEA3.EmailTools.csproj
-		SccProjectName40 = FOAEA3.EmailTools
-		SccLocalPath40 = FOAEA3.EmailTools
-		SccProjectUniqueName41 = FOAEA3.EmailTools.Tests\\FOAEA3.EmailTools.Tests.csproj
-		SccProjectTopLevelParentUniqueName41 = FOAEA3.sln
-		SccProjectName41 = FOAEA3.EmailTools.Tests
-		SccLocalPath41 = FOAEA3.EmailTools.Tests
-		SccProjectUniqueName42 = FileBroker.Data.Tests\\FileBroker.Data.Tests.csproj
-		SccProjectTopLevelParentUniqueName42 = FOAEA3.sln
-		SccProjectName42 = FileBroker.Data.Tests
-		SccLocalPath42 = FileBroker.Data.Tests
-		SccProjectUniqueName43 = FOAEA3.Web\\FOAEA3.Web.csproj
-		SccProjectName43 = FOAEA3.Web
-		SccLocalPath43 = FOAEA3.Web
-		SccProjectUniqueName44 = Outgoing.API.Fed.SIN\\Outgoing.API.Fed.SIN.csproj
-		SccProjectTopLevelParentUniqueName44 = FOAEA3.sln
-		SccProjectName44 = Outgoing.API.Fed.SIN
-		SccLocalPath44 = Outgoing.API.Fed.SIN
-		SccProjectUniqueName45 = Incoming.API.Fed.SIN\\Incoming.API.Fed.SIN.csproj
-		SccProjectTopLevelParentUniqueName45 = FOAEA3.sln
-		SccProjectName45 = Incoming.API.Fed.SIN
-		SccLocalPath45 = Incoming.API.Fed.SIN
-		SccProjectUniqueName46 = FOAEA3.Common\\FOAEA3.Common.csproj
-		SccProjectName46 = FOAEA3.Common
-		SccLocalPath46 = FOAEA3.Common
-		SccProjectUniqueName47 = FOAEA3.Admin.Web\\FOAEA3.Admin.Web.csproj
-		SccProjectName47 = FOAEA3.Admin.Web
-		SccLocalPath47 = FOAEA3.Admin.Web
 	EndGlobalSection
 EndGlobal

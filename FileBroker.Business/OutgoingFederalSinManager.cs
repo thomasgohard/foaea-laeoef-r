@@ -76,7 +76,6 @@ namespace FileBroker.Business
 
                 return string.Empty;
             }
-
         }
 
         private List<SINOutgoingFederalData> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,

@@ -5,15 +5,10 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Incoming.API.Fed.SIN.Controllers
 {
@@ -23,12 +18,12 @@ namespace Incoming.API.Fed.SIN.Controllers
     {
         [HttpPost]
         public ActionResult ProcessSINFile([FromQuery] string fileName,
-                                              [FromServices] IFileAuditRepository fileAuditDB,
-                                              [FromServices] IFileTableRepository fileTableDB,
-                                              [FromServices] IMailServiceRepository mailService,
-                                              [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
-                                              [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                              [FromServices] IOptions<ApiConfig> apiConfig)
+                                           [FromServices] IFileAuditRepository fileAuditDB,
+                                           [FromServices] IFileTableRepository fileTableDB,
+                                           [FromServices] IMailServiceRepository mailService,
+                                           [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
+                                           [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
+                                           [FromServices] IOptions<ApiConfig> apiConfig)
         {
             string flatFileContent;
             using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -42,7 +37,7 @@ namespace Incoming.API.Fed.SIN.Controllers
             if (fileName.ToUpper().EndsWith(".XML"))
                 fileName = fileName[0..^4]; // remove .XML extension
 
-            var apiHelper = new APIBrokerHelper(apiConfig.Value.TracingRootAPI, "", "");
+            var apiHelper = new APIBrokerHelper(apiConfig.Value.ApplicationRootAPI, "", "");
 
             var apis = new APIBrokerList
             {
