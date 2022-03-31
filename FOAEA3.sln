@@ -105,6 +105,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Admin.Web", "FOAEA3.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.SIN", "Outgoing.FileCreator.Fed.SIN\Outgoing.FileCreator.Fed.SIN.csproj", "{7F22323A-637B-43DF-86F8-07DDFAF9348D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA65889E-DE0F-4E71-B8F5-4A723BA9F69E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{743BE927-E590-4C4D-A778-2F2F6F3F78F4}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\Overview_ProcessingFederalSinFiles.md = documentation\Overview_ProcessingFederalSinFiles.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{941E44E5-FBB9-4A54-923F-A557A4083A34}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\images\IncomingFedSinFile.png = documentation\images\IncomingFedSinFile.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BackendProcesses Debug|Any CPU = BackendProcesses Debug|Any CPU
@@ -792,6 +804,7 @@ Global
 		{786D8C70-8E02-4AE9-8666-EDBDFB27D1E3} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{719D8AF0-9377-4048-A482-F1B6034D29F9} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{7F22323A-637B-43DF-86F8-07DDFAF9348D} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{941E44E5-FBB9-4A54-923F-A557A4083A34} = {743BE927-E590-4C4D-A778-2F2F6F3F78F4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}
