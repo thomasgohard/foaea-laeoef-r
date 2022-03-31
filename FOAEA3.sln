@@ -109,12 +109,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{743BE927-E590-4C4D-A778-2F2F6F3F78F4}"
 	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
 		documentation\Overview_ProcessingFederalSinFiles.md = documentation\Overview_ProcessingFederalSinFiles.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{941E44E5-FBB9-4A54-923F-A557A4083A34}"
 	ProjectSection(SolutionItems) = preProject
 		documentation\images\IncomingFedSinFile.png = documentation\images\IncomingFedSinFile.png
+		documentation\images\OutgoingFedSinFile.png = documentation\images\OutgoingFedSinFile.png
 	EndProjectSection
 EndProject
 Global
