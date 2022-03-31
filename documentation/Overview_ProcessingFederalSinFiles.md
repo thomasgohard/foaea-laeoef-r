@@ -5,7 +5,7 @@ The following processes uses the same files currently being exchanged with the S
 
     `POST http://{server}:14015/api/v1/SinFiles?fileName=HR3SVSIS.{nnn}`
 
-    * **Important:** The **body** of the API must contain the flatfile we currently receive, as text.
+    * **Important:** The **body** of the API must contain the flatfile in the same format that we currently receive.
     * `{server}` will be our server name available to external users
     * `{nnn}` will be the next sequence that we are expecting (e.g. 123)
 The `ProcessSINFile()` method of the `SinFilesController` class found in the `Incoming.API.Fed.SIN` project is called via that API.
@@ -22,3 +22,7 @@ The `ProcessSINFile()` method of the `SinFilesController` class found in the `In
     7.	Reset the File Loading flag in the `FileTable` in the Message Broker database
 
    ![IncomingFedSINFileProcess](images/IncomingFedSinFile.png)
+
+## Outgoing Federal SIN Files
+1.	The Windows Task Scheduler will call the following command line tool on a designated time. This will create the outgoing file
+2.	External partners will call our API to get the latest file. An alternative would be for the SIN Registry to have an API available that we can call to send them the newly generated file.
