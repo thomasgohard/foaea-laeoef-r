@@ -18,5 +18,37 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        protected override void Process_12_PartiallyServiced()
+        {
+            base.Process_12_PartiallyServiced();
+
+            var licenceResponseData = Repositories.LicenceDenialResponseRepository.GetLastResponseData(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            if (licenceResponseData != null)
+            {
+
+                short rqstStatCd = licenceResponseData.RqstStat_Cd;
+                string source = licenceResponseData.EnfSrv_Cd;
+
+                switch (rqstStatCd)
+                {
+                    case 3:
+                        LicenceDenialApplication.LicSusp_AnyLicReinst_Ind = 1;
+                        EventManager.AddEvent(EventCode.C50824_A_DEBTOR_LICENCE_HAS_BEEN_SUSPENDED);
+                        break;
+                    case 5:
+                        EventManager.AddEvent(EventCode.C50827_ASSISTANCE_REQUESTED_TO_CORRECTLY_IDENTIFY_DEBTOR, 
+                                              queue: EventQueue.EventAM);
+                        break;
+                    case 8:
+                        LicenceDenialApplication.LicSusp_AnyLicRvkd_Ind = 1;
+                        break;
+                    default: 
+                        break;
+                }
+
+            }
+        }
+
     }
 }

@@ -277,11 +277,11 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public void TransferApplication(string applSelectedSubmitter, string applSelectedRecipient, string userid)
+        public void TransferApplication(string applSelectedSubmitter, string applSelectedRecipient)
         {
 
             Application.Subm_SubmCd = applSelectedSubmitter;
-            Application.Appl_LastUpdate_Usr = userid; // is this really needed?
+            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             if (Application.Medium_Cd == "ONL")
                 Application.Subm_Recpt_SubmCd = applSelectedRecipient;
 

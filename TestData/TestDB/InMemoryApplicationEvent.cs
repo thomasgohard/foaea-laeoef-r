@@ -71,5 +71,10 @@ namespace TestData.TestDB
         {
             throw new NotImplementedException();
         }
+
+        public List<SinInboundToApplData> GetLatestSinEventDataSummary()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

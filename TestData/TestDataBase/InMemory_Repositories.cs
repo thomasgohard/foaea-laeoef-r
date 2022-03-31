@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using TestData.TestDB;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace TestData.TestDataBase
 {
@@ -65,6 +66,8 @@ namespace TestData.TestDataBase
         public IFailedSubmitAuditRepository FailedSubmitAuditRepository => throw new System.NotImplementedException();
 
         public IPostalCodeRepository PostalCodeRepository => throw new System.NotImplementedException();
+
+        public ILicenceDenialResponseRepository LicenceDenialResponseRepository => throw new System.NotImplementedException();
 
         public InMemory_Repositories()
         {

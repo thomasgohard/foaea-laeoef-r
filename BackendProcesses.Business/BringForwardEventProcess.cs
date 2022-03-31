@@ -45,7 +45,7 @@ namespace BackendProcesses.Business
                             break;
 
                         case "L01":
-                            var licencingData = new LicenceDenialData();
+                            var licencingData = new LicenceDenialApplicationData();
                             licencingData.Merge(application);
                             // TODO: call API instead?
                             //var licencingManager = new LicenceDenialManager(licencingData, Repositories, config);

@@ -15,24 +15,131 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public LicenceDenialData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null , string appl_L03_CtrlCd = null)
         {
+
+
             var parameters = new Dictionary<string, object>
                     {
-                        {"Appl_CtrlCd", appl_CtrlCd },
                         {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd}
                     };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialData>("LicSusp_Select", parameters, FillDataFromReader);
+            if (!string.IsNullOrEmpty(appl_L01_CtrlCd))
+                parameters.Add("appl_L01_CtrlCd", appl_L01_CtrlCd);
 
-            //            if (!string.IsNullOrEmpty(MainDB.LastError))
+            if (!string.IsNullOrEmpty(appl_L03_CtrlCd))
+                parameters.Add("appl_L03_CtrlCd", appl_L03_CtrlCd);
+
+            var data = MainDB.GetDataFromStoredProc<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
 
             var result = data.FirstOrDefault();
 
-            return result; // returns null if no data found
+            return result; 
         }
 
-        private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialData data)
+        public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                    {
+                        {"ControlCode", appl_CtrlCd },
+                        {"EnforcementServiceCode", appl_EnfSrv_Cd}
+                    };
+
+            var data = MainDB.GetDataFromStoredProc<LicenceSuspensionHistoryData>("LicSuspApplGetLicenseSuspensionHist", parameters, FillSuspensionHistoryDataFromReader);
+
+            return data;
+        }
+
+        public void CreateLicenceDenialData(LicenceDenialApplicationData data)
+        {
+            var parameters = SetParameters(data);
+
+            MainDB.ExecProc("LicSuspInsert", parameters);
+
+        }
+
+        public void UpdateLicenceDenialData(LicenceDenialApplicationData data)
+        {
+            var parameters = SetParameters(data);
+
+            MainDB.ExecProc("LicSuspUpdate", parameters);
+        }
+
+        public bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "L01Appl_CtrlCd", appl_L01_CtrlCd },
+                { "L03Appl_CtrlCd", appl_L03_CtrlCd }
+            };
+
+            return MainDB.GetDataFromStoredProcViaReturnParameter<bool>("CloseSameDayLicenseEvent", parameters, "L01Event");
+        }
+
+        private Dictionary<string, object> SetParameters(LicenceDenialApplicationData data)
+        {
+            var parameters = new Dictionary<string, object>
+                    {
+                        {"Appl_EnfSrv_Cd", data.Appl_EnfSrv_Cd },
+                        {"Appl_CtrlCd", data.Appl_CtrlCd },
+                        {"LicSusp_SupportOrder_Dte", data.LicSusp_SupportOrder_Dte },
+                        {"LicSusp_NoticeSentToDbtr_Dte", data.LicSusp_NoticeSentToDbtr_Dte },
+                        {"LicSusp_CourtNme", data.LicSusp_CourtNme },
+                        {"PymPr_Cd", data.PymPr_Cd },
+                        {"LicSusp_NrOfPymntsInDefault", data.LicSusp_NrOfPymntsInDefault ?? 0},
+                        {"LicSusp_AmntOfArrears", data.LicSusp_AmntOfArrears ?? 0M },
+                        {"LicSusp_Dbtr_EmplNme", data.LicSusp_Dbtr_EmplNme },
+                        {"LicSusp_Dbtr_EmplAddr_Ln", data.LicSusp_Dbtr_EmplAddr_Ln },
+                        {"LicSusp_Dbtr_EmplAddr_Ln1", data.LicSusp_Dbtr_EmplAddr_Ln1 },
+                        {"LicSusp_Dbtr_EmplAddr_CityNme", data.LicSusp_Dbtr_EmplAddr_CityNme },
+                        {"LicSusp_Dbtr_EmplAddr_PrvCd", data.LicSusp_Dbtr_EmplAddr_PrvCd },
+                        {"LicSusp_Dbtr_EmplAddr_CtryCd", data.LicSusp_Dbtr_EmplAddr_CtryCd },
+                        {"LicSusp_Dbtr_EmplAddr_PCd", data.LicSusp_Dbtr_EmplAddr_PCd },
+                        {"LicSusp_Dbtr_EyesColorCd", data.LicSusp_Dbtr_EyesColorCd },
+                        {"LicSusp_Dbtr_HeightUOMCd", data.LicSusp_Dbtr_HeightUOMCd },
+                        {"LicSusp_Dbtr_HeightQty", data.LicSusp_Dbtr_HeightQty ?? 0},
+                        {"LicSusp_Dbtr_PhoneNumber", data.LicSusp_Dbtr_PhoneNumber },
+                        {"LicSusp_Dbtr_EmailAddress", data.LicSusp_Dbtr_EmailAddress },
+                        {"LicSusp_Dbtr_Brth_CityNme", data.LicSusp_Dbtr_Brth_CityNme },
+                        {"LicSusp_Dbtr_Brth_CtryCd", data.LicSusp_Dbtr_Brth_CtryCd },
+                        {"LicSusp_Still_InEffect_Ind", data.LicSusp_Still_InEffect_Ind },
+                        {"LicSusp_AnyLicRvkd_Ind", data.LicSusp_AnyLicRvkd_Ind },
+                        {"LicSusp_AnyLicReinst_Ind", data.LicSusp_AnyLicReinst_Ind },
+                        {"LicSusp_LiStCd", data.LicSusp_LiStCd },
+                        {"LicSusp_Appl_CtrlCd", data.LicSusp_Appl_CtrlCd }
+                    };
+
+            if (data.LicSusp_TermRequestDte.HasValue)
+                parameters.Add("LicSusp_TermRequestDte", data.LicSusp_TermRequestDte.Value);
+            else
+                parameters.Add("LicSusp_TermRequestDte", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_Ln))
+                parameters.Add("LicSusp_Dbtr_LastAddr_Ln", data.LicSusp_Dbtr_LastAddr_Ln);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_Ln1))
+                parameters.Add("LicSusp_Dbtr_LastAddr_Ln1", data.LicSusp_Dbtr_LastAddr_Ln1);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_CityNme))
+                parameters.Add("LicSusp_Dbtr_LastAddr_CityNme", data.LicSusp_Dbtr_LastAddr_CityNme);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_PrvCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_PrvCd", data.LicSusp_Dbtr_LastAddr_PrvCd);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_CtryCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_CtryCd", data.LicSusp_Dbtr_LastAddr_CtryCd);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_LastAddr_PCd))
+                parameters.Add("LicSusp_Dbtr_LastAddr_PCd", data.LicSusp_Dbtr_LastAddr_PCd);
+
+            if (data.LicSusp_Declaration_Ind.HasValue)
+                parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
+
+            return parameters;
+        }
+
+        private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialApplicationData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
@@ -67,5 +174,19 @@ namespace FOAEA3.Data.DB
             data.LicSusp_Dbtr_LastAddr_CtryCd = rdr["LicSusp_Dbtr_LastAddr_CtryCd"] as string; // can be null 
             data.LicSusp_Dbtr_LastAddr_PCd = rdr["LicSusp_Dbtr_LastAddr_PCd"] as string; // can be null 
         }
+
+        private void FillSuspensionHistoryDataFromReader(IDBHelperReader rdr, LicenceSuspensionHistoryData data)
+        {
+            data.EnforcementServiceCode = rdr["EnforcementServiceCode"] as string;
+            data.ControlCode = rdr["ControlCode"] as string;
+            data.FromName = rdr["FromName"] as string;
+            data.ConvertedResponseDate = rdr["ConvertedResponseDate"] as string;
+            data.ResponseDate = (DateTime)rdr["ResponseDate"];
+            data.ResponseCode = (short)rdr["ResponseCode"];
+            data.LicRspSource_RefNo = rdr["LicRspSource_RefNo"] as string;
+            data.ResponseDescription_E = rdr["ResponseDescription_E"] as string;
+            data.ResponseDescription_F = rdr["ResponseDescription_F"] as string;
+        }
+
     }
 }

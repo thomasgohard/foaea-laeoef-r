@@ -1,7 +1,8 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 
@@ -9,9 +10,10 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialManager : ApplicationManager
     {
-        public LicenceDenialData LicenceDenialApplication { get; }
+        public LicenceDenialApplicationData LicenceDenialApplication { get; }
+        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
-        public LicenceDenialManager(LicenceDenialData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -24,16 +26,14 @@ namespace FOAEA3.Business.Areas.Application
                             ApplicationState.MANUALLY_TERMINATED_14
                         });
 
-//            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
-        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialData(), repositories, config)
+        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
 
         }
-
-        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
         public override bool LoadApplication(string enfService, string controlCode)
         {
@@ -43,7 +43,8 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                var licenceDenialDB = Repositories.LicenceDenialRepository;
+                var data = licenceDenialDB.GetLicenceDenialData(enfService, appl_L01_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialApplication.Merge(data);
@@ -51,7 +52,78 @@ namespace FOAEA3.Business.Areas.Application
 
             return isSuccess;
         }
-                
+
+        public override bool CreateApplication()
+        {
+            if (!IsValidCategory("L01"))
+                return false;
+
+            bool success = base.CreateApplication();
+
+            if (!success)
+            {
+                var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, LicenceDenialApplication);
+                failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.L01);
+            }
+
+            Repositories.LicenceDenialRepository.CreateLicenceDenialData(LicenceDenialApplication);
+
+            return success;
+        }
+
+        public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory()
+        {
+            return Repositories.LicenceDenialRepository.GetLicenceSuspensionHistory(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
+        }
+
+        public void CancelApplication()
+        {
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
+            SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+
+            MakeUpperCase();
+            UpdateApplicationNoValidation();
+
+            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialApplication);
+
+            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
+
+            EventManager.SaveEvents();
+        }
+
+        public bool ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            if (!LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
+            {
+                LicenceDenialApplication.Messages.AddError("Application not found!");
+                return false;
+            }
+
+            if (!IsValidCategory("L01"))
+                return false;
+
+            if (LicenceDenialApplication.AppLiSt_Cd.NotIn(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12))
+            {
+                LicenceDenialApplication.Messages.AddError("Invalid State for the current application.  Valid states allowed are 10 and 12.");
+                return false;
+            }
+
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
+            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
+            UpdateApplicationNoValidation();
+
+            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialApplication);
+
+            EventManager.SaveEvents();
+
+            return true;
+        }
+
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
@@ -69,11 +141,12 @@ namespace FOAEA3.Business.Areas.Application
                                               EventCode.C50600_INVALID_APPLICATION)))) &&
                 ((diff.Equals(TimeSpan.Zero)) || (Math.Abs(diff.TotalHours) > 24)))
             {
-                // TODO: make BF event inactive
-                /*
-                      .UpdateEvent("EvntBF", Event_Id, 14, "I")
-                      bCloseEvent = False
-                */
+                bfEvent.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
+                bfEvent.ActvSt_Cd = "I";
+
+                EventManager.SaveEvent(bfEvent);
+
+                closeEvent = false;
             }
             else
             {
@@ -144,7 +217,10 @@ namespace FOAEA3.Business.Areas.Application
 
             if (closeEvent)
             {
-                // .UpdateEvent("EvntBF", Event_Id, AppList_Cd, "C")
+                bfEvent.AppLiSt_Cd = LicenceDenialApplication.AppLiSt_Cd;
+                bfEvent.ActvSt_Cd = "C";
+
+                EventManager.SaveEvent(bfEvent);
             }
 
             EventManager.SaveEvents();

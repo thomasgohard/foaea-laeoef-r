@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Data.DB;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Data.Base
 {
@@ -19,14 +20,15 @@ namespace FOAEA3.Data.Base
         private ISubjectRepository subjectDB;
         private IInterceptionRepository interceptionDB;
         private ITracingRepository tracingDB;
+        private ITraceResponseRepository traceResponseDB;
         private ILicenceDenialRepository licenceDenialDB;
+        private ILicenceDenialResponseRepository licenceDenialResponseDB;
         private IAffidavitRepository affidavitDB;
         private ILoginRepository loginDB;
         private INotificationRepository notificationDB;
         private ISubmitterProfileRepository submitterProfileDB;
         private ISubjectRoleRepository subjectRoleDB;
         private ISINResultRepository sinResultDB;
-        private ITraceResponseRepository traceResponseDB;
         private IProductionAuditRepository productionAuditDB;
         private ISINChangeHistoryRepository sinChangeHistoryDB;
         private IFamilyProvisionRepository familyProvisionDB;
@@ -73,6 +75,16 @@ namespace FOAEA3.Data.Base
                 if (traceResponseDB is null)
                     traceResponseDB = new DBTraceResponse(MainDB);
                 return traceResponseDB;
+            }
+        }
+
+        public ILicenceDenialResponseRepository LicenceDenialResponseRepository
+        {
+            get
+            {
+                if (licenceDenialResponseDB is null)
+                    licenceDenialResponseDB = new DBLicenceDenialResponse(MainDB);
+                return licenceDenialResponseDB;
             }
         }
 

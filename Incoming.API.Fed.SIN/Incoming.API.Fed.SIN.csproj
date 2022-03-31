@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+    <ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
     <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />

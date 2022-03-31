@@ -15,11 +15,11 @@ namespace FOAEA3.Areas.Application.Controllers
 
         private const string SESSION_LICENCING_ERRORS = "SessionLicencingErrors";
 
-        public IActionResult Create(LicenceDenialData enteredData = null)
+        public IActionResult Create(LicenceDenialApplicationData enteredData = null)
         {
-            LicenceDenialData licenceDenialData;
+            LicenceDenialApplicationData licenceDenialData;
             if ((enteredData is null) || (enteredData.Appl_EnfSrv_Cd is null))
-                licenceDenialData = new LicenceDenialData()
+                licenceDenialData = new LicenceDenialApplicationData()
                 {
                     // set default values for current user -- for testing only
                     Appl_EnfSrv_Cd = SessionData.CurrentEnforcementServiceCode,
@@ -50,7 +50,7 @@ namespace FOAEA3.Areas.Application.Controllers
         public IActionResult Create(LicenceDenialDataEntryViewModel data)
         {
             var licenceDenialsAPI = new LicenceDenialsAPI();
-            LicenceDenialData licencingApplication = licenceDenialsAPI.CreateApplication(data.LicenceDenial);
+            LicenceDenialApplicationData licencingApplication = licenceDenialsAPI.CreateApplication(data.LicenceDenial);
 
             if (!licencingApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             {
@@ -163,7 +163,7 @@ namespace FOAEA3.Areas.Application.Controllers
 
             // reload these values from original in database so as not to lose those values when we update
 
-            LicenceDenialData existingLicenceDenial = licenceDenialsAPI.GetApplication(data.LicenceDenial.Appl_EnfSrv_Cd, data.LicenceDenial.Appl_CtrlCd);
+            LicenceDenialApplicationData existingLicenceDenial = licenceDenialsAPI.GetApplication(data.LicenceDenial.Appl_EnfSrv_Cd, data.LicenceDenial.Appl_CtrlCd);
             data.LicenceDenial.Subm_SubmCd = existingLicenceDenial.Subm_SubmCd;
             data.LicenceDenial.Subm_Recpt_SubmCd = existingLicenceDenial.Subm_Recpt_SubmCd;
             data.LicenceDenial.Appl_Lgl_Dte = existingLicenceDenial.Appl_Lgl_Dte;
@@ -214,7 +214,7 @@ namespace FOAEA3.Areas.Application.Controllers
                 data.LicenceDenial.Appl_Source_RfrNr = existingLicenceDenial.Appl_Source_RfrNr;
             }
 
-            LicenceDenialData updatedData = licenceDenialsAPI.UpdateApplication(data.LicenceDenial);
+            LicenceDenialApplicationData updatedData = licenceDenialsAPI.UpdateApplication(data.LicenceDenial);
 
             var messages = updatedData.Messages;
             if (messages?.Count > 0)

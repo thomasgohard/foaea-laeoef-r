@@ -14,10 +14,28 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public void SaveEvent(ApplicationEventData activeTraceEvent)
+        public List<ApplicationEventData> GetRequestedSINEventDataForFile(string fileName)
+        {
+            string apiCall = $"api/v1/applicationSins/RequestedEventsForFile?fileName={fileName}";
+            return ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall).Result;
+        }
+
+        public List<ApplicationEventDetailData> GetRequestedSINEventDetailDataForFile(string fileName)
+        {
+            string apiCall = $"api/v1/applicationSins/RequestedEventDetailsForFile?fileName={fileName}";
+            return ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall).Result;
+        }
+
+        public List<SinInboundToApplData> GetLatestSinEventDataSummary()
+        {
+            string apiCall = $"api/v1/applicationSins/GetLatestSinEventDataSummary";
+            return ApiHelper.GetDataAsync<List<SinInboundToApplData>>(apiCall).Result;
+        }
+
+        public void SaveEvent(ApplicationEventData eventData)
         {
             string apiCall = $"api/v1/applicationEvents";
-            _ = ApiHelper.PostDataAsync<ApplicationEventData, ApplicationEventData>(apiCall, activeTraceEvent).Result;
+            _ = ApiHelper.PostDataAsync<ApplicationEventData, ApplicationEventData>(apiCall, eventData).Result;
         }
 
         public void SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail)
@@ -34,5 +52,6 @@ namespace FOAEA3.Common.Brokers
                              $"&applicationState={appLiSt_Cd}&enfSrvCode={enfSrv_Cd}&writtenFile={writtenFile}";
             _ = ApiHelper.PutDataAsync<ApplicationEventDetailData, List<int>>(apiCall, eventIds).Result;
         }
+
     }
 }

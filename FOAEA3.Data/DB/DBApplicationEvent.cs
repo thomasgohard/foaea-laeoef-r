@@ -311,6 +311,28 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
+        public List<SinInboundToApplData> GetLatestSinEventDataSummary()
+        {
+            return MainDB.GetDataFromStoredProc<SinInboundToApplData>("", FillLatestSinEventDataFromReader);
+        }
+
+        private void FillLatestSinEventDataFromReader(IDBHelperReader rdr, SinInboundToApplData data)
+        {
+            data.Event_Id = (int)rdr["Event_Id"];
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.Tot_Childs = (int)rdr["Tot_Childs"];
+            data.Tot_Closed = (int)rdr["Tot_Closed"];
+            data.Tot_Invalid = (int)rdr["Tot_Invalid"];
+            data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Appl_Dbtr_Cnfrmd_SIN"] as string;
+            data.Appl_Dbtr_RtrndBySrc_SIN = rdr["Appl_Dbtr_RtrndBySrc_SIN"] as string;
+            data.AppLiSt_Cd = (short)rdr["AppLiSt_Cd"];
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.SVR_SIN = rdr["SVR_SIN"] as string;
+            data.ValStat_Cd = (short)rdr["ValStat_Cd"];
+        }
+
         public void DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>

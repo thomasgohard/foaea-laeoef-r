@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -21,7 +22,9 @@ namespace FOAEA3.Model.Interfaces
         public IInterceptionRepository InterceptionRepository { get; }
         public ISubjectRepository SubjectRepository { get; }
         public ITracingRepository TracingRepository { get; }
+        public ITraceResponseRepository TraceResponseRepository { get; }
         public ILicenceDenialRepository LicenceDenialRepository { get; }
+        public ILicenceDenialResponseRepository LicenceDenialResponseRepository { get; }
         public IAffidavitRepository AffidavitRepository { get; }
         public ILoginRepository LoginRepository { get; }
         public INotificationRepository NotificationRepository { get; }
@@ -29,7 +32,6 @@ namespace FOAEA3.Model.Interfaces
         public ISubjectRoleRepository SubjectRoleRepository { get; }
         public ISubmitterProfileRepository SubmitterProfileRepository { get; }
         public ISINResultRepository SINResultRepository { get; }
-        public ITraceResponseRepository TraceResponseRepository { get; }
         public IProductionAuditRepository ProductionAuditRepository { get; }
         public ISINChangeHistoryRepository SINChangeHistoryRepository { get; }
         public IFamilyProvisionRepository FamilyProvisionRepository { get; }

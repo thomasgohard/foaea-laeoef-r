@@ -58,8 +58,8 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        private void SINconfirmation(bool isSinConfirmed, string confirmedSin, string lastUpdateUser, bool swapNames = false,
-                                     string HRDCcomments = "")
+        public void SINconfirmation(bool isSinConfirmed, string confirmedSin, string lastUpdateUser, bool swapNames = false,
+                                    string HRDCcomments = "")
         {
 
             if (swapNames)

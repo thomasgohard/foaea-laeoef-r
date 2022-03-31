@@ -25,6 +25,12 @@ namespace FOAEA3.API.Tracing.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> Version()
+        {
+            return Ok("FOAEA3.API.Tracing API Version 1.4");
+        }
+        
         [HttpGet("{key}")]
         public ActionResult<TracingApplicationData> GetApplication([FromRoute] string key,
                                                                    [FromServices] IRepositories repositories)
@@ -57,23 +63,24 @@ namespace FOAEA3.API.Tracing.Controllers
 
             var tracingData = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
 
-            if (tracingData is null)
-                return UnprocessableEntity("Missing or invalid request body.");
+            if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
+                return UnprocessableEntity(error);
 
             var tracingManager = new TracingManager(tracingData, repositories, config);
+            var appl = tracingManager.TracingApplication;
 
             bool isCreated = tracingManager.CreateApplication();
             if (isCreated)
             {
-                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + tracingManager.TracingApplication.Appl_EnfSrv_Cd + "-" + tracingManager.TracingApplication.Appl_CtrlCd;
-                var rootPath = "http://" + HttpContext.Request.Host.ToString();
-                var apiGetURIForNewlyCreatedTracing = new Uri(rootPath + actionPath);
+                var appKey = $"{appl.Appl_EnfSrv_Cd}-{appl.Appl_CtrlCd}";
+                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
+                var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-                return Created(apiGetURIForNewlyCreatedTracing, tracingManager.TracingApplication);
+                return Created(getURI, appl);
             }
             else
             {
-                return UnprocessableEntity(tracingManager.TracingApplication.Messages.GetMessagesForType(MessageType.Error));
+                return UnprocessableEntity(appl);
             }
 
         }
@@ -89,17 +96,14 @@ namespace FOAEA3.API.Tracing.Controllers
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var tracingData = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
-
             var applKey = new ApplKey(key);
-            if ((applKey.EnfSrv.Trim() != tracingData.Appl_EnfSrv_Cd.Trim()) || (applKey.CtrlCd.Trim() != tracingData.Appl_CtrlCd.Trim()))
-            {
-                tracingData.Messages.AddSystemError($"id [{key}] does not match content " +
-                                                    $"[{tracingData.Appl_EnfSrv_Cd.Trim()}-{tracingData.Appl_CtrlCd.Trim()}]");
-                return UnprocessableEntity(tracingData);
-            }
+            
+            var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
 
-            var tracingManager = new TracingManager(tracingData, repositories, config);
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var tracingManager = new TracingManager(application, repositories, config);
 
             if (string.IsNullOrEmpty(command))
                 command = "";
@@ -119,14 +123,14 @@ namespace FOAEA3.API.Tracing.Controllers
                     break;
 
                 default:
-                    tracingData.Messages.AddSystemError($"Unknown command: {command}");
-                    return UnprocessableEntity(tracingManager.TracingApplication);
+                    application.Messages.AddSystemError($"Unknown command: {command}");
+                    return UnprocessableEntity(application);
             }
 
             if (!tracingManager.TracingApplication.Messages.ContainsMessagesOfType(MessageType.Error))
-                return Ok(tracingManager.TracingApplication);
+                return Ok(application);
             else
-                return UnprocessableEntity(tracingManager.TracingApplication);
+                return UnprocessableEntity(application);
 
         }
 
@@ -198,12 +202,7 @@ namespace FOAEA3.API.Tracing.Controllers
 
             return Ok(data);
 
-        }
-        [HttpGet("Version")]
-        public ActionResult<string> Version()
-        {
-            return Ok("FOAEA3.API.Tracing API Version 1.4");
-        }
+        }        
 
     }
 }
