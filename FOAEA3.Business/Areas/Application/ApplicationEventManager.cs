@@ -143,6 +143,10 @@ namespace FOAEA3.Business.Areas.Application
             return EventDB.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
         }
 
+        public List<SinInboundToApplData> GetLatestSinEventDataSummary()
+        {
+            return EventDB.GetLatestSinEventDataSummary();
+        }
         #endregion
 
     }

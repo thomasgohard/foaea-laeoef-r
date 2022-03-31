@@ -27,5 +27,6 @@ namespace FOAEA3.Model.Interfaces
         List<ApplicationEventData> GetRequestedTRCINTracingEvents(string appl_EnfSrv_Cd, string cycle);
         void DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd);
         DataList<ApplicationEventData> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName);
+        List<SinInboundToApplData> GetLatestSinEventDataSummary();
     }
 }

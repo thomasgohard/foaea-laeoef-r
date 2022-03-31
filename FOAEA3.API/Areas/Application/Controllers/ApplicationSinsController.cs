@@ -1,15 +1,12 @@
 ﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace FOAEA3.API.Areas.Application.Controllers
 {
@@ -56,5 +53,40 @@ namespace FOAEA3.API.Areas.Application.Controllers
             return manager.GetRequestedSINEventDataForFile("HR01", fileName).Items;
         }
 
+        [HttpGet("RequestedEventDetailsForFile")]
+        public ActionResult<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
+                                                                                              [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var manager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
+
+            return manager.GetRequestedSINEventDetailDataForFile("HR01", fileName).Items;
+        }
+
+        [HttpPut("{key}/SinConfirmation")]
+        public ActionResult<ApplicationData> SINconfirmation([FromRoute] string key,
+                                                             [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var sinConfirmationData = APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
+
+            var application = new ApplicationData();
+
+            var appManager = new ApplicationManager(application, repositories, config);
+            appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+
+            var sinManager = new ApplicationSINManager(application, appManager);
+            sinManager.SINconfirmation(isSinConfirmed: sinConfirmationData.IsSinConfirmed, 
+                                       confirmedSin: sinConfirmationData.ConfirmedSIN,
+                                       lastUpdateUser: repositories.CurrentSubmitter);
+
+            return Ok(application);
+        }
     }
 }

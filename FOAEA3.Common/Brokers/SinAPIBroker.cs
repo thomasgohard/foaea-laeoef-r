@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
 
 namespace FOAEA3.Common.Brokers
@@ -28,5 +29,12 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.GetDataAsync<List<SINOutgoingFederalData>>(apiCall).Result;
         }
 
+        public ApplicationData SinConfirmation(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
+        {
+            string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
+            string baseCall = "api/v1/ApplicationSins";
+            string apiCall = $"{baseCall}/{key}";
+            return ApiHelper.PostDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
+        }
     }
 }

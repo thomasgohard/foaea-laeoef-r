@@ -78,6 +78,16 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return NotFound();
         }
 
+        [HttpGet("GetLatestSinEventDataSummary")]
+        public ActionResult<List<SinInboundToApplData>> GetLatestSinEventDataSummary([FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applManager = new ApplicationEventManager(new ApplicationData(), repositories);
+
+            return applManager.GetLatestSinEventDataSummary();
+        }
 
     }
 }

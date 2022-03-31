@@ -43,21 +43,12 @@ namespace Incoming.API.Fed.SIN.Controllers
                 fileName = fileName[0..^4]; // remove .XML extension
 
             var apiHelper = new APIBrokerHelper(apiConfig.Value.TracingRootAPI, "", "");
-            var sinApplicationAPIs = new SinAPIBroker(apiHelper);
-            var applicationEventsAPIs = new ApplicationEventAPIBroker(apiHelper);
 
             var apis = new APIBrokerList
             {
-                SinAPIBroker = sinApplicationAPIs,
-                ApplicationEventAPIBroker = applicationEventsAPIs
-
-                /*
-                        public ITracingEventAPIBroker TracingEventAPIBroker { get; set; }
-                        public ITracingApplicationAPIBroker TracingApplicationAPIBroker { get; set; }
-                        public ITraceResponseAPIBroker TraceResponseAPIBroker { get; set; }
-                        public IApplicationEventAPIBroker ApplicationEventAPIBroker { get; set; }
-                        public ISinAPIBroker SinAPIBroker { get; set; }
-                 */
+                SinAPIBroker = new SinAPIBroker(apiHelper),
+                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(apiHelper),
+                ApplicationAPIBroker = new ApplicationAPIBroker(apiHelper)
             };
 
             var repositories = new RepositoryList
