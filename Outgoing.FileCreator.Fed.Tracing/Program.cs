@@ -46,11 +46,11 @@ namespace Outgoing.FileCreator.Fed.Tracing
         {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.ApplicationRootAPI)),
-                TracingApplicationAPIBroker = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.TracingRootAPI)),
-                TraceResponseAPIBroker = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.TracingRootAPI)),
-                TracingEventAPIBroker = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.TracingRootAPI)),
-                SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.ApplicationRootAPI))
+                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                TracingApplicationAPIBroker = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                TraceResponseAPIBroker = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                TracingEventAPIBroker = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
             };
 
             var repositories = new RepositoryList

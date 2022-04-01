@@ -67,7 +67,7 @@ namespace Incoming.Common
 
                 // send json to processor api
 
-                var response = APIHelper.PostFlatFile($"api/v1/FederalTracingFiles?fileName={fileNameNoPath}", flatFile, ApiFilesConfig.IncomingFederalTracingRootAPI);
+                var response = APIHelper.PostFlatFile($"api/v1/FederalTracingFiles?fileName={fileNameNoPath}", flatFile, ApiFilesConfig.FileBrokerFederalTracingRootAPI);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
                 else

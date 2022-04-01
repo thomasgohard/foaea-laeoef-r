@@ -45,8 +45,8 @@ namespace Outgoing.FileCreator.Fed.SIN
         {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.ApplicationRootAPI)),
-                SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.ApplicationRootAPI))
+                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
             };
 
             var repositories = new RepositoryList

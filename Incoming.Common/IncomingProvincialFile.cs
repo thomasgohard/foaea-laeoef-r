@@ -84,17 +84,17 @@ namespace Incoming.Common
 
                 if (fileNameNoCycle == InterceptionPrefix + "II")
                 {
-                    APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.InterceptionRootAPI);
+                    APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
                     fileProcessedSuccessfully = true;
                 }
                 else if (fileNameNoCycle == LicencingPrefix + "IL")
                 {
-                    APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.IncomingFederalLicenceDenialRootAPI);
+                    APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
                     fileProcessedSuccessfully = true;
                 }
                 else if (fileNameNoCycle == TracingPrefix + "IT")
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.TracingRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaTracingRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
                     else
