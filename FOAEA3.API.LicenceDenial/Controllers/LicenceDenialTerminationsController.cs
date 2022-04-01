@@ -21,6 +21,9 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("LicenceDenialTerminations API Version 1.0");
+
         [HttpGet("{key}")]
         public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key, 
                                                                          [FromServices] IRepositories repositories)

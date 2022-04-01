@@ -12,6 +12,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class ActiveStatusesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ActiveStatuses API Version 1.0");
+
         [HttpGet]
         public ActionResult<DataList<ActiveStatusData>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
         {

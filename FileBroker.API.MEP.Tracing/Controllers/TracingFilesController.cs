@@ -17,6 +17,9 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 [Route("api/v1/[controller]")]
 public class TracingFilesController : ControllerBase
 {
+    [HttpGet("Version")]
+    public ActionResult<string> GetVersion() => Ok("TracingFiles API Version 1.0");
+
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
     public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)

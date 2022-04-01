@@ -24,10 +24,7 @@ namespace FOAEA3.API.Interception.Controllers
         }
 
         [HttpGet("Version")]
-        public ActionResult<string> Version()
-        {
-            return Ok("FOAEA3.API.Interception API Version 1.4");
-        }
+        public ActionResult<string> Version() => Ok("Interceptions API Version 1.0");
 
         [HttpGet("{key}")]
         public ActionResult<InterceptionApplicationData> GetApplication([FromRoute] string key,

@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class EnfServicesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("EnfServices API Version 1.0");
+
         [HttpGet("{enfServiceCode}")]
         public ActionResult<EnfSrvData> GetEnforcementService([FromRoute] string enfServiceCode, [FromServices] IRepositories repositories)
         {

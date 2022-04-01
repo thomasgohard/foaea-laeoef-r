@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class SubjectRolesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("SubjectRoles API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<SubjectRoleData>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
         {

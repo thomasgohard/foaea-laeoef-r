@@ -20,6 +20,9 @@ namespace FOAEA3.API.Tracing.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("TraceCycles API Version 1.0");
+
         [HttpGet("")]
         public ActionResult<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(
                                                                 [FromQuery] string enforcementServiceCode,

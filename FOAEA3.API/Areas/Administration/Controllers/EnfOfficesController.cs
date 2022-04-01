@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class EnfOfficesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("EnfOffices API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<EnfOffData>> GetEnfOffices([FromServices] IRepositories repositories,
                                                             [FromQuery] string enfOffName = null, [FromQuery] string enfOffCode = null,

@@ -28,6 +28,9 @@ namespace FOAEA3.API.Tracing.Controllers
 
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("TracingEvents API Version 1.0");
+
         [HttpGet("queues")]
         public ActionResult<Dictionary<int, string>> GetQueueNames()
         {

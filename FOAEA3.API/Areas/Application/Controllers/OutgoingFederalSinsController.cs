@@ -21,6 +21,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("OutgoingFederalSins API Version 1.0");
+
         [HttpGet("")]
         public ActionResult<List<SINOutgoingFederalData>> GetFederalOutgoingData(
                                                                 [FromQuery] int maxRecords,

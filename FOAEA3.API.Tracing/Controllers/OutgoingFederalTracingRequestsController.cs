@@ -3,7 +3,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
@@ -20,6 +19,9 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             this.config = config.Value;
         }
+
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("OutgoingFederalTracingRequests API Version 1.0");
 
         [HttpGet("")]
         public ActionResult<List<TracingOutgoingFederalData>> GetFederalOutgoingData(

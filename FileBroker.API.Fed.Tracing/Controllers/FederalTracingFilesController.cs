@@ -16,6 +16,9 @@ namespace FileBroker.API.Fed.Tracing.Controllers;
 [ApiController]
 public class FederalTracingFilesController : ControllerBase
 {
+    [HttpGet("Version")]
+    public ActionResult<string> GetVersion() => Ok("FederalTracingFiles API Version 1.4");
+
     //GET api/v1/TraceRequests?partnerId=RC
     [HttpGet("")]
     public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)

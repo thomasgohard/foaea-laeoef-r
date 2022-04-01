@@ -11,6 +11,9 @@ namespace FOAEA3.API.Controllers
     [Route("api/v1/[controller]")]
     public class LoginsController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
+
         [HttpGet("CheckPreviousPasswords")]
         public ActionResult<string> CheckPreviousPasswords([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {

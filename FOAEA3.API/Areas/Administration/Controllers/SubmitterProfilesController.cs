@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     public class SubmitterProfilesController : ControllerBase
     {
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("SubmitterProfiles API Version 1.0");
+
         [HttpGet("{submCd}")]
         public ActionResult<SubmitterProfileData> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)
         {

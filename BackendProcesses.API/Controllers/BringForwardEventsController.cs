@@ -24,6 +24,9 @@ namespace BackendProcesses.API.Controllers
             return View();
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4"); 
+        
         [HttpPut("")]
         public ActionResult<string> RunBringForward([FromServices] IRepositories repositories)
         {

@@ -11,7 +11,10 @@ namespace FOAEA3.API.Areas.Application.Controllers
     [ApiController]
     [Route("api/v1/[controller]")]
     public class ApplicationSearchesController : ControllerBase
-    {       
+    {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationSearches API Version 1.0");
+
         [HttpPost]
         public ActionResult<List<ApplicationSearchResultData>> CreateApplicationSearchResultFromSearchCriteria([FromBody] QuickSearchData quickSearchCriteria,
                                                                                                                [FromServices] IRepositories repositories)

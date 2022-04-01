@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [ApiController]
     public class InfoBanksController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("InfoBanks API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<InfoBankData>> GetInfoBanks([FromServices] IRepositories repositories)
         {

@@ -14,6 +14,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class FoaEventsController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("FoaEvents API Version 1.0");
+
         [HttpGet]
         public ActionResult<FoaEventDataDictionary> GetFoaeEvents()
         {
