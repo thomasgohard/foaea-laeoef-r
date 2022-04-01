@@ -25,8 +25,8 @@ namespace FOAEA3.Web.Pages.Applications
         {
             ApiRoots = apiConfig.Value;
 
-            string currentSubmitter = "";  // need to put something here, for testing/prototype
-            string currentUser = "";       // need to put something here, for testing/prototype
+            string currentSubmitter = "ON2D68";  // need to put something here, for testing/prototype
+            string currentUser = "system_support";       // need to put something here, for testing/prototype
             var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
             var apiBroker = new ApplicationLifeStatesAPIBroker(apiHelper);
 
@@ -48,8 +48,8 @@ namespace FOAEA3.Web.Pages.Applications
             if (!ModelState.IsValid)
             {
                 // call API to do search and display result
-                string currentSubmitter = "";
-                string currentUser = "";
+                string currentSubmitter = "ON2D68";
+                string currentUser = "system_support";
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
                 var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
 
@@ -81,8 +81,8 @@ namespace FOAEA3.Web.Pages.Applications
             if (!ModelState.IsValid)
             {
                 // call API to do search and display result
-                string currentSubmitter = "";
-                string currentUser = "";
+                string currentSubmitter = "ON2D68";
+                string currentUser = "system_support";
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
                 var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
 
