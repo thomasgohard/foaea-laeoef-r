@@ -12,6 +12,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class SubjectsController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Subjects API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<SubjectData>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
         {

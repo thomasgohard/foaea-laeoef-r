@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [ApiController]
     public class ApplicationLifeStatesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationLifeStates API Version 1.0");
+
         [HttpGet]
         public ActionResult<DataList<ApplicationLifeStateData>> GetApplicationLifeStates([FromServices] IApplicationLifeStateRepository applicationLifeStateRepository)
         {

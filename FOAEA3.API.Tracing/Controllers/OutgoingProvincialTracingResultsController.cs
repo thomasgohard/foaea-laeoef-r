@@ -11,14 +11,17 @@ namespace FOAEA3.API.Tracing.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class OutgoingProvincialTracingResults : ControllerBase
+    public class OutgoingProvincialTracingResultsController : ControllerBase
     {
         private readonly CustomConfig config;
 
-        public OutgoingProvincialTracingResults(IOptions<CustomConfig> config)
+        public OutgoingProvincialTracingResultsController(IOptions<CustomConfig> config)
         {
             this.config = config.Value;
         }
+
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("OutgoingProvincialTracingResults API Version 1.0");
 
         [HttpGet("")]
         public ActionResult<List<TracingOutgoingProvincialData>> GetProvincialOutgoingData(

@@ -21,6 +21,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationSins API Version 1.0");
+
         [HttpPost("bulk")]
         public ActionResult<int> CreateSinResultBulk([FromServices] IRepositories repositories)
         {

@@ -21,6 +21,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
+
         [HttpGet("{id}/SINresults")]
         public ActionResult<DataList<SINResultData>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
         {

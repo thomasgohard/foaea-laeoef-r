@@ -23,6 +23,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationEvents API Version 1.0");
+
         [HttpGet("queues")]
         public ActionResult<Dictionary<int, string>> GetQueueNames()
         {

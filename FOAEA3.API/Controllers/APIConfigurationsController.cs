@@ -11,10 +11,7 @@ namespace FOAEA3.API.Controllers
     public class APIConfigurationsController : ControllerBase
     {
         [HttpGet("Version")]
-        public ActionResult<string> Version()
-        {
-            return Ok("FOAEA3.API 1.0");
-        }
+        public ActionResult<string> GetVersion() => Ok("APIConfigurations API Version 1.0");
 
         [HttpGet("MainDBCconnectionString")]
         public ActionResult<string> MainDBConnectionString([FromServices] IRepositories repositories)

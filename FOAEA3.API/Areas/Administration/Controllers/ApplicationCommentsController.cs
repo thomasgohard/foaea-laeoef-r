@@ -15,6 +15,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [ApiController]
     public class ApplicationCommentsController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationComments API Version 1.0");
+
         [HttpGet]
         public ActionResult<DataList<ApplicationCommentsData>> GetApplicationComments([FromServices] IApplicationCommentsRepository applicationCommentsRepository)
         {

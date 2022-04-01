@@ -22,6 +22,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("ApplicationEventDetails API Version 1.0");
+
         [HttpGet("{id}/SIN")]
         public ActionResult<List<ApplicationEventDetailData>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
         {

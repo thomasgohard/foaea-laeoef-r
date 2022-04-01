@@ -17,6 +17,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     public class SubmittersController : ControllerBase
     {
 
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Submitters API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<SubmitterData>> GetSubmitters([FromServices] IRepositories repositories,
                                                                [FromQuery] string provCd = null, [FromQuery] string enfOffCode = null,

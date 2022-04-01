@@ -25,10 +25,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         }
 
         [HttpGet("Version")]
-        public ActionResult<string> Version()
-        {
-            return Ok("FOAEA3.API.LicenceDenial API Version 1.4");
-        }
+        public ActionResult<string> GetVersion() => Ok("LicenceDenialsFiles API Version 1.0");
 
         [HttpGet("{key}")]
         public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key,

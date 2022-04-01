@@ -11,6 +11,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class ProvincesController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Provinces API Version 1.0");
+
         [HttpGet]
         public ActionResult<List<ProvinceData>> GetProvinces([FromServices] IRepositories repositories)
         {

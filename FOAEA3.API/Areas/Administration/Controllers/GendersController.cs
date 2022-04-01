@@ -13,6 +13,9 @@ namespace FOAEA3.API.Areas.Administration.Controllers
     [Route("api/v1/[controller]")]
     public class GendersController : ControllerBase
     {
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("Genders API Version 1.0");
+
         [HttpGet]
         public ActionResult<DataList<GenderData>> GetGenders([FromServices] IGenderRepository genderRepository)
         {
