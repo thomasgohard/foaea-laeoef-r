@@ -8,7 +8,7 @@ The following processes uses the same files currently being exchanged with the S
     * **Important:** The **body** of the API must contain the flatfile in the same format that we currently receive.
     * `{server}` will be our server name available to external users
     * `{nnn}` will be the next sequence that we are expecting (e.g. 123)
-The `ProcessSINFile()` method of the `SinFilesController` class found in the `Incoming.API.Fed.SIN` project is called via that API.
+The `ProcessSINFile()` method of the `SinFilesController` class found in the `FileBroker.API.Fed.SIN` project is called via that API.
 1.	`ProcessSINFile()` will call the `ProcessFlatFile()` method of the `IncomingFederalSinManager` class found in the `FileBroker.Business` project. `ProcessFlatFile()` will load the flat file, extract it’s data, and call APIs to update the FOAEA system with the new data:
     1.	Set the File Loading flag in the `FileTable` in the Message Broker database
     1.	Extract the flat file data
@@ -32,6 +32,10 @@ The `ProcessSINFile()` method of the `SinFilesController` class found in the `In
     1.  update the `OutboundFileTable` in the Message Broker
     1.  set the cycle to the new cycle in the Message Broker `FileTable`
     5.  call an API to update the outbound SIN events in the FOAEA system
-1.	External partners will call our API to get the latest file. *An alternative would be for the SIN Registry to have an API available that we can call to send them the newly generated file.*
+1.	External partners will call our API to get the latest file:
+
+    `GET http://{server}:14015/api/v1/SinFiles`
+
+     *An alternative would be for the SIN Registry to have an API available that we can call to send them the newly generated file.*
 
     ![IncomingFedSINFileProcess](images/OutgoingFedSinFile.png)
