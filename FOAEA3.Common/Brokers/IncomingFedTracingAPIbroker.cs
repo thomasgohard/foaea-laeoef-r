@@ -18,7 +18,7 @@ namespace FOAEA3.Common.Brokers
         public HttpResponseMessage ProcessFlatFile(string fileNameNoPath, string flatFile)
         {
             string apiCall = $"api/v1/FederalTracingFiles?fileName={fileNameNoPath}";
-            return ApiHelper.PostFlatFile(apiCall, flatFile, rootAPI: ApiFilesConfig.IncomingFederalTracingRootAPI);
+            return ApiHelper.PostFlatFile(apiCall, flatFile, rootAPI: ApiFilesConfig.FileBrokerFederalTracingRootAPI);
         }
     }
 }

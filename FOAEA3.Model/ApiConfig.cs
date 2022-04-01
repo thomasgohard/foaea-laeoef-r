@@ -1,127 +1,83 @@
 ﻿using FOAEA3.Resources.Helpers;
-using System;
 
 namespace FOAEA3.Model
 {
     public class ApiConfig
     {
-        private string applicationRootAPI;
-        private string interceptionRootAPI;
-        private string licenceDenialRootAPI;
-        private string tracingRootAPI;
-        private string incomingMEPInterceptionRootAPI;
-        private string incomingMEPLicenceDenialRootAPI;
-        private string incomingMEPTracingRootAPI;
-        private string incomingFederalInterceptionRootAPI;
-        private string incomingFederalLicenceDenialRootAPI;
-        private string incomingFederalTracingRootAPI;
-        private string incomingFederalSINRootAPI;
-        private string outgoingMEPInterceptionRootAPI;
-        private string outgoingMEPLicenceDenialRootAPI;
-        private string outgoingMEPTracingRootAPI;
-        private string outgoingFederalInterceptionRootAPI;
-        private string outgoingFederalLicenceDenialRootAPI;
-        private string outgoingFederalTracingRootAPI;
-        private string outgoingFederalSINRootAPI;
+        private string foaeaApplicationRootAPI;
+        private string foaeaInterceptionRootAPI;
+        private string foaeaLicenceDenialRootAPI;
+        private string foaeaTracingRootAPI;
+        private string fileBrokerMEPInterceptionRootAPI;
+        private string fileBrokerMEPLicenceDenialRootAPI;
+        private string fileBrokerMEPTracingRootAPI;
+        private string fileBrokerFederalInterceptionRootAPI;
+        private string fileBrokerFederalLicenceDenialRootAPI;
+        private string fileBrokerFederalTracingRootAPI;
+        private string fileBrokerFederalSINRootAPI;
         private string backendProcessesRootAPI;
 
-        public string ApplicationRootAPI
+        public string FoaeaApplicationRootAPI
         {
-            get => applicationRootAPI;
-            set => applicationRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => foaeaApplicationRootAPI;
+            set => foaeaApplicationRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string InterceptionRootAPI
+        public string FoaeaInterceptionRootAPI
         {
-            get => interceptionRootAPI;
-            set => interceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => foaeaInterceptionRootAPI;
+            set => foaeaInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string LicenceDenialRootAPI
+        public string FoaeaLicenceDenialRootAPI
         {
-            get => licenceDenialRootAPI;
-            set => licenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => foaeaLicenceDenialRootAPI;
+            set => foaeaLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string TracingRootAPI
+        public string FoaeaTracingRootAPI
         {
-            get => tracingRootAPI;
-            set => tracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => foaeaTracingRootAPI;
+            set => foaeaTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingMEPInterceptionRootAPI
+        public string FileBrokerMEPInterceptionRootAPI
         {
-            get => incomingMEPInterceptionRootAPI;
-            set => incomingMEPInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerMEPInterceptionRootAPI;
+            set => fileBrokerMEPInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingMEPLicenceDenialRootAPI
+        public string FileBrokerMEPLicenceDenialRootAPI
         {
-            get => incomingMEPLicenceDenialRootAPI;
-            set => incomingMEPLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerMEPLicenceDenialRootAPI;
+            set => fileBrokerMEPLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingMEPTracingRootAPI
+        public string FileBrokerMEPTracingRootAPI
         {
-            get => incomingMEPTracingRootAPI;
-            set => incomingMEPTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerMEPTracingRootAPI;
+            set => fileBrokerMEPTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingFederalInterceptionRootAPI
+        public string FileBrokerFederalInterceptionRootAPI
         {
-            get => incomingFederalInterceptionRootAPI;
-            set => incomingFederalInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerFederalInterceptionRootAPI;
+            set => fileBrokerFederalInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingFederalLicenceDenialRootAPI
+        public string FileBrokerFederalLicenceDenialRootAPI
         {
-            get => incomingFederalLicenceDenialRootAPI;
-            set => incomingFederalLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerFederalLicenceDenialRootAPI;
+            set => fileBrokerFederalLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingFederalTracingRootAPI
+        public string FileBrokerFederalTracingRootAPI
         {
-            get => incomingFederalTracingRootAPI;
-            set => incomingFederalTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerFederalTracingRootAPI;
+            set => fileBrokerFederalTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string IncomingFederalSINRootAPI
+        public string FileBrokerFederalSINRootAPI
         {
-            get => incomingFederalSINRootAPI;
-            set => incomingFederalSINRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => fileBrokerFederalSINRootAPI;
+            set => fileBrokerFederalSINRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-        public string OutgoingMEPInterceptionRootAPI
-        {
-            get => outgoingMEPInterceptionRootAPI;
-            set => outgoingMEPInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingMEPLicenceDenialRootAPI
-        {
-            get => outgoingMEPLicenceDenialRootAPI;
-            set => outgoingMEPLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingMEPTracingRootAPI
-        {
-            get => outgoingMEPTracingRootAPI;
-            set => outgoingMEPTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingFederalInterceptionRootAPI
-        {
-            get => outgoingFederalInterceptionRootAPI;
-            set => outgoingFederalInterceptionRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingFederalLicenceDenialRootAPI
-        {
-            get => outgoingFederalLicenceDenialRootAPI;
-            set => outgoingFederalLicenceDenialRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingFederalTracingRootAPI
-        {
-            get => outgoingFederalTracingRootAPI;
-            set => outgoingFederalTracingRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        public string OutgoingFederalSINRootAPI
-        {
-            get => outgoingFederalSINRootAPI;
-            set => outgoingFederalSINRootAPI = value.ReplaceVariablesWithEnvironmentValues();
-        }
-        
+
         public string BackendProcessesRootAPI
         {
             get => backendProcessesRootAPI;
             set => backendProcessesRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
-
 
     }
 }
