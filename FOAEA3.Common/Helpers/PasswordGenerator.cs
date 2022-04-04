@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace FOAEA3.API.Helpers
+namespace FOAEA3.Common.Helpers
 {
     using System;
     using System.Text.RegularExpressions;

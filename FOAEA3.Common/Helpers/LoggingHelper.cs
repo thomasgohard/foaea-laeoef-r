@@ -6,7 +6,7 @@ using Serilog.Sinks.MSSqlServer;
 using System.Collections.ObjectModel;
 using System.Data;
 
-namespace FOAEA3.API.Helpers
+namespace FOAEA3.Common.Helpers
 {
     public static class LoggingHelper
     {
