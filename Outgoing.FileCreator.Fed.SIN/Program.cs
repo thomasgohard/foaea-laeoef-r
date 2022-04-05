@@ -36,7 +36,7 @@ internal class Program
 
         CreateOutgoingFederalSinFile(fileBrokerDB, apiRootForFiles);
 
-        ColourConsole.Write("Completed.");
+        ColourConsole.Write("Completed.\n");
         ColourConsole.WriteEmbeddedColorLine("[yellow]Press any key to close[/yellow]");
         Console.ReadKey();
     }
@@ -68,13 +68,16 @@ internal class Program
         {
             string filePath = federalFileManager.CreateOutputFile(federalSinOutgoingSource.Name,
                                                                   out List<string> errors);
-            allErrors.Add(federalSinOutgoingSource.Name, errors);
+
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+            else
+                allErrors.Add(federalSinOutgoingSource.Name, errors);
         }
 
         if (allErrors.Count > 0)
-            foreach (var error in allErrors)
-                ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{error.Key}[/cyan]: [red]{error.Value}[/red]");
+            foreach (var fedSource in allErrors)
+                foreach(var error in allErrors[fedSource.Key])
+                    ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{fedSource.Key}[/cyan]: [red]{error}[/red]");
     }
 }

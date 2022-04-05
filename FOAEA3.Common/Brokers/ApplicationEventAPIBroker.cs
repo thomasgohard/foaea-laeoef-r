@@ -40,7 +40,7 @@ namespace FOAEA3.Common.Brokers
 
         public void SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail)
         {
-            string apiCall = $"api/v1/applicationEvents/Detail";
+            string apiCall = $"api/v1/applicationEventDetails";
             _ = ApiHelper.PostDataAsync<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, activeTraceEventDetail).Result;
         }
 
@@ -48,7 +48,7 @@ namespace FOAEA3.Common.Brokers
         {
             string writtenFile = HttpUtility.UrlEncode(newFilePath);
 
-            string apiCall = $"api/v1/applicationEvent/Detail?command=MarkOutboundProcessed&activeState={actvSt_Cd}" +
+            string apiCall = $"api/v1/applicationEventDetails?command=MarkOutboundProcessed&activeState={actvSt_Cd}" +
                              $"&applicationState={appLiSt_Cd}&enfSrvCode={enfSrv_Cd}&writtenFile={writtenFile}";
             _ = ApiHelper.PutDataAsync<ApplicationEventDetailData, List<int>>(apiCall, eventIds).Result;
         }

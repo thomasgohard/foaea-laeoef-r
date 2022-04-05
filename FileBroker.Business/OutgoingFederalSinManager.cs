@@ -33,7 +33,10 @@ public class OutgoingFederalSinManager
             var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
             int cycleLength = 3;
-            string newCycle = fileTableData.Cycle.ToString(new string('0', cycleLength));
+            int thisNewCycle = fileTableData.Cycle + 1;
+            if (thisNewCycle == 1000)
+                thisNewCycle = 1;
+            string newCycle = thisNewCycle.ToString(new string('0', cycleLength));
 
             newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
             if (File.Exists(newFilePath))
@@ -111,9 +114,9 @@ public class OutgoingFederalSinManager
 
     private static string GenerateDetailLine(SINOutgoingFederalData item)
     {
-        string result = $"02{item.Appl_EnfSrv_Cd:6}{item.Appl_CtrlCd:6}{item.Appl_Dbtr_Entrd_SIN:9}" +
-                        $"{item.Appl_Dbtr_FrstNme:15}{item.Appl_Dbtr_MddleNme:15}{item.Appl_Dbtr_SurNme:25}" +
-                        $"{item.Appl_Dbtr_Parent_SurNme:25}{item.Appl_Dbtr_Gendr_Cd:1}{item.Appl_Dbtr_Brth_Dte:8}";
+        string result = $"02{item.Appl_EnfSrv_Cd,6}{item.Appl_CtrlCd,6}{item.Appl_Dbtr_Entrd_SIN,9}" +
+                        $"{item.Appl_Dbtr_FrstNme,15}{item.Appl_Dbtr_MddleNme,15}{item.Appl_Dbtr_SurNme,25}" +
+                        $"{item.Appl_Dbtr_Parent_SurNme,25}{item.Appl_Dbtr_Gendr_Cd,1}{item.Appl_Dbtr_Brth_Dte,8}";
 
         return result;
     }
