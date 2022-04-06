@@ -24,6 +24,23 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 
+        [HttpGet("{id}")]
+        public ActionResult<DataList<SINResultData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(id);
+
+            var appl = new ApplicationData();
+            var applManager = new ApplicationManager(appl, repositories, config);
+
+            if (applManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
+                return Ok(appl);
+            else
+                return NotFound();
+        }
+
         [HttpGet("{id}/SINresults")]
         public ActionResult<DataList<SINResultData>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
         {

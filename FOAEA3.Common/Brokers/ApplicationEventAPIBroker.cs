@@ -28,7 +28,7 @@ namespace FOAEA3.Common.Brokers
 
         public List<SinInboundToApplData> GetLatestSinEventDataSummary()
         {
-            string apiCall = $"api/v1/applicationSins/GetLatestSinEventDataSummary";
+            string apiCall = $"api/v1/applicationEvents/GetLatestSinEventDataSummary";
             return ApiHelper.GetDataAsync<List<SinInboundToApplData>>(apiCall).Result;
         }
 

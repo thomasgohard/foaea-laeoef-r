@@ -60,6 +60,7 @@ public class SinFilesController : ControllerBase
                                        [FromServices] IFileAuditRepository fileAuditDB,
                                        [FromServices] IFileTableRepository fileTableDB,
                                        [FromServices] IMailServiceRepository mailService,
+                                       [FromServices] IProcessParameterRepository processParameterDB,
                                        [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                        [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                        [FromServices] IOptions<ApiConfig> apiConfig)
@@ -90,7 +91,8 @@ public class SinFilesController : ControllerBase
             FlatFileSpecs = flatFileSpecs,
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService
+            MailServiceDB = mailService,
+            ProcessParameterTable = processParameterDB
         };
 
         var sinManager = new IncomingFederalSinManager(apis, repositories);
@@ -99,8 +101,11 @@ public class SinFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            sinManager.ProcessFlatFile(flatFileContent, fileName);
-            return Ok("File processed.");
+            var errors = sinManager.ProcessFlatFile(flatFileContent, fileName);
+            if (errors.Any())
+                return UnprocessableEntity(errors);
+            else
+                return Ok("File processed.");
         }
         else
             return UnprocessableEntity("File was already loading?");

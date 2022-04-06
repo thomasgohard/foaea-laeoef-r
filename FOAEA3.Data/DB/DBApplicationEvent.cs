@@ -313,7 +313,7 @@ namespace FOAEA3.Data.DB
 
         public List<SinInboundToApplData> GetLatestSinEventDataSummary()
         {
-            return MainDB.GetDataFromStoredProc<SinInboundToApplData>("", FillLatestSinEventDataFromReader);
+            return MainDB.GetDataFromStoredProc<SinInboundToApplData>("MessageBrokerGetSINInboundToApplData", FillLatestSinEventDataFromReader);
         }
 
         private void FillLatestSinEventDataFromReader(IDBHelperReader rdr, SinInboundToApplData data)
