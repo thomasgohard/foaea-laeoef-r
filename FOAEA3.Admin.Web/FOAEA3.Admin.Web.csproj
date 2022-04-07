@@ -23,7 +23,6 @@
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
     <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
     <ProjectReference Include="..\FOAEA3.Admin.Business\FOAEA3.Admin.Business.csproj" />
-    <ProjectReference Include="..\FOAEA3.API\FOAEA3.API.csproj" />
     <ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
     <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />

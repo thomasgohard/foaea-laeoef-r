@@ -215,7 +215,7 @@ public class IncomingFederalTracingManager
 
             int eventId = activeTraceEvent.Event_Id;
             string eventReason = $"[FileNm:{flatFileName}[ErrDes:000000MSGBRO]" +
-                                 $"[(EnfSrv:{applEnfSrvCd})(CtrlCd:{applCtrlCd})]";
+                                 $"[(EnfSrv:{applEnfSrvCd.Trim()})(CtrlCd:{applCtrlCd.Trim()})]";
 
             var activeTraceEventDetail = activeTraceEventDetails
                                             .Where(m => m.Event_Id.Value == eventId)

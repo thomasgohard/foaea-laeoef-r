@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using System;
 
-namespace FOAEA3.API.Filters
+namespace FOAEA3.Common.Filters
 {
     public class ActionAutoLoggerFilter : IActionFilter
     {

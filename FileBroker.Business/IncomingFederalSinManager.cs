@@ -25,9 +25,18 @@ public class IncomingFederalSinManager
         if (errors.Any())
             return errors;
 
+        string fileCycle = Path.GetExtension(flatFileName)[1..];
+
+        int expectedCyle = fileTableData.Cycle;
+        int actualCyle = int.Parse(fileCycle);
+        if (actualCyle != expectedCyle)
+        {
+            errors.Add($"Error: expecting cycle {expectedCyle} but received {actualCyle}");
+            return errors;
+        }
+
         Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
-        string fileCycle = Path.GetExtension(flatFileName)[1..];
         try
         {
             var fileLoader = new IncomingFederalSinFileLoader(Repositories.FlatFileSpecs, fileTableData.PrcId);
@@ -58,7 +67,8 @@ public class IncomingFederalSinManager
         }
         finally
         {
-            Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
+            if (errors.Count == 0)
+                Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
             Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
         }
 
@@ -75,8 +85,8 @@ public class IncomingFederalSinManager
 
         UpdateSinResultTable(sinResults);
 
-        var lastestUpdatedSinData = APIs.ApplicationEventAPIBroker.GetLatestSinEventDataSummary();
-        foreach (var updatedSinDataSummary in lastestUpdatedSinData)
+        var latestUpdatedSinData = APIs.ApplicationEventAPIBroker.GetLatestSinEventDataSummary();
+        foreach (var updatedSinDataSummary in latestUpdatedSinData)
             UpdateApplicationBasedOnReceivedSinResult(updatedSinDataSummary, requestedEvents, requestedEventDetails);
 
     }
@@ -154,7 +164,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = updatedSinDataSummary.SVR_SIN
             };
 
-            APIs.SinAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -164,7 +174,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = String.Empty
             };
 
-            APIs.SinAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,
@@ -243,7 +253,7 @@ public class IncomingFederalSinManager
             if (eventDetailForThisAppl is not null)
             {
                 string eventReason = $"[FileNm:{flatFileName}][ErrDes:000000MSGBRO]" +
-                                     $"[(EnfSrv:{sinResult.Appl_EnfSrv_Cd})(CtrlCd:{sinResult.Appl_CtrlCd})]";
+                                     $"[(EnfSrv:{sinResult.Appl_EnfSrv_Cd.Trim()})(CtrlCd:{sinResult.Appl_CtrlCd.Trim()})]";
 
                 eventDetailForThisAppl.Event_Reas_Cd = null;
                 eventDetailForThisAppl.Event_Reas_Text = eventReason;
@@ -271,13 +281,13 @@ public class IncomingFederalSinManager
                     SVR_TimeStamp = sinFileData.SININ01.FileDate,
                     SVR_TolCd = sinResult.dat_SVR_TolCd,
                     SVR_SIN = sinResult.dat_SVR_SIN,
-                    SVR_DOB_TolCd = sinResult.dat_SVR_DOB_TolCd,
-                    SVR_GvnNme_TolCd = sinResult.dat_SVR_GvnNme_TolCd,
-                    SVR_MddlNme_TolCd = sinResult.dat_SVR_MddlNme_TolCd,
-                    SVR_SurNme_TolCd = sinResult.dat_SVR_SurNme_TolCd,
-                    SVR_MotherNme_TolCd = sinResult.dat_SVR_MotherNme_TolCd,
-                    SVR_Gendr_TolCd = sinResult.dat_SVR_Gendr_TolCd,
-                    ValStat_Cd = sinResult.dat_ValStat_Cd,
+                    SVR_DOB_TolCd = (short?)sinResult.dat_SVR_DOB_TolCd,
+                    SVR_GvnNme_TolCd = (short?)sinResult.dat_SVR_GvnNme_TolCd,
+                    SVR_MddlNme_TolCd = (short?)sinResult.dat_SVR_MddlNme_TolCd,
+                    SVR_SurNme_TolCd = (short?)sinResult.dat_SVR_SurNme_TolCd,
+                    SVR_MotherNme_TolCd = (short?)sinResult.dat_SVR_MotherNme_TolCd,
+                    SVR_Gendr_TolCd = (short?)sinResult.dat_SVR_Gendr_TolCd,
+                    ValStat_Cd = (short)sinResult.dat_ValStat_Cd,
                     ActvSt_Cd = "C"
                 }
             );

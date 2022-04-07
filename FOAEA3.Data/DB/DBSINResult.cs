@@ -134,7 +134,8 @@ namespace FOAEA3.Data.DB
             data.SVR_GvnNme_TolCd = rdr["SVR_GvnNme_TolCd"] as string; // can be null 
             data.SVR_MddlNme_TolCd = rdr["SVR_MddlNme_TolCd"] as string; // can be null 
             data.SVR_SurNme_TolCd = rdr["SVR_SurNme_TolCd"] as string; // can be null 
-            data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as string; // can be null 
+            //data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as string; // can be null 
+            data.SVR_MotherNme_TolCd = rdr["SVR_ParentNme_TolCd"] as string; // can be null 
             data.SVR_Gendr_TolCd = rdr["SVR_Gendr_TolCd"] as string; // can be null 
             data.SVR_TolCd = rdr["SVR_TolCd"] as string; // can be null 
             data.ValStat_Cd = (short)rdr["ValStat_Cd"];
@@ -159,7 +160,8 @@ namespace FOAEA3.Data.DB
             data.SVR_GvnNme_TolCd = rdr["SVR_GvnNme_TolCd"] as short?; // can be null 
             data.SVR_MddlNme_TolCd = rdr["SVR_MddlNme_TolCd"] as short?; // can be null 
             data.SVR_SurNme_TolCd = rdr["SVR_SurNme_TolCd"] as short?; // can be null 
-            data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as short?; // can be null 
+            data.SVR_MotherNme_TolCd = rdr["SVR_ParentNme_TolCd"] as short?; // can be null 
+           // data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as short?; // can be null 
             data.SVR_Gendr_TolCd = rdr["SVR_Gendr_TolCd"] as short?; // can be null 
             data.ValStat_Cd = (short)rdr["ValStat_Cd"];
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;

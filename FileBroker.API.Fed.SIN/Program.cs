@@ -1,4 +1,4 @@
-using FOAEA3.API.Helpers;
+using FOAEA3.Common.Helpers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

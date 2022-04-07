@@ -15,15 +15,15 @@ namespace FileBroker.Model
         public int RecType;
         public string dat_Appl_EnfSrvCd;
         public string dat_Appl_CtrlCd;
-        public short dat_ValStat_Cd;
+        public int dat_ValStat_Cd;
         public string dat_SVR_TolCd;
         public string dat_SVR_SIN;
-        public short dat_SVR_DOB_TolCd;
-        public short dat_SVR_GvnNme_TolCd;
-        public short dat_SVR_MddlNme_TolCd;
-        public short dat_SVR_SurNme_TolCd;
-        public short dat_SVR_MotherNme_TolCd;
-        public short dat_SVR_Gendr_TolCd;
+        public int dat_SVR_DOB_TolCd;
+        public int dat_SVR_GvnNme_TolCd;
+        public int dat_SVR_MddlNme_TolCd;
+        public int dat_SVR_SurNme_TolCd;
+        public int dat_SVR_MotherNme_TolCd;
+        public int dat_SVR_Gendr_TolCd;
     }
 
     public struct FedSin_RecType99

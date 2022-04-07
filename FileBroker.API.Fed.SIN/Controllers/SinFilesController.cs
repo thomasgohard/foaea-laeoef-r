@@ -60,9 +60,12 @@ public class SinFilesController : ControllerBase
                                        [FromServices] IFileAuditRepository fileAuditDB,
                                        [FromServices] IFileTableRepository fileTableDB,
                                        [FromServices] IMailServiceRepository mailService,
+                                       [FromServices] IProcessParameterRepository processParameterDB,
                                        [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                        [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                       [FromServices] IOptions<ApiConfig> apiConfig)
+                                       [FromServices] IOptions<ApiConfig> apiConfig,
+                                       [FromHeader] string currentSubmitter,
+                                       [FromHeader] string currentSubject)
     {
         string flatFileContent;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -76,7 +79,7 @@ public class SinFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, "", "");
+        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
 
         var apis = new APIBrokerList
         {
@@ -90,7 +93,8 @@ public class SinFilesController : ControllerBase
             FlatFileSpecs = flatFileSpecs,
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService
+            MailServiceDB = mailService,
+            ProcessParameterTable = processParameterDB
         };
 
         var sinManager = new IncomingFederalSinManager(apis, repositories);
@@ -99,8 +103,11 @@ public class SinFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            sinManager.ProcessFlatFile(flatFileContent, fileName);
-            return Ok("File processed.");
+            var errors = sinManager.ProcessFlatFile(flatFileContent, fileName);
+            if (errors.Any())
+                return UnprocessableEntity(errors);
+            else
+                return Ok("File processed.");
         }
         else
             return UnprocessableEntity("File was already loading?");

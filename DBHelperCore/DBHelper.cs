@@ -771,6 +771,14 @@ namespace DBHelper
                         };
                         newDataTable.Columns.Add(newColumn);
                     }
+                    else if (info.PropertyType.FullName.Contains("System.Int16"))
+                    {
+                        var newColumn = new DataColumn(info.Name, typeof(Int16))
+                        {
+                            AllowDBNull = true
+                        };
+                        newDataTable.Columns.Add(newColumn);
+                    }
                 }
                 else
                     newDataTable.Columns.Add(new DataColumn(info.Name, info.PropertyType));

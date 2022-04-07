@@ -1,11 +1,9 @@
-﻿using FOAEA3.API.Areas.Application.Controllers;
-using FOAEA3.Business.Areas.Application;
+﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,14 +16,10 @@ namespace FOAEA3.API.Tracing.Controllers
     public class TracingEventsController : ControllerBase
     {
         private readonly CustomConfig config;
-        private readonly ApplicationEventsController appEventsController;
 
         public TracingEventsController(IOptions<CustomConfig> config)
         {
             this.config = config.Value;
-
-            appEventsController = new ApplicationEventsController(config);
-
         }
 
         [HttpGet("Version")]
@@ -34,17 +28,27 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpGet("queues")]
         public ActionResult<Dictionary<int, string>> GetQueueNames()
         {
-            return appEventsController.GetQueueNames();
+            var values = new Dictionary<int, string>();
+            foreach (var g in Enum.GetValues(typeof(EventQueue)))
+                values.Add((int)g, g.ToString().Replace("Event", "Evnt"));
+
+            return Ok(values);
         }
-        
+
         [HttpGet("{id}")]
-        public ActionResult<List<ApplicationEventData>> GetEvents([FromRoute] string id, 
+        public ActionResult<List<ApplicationEventData>> GetEvents([FromRoute] string id,
                                                                   [FromQuery] int? queue,
                                                                   [FromServices] IRepositories repositories)
         {
-            return appEventsController.GetEvents(id, queue, repositories);
+            EventQueue eventQueue;
+            if (queue.HasValue)
+                eventQueue = (EventQueue)queue.Value;
+            else
+                eventQueue = EventQueue.EventSubm;
+
+            return GetEventsForQueue(id, repositories, eventQueue);
         }
-                
+               
         [HttpGet("RequestedTRCIN")]
         public ActionResult<ApplicationEventData> GetRequestedTRCINTracingEvents([FromQuery] string enforcementServiceCode,
                                                                                  [FromQuery] string fileCycle,
@@ -81,5 +85,19 @@ namespace FOAEA3.API.Tracing.Controllers
             return Ok(result);
         }
 
+        private ActionResult<List<ApplicationEventData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(id);
+
+            var manager = new ApplicationManager(new ApplicationData(), repositories, config);
+
+            if (manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
+                return Ok(manager.EventManager.GetApplicationEventsForQueue(queue));
+            else
+                return NotFound();
+        }
     }
 }

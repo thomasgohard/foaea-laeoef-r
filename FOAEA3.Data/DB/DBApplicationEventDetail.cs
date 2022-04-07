@@ -311,8 +311,9 @@ namespace FOAEA3.Data.DB
 
         private static string ConvertEventIdsListToXml(List<int> eventIds)
         {
-            var x = new XElement("FTPEvents", eventIds.Select(eventId => new XElement("Event_dtl_Id", eventId)));
-
+            var x = new XElement("NewDataSet", eventIds.Select(eventId => new XElement("FTPEvents", 
+                                                                                       new XElement("Event_dtl_Id", eventId))));
+           
             return x.ToString();
         }
 

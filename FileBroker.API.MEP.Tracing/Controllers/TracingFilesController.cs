@@ -64,7 +64,9 @@ public class TracingFilesController : ControllerBase
                                            [FromServices] IFileTableRepository fileTableDB,
                                            [FromServices] IMailServiceRepository mailService,
                                            [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                           [FromServices] IOptions<ApiConfig> apiConfig)
+                                           [FromServices] IOptions<ApiConfig> apiConfig,
+                                           [FromHeader] string currentSubmitter,
+                                           [FromHeader] string currentSubject)
     {
         string sourceTracingData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -78,7 +80,7 @@ public class TracingFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, "", "");
+        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
         var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper);
 
         var apis = new APIBrokerList
