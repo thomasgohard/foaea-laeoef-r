@@ -117,7 +117,8 @@ namespace FOAEA3.Business.Areas.Application
         protected virtual void Process_05_SinNotConfirmed()
         {
             Application.AppLiSt_Cd = ApplicationState.SIN_NOT_CONFIRMED_5;
-            EventManager.AddEvent(EventCode.C50680_CHANGE_OR_SUPPLY_ADDITIONAL_DEBTOR_INFORMATION_SEE_SIN_VERIFICATION_RESULTS_PAGE_IN_FOAEA_FOR_SPECIFIC_DETAILS);
+            EventManager.AddEvent(EventCode.C50680_CHANGE_OR_SUPPLY_ADDITIONAL_DEBTOR_INFORMATION_SEE_SIN_VERIFICATION_RESULTS_PAGE_IN_FOAEA_FOR_SPECIFIC_DETAILS,
+                                  eventReasonText: GetSINResultsEventText());
         }
 
         protected virtual void Process_06_PendingAcceptanceSwearing()

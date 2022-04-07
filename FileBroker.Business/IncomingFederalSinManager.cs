@@ -164,7 +164,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = updatedSinDataSummary.SVR_SIN
             };
 
-            APIs.SinAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -174,7 +174,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = String.Empty
             };
 
-            APIs.SinAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,
@@ -253,7 +253,7 @@ public class IncomingFederalSinManager
             if (eventDetailForThisAppl is not null)
             {
                 string eventReason = $"[FileNm:{flatFileName}][ErrDes:000000MSGBRO]" +
-                                     $"[(EnfSrv:{sinResult.Appl_EnfSrv_Cd})(CtrlCd:{sinResult.Appl_CtrlCd})]";
+                                     $"[(EnfSrv:{sinResult.Appl_EnfSrv_Cd.Trim()})(CtrlCd:{sinResult.Appl_CtrlCd.Trim()})]";
 
                 eventDetailForThisAppl.Event_Reas_Cd = null;
                 eventDetailForThisAppl.Event_Reas_Text = eventReason;

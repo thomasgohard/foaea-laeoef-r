@@ -6,6 +6,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources;
 using System;
 using System.Text;
+using System.Linq;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -370,6 +371,23 @@ namespace FOAEA3.Business.Areas.Application
             Application.AppCtgy_Cd = Application.AppCtgy_Cd?.ToUpper();
             Application.AppReas_Cd = Application.AppReas_Cd?.ToUpper();
             Application.ActvSt_Cd = Application.ActvSt_Cd?.ToUpper();
+        }
+
+        public string GetSINResultsEventText()
+        {
+            string result = string.Empty;
+
+            var data = Repositories.SINResultRepository.GetSINResults(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            var sinData = data.Items.FirstOrDefault();
+
+            if (sinData != null)
+            {
+                result = $"{sinData.SVR_DOB_TolCd}{sinData.SVR_GvnNme_TolCd}{sinData.SVR_MddlNme_TolCd}" +
+                         $"{sinData.SVR_SurNme_TolCd}{sinData.SVR_MotherNme_TolCd}{sinData.SVR_Gendr_TolCd}";
+                result += ((sinData.ValStat_Cd == 0) || (sinData.ValStat_Cd == 10)) ? "Y" : "N";
+            }
+
+            return result;
         }
 
         private static string BuildCommentsChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)

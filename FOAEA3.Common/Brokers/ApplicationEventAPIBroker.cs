@@ -16,13 +16,13 @@ namespace FOAEA3.Common.Brokers
 
         public List<ApplicationEventData> GetRequestedSINEventDataForFile(string fileName)
         {
-            string apiCall = $"api/v1/applicationSins/RequestedEventsForFile?fileName={fileName}";
+            string apiCall = $"api/v1/applicationFederalSins/RequestedEventsForFile?fileName={fileName}";
             return ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall).Result;
         }
 
         public List<ApplicationEventDetailData> GetRequestedSINEventDetailDataForFile(string fileName)
         {
-            string apiCall = $"api/v1/applicationSins/RequestedEventDetailsForFile?fileName={fileName}";
+            string apiCall = $"api/v1/applicationFederalSins/RequestedEventDetailsForFile?fileName={fileName}";
             return ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall).Result;
         }
 

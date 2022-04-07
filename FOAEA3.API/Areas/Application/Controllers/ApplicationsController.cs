@@ -77,5 +77,52 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return NotFound();
         }
 
+        [HttpPut("{key}/SinConfirmation")]
+        public ActionResult<ApplicationData> SINconfirmation([FromRoute] string key,
+                                                             [FromServices] IRepositories repositories,
+                                                             [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var sinConfirmationData = APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
+
+            var application = new ApplicationData();
+
+            var appManager = new ApplicationManager(application, repositories, config);
+            appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+
+            ApplicationSINManager sinManager;
+
+            switch (application.AppCtgy_Cd)
+            {
+                case "T01":
+                    var tracingManager = new TracingManager(repositories, config);
+                    tracingManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                    sinManager = new ApplicationSINManager(tracingManager.TracingApplication, tracingManager);
+                    break;
+                case "I01":
+                    var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
+                    interceptionManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                    sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
+                    break;
+                case "L01":
+                    var licenceDenialManager = new LicenceDenialManager(repositories, config);
+                    licenceDenialManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                    sinManager = new ApplicationSINManager(licenceDenialManager.LicenceDenialApplication, licenceDenialManager);
+                    break;
+                default:
+                    sinManager = new ApplicationSINManager(application, appManager);
+                    break;
+            }
+
+            sinManager.SINconfirmation(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
+                                       confirmedSin: sinConfirmationData.ConfirmedSIN,
+                                       lastUpdateUser: repositories.CurrentSubmitter);
+
+            return Ok(application);
+        }
     }
 }

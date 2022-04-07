@@ -137,30 +137,12 @@ namespace FOAEA3.Business.Areas.Application
                 else
                 {
                     sinChangeHistoryData.SINChangeHistoryComment = "SIN Confirmation";
-                    EventManager.AddEvent(EventCode.C50650_SIN_CONFIRMED, eventReasonText: GetSINResultsEventText());
+                    EventManager.AddEvent(EventCode.C50650_SIN_CONFIRMED, eventReasonText: ApplicationManager.GetSINResultsEventText());
                 }
 
                 Repositories.SINChangeHistoryRepository.CreateSINChangeHistory(sinChangeHistoryData);
             }
 
-        }
-
-
-        public string GetSINResultsEventText()
-        {
-            string result = string.Empty;
-
-            var data = Repositories.SINResultRepository.GetSINResults(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
-            var sinData = data.Items.FirstOrDefault();
-
-            if (sinData != null)
-            {
-                result = $"{sinData.SVR_DOB_TolCd}{sinData.SVR_GvnNme_TolCd}{sinData.SVR_MddlNme_TolCd}" +
-                         $"{sinData.SVR_SurNme_TolCd}{sinData.SVR_MotherNme_TolCd}{sinData.SVR_Gendr_TolCd}";
-                result += ((sinData.ValStat_Cd == 0) || (sinData.ValStat_Cd == 10)) ? "Y" : "N";
-            }
-
-            return result;
         }
 
         public DataList<SINResultData> GetSINResults()

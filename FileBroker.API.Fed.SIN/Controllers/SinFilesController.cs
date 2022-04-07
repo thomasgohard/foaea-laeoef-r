@@ -63,7 +63,9 @@ public class SinFilesController : ControllerBase
                                        [FromServices] IProcessParameterRepository processParameterDB,
                                        [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                        [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                       [FromServices] IOptions<ApiConfig> apiConfig)
+                                       [FromServices] IOptions<ApiConfig> apiConfig,
+                                       [FromHeader] string currentSubmitter,
+                                       [FromHeader] string currentSubject)
     {
         string flatFileContent;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -77,7 +79,7 @@ public class SinFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, "", "");
+        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
 
         var apis = new APIBrokerList
         {

@@ -21,5 +21,12 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.GetDataAsync<ApplicationData>(apiCall).Result;
         }
 
+        public ApplicationData SinConfirmation(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
+        {
+            string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
+            string baseCall = "api/v1/Applications";
+            string apiCall = $"{baseCall}/{key}/SinConfirmation";
+            return ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
+        }
     }
 }
