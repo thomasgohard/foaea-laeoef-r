@@ -59,14 +59,14 @@ public class TracingFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessTracingFile([FromQuery] string fileName,
-                                           [FromServices] IFileAuditRepository fileAuditDB,
-                                           [FromServices] IFileTableRepository fileTableDB,
-                                           [FromServices] IMailServiceRepository mailService,
-                                           [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                           [FromServices] IOptions<ApiConfig> apiConfig,
-                                           [FromHeader] string currentSubmitter,
-                                           [FromHeader] string currentSubject)
+    public ActionResult ProcessIncomingTracingFile([FromQuery] string fileName,
+                                                   [FromServices] IFileAuditRepository fileAuditDB,
+                                                   [FromServices] IFileTableRepository fileTableDB,
+                                                   [FromServices] IMailServiceRepository mailService,
+                                                   [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
+                                                   [FromServices] IOptions<ApiConfig> apiConfig,
+                                                   [FromHeader] string currentSubmitter,
+                                                   [FromHeader] string currentSubject)
     {
         string sourceTracingData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))

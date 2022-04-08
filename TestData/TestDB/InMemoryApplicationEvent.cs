@@ -27,7 +27,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public List<ApplicationEventData> GetRequestedTRCINTracingEvents(string appl_EnfSrv_Cd, string cycle)
+        public List<ApplicationEventData> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             throw new NotImplementedException();
         }
@@ -73,6 +73,11 @@ namespace TestData.TestDB
         }
 
         public List<SinInboundToApplData> GetLatestSinEventDataSummary()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<ApplicationEventData> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }

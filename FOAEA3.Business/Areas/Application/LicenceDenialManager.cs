@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
+using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
@@ -122,6 +123,29 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.SaveEvents();
 
             return true;
+        }
+
+        public List<ApplicationEventData> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return EventManager.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+
+        //public DataList<LicenceDenialResponseData> GetLicenceDenialResults(bool checkCycle = false)
+        //{
+        //    return Repositories.LicenceDenialResponseRepository.GetLicenceDenialResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
+        //}
+
+        public void CreateResponseData(List<LicenceDenialResponseData> responseData)
+        {
+            var responsesDB = Repositories.LicenceDenialResponseRepository;
+            responsesDB.InsertBulkData(responseData);
+        }
+
+        public void MarkResponsesAsViewed(string enfService)
+        {
+            var responsesDB = Repositories.LicenceDenialResponseRepository;
+            responsesDB.MarkResponsesAsViewed(enfService);
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)

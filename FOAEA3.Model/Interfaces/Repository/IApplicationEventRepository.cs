@@ -24,7 +24,9 @@ namespace FOAEA3.Model.Interfaces
         void CloseNETPTraceEvents();
         int GetTraceEventCount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
                                EventCode eventReasonCode, int eventId);
-        List<ApplicationEventData> GetRequestedTRCINTracingEvents(string appl_EnfSrv_Cd, string cycle);
+        List<ApplicationEventData> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle);
+        List<ApplicationEventData> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                        string appl_CtrlCd);
         void DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd);
         DataList<ApplicationEventData> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName);
         List<SinInboundToApplData> GetLatestSinEventDataSummary();

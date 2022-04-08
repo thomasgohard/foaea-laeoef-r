@@ -47,7 +47,7 @@ public class OutgoingProvincialTracingManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.TraceResponseAPIBroker.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
+            APIs.TracingResponseAPIBroker.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
 
             return newFilePath;
 

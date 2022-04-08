@@ -84,8 +84,19 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!PrepareL03(originalL01, requestDate))
+            if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.Appl_CtrlCd) && (ApplicationExists()))
+            {
+                LicenceDenialTerminationApplication.Messages.AddError("Application already exists in database.");
                 return false;
+            }
+
+            SetL03ValuesBasedOnL01(originalL01, requestDate);
+
+            if (String.IsNullOrEmpty(Appl_CtrlCd))
+            {
+                LicenceDenialTerminationApplication.Appl_CtrlCd = Repositories.ApplicationRepository.GenerateApplicationControlCode(Appl_EnfSrv_Cd);
+                Validation.IsSystemGeneratedControlCode = true;
+            }
 
             TrimTrailingSpaces();
             MakeUpperCase();
@@ -99,20 +110,15 @@ namespace FOAEA3.Business.Areas.Application
 
             switch (LicenceDenialTerminationApplication.AppLiSt_Cd)
             {
-                case ApplicationState.EXPIRED_15:
-                    EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED);
-
-                    break;
                 case ApplicationState.APPLICATION_ACCEPTED_10:
                     EventManager.AddEvent(EventCode.C50781_L03_ACCEPTED, queue: EventQueue.EventLicence);
                     EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED);
+                    break;
 
+                case ApplicationState.EXPIRED_15:
+                    EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED);
                     break;
-                case ApplicationState.INVALID_APPLICATION_1:
-                    LicenceDenialTerminationApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
-                    LicenceDenialTerminationApplication.ActvSt_Cd = "X";
-                    UpdateApplicationNoValidation();
-                    break;
+
                 default:
                     break;
             }
@@ -136,7 +142,7 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        private bool PrepareL03(LicenceDenialApplicationData originalL01, DateTime requestDate)
+        private void SetL03ValuesBasedOnL01(LicenceDenialApplicationData originalL01, DateTime requestDate)
         {
             var newL03 = LicenceDenialTerminationApplication;
 
@@ -144,12 +150,6 @@ namespace FOAEA3.Business.Areas.Application
             newL03.Subm_SubmCd = originalL01.Subm_SubmCd;
 
             newL03.LicSusp_TermRequestDte = requestDate;
-
-            if (!string.IsNullOrEmpty(newL03.Appl_CtrlCd) && (ApplicationExists()))
-            {
-                newL03.Messages.AddError("Application already exists in database.");
-                return false;
-            }
 
             string appl_CommSubm_Text = LicenceDenialTerminationApplication.Appl_CommSubm_Text;
             if ((Repositories.CurrentSubmitter != originalL01.Subm_SubmCd) &&
@@ -217,13 +217,6 @@ namespace FOAEA3.Business.Areas.Application
                 newL03.Appl_Rcptfrm_Dte = DateTime.Now.Date;
             }
 
-            if (String.IsNullOrEmpty(Appl_CtrlCd))
-            {
-                newL03.Appl_CtrlCd = Repositories.ApplicationRepository.GenerateApplicationControlCode(Appl_EnfSrv_Cd);
-                Validation.IsSystemGeneratedControlCode = true;
-            }
-
-            return true;
         }
                 
     }

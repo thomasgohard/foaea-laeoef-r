@@ -260,7 +260,7 @@ public class IncomingFederalTracingManager
 
     private void SendTRACEDataToTrcRsp(List<TraceResponseData> responseData)
     {
-        APIs.TraceResponseAPIBroker.InsertBulkData(responseData);
+        APIs.TracingResponseAPIBroker.InsertBulkData(responseData);
     }
 
     private void UpdateTracingApplications(string enfSrvCd, string fileCycle)

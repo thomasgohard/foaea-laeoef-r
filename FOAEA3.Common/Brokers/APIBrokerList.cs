@@ -7,7 +7,12 @@ namespace FOAEA3.Common.Brokers
     {
         public ITracingEventAPIBroker TracingEventAPIBroker { get; set; }
         public ITracingApplicationAPIBroker TracingApplicationAPIBroker { get; set; }
-        public ITraceResponseAPIBroker TraceResponseAPIBroker { get; set; }
+        public ITraceResponseAPIBroker TracingResponseAPIBroker { get; set; }
+
+        public ILicenceDenialEventAPIBroker LicenceDenialEventAPIBroker { get; set; }
+        public ILicenceDenialApplicationAPIBroker LicenceDenialApplicationAPIBroker { get; set; }
+        public ILicenceDenialResponseAPIBroker LicenceDenialResponseAPIBroker { get; set; }
+
 
         public IApplicationEventAPIBroker ApplicationEventAPIBroker { get; set; }
         public IApplicationAPIBroker ApplicationAPIBroker { get; set; }
