@@ -110,7 +110,7 @@ public class OutgoingFederalTracingManager
 
     private static string GenerateDetailLine(TracingOutgoingFederalData item, string enfSrvCode)
     {
-        string result = $"02{item.Appl_Dbtr_Cnfrmd_SIN:9}{item.Appl_EnfSrv_Cd:6}{item.Appl_CtrlCd:6}";
+        string result = $"02{item.Appl_Dbtr_Cnfrmd_SIN,9}{item.Appl_EnfSrv_Cd,6}{item.Appl_CtrlCd,6}";
 
         if (enfSrvCode == "RC01")
             result += $"{item.ReturnType}";

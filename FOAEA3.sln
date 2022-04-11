@@ -108,11 +108,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{941E44
 		documentation\images\OutgoingFedSinFile.png = documentation\images\OutgoingFedSinFile.png
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.Fed.SIN", "FileBroker.API.Fed.SIN\FileBroker.API.Fed.SIN.csproj", "{5F16F983-80F8-4698-98E7-2EC9360CA183}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.Fed.SIN", "FileBroker.API.Fed.SIN\FileBroker.API.Fed.SIN.csproj", "{5F16F983-80F8-4698-98E7-2EC9360CA183}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.Fed.Tracing", "FileBroker.API.Fed.Tracing\FileBroker.API.Fed.Tracing.csproj", "{D237B2A1-7AAE-4D71-876C-DDFB9217196F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.Fed.Tracing", "FileBroker.API.Fed.Tracing\FileBroker.API.Fed.Tracing.csproj", "{D237B2A1-7AAE-4D71-876C-DDFB9217196F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.MEP.Tracing", "FileBroker.API.MEP.Tracing\FileBroker.API.MEP.Tracing.csproj", "{245FCF12-0820-43FA-927B-46734F83E3E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.MEP.Tracing", "FileBroker.API.MEP.Tracing\FileBroker.API.MEP.Tracing.csproj", "{245FCF12-0820-43FA-927B-46734F83E3E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.LicenceDenial", "Outgoing.FileCreator.Fed.LicenceDenial\Outgoing.FileCreator.Fed.LicenceDenial.csproj", "{4136246D-C681-4DDD-AA70-A8AEC53EED72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -728,6 +730,20 @@ Global
 		{245FCF12-0820-43FA-927B-46734F83E3E5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{245FCF12-0820-43FA-927B-46734F83E3E5}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{245FCF12-0820-43FA-927B-46734F83E3E5}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -757,6 +773,7 @@ Global
 		{5F16F983-80F8-4698-98E7-2EC9360CA183} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{D237B2A1-7AAE-4D71-876C-DDFB9217196F} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{245FCF12-0820-43FA-927B-46734F83E3E5} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{4136246D-C681-4DDD-AA70-A8AEC53EED72} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}

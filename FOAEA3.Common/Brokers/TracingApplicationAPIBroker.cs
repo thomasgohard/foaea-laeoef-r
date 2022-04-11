@@ -81,7 +81,7 @@ namespace FOAEA3.Common.Brokers
                                         $"&lifeState={lifeState}&enfServiceCode={enfServiceCode}";
             return ApiHelper.GetDataAsync<List<TracingOutgoingFederalData>>(apiCall).Result;
         }
-
+         
         public List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords,
                                                                                   string activeState,
                                                                                   string recipientCode)

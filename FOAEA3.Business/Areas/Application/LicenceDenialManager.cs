@@ -136,6 +136,15 @@ namespace FOAEA3.Business.Areas.Application
         //    return Repositories.LicenceDenialResponseRepository.GetLicenceDenialResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
         //}
 
+        public List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+                                                                      string activeState,
+                                                                      ApplicationState lifeState,
+                                                                      string enfServiceCode)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            return licenceDenialDB.GetFederalOutgoingData(maxRecords, activeState, lifeState, enfServiceCode);
+        }
+
         public void CreateResponseData(List<LicenceDenialResponseData> responseData)
         {
             var responsesDB = Repositories.LicenceDenialResponseRepository;

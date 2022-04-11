@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FOAEA3.Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,5 +17,10 @@ namespace FOAEA3.Model.Interfaces
         void UpdateLicenceDenialData(LicenceDenialApplicationData data);
 
         bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
+
+        List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+                                                                string activeState,
+                                                                ApplicationState lifeState,
+                                                                string enfServiceCode);
     }
 }
