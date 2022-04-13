@@ -20,5 +20,13 @@ namespace FOAEA3.Common.Brokers
                              $"appl_EnfSrv_Cd={appl_EnfSrv_Cd}&appl_CtrlCd={appl_CtrlCd}";
             return ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall).Result;
         }
+        
+        public List<ApplicationEventDetailData> GetRequestedLICINEventDetails(string enfSrvCd, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            string apiCall = $"api/v1/licenceDenialEventDetails/RequestedLICIN?enforcementServiceCode={enfSrvCd}&" +
+                             $"appl_EnfSrv_Cd={appl_EnfSrv_Cd}&appl_CtrlCd={appl_CtrlCd}";
+            return ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall).Result;
+        }
+
     }
 }

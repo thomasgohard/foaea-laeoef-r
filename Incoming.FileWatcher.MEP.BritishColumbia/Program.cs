@@ -14,16 +14,8 @@ namespace Incoming.FileWatcher.MEP.BritishColumbia
 
         static void Main(string[] args)
         {
-            // expects to be called by scheluder on a regular basis
-
-            //using var mutex = new Mutex(false, appGuid);
-
-            //if (!mutex.WaitOne(0, false))
-            //{
-            //    Console.WriteLine("Instance already running");
-            //    return;
-            //}
-
+            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] BC MEP File Monitor");
+            
             string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()

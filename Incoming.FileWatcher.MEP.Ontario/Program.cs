@@ -14,17 +14,8 @@ namespace Incoming.FileWatcher.MEP.Ontario
 
         static void Main(string[] args)
         {
-            // expects to be called by scheluder on a regular basis
 
-            //using var mutex = new Mutex(false, appGuid);
-
-            //if (!mutex.WaitOne(0, false))
-            //{
-            //    Console.WriteLine("Instance already running");
-            //    return;
-            //}
-
-            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] File Monitor");
+            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Ontario MEP File Monitor");
 
             string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 

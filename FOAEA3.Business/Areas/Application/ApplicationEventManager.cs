@@ -148,7 +148,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             return EventDB.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
-
+        
         public List<SinInboundToApplData> GetLatestSinEventDataSummary()
         {
             return EventDB.GetLatestSinEventDataSummary();

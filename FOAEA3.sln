@@ -114,7 +114,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.Fed.Tracing"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.MEP.Tracing", "FileBroker.API.MEP.Tracing\FileBroker.API.MEP.Tracing.csproj", "{245FCF12-0820-43FA-927B-46734F83E3E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.LicenceDenial", "Outgoing.FileCreator.Fed.LicenceDenial\Outgoing.FileCreator.Fed.LicenceDenial.csproj", "{4136246D-C681-4DDD-AA70-A8AEC53EED72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Outgoing.FileCreator.Fed.LicenceDenial", "Outgoing.FileCreator.Fed.LicenceDenial\Outgoing.FileCreator.Fed.LicenceDenial.csproj", "{4136246D-C681-4DDD-AA70-A8AEC53EED72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Incoming.FileWatcher.Fed.LicenceDenial", "Incoming.FileWatcher.Fed.LicenceDenial\Incoming.FileWatcher.Fed.LicenceDenial.csproj", "{EEAA64C2-292D-4BD5-AC4B-09E202622E53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.Fed.LicenceDenial", "FileBroker.API.Fed.LicenceDenial\FileBroker.API.Fed.LicenceDenial.csproj", "{1A01E511-AC78-432F-B091-691C35C0826A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -744,6 +748,34 @@ Global
 		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{4136246D-C681-4DDD-AA70-A8AEC53EED72}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A01E511-AC78-432F-B091-691C35C0826A}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -774,6 +806,8 @@ Global
 		{D237B2A1-7AAE-4D71-876C-DDFB9217196F} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{245FCF12-0820-43FA-927B-46734F83E3E5} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{4136246D-C681-4DDD-AA70-A8AEC53EED72} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{EEAA64C2-292D-4BD5-AC4B-09E202622E53} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{1A01E511-AC78-432F-B091-691C35C0826A} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}

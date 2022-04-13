@@ -154,7 +154,8 @@ public class IncomingFederalTracingManager
             {
                 foreach (var item in fileTracingSummary)
                 {
-                    MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, 2, ref activeTraceEvents, ref activeTraceEventDetails);
+                    MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, newState:2, 
+                                               ref activeTraceEvents, ref activeTraceEventDetails);
                 }
                 CloseOrInactivateTraceEventDetails(cutOffDays, ref activeTraceEventDetails);
                 SendTRACEDataToTrcRsp(tracingResponses);

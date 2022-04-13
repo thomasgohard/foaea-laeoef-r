@@ -102,6 +102,24 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
+        public List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"EnfSrv_Cd", enfSrv_Cd},
+                {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", appl_CtrlCd}
+            };
+
+            var result = MainDB.GetDataFromStoredProc<ApplicationEventDetailData>("MessageBrokerRequestedLICINEventDetailData", parameters,
+                                                                                  FillEventDetailDataFromReader);
+            foreach (var item in result)
+                item.Queue = EventQueue.EventLicence;
+
+            return result;
+        }
+
         public DataList<ApplicationEventDetailData> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>

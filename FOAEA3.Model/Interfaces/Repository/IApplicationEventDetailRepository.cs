@@ -15,6 +15,9 @@ namespace FOAEA3.Model.Interfaces
 
         List<ApplicationEventDetailData> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle);
 
+        List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                string appl_CtrlCd);
+
         DataList<ApplicationEventDetailData> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName);
         public ApplicationEventDetailData GetEventSINDetailDataForEventID(int eventID);
         List<ApplicationEventDetailData> GetApplicationEventDetails(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null);

@@ -300,10 +300,9 @@ namespace FOAEA3.Data.DB
                                                                             FillEventDataFromReader);
             foreach (var item in result)
                 item.Queue = EventQueue.EventLicence;
-
             return result;
         }
-
+        
         public DataList<ApplicationEventData> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>

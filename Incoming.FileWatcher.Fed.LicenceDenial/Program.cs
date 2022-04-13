@@ -12,11 +12,11 @@ namespace Incoming.FileWatcher.Fed.Tracing
 {
     class Program
     {
-        private static IncomingFederalTracingFile FederalFileManager;
+        private static IncomingFederalLicenceDenialFile FederalFileManager;
 
         static void Main(string[] args)
         {
-            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
+            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Licence Denial File Monitor");
 
             string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -37,9 +37,8 @@ namespace Incoming.FileWatcher.Fed.Tracing
             string ftpRoot = configuration["FTProot"];
 
             var allNewFiles = new Dictionary<string, FileTableData>();
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\EI3STS"); // NETP
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\HR3STS"); // EI Tracing
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\RC3STS"); // CRA Tracing
+            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\Tc3sls"); // Transport Canada Licence Denial
+            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\Pa3sls"); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {

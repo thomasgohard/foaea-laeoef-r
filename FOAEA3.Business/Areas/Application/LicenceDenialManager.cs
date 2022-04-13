@@ -130,6 +130,12 @@ namespace FOAEA3.Business.Areas.Application
         {
             return EventManager.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
+        
+        public List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return EventDetailManager.GetRequestedLICINLicenceDenialEventDetails(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
 
         //public DataList<LicenceDenialResponseData> GetLicenceDenialResults(bool checkCycle = false)
         //{

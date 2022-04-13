@@ -9,11 +9,11 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class LicenceDenialEventsController : ControllerBase
+    public class LicenceDenialEventDetailsController : ControllerBase
     {
         private readonly CustomConfig config;
 
-        public LicenceDenialEventsController(IOptions<CustomConfig> config)
+        public LicenceDenialEventDetailsController(IOptions<CustomConfig> config)
         {
             this.config = config.Value;
         }
@@ -23,7 +23,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 
         [HttpGet("RequestedLICIN")]
         public ActionResult<ApplicationEventData> GetRequestedLICINTracingEvents([FromQuery] string enforcementServiceCode,
-                                                                                 [FromQuery] string appl_EnfSrv_Cd, 
+                                                                                 [FromQuery] string appl_EnfSrv_Cd,
                                                                                  [FromQuery] string appl_CtrlCd,
                                                                                  [FromServices] IRepositories repositories)
         {
@@ -37,14 +37,14 @@ namespace FOAEA3.API.LicenceDenial.Controllers
 
             if (string.IsNullOrEmpty(appl_EnfSrv_Cd))
                 return BadRequest("Missing appl_EnfSrv_Cd parameter");
-            
+
             if (string.IsNullOrEmpty(appl_CtrlCd))
                 return BadRequest("Missing appl_CtrlCd parameter");
 
-            var result = manager.GetRequestedLICINLicenceDenialEvents(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
+            var result = manager.GetRequestedLICINLicenceDenialEventDetails(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
             return Ok(result);
 
         }
-
+               
     }
 }
