@@ -33,5 +33,11 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.GetDataAsync<List<LicenceDenialOutgoingFederalData>>(apiCall).Result;
         }
 
+        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource)
+        {
+            string apiCall = $"api/v1/licenceDenials/LicenceDenialToApplication?federalSource={fedSource}";
+            return ApiHelper.GetDataAsync<List<LicenceDenialToApplData>>(apiCall).Result;
+        }
+
     }
 }

@@ -55,7 +55,7 @@ namespace FileBroker.Business
                 if (errors.Any())
                     return errors;
 
-                var licenceDenialResponseData = ExtractFoaeaResponseDataFromIncomingResponseData(licenceDenialResponses, 
+                var licenceDenialResponseData = ExtractFoaeaResponseDataFromIncomingResponseData(licenceDenialResponses,
                                                                                                  fileName, validEvents);
 
                 if ((licenceDenialResponseData != null) && (licenceDenialResponseData.Count > 0))
@@ -230,21 +230,10 @@ namespace FileBroker.Business
                 APIs.LicenceDenialResponseAPIBroker.InsertBulkData(dataToSave);
 
                 foreach (var item in licenceDenialResponseData)
-                    UpdateLicenceEventTables(item, newState: 2, flatFileName);
+                    UpdateLicenceEventTables(item, newState: 2, flatFileName, validEvents, validEventDetails);
 
-                // ByVal dRow As Common.LicenseResponseData.LicRspRow, ByVal appLiStCode As Integer, ByVal fileName As String
-
-                //foreach (var item in fileLicenceDenialSummary)
-                //{
-                //    MarkLicenceDenialEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, 2, ref activeLicenceDenialEvents, ref activeLicenceDenialEventDetails);
-                //}
-                //CloseOrInactivateTraceEventDetails(cutOffDays, ref activeLicenceDenialEventDetails);
-                //SendTRACEDataToTrcRsp(licenceDenialResponses);
-                //CloseNETPTraceEvents();
+                SendLicenceDataToFOAEA(fedSource, flatFileName);
                 /*
-                .SendDataToLicenseSuspension(fInfo.Name)
-                .UpdateLicenseEventTables()
-                .SendEventLicenseDataToFOAEA()
                 .SendLicenseDataToFOAEA(fInfo.Name)
                 .SendEventLicenseDataToFOAEA()
                 .UpdateCycle()
@@ -256,20 +245,112 @@ namespace FileBroker.Business
             }
         }
 
+        private void SendLicenceDataToFOAEA(string fedSource, string fileName)
+        {
+            var dataToAppl = APIs.LicenceDenialApplicationAPIBroker.GetLicenceDenialToApplData(fedSource);
+
+            foreach(var item in dataToAppl)
+            {
+                ProcessEventsToAppl(item, fileName);
+            }
+        }
+
+        private void ProcessEventsToAppl(LicenceDenialToApplData item, string fileName)
+        {
+            
+        }
+
+
+        /*
+         
+        Dim eventLicensedata As Justice.FOAEA.Common.EventLicense
+        Dim eventLicenseDtldata As Justice.FOAEA.Common.EventLicenseDetail
+
+        Dim evntLicenseRow As Justice.FOAEA.Common.EventLicense.EvntLicenseRow()
+        Dim evntLicenseDtlRow As Justice.FOAEA.Common.EventLicenseDetail.EvntLicense_dtlRow()
+
+        Dim fullyProcessed As Boolean = True
+
+        eventLicensedata = Me.DataClass.LICENSEEvents
+        eventLicenseDtldata = Me.DataClass.LICENSEEventsDetail
+
+        evntLicenseDtlRow = eventLicenseDtldata.EvntLicense_dtl.Select("Event_Id='" & LicenseDataToApplRow.Event_Id.ToString & "'")
+        evntLicenseRow = eventLicensedata.EvntLicense.Select("Event_Id='" & LicenseDataToApplRow.Event_Id.ToString & "'")
+
+        If LicenseDataToApplRow.Event_Reas_Cd = 50780 And LicenseDataToApplRow.ActvSt_Cd = "A" Then
+
+            Dim sendFullyServed As New MidTier.Business.LicenseDenialSystem(DataClass.ConnectionStringFOAEA)
+
+            Try
+                sendFullyServed.LicenseResponse(LicenseDataToApplRow.Appl_EnfSrv_Cd, LicenseDataToApplRow.Appl_CtrlCd, "MSGBRO")
+            Catch ex As Exception
+                'cr 938 no record found
+                If ex.Message = "There is no row at position 0." Then
+                    Me.DataClass.MessageBrokerError("MessageBrokerService", "Message Broker Service Error", New SystemException(LicenseDataToApplRow.Appl_EnfSrv_Cd & "-" & LicenseDataToApplRow.Appl_CtrlCd & " no record found. File " & sFileName & " was loaded"), True)
+                    Exit Sub
+                Else
+                    Dim newEventLog As New EventLog
+
+                    newEventLog.Source = "Message Broker Inbound"
+                    newEventLog.WriteEntry(ex.Message, System.Diagnostics.EventLogEntryType.Error)
+
+                    newEventLog.Dispose()
+                    Exit Sub
+                End If
+            End Try
+
+            'CR 670 future use
+        Else 'L03 update
+
+
+            Dim L03processing As New MidTier.Business.LicenseDenialSystem(DataClass.ConnectionStringFOAEA)
+            Try
+
+                fullyProcessed = L03processing.ProcessL03(LicenseDataToApplRow.Appl_EnfSrv_Cd, LicenseDataToApplRow.Appl_CtrlCd, "MSGBRO")
+
+            Catch ex As Exception
+                'cr 938 no record found
+                If ex.Message = "There is no row at position 0." Then
+                    Me.DataClass.MessageBrokerError("MessageBrokerService", "Message Broker Service Error", New SystemException(LicenseDataToApplRow.Appl_EnfSrv_Cd & "-" & LicenseDataToApplRow.Appl_CtrlCd & " no record found. File " & sFileName & " was loaded"), True)
+                    Exit Sub
+                Else
+                    Dim newEventLog As New EventLog
+
+                    newEventLog.Source = "Message Broker Inbound"
+                    newEventLog.WriteEntry(ex.Message, System.Diagnostics.EventLogEntryType.Error)
+
+                    newEventLog.Dispose()
+                    Exit Sub
+                End If
+
+            End Try
+        End If
+
+        'If the L03 is not fully processed, do not close the EventLivence record
+        If evntLicenseRow.Count > 0 And fullyProcessed Then
+            evntLicenseRow(0).ActvSt_Cd = LicenseDataToApplRow.ActvSt_Cd
+            evntLicenseRow(0).Event_Compl_Dte = Date.Now
+            eventLicensedata.EvntLicense.AcceptChanges()
+        End If
+
+        If evntLicenseDtlRow.Count > 0 Then
+            evntLicenseDtlRow(0).ActvSt_Cd = LicenseDataToApplRow.ActvSt_Cd
+            evntLicenseDtlRow(0).AppLiSt_Cd = LicenseDataToApplRow.dtl_List
+            evntLicenseDtlRow(0).Event_Compl_Dte = Date.Now
+            eventLicenseDtldata.EvntLicense_dtl.AcceptChanges()
+        End If
+    End Sub
+         */
+
         private void VerifyReceivedDataForErrors(LicenceDenialResponseData item, string flatFileName,
                                                  ref List<ApplicationEventData> validEvents)
         {
-            var licenceEventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
+            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
                                                              (m.Appl_CtrlCd == item.Appl_CtrlCd)).FirstOrDefault();
             //string responseType = string.Empty;
 
-            if (licenceEventForAppl is not null)
+            if (eventForAppl is not null)
             {
-                //if (licenceEventForAppl.Event_Reas_Cd == EventCode.C50780_APPLICATION_ACCEPTED)
-                //    responseType = "L01";
-                //else if (licenceEventForAppl.Event_Reas_Cd == EventCode.C50781_L03_ACCEPTED)
-                //    responseType = "L03";
-
                 var licenceDenialAppl = APIs.LicenceDenialApplicationAPIBroker.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
 
                 // CR 932 remove code 05 from Passport Canada  
@@ -283,103 +364,47 @@ namespace FileBroker.Business
 
         }
 
-        private void UpdateLicenceEventTables(LicenceDenialResponseData item, int newState, string flatFileName)
+        private void UpdateLicenceEventTables(LicenceDenialResponseData item, short newState, string fileName,
+                                              List<ApplicationEventData> validEvents, List<ApplicationEventDetailData> validEventDetails)
         {
-            throw new NotImplementedException();
+            string eventReason = $"[FileNm:{fileName}][RecPos:{item.LicRsp_SeqNr}][ErrDes:000000MSGBRO]" +
+                                 $"[(EnfSrv:{item.Appl_EnfSrv_Cd})(CtrlCd:{item.Appl_CtrlCd})]" +
+                                 $"[RqStat:{item.RqstStat_Cd}]";
+
+            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
+                                                 (m.Appl_CtrlCd == item.Appl_CtrlCd)).FirstOrDefault();
+            if (eventForAppl != null)
+            {
+                int eventId = eventForAppl.Event_Id;
+
+                var eventDetailForAppl = validEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
+                if (eventDetailForAppl != null)
+                {
+                    switch (eventForAppl.Event_Reas_Cd)
+                    {
+                        case EventCode.C50780_APPLICATION_ACCEPTED: // L01
+                            if ((eventForAppl.ActvSt_Cd != "C") && (item.RqstStat_Cd != 8))
+                            {
+                                eventDetailForAppl.Event_Reas_Text = eventReason;
+                                eventDetailForAppl.Event_Effctv_Dte = DateTime.Now;
+                                eventDetailForAppl.AppLiSt_Cd = newState;
+                                eventDetailForAppl.ActvSt_Cd = "P";
+                            }
+                            break;
+                        case EventCode.C50781_L03_ACCEPTED: // L03
+                            if ((eventForAppl.ActvSt_Cd != "C") && (eventDetailForAppl.ActvSt_Cd != "C"))
+                            {
+                                eventDetailForAppl.Event_Reas_Text = eventReason;
+                                eventDetailForAppl.Event_Effctv_Dte = DateTime.Now;
+                                eventDetailForAppl.AppLiSt_Cd = newState;
+                                eventDetailForAppl.ActvSt_Cd = "P";
+                            }
+                            break;
+                    }
+
+                    APIs.ApplicationEventAPIBroker.SaveEventDetail(eventDetailForAppl);
+                }
+            }
         }
-
-        /*
-    Public Sub UpdateEventLicense(ByVal dRow As Common.LicenseResponseData.LicRspRow, ByVal appLiStCode As Integer, ByVal fileName As String)
-
-        Dim eventID As Integer
-        '[FileNm:' + S2.Prcs_FileName + ']' + '[RecPos:' + CONVERT(varchar , S2.Prcs_RecPos) + ']' + '[ErrDes:' + S2.Prcs_RecErr + ']' + '[(EnfSrv:' + S2.dat_Appl_EnfSrv_Cd + ')' + '(CtrlCd:' + S2.dat_Appl_CtrlCd + ')]'
-        Dim eventReason As String
-        eventReason = "[FileNm:" & fileName & "]" & _
-                        "[RecPos:" & dRow.LicRsp_SeqNr.ToString & "]" & _
-                        "[ErrDes:000000MSGBRO]" & _
-                        "[(EnfSrv:" & dRow.Appl_EnfSrv_Cd.ToString & ")" & _
-                        "(CtrlCd:" & dRow.Appl_CtrlCd.ToString & ")]" & _
-                        "[RqStat:" & dRow.RqstStat_Cd.ToString & "]"
-
-        Dim evntLICENSERow As Common.EventLicense.EvntLicenseRow()
-        evntLICENSERow = LICENSEEvents.EvntLicense.Select("Appl_EnfSrv_Cd='" & dRow("Appl_EnfSrv_Cd").ToString.Trim & "'" & " and Appl_CtrlCd='" & dRow("Appl_CtrlCd").ToString.Trim & "'")
-
-        If evntLICENSERow.Count > 0 Then
-            eventID = evntLICENSERow(0).Event_Id
-            'evntLICENSERow(0).ActvSt_Cd = "P"
-            'evntLICENSERow(0).Event_Compl_Dte = Date.Now
-            'LICENSEEvents.EvntLicense.AcceptChanges()
-        End If
-
-        Dim evntLICENSEdtlRow As Common.EventLicenseDetail.EvntLicense_dtlRow()
-        evntLICENSEdtlRow = LICENSEEventsDetail.EvntLicense_dtl.Select("Event_Id='" & eventID.ToString & "'")
-
-        If evntLICENSEdtlRow.Count > 0 Then
-
-            'If evntLICENSERow(0).Event_Reas_Cd = 50780 And evntLICENSERow(0).ActvSt_Cd <> "C" And dRow.RqstStat_Cd <> 8 Then
-            '    'evntLICENSEdtlRow(0).Event_Reas_Cd = evntLICENSERow(0).Event_Reas_Cd
-            '    evntLICENSEdtlRow(0).Event_Reas_Text = eventReason
-            '    evntLICENSEdtlRow(0).Event_Effctv_Dte = Date.Now
-            '    evntLICENSEdtlRow(0).AppLiSt_Cd = appLiStCode
-            '    'evntTRACEdtlRow(0)("ActvSt_Cd") = "P"
-            '    'Set the event to completed.
-            '    evntLICENSEdtlRow(0).ActvSt_Cd = "P"
-
-            'ElseIf evntLICENSERow(0).Event_Reas_Cd = 50781 And evntLICENSERow(0).ActvSt_Cd <> "C" And (dRow.RqstStat_Cd = 8 Or dRow.RqstStat_Cd = 1) Then
-            '    'evntLICENSEdtlRow(0).Event_Reas_Cd = evntLICENSERow(0).Event_Reas_Cd
-            '    evntLICENSEdtlRow(0).Event_Reas_Text = eventReason
-            '    evntLICENSEdtlRow(0).Event_Effctv_Dte = Date.Now
-            '    evntLICENSEdtlRow(0).AppLiSt_Cd = appLiStCode
-            '    'evntTRACEdtlRow(0)("ActvSt_Cd") = "P"
-            '    'Set the event to completed.
-            '    evntLICENSEdtlRow(0).ActvSt_Cd = "P"
-            'End If
-            Select Case evntLICENSERow(0).Event_Reas_Cd
-                Case 50780
-                    If evntLICENSERow(0).ActvSt_Cd <> "C" And dRow.RqstStat_Cd <> 8 Then
-                        'evntLICENSEdtlRow(0).Event_Reas_Cd = evntLICENSERow(0).Event_Reas_Cd
-                        evntLICENSEdtlRow(0).Event_Reas_Text = eventReason
-                        evntLICENSEdtlRow(0).Event_Effctv_Dte = Date.Now
-                        evntLICENSEdtlRow(0).AppLiSt_Cd = appLiStCode
-                        'evntTRACEdtlRow(0)("ActvSt_Cd") = "P"
-                        'Set the event to completed.
-                        evntLICENSEdtlRow(0).ActvSt_Cd = "P"
-                    End If
-                Case 50781
-                    If evntLICENSERow(0).ActvSt_Cd <> "C" Then
-                        If evntLICENSEdtlRow(0).ActvSt_Cd <> "C" Then
-                            Select Case dRow.RqstStat_Cd
-                                Case 1, 4, 8
-                                    'evntLICENSEdtlRow(0).Event_Reas_Cd = evntLICENSERow(0).Event_Reas_Cd
-                                    evntLICENSEdtlRow(0).Event_Reas_Text = eventReason
-                                    evntLICENSEdtlRow(0).Event_Effctv_Dte = Date.Now
-                                    evntLICENSEdtlRow(0).AppLiSt_Cd = appLiStCode
-                                    'evntTRACEdtlRow(0)("ActvSt_Cd") = "P"
-                                    'Set the event to completed.
-                                    evntLICENSEdtlRow(0).ActvSt_Cd = "P"
-                                Case Else
-                                    ' Future use to filter the response code coming back from passport / licensing 
-                                    'Dim messageText As String = ""
-                                    'messageText = messageText & "L03 Request Status " & "0" & dRow.RqstStat_Cd.ToString.Trim & " received from " & dRow.EnfSrv_Cd & vbCrLf & vbLf
-                                    'messageText = messageText & "L01 application " & dRow.Appl_EnfSrv_Cd & " " & dRow.Appl_CtrlCd & vbCrLf & vbLf
-                                    'messageText = messageText & "L03 Request Status message: " & LiceneseDenialRequestStatus.Get("0" & dRow.RqstStat_Cd.ToString.Trim)
-                                    'SendMailMessage("L03 Request Status incopmlete", "FLAS-IT-SO@justice.gc.ca", messageText)
-                                    evntLICENSEdtlRow(0).Event_Reas_Text = eventReason
-                                    evntLICENSEdtlRow(0).Event_Effctv_Dte = Date.Now
-                                    evntLICENSEdtlRow(0).AppLiSt_Cd = appLiStCode
-                                    evntLICENSEdtlRow(0).ActvSt_Cd = "P"
-                            End Select
-                        End If
-                    End If
-            End Select
-
-
-            LICENSEEventsDetail.EvntLicense_dtl.AcceptChanges()
-            LICENSEEvents.EvntLicense.AcceptChanges()
-        End If
-
-    End Sub
-        
-        */
     }
 }

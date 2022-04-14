@@ -265,5 +265,10 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.SaveEvents();
         }
 
+        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string federalSource)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            return licenceDenialDB.GetLicenceDenialToApplData(federalSource);
+        }
     }
 }

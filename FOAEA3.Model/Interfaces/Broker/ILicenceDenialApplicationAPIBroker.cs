@@ -9,5 +9,8 @@ namespace FOAEA3.Model.Interfaces.Broker
                                                                                   string activeState,
                                                                                   int lifeState,
                                                                                   string enfServiceCode);
+
+        List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource);
+
     }
 }

@@ -159,6 +159,30 @@ namespace FOAEA3.Data.DB
 
         }
 
+        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "chrEnfSrv_Cd", fedSource }
+            };
+
+            return MainDB.GetDataFromStoredProc<LicenceDenialToApplData>("MessageBrokerGetLICENSEInboundToApplData", 
+                                                                         parameters, FillLicenceDenialToApplDataFromReader);
+        }
+
+        private void FillLicenceDenialToApplDataFromReader(IDBHelperReader rdr, LicenceDenialToApplData data)
+        {
+            data.Dtl_Reas_Cd = (int) rdr["dtl_Reas_Cd"];
+            data.Dtl_List = (short) rdr["dtl_List"];
+            data.Dtl_ActvSt = rdr["dtl_ActvSt"] as string;
+            data.Dtl_Id = (int) rdr["dtl_Id"];
+            data.Event_Reas_Cd = (int) rdr["Event_Reas_Cd"];
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Event_Id = (int) rdr["Event_Id"];
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+    }
+
         private void FillLicenceDenialOutgoingFederalData(IDBHelperReader rdr, LicenceDenialOutgoingFederalData data)
         {
             data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
