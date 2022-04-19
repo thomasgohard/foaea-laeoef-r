@@ -51,10 +51,10 @@ namespace Outgoing.FileCreator.MEP
         {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                TracingApplicationAPIBroker = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingResponseAPIBroker = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingEventAPIBroker = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                TracingApplications = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                TracingResponses = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                TracingEvents = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
             };
 
             var repositories = new RepositoryList
@@ -89,10 +89,11 @@ namespace Outgoing.FileCreator.MEP
         {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                LicenceDenialApplicationAPIBroker = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialResponseAPIBroker = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialEventAPIBroker = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
             };
 
             var repositories = new RepositoryList

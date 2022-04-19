@@ -89,14 +89,7 @@ namespace FileBroker.Business
                 var existingEventsForAppl = validEvents.Where(m => m.Appl_EnfSrv_Cd.Equals(item.Appl_EnfSrv_Cd) &&
                                                                    m.Appl_CtrlCd.Equals(item.Appl_CtrlCd)).FirstOrDefault();
 
-                var responseType = string.Empty;
-                if (existingEventsForAppl != null)
-                {
-                    if (existingEventsForAppl.Event_Reas_Cd == EventCode.C50780_APPLICATION_ACCEPTED)
-                        responseType = "L01";
-                    else if (existingEventsForAppl.Event_Reas_Cd == EventCode.C50781_L03_ACCEPTED)
-                        responseType = "L03";
-                }
+                var responseType = GetResponseType(existingEventsForAppl);
 
                 responseData.Add(new LicenceDenialResponseData
                 {
@@ -178,7 +171,7 @@ namespace FileBroker.Business
                 string applEnfSrv = detail.Appl_EnfSrv_Cd;
                 string applControlCode = detail.Appl_CtrlCd;
 
-                var events = APIs.LicenceDenialEventAPIBroker.GetRequestedLICINEvents(fedSource, applEnfSrv, applControlCode);
+                var events = APIs.LicenceDenialEvents.GetRequestedLICINEvents(fedSource, applEnfSrv, applControlCode);
                 if (events.Count == 0)
                 {
                     string errorMsg = $"type 02 {applEnfSrv} {applControlCode} no active event found. File was not loaded.";
@@ -191,7 +184,7 @@ namespace FileBroker.Business
                     if (!existingEventsForAppl.Any())
                         validEvents.AddRange(events);
 
-                    var eventDetails = APIs.LicenceDenialEventAPIBroker.GetRequestedLICINEventDetails(fedSource, applEnfSrv, applControlCode);
+                    var eventDetails = APIs.LicenceDenialEvents.GetRequestedLICINEventDetails(fedSource, applEnfSrv, applControlCode);
                     if (eventDetails.Count == 0)
                     {
                         string errorMsg = $"type 02 {applEnfSrv} {applControlCode} no active event found. File was not loaded.";
@@ -227,17 +220,12 @@ namespace FileBroker.Business
                     VerifyReceivedDataForErrors(item, flatFileName, ref validEvents); // <-- is this really needed?
 
                 var dataToSave = licenceDenialResponseData.Where(m => (m.RqstStat_Cd != 5) || !flatFileName.ToUpper().StartsWith("PA3SL")).ToList();
-                APIs.LicenceDenialResponseAPIBroker.InsertBulkData(dataToSave);
+                APIs.LicenceDenialResponses.InsertBulkData(dataToSave);
 
                 foreach (var item in licenceDenialResponseData)
                     UpdateLicenceEventTables(item, newState: 2, flatFileName, validEvents, validEventDetails);
 
-                SendLicenceDataToFOAEA(fedSource, flatFileName);
-                /*
-                .SendLicenseDataToFOAEA(fInfo.Name)
-                .SendEventLicenseDataToFOAEA()
-                .UpdateCycle()
-                 */
+                SendLicenceDataToFOAEA(fedSource, flatFileName, validEvents, validEventDetails, ref errors);
             }
             catch (Exception e)
             {
@@ -245,102 +233,81 @@ namespace FileBroker.Business
             }
         }
 
-        private void SendLicenceDataToFOAEA(string fedSource, string fileName)
+        private void SendLicenceDataToFOAEA(string fedSource, string fileName, List<ApplicationEventData> validEvents,
+                                            List<ApplicationEventDetailData> validEventDetails, ref List<string> errors)
         {
-            var dataToAppl = APIs.LicenceDenialApplicationAPIBroker.GetLicenceDenialToApplData(fedSource);
+            var dataToAppl = APIs.LicenceDenialApplications.GetLicenceDenialToApplData(fedSource);
 
-            foreach(var item in dataToAppl)
+            foreach (var item in dataToAppl)
             {
-                ProcessEventsToAppl(item, fileName);
+                ProcessEventsToAppl(item, fileName, validEvents, validEventDetails, ref errors);
             }
         }
 
-        private void ProcessEventsToAppl(LicenceDenialToApplData item, string fileName)
+        private void ProcessEventsToAppl(LicenceDenialToApplData item, string fileName, List<ApplicationEventData> validEvents,
+                                         List<ApplicationEventDetailData> validEventDetails, ref List<string> errors)
         {
-            
+            var licenceEvent = validEvents.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
+            var licenseDetailEvent = validEventDetails.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
+
+            var responseType = GetResponseType(licenceEvent);
+
+            bool fullyProcessed = true;
+
+            if ((responseType == "L01") && (item.ActvSt_Cd == "A"))
+            {
+                var applLicenceDenial = APIs.LicenceDenialApplications.ProcessLicenceDenialResponse(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+                if (applLicenceDenial.Messages.ContainsMessagesOfType(MessageType.Error))
+                {
+                    foreach(var error in applLicenceDenial.Messages.GetMessagesForType(MessageType.Error))
+                    {
+                        errors.Add(error.Description);
+                        if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
+                        {
+                            string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
+                            Repositories.ErrorTrackingDB.MessageBrokerError("MessageBrokerService", "File Broker Service Error",
+                                                                            new Exception(errorMsg), displayExceptionError: true);
+                        }
+                    }
+                }
+            }
+            else if (responseType == "L03")
+            {
+                var applLicenceDenialTermination = APIs.LicenceDenialTerminationApplications.ProcessLicenceDenialResponse(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+                if (applLicenceDenialTermination.Messages.ContainsMessagesOfType(MessageType.Error))
+                {
+                    foreach (var error in applLicenceDenialTermination.Messages.GetMessagesForType(MessageType.Error))
+                    {
+                        errors.Add(error.Description);
+                        if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
+                        {
+                            string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
+                            Repositories.ErrorTrackingDB.MessageBrokerError("MessageBrokerService", "File Broker Service Error",
+                                                                            new Exception(errorMsg), displayExceptionError: true);
+                        }
+                    }
+                }
+
+                fullyProcessed = applLicenceDenialTermination.AppLiSt_Cd == ApplicationState.EXPIRED_15;
+
+            }
+
+            if ((licenceEvent is not null) && fullyProcessed)
+            {
+                licenceEvent.ActvSt_Cd = item.ActvSt_Cd;
+                licenceEvent.Event_Compl_Dte = DateTime.Now;
+                APIs.ApplicationEvents.SaveEvent(licenceEvent);
+            }
+
+            if (licenseDetailEvent is not null)
+            {
+                licenseDetailEvent.ActvSt_Cd = item.ActvSt_Cd;
+                licenseDetailEvent.AppLiSt_Cd = item.Dtl_List;
+                licenseDetailEvent.Event_Compl_Dte = DateTime.Now;
+                APIs.ApplicationEvents.SaveEventDetail(licenseDetailEvent);
+            }
+
         }
-
-
-        /*
-         
-        Dim eventLicensedata As Justice.FOAEA.Common.EventLicense
-        Dim eventLicenseDtldata As Justice.FOAEA.Common.EventLicenseDetail
-
-        Dim evntLicenseRow As Justice.FOAEA.Common.EventLicense.EvntLicenseRow()
-        Dim evntLicenseDtlRow As Justice.FOAEA.Common.EventLicenseDetail.EvntLicense_dtlRow()
-
-        Dim fullyProcessed As Boolean = True
-
-        eventLicensedata = Me.DataClass.LICENSEEvents
-        eventLicenseDtldata = Me.DataClass.LICENSEEventsDetail
-
-        evntLicenseDtlRow = eventLicenseDtldata.EvntLicense_dtl.Select("Event_Id='" & LicenseDataToApplRow.Event_Id.ToString & "'")
-        evntLicenseRow = eventLicensedata.EvntLicense.Select("Event_Id='" & LicenseDataToApplRow.Event_Id.ToString & "'")
-
-        If LicenseDataToApplRow.Event_Reas_Cd = 50780 And LicenseDataToApplRow.ActvSt_Cd = "A" Then
-
-            Dim sendFullyServed As New MidTier.Business.LicenseDenialSystem(DataClass.ConnectionStringFOAEA)
-
-            Try
-                sendFullyServed.LicenseResponse(LicenseDataToApplRow.Appl_EnfSrv_Cd, LicenseDataToApplRow.Appl_CtrlCd, "MSGBRO")
-            Catch ex As Exception
-                'cr 938 no record found
-                If ex.Message = "There is no row at position 0." Then
-                    Me.DataClass.MessageBrokerError("MessageBrokerService", "Message Broker Service Error", New SystemException(LicenseDataToApplRow.Appl_EnfSrv_Cd & "-" & LicenseDataToApplRow.Appl_CtrlCd & " no record found. File " & sFileName & " was loaded"), True)
-                    Exit Sub
-                Else
-                    Dim newEventLog As New EventLog
-
-                    newEventLog.Source = "Message Broker Inbound"
-                    newEventLog.WriteEntry(ex.Message, System.Diagnostics.EventLogEntryType.Error)
-
-                    newEventLog.Dispose()
-                    Exit Sub
-                End If
-            End Try
-
-            'CR 670 future use
-        Else 'L03 update
-
-
-            Dim L03processing As New MidTier.Business.LicenseDenialSystem(DataClass.ConnectionStringFOAEA)
-            Try
-
-                fullyProcessed = L03processing.ProcessL03(LicenseDataToApplRow.Appl_EnfSrv_Cd, LicenseDataToApplRow.Appl_CtrlCd, "MSGBRO")
-
-            Catch ex As Exception
-                'cr 938 no record found
-                If ex.Message = "There is no row at position 0." Then
-                    Me.DataClass.MessageBrokerError("MessageBrokerService", "Message Broker Service Error", New SystemException(LicenseDataToApplRow.Appl_EnfSrv_Cd & "-" & LicenseDataToApplRow.Appl_CtrlCd & " no record found. File " & sFileName & " was loaded"), True)
-                    Exit Sub
-                Else
-                    Dim newEventLog As New EventLog
-
-                    newEventLog.Source = "Message Broker Inbound"
-                    newEventLog.WriteEntry(ex.Message, System.Diagnostics.EventLogEntryType.Error)
-
-                    newEventLog.Dispose()
-                    Exit Sub
-                End If
-
-            End Try
-        End If
-
-        'If the L03 is not fully processed, do not close the EventLivence record
-        If evntLicenseRow.Count > 0 And fullyProcessed Then
-            evntLicenseRow(0).ActvSt_Cd = LicenseDataToApplRow.ActvSt_Cd
-            evntLicenseRow(0).Event_Compl_Dte = Date.Now
-            eventLicensedata.EvntLicense.AcceptChanges()
-        End If
-
-        If evntLicenseDtlRow.Count > 0 Then
-            evntLicenseDtlRow(0).ActvSt_Cd = LicenseDataToApplRow.ActvSt_Cd
-            evntLicenseDtlRow(0).AppLiSt_Cd = LicenseDataToApplRow.dtl_List
-            evntLicenseDtlRow(0).Event_Compl_Dte = Date.Now
-            eventLicenseDtldata.EvntLicense_dtl.AcceptChanges()
-        End If
-    End Sub
-         */
 
         private void VerifyReceivedDataForErrors(LicenceDenialResponseData item, string flatFileName,
                                                  ref List<ApplicationEventData> validEvents)
@@ -351,7 +318,7 @@ namespace FileBroker.Business
 
             if (eventForAppl is not null)
             {
-                var licenceDenialAppl = APIs.LicenceDenialApplicationAPIBroker.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+                var licenceDenialAppl = APIs.LicenceDenialApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
 
                 // CR 932 remove code 05 from Passport Canada  
                 if ((item.RqstStat_Cd == 5) && flatFileName.ToUpper().StartsWith("PA3SL"))
@@ -380,9 +347,11 @@ namespace FileBroker.Business
                 var eventDetailForAppl = validEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
                 if (eventDetailForAppl != null)
                 {
-                    switch (eventForAppl.Event_Reas_Cd)
+                    var responseType = GetResponseType(eventForAppl);
+
+                    switch (responseType)
                     {
-                        case EventCode.C50780_APPLICATION_ACCEPTED: // L01
+                        case "L01":
                             if ((eventForAppl.ActvSt_Cd != "C") && (item.RqstStat_Cd != 8))
                             {
                                 eventDetailForAppl.Event_Reas_Text = eventReason;
@@ -391,7 +360,8 @@ namespace FileBroker.Business
                                 eventDetailForAppl.ActvSt_Cd = "P";
                             }
                             break;
-                        case EventCode.C50781_L03_ACCEPTED: // L03
+
+                        case "L03":
                             if ((eventForAppl.ActvSt_Cd != "C") && (eventDetailForAppl.ActvSt_Cd != "C"))
                             {
                                 eventDetailForAppl.Event_Reas_Text = eventReason;
@@ -402,9 +372,24 @@ namespace FileBroker.Business
                             break;
                     }
 
-                    APIs.ApplicationEventAPIBroker.SaveEventDetail(eventDetailForAppl);
+                    APIs.ApplicationEvents.SaveEventDetail(eventDetailForAppl);
                 }
             }
         }
+
+        private static string GetResponseType(ApplicationEventData existingEventsForAppl)
+        {
+            var responseType = string.Empty;
+            if (existingEventsForAppl != null)
+            {
+                if (existingEventsForAppl.Event_Reas_Cd == EventCode.C50780_APPLICATION_ACCEPTED)
+                    responseType = "L01";
+                else if (existingEventsForAppl.Event_Reas_Cd == EventCode.C50781_L03_ACCEPTED)
+                    responseType = "L03";
+            }
+
+            return responseType;
+        }
+
     }
 }

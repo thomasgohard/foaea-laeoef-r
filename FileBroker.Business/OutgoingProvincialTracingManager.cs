@@ -47,7 +47,7 @@ public class OutgoingProvincialTracingManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.TracingResponseAPIBroker.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
+            APIs.TracingResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
 
             return newFilePath;
 
@@ -72,7 +72,7 @@ public class OutgoingProvincialTracingManager
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.TracingApplicationAPIBroker.GetOutgoingProvincialTracingData(maxRecords, actvSt_Cd,
+        var data = APIs.TracingApplications.GetOutgoingProvincialTracingData(maxRecords, actvSt_Cd,
                                                                                      recipientCode);
         return data;
     }

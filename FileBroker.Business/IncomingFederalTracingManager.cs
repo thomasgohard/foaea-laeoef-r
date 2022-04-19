@@ -127,13 +127,13 @@ public class IncomingFederalTracingManager
 
     private void CloseNETPTraceEvents()
     {
-        APIs.TracingEventAPIBroker.CloseNETPTraceEvents();
+        APIs.TracingEvents.CloseNETPTraceEvents();
     }
 
     private List<TraceResponseData> ExtractTracingResponsesFromFileData(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
                                                                         ref List<string> errors)
     {
-        var cycles = APIs.TracingApplicationAPIBroker.GetTraceCycleQuantityData(enfSrvCd, fileCycle);
+        var cycles = APIs.TracingApplications.GetTraceCycleQuantityData(enfSrvCd, fileCycle);
 
         return IncomingFederalTracingResponse.GenerateFromFileData(tracingFileData, enfSrvCd, cycles, ref errors);
     }
@@ -147,8 +147,8 @@ public class IncomingFederalTracingManager
             string cutOffDaysValue = Repositories.ProcessParameterTable.GetValueForParameter(processId, "evnt_cutoff");
             int cutOffDays = int.Parse(cutOffDaysValue);
 
-            var activeTraceEvents = APIs.TracingEventAPIBroker.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
-            var activeTraceEventDetails = APIs.TracingEventAPIBroker.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
+            var activeTraceEvents = APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+            var activeTraceEventDetails = APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
             if (fedSource == EFederalSource.NETP)
             {
@@ -165,7 +165,7 @@ public class IncomingFederalTracingManager
             {
                 foreach (var item in fileTracingSummary)
                 {
-                    var appl = APIs.TracingApplicationAPIBroker.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
+                    var appl = APIs.TracingApplications.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
 
                     MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
                                                ref activeTraceEvents, ref activeTraceEventDetails);
@@ -212,7 +212,7 @@ public class IncomingFederalTracingManager
             activeTraceEvent.ActvSt_Cd = "P";
             activeTraceEvent.Event_Compl_Dte = DateTime.Now;
 
-            APIs.ApplicationEventAPIBroker.SaveEvent(activeTraceEvent);
+            APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
 
             int eventId = activeTraceEvent.Event_Id;
             string eventReason = $"[FileNm:{flatFileName}[ErrDes:000000MSGBRO]" +
@@ -230,7 +230,7 @@ public class IncomingFederalTracingManager
                 activeTraceEventDetail.ActvSt_Cd = "C";
                 activeTraceEventDetail.Event_Compl_Dte = DateTime.Now;
 
-                APIs.ApplicationEventAPIBroker.SaveEventDetail(activeTraceEventDetail);
+                APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
             }
         }
 
@@ -253,7 +253,7 @@ public class IncomingFederalTracingManager
                 row.Event_Compl_Dte = DateTime.Now;
             }
 
-            APIs.ApplicationEventAPIBroker.SaveEventDetail(row);
+            APIs.ApplicationEvents.SaveEventDetail(row);
 
         }
 
@@ -261,12 +261,12 @@ public class IncomingFederalTracingManager
 
     private void SendTRACEDataToTrcRsp(List<TraceResponseData> responseData)
     {
-        APIs.TracingResponseAPIBroker.InsertBulkData(responseData);
+        APIs.TracingResponses.InsertBulkData(responseData);
     }
 
     private void UpdateTracingApplications(string enfSrvCd, string fileCycle)
     {
-        var traceToApplData = APIs.TracingApplicationAPIBroker.GetTraceToApplData();
+        var traceToApplData = APIs.TracingApplications.GetTraceToApplData();
 
         foreach (var row in traceToApplData)
         {
@@ -277,8 +277,8 @@ public class IncomingFederalTracingManager
 
     private void ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle)
     {
-        var activeTracingEvents = APIs.TracingEventAPIBroker.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
-        var activeTracingEventDetails = APIs.TracingEventAPIBroker.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
+        var activeTracingEvents = APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+        var activeTracingEventDetails = APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
         string newEventState;
 
@@ -288,16 +288,16 @@ public class IncomingFederalTracingManager
         }
         else
         {
-            var tracingApplication = APIs.TracingApplicationAPIBroker.GetApplication(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
+            var tracingApplication = APIs.TracingApplications.GetApplication(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
 
             if (row.Tot_Childs == row.Tot_Closed)
             {
-                APIs.TracingApplicationAPIBroker.FullyServiceApplication(tracingApplication, enfSrvCd);
+                APIs.TracingApplications.FullyServiceApplication(tracingApplication, enfSrvCd);
                 newEventState = "C";
             }
             else
             {
-                APIs.TracingApplicationAPIBroker.PartiallyServiceApplication(tracingApplication, enfSrvCd);
+                APIs.TracingApplications.PartiallyServiceApplication(tracingApplication, enfSrvCd);
                 newEventState = "A";
             }
         }
@@ -307,7 +307,7 @@ public class IncomingFederalTracingManager
         if (eventData != null)
         {
             eventData.ActvSt_Cd = newEventState;
-            APIs.ApplicationEventAPIBroker.SaveEvent(eventData);
+            APIs.ApplicationEvents.SaveEvent(eventData);
         }
 
         if (newEventState.In("A", "C"))
@@ -316,7 +316,7 @@ public class IncomingFederalTracingManager
             if (eventDetailData != null)
             {
                 eventDetailData.Event_Compl_Dte = DateTime.Now;
-                APIs.ApplicationEventAPIBroker.SaveEventDetail(eventDetailData);
+                APIs.ApplicationEvents.SaveEventDetail(eventDetailData);
             }
         }
 

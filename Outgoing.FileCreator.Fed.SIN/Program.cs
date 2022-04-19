@@ -45,8 +45,8 @@ internal class Program
     {
         var apiBrokers = new APIBrokerList
         {
-            ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-            SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+            ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+            Sins = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
         };
 
         var repositories = new RepositoryList

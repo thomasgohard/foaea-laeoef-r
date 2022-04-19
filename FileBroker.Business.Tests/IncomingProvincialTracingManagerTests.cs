@@ -34,7 +34,7 @@ namespace FileBroker.Business.Tests
 
             var apis = new APIBrokerList
             {
-                TracingApplicationAPIBroker = tracingApplicationAPIs
+                TracingApplications = tracingApplicationAPIs
             };
 
             var fileBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"

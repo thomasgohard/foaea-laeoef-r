@@ -39,5 +39,18 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.GetDataAsync<List<LicenceDenialToApplData>>(apiCall).Result;
         }
 
+        public LicenceDenialApplicationData ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var appData = new LicenceDenialApplicationData
+            {
+                Appl_EnfSrv_Cd = appl_EnfSrv_Cd,
+                Appl_CtrlCd = appl_CtrlCd,
+                Subm_SubmCd = "MSGBRO"
+            };
+            string key = ApplKey.MakeKey(appl_EnfSrv_Cd, appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenials/{key}/ProcessLicenceDenialResponse";
+            return ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData).Result;
+        }
+
     }
 }

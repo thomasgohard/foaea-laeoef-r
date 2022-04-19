@@ -46,11 +46,12 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
         {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                LicenceDenialApplicationAPIBroker = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialResponseAPIBroker = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialEventAPIBroker = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                SinAPIBroker = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                Sins = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
             };
 
             var repositories = new RepositoryList

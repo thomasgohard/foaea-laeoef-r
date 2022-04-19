@@ -77,15 +77,15 @@ public class IncomingFederalSinManager
 
     private void SendSinResultsToFOAEA(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
-        var requestedEvents = APIs.ApplicationEventAPIBroker.GetRequestedSINEventDataForFile(flatFileName);
-        var requestedEventDetails = APIs.ApplicationEventAPIBroker.GetRequestedSINEventDetailDataForFile(flatFileName);
+        var requestedEvents = APIs.ApplicationEvents.GetRequestedSINEventDataForFile(flatFileName);
+        var requestedEventDetails = APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFile(flatFileName);
 
         foreach (var sinResult in sinResults)
             UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
 
         UpdateSinResultTable(sinResults);
 
-        var latestUpdatedSinData = APIs.ApplicationEventAPIBroker.GetLatestSinEventDataSummary();
+        var latestUpdatedSinData = APIs.ApplicationEvents.GetLatestSinEventDataSummary();
         foreach (var updatedSinDataSummary in latestUpdatedSinData)
             UpdateApplicationBasedOnReceivedSinResult(updatedSinDataSummary, requestedEvents, requestedEventDetails);
 
@@ -99,7 +99,7 @@ public class IncomingFederalSinManager
         {
             var thisEvent = eventsForThisAppl.First();
             thisEvent.ActvSt_Cd = newState;
-            APIs.ApplicationEventAPIBroker.SaveEvent(thisEvent);
+            APIs.ApplicationEvents.SaveEvent(thisEvent);
         }
     }
 
@@ -112,7 +112,7 @@ public class IncomingFederalSinManager
 
         bool sourceModifiedSin = false;
 
-        var appl = APIs.ApplicationAPIBroker.GetApplication(appl_EnfSrv_Cd, appl_CtrlCd);
+        var appl = APIs.Applications.GetApplication(appl_EnfSrv_Cd, appl_CtrlCd);
 
         if (appl.ActvSt_Cd != "A")
         {
@@ -164,7 +164,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = updatedSinDataSummary.SVR_SIN
             };
 
-            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -174,7 +174,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = String.Empty
             };
 
-            APIs.ApplicationAPIBroker.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,
@@ -200,7 +200,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEventAPIBroker.SaveEvent(newSysEvent);
+        APIs.ApplicationEvents.SaveEvent(newSysEvent);
     }
 
     private void AddAMEvent(string appl_EnfSrv_Cd, string appl_CtrlCd, EventCode eventCode, string reasonText)
@@ -220,7 +220,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEventAPIBroker.SaveEvent(newSysEvent);
+        APIs.ApplicationEvents.SaveEvent(newSysEvent);
     }
 
     private static bool IsSinConfirmed(SinInboundToApplData updatedSinDataSummary)
@@ -230,7 +230,7 @@ public class IncomingFederalSinManager
 
     private void UpdateSinResultTable(List<SINResultData> sinResults)
     {
-        APIs.SinAPIBroker.InsertBulkData(sinResults);
+        APIs.Sins.InsertBulkData(sinResults);
     }
 
     private void UpdateSinEventTables(SINResultData sinResult,
@@ -246,7 +246,7 @@ public class IncomingFederalSinManager
             int eventId = eventForThisAppl.Event_Id;
             eventForThisAppl.ActvSt_Cd = "P";
             eventForThisAppl.Event_Compl_Dte = DateTime.Now;
-            APIs.ApplicationEventAPIBroker.SaveEvent(eventForThisAppl);
+            APIs.ApplicationEvents.SaveEvent(eventForThisAppl);
 
             var eventDetailForThisAppl = requestedEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
 
@@ -262,7 +262,7 @@ public class IncomingFederalSinManager
                 eventDetailForThisAppl.ActvSt_Cd = "C";
                 eventDetailForThisAppl.Event_Compl_Dte = DateTime.Now;
 
-                APIs.ApplicationEventAPIBroker.SaveEventDetail(eventDetailForThisAppl);
+                APIs.ApplicationEvents.SaveEventDetail(eventDetailForThisAppl);
             }
         }
     }

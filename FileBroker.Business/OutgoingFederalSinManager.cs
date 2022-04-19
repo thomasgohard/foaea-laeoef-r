@@ -59,7 +59,7 @@ public class OutgoingFederalSinManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.ApplicationEventAPIBroker.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                      processCodes.EnfSrv_Cd,
                                                                      "OK: Written to " + newFilePath, eventIds);
 
@@ -85,7 +85,7 @@ public class OutgoingFederalSinManager
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.SinAPIBroker.GetOutgoingFederalSins(maxRecords, actvSt_Cd, appLiSt_Cd, enfSrvCode);
+        var data = APIs.Sins.GetOutgoingFederalSins(maxRecords, actvSt_Cd, appLiSt_Cd, enfSrvCode);
         return data;
     }
 

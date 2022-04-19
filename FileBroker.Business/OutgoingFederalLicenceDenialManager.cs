@@ -49,7 +49,7 @@ public class OutgoingFederalLicenceDenialManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.ApplicationEventAPIBroker.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                      processCodes.EnfSrv_Cd,
                                                                      "OK: Written to " + newFilePath, eventIds);
 
@@ -76,7 +76,7 @@ public class OutgoingFederalLicenceDenialManager
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.LicenceDenialApplicationAPIBroker.GetOutgoingFederalLicenceDenialRequests(maxRecords, actvSt_Cd,
+        var data = APIs.LicenceDenialApplications.GetOutgoingFederalLicenceDenialRequests(maxRecords, actvSt_Cd,
                                                                                                   appLiSt_Cd, enfSrvCode);
         return data;
     }

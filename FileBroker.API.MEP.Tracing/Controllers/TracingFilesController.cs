@@ -85,7 +85,7 @@ public class TracingFilesController : ControllerBase
 
         var apis = new APIBrokerList
         {
-            TracingApplicationAPIBroker = tracingApplicationAPIs
+            TracingApplications = tracingApplicationAPIs
         };
 
         var repositories = new RepositoryList

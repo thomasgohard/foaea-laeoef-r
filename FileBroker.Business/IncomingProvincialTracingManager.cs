@@ -147,13 +147,13 @@ public class IncomingProvincialTracingManager
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
-            tracing = APIs.TracingApplicationAPIBroker.CreateTracingApplication(tracingMessageData.TracingApplication);
+            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.TracingApplication);
         else // tracingMessageData.MaintenanceAction == "C"
         {
             if (tracingMessageData.MaintenanceLifeState == "14")
-                tracing = APIs.TracingApplicationAPIBroker.CloseTracingApplication(tracingMessageData.TracingApplication);
+                tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.TracingApplication);
             else
-                tracing = APIs.TracingApplicationAPIBroker.UpdateTracingApplication(tracingMessageData.TracingApplication);
+                tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.TracingApplication);
         }
 
         return tracing.Messages;

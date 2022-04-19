@@ -142,6 +142,96 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
+        public bool ProcessLicenceDenialTerminationResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            if (!LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
+            {
+                LicenceDenialTerminationApplication.Messages.AddError(SystemMessage.APPLICATION_NOT_FOUND);
+                return false;
+            }
+
+            if (!IsValidCategory("L03"))
+                return false;
+
+            if (LicenceDenialTerminationApplication.AppLiSt_Cd.NotIn(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12))
+            {
+                LicenceDenialTerminationApplication.Messages.AddError("Invalid State for the current application.  Valid states allowed are 10 and 12.");
+                return false;
+            }
+
+            LicenceDenialTerminationApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+
+           
+
+            UpdateApplicationNoValidation();
+
+            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialTerminationApplication);
+
+            EventManager.SaveEvents();
+
+            return true;
+
+            /*
+             
+    Public Function ProcessL03(ByVal applicationEnforcementServiceCode As String,
+                   ByVal applicationControlCode As String,
+                   ByVal lastUpdateUser As String) As Boolean
+
+        Dim returnBoolean As Boolean = True
+        'IsInsert = False
+
+        ' CR769 - Event 50828 should be generated in an L03. the event should be generated no matter what returned code is
+        'Get the request status code and the source.
+        Dim LO1LicRspData As Justice.FOAEA.Common.LicenseResponseData
+
+        'Get an existing LO3 application
+        With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+            _currentLO3Application = .GetLO3FromL01(applicationEnforcementServiceCode, applicationControlCode)
+            'Get an existing LicRsp application.
+            LO1LicRspData = .GetLastLicRsp(applicationEnforcementServiceCode, applicationControlCode)
+        End With
+
+        _newLO3Application = _currentLO3Application.Copy
+
+        _newLO3Application.Appl.Item(0).Appl_LastUpdate_Usr = lastUpdateUser
+        _newLO3Application.Appl.Item(0).Appl_LastUpdate_Dte = Date.Now
+
+        If _currentLO3Application.Appl.Item(0).AppLiSt_Cd = 10 Then
+            _newLO3Application.Appl.Item(0).AppLiSt_Cd = 12
+        Else
+            If _currentLO3Application.Appl.Item(0).AppLiSt_Cd = 12 Then
+                _newLO3Application.Appl.Item(0).ActvSt_Cd = "C"
+                _newLO3Application.Appl.Item(0).AppLiSt_Cd = 15
+            End If
+
+        End If
+
+        With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+            MakeApplicationUpperCase(_newLO3Application)
+            .UpdateLO1Appl(_newLO3Application)
+        End With
+
+        ClearEventQueue(_EventQueueData)
+        ' CR769 - Event 50828 should be generated in an L03. the event should be generated no matter what returned code is
+
+        Dim rqstStatCd As Short = LO1LicRspData.LicRsp.Item(0).RqstStat_Cd
+        Dim source As String = LO1LicRspData.LicRsp.Item(0).EnfSrv_Cd
+
+        QueueEvent(_EventQueueData, CreateEventEnum.CreateSubmEvent, 50828, _newLO3Application, source) '-- L03
+        SaveEventQueue(_EventQueueData)
+
+        If _newLO3Application.Appl.Item(0).AppLiSt_Cd = 15 Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function             
+             */
+
+        }
+
         private void SetL03ValuesBasedOnL01(LicenceDenialApplicationData originalL01, DateTime requestDate)
         {
             var newL03 = LicenceDenialTerminationApplication;

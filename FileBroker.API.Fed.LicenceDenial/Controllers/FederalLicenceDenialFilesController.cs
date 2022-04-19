@@ -86,12 +86,14 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
 
             var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaLicenceDenialRootAPI, currentSubmitter, currentSubject);
             var licenceDenialApplicationAPIs = new LicenceDenialApplicationAPIBroker(apiHelper);
+            var licenceDenialTerminationApplicationAPIs = new LicenceDenialTerminationApplicationAPIBroker(apiHelper);
             var licenceDenialEventAPIs = new LicenceDenialEventAPIBroker(apiHelper);
 
             var apis = new APIBrokerList
             {
-                LicenceDenialApplicationAPIBroker = licenceDenialApplicationAPIs,
-                LicenceDenialEventAPIBroker = licenceDenialEventAPIs
+                LicenceDenialApplications = licenceDenialApplicationAPIs,
+                LicenceDenialTerminationApplications = licenceDenialTerminationApplicationAPIs,
+                LicenceDenialEvents = licenceDenialEventAPIs
             };
 
             var repositories = new RepositoryList

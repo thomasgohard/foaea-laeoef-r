@@ -78,5 +78,24 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             }
 
         }
+
+        [HttpPut("{key}/ProcessLicenceDenialTerminationResponse")]
+        public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialTerminationResponse([FromRoute] string key,
+                                                                                                  [FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = new LicenceDenialApplicationData();
+
+            var appManager = new LicenceDenialTerminationManager(application, repositories, config);
+            if (appManager.ProcessLicenceDenialTerminationResponse(applKey.EnfSrv, applKey.CtrlCd))
+                return Ok(application);
+            else
+                return UnprocessableEntity(application);
+        }
+
     }
 }

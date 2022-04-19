@@ -191,7 +191,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             else
                 return UnprocessableEntity(application);
         }
-
+           
         [HttpGet("LicenceDenialToApplication")]
         public ActionResult<List<TraceCycleQuantityData>> GetLicenceDenialToApplData([FromQuery] string federalSource,
                                                                 [FromServices] IRepositories repositories)

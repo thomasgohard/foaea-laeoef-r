@@ -83,9 +83,9 @@ public class SinFilesController : ControllerBase
 
         var apis = new APIBrokerList
         {
-            SinAPIBroker = new SinAPIBroker(apiHelper),
-            ApplicationEventAPIBroker = new ApplicationEventAPIBroker(apiHelper),
-            ApplicationAPIBroker = new ApplicationAPIBroker(apiHelper)
+            Sins = new SinAPIBroker(apiHelper),
+            ApplicationEvents = new ApplicationEventAPIBroker(apiHelper),
+            Applications = new ApplicationAPIBroker(apiHelper)
         };
 
         var repositories = new RepositoryList
