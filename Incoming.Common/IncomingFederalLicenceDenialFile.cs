@@ -59,14 +59,12 @@ namespace Incoming.Common
             string fileNameNoPath = Path.GetFileName(fullPath);
 
             if (fullPath.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
-            {                                 //                                                    ↑ 
+            {                                                                                    ↑ 
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
                 string jsonText = JsonConvert.SerializeXmlNode(doc); // convert xml to json
-
-                // send XML??? to processor api
 
                 var response = APIHelper.PostFlatFile($"api/v1/FederalLicenceDenialFiles?fileName={fileNameNoPath}",
                                                       jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
