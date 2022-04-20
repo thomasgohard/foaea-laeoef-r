@@ -159,76 +159,30 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
+            var lastResponse = Repositories.LicenceDenialResponseRepository.GetLastResponseData(appl_EnfSrv_Cd, appl_CtrlCd);
+
             LicenceDenialTerminationApplication.Appl_LastUpdate_Dte = DateTime.Now;
             LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
 
-           
+            if (LicenceDenialTerminationApplication.AppLiSt_Cd == ApplicationState.APPLICATION_ACCEPTED_10)
+            {
+                LicenceDenialTerminationApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
+            }
+            else if (LicenceDenialTerminationApplication.AppLiSt_Cd == ApplicationState.PARTIALLY_SERVICED_12)
+            {
+                LicenceDenialTerminationApplication.AppLiSt_Cd = ApplicationState.EXPIRED_15;
+                LicenceDenialTerminationApplication.ActvSt_Cd = "C";
+            }
 
             UpdateApplicationNoValidation();
 
             Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialTerminationApplication);
 
+            EventManager.AddEvent(EventCode.C50828_LICENSE_RESPONSE_RECEIVED, lastResponse.EnfSrv_Cd);
+
             EventManager.SaveEvents();
 
-            return true;
-
-            /*
-             
-    Public Function ProcessL03(ByVal applicationEnforcementServiceCode As String,
-                   ByVal applicationControlCode As String,
-                   ByVal lastUpdateUser As String) As Boolean
-
-        Dim returnBoolean As Boolean = True
-        'IsInsert = False
-
-        ' CR769 - Event 50828 should be generated in an L03. the event should be generated no matter what returned code is
-        'Get the request status code and the source.
-        Dim LO1LicRspData As Justice.FOAEA.Common.LicenseResponseData
-
-        'Get an existing LO3 application
-        With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
-            _currentLO3Application = .GetLO3FromL01(applicationEnforcementServiceCode, applicationControlCode)
-            'Get an existing LicRsp application.
-            LO1LicRspData = .GetLastLicRsp(applicationEnforcementServiceCode, applicationControlCode)
-        End With
-
-        _newLO3Application = _currentLO3Application.Copy
-
-        _newLO3Application.Appl.Item(0).Appl_LastUpdate_Usr = lastUpdateUser
-        _newLO3Application.Appl.Item(0).Appl_LastUpdate_Dte = Date.Now
-
-        If _currentLO3Application.Appl.Item(0).AppLiSt_Cd = 10 Then
-            _newLO3Application.Appl.Item(0).AppLiSt_Cd = 12
-        Else
-            If _currentLO3Application.Appl.Item(0).AppLiSt_Cd = 12 Then
-                _newLO3Application.Appl.Item(0).ActvSt_Cd = "C"
-                _newLO3Application.Appl.Item(0).AppLiSt_Cd = 15
-            End If
-
-        End If
-
-        With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
-            MakeApplicationUpperCase(_newLO3Application)
-            .UpdateLO1Appl(_newLO3Application)
-        End With
-
-        ClearEventQueue(_EventQueueData)
-        ' CR769 - Event 50828 should be generated in an L03. the event should be generated no matter what returned code is
-
-        Dim rqstStatCd As Short = LO1LicRspData.LicRsp.Item(0).RqstStat_Cd
-        Dim source As String = LO1LicRspData.LicRsp.Item(0).EnfSrv_Cd
-
-        QueueEvent(_EventQueueData, CreateEventEnum.CreateSubmEvent, 50828, _newLO3Application, source) '-- L03
-        SaveEventQueue(_EventQueueData)
-
-        If _newLO3Application.Appl.Item(0).AppLiSt_Cd = 15 Then
-            Return True
-        Else
-            Return False
-        End If
-
-    End Function             
-             */
+            return (LicenceDenialTerminationApplication.AppLiSt_Cd == ApplicationState.EXPIRED_15);
 
         }
 
@@ -294,7 +248,7 @@ namespace FOAEA3.Business.Areas.Application
 
             newL03.Appl_Create_Usr = Repositories.CurrentSubmitter;
             newL03.Appl_Create_Dte = DateTime.Now;
-            
+
             newL03.Appl_CommSubm_Text = appl_CommSubm_Text;
 
             if (UserHelper.IsInternalUser(Repositories.CurrentSubmitter))
@@ -308,6 +262,6 @@ namespace FOAEA3.Business.Areas.Application
             }
 
         }
-                
+
     }
 }
