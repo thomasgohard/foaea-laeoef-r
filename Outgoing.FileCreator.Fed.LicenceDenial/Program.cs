@@ -75,7 +75,10 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
                     foreach (var error in errors)
+                    {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("LICOUT", federalLicenceDenialOutgoingSource.Name, new Exception(error), false);
+                    }
             }
 
         }

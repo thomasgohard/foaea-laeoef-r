@@ -70,7 +70,10 @@ internal class Program
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
             else
                 foreach (var error in errors)
+                {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                    repositories.ErrorTrackingDB.MessageBrokerError("SINOUT", federalSinOutgoingSource.Name, new Exception(error), false);
+                }
         }
 
     }

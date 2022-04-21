@@ -52,13 +52,13 @@ namespace Incoming.Common
             return newFiles;
         }
 
-        public bool ProcessNewFile(string fullPath)
+        public bool ProcessNewFile(string fullPath, ref List<string> errors)
         {
             bool fileProcessedSuccessfully = false;
 
             string fileNameNoPath = Path.GetFileName(fullPath);
 
-            if (fullPath.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
+            if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
             {                                                                                     
 
                 var doc = new XmlDocument(); // load xml file
@@ -70,7 +70,10 @@ namespace Incoming.Common
                                                       jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
                     ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                    errors.Add($"FederalLicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                }
                 else
                     ColourConsole.WriteEmbeddedColorLine($"[green]{response.Content?.ReadAsStringAsync().Result}[/green]");
 
@@ -79,7 +82,7 @@ namespace Incoming.Common
             }
             else
             {
-                // TODO: generate Unknown file name exception or ignore?
+                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
             }
 
             return fileProcessedSuccessfully;

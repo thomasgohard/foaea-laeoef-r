@@ -23,22 +23,21 @@ public class OutgoingFederalSinManager
     {
         errors = new List<string>();
 
-        string newFilePath = string.Empty;
         bool fileCreated = false;
 
         var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileBaseName);
+
+        int cycleLength = 3;
+        int thisNewCycle = fileTableData.Cycle + 1;
+        if (thisNewCycle == 1000)
+            thisNewCycle = 1;
+        string newCycle = thisNewCycle.ToString(new string('0', cycleLength));
 
         try
         {
             var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-            int cycleLength = 3;
-            int thisNewCycle = fileTableData.Cycle + 1;
-            if (thisNewCycle == 1000)
-                thisNewCycle = 1;
-            string newCycle = thisNewCycle.ToString(new string('0', cycleLength));
-
-            newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
+            string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
@@ -54,14 +53,14 @@ public class OutgoingFederalSinManager
             File.WriteAllText(newFilePath, fileContent);
             fileCreated = true;
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated,
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                  "Outbound File created successfully.");
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
             APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                                     processCodes.EnfSrv_Cd,
-                                                                     "OK: Written to " + newFilePath, eventIds);
+                                                             processCodes.EnfSrv_Cd,
+                                                             "OK: Written to " + newFilePath, eventIds);
 
             return newFilePath;
 
@@ -71,7 +70,7 @@ public class OutgoingFederalSinManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated, error);
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
             Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", "Error creating outbound file", e, true);
 

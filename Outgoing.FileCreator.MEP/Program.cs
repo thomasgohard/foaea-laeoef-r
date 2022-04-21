@@ -7,6 +7,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,7 +35,8 @@ namespace Outgoing.FileCreator.MEP
 
             CreateOutgoingProvincialTracingFiles(fileBrokerDB, apiRootForFiles);
             CreateOutgoingProvincialLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
-            //CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
+            // CreateOutgoingProvincialInterceptionFiles(fileBrokerDB, apiRootForFiles);
+            // CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
         }
 
         private static void CreateOutgoingProvincialTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
@@ -69,7 +71,10 @@ namespace Outgoing.FileCreator.MEP
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
                     foreach (var error in errors)
+                    {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("TRCAPPOUT", provincialTraceOutgoingSource.Name, new Exception(error), false);
+                    }
 
             }
 
@@ -108,7 +113,10 @@ namespace Outgoing.FileCreator.MEP
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
                     foreach (var error in errors)
+                    {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("TRCAPPOUT", provincialTraceOutgoingSource.Name, new Exception(error), false);
+                    }
             }
 
         }

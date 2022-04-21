@@ -1,10 +1,14 @@
 ﻿using DBHelper;
+using FileBroker.Data.DB;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Incoming.Common;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Incoming.FileWatcher.MEP.BritishColumbia
 {
@@ -26,27 +30,34 @@ namespace Incoming.FileWatcher.MEP.BritishColumbia
 
             IConfigurationRoot configuration = builder.Build();
 
-            var mainDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
 
             var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             // process any new files
 
             var apiAction = new APIBrokerHelper();
-            var provincialFileManager = new IncomingProvincialFile(mainDB, apiRootData, apiAction,
+            var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootData, apiAction,
                                                                    defaultProvincePrefix: "BC3B",
                                                                    tracingOverridePrefix: "BC3V");
 
             string ftpRoot = configuration["FTProot"];
             var newFiles = provincialFileManager.GetNewFiles(ftpRoot + @"\BC3B01");
-            var newTracingFiles = provincialFileManager.GetNewFiles(ftpRoot + @"\BC3V01");
-            foreach (var newTracingFile in newTracingFiles) // combine new files from both folders
+            var newFiles2 = provincialFileManager.GetNewFiles(ftpRoot + @"\BC3V01");
+            foreach (var newTracingFile in newFiles2) // combine new files from both folders
                 newFiles.Add(newTracingFile.Key, newTracingFile.Value);
 
             if (newFiles.Count > 0)
             {
                 foreach (var newFile in newFiles)
-                    provincialFileManager.ProcessNewFile(newFile.Key);
+                {
+                    var errors = new List<string>();
+                    provincialFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    if (errors.Any())
+                        foreach (var error in errors)
+                            errorTrackingDB.MessageBrokerError("BC APPIN", newFile.Key, new Exception(error), false);
+                }
             }
 
         }

@@ -74,7 +74,10 @@ namespace Outgoing.FileCreator.Fed.Tracing
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
                     foreach (var error in errors)
+                    {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name, new Exception(error), false);
+                    }
             }
 
         }

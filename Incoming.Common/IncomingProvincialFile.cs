@@ -65,14 +65,14 @@ namespace Incoming.Common
             return newFiles;
         }
 
-        public bool ProcessNewFile(string fullPath)
+        public bool ProcessNewFile(string fullPath, ref List<string> errors)
         {
             bool fileProcessedSuccessfully = false;
 
             string fileNameNoExtension = Path.GetFileNameWithoutExtension(fullPath);
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
 
-            if (fileNameNoExtension.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
+            if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
             {                                            //                                                    ↑
 
                 var doc = new XmlDocument(); // load xml file
@@ -84,38 +84,68 @@ namespace Incoming.Common
 
                 if (fileNameNoCycle == InterceptionPrefix + "II")
                 {
-                    APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
-                    fileProcessedSuccessfully = true;
+                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                        errors.Add($"InterceptionFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                        fileProcessedSuccessfully = false;
+                    }
+                    else
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"[green]InterceptionFiles API succeeded.[/green]");
+                        fileProcessedSuccessfully = true;
+                    }
                 }
                 else if (fileNameNoCycle == LicencingPrefix + "IL")
                 {
-                    APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
-                    fileProcessedSuccessfully = true;
+                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                        errors.Add($"LicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                        fileProcessedSuccessfully = false;
+                    }
+                    else
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"[green]LicenceDenialFiles API succeeded.[/green]");
+                        fileProcessedSuccessfully = true;
+                    }
                 }
                 else if (fileNameNoCycle == TracingPrefix + "IT")
                 {
                     var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaTracingRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                        errors.Add($"TracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                        fileProcessedSuccessfully = false;
+                    }
                     else
-                        ColourConsole.WriteEmbeddedColorLine($"[green]{response.Content?.ReadAsStringAsync().Result}[/green]");
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"[green]TracingFiles API succeeded.[/green]");
+                        fileProcessedSuccessfully = true;
+                    }
 
-                    fileProcessedSuccessfully = true;
                 }
-                else if (fileNameNoCycle == LicencingPrefix + "IW")
+                //else if (fileNameNoCycle == LicencingPrefix + "IW")
+                //{
+                //    // var response = APIHelper.PostJsonFile($"api/v1/AffidavitSwearingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.SwearingRootAPI);
+                //    fileProcessedSuccessfully = true;
+                //}
+                else
                 {
-                    //                    APIHelper.PostJsonFile($"api/v1/AffidavitSwearingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.SwearingRootAPI);
-                    fileProcessedSuccessfully = true;
+                    errors.Add($"Error: Unrecognized file name '{fileNameNoCycle}'");
                 }
 
             }
-            else if (fileNameNoExtension.ToUpper().StartsWith(ElectronicSummonsPrefix.Substring(0, 2) + "ESD"))
-            {
-                // TODO: call Incoming.API.MEP.ESD 
-            }
+            //else if (fileNameNoExtension.ToUpper().StartsWith(ElectronicSummonsPrefix.Substring(0, 2) + "ESD"))
+            //{
+            //    // TODO: call Incoming.API.MEP.ESD 
+            //}
             else
             {
-                // TODO: generate Unknown file name exception or ignore?
+                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoExtension?.ToUpper()[6]}'. Is this an incoming file?");
             }
 
             return fileProcessedSuccessfully;

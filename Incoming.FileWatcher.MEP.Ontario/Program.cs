@@ -1,10 +1,14 @@
 ﻿using DBHelper;
+using FileBroker.Data.DB;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Incoming.Common;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Incoming.FileWatcher.MEP.Ontario
 {
@@ -27,13 +31,14 @@ namespace Incoming.FileWatcher.MEP.Ontario
 
             IConfiguration configuration = builder.Build();
 
-            var mainDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
 
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             // process any new files
             var apiAction = new APIBrokerHelper();
-            var provincialFileManager = new IncomingProvincialFile(mainDB, apiRootForFiles, apiAction, "ON3D01");
+            var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootForFiles, apiAction, "ON3D01");
 
             string ftpRoot = configuration["FTProot"];
             var newFiles = provincialFileManager.GetNewFiles(ftpRoot + @"\ON3D01");
@@ -42,8 +47,12 @@ namespace Incoming.FileWatcher.MEP.Ontario
                 ColourConsole.WriteEmbeddedColorLine($"Found [green]{newFiles.Count}[/green] file(s)");
                 foreach (var newFile in newFiles)
                 {
+                    var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile.Key}[/green]...");
-                    provincialFileManager.ProcessNewFile(newFile.Key);
+                    provincialFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    if (errors.Any())
+                        foreach (var error in errors)
+                            errorTrackingDB.MessageBrokerError("ON APPIN", newFile.Key, new Exception(error), false);
                 }
             }
             else

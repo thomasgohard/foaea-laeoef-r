@@ -17,18 +17,16 @@ public class OutgoingFederalLicenceDenialManager
     {
         errors = new List<string>();
 
-        string newFilePath = string.Empty;
         bool fileCreated = false;
 
         var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileBaseName);
+        string newCycle = (fileTableData.Cycle + 1).ToString("000000");
 
         try
         {
             var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-            string newCycle = (fileTableData.Cycle+1).ToString("000000");
-
-            newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
+            string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".XML";
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
@@ -47,7 +45,7 @@ public class OutgoingFederalLicenceDenialManager
             File.WriteAllText(newFilePath, fileContent);
             fileCreated = true;
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated,
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                  "Outbound File created successfully.");
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
@@ -64,7 +62,7 @@ public class OutgoingFederalLicenceDenialManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated, error);
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
             Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", "Error creating outbound file", e, true);
 

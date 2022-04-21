@@ -1,12 +1,15 @@
 ﻿using DBHelper;
+using FileBroker.Data.DB;
 using FileBroker.Model;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Incoming.Common;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Incoming.FileWatcher.Fed.Tracing
 {
@@ -29,6 +32,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
             IConfiguration configuration = builder.Build();
 
             var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
             var apiAction = new APIBrokerHelper();
 
@@ -45,8 +49,12 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file(s)");
                 foreach (var newFile in allNewFiles)
                 {
+                    var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile.Key}[/green]...");
-                    FederalFileManager.ProcessNewFile(newFile.Key);
+                    FederalFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    if (errors.Any())
+                        foreach (var error in errors)
+                            errorTrackingDB.MessageBrokerError("LICIN", newFile.Key, new Exception(error), false);
                 }
             }
             else
