@@ -63,7 +63,6 @@ internal class Program
         var federalSinOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("SINOUT")
                                           .Where(s => s.Active == true);
 
-        var allErrors = new Dictionary<string, List<string>>();
         foreach (var federalSinOutgoingSource in federalSinOutgoingSources)
         {
             string filePath = federalFileManager.CreateOutputFile(federalSinOutgoingSource.Name,
@@ -72,12 +71,9 @@ internal class Program
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
             else
-                allErrors.Add(federalSinOutgoingSource.Name, errors);
+                foreach (var error in errors)
+                    ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
         }
 
-        if (allErrors.Count > 0)
-            foreach (var fedSource in allErrors)
-                foreach(var error in allErrors[fedSource.Key])
-                    ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{fedSource.Key}[/cyan]: [red]{error}[/red]");
     }
 }

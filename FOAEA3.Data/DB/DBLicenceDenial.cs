@@ -186,7 +186,7 @@ namespace FOAEA3.Data.DB
         private void FillLicenceDenialOutgoingFederalData(IDBHelperReader rdr, LicenceDenialOutgoingFederalData data)
         {
             data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
-            data.Event_Reas_Cd = (int)rdr["Event_Reas_Cd"];
+            data.Event_Reas_Cd = (int?)rdr["Event_Reas_Cd"];
             data.Event_Reas_Text = rdr["Event_Reas_Text"] as string;
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
             data.Recordtype = rdr["Recordtype"] as string;

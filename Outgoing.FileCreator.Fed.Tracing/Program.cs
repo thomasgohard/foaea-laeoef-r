@@ -68,19 +68,17 @@ namespace Outgoing.FileCreator.Fed.Tracing
             var federalTraceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("TRCOUT")
                                                 .Where(s => s.Active == true);
 
-            var allErrors = new Dictionary<string, List<string>>();
             foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
             {
                 string filePath = federalFileManager.CreateOutputFile(federalTraceOutgoingSource.Name,
                                                                       out List<string> errors);
-                allErrors.Add(federalTraceOutgoingSource.Name, errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    foreach (var error in errors)
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
             }
 
-            if (allErrors.Count > 0)
-                foreach (var error in allErrors)
-                    ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{error.Key}[/cyan]: [red]{error.Value}[/red]");
         }
     }
 }

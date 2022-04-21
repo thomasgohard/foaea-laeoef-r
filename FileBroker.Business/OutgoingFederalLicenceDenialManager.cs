@@ -77,7 +77,7 @@ public class OutgoingFederalLicenceDenialManager
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
         var data = APIs.LicenceDenialApplications.GetOutgoingFederalLicenceDenialRequests(maxRecords, actvSt_Cd,
-                                                                                                  appLiSt_Cd, enfSrvCode);
+                                                                                          appLiSt_Cd, enfSrvCode);
         return data;
     }
 
@@ -86,7 +86,7 @@ public class OutgoingFederalLicenceDenialManager
     {
         var result = new StringBuilder();
 
-        result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
+        result.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         result.AppendLine("<NewDataSet>");
 
         result.AppendLine(GenerateHeaderLine(newCycle));
@@ -115,11 +115,29 @@ public class OutgoingFederalLicenceDenialManager
         return output.ToString();
     }
 
+    public static string FormatDBDateString(string dateString)
+    {
+        if (!string.IsNullOrEmpty(dateString.Trim()) && (dateString.Length == 8))
+        {
+            try
+            {
+                int day = int.Parse(dateString[0..2]);
+                int month = int.Parse(dateString[2..4]);
+                int year = int.Parse(dateString[4..8]);
+                var dateTime = new DateTime(year, month, day);
+                return dateTime.ToString("o");
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+        return string.Empty;
+    }
+
     private static string GenerateDetailLine(string enfSource, LicenceDenialOutgoingFederalData item)
     {
-        string xmlDebtorDOB = string.Empty;
-        if (DateTime.TryParse(item.Appl_Dbtr_Brth_Dte, out DateTime debtorDOB))
-            xmlDebtorDOB = debtorDOB.ToString("o");
+        string xmlDebtorDOB = FormatDBDateString(item.Appl_Dbtr_Brth_Dte);
 
         var output = new StringBuilder();
         output.AppendLine($"<LICOUT02>");

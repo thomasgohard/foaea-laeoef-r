@@ -59,7 +59,7 @@ namespace Incoming.Common
             string fileNameNoPath = Path.GetFileName(fullPath);
 
             if (fullPath.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
-            {                                                                                    ↑ 
+            {                                                                                     
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);

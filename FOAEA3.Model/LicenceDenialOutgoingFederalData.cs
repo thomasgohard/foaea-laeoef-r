@@ -3,7 +3,7 @@
     public class LicenceDenialOutgoingFederalData
     {
         public int Event_dtl_Id { get; set; }
-        public int Event_Reas_Cd { get; set; }
+        public int? Event_Reas_Cd { get; set; }
         public string Event_Reas_Text { get; set; }
         public string ActvSt_Cd { get; set; }
         public string Recordtype { get; set; }

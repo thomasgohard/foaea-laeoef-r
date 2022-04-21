@@ -37,7 +37,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             CreateOutgoingFederalLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
 
             ColourConsole.Write("Completed.");
-            ColourConsole.WriteEmbeddedColorLine("[yellow]Press any key to close[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine("\n[yellow]Press any key to close[/yellow]");
             Console.ReadKey();
 
         }
@@ -69,19 +69,17 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             var federalLicenceDenialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("LICOUT")
                                                                   .Where(s => s.Active == true);
 
-            var allErrors = new Dictionary<string, List<string>>();
             foreach (var federalLicenceDenialOutgoingSource in federalLicenceDenialOutgoingSources)
             {
                 string filePath = federalFileManager.CreateOutputFile(federalLicenceDenialOutgoingSource.Name,
                                                                       out List<string> errors);
-                allErrors.Add(federalLicenceDenialOutgoingSource.Name, errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    foreach (var error in errors)
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
             }
 
-            if (allErrors.Count > 0)
-                foreach (var error in allErrors)
-                    ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{error.Key}[/cyan]: [red]{error.Value}[/red]");
         }
     }
 }
