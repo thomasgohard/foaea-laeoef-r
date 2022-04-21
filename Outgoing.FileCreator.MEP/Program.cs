@@ -37,16 +37,6 @@ namespace Outgoing.FileCreator.MEP
             //CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
         }
 
-        //private static void CreateOutgoingProvincialStatusFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //private static void CreateOutgoingProvincialLicencingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         private static void CreateOutgoingProvincialTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
         {
             var apiBrokers = new APIBrokerList
@@ -72,17 +62,17 @@ namespace Outgoing.FileCreator.MEP
             var provincialTraceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("TRCAPPOUT")
                                                 .Where(s => s.Active == true);
 
-            var allErrors = new Dictionary<string, List<string>>();
             foreach (var provincialTraceOutgoingSource in provincialTraceOutgoingSources)
             {
                 string filePath = federalFileManager.CreateOutputFile(provincialTraceOutgoingSource.Name, out List<string> errors);
-                allErrors.Add(provincialTraceOutgoingSource.Name, errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    foreach (var error in errors)
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+
             }
 
-            foreach (var error in allErrors)
-                ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{error.Key}[/cyan]: [red]{error.Value}[/red]");
         }
 
         private static void CreateOutgoingProvincialLicenceDenialFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)

@@ -37,8 +37,6 @@ internal class Program
         CreateOutgoingFederalSinFile(fileBrokerDB, apiRootForFiles);
 
         ColourConsole.Write("Completed.\n");
-        ColourConsole.WriteEmbeddedColorLine("[yellow]Press any key to close[/yellow]");
-        Console.ReadKey();
     }
 
     private static void CreateOutgoingFederalSinFile(DBTools fileBrokerDB, ApiConfig apiRootForFiles)

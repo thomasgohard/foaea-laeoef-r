@@ -26,7 +26,7 @@ public class OutgoingFederalLicenceDenialManager
         {
             var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-            string newCycle = fileTableData.Cycle.ToString("000000");
+            string newCycle = (fileTableData.Cycle+1).ToString("000000");
 
             newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
             if (File.Exists(newFilePath))
@@ -35,11 +35,14 @@ public class OutgoingFederalLicenceDenialManager
                 return "";
             }
 
-            var data = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            var outgoingData = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                        processCodes.EnfSrv_Cd);
 
-            var eventIds = new List<int>();
-            string fileContent = GenerateOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd);
+            var eventDetailIds = new List<int>();
+            foreach (var item in outgoingData)
+                eventDetailIds.Add(item.Event_dtl_Id);
+
+            string fileContent = GenerateOutputFileContentFromData(outgoingData, newCycle, processCodes.EnfSrv_Cd);
 
             File.WriteAllText(newFilePath, fileContent);
             fileCreated = true;
@@ -50,8 +53,8 @@ public class OutgoingFederalLicenceDenialManager
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
             APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                                     processCodes.EnfSrv_Cd,
-                                                                     "OK: Written to " + newFilePath, eventIds);
+                                                             processCodes.EnfSrv_Cd,
+                                                             "OK: Written to " + newFilePath, eventDetailIds);
 
             return newFilePath;
 

@@ -37,8 +37,6 @@ namespace Outgoing.FileCreator.Fed.Tracing
             CreateOutgoingFederalTracingFiles(fileBrokerDB, apiRootForFiles);
 
             ColourConsole.Write("Completed.");
-            ColourConsole.WriteEmbeddedColorLine("[yellow]Press any key to close[/yellow]");
-            Console.ReadKey();
 
         }
 

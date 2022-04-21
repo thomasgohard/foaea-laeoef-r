@@ -37,8 +37,6 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             CreateOutgoingFederalLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
 
             ColourConsole.Write("Completed.");
-            ColourConsole.WriteEmbeddedColorLine("\n[yellow]Press any key to close[/yellow]");
-            Console.ReadKey();
 
         }
 
