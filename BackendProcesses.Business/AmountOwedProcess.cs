@@ -438,28 +438,26 @@ namespace BackendProcesses.Business
                         break;
 
                     case PaymentPeriodicCode.BIWEEKLY:
-                        // days = DateDiff(DateInterval.Day, calcStartDateNoTime, calcFaDtePayableNoTime)
-                        // currentPeriod = Decimal.Floor(days / 14) + 1
                         days = (decimal)(payableDateNoTime - calcAcceptedDateNoTime).TotalDays;
                         currentPeriodCount = (int)Math.Floor(days / 14.0m) + 1;
                         break;
                     case PaymentPeriodicCode.MONTHLY:
-                        currentPeriodCount = DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime);
+                        currentPeriodCount = payableDateNoTime.MonthDifference(calcAcceptedDateNoTime);
                         if (calcAcceptedDateNoTime.Day <= payableDateNoTime.Day)
                             currentPeriodCount++;
                         break;
                     case PaymentPeriodicCode.QUARTERLY:
-                        currentPeriodCount = DateTimeHelper.GetQuarters(calcAcceptedDateNoTime, payableDateNoTime);
+                        currentPeriodCount = calcAcceptedDateNoTime.GetQuarters(payableDateNoTime);
                         if (calcAcceptedDateNoTime.AddMonths(3 * currentPeriodCount) <= payableDateNoTime)
                             currentPeriodCount++;
                         break;
                     case PaymentPeriodicCode.SEMI_ANNUALLY:
-                        currentPeriodCount = (int)Math.Floor(DateTimeHelper.MonthDifference(payableDateNoTime, calcAcceptedDateNoTime) / 6.0);
+                        currentPeriodCount = (int)Math.Floor(payableDateNoTime.MonthDifference(calcAcceptedDateNoTime) / 6.0);
                         if (calcAcceptedDateNoTime.AddMonths(currentPeriodCount * 6) <= payableDateNoTime)
                             currentPeriodCount++;
                         break;
                     case PaymentPeriodicCode.SEMI_MONTHLY:
-                        currentPeriodCount = DateTimeHelper.MonthDifference(calcAcceptedDateNoTime, payableDateNoTime) * 2;
+                        currentPeriodCount = calcAcceptedDateNoTime.MonthDifference(payableDateNoTime) * 2;
 
                         if ((calcAcceptedDateNoTime.Day < 15) && (payableDateNoTime.Day > 14))
                             currentPeriodCount += 2;

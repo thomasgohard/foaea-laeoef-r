@@ -45,7 +45,7 @@ namespace FOAEA3.Model
         public string Appl_Dbtr_Parent_SurNme { get; set; }
 
         [Display(Name = "DOB", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeHelper.YYYY_MM_DD)]
+        [DisplayFormat(DataFormatString = DateTimeExtensions.YYYY_MM_DD)]
         public DateTime? Appl_Dbtr_Brth_Dte { get; set; }
 
         [Display(Name = "LANGUAGE_OF_CHOICE", ResourceType = typeof(LanguageResource))]

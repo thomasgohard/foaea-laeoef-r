@@ -251,7 +251,7 @@ namespace FOAEA3.Business.Areas.Application
 
             newL03.Appl_CommSubm_Text = appl_CommSubm_Text;
 
-            if (UserHelper.IsInternalUser(Repositories.CurrentSubmitter))
+            if (Repositories.CurrentSubmitter.IsInternalUser())
             {
                 newL03.Medium_Cd = "PAP";
             }

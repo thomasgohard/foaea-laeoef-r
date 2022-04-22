@@ -51,7 +51,7 @@
                         <td>@data.Appl_EnfSrv_Cd</td>
                         <td>@data.Subm_SubmCd</td>
                         <td><a id="@appKey" asp-controller="Tracing" asp-action="Edit" asp-area="Application" asp-route-id="@appKey">@data.Appl_CtrlCd</a></td>
-                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeHelper.YYYY_MM_DD)</td>
+                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeExtensions.YYYY_MM_DD)</td>
                         <td>@data.Appl_Dbtr_SurNme</td>
                         <td>@data.Appl_Source_RfrNr</td>
                         <td>@data.Appl_JusticeNr</td>

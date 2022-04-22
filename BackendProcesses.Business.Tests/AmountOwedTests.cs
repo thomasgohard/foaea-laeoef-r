@@ -108,11 +108,11 @@ namespace BackendProcesses.Business.Tests
             logger.AppendLine("");
             logger.AppendLine("| Item | Value | Item | Value | Item | Value |");
             logger.AppendLine("| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |");
-            logger.AppendLine($"| Start Date | {s.Start_Dte.ToString(DateTimeHelper.YYYY_MM_DD)} | End Date | {s.End_Dte.ToString(DateTimeHelper.YYYY_MM_DD)} | | |");
+            logger.AppendLine($"| Start Date | {s.Start_Dte.ToString(DateTimeExtensions.YYYY_MM_DD)} | End Date | {s.End_Dte.ToString(DateTimeExtensions.YYYY_MM_DD)} | | |");
             logger.AppendLine($"| Lump Sum Diverted | {s.LmpSumDivertedTtl_Money} | Periodic Diverted | {s.PerPymDivertedTtl_Money} | Fees Diverted | {s.FeeDivertedTtl_Money} |");
             logger.AppendLine($"| Lump Sum Owed | {s.LmpSumOwedTtl_Money} | Periodic Owed | {s.PerPymOwedTtl_Money} | Fees Owed | {s.FeeOwedTtl_Money} |");
             logger.AppendLine($"| Total Amount | {s.Appl_TotalAmnt} |  |  |  |  |");
-            logger.AppendLine($"| Last Calc | {s.SummSmry_LastCalc_Dte?.ToString(DateTimeHelper.YYYY_MM_DD)} | Recalc Dte | {s.SummSmry_Recalc_Dte?.ToString(DateTimeHelper.YYYY_MM_DD)} | Vary Count | {s.SummSmry_Vary_Cnt} |");
+            logger.AppendLine($"| Last Calc | {s.SummSmry_LastCalc_Dte?.ToString(DateTimeExtensions.YYYY_MM_DD)} | Recalc Dte | {s.SummSmry_Recalc_Dte?.ToString(DateTimeExtensions.YYYY_MM_DD)} | Vary Count | {s.SummSmry_Vary_Cnt} |");
 
             logger.AppendLine("");
             logger.AppendLine("<div style='page-break-after: always'></div>");

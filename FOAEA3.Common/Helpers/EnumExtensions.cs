@@ -2,7 +2,7 @@
 
 namespace FOAEA3.Common.Helpers
 {
-    public static class EnumHelper
+    public static class EnumExtensions
     {
         public static string AsString(this ApplicationState state)
         {

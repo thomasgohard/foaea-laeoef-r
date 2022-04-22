@@ -39,11 +39,11 @@
     string legalDate;
     if (Model.LicenceDenial.Appl_Lgl_Dte.HasValue)
     {
-        legalDate = Model.LicenceDenial.Appl_Lgl_Dte.Value.ToString(DateTimeHelper.YYYY_MM_DD);
+        legalDate = Model.LicenceDenial.Appl_Lgl_Dte.Value.ToString(DateTimeExtensions.YYYY_MM_DD);
     }
     else
     {
-        legalDate = DateTime.Now.ToString(DateTimeHelper.YYYY_MM_DD);
+        legalDate = DateTime.Now.ToString(DateTimeExtensions.YYYY_MM_DD);
     }
 
     Dictionary<string, string> unitsOfMeasures = new Dictionary<string, string>

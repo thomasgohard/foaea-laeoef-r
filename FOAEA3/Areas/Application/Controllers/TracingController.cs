@@ -107,7 +107,7 @@ namespace FOAEA3.Areas.Application.Controllers
                 Debtor = $"{tracingApplication.Appl_Dbtr_FrstNme?.Trim()} {tracingApplication.Appl_Dbtr_MddleNme?.Trim()} {tracingApplication.Appl_Dbtr_SurNme?.Trim()}",
                 Declarant = submittersAPI.GetDeclarant(tracingApplication.Subm_SubmCd),
                 Tracing = tracingApplication,
-                CurrentDate = DateTime.Now.ToString(DateTimeHelper.YYYY_MM_DD),
+                CurrentDate = DateTime.Now.ToString(DateTimeExtensions.YYYY_MM_DD),
                 FamilyProvisions = new SelectList(familyProvisionAPI.GetFamilyProvisions(), nameof(FamilyProvisionData.FamPro_Cd), nameof(FamilyProvisionData.Description)),
                 InfoBanks = new SelectList(infoBanksAPI.GetInfoActiveBanksForProvince(submProfile.Prv_Cd), nameof(InfoBankData.InfoBank_Cd), nameof(InfoBankData.Description)),
                 Commissionners = new SelectList(submittersAPI.GetCommissionersForLocation(submProfile.EnfOff_City_LocCd), nameof(CommissionerData.Subm_SubmCd), nameof(CommissionerData.Subm_Name))

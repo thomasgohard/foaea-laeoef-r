@@ -47,11 +47,11 @@
     string legalDate;
     if (Model.Tracing.Appl_Lgl_Dte.HasValue)
     {
-        legalDate = Model.Tracing.Appl_Lgl_Dte.Value.ToString(DateTimeHelper.YYYY_MM_DD);
+        legalDate = Model.Tracing.Appl_Lgl_Dte.Value.ToString(DateTimeExtensions.YYYY_MM_DD);
     }
     else
     {
-        legalDate = DateTime.Now.ToString(DateTimeHelper.YYYY_MM_DD);
+        legalDate = DateTime.Now.ToString(DateTimeExtensions.YYYY_MM_DD);
     }
 
     ViewBag.CourtValue = Model.CourtValue;
