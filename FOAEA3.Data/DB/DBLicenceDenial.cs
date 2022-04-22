@@ -172,7 +172,7 @@ namespace FOAEA3.Data.DB
 
         private void FillLicenceDenialToApplDataFromReader(IDBHelperReader rdr, LicenceDenialToApplData data)
         {
-            data.Dtl_Reas_Cd = (int) rdr["dtl_Reas_Cd"];
+            data.Dtl_Reas_Cd = (int?) rdr["dtl_Reas_Cd"];
             data.Dtl_List = (short) rdr["dtl_List"];
             data.Dtl_ActvSt = rdr["dtl_ActvSt"] as string;
             data.Dtl_Id = (int) rdr["dtl_Id"];

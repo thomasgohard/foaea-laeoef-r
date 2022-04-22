@@ -19,7 +19,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
         static void Main(string[] args)
         {
-            ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Licence Denial File Monitor");
+            ColourConsole.WriteEmbeddedColorLine("Starting Federal Licence Denial File Monitor");
 
             string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 

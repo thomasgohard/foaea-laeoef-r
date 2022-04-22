@@ -16,7 +16,7 @@ namespace FileBroker.Business
         public List<string> ProcessJsonFile(string jsonFileContent, string fileName)
         {
             var fileTableData = GetFileTableData(fileName);
-            var fedSource = fileTableData?.Name[0..1].ToUpper() switch
+            var fedSource = fileTableData?.Name[0..2].ToUpper() switch
             {
                 "PA" => "PA01",
                 "TC" => "TC01",
@@ -44,26 +44,26 @@ namespace FileBroker.Business
                 if (errors.Any())
                     return errors;
 
-                MessageDataList result = new MessageDataList();
-                List<ApplicationEventData> validEvents;
-                List<ApplicationEventDetailData> validEventDetails;
+                var result = new MessageDataList();
 
                 ValidateHeader(licenceDenialResponses.NewDataSet, fileName, ref errors);
                 ValidateFooter(licenceDenialResponses.NewDataSet, ref errors);
-                ValidateDetails(licenceDenialResponses.NewDataSet, fedSource, ref errors, out validEvents, out validEventDetails);
+                ValidateDetails(licenceDenialResponses.NewDataSet, fedSource, ref errors, 
+                                out List<ApplicationEventData> validEvents, 
+                                out List<ApplicationEventDetailData> validEventDetails);
 
                 if (errors.Any())
                     return errors;
 
-                var licenceDenialFoaeaResponseData = GenerateLicenceDenialResponseDataFromIncomingResponses(licenceDenialResponses,
+                var licenceDenialFoaeaResponseData = GenerateLicenceDenialResponseDataFromIncomingResponses(
+                                                                                                    licenceDenialResponses,
                                                                                                     fileName, fedSource,
                                                                                                     validEvents);
 
                 if ((licenceDenialFoaeaResponseData != null) && (licenceDenialFoaeaResponseData.Count > 0))
                 {
-                    SendLicenceDenialResponsesToFOAEA(licenceDenialFoaeaResponseData, fileTableData.PrcId,
-                                                      fedSource, fileName, validEvents, validEventDetails,
-                                                      ref errors);
+                    SendLicenceDenialResponsesToFOAEA(licenceDenialFoaeaResponseData, fedSource, fileName, 
+                                                      validEvents, validEventDetails, ref errors);
 
                     Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
                 }
@@ -199,7 +199,7 @@ namespace FileBroker.Business
                         foreach (var eventData in events)
                         {
                             var existingEventDetailsForAppl = eventDetails.Where(m => m.Event_Id == eventData.Event_Id).ToList();
-                            if (!existingEventDetailsForAppl.Any())
+                            if (existingEventDetailsForAppl.Any())
                                 validEventDetails.AddRange(existingEventDetailsForAppl);
                         }
                     }
@@ -209,18 +209,15 @@ namespace FileBroker.Business
         }
 
         public void SendLicenceDenialResponsesToFOAEA(List<LicenceDenialResponseData> licenceDenialResponseData,
-                                                      int processId, string fedSource, 
-                                                      string fileName, List<ApplicationEventData> validEvents,
+                                                      string fedSource, string fileName, 
+                                                      List<ApplicationEventData> validEvents,
                                                       List<ApplicationEventDetailData> validEventDetails,
                                                       ref List<string> errors)
         {
             try
             {
-                string cutOffDaysValue = Repositories.ProcessParameterTable.GetValueForParameter(processId, "evnt_cutoff");
-                int cutOffDays = int.Parse(cutOffDaysValue);
-
                 foreach (var item in licenceDenialResponseData)
-                    VerifyReceivedDataForErrors(item, fedSource, fileName, ref validEvents); 
+                    VerifyReceivedDataForErrors(item, fedSource, fileName, ref validEvents);
 
                 var dataToSave = licenceDenialResponseData.Where(m => (m.RqstStat_Cd != 5) || (fedSource != "PA01")).ToList();
                 APIs.LicenceDenialResponses.InsertBulkData(dataToSave);
@@ -242,9 +239,7 @@ namespace FileBroker.Business
             var dataToAppl = APIs.LicenceDenialApplications.GetLicenceDenialToApplData(fedSource);
 
             foreach (var item in dataToAppl)
-            {
                 UpdateLicenceApplication(item, fileName, validEvents, validEventDetails, ref errors);
-            }
         }
 
         private void UpdateLicenceApplication(LicenceDenialToApplData item, string fileName, List<ApplicationEventData> validEvents,
@@ -322,8 +317,6 @@ namespace FileBroker.Business
 
             if (eventForAppl is not null)
             {
-                var licenceDenialAppl = APIs.LicenceDenialApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-
                 // CR 932 remove code 05 from Passport Canada  
                 if ((item.RqstStat_Cd == 5) && (fedSource == "PA01"))
                 {
@@ -339,11 +332,11 @@ namespace FileBroker.Business
                                               List<ApplicationEventData> validEvents, List<ApplicationEventDetailData> validEventDetails)
         {
             string eventReason = $"[FileNm:{fileName}][RecPos:{item.LicRsp_SeqNr}][ErrDes:000000MSGBRO]" +
-                                 $"[(EnfSrv:{item.Appl_EnfSrv_Cd})(CtrlCd:{item.Appl_CtrlCd})]" +
+                                 $"[(EnfSrv:{item.Appl_EnfSrv_Cd.Trim()})(CtrlCd:{item.Appl_CtrlCd.Trim()})]" +
                                  $"[RqStat:{item.RqstStat_Cd}]";
 
-            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
-                                                 (m.Appl_CtrlCd == item.Appl_CtrlCd)).FirstOrDefault();
+            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd.Trim() == item.Appl_EnfSrv_Cd.Trim()) &&
+                                                      (m.Appl_CtrlCd.Trim() == item.Appl_CtrlCd.Trim())).FirstOrDefault();
             if (eventForAppl != null)
             {
                 int eventId = eventForAppl.Event_Id;

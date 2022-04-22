@@ -115,7 +115,7 @@ namespace FOAEA3.Data.DB
             var result = MainDB.GetDataFromStoredProc<ApplicationEventDetailData>("MessageBrokerRequestedLICINEventDetailData", parameters,
                                                                                   FillEventDetailDataFromReader);
             foreach (var item in result)
-                item.Queue = EventQueue.EventLicence;
+                item.Queue = EventQueue.EventLicence_dtl;
 
             return result;
         }
@@ -145,7 +145,6 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-
         public bool SaveEventDetail(ApplicationEventDetailData eventDetailData)
         {
             bool success = false;
@@ -163,14 +162,21 @@ namespace FOAEA3.Data.DB
                     if (eventDetailData.Event_dtl_Id == 0)
                         success = CreateEventDetail(eventDetailData, "EvntTrace");
                     else
-                        success = UpdateTracingEventDetai(eventDetailData);
+                        success = UpdateEventDetail(eventDetailData, "MessageBrokerEventTraceDetailUpdate");
+                    break;                
+                
+                case EventQueue.EventLicence_dtl:
+                    if (eventDetailData.Event_dtl_Id == 0)
+                        success = CreateEventDetail(eventDetailData, "EvntLicence");
+                    else
+                        success = UpdateEventDetail(eventDetailData, "MessageBrokerEventLicenseDetailUpdate");
                     break;
 
                 case EventQueue.EventSIN_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
                         success = CreateEventDetail(eventDetailData, "EvntSIN");
                     else
-                        success = UpdateSINEventDetail(eventDetailData);
+                        success = UpdateEventDetail(eventDetailData, "MessageBrokerEventSINDetailUpdate");
                     break;
 
             }
@@ -244,66 +250,39 @@ namespace FOAEA3.Data.DB
 
             return success;
         }
-        
-        private bool UpdateTracingEventDetai(ApplicationEventDetailData eventDetailData)
-        {
-            bool success = false;
 
-            var parameters = new Dictionary<string, object>
-                    {
-                        { "Event_dtl_Id", eventDetailData.Event_dtl_Id},
-                        { "EnfSrv_Cd", eventDetailData.EnfSrv_Cd},
-                        { "Event_Id", eventDetailData.Event_Id},
-                        { "Event_TimeStamp", eventDetailData.Event_TimeStamp},
-                        { "Event_Compl_Dte", eventDetailData.Event_Compl_Dte},
-                        { "Event_Reas_Cd", eventDetailData.Event_Reas_Cd},
-                        { "Event_Reas_Text", eventDetailData.Event_Reas_Text},
-                        { "Event_Priority_Ind", eventDetailData.Event_Priority_Ind},
-                        { "Event_Effctv_Dte", eventDetailData.Event_Effctv_Dte},
-                        { "AppLiSt_Cd", eventDetailData.ActvSt_Cd},
-                        { "ActvSt_Cd", eventDetailData.AppLiSt_Cd}
-                    };
-
-            MainDB.ExecProc("MessageBrokerEventTraceDetailUpdate", parameters);
-
-            if (string.IsNullOrEmpty(MainDB.LastError))
-                success = true;
-
-            return success;
-        }
-
-        private bool UpdateSINEventDetail(ApplicationEventDetailData eventData)
+        private bool UpdateEventDetail(ApplicationEventDetailData eventDetailData, string procName)
         {
             bool success = false;
 
             var parameters = new Dictionary<string, object>
             {
-                { "Event_dtl_Id", eventData.Event_dtl_Id },
-                { "EnfSrv_Cd", eventData.EnfSrv_Cd },
-                { "Event_Id", eventData.Event_Id },
-                { "Event_TimeStamp", eventData.Event_TimeStamp },
-                { "Event_Priority_Ind", eventData.Event_Priority_Ind },
-                { "Event_Effctv_Dte", eventData.Event_Effctv_Dte },
-                { "ActvSt_Cd", eventData.ActvSt_Cd },
-                { "AppLiSt_Cd", (int) eventData.AppLiSt_Cd }
+                { "Event_dtl_Id", eventDetailData.Event_dtl_Id },
+                { "EnfSrv_Cd", eventDetailData.EnfSrv_Cd },
+                { "Event_Id", eventDetailData.Event_Id },
+                { "Event_TimeStamp", eventDetailData.Event_TimeStamp },
+                { "Event_Priority_Ind", eventDetailData.Event_Priority_Ind },
+                { "Event_Effctv_Dte", eventDetailData.Event_Effctv_Dte },
+                { "ActvSt_Cd", eventDetailData.ActvSt_Cd },
+                { "AppLiSt_Cd", (int) eventDetailData.AppLiSt_Cd }
             };
 
-            if (eventData.Event_Compl_Dte.HasValue)
-                parameters.Add("Event_Compl_Dte", eventData.Event_Compl_Dte.Value);
+            if (eventDetailData.Event_Compl_Dte.HasValue)
+                parameters.Add("Event_Compl_Dte", eventDetailData.Event_Compl_Dte.Value);
 
-            if (eventData.Event_Reas_Cd.HasValue)
-                parameters.Add("Event_Reas_Cd", (int)eventData.Event_Reas_Cd.Value);
+            if (eventDetailData.Event_Reas_Cd.HasValue)
+                parameters.Add("Event_Reas_Cd", (int)eventDetailData.Event_Reas_Cd.Value);
             else
                 parameters.Add("Event_Reas_Cd", DBNull.Value);
 
-            if (!string.IsNullOrWhiteSpace(eventData.Event_Reas_Text))
-                parameters.Add("Event_Reas_Text", eventData.Event_Reas_Text);
+            if (!string.IsNullOrWhiteSpace(eventDetailData.Event_Reas_Text))
+                parameters.Add("Event_Reas_Text", eventDetailData.Event_Reas_Text);
             else
                 parameters.Add("Event_Reas_Text", DBNull.Value);
 
-            _ = MainDB.ExecProc("MessageBrokerEventSINDetailUpdate", parameters);
+            MainDB.ExecProc(procName, parameters);
 
-            if (string.IsNullOrWhiteSpace(MainDB.LastError))
+            if (string.IsNullOrEmpty(MainDB.LastError))
                 success = true;
 
             return success;

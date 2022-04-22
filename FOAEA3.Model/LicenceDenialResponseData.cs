@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace FOAEA3.Model
 {
+    [DebuggerDisplay("{Appl_EnfSrv_Cd}-{Appl_CtrlCd} [{EnfSrv_Cd}/{LicRspType}]")]
     public class LicenceDenialResponseData
     {
         public string Appl_EnfSrv_Cd { get; set; }
