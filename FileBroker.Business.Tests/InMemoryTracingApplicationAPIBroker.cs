@@ -79,5 +79,10 @@ namespace FileBroker.Business.Tests
         {
             throw new System.NotImplementedException();
         }
+
+        public TracingApplicationData TransferTracingApplication(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

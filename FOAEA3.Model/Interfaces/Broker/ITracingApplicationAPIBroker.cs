@@ -12,6 +12,9 @@ namespace FOAEA3.Model.Interfaces
         List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle);
         List<TraceToApplData> GetTraceToApplData();
         TracingApplicationData UpdateTracingApplication(TracingApplicationData tracingApplication);
+        TracingApplicationData TransferTracingApplication(TracingApplicationData tracingApplication,
+                                                                 string newRecipientSubmitter,
+                                                                 string newIssuingSubmitter);
         List<TracingOutgoingFederalData> GetOutgoingFederalTracingRequests(int maxRecords, string activeState,
                                                                            int lifeState, string enfServiceCode);
         List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords, string activeState,

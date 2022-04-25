@@ -17,7 +17,7 @@ namespace Incoming.FileWatcher.MEP
     {
         static void Main(string[] args)
         {
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -45,8 +45,9 @@ namespace Incoming.FileWatcher.MEP
             string provinceCode = (args.Length > 0) ? args[0]?.ToUpper() : string.Empty;
             if (string.IsNullOrEmpty(provinceCode) || !validProvinces.Contains(provinceCode))
             {
-                ColourConsole.WriteEmbeddedColorLine("Error starting MEP File Monitor. Missing or invalid province argument on command line.");
-                ColourConsole.WriteEmbeddedColorLine("Must be one of: " + string.Join(", ", validProvinces));
+                string error = $"Missing or invalid province argument on command line: [{provinceCode}]\nMust be one of: " + string.Join(", ", validProvinces);
+                ColourConsole.WriteEmbeddedColorLine(error);
+                errorTrackingDB.MessageBrokerError($"Incoming MEP File Processing", "Error starting MEP File Monitor", new Exception(error), false);
                 return;
             }
 
