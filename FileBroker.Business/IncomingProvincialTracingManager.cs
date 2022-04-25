@@ -170,8 +170,8 @@ public class IncomingProvincialTracingManager
 
                 default:
                     tracing = tracingMessageData.TracingApplication;
-                    tracing.Messages.AddError($"Unknown MaintenanceLifeState ({tracingMessageData.MaintenanceLifeState})"+
-                                              $" for MaintenanceAction ({tracingMessageData.MaintenanceAction})");
+                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})"+
+                                              $" for Maintenance_ActionCd ({tracingMessageData.MaintenanceAction})");
                     break;
             }
         }
