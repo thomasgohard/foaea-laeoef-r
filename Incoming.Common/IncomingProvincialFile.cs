@@ -17,35 +17,29 @@ namespace Incoming.Common
     public class IncomingProvincialFile
     {
         private DBFileTable FileTableDB { get; }
-        private string InterceptionPrefix { get; }
-        private string TracingPrefix { get; }
-        private string LicencingPrefix { get; }
-        private string ElectronicSummonsPrefix { get; }
+        private string InterceptionBaseName { get; }
+        private string TracingBaseName { get; }
+        private string LicencingBaseName { get; }
         private ApiConfig ApiFilesConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
 
         public IncomingProvincialFile(IDBTools mainDB,
                                       ApiConfig apiFilesConfig,
                                       IAPIBrokerHelper apiHelper,
-                                      string defaultProvincePrefix,
-                                      string interceptionOverridePrefix = null,
-                                      string tracingOverridePrefix = null,
-                                      string licencingOverridePrefix = null,
-                                      string electronicSummonsOverridePrefix = null)
+                                      string interceptionBaseName,
+                                      string tracingBaseName,
+                                      string licencingBaseName)
         {
             ApiFilesConfig = apiFilesConfig;
             APIHelper = apiHelper;
             FileTableDB = new DBFileTable(mainDB);
-            InterceptionPrefix = interceptionOverridePrefix ?? defaultProvincePrefix;
-            TracingPrefix = tracingOverridePrefix ?? defaultProvincePrefix;
-            LicencingPrefix = licencingOverridePrefix ?? defaultProvincePrefix;
-            ElectronicSummonsPrefix = electronicSummonsOverridePrefix ?? defaultProvincePrefix;
+            InterceptionBaseName = interceptionBaseName;
+            TracingBaseName = tracingBaseName;
+            LicencingBaseName = licencingBaseName;
         }
 
-        public Dictionary<string, FileTableData> GetNewFiles(string rootPath)
+        public Dictionary<string, FileTableData> GetNewFiles(string rootPath, ref Dictionary<string, FileTableData> newFiles)
         {
-            var newFiles = new Dictionary<string, FileTableData>();
-
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*.xml");
             var last31days = DateTime.Now.AddDays(-31);
@@ -82,7 +76,7 @@ namespace Incoming.Common
 
                 // send json to processor api
 
-                if (fileNameNoCycle == InterceptionPrefix + "II")
+                if (fileNameNoCycle == InterceptionBaseName)
                 {
                     var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -97,7 +91,7 @@ namespace Incoming.Common
                         fileProcessedSuccessfully = true;
                     }
                 }
-                else if (fileNameNoCycle == LicencingPrefix + "IL")
+                else if (fileNameNoCycle == LicencingBaseName)
                 {
                     var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -112,7 +106,7 @@ namespace Incoming.Common
                         fileProcessedSuccessfully = true;
                     }
                 }
-                else if (fileNameNoCycle == TracingPrefix + "IT")
+                else if (fileNameNoCycle == TracingBaseName)
                 {
                     var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaTracingRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -128,21 +122,12 @@ namespace Incoming.Common
                     }
 
                 }
-                //else if (fileNameNoCycle == LicencingPrefix + "IW")
-                //{
-                //    // var response = APIHelper.PostJsonFile($"api/v1/AffidavitSwearingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.SwearingRootAPI);
-                //    fileProcessedSuccessfully = true;
-                //}
                 else
                 {
                     errors.Add($"Error: Unrecognized file name '{fileNameNoCycle}'");
                 }
 
             }
-            //else if (fileNameNoExtension.ToUpper().StartsWith(ElectronicSummonsPrefix.Substring(0, 2) + "ESD"))
-            //{
-            //    // TODO: call Incoming.API.MEP.ESD 
-            //}
             else
             {
                 errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoExtension?.ToUpper()[6]}'. Is this an incoming file?");

@@ -2,7 +2,7 @@
 
 namespace FileBroker.Business.Helpers;
 
-public static class SpecHelper
+public static class FlatFileSpecHelper
 {
     public static void ExtractRecTypeSingle<T>(ref T recTypeSingle, string flatFileLine,
                                                List<FlatFileSpecificationData> specs, string recType,
