@@ -2,6 +2,7 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
+using System.Collections.Generic;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -27,6 +28,14 @@ namespace FOAEA3.Common.Brokers
             string baseCall = "api/v1/Applications";
             string apiCall = $"{baseCall}/{key}/SinConfirmation";
             return ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
+        }
+
+        List<StatsOutgoingProvincialData> IApplicationAPIBroker.GetOutgoingProvincialStatusData(int maxRecords, string activeState, string recipientCode)
+        {
+            string baseCall = "api/v1/Applications";
+            string apiCall = $"{baseCall}/stats?maxRecords={maxRecords}&activeState={activeState}" +
+                                        $"&recipientCode={recipientCode}";
+            return ApiHelper.GetDataAsync<List<StatsOutgoingProvincialData>>(apiCall).Result;
         }
     }
 }
