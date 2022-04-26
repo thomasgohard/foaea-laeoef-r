@@ -30,7 +30,8 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
         }
 
-        List<StatsOutgoingProvincialData> IApplicationAPIBroker.GetOutgoingProvincialStatusData(int maxRecords, string activeState, string recipientCode)
+        List<StatsOutgoingProvincialData> IApplicationAPIBroker.GetOutgoingProvincialStatusData(int maxRecords, 
+                                                                                    string activeState, string recipientCode)
         {
             string baseCall = "api/v1/Applications";
             string apiCall = $"{baseCall}/stats?maxRecords={maxRecords}&activeState={activeState}" +

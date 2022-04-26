@@ -31,6 +31,24 @@ namespace FOAEA3.Business.Areas.Application
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
+        public List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            var data = licenceDenialDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            return data;
+        }
+        /*
+                 public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+                                                                             string activeState,
+                                                                             string recipientCode,
+                                                                             bool isXML = true)
+        {
+            var tracingDB = Repositories.TracingRepository;
+            var data = tracingDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            return data;
+        }
+         */
+
         public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
 

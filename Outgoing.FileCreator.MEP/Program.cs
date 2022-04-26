@@ -33,10 +33,10 @@ namespace Outgoing.FileCreator.MEP
             var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            CreateOutgoingProvincialTracingFiles(fileBrokerDB, apiRootForFiles);
-            CreateOutgoingProvincialLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
+//           CreateOutgoingProvincialTracingFiles(fileBrokerDB, apiRootForFiles);
+//           CreateOutgoingProvincialLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
             // CreateOutgoingProvincialInterceptionFiles(fileBrokerDB, apiRootForFiles);
-            // CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
+            CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
         }
 
         private static void CreateOutgoingProvincialTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
@@ -59,14 +59,14 @@ namespace Outgoing.FileCreator.MEP
                 MailServiceDB = new DBMailService(fileBrokerDB)
             };
 
-            var federalFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+            var provincialFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
 
             var provincialTraceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("TRCAPPOUT")
-                                                .Where(s => s.Active == true);
+                                                                       .Where(s => s.Active == true);
 
             foreach (var provincialTraceOutgoingSource in provincialTraceOutgoingSources)
             {
-                string filePath = federalFileManager.CreateOutputFile(provincialTraceOutgoingSource.Name, out List<string> errors);
+                string filePath = provincialFileManager.CreateOutputFile(provincialTraceOutgoingSource.Name, out List<string> errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
@@ -101,21 +101,59 @@ namespace Outgoing.FileCreator.MEP
                 MailServiceDB = new DBMailService(fileBrokerDB)
             };
 
-            var federalFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+            var provincialFileManager = new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories);
 
-            var provincialTraceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("TRCAPPOUT")
-                                                .Where(s => s.Active == true);
+            var provincialLicenceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("LICAPPOUT")
+                                                                         .Where(s => s.Active == true);
 
-            foreach (var provincialTraceOutgoingSource in provincialTraceOutgoingSources)
+            foreach (var provincialLicenceOutgoingSource in provincialLicenceOutgoingSources)
             {
-                string filePath = federalFileManager.CreateOutputFile(provincialTraceOutgoingSource.Name, out List<string> errors);
+                string filePath = provincialFileManager.CreateOutputFile(provincialLicenceOutgoingSource.Name, out List<string> errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
                     foreach (var error in errors)
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError("TRCAPPOUT", provincialTraceOutgoingSource.Name, new Exception(error), false);
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialLicenceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("LICAPPOUT", provincialLicenceOutgoingSource.Name, new Exception(error), false);
+                    }
+            }
+
+        }
+
+        private static void CreateOutgoingProvincialStatusFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
+        {
+            var apiBrokers = new APIBrokerList
+            {
+                Applications = new ApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
+                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+            };
+
+            var repositories = new RepositoryList
+            {
+                FileTable = new DBFileTable(fileBrokerDB),
+                FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
+                OutboundAuditDB = new DBOutboundAudit(fileBrokerDB),
+                ErrorTrackingDB = new DBErrorTracking(fileBrokerDB),
+                ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
+                MailServiceDB = new DBMailService(fileBrokerDB)
+            };
+
+            var provincialFileManager = new OutgoingProvincialStatusManager(apiBrokers, repositories);
+
+            var provincialStatsOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("STATAPPOUT")
+                                                                       .Where(s => s.Active == true);
+
+            foreach (var provincialStatOutgoingSource in provincialStatsOutgoingSources)
+            {
+                string filePath = provincialFileManager.CreateOutputFile(provincialStatOutgoingSource.Name, out List<string> errors);
+                if (errors.Count == 0)
+                    ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    foreach (var error in errors)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialStatOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError("STATAPPOUT", provincialStatOutgoingSource.Name, new Exception(error), false);
                     }
             }
 

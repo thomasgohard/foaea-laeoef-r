@@ -46,8 +46,6 @@ namespace FileBroker.Business
 
                 Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                APIs.TracingResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
-
                 return newFilePath;
 
             }
@@ -114,6 +112,8 @@ namespace FileBroker.Business
         {
             string xmlEvent_Effctv_Dte = item.Event_Effctv_Dte.ToString("o");
             string xmlEvent_Compl_Dte = item.Event_Compl_Dte.ToString("o");
+            string recordedDate = item.Event_TimeStamp.Date.ToString("o");
+            string recordedTime = new DateTime(1, 1, 1, item.Event_TimeStamp.Hour, item.Event_TimeStamp.Minute, item.Event_TimeStamp.Second).ToString("o");
 
             var output = new StringBuilder();
             output.AppendLine($"<Status_Events>");
@@ -124,8 +124,8 @@ namespace FileBroker.Business
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Source_Reference_Number", item.Appl_Source_RfrNr));
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Category_Code", item.AppCtgy_Cd));
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recipient_Submitter_Code", item.Subm_Recpt_SubmCd));
-            //output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recorded_Date", xmlReceiptDate));
-            //output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recorded_Time", xmlReceiptDate));
+            output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recorded_Date", recordedDate));
+            output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recorded_Time", recordedTime));
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Life_State_Code", item.AppLiSt_Cd));
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Priority_Code", item.Event_Priority_Ind));
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Event_Reason_Code", item.Event_Reas_Cd));

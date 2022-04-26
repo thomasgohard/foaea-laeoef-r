@@ -22,5 +22,7 @@ namespace FOAEA3.Model.Interfaces
         List<ApplicationData> GetDailyApplCountBySIN(string appl_Dbtr_Entrd_SIN, string appl_EnfSrv_Cd, string appl_CtrlCd, string appCtgy_Cd, string appl_Source_RfrNr);
         List<ApplicationData> GetSameCreditorForAppCtgy(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd);
         void UpdateSubmitterDefaultControlCode(string subm_SubmCd, string appl_CtrlCd);
+        List<StatsOutgoingProvincialData> GetStatsProvincialOutgoingData(int maxRecords, string activeState, string recipientCode,
+                                                                         bool isXML = true);
     }
 }

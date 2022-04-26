@@ -13,6 +13,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource);
 
         LicenceDenialApplicationData ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd);
-
+        List<LicenceDenialOutgoingProvincialData> GetOutgoingProvincialLicenceDenialData(int maxRecords, string activeState,
+                                                                                         string recipientCode);
     }
 }

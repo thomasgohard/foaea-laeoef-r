@@ -66,6 +66,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public List<StatsOutgoingProvincialData> GetStatsProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsFeeCumulativeForApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             return false;

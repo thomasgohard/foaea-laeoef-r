@@ -52,5 +52,15 @@ namespace FOAEA3.Common.Brokers
             return ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData).Result;
         }
 
+        public List<LicenceDenialOutgoingProvincialData> GetOutgoingProvincialLicenceDenialData(int maxRecords, string activeState,
+                                                                                                string recipientCode)
+        {
+            string baseCall = "api/v1/OutgoingProvincialLicenceDenialResults";
+            string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
+                                        $"&recipientCode={recipientCode}&isXML=true";
+            return ApiHelper.GetDataAsync<List<LicenceDenialOutgoingProvincialData>>(apiCall).Result;
+        }
+
+
     }
 }

@@ -22,5 +22,10 @@ namespace FOAEA3.Model.Interfaces
                                                                 string enfServiceCode);
 
         List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource);
+
+        List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+                                                                            string activeState,
+                                                                            string recipientCode,
+                                                                            bool isXML = true);
     }
 }

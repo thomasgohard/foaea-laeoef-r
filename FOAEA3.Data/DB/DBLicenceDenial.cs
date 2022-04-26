@@ -170,6 +170,22 @@ namespace FOAEA3.Data.DB
                                                                          parameters, FillLicenceDenialToApplDataFromReader);
         }
 
+        public List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "chrRecptCd", recipientCode },
+                { "isXML", isXML ? 1 : 0 }
+            };
+
+            var data = MainDB.GetDataFromStoredProc<LicenceDenialOutgoingProvincialData>("MessageBrokerGetLICAPPOUTOutboundData",
+                                                                                 parameters, FillLicenceDenialOutgoingProvincialData);
+            return data;
+
+        }
+
         private void FillLicenceDenialToApplDataFromReader(IDBHelperReader rdr, LicenceDenialToApplData data)
         {
             data.Dtl_Reas_Cd = (int?) rdr["dtl_Reas_Cd"];
@@ -268,5 +284,19 @@ namespace FOAEA3.Data.DB
             data.ResponseDescription_F = rdr["ResponseDescription_F"] as string;
         }
 
+        private void FillLicenceDenialOutgoingProvincialData(IDBHelperReader rdr, LicenceDenialOutgoingProvincialData data)
+        {
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Recordtype = rdr["Recordtype"] as string;
+            data.Appl_EnfSrv_Cd = rdr["Val_1"] as string;
+            data.Subm_SubmCd = rdr["Val_2"] as string;
+            data.Appl_CtrlCd = rdr["Val_3"] as string;
+            data.Appl_Source_RfrNr = rdr["Val_4"] as string;
+            data.Subm_Recpt_SubmCd = rdr["Val_5"] as string;
+            data.LicRsp_Rcpt_Dte = (DateTime)rdr["Val_6"];
+            data.LicRsp_SeqNr = rdr["Val_7"] as string;
+            data.RqstStat_Cd = (short)rdr["Val_8"];
+            data.EnfSrv_Cd = rdr["Val_9"] as string;
+        }
     }
 }

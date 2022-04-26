@@ -338,6 +338,50 @@ namespace FOAEA3.Data.DB
             return MainDB.GetDataFromStoredProc<ApplicationData>("ApplGetDailyApplCountBySIN", parameters, FillApplicationDataFromReader);
         }
 
+        public List<StatsOutgoingProvincialData> GetStatsProvincialOutgoingData(int maxRecords,
+                                                                                string activeState,
+                                                                                string recipientCode,
+                                                                                bool isXML = true)
+        {
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "chrRecptCd", recipientCode },
+                { "isXML", isXML ? 1 : 0 }
+            };
+
+            var data = MainDB.GetDataFromStoredProc<StatsOutgoingProvincialData>("MessageBrokerGetSTATAPPOUTOutboundData",
+                                                                               parameters, FillStatsOutgoingProvincialData);
+            return data;
+
+        }
+
+        private void FillStatsOutgoingProvincialData(IDBHelperReader rdr, StatsOutgoingProvincialData data)
+        {
+            data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
+            data.Event_Reas_Cd_Zero = (int)rdr["Event_Reas_Cd"];
+            data.Event_Reas_Text_Zero = (int)rdr["Event_Reas_Text"];
+            data.Source_ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Recordtype = rdr["Recordtype"] as string;
+            data.EnfSrv_Cd = rdr["Val_1"] as string;
+            data.Subm_SubmCd = rdr["Val_2"] as string;
+            data.Appl_CtrlCd = rdr["Val_3"] as string;
+            data.Appl_Source_RfrNr = rdr["Val_4"] as string;
+            data.AppCtgy_Cd = rdr["Val_5"] as string;
+            data.Subm_Recpt_SubmCd = rdr["Val_6"] as string;
+            data.Event_TimeStamp = (DateTime) rdr["Val_7"];
+            data.Event_TimeStamp2 = (DateTime) rdr["Val_8"];
+            data.ActvSt_Cd = rdr["Val_9"] as string;
+            data.AppLiSt_Cd = rdr["Val_10"] as string;
+            data.Event_Priority_Ind = rdr["Val_11"] as string;
+            data.Event_Reas_Cd = rdr["Val_12"] as string;
+            data.Event_Effctv_Dte = (DateTime) rdr["Val_13"];
+            data.Event_Compl_Dte = (DateTime) rdr["Val_14"];
+            data.Event_Reas_Text = rdr["Val_15"] as string;
+        }
+
         private void FillConfirmedSINDataFromReader(IDBHelperReader rdr, ApplicationConfirmedSINData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
