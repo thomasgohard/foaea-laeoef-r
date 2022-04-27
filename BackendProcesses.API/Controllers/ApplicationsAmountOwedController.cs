@@ -13,7 +13,7 @@ namespace BackendProcess.API.Controllers
     public class ApplicationsAmountOwedController : ControllerBase
     {
         [HttpGet("Version")]
-        public ActionResult<string> Version() => Ok("Applications Amount Owed API Version 1.4");
+        public ActionResult<string> Version() => Ok("Applications Amount Owed API Version 1.5");
 
         [HttpPut("")]
         public ActionResult<string> RunAmountOwed([FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)

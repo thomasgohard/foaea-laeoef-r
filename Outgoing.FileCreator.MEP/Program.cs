@@ -60,17 +60,21 @@ namespace Outgoing.FileCreator.MEP
                 }
             }
 
+            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI);
+            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI);
+            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI);
+
             var apiBrokers = new APIBrokerList
             {
-                Applications = new ApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                TracingApplications = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingResponses = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingEvents = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
+                Applications = new ApplicationAPIBroker(applicationApiHelper),
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
+                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper),
+                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper),
+                TracingEvents = new TracingEventAPIBroker(tracingApiHelper),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper),
             };
 
             var repositories = new RepositoryList
