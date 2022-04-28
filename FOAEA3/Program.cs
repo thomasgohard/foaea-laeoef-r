@@ -10,6 +10,7 @@ using Serilog.Sinks.MSSqlServer;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using FOAEA3.Resources.Helpers;
 
 namespace FOAEA3
 {
@@ -89,7 +90,7 @@ namespace FOAEA3
             // log to SQL Server table
 
             logConfig = logConfig.WriteTo.MSSqlServer(
-                           connectionString: config["ConnectionStrings:FOAEAMain"],
+                           connectionString: config["ConnectionStrings:FOAEAMain"].ReplaceVariablesWithEnvironmentValues(),
                            restrictedToMinimumLevel: LogEventLevel.Warning,
                            sinkOptions: sqlSinkOpts,
                            columnOptions: sqlColumnOpts);
