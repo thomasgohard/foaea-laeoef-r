@@ -6,8 +6,6 @@ using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -17,6 +15,8 @@ namespace FOAEA3.Data.DB
         {
 
         }
+
+        public MessageDataList Messages => throw new NotImplementedException();
 
         //public DataList<LicenceDenialResponseData> GetLicenceDenialResponseForApplication(string applEnfSrvCd, string applCtrlCd)
         //{
@@ -42,6 +42,36 @@ namespace FOAEA3.Data.DB
             var data = MainDB.GetDataFromStoredProc<LicenceDenialResponseData>("GetLastLicenseResponse", parameters, FillLicenceDenialResultDataFromReader);
 
             return data.FirstOrDefault();
+        }
+
+        //public DataList<LicenceDenialResponseData> GetLicenceDenialResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        //{
+        //    var parameters = new Dictionary<string, object>
+        //        {
+        //            {"EnfSrv_Cd", applEnfSrvCd },
+        //            {"CtrlCd", applCtrlCd },
+        //            {"chkCycle", checkCycle }
+        //        };
+
+        //    var data = MainDB.GetDataFromStoredProc<LicenceDenialResponseData>("TraceResultsGetTrace", parameters, FillLicenceDenialResultDataFromReader);
+
+        //    return new DataList<LicenceDenialResponseData>(data, MainDB.LastError);
+        //}
+
+        public void InsertBulkData(List<LicenceDenialResponseData> responseData)
+        {
+            MainDB.BulkUpdate<LicenceDenialResponseData>(responseData, "LicRsp");
+        }
+
+        public void MarkResponsesAsViewed(string enfService)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"chrRecptCd", enfService }
+            };
+
+            MainDB.ExecProc("LicAPPLicUpdate", parameters);
+
         }
 
         /*

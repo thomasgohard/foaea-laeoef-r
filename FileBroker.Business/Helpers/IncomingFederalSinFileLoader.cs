@@ -23,19 +23,19 @@ public class IncomingFederalSinFileLoader
 
             if (flatFileLine.Trim().Length > 2)
             {
-                string recType = flatFileLine.Substring(0, 2);
+                string recType = flatFileLine[..2];
                 switch (recType)
                 {
                     case "01":
-                        SpecHelper.ExtractRecTypeSingle<FedSin_RecType01>(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle<FedSin_RecType01>(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
                         break;
 
                     case "02":
-                        SpecHelper.ExtractRecTypeMultiple<FedSin_RecType02>(fileData.SININ02, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeMultiple<FedSin_RecType02>(fileData.SININ02, flatFileLine, specs, recType, ref error);
                         break;
 
                     case "99":
-                        SpecHelper.ExtractRecTypeSingle<FedSin_RecType99>(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle<FedSin_RecType99>(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
                         break;
                 }
             }

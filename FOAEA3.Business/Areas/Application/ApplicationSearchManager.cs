@@ -46,12 +46,12 @@ namespace FOAEA3.Business.Areas.Application
             if (!string.IsNullOrEmpty(searchCriteria.Status)) items.Add(AccessAuditElement.Status, searchCriteria.Status);
             if (!string.IsNullOrEmpty(searchCriteria.Subm_SubmCd)) items.Add(AccessAuditElement.Subm_SubmCd, searchCriteria.Subm_SubmCd);
             if (searchCriteria.State != ApplicationState.UNDEFINED) items.Add(AccessAuditElement.State, ((int)searchCriteria.State).ToString());
-            if (searchCriteria.Appl_Dbtr_Brth_Dte_Start.HasValue) items.Add(AccessAuditElement.DOBFrom, searchCriteria.Appl_Dbtr_Brth_Dte_Start.Value.ToString(DateTimeHelper.YYYY_MM_DD));
-            if (searchCriteria.Appl_Dbtr_Brth_Dte_End.HasValue) items.Add(AccessAuditElement.DOBTo, searchCriteria.Appl_Dbtr_Brth_Dte_End.Value.ToString(DateTimeHelper.YYYY_MM_DD));
-            if (searchCriteria.Appl_Create_Dte_Start.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateFrom, searchCriteria.Appl_Create_Dte_Start.Value.ToString(DateTimeHelper.YYYY_MM_DD));
-            if (searchCriteria.Appl_Create_Dte_End.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateTo, searchCriteria.Appl_Create_Dte_End.Value.ToString(DateTimeHelper.YYYY_MM_DD));
-            if (searchCriteria.ActualEnd_Dte_Start.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateFrom, searchCriteria.ActualEnd_Dte_Start.Value.ToString(DateTimeHelper.YYYY_MM_DD));
-            if (searchCriteria.ActualEnd_Dte_End.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateTo, searchCriteria.ActualEnd_Dte_End.Value.ToString(DateTimeHelper.YYYY_MM_DD));
+            if (searchCriteria.Appl_Dbtr_Brth_Dte_Start.HasValue) items.Add(AccessAuditElement.DOBFrom, searchCriteria.Appl_Dbtr_Brth_Dte_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.Appl_Dbtr_Brth_Dte_End.HasValue) items.Add(AccessAuditElement.DOBTo, searchCriteria.Appl_Dbtr_Brth_Dte_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.Appl_Create_Dte_Start.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateFrom, searchCriteria.Appl_Create_Dte_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.Appl_Create_Dte_End.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateTo, searchCriteria.Appl_Create_Dte_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.ActualEnd_Dte_Start.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateFrom, searchCriteria.ActualEnd_Dte_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.ActualEnd_Dte_End.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateTo, searchCriteria.ActualEnd_Dte_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
             if (searchCriteria.ViewAllJurisdiction) items.Add(AccessAuditElement.ViewAllJurisdictions, searchCriteria.ViewAllJurisdiction.ToString());
             if (searchCriteria.SearchOnlySinConfirmed) items.Add(AccessAuditElement.SINConfirmed, searchCriteria.SearchOnlySinConfirmed.ToString());
 

@@ -5,21 +5,22 @@ using System.Text.RegularExpressions;
 
 namespace FOAEA3.Resources.Helpers
 {
-    public static class StringHelper
+    public static class StringExtensions
     {
 
         public static bool IsAlphanumeric(this string value)
         {
             return Regex.IsMatch(value, @"^[a-zA-Z0-9]+$");
         }
-        public static byte[] GetBytes(string str)
+
+        public static byte[] GetBytes(this string str)
         {
             byte[] bytes = new byte[str.Length * sizeof(char)];
             System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
             return bytes;
         }
 
-        public static string GetString(byte[] bytes)
+        public static string GetString(this byte[] bytes)
         {
             char[] chars = new char[bytes.Length / sizeof(char)];
             System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
@@ -32,7 +33,7 @@ namespace FOAEA3.Resources.Helpers
             return regex.Replace(value, " ");
         }
 
-        public static int ConvertStringToInteger(string valueFromLine)
+        public static int ConvertStringToInteger(this string valueFromLine)
         {
             if (!int.TryParse(valueFromLine, out int result))
                 result = 0;
@@ -47,7 +48,7 @@ namespace FOAEA3.Resources.Helpers
 
             data = data.Replace("%%", "%|||%"); // needed to handle two variables next to each other
 
-            var result = GetEnvironmentVariablesAndValues(data);
+            var result = data.GetEnvironmentVariablesAndValues();
 
             foreach (var item in result)
                 data = data.Replace($"%{item.Key}%", $"{item.Value}");
@@ -56,7 +57,7 @@ namespace FOAEA3.Resources.Helpers
         }
 
 
-        private static Dictionary<string, string> GetEnvironmentVariablesAndValues(string data)
+        private static Dictionary<string, string> GetEnvironmentVariablesAndValues(this string data)
         {
             var results = new Dictionary<string, string>();
 
@@ -84,7 +85,7 @@ namespace FOAEA3.Resources.Helpers
 
         public static string FixWildcardForSQL(this string value)
         {
-            if (value.Contains("*"))
+            if (value.Contains('*'))
                 return value.Replace("*", "%");
             else
                 return value;

@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -77,7 +78,7 @@ namespace FOAEA3.Data.DB
             return MainDB.GetDataFromStoredProcViaReturnParameter<bool>("CloseSameDayLicenseEvent", parameters, "L01Event");
         }
 
-        private Dictionary<string, object> SetParameters(LicenceDenialApplicationData data)
+        private static Dictionary<string, object> SetParameters(LicenceDenialApplicationData data)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -139,6 +140,101 @@ namespace FOAEA3.Data.DB
             return parameters;
         }
 
+        public List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+                                                                      string activeState,
+                                                                      ApplicationState lifeState,
+                                                                      string enfServiceCode)
+        {
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "sntAppLiSt_Cd", lifeState },
+                { "chrEnfSrv_Cd", enfServiceCode }
+            };
+
+            return MainDB.GetDataFromStoredProc<LicenceDenialOutgoingFederalData>("MessageBrokerGetLICOUTOutboundData",
+                                                                            parameters, FillLicenceDenialOutgoingFederalData);
+
+        }
+
+        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "chrEnfSrv_Cd", fedSource }
+            };
+
+            return MainDB.GetDataFromStoredProc<LicenceDenialToApplData>("MessageBrokerGetLICENSEInboundToApplData", 
+                                                                         parameters, FillLicenceDenialToApplDataFromReader);
+        }
+
+        public List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "chrRecptCd", recipientCode },
+                { "isXML", isXML ? 1 : 0 }
+            };
+
+            var data = MainDB.GetDataFromStoredProc<LicenceDenialOutgoingProvincialData>("MessageBrokerGetLICAPPOUTOutboundData",
+                                                                                 parameters, FillLicenceDenialOutgoingProvincialData);
+            return data;
+
+        }
+
+        private void FillLicenceDenialToApplDataFromReader(IDBHelperReader rdr, LicenceDenialToApplData data)
+        {
+            data.Dtl_Reas_Cd = (int?) rdr["dtl_Reas_Cd"];
+            data.Dtl_List = (short) rdr["dtl_List"];
+            data.Dtl_ActvSt = rdr["dtl_ActvSt"] as string;
+            data.Dtl_Id = (int) rdr["dtl_Id"];
+            data.Event_Reas_Cd = (int) rdr["Event_Reas_Cd"];
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Event_Id = (int) rdr["Event_Id"];
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+    }
+
+        private void FillLicenceDenialOutgoingFederalData(IDBHelperReader rdr, LicenceDenialOutgoingFederalData data)
+        {
+            data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
+            data.Event_Reas_Cd = (int?)rdr["Event_Reas_Cd"];
+            data.Event_Reas_Text = rdr["Event_Reas_Text"] as string;
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Recordtype = rdr["Recordtype"] as string;
+            data.RequestType = rdr["Val_1"] as string;
+            data.Appl_EnfSrv_Cd = rdr["Val_2"] as string;
+            data.Appl_CtrlCd = rdr["Val_3"] as string;
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Val_4"] as string; 
+            data.Appl_Dbtr_FrstNme = rdr["Val_5"] as string;
+            data.Appl_Dbtr_MddleNme = rdr["Val_6"] as string;
+            data.Appl_Dbtr_SurNme = rdr["Val_7"] as string;
+            data.Appl_Dbtr_Parent_SurNme = rdr["Val_8"] as string;
+            data.Appl_Dbtr_Gendr_Cd = rdr["Val_9"] as string;
+            data.Appl_Dbtr_Brth_Dte = rdr["Val_10"] as string;
+            data.LicSusp_Dbtr_Brth_CityNme = rdr["Val_11"] as string;
+            data.LicSusp_Dbtr_Brth_CtryCd = rdr["Val_12"] as string;
+            data.LicSusp_Dbtr_EyesColorCd = rdr["Val_13"] as string;
+            data.LicSusp_Dbtr_HeightQty = rdr["Val_14"] as string;
+            data.Dbtr_Addr_Ln = rdr["Val_15"] as string;
+            data.Dbtr_Addr_Ln1 = rdr["Val_16"] as string;
+            data.Dbtr_Addr_CityNme = rdr["Val_17"] as string;
+            data.Dbtr_Addr_PrvCd = rdr["Val_18"] as string;
+            data.Dbtr_Addr_PCd = rdr["Val_19"] as string;
+            data.Dbtr_Addr_CtryCd = rdr["Val_20"] as string;
+            data.LicSusp_Dbtr_EmplNme = rdr["Val_21"] as string;
+            data.LicSusp_Dbtr_EmplAddr_Ln = rdr["Val_22"] as string;
+            data.LicSusp_Dbtr_EmplAddr_Ln1 = rdr["Val_23"] as string;
+            data.LicSusp_Dbtr_EmplAddr_CityNme = rdr["Val_24"] as string;
+            data.LicSusp_Dbtr_EmplAddr_PrvCd = rdr["Val_25"] as string;
+            data.LicSusp_Dbtr_EmplAddr_PCd = rdr["Val_26"] as string;
+            data.LicSusp_Dbtr_EmplAddr_CtryCd = rdr["Val_27"] as string;
+        }
+
         private void FillDataFromReader(IDBHelperReader rdr, LicenceDenialApplicationData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
@@ -188,5 +284,19 @@ namespace FOAEA3.Data.DB
             data.ResponseDescription_F = rdr["ResponseDescription_F"] as string;
         }
 
+        private void FillLicenceDenialOutgoingProvincialData(IDBHelperReader rdr, LicenceDenialOutgoingProvincialData data)
+        {
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Recordtype = rdr["Recordtype"] as string;
+            data.Appl_EnfSrv_Cd = rdr["Val_1"] as string;
+            data.Subm_SubmCd = rdr["Val_2"] as string;
+            data.Appl_CtrlCd = rdr["Val_3"] as string;
+            data.Appl_Source_RfrNr = rdr["Val_4"] as string;
+            data.Subm_Recpt_SubmCd = rdr["Val_5"] as string;
+            data.LicRsp_Rcpt_Dte = (DateTime)rdr["Val_6"];
+            data.LicRsp_SeqNr = rdr["Val_7"] as string;
+            data.RqstStat_Cd = (short)rdr["Val_8"];
+            data.EnfSrv_Cd = rdr["Val_9"] as string;
+        }
     }
 }

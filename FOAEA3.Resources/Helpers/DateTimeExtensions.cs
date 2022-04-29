@@ -2,7 +2,7 @@
 
 namespace FOAEA3.Resources.Helpers
 {
-    public static class DateTimeHelper
+    public static class DateTimeExtensions
     {
         public const string MM_DD_YYYY_HH_MM_SS = "MM/dd/yyyy HH:mm:ss";
         public const string YYYY_MM_DD_HH_MM_SS = "yyyy/MM/dd HH:mm:ss";
@@ -18,7 +18,7 @@ namespace FOAEA3.Resources.Helpers
             return $"{value.Year}{dayOfYear}";
         }
 
-        public static DateTime ConvertJulianDateStringToDateTime(string flatDate, ref string error)
+        public static DateTime ConvertJulianDateStringToDateTime(this string flatDate, ref string error)
         {
             if (flatDate.Length == 7)
             {
@@ -39,12 +39,12 @@ namespace FOAEA3.Resources.Helpers
                 return new DateTime();
         }
 
-        public static int MonthDifference(DateTime lValue, DateTime rValue)
+        public static int MonthDifference(this DateTime lValue, DateTime rValue)
         {
             return Math.Abs((lValue.Month - rValue.Month) + 12 * (lValue.Year - rValue.Year));
         }
 
-        public static int GetQuarters(DateTime dt1, DateTime dt2)
+        public static int GetQuarters(this DateTime dt1, DateTime dt2)
         {
             double d1Quarter = GetQuarter(dt1.Month);
             double d2Quarter = GetQuarter(dt2.Month);
@@ -53,7 +53,7 @@ namespace FOAEA3.Resources.Helpers
             return (int)Round(d1 + d2);
         }
 
-        private static int GetQuarter(int nMonth)
+        private static int GetQuarter(this int nMonth)
         {
             if (nMonth <= 3) return 1;
             if (nMonth <= 6) return 2;
@@ -61,12 +61,12 @@ namespace FOAEA3.Resources.Helpers
             return 4;
         }
 
-        public static DateTime AddQuarter(DateTime baseDateTime, int quarterCount)
+        public static DateTime AddQuarter(this DateTime baseDateTime, int quarterCount)
         {
             return baseDateTime.AddMonths(quarterCount * 3);
         }
 
-        public static int GetFiscalMonth(DateTime baseDateTime)
+        public static int GetFiscalMonth(this DateTime baseDateTime)
         {
             int fiscalMonth = baseDateTime.Month;
 
@@ -78,7 +78,7 @@ namespace FOAEA3.Resources.Helpers
             return fiscalMonth;
         }
 
-        public static int GetFiscalYear(DateTime baseDateTime)
+        public static int GetFiscalYear(this DateTime baseDateTime)
         {
             int fiscalYear = baseDateTime.Year;
 
@@ -88,14 +88,7 @@ namespace FOAEA3.Resources.Helpers
             return fiscalYear;
         }
 
-        private static long Round(double dVal)
-        {
-            if (dVal >= 0)
-                return (long)Math.Floor(dVal);
-            return (long)Math.Ceiling(dVal);
-        }
-
-        public static bool AreDatesEqual(DateTime date1, DateTime date2)
+        public static bool AreDatesEqual(this DateTime date1, DateTime date2)
         {
             // compare two dates but ignore milliseconds
 
@@ -105,7 +98,7 @@ namespace FOAEA3.Resources.Helpers
             return date1 == date2;
         }
 
-        public static bool AreDatesEqual(DateTime? date1, DateTime? date2)
+        public static bool AreDatesEqual(this DateTime? date1, DateTime? date2)
         {
             // compare two dates but ignore milliseconds
 
@@ -116,6 +109,13 @@ namespace FOAEA3.Resources.Helpers
                 date2 = date2.Value.AddMilliseconds(0 - date2.Value.Millisecond);
 
             return date1 == date2;
+        }
+
+        private static long Round(double dVal)
+        {
+            if (dVal >= 0)
+                return (long)Math.Floor(dVal);
+            return (long)Math.Ceiling(dVal);
         }
 
     }

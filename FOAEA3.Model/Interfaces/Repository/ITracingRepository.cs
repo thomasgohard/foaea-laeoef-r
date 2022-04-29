@@ -1,6 +1,5 @@
 ﻿using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using System;
 using System.Collections.Generic;
 
 namespace FOAEA3.Model.Interfaces

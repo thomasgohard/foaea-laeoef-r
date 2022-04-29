@@ -66,7 +66,7 @@
                         <td>@data.Subm_SubmCd</td>
                         <td><a asp-controller="@controller" asp-action="Edit" asp-area="Application" asp-route-id="@appKey">@data.Appl_CtrlCd</a></td>
                         <td>@data.Subm_Recpt_SubmCd</td>
-                        <td class='nowrap'>@data.Event_TimeStamp.ToString(DateTimeHelper.YYYY_MM_DD_HH_MM_SS)</td>
+                        <td class='nowrap'>@data.Event_TimeStamp.ToString(DateTimeExtensions.YYYY_MM_DD_HH_MM_SS)</td>
                         <td>@eventReasonCode</td>
                         <td class='nowrap'>@reasonDescription</td>
                         <td class='nowrap'>@stateValue - @ReferenceData.Instance().ApplicationLifeStates[data.AppLiSt_Cd].Description</td>

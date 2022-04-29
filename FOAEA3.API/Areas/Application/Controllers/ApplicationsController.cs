@@ -7,6 +7,7 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 
 namespace FOAEA3.API.Areas.Application.Controllers
 {
@@ -39,6 +40,21 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return Ok(appl);
             else
                 return NotFound();
+        }
+
+        [HttpGet("Stats")]
+        public ActionResult<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
+                                                                   [FromQuery] int maxRecords,
+                                                                   [FromQuery] string activeState,
+                                                                   [FromQuery] string recipientCode)
+        { 
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var appl = new ApplicationData();
+            var applManager = new ApplicationManager(appl, repositories, config);
+
+            return applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
         }
 
         [HttpGet("{id}/SINresults")]

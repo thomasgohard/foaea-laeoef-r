@@ -7,6 +7,7 @@ using FOAEA3.Resources;
 using System;
 using System.Text;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -302,6 +303,16 @@ namespace FOAEA3.Business.Areas.Application
 
             UpdateApplication();
 
+        }
+
+        public List<StatsOutgoingProvincialData> GetProvincialStatsOutgoingData(int maxRecords,
+                                                                     string activeState,
+                                                                     string recipientCode,
+                                                                     bool isXML = true)
+        {
+            var applicationDB = Repositories.ApplicationRepository;
+            var data = applicationDB.GetStatsProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            return data;
         }
 
         public virtual void ProcessBringForwards(ApplicationEventData bfEvent)

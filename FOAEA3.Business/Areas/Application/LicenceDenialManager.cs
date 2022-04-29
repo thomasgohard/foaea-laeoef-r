@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
+using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
@@ -29,6 +30,24 @@ namespace FOAEA3.Business.Areas.Application
             //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
+
+        public List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            var data = licenceDenialDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            return data;
+        }
+        /*
+                 public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+                                                                             string activeState,
+                                                                             string recipientCode,
+                                                                             bool isXML = true)
+        {
+            var tracingDB = Repositories.TracingRepository;
+            var data = tracingDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            return data;
+        }
+         */
 
         public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
@@ -97,7 +116,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (!LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
             {
-                LicenceDenialApplication.Messages.AddError("Application not found!");
+                LicenceDenialApplication.Messages.AddError(SystemMessage.APPLICATION_NOT_FOUND);
                 return false;
             }
 
@@ -122,6 +141,96 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.SaveEvents();
 
             return true;
+
+            /*
+             
+    Public Sub LicenseResponse(ByVal applEnfSrvCd As String, ByVal applCtrCd As String, ByVal lastUpdateUser As String)
+        IsInsert = False
+
+        ClearEventQueue(_EventQueueData)
+
+        'Get an existing LicSusp and LicRsp application.
+        With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+            _currentLO1Application = .GetLO1Appl(applEnfSrvCd, applCtrCd)
+        End With
+
+        _newLO1Application = _currentLO1Application.Copy
+
+        'Check if the dataset received has the appropriate application category code.
+        If (ValidateApplicationCategory(_newLO1Application.Appl.Item(0).AppCtgy_Cd, L01_CATEGORY_CODE) = False) Then
+            Throw New Exception("Wrong Application Category Code!")
+        End If
+
+        'Check if the current state is set to 10 or 12  If not throw an exception. 
+        If ((_currentLO1Application.Appl.Item(0).AppLiSt_Cd <> 10) AndAlso (_currentLO1Application.Appl.Item(0).AppLiSt_Cd <> 12)) Then
+            Throw New Exception("Invalid State for the current application.  Valid states allowed are 10 and 12.")
+        Else
+
+            'If _currentLO1Application.Appl.Item(0).AppLiSt_Cd <> 14 Then
+            'Get an existing LO1 LicSusp application.
+            With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+                _LO1LicSuspData = .GetLO1LicSusp(_currentLO1Application.Appl.Item(0).Appl_EnfSrv_Cd, _currentLO1Application.Appl.Item(0).Appl_CtrlCd)
+            End With
+
+            'Setting the last update fields.
+            _newLO1Application.Appl.Item(0).Appl_LastUpdate_Usr = lastUpdateUser
+            _newLO1Application.Appl.Item(0).Appl_LastUpdate_Dte = Date.Now()
+
+            ' Move to State 12 - Partially serviced
+            StateTransitionManager(12)
+
+            With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+                .UpdateLO1Appl(_newLO1Application)
+
+            End With
+
+            With New Justice.FOAEA.MidTier.DataAccess.LicenceDenial(_connectionString)
+                .UpdateLO1LicSusp(_LO1LicSuspData)
+            End With
+
+        End If
+
+        SaveEventQueue(_EventQueueData)
+    End Sub             
+             */
+        }
+
+        public List<ApplicationEventData> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return EventManager.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+        
+        public List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return EventDetailManager.GetRequestedLICINLicenceDenialEventDetails(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+
+        //public DataList<LicenceDenialResponseData> GetLicenceDenialResults(bool checkCycle = false)
+        //{
+        //    return Repositories.LicenceDenialResponseRepository.GetLicenceDenialResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
+        //}
+
+        public List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+                                                                      string activeState,
+                                                                      ApplicationState lifeState,
+                                                                      string enfServiceCode)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            return licenceDenialDB.GetFederalOutgoingData(maxRecords, activeState, lifeState, enfServiceCode);
+        }
+
+        public void CreateResponseData(List<LicenceDenialResponseData> responseData)
+        {
+            var responsesDB = Repositories.LicenceDenialResponseRepository;
+            responsesDB.InsertBulkData(responseData);
+        }
+
+        public void MarkResponsesAsViewed(string enfService)
+        {
+            var responsesDB = Repositories.LicenceDenialResponseRepository;
+            responsesDB.MarkResponsesAsViewed(enfService);
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
@@ -226,5 +335,10 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.SaveEvents();
         }
 
+        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string federalSource)
+        {
+            var licenceDenialDB = Repositories.LicenceDenialRepository;
+            return licenceDenialDB.GetLicenceDenialToApplData(federalSource);
+        }
     }
 }

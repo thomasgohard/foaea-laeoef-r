@@ -53,7 +53,7 @@
 
                     if (data.Appl_Expiry_Dte.HasValue)
                     {
-                        expiryDate = data.Appl_Expiry_Dte.Value.ToString(DateTimeHelper.YYYY_MM_DD);
+                        expiryDate = data.Appl_Expiry_Dte.Value.ToString(DateTimeExtensions.YYYY_MM_DD);
                     }
                     <tr>
                         <td class="nowrap" style="width:50px;">
@@ -68,7 +68,7 @@
                         <td>@data.Subm_SubmCd</td>
                         <td><a id="@appKey" asp-controller="@controller" asp-action="Edit" asp-area="Application" asp-route-id="@appKey">@data.Appl_CtrlCd</a></td>
                         <td>@data.Subm_Recpt_SubmCd</td>
-                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeHelper.YYYY_MM_DD)</td>
+                        <td>@data.Appl_Rcptfrm_Dte.ToString(DateTimeExtensions.YYYY_MM_DD)</td>
                         <td>@expiryDate</td>
                         <td>@data.Appl_Dbtr_SurNme</td>
                         <td>@data.Appl_Source_RfrNr</td>

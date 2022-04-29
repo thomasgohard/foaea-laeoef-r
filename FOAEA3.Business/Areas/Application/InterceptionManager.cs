@@ -562,7 +562,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             if (applicationRejectReasons.Length > 80)
-                applicationRejectReasons = applicationRejectReasons?[0..79];
+                applicationRejectReasons = applicationRejectReasons?[0..80];
 
             EventManager.AddEvent(EventCode.C51110_VARIATION_REJECTED, applicationRejectReasons);
 

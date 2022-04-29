@@ -2,11 +2,13 @@
 using FileBroker.Business;
 using FileBroker.Data;
 using FileBroker.Data.DB;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +21,7 @@ namespace Outgoing.FileCreator.MEP
         {
             ColourConsole.WriteEmbeddedColorLine("Starting MEP Outgoing File Creator");
 
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -32,29 +34,47 @@ namespace Outgoing.FileCreator.MEP
             var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            CreateOutgoingProvincialTracingFiles(fileBrokerDB, apiRootForFiles);
-            //CreateOutgoingProvincialLicencingFiles(fileBrokerDB, apiRootForFiles);
-            //CreateOutgoingProvincialStatusFiles(fileBrokerDB, apiRootForFiles);
-        }
+            bool generateTracingFiles = true;
+            bool generateLicencingFiles = true;
+            bool generateStatsFiles = true;
 
-        //private static void CreateOutgoingProvincialStatusFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            if (args.Length > 0)
+            {
+                string option = args[0].ToUpper();
+                switch (option)
+                {
+                    case "TRACE_ONLY":
+                        generateLicencingFiles = false;
+                        generateStatsFiles = false;
+                        break;
+                    case "LICENCE_ONLY":
+                        generateTracingFiles = false;
+                        generateStatsFiles = false;
+                        break;
+                    case "STATS_ONLY":
+                        generateLicencingFiles = false;
+                        generateTracingFiles = false;
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-        //private static void CreateOutgoingProvincialLicencingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI);
+            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI);
+            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI);
 
-        private static void CreateOutgoingProvincialTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
-        {
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEventAPIBroker = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                TracingApplicationAPIBroker = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TraceResponseAPIBroker = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingEventAPIBroker = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
+                Applications = new ApplicationAPIBroker(applicationApiHelper),
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
+                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper),
+                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper),
+                TracingEvents = new TracingEventAPIBroker(tracingApiHelper),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper),
             };
 
             var repositories = new RepositoryList
@@ -67,22 +87,34 @@ namespace Outgoing.FileCreator.MEP
                 MailServiceDB = new DBMailService(fileBrokerDB)
             };
 
-            var federalFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+            if (generateTracingFiles)
+                CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories));
 
-            var provincialTraceOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("TRCAPPOUT")
-                                                .Where(s => s.Active == true);
+            if (generateLicencingFiles)
+                CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories));
 
-            var allErrors = new Dictionary<string, List<string>>();
-            foreach (var provincialTraceOutgoingSource in provincialTraceOutgoingSources)
+            if (generateStatsFiles)
+                CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories));
+        }
+
+        private static void CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
+                                                          IOutgoingProvincialFileManager outgoingProvincialFileManager)
+        {
+            var provincialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory(category)
+                                                                  .Where(s => s.Active == true);
+
+            foreach (var provincialOutgoingSource in provincialOutgoingSources)
             {
-                string filePath = federalFileManager.CreateOutputFile(provincialTraceOutgoingSource.Name, out List<string> errors);
-                allErrors.Add(provincialTraceOutgoingSource.Name, errors);
+                string filePath = outgoingProvincialFileManager.CreateOutputFile(provincialOutgoingSource.Name, out List<string> errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    foreach (var error in errors)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
+                        repositories.ErrorTrackingDB.MessageBrokerError(category, provincialOutgoingSource.Name, new Exception(error), false);
+                    }
             }
-
-            foreach (var error in allErrors)
-                ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{error.Key}[/cyan]: [red]{error.Value}[/red]");
         }
     }
 }

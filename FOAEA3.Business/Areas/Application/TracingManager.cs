@@ -186,7 +186,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!UserHelper.IsInternalUser(lastUpdateUser))
+            if (!lastUpdateUser.IsInternalUser())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = lastUpdateUser;
                 TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
@@ -302,7 +302,7 @@ namespace FOAEA3.Business.Areas.Application
         private void ValidateAndProcessNewAffidavit()
         {
 
-            if (!UserHelper.IsInternalUser(TracingApplication.Appl_LastUpdate_Usr))
+            if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalUser())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = null;
             }

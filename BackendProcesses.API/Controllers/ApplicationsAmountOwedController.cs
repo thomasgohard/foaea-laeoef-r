@@ -3,7 +3,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using System;
 
 namespace BackendProcess.API.Controllers
@@ -13,15 +12,13 @@ namespace BackendProcess.API.Controllers
     public class ApplicationsAmountOwedController : ControllerBase
     {
         [HttpGet("Version")]
-        public ActionResult<string> Version() => Ok("Applications Amount Owed API Version 1.4");
+        public ActionResult<string> Version([FromServices] IRepositories repositories) =>
+            Ok($"Applications Amount Owed API Version 1.5\nDB: {repositories.MainDB.ConnectionString}");
 
         [HttpPut("")]
         public ActionResult<string> RunAmountOwed([FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
         {
             repositories.CurrentSubmitter = "";
-
-            ILogger log = Log.ForContext("APIpath", HttpContext.Request.Path.Value);
-            log.Information("(PUT) method RunAmountOwed(): referer = {referer}", Request.Headers["Referer"]);
 
             var startTime = DateTime.Now;
 
@@ -39,9 +36,6 @@ namespace BackendProcess.API.Controllers
         public ActionResult<SummonsSummaryData> CalculateAmountOwed(string id, [FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
         {
             repositories.CurrentSubmitter = "";
-
-            ILogger log = Log.ForContext("APIpath", HttpContext.Request.Path.Value);
-            log.Information("(PUT) method CalculateAmountOwed({id}): referer = {referer}", id, Request.Headers["Referer"]);
 
             string[] values = id.Split("-");
             if (values.Length == 2)

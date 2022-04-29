@@ -2,7 +2,7 @@
 
 namespace FileBroker.Business.Helpers;
 
-public static class SpecHelper
+public static class FlatFileSpecHelper
 {
     public static void ExtractRecTypeSingle<T>(ref T recTypeSingle, string flatFileLine,
                                                List<FlatFileSpecificationData> specs, string recType,
@@ -50,10 +50,10 @@ public static class SpecHelper
             {
                 // need to user SetValueDirect and __makeref() since we are using struct instead of class
                 if ((specItem.PrcsType_Cd.ToLower().Trim() == "date") && (specItem.FormatDate.ToLower().Trim() == "ccyyjjj"))
-                    fieldInfo.SetValueDirect(__makeref(newRecType), DateTimeHelper.ConvertJulianDateStringToDateTime(valueFromFlatFileLine, ref error));
+                    fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine.ConvertJulianDateStringToDateTime(ref error));
 
                 else if (specItem.PrcsType_Cd.ToLower().Trim() == "integer")
-                    fieldInfo.SetValueDirect(__makeref(newRecType), StringHelper.ConvertStringToInteger(valueFromFlatFileLine));
+                    fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine.ConvertStringToInteger());
 
                 else
                     fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine);

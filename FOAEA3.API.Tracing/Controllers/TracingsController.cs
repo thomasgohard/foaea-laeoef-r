@@ -131,6 +131,29 @@ namespace FOAEA3.API.Tracing.Controllers
 
         }
 
+        [HttpPut("{key}/Transfer")]
+        public ActionResult<TracingApplicationData> Transfer([FromRoute] string key,
+                                                             [FromServices] IRepositories repositories,
+                                                             [FromQuery] string newRecipientSubmitter,
+                                                             [FromQuery] string newIssuingSubmitter)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+            
+            var appManager = new TracingManager(application, repositories, config);
+
+            appManager.TransferApplication(newIssuingSubmitter, newRecipientSubmitter);
+
+            return Ok(application);
+        }
+
         [HttpPut("{key}/SINbypass")]
         public ActionResult<TracingApplicationData> SINbypass([FromRoute] string key,
                                                               [FromServices] IRepositories repositories)

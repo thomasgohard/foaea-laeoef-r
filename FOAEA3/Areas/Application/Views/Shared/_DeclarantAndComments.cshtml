@@ -27,7 +27,7 @@
 
     <label class='control-label pl-3' for='@fieldName'>
         Comments&nbsp;
-        @if ((UserHelper.IsInternalUser(SessionData.CurrentSubmitter)) && (!commentsDisabled) && (!isCreateMode))
+        @if ((SessionData.CurrentSubmitter.IsInternalUser()) && (!commentsDisabled) && (!isCreateMode))
         {
             <select id="ddlComments" name="ddlComments">
                 <option value="0" selected></option>

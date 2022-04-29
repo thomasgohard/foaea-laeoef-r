@@ -50,13 +50,13 @@ namespace Incoming.Common
             return newFiles;
         }
 
-        public bool ProcessNewFile(string fullPath)
+        public bool ProcessNewFile(string fullPath, ref List<string> errors)
         {
             bool fileProcessedSuccessfully = false;
 
             string fileNameNoPath = Path.GetFileName(fullPath);
 
-            if (fullPath.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. EI3STSIT.000022)
+            if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. EI3STSIT.000022)
             {                                 //                                                    ↑ 
 
                 string flatFile;
@@ -69,7 +69,10 @@ namespace Incoming.Common
 
                 var response = APIHelper.PostFlatFile($"api/v1/FederalTracingFiles?fileName={fileNameNoPath}", flatFile, ApiFilesConfig.FileBrokerFederalTracingRootAPI);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
                     ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                    errors.Add($"FederalTracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                }
                 else
                     ColourConsole.WriteEmbeddedColorLine($"[green]{response.Content?.ReadAsStringAsync().Result}[/green]");
 
@@ -78,7 +81,7 @@ namespace Incoming.Common
             }
             else
             {
-                // TODO: generate Unknown file name exception or ignore?
+                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
             }
 
             return fileProcessedSuccessfully;

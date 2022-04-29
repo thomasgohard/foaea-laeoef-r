@@ -44,10 +44,10 @@
                     
                     <tr>
                         <td class='nowrap'>@appKey</td>
-                        <td class='nowrap'>@string.Format(DateTimeHelper.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Rcpt_Dte)</td>
+                        <td class='nowrap'>@string.Format(DateTimeExtensions.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Rcpt_Dte)</td>
                         <td class='nowrap'>@data.Originator</td>
                         <td class='nowrap'>@data.AddrTyp_Cd</td>
-                        <td class='nowrap'>@string.Format(DateTimeHelper.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Addr_LstUpdte)</td>
+                        <td class='nowrap'>@string.Format(DateTimeExtensions.GRID_DATETIMEFORMATSTRING, data.TrcRsp_Addr_LstUpdte)</td>
                         <td class='nowrap'>@Html.Raw(data.Address)</td>
                         <td class='nowrap'>@data.TrcRsp_Trace_CyclNr</td>
                     </tr>

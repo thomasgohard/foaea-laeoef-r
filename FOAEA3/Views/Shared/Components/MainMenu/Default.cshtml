@@ -83,7 +83,7 @@
                     <li><div>Sin Verification Results</div></li>
                     <li><div>Licence Suspension History</div></li>
                     <li><div>View Trace Responses</div></li>
-                    @if (UserHelper.IsInternalUser(currentSubmitter))
+                    @if (currentSubmitter.IsInternalUser())
                     {
                         <li><div style="display:none;">-</div></li>
                         <li><div>Specify Other Submitter</div></li>

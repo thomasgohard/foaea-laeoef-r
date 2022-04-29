@@ -492,11 +492,11 @@ namespace FOAEA3.Business.Areas.Application
                 (Application.Appl_CtrlCd != current.Appl_CtrlCd) ||
                 (Application.Subm_SubmCd != current.Subm_SubmCd) ||
                 (Application.Subm_Recpt_SubmCd != current.Subm_Recpt_SubmCd) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Lgl_Dte, current.Appl_Lgl_Dte)) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Rcptfrm_Dte, current.Appl_Rcptfrm_Dte)) ||
+                (!Application.Appl_Lgl_Dte.AreDatesEqual(current.Appl_Lgl_Dte)) ||
+                (!Application.Appl_Rcptfrm_Dte.AreDatesEqual(current.Appl_Rcptfrm_Dte)) ||
                 (Application.Appl_Group_Batch_Cd != current.Appl_Group_Batch_Cd) ||
                 (Application.Subm_Affdvt_SubmCd != current.Subm_Affdvt_SubmCd) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_RecvAffdvt_Dte, current.Appl_RecvAffdvt_Dte)) ||
+                (!Application.Appl_RecvAffdvt_Dte.AreDatesEqual(current.Appl_RecvAffdvt_Dte)) ||
                 (Application.Appl_Affdvt_DocTypCd != current.Appl_Affdvt_DocTypCd) ||
                 (Application.Appl_JusticeNr != current.Appl_JusticeNr) ||
                 (Application.Appl_Crdtr_FrstNme != current.Appl_Crdtr_FrstNme) ||
@@ -506,21 +506,21 @@ namespace FOAEA3.Business.Areas.Application
                 (Application.Appl_Dbtr_MddleNme != current.Appl_Dbtr_MddleNme) ||
                 (Application.Appl_Dbtr_SurNme != current.Appl_Dbtr_SurNme) ||
                 (Application.Appl_Dbtr_Parent_SurNme != current.Appl_Dbtr_Parent_SurNme) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Dbtr_Brth_Dte, current.Appl_Dbtr_Brth_Dte)) ||
+                (!Application.Appl_Dbtr_Brth_Dte.AreDatesEqual(current.Appl_Dbtr_Brth_Dte)) ||
                 (Application.Appl_Dbtr_LngCd != current.Appl_Dbtr_LngCd) ||
                 (Application.Appl_Dbtr_Gendr_Cd != current.Appl_Dbtr_Gendr_Cd) ||
                 (Application.Appl_Dbtr_Entrd_SIN != current.Appl_Dbtr_Entrd_SIN) ||
                 (Application.Appl_Dbtr_Cnfrmd_SIN != current.Appl_Dbtr_Cnfrmd_SIN) ||
                 (Application.Appl_Dbtr_RtrndBySrc_SIN != current.Appl_Dbtr_RtrndBySrc_SIN) ||
                 (Application.Medium_Cd != current.Medium_Cd) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Reactv_Dte, current.Appl_Reactv_Dte)) ||
+                (!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
                 (Application.Appl_SIN_Cnfrmd_Ind != current.Appl_SIN_Cnfrmd_Ind) ||
                 (Application.AppCtgy_Cd != current.AppCtgy_Cd) ||
                 (Application.AppReas_Cd != current.AppReas_Cd) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Create_Dte, current.Appl_Create_Dte)) ||
+                (!Application.Appl_Create_Dte.AreDatesEqual(current.Appl_Create_Dte)) ||
                 (Application.Appl_Create_Usr != current.Appl_Create_Usr) ||
                 (Application.Appl_WFID != current.Appl_WFID) ||
-                (!DateTimeHelper.AreDatesEqual(Application.Appl_Crdtr_Brth_Dte, current.Appl_Crdtr_Brth_Dte)))
+                (!Application.Appl_Crdtr_Brth_Dte.AreDatesEqual(current.Appl_Crdtr_Brth_Dte)))
             {
                 // revert any values that cannot be modified
 

@@ -71,6 +71,20 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public TracingApplicationData TransferTracingApplication(TracingApplicationData tracingApplication,
+                                                                 string newRecipientSubmitter,
+                                                                 string newIssuingSubmitter)
+        {
+            string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/tracings/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
+                                                           $"&newIssuingSubmitter={newIssuingSubmitter}";
+            var data = ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall,
+                                                                                              tracingApplication).Result;
+            return data;
+        }
+
+
+
         public List<TracingOutgoingFederalData> GetOutgoingFederalTracingRequests(int maxRecords,
                                                                                   string activeState,
                                                                                   int lifeState,

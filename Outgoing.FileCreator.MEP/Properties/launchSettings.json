@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Outgoing.FileCreator.MEP": {
+      "commandName": "Project"
+    },
+    "Outgoing.FileCreator.MEP STATS_ONLY": {
+      "commandName": "Project",
+      "commandLineArgs": "STATS_ONLY"
+    }
+  }
+}

@@ -17,22 +17,21 @@ public class OutgoingFederalTracingManager
     {
         errors = new List<string>();
 
-        string newFilePath = string.Empty;
         bool fileCreated = false;
 
         var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileBaseName);
 
+        var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
+
+        string newCycle;
+        if (processCodes.EnfSrv_Cd == "RC01") // TODO: should be a flag in the FileTable...
+            newCycle = fileTableData.Cycle.ToString("000");
+        else
+            newCycle = fileTableData.Cycle.ToString("000000");
+
         try
         {
-            var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
-
-            string newCycle;
-            if (processCodes.EnfSrv_Cd == "RC01") // TODO: should be a flag in the FileTable...
-                newCycle = fileTableData.Cycle.ToString("000");
-            else
-                newCycle = fileTableData.Cycle.ToString("000000");
-
-            newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
+            string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
@@ -48,12 +47,12 @@ public class OutgoingFederalTracingManager
             File.WriteAllText(newFilePath, fileContent);
             fileCreated = true;
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated,
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                  "Outbound File created successfully.");
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.ApplicationEventAPIBroker.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                      processCodes.EnfSrv_Cd,
                                                                      "OK: Written to " + newFilePath, eventIds);
 
@@ -65,7 +64,7 @@ public class OutgoingFederalTracingManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated, error);
+            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
             Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", "Error creating outbound file", e, true);
 
@@ -80,7 +79,7 @@ public class OutgoingFederalTracingManager
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.TracingApplicationAPIBroker.GetOutgoingFederalTracingRequests(maxRecords, actvSt_Cd,
+        var data = APIs.TracingApplications.GetOutgoingFederalTracingRequests(maxRecords, actvSt_Cd,
                                                                                       appLiSt_Cd, enfSrvCode);
         return data;
     }
@@ -110,7 +109,7 @@ public class OutgoingFederalTracingManager
 
     private static string GenerateDetailLine(TracingOutgoingFederalData item, string enfSrvCode)
     {
-        string result = $"02{item.Appl_Dbtr_Cnfrmd_SIN:9}{item.Appl_EnfSrv_Cd:6}{item.Appl_CtrlCd:6}";
+        string result = $"02{item.Appl_Dbtr_Cnfrmd_SIN,9}{item.Appl_EnfSrv_Cd,6}{item.Appl_CtrlCd,6}";
 
         if (enfSrvCode == "RC01")
             result += $"{item.ReturnType}";

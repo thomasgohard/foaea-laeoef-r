@@ -38,7 +38,9 @@ namespace FileBroker.Model
 		public string dat_Appl_LiSt_Cd;
 		public string Maintenance_ActionCd;
 		public string dat_New_Owner_RcptSubmCd;
-    }
+		public string dat_New_Owner_SubmCd;
+	}
+
 	public struct MEPTracing_RecType21
     {
 		public string RecType;

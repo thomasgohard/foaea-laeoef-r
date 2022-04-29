@@ -32,7 +32,7 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
 
             // FOAEA users can bypass swearing and go directly to state 10 
-            if (UserHelper.IsInternalUser(TracingApplication.Subm_Recpt_SubmCd) &&
+            if (TracingApplication.Subm_Recpt_SubmCd.IsInternalUser() &&
                 !String.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd) &&
                 TracingApplication.Appl_RecvAffdvt_Dte.HasValue)
             {
@@ -99,10 +99,10 @@ namespace FOAEA3.Business.Areas.Application
                     return;
                 case 1:
                 case 2:
-                    quarterDate = DateTimeHelper.AddQuarter(ReinstateEffectiveDate, 1);
+                    quarterDate = ReinstateEffectiveDate.AddQuarter(1);
                     break;
                 case 3:
-                    quarterDate = DateTimeHelper.AddQuarter(ReinstateEffectiveDate, 1).AddDays(-14);
+                    quarterDate = ReinstateEffectiveDate.AddQuarter(1).AddDays(-14);
                     break;
                 case 4:
                     quarterDate = ReinstateEffectiveDate;

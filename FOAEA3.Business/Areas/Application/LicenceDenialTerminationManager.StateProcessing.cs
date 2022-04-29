@@ -8,5 +8,6 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialTerminationManager
     {
+        
     }
 }

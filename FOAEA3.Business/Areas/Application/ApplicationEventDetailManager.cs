@@ -49,5 +49,11 @@ namespace FOAEA3.Business.Areas.Application
         {
             return EventDetailDB.GetActiveTracingEventDetails(enfSrv_Cd, cycle);
         }
+
+        public List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                       string appl_CtrlCd)
+        {
+            return EventDetailDB.GetRequestedLICINLicenceDenialEventDetails(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
     }
 }

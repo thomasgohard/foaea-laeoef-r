@@ -73,13 +73,13 @@ public class IncomingProvincialTracingManager
                     {
                         var traceData = tracingFile.TRCAPPIN21.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
-                        var tracingApplication = GetTracingApplicationDataFromRequest(data, traceData);
-
                         var tracingMessage = new TracingMessageData
                         {
-                            TracingApplication = tracingApplication,
+                            TracingApplication = GetTracingApplicationDataFromRequest(data, traceData),
                             MaintenanceAction = data.Maintenance_ActionCd,
-                            MaintenanceLifeState = data.dat_Appl_LiSt_Cd
+                            MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
+                            NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
+                            NewIssuingSubmitter = data.dat_New_Owner_SubmCd
                         };
 
                         var messages = ProcessApplicationRequest(tracingMessage);
@@ -147,13 +147,33 @@ public class IncomingProvincialTracingManager
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
-            tracing = APIs.TracingApplicationAPIBroker.CreateTracingApplication(tracingMessageData.TracingApplication);
-        else // tracingMessageData.MaintenanceAction == "C"
         {
-            if (tracingMessageData.MaintenanceLifeState == "14")
-                tracing = APIs.TracingApplicationAPIBroker.CloseTracingApplication(tracingMessageData.TracingApplication);
-            else
-                tracing = APIs.TracingApplicationAPIBroker.UpdateTracingApplication(tracingMessageData.TracingApplication);
+            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.TracingApplication);
+        }
+        else // if (tracingMessageData.MaintenanceAction == "C")
+        {
+            switch (tracingMessageData.MaintenanceLifeState)
+            {
+                case "00": // change
+                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.TracingApplication);
+                    break;
+
+                case "14": // cancellation
+                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.TracingApplication);
+                    break;
+
+                case "29": // transfer
+                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.TracingApplication,
+                                                                                  tracingMessageData.NewRecipientSubmitter,
+                                                                                  tracingMessageData.NewIssuingSubmitter);
+                    break;
+
+                default:
+                    tracing = tracingMessageData.TracingApplication;
+                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})"+
+                                              $" for Maintenance_ActionCd ({tracingMessageData.MaintenanceAction})");
+                    break;
+            }
         }
 
         return tracing.Messages;
@@ -185,7 +205,7 @@ public class IncomingProvincialTracingManager
 
         if ((data.Maintenance_ActionCd == "A") && (data.dat_Appl_LiSt_Cd != "00"))
             validActionLifeState = false;
-        else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14")))
+        else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
             validActionLifeState = false;
         else if (data.Maintenance_ActionCd.NotIn("A", "C"))
             validActionLifeState = false;

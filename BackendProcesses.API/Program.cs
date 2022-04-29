@@ -1,3 +1,4 @@
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -88,7 +89,7 @@ namespace BackendProcesses.API
             // log to SQL Server table
 
             logConfig = logConfig.WriteTo.MSSqlServer(
-                           connectionString: config["ConnectionStrings:FOAEAMain"],
+                           connectionString: config["ConnectionStrings:FOAEAMain"].ReplaceVariablesWithEnvironmentValues(),
                            restrictedToMinimumLevel: LogEventLevel.Information,
                            sinkOptions: sqlSinkOpts,
                            columnOptions: sqlColumnOpts);

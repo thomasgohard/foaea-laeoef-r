@@ -273,8 +273,8 @@ namespace FOAEA3.Business.Areas.Application
                                                                           ApplicationState.APPLICATION_REJECTED_9,
                                                                           ApplicationState.APPLICATION_SUSPENDED_35))
             {
-                int fiscalMonthCounter = DateTimeHelper.GetFiscalMonth(DateTime.Now);
-                int fiscalYear = DateTimeHelper.GetFiscalYear(DateTime.Now);
+                int fiscalMonthCounter = DateTime.Now.GetFiscalMonth();
+                int fiscalYear = DateTime.Now.GetFiscalYear();
                 string enfOfficeCode = InterceptionApplication.Subm_SubmCd.Substring(3, 1);
 
                 var garnSummaryData = garnSmryDB.GetGarnSummary(Appl_EnfSrv_Cd, enfOfficeCode, fiscalMonthCounter, fiscalYear);

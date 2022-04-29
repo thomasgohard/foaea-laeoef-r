@@ -38,10 +38,10 @@ namespace FOAEA3.Common.Brokers
             _ = ApiHelper.PostDataAsync<ApplicationEventData, ApplicationEventData>(apiCall, eventData).Result;
         }
 
-        public void SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail)
+        public void SaveEventDetail(ApplicationEventDetailData eventDetail)
         {
             string apiCall = $"api/v1/applicationEventDetails";
-            _ = ApiHelper.PostDataAsync<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, activeTraceEventDetail).Result;
+            _ = ApiHelper.PostDataAsync<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, eventDetail).Result;
         }
 
         public void UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)

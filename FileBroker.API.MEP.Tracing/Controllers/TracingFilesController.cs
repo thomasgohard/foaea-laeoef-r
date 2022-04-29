@@ -22,9 +22,9 @@ public class TracingFilesController : ControllerBase
 
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
-    public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
+    public IActionResult GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {
-        string fileContent = LoadLatestFederalTracingFile(partnerId, fileTable, out string lastFileName);
+        string fileContent = LoadLatestProvincialTracingFile(partnerId, fileTable, out string lastFileName);
 
         if (fileContent == null)
             return NotFound();
@@ -34,8 +34,8 @@ public class TracingFilesController : ControllerBase
         return File(result, "text/xml", lastFileName);
     }
 
-    private static string LoadLatestFederalTracingFile(string partnerId, IFileTableRepository fileTable,
-                                                       out string lastFileName)
+    private static string LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable,
+                                                          out string lastFileName)
     {
         var fileTableData = fileTable.GetFileTableDataForCategory("TRCAPPOUT")
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
@@ -59,14 +59,14 @@ public class TracingFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessTracingFile([FromQuery] string fileName,
-                                           [FromServices] IFileAuditRepository fileAuditDB,
-                                           [FromServices] IFileTableRepository fileTableDB,
-                                           [FromServices] IMailServiceRepository mailService,
-                                           [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                           [FromServices] IOptions<ApiConfig> apiConfig,
-                                           [FromHeader] string currentSubmitter,
-                                           [FromHeader] string currentSubject)
+    public ActionResult ProcessIncomingTracingFile([FromQuery] string fileName,
+                                                   [FromServices] IFileAuditRepository fileAuditDB,
+                                                   [FromServices] IFileTableRepository fileTableDB,
+                                                   [FromServices] IMailServiceRepository mailService,
+                                                   [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
+                                                   [FromServices] IOptions<ApiConfig> apiConfig,
+                                                   [FromHeader] string currentSubmitter,
+                                                   [FromHeader] string currentSubject)
     {
         string sourceTracingData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -85,7 +85,7 @@ public class TracingFilesController : ControllerBase
 
         var apis = new APIBrokerList
         {
-            TracingApplicationAPIBroker = tracingApplicationAPIs
+            TracingApplications = tracingApplicationAPIs
         };
 
         var repositories = new RepositoryList
