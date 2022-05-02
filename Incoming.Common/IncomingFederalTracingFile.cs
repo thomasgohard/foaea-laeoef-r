@@ -28,10 +28,8 @@ namespace Incoming.Common
             FileTable = new DBFileTable(fileBrokerDB);
         }
 
-        public Dictionary<string, FileTableData> GetNewFiles(string rootPath)
+        public void AddNewFiles(string rootPath, ref List<string> newFiles)
         {
-            var newFiles = new Dictionary<string, FileTableData>();
-
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IT.*");
             var last31days = DateTime.Now.AddDays(-31);
@@ -44,10 +42,8 @@ namespace Incoming.Common
                 var fileTableData = FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName, fileTableData);
+                    newFiles.Add(fileInfo.FullName);
             }
-
-            return newFiles;
         }
 
         public bool ProcessNewFile(string fullPath, ref List<string> errors)

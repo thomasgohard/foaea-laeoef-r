@@ -25,9 +25,9 @@
     }
 
     Dictionary<string, string> genderChoices = new Dictionary<string, string>();
-    foreach (var gender in ReferenceData.Instance().Genders)
+    foreach (var (genderCode, genderData) in ReferenceData.Instance().Genders)
     {
-        genderChoices.Add(gender.Key, gender.Value.Description);
+        genderChoices.Add(genderCode, genderData.Description);
     }
 
     bool optRoleReason1 = false;

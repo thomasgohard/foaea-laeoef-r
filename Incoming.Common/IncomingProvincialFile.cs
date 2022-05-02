@@ -38,7 +38,7 @@ namespace Incoming.Common
             LicencingBaseName = licencingBaseName;
         }
 
-        public Dictionary<string, FileTableData> GetNewFiles(string rootPath, ref Dictionary<string, FileTableData> newFiles)
+        public void AddNewFiles(string rootPath, ref List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*.xml");
@@ -53,10 +53,8 @@ namespace Incoming.Common
                 var fileTableData = FileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName, fileTableData);
+                    newFiles.Add(fileInfo.FullName);
             }
-
-            return newFiles;
         }
 
         public bool ProcessNewFile(string fullPath, ref List<string> errors)

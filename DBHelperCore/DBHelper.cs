@@ -341,19 +341,19 @@ namespace DBHelper
                     }
                 }
 
-                foreach (var returnParam in returnParameters)
+                foreach (var (fieldName, returnedValue) in returnParameters)
                 {
-                    var returnType = returnParam.Value.Substring(0, 1) switch
+                    var returnType = returnedValue[0] switch
                     {
-                        "S" => SqlDbType.VarChar,
-                        "C" => SqlDbType.Char,
-                        "I" => SqlDbType.Int,
-                        _ => throw new Exception($"Unsupported DB type! ({returnParam.Value})"),
+                        'S' => SqlDbType.VarChar,
+                        'C' => SqlDbType.Char,
+                        'I' => SqlDbType.Int,
+                        _ => throw new Exception($"Unsupported DB type! ({returnedValue})"),
                     };
-                    var outParameter = cmd.Parameters.Add("@" + returnParam.Key, returnType);
-                    if (returnParam.Value.Substring(0, 1).In("S", "C"))
+                    var outParameter = cmd.Parameters.Add("@" + fieldName, returnType);
+                    if (returnedValue[0].In('S', 'C'))
                     {
-                        int length = int.Parse(returnParam.Value[1..]);
+                        int length = int.Parse(returnedValue[1..]);
                         outParameter.Size = length;
                     }
 
@@ -378,9 +378,9 @@ namespace DBHelper
                     LastException = e;
                 }
 
-                foreach (var returnParam in returnParameters)
+                foreach (var (fieldName, _) in returnParameters)
                 {
-                    result.Add(returnParam.Key, cmd.Parameters["@" + returnParam.Key].Value);
+                    result.Add(fieldName, cmd.Parameters["@" + fieldName].Value);
                 }
 
             }

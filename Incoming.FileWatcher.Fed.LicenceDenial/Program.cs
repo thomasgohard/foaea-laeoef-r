@@ -40,9 +40,9 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
             string ftpRoot = configuration["FTProot"];
 
-            var allNewFiles = new Dictionary<string, FileTableData>();
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\Tc3sls"); // Transport Canada Licence Denial
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\Pa3sls"); // Passport Canada Licence Denial
+            var allNewFiles = new List<string>();
+            FederalFileManager.AddNewFiles(ftpRoot + @"\Tc3sls", ref allNewFiles); // Transport Canada Licence Denial
+            FederalFileManager.AddNewFiles(ftpRoot + @"\Pa3sls", ref allNewFiles); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {
@@ -50,22 +50,16 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 foreach (var newFile in allNewFiles)
                 {
                     var errors = new List<string>();
-                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile.Key}[/green]...");
-                    FederalFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                    FederalFileManager.ProcessNewFile(newFile, ref errors);
                     if (errors.Any())
                         foreach (var error in errors)
-                            errorTrackingDB.MessageBrokerError("LICIN", newFile.Key, new Exception(error), false);
+                            errorTrackingDB.MessageBrokerError("LICIN", newFile, new Exception(error), false);
                 }
             }
             else
                 ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
         }
-
-        private static void AppendNewFilesFrom(ref Dictionary<string, FileTableData> allNewFiles, string filePath)
-        {
-            var newFiles = FederalFileManager.GetNewFiles(filePath);
-            foreach (var newFile in newFiles)
-                allNewFiles.Add(newFile.Key, newFile.Value);
-        }
+   
     }
 }

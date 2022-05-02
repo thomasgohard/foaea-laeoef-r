@@ -50,8 +50,8 @@ namespace FOAEA3.Resources.Helpers
 
             var result = data.GetEnvironmentVariablesAndValues();
 
-            foreach (var item in result)
-                data = data.Replace($"%{item.Key}%", $"{item.Value}");
+            foreach (var (oldValue, newValue) in result)
+                data = data.Replace($"%{oldValue}%", $"{newValue}");
 
             return data.Replace("|||", "");
         }

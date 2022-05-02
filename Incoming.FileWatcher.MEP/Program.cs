@@ -79,23 +79,23 @@ namespace Incoming.FileWatcher.MEP
                                                                    tracingBaseName: tracingName,
                                                                    licencingBaseName: licenceName);
 
-            var newFiles = new Dictionary<string, FileTableData>();
+            var allNewFiles = new List<string>();
             foreach(string searchPath in searchPaths)
-                provincialFileManager.GetNewFiles(searchPath, ref newFiles);
+                provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
 
-            if (newFiles.Count > 0)
+            if (allNewFiles.Count > 0)
             {
-                ColourConsole.WriteEmbeddedColorLine($"Found [green]{newFiles.Count}[/green] file(s)");
+                ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file(s)");
 
-                foreach (var newFile in newFiles)
+                foreach (var newFile in allNewFiles)
                 {
-                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile.Key}[/green]...");
+                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
 
                     var errors = new List<string>();
-                    provincialFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    provincialFileManager.ProcessNewFile(newFile, ref errors);
                     if (errors.Any())
                         foreach (var error in errors)
-                            errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile.Key, new Exception(error), false);
+                            errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), false);
                 }
             }
             else

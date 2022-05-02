@@ -40,10 +40,10 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
             string ftpRoot = configuration["FTProot"];
 
-            var allNewFiles = new Dictionary<string, FileTableData>();
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\EI3STS"); // NETP
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\HR3STS"); // EI Tracing
-            AppendNewFilesFrom(ref allNewFiles, ftpRoot + @"\RC3STS"); // CRA Tracing
+            var allNewFiles = new List<string>();
+            FederalFileManager.AddNewFiles(ftpRoot + @"\EI3STS", ref allNewFiles); // NETP
+            FederalFileManager.AddNewFiles(ftpRoot + @"\HR3STS", ref allNewFiles); // EI Tracing
+            FederalFileManager.AddNewFiles(ftpRoot + @"\RC3STS", ref allNewFiles); // CRA Tracing
 
             if (allNewFiles.Count > 0)
             {
@@ -51,11 +51,11 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 foreach (var newFile in allNewFiles)
                 {
                     var errors = new List<string>();
-                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile.Key}[/green]...");
-                    FederalFileManager.ProcessNewFile(newFile.Key, ref errors);
+                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                    FederalFileManager.ProcessNewFile(newFile, ref errors);
                     if (errors.Any())
                         foreach(var error in errors)
-                            errorTrackingDB.MessageBrokerError("TRCIN", newFile.Key, new Exception(error), false);
+                            errorTrackingDB.MessageBrokerError("TRCIN", newFile, new Exception(error), false);
 
                 }
             }
@@ -63,11 +63,5 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
         }
 
-        private static void AppendNewFilesFrom(ref Dictionary<string, FileTableData> allNewFiles, string filePath)
-        {
-            var newFiles = FederalFileManager.GetNewFiles(filePath);
-            foreach (var newFile in newFiles)
-                allNewFiles.Add(newFile.Key, newFile.Value);
-        }
     }
 }
