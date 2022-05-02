@@ -144,7 +144,7 @@ namespace DBHelper
         }
 
         public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
-                                                           ActionOut<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
+                                                           ActionOut<IDBHelperReader, Tdata> fillDataFromReader)
         {
 
             ValidateConfiguration();
@@ -162,7 +162,6 @@ namespace DBHelper
                     }
                 }
 
-
                 var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                 retParameter.Direction = ParameterDirection.ReturnValue;
 
@@ -174,15 +173,10 @@ namespace DBHelper
                     using SqlDataReader rdr = cmd.ExecuteReader();
                     while (rdr.Read())
                     {
-
-                        // var data = new Tdata();
-                        //Tdata data = (Tdata)Activator.CreateInstance(typeof(Tdata));
                         var dataReader = new DBHelperReader(rdr);
-
                         fillDataFromReader(dataReader, out var data);
 
                         result.Add(data);
-
                     }
 
                     rdr.Close();

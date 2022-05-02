@@ -60,7 +60,7 @@ namespace DBHelper
                                                        Action<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new();
 
         List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
-                                                    ActionOut<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new();
+                                                    ActionOut<IDBHelperReader, Tdata> fillDataFromReader);
 
         Tdata GetDataFromProcSingleValue<Tdata>(string procName, Dictionary<string, object> parameters);
 

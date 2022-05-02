@@ -146,18 +146,17 @@ namespace FOAEA3.Data.DB
 
         private void FillTracingOutgoingFederalRecord(IDBHelperReader rdr, out TracingOutgoingFederalData data)
         {
-            data = new TracingOutgoingFederalData()
-            {
-                Event_dtl_Id = (int)rdr["Event_dtl_Id"],
-                Event_Reas_Cd = (rdr["Event_Reas_Cd"] != null) ? (int)rdr["Event_Reas_Cd"] : default,
-                Event_Reas_Text = (rdr["Event_Reas_Text"] != null) ? rdr["Event_Reas_Text"] as string : default,
-                ActvSt_Cd = rdr["ActvSt_Cd"] as string,
-                Recordtype = rdr["Recordtype"] as string,
-                Appl_Dbtr_Cnfrmd_SIN = rdr["Val_1"] as string,
-                Appl_EnfSrv_Cd = rdr["Val_2"] as string,
-                Appl_CtrlCd = rdr["Val_3"] as string,
-                ReturnType = (int)rdr["Val_4"],
-            };
+            data = new TracingOutgoingFederalData(
+                Event_dtl_Id : (int)rdr["Event_dtl_Id"],
+                Event_Reas_Cd : (rdr["Event_Reas_Cd"] != null) ? (int)rdr["Event_Reas_Cd"] : default,
+                Event_Reas_Text : (rdr["Event_Reas_Text"] != null) ? rdr["Event_Reas_Text"] as string : default,
+                ActvSt_Cd : rdr["ActvSt_Cd"] as string,
+                Recordtype : rdr["Recordtype"] as string,
+                Appl_Dbtr_Cnfrmd_SIN : rdr["Val_1"] as string,
+                Appl_EnfSrv_Cd : rdr["Val_2"] as string,
+                Appl_CtrlCd : rdr["Val_3"] as string,
+                ReturnType : (int)rdr["Val_4"]
+            );
         }
 
         public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,

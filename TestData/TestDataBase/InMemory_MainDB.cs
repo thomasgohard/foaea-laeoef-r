@@ -94,7 +94,7 @@ namespace TestData.TestDataBase
             throw new NotImplementedException();
         }
 
-        public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters, ActionOut<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
+        public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters, ActionOut<IDBHelperReader, Tdata> fillDataFromReader)
         {
             throw new NotImplementedException();
         }
