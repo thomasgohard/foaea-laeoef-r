@@ -59,6 +59,9 @@ namespace DBHelper
         List<Tdata> GetDataFromStoredProc<Tdata, Tkey>(string procName, string paramName, Tkey paramVal,
                                                        Action<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new();
 
+        List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
+                                                    ActionOut<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new();
+
         Tdata GetDataFromProcSingleValue<Tdata>(string procName, Dictionary<string, object> parameters);
 
         Tdata GetDataFromStoredProcViaReturnParameter<Tdata>(string procName, Dictionary<string, object> parameters, string returnParameter);

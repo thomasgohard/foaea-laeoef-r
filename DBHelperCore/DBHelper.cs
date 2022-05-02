@@ -143,6 +143,64 @@ namespace DBHelper
             return result;
         }
 
+        public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
+                                                           ActionOut<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
+        {
+
+            ValidateConfiguration();
+
+            var result = new List<Tdata>();
+
+            using (var con = new SqlConnection(ConnectionString))
+            {
+                using SqlCommand cmd = CreateCommand(procName, con);
+                if ((parameters != null) && (parameters.Count > 0))
+                {
+                    foreach (var item in parameters)
+                    {
+                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                    }
+                }
+
+
+                var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                retParameter.Direction = ParameterDirection.ReturnValue;
+
+                LastException = null;
+                try
+                {
+                    con.Open();
+
+                    using SqlDataReader rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
+                    {
+
+                        // var data = new Tdata();
+                        //Tdata data = (Tdata)Activator.CreateInstance(typeof(Tdata));
+                        var dataReader = new DBHelperReader(rdr);
+
+                        fillDataFromReader(dataReader, out var data);
+
+                        result.Add(data);
+
+                    }
+
+                    rdr.Close();
+
+                    if (retParameter.Value is not null)
+                        LastReturnValue = (int)retParameter.Value;
+
+                }
+                catch (Exception e)
+                {
+                    LastException = e;
+                }
+
+            }
+
+            return result;
+        }
+
         public Tdata GetDataFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters)
         {
             ValidateConfiguration();

@@ -139,9 +139,25 @@ namespace FOAEA3.Data.DB
                 { "chrEnfSrv_Cd", enfServiceCode }
             };
 
-            return MainDB.GetDataFromStoredProc<TracingOutgoingFederalData>("MessageBrokerGetTRCOUTOutboundData",
-                                                                            parameters, FillTracingOutgoingFederalData);
+            return MainDB.GetRecordsFromStoredProc<TracingOutgoingFederalData>("MessageBrokerGetTRCOUTOutboundData",
+                                                                               parameters, FillTracingOutgoingFederalRecord);
 
+        }
+
+        private void FillTracingOutgoingFederalRecord(IDBHelperReader rdr, out TracingOutgoingFederalData data)
+        {
+            data = new TracingOutgoingFederalData()
+            {
+                Event_dtl_Id = (int)rdr["Event_dtl_Id"],
+                Event_Reas_Cd = (rdr["Event_Reas_Cd"] != null) ? (int)rdr["Event_Reas_Cd"] : default,
+                Event_Reas_Text = (rdr["Event_Reas_Text"] != null) ? rdr["Event_Reas_Text"] as string : default,
+                ActvSt_Cd = rdr["ActvSt_Cd"] as string,
+                Recordtype = rdr["Recordtype"] as string,
+                Appl_Dbtr_Cnfrmd_SIN = rdr["Val_1"] as string,
+                Appl_EnfSrv_Cd = rdr["Val_2"] as string,
+                Appl_CtrlCd = rdr["Val_3"] as string,
+                ReturnType = (int)rdr["Val_4"],
+            };
         }
 
         public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
@@ -199,20 +215,20 @@ namespace FOAEA3.Data.DB
             }
         }
 
-        private void FillTracingOutgoingFederalData(IDBHelperReader rdr, TracingOutgoingFederalData data)
-        {
-            data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
-            if (rdr["Event_Reas_Cd"] != null)
-                data.Event_Reas_Cd = (int)rdr["Event_Reas_Cd"];
-            if (rdr["Event_Reas_Text"] != null)
-                data.Event_Reas_Text = rdr["Event_Reas_Text"] as string;
-            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
-            data.Recordtype = rdr["Recordtype"] as string;
-            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Val_1"] as string;
-            data.Appl_EnfSrv_Cd = rdr["Val_2"] as string;
-            data.Appl_CtrlCd = rdr["Val_3"] as string;
-            data.ReturnType = (int)rdr["Val_4"];
-        }
+        //private void FillTracingOutgoingFederalData(IDBHelperReader rdr, TracingOutgoingFederalData data)
+        //{
+        //    data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
+        //    if (rdr["Event_Reas_Cd"] != null)
+        //        data.Event_Reas_Cd = (int)rdr["Event_Reas_Cd"];
+        //    if (rdr["Event_Reas_Text"] != null)
+        //        data.Event_Reas_Text = rdr["Event_Reas_Text"] as string;
+        //    data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+        //    data.Recordtype = rdr["Recordtype"] as string;
+        //    data.Appl_Dbtr_Cnfrmd_SIN = rdr["Val_1"] as string;
+        //    data.Appl_EnfSrv_Cd = rdr["Val_2"] as string;
+        //    data.Appl_CtrlCd = rdr["Val_3"] as string;
+        //    data.ReturnType = (int)rdr["Val_4"];
+        //}
 
         private void FillTraceToApplDataFromReader(IDBHelperReader rdr, TraceToApplData data)
         {
