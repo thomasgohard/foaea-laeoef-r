@@ -16,7 +16,7 @@ namespace FOAEA3.Model
             ActvSt_Cd = "A";
             Appl_SIN_Cnfrmd_Ind = 0;
             Appl_Create_Dte = DateTime.Now;
-            Appl_Rcptfrm_Dte = Appl_Create_Dte.Value.Date; // only date, no time
+            Appl_Rcptfrm_Dte = Appl_Create_Dte.Date; // only date, no time
             Appl_Lgl_Dte = Appl_Create_Dte;
             Appl_LastUpdate_Dte = Appl_Create_Dte;
 

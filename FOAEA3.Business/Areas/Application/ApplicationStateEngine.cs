@@ -6,28 +6,77 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationStateEngine
     {
-        public Action Process_00_InitialState { get; set; }
-        public Action Process_01_InvalidApplication { get; set; }
-        public Action Process_02_AwaitingValidation { get; set; }
-        public Action Process_03_SinConfirmationPending { get; set; }
-        public Action Process_04_SinConfirmed { get; set; }
-        public Action Process_05_SinNotConfirmed { get; set; }
-        public Action Process_06_PendingAcceptanceSwearing { get; set; }
-        public Action Process_07_ValidAffidavitNotReceived { get; set; }
-        public Action Process_09_ApplicationRejected { get; set; }
-        public Action Process_10_ApplicationAccepted { get; set; }
-        public Action Process_11_ApplicationReinstated { get; set; }
-        public Action Process_12_PartiallyServiced { get; set; }
-        public Action Process_13_FullyServiced { get; set; }
-        public Action Process_14_ManuallyTerminated { get; set; }
-        public Action Process_15_Expired { get; set; }
-        public Action Process_17_FinancialTermsVaried { get; set; }
-        public Action Process_19_AwaitingDocumentsForVariation { get; set; }
-        public Action Process_35_ApplicationSuspended { get; set; }
-        public Action Process_91_InvalidVariationSource { get; set; }
-        public Action Process_92_InvalidVariationFinTerms { get; set; }
-        public Action Process_93_ValidFinancialVariation { get; set; }
-        public Action<ApplicationState, ApplicationState> InvalidStateChange { get; set; }
+        private readonly Action Process_00_InitialState ;
+        private readonly Action Process_01_InvalidApplication ;
+        private readonly Action Process_02_AwaitingValidation ;
+        private readonly Action Process_03_SinConfirmationPending ;
+        private readonly Action Process_04_SinConfirmed ;
+        private readonly Action Process_05_SinNotConfirmed ;
+        private readonly Action Process_06_PendingAcceptanceSwearing ;
+        private readonly Action Process_07_ValidAffidavitNotReceived ;
+        private readonly Action Process_09_ApplicationRejected ;
+        private readonly Action Process_10_ApplicationAccepted ;
+        private readonly Action Process_11_ApplicationReinstated ;
+        private readonly Action Process_12_PartiallyServiced ;
+        private readonly Action Process_13_FullyServiced ;
+        private readonly Action Process_14_ManuallyTerminated ;
+        private readonly Action Process_15_Expired ;
+        private readonly Action Process_17_FinancialTermsVaried ;
+        private readonly Action Process_19_AwaitingDocumentsForVariation ;
+        private readonly Action Process_35_ApplicationSuspended ;
+        private readonly Action Process_91_InvalidVariationSource ;
+        private readonly Action Process_92_InvalidVariationFinTerms ;
+        private readonly Action Process_93_ValidFinancialVariation ;
+        private readonly Action<ApplicationState, ApplicationState> InvalidStateChange ;
+
+        public ApplicationStateEngine(
+                Action process_00_InitialState,
+                Action process_01_InvalidApplication,
+                Action process_02_AwaitingValidation,
+                Action process_03_SinConfirmationPending,
+                Action process_04_SinConfirmed,
+                Action process_05_SinNotConfirmed,
+                Action process_06_PendingAcceptanceSwearing,
+                Action process_07_ValidAffidavitNotReceived,
+                Action process_09_ApplicationRejected,
+                Action process_10_ApplicationAccepted,
+                Action process_11_ApplicationReinstated,
+                Action process_12_PartiallyServiced,
+                Action process_13_FullyServiced,
+                Action process_14_ManuallyTerminated,
+                Action process_15_Expired,
+                Action process_17_FinancialTermsVaried,
+                Action process_19_AwaitingDocumentsForVariation,
+                Action process_35_ApplicationSuspended,
+                Action process_91_InvalidVariationSource,
+                Action process_92_InvalidVariationFinTerms,
+                Action process_93_ValidFinancialVariation,
+                Action<ApplicationState, ApplicationState> invalidStateChange
+            )
+        {
+            Process_00_InitialState = process_00_InitialState;
+            Process_01_InvalidApplication = process_01_InvalidApplication;
+            Process_02_AwaitingValidation = process_02_AwaitingValidation;
+            Process_03_SinConfirmationPending = process_03_SinConfirmationPending;
+            Process_04_SinConfirmed = process_04_SinConfirmed;
+            Process_05_SinNotConfirmed = process_05_SinNotConfirmed;
+            Process_06_PendingAcceptanceSwearing = process_06_PendingAcceptanceSwearing;
+            Process_07_ValidAffidavitNotReceived = process_07_ValidAffidavitNotReceived;
+            Process_09_ApplicationRejected = process_09_ApplicationRejected;
+            Process_10_ApplicationAccepted = process_10_ApplicationAccepted;
+            Process_11_ApplicationReinstated = process_11_ApplicationReinstated;
+            Process_12_PartiallyServiced = process_12_PartiallyServiced;
+            Process_13_FullyServiced = process_13_FullyServiced;
+            Process_14_ManuallyTerminated = process_14_ManuallyTerminated;
+            Process_15_Expired = process_15_Expired;
+            Process_17_FinancialTermsVaried = process_17_FinancialTermsVaried;
+            Process_19_AwaitingDocumentsForVariation = process_19_AwaitingDocumentsForVariation;
+            Process_35_ApplicationSuspended = process_35_ApplicationSuspended;
+            Process_91_InvalidVariationSource = process_91_InvalidVariationSource;
+            Process_92_InvalidVariationFinTerms = process_92_InvalidVariationFinTerms;
+            Process_93_ValidFinancialVariation = process_93_ValidFinancialVariation;
+            InvalidStateChange = invalidStateChange;
+        }
 
         public Dictionary<ApplicationState, List<ApplicationState>> ValidStateChange = new()
         {

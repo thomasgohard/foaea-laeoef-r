@@ -222,6 +222,13 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.HldbCnd = newHldbCnd;
 
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
+            if (summSmry is null)
+            {
+                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                               $"No summsmry record was found for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot vary.");
+                return false;
+            }
+
             if (summSmry.Start_Dte >= DateTime.Now)
             {
                 EventManager.AddEvent(EventCode.C50881_CANNOT_VARY_TERMS_AT_THIS_TIME);

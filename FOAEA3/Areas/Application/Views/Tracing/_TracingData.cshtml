@@ -44,15 +44,7 @@
             case "5": optRoleReason5 = true; break;
         }
 
-    string legalDate;
-    if (Model.Tracing.Appl_Lgl_Dte.HasValue)
-    {
-        legalDate = Model.Tracing.Appl_Lgl_Dte.Value.ToString(DateTimeExtensions.YYYY_MM_DD);
-    }
-    else
-    {
-        legalDate = DateTime.Now.ToString(DateTimeExtensions.YYYY_MM_DD);
-    }
+    string legalDate = Model.Tracing.Appl_Lgl_Dte.ToString(DateTimeExtensions.YYYY_MM_DD);
 
     ViewBag.CourtValue = Model.CourtValue;
     ViewBag.ApplCtrlDisabled = applCtrlDisabled;

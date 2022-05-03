@@ -8,6 +8,7 @@ namespace FOAEA3.Model
         private string auditRecipients;
         private string emailRecipients;
         private string exGratiaRecipients;
+        private string systemErrorRecipients;
 
         public string AuditRecipients
         {
@@ -23,6 +24,11 @@ namespace FOAEA3.Model
         {
             get => exGratiaRecipients;
             set => exGratiaRecipients = value.ReplaceVariablesWithEnvironmentValues();
+        }
+        public string SystemErrorRecipients
+        {
+            get => systemErrorRecipients;
+            set => systemErrorRecipients = value.ReplaceVariablesWithEnvironmentValues();
         }
 
         public List<string> ESDsites { get; set; }

@@ -112,6 +112,13 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_10_ApplicationAccepted()
         {
+            if (GarnisheeSummonsReceiptDate is null)
+            {
+                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                               $"GarnisheeSummonsReceiptDate is null. Cannot accept application {Appl_EnfSrv_Cd}-{Appl_CtrlCd}.");
+                return;
+            }
+
             base.Process_10_ApplicationAccepted();
 
             var interceptionDB = Repositories.InterceptionRepository;

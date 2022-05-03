@@ -17,7 +17,7 @@ namespace FOAEA3.Business.Areas.Application
         protected IRepositories Repositories { get; }
         private ApplicationData Application { get; }
 
-        private readonly CustomConfig config;
+        protected readonly CustomConfig config;
 
         public ApplicationEventManager EventManager { get; set; }
 

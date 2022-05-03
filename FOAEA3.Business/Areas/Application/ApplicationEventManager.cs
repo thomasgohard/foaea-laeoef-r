@@ -42,7 +42,7 @@ namespace FOAEA3.Business.Areas.Application
                 if (queue == EventQueue.EventBF)
                 {
                     if (Application.AppCtgy_Cd == "I01")
-                        eventEffectiveDateTime = Application.Appl_Create_Dte.Value.AddDays(3);
+                        eventEffectiveDateTime = Application.Appl_Create_Dte.AddDays(3);
                     else
                         eventEffectiveDateTime = DateTime.Now.AddDays(10);
                 }

@@ -182,6 +182,13 @@ namespace FOAEA3.Business.Areas.Application
                     // adjust calcStartDate so that it matches the SummSmry StartDate (as if the periods
                     // had been calculated from that start date)
 
+                    if (InterceptionApplication.Appl_RecvAffdvt_Dte is null)
+                    {
+                        AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                                       $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot recalculate fixed amount recalc date after variation!");
+                        return fixedAmountRecalcDate;
+                    }
+
                     DateTime acceptedDate = InterceptionApplication.Appl_RecvAffdvt_Dte.Value.Date;
                     calcStartDate = AmountOwedProcess.AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(calcStartDate, acceptedDate, fixedAmountPrdFreqCd);
 
@@ -483,7 +490,12 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN);
 
             var summSmryForCurrentAppl = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
-
+            if (summSmryForCurrentAppl is null)
+            {
+                AddSystemError(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                               $"Could not find summSmry record for {Appl_EnfSrv_Cd}-{Appl_CtrlCd} in StopBlockFunds!");
+                return;
+            }
             switch (fromState)
             {
                 case ApplicationState.FULLY_SERVICED_13:
