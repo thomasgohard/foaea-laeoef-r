@@ -41,6 +41,12 @@ public class TracingFilesController : ControllerBase
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 
+        if (fileTableData is null)
+        {
+            lastFileName = "";
+            return $"Error: fileTableData is empty for category TRCAPPOUT.";
+        }
+
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle;
 

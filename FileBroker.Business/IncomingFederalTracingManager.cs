@@ -219,7 +219,7 @@ public class IncomingFederalTracingManager
                                  $"[(EnfSrv:{applEnfSrvCd.Trim()})(CtrlCd:{applCtrlCd.Trim()})]";
 
             var activeTraceEventDetail = activeTraceEventDetails
-                                            .Where(m => m.Event_Id.Value == eventId)
+                                            .Where(m => m.Event_Id.HasValue && m.Event_Id.Value == eventId)
                                             .FirstOrDefault();
 
             if (activeTraceEventDetail != null)

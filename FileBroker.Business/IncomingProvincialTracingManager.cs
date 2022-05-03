@@ -170,7 +170,7 @@ public class IncomingProvincialTracingManager
 
                 default:
                     tracing = tracingMessageData.TracingApplication;
-                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})"+
+                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})" +
                                               $" for Maintenance_ActionCd ({tracingMessageData.MaintenanceAction})");
                     break;
             }
@@ -232,6 +232,8 @@ public class IncomingProvincialTracingManager
             try
             {
                 var single = JsonConvert.DeserializeObject<MEPTracingFileDataSingle>(sourceTracingData);
+                if (single is null) 
+                    throw new NullReferenceException("json conversion failed for MEPTracingFileDataSingle");
 
                 result = new MEPTracingFileData();
                 result.NewDataSet.TRCAPPIN01 = single.NewDataSet.TRCAPPIN01;

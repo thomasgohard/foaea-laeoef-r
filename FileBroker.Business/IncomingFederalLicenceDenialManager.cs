@@ -16,14 +16,22 @@ namespace FileBroker.Business
         public List<string> ProcessJsonFile(string jsonFileContent, string fileName)
         {
             var fileTableData = GetFileTableData(fileName);
-            var fedSource = fileTableData?.Name[0..2].ToUpper() switch
+
+            var errors = new List<string>();
+
+            if (fileTableData is null)
+            {
+                errors.Add($"fileTableData is empty for fileName [{fileName}].");
+                return errors;
+            }
+
+            var fedSource = fileTableData.Name[0..2].ToUpper() switch
             {
                 "PA" => "PA01",
                 "TC" => "TC01",
                 _ => ""
             };
 
-            var errors = new List<string>();
 
             if (string.IsNullOrEmpty(fedSource))
                 errors.Add($"Federal source could not be determined for {fileName}");
@@ -95,6 +103,8 @@ namespace FileBroker.Business
                 try
                 {
                     var single = JsonConvert.DeserializeObject<FedLicenceDenialFileDataSingle>(sourceLicenceDenialData);
+                    if (single is null)
+                        throw new NullReferenceException("json conversion failed for FedLicenceDenialFileDataSingle");
 
                     result = new FedLicenceDenialFileData();
                     result.NewDataSet.LICIN01 = single.NewDataSet.LICIN01;

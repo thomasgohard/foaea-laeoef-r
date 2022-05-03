@@ -38,6 +38,12 @@ public class SinFilesController : ControllerBase
         var fileTableData = fileTable.GetFileTableDataForCategory("SINOUT")
                                      .FirstOrDefault(m => m.Active.HasValue && m.Active.Value);
 
+        if (fileTableData is null)
+        {
+            lastFileName = "";
+            return $"Error: fileTableData is empty for category SINOUT.";
+        }
+
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle;
 
