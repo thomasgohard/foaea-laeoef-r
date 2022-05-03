@@ -123,7 +123,7 @@ namespace BackendProcesses.Business
             {
                 ActiveSummonsData activeSummonsData = dbActiveSummons.GetActiveSummonsData(payableDate, ctrlCd, enfSrvCd, isVariation);
 
-                if (activeSummonsData != null)
+                if ((activeSummonsData is not null) && (activeSummonsData.Appl_RecvAffdvt_Dte is not null))
                 {
                     (string paymentPeriodCode, string fixedAmountPeriodCode) = GetPeriodTypeCodes(activeSummonsData);
 
@@ -392,10 +392,10 @@ namespace BackendProcesses.Business
             return (paymentPeriodCode, fixedAmountPeriodCode);
         }
 
-        private static (int paymentPeriodCount, int fixedAmountPeriodCount) CalculateCurrentPeriodCounts(DateTime payableDate, 
+        private static (int paymentPeriodCount, int fixedAmountPeriodCount) CalculateCurrentPeriodCounts(DateTime payableDate,
                                                                                                   string paymentPeriodCode,
                                                                                                   string fixedAmountPeriodCode,
-                                                                                                  PeriodInfo periodData, 
+                                                                                                  PeriodInfo periodData,
                                                                                                   DateTime calcAcceptedDateNoTime)
         {
             DateTime payableDateNoTime = payableDate.Date;
@@ -517,7 +517,7 @@ namespace BackendProcesses.Business
             return (newRecalcDate, newFixedAmountRecalcDate);
         }
 
-        public static DateTime? CalculateRecalcDateFromStartDateForPeriodCount(string paymentPeriodCode, int currentPeriodCount, 
+        public static DateTime? CalculateRecalcDateFromStartDateForPeriodCount(string paymentPeriodCode, int currentPeriodCount,
                                                                                 DateTime CalcAcceptedDate)
         {
             DateTime? summSmryRecalcDate;
@@ -552,7 +552,7 @@ namespace BackendProcesses.Business
 
         }
 
-        public static DateTime AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(DateTime calcAcceptedDate, DateTime acceptedDate, 
+        public static DateTime AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(DateTime calcAcceptedDate, DateTime acceptedDate,
                                                                                   string periodCode)
         {
 
@@ -565,11 +565,11 @@ namespace BackendProcesses.Business
             {
                 switch (periodCode)
                 {
-                    case PaymentPeriodicCode.WEEKLY: newCalcAcceptedDate = newCalcAcceptedDate.AddDays(7); break;   
-                    case PaymentPeriodicCode.BIWEEKLY: newCalcAcceptedDate = newCalcAcceptedDate.AddDays(14); break; 
-                    case PaymentPeriodicCode.MONTHLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(1); break; 
-                    case PaymentPeriodicCode.QUARTERLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(3); break; 
-                    case PaymentPeriodicCode.SEMI_ANNUALLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(6); break; 
+                    case PaymentPeriodicCode.WEEKLY: newCalcAcceptedDate = newCalcAcceptedDate.AddDays(7); break;
+                    case PaymentPeriodicCode.BIWEEKLY: newCalcAcceptedDate = newCalcAcceptedDate.AddDays(14); break;
+                    case PaymentPeriodicCode.MONTHLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(1); break;
+                    case PaymentPeriodicCode.QUARTERLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(3); break;
+                    case PaymentPeriodicCode.SEMI_ANNUALLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(6); break;
                     case PaymentPeriodicCode.SEMI_MONTHLY:
                         if (newCalcAcceptedDate.Day >= 15)
                         {   // The 1st day of the next month
@@ -582,7 +582,7 @@ namespace BackendProcesses.Business
                             newCalcAcceptedDate = new DateTime(tmp.Year, tmp.Month, 15);
                         }
                         break;
-                    case PaymentPeriodicCode.ANNUALLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(12); break; 
+                    case PaymentPeriodicCode.ANNUALLY: newCalcAcceptedDate = newCalcAcceptedDate.AddMonths(12); break;
                     default:
                         newCalcAcceptedDate = calcAcceptedDate;
                         break;
@@ -671,8 +671,9 @@ namespace BackendProcesses.Business
 
                 if (summSmryFixedAmount == default)
                 {
-                    if (!isVariation)
-                        dbSummSmryFixedAmount.CreateSummonsSummaryFixedAmount(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd, newFixedAmountRecalcDate.Value);
+                    if ((!isVariation) && (newFixedAmountRecalcDate.HasValue))
+                        dbSummSmryFixedAmount.CreateSummonsSummaryFixedAmount(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd,
+                                                                              newFixedAmountRecalcDate.Value);
                 }
                 else
                 {
@@ -692,7 +693,8 @@ namespace BackendProcesses.Business
                 // update summsmry recalc date
 
                 summSmryData.SummSmry_LastCalc_Dte = payableDate;
-                summSmryData.SummSmry_Recalc_Dte = newRecalcDate.Value;
+                if (newRecalcDate is not null)
+                    summSmryData.SummSmry_Recalc_Dte = newRecalcDate.Value;
 
             }
 

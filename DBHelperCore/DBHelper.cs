@@ -803,7 +803,8 @@ namespace DBHelper
 
             foreach (var info in dataType.GetProperties())
             {
-                if (info.PropertyType.FullName.Contains("Nullable"))
+                if ((info.PropertyType is not null) && (info.PropertyType.FullName is not null) && 
+                    (info.PropertyType.FullName.Contains("Nullable")))
                 {
                     //     FullName: "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 
@@ -832,7 +833,7 @@ namespace DBHelper
                         newDataTable.Columns.Add(newColumn);
                     }
                 }
-                else
+                else if (info.PropertyType is not null)
                     newDataTable.Columns.Add(new DataColumn(info.Name, info.PropertyType));
             }
 

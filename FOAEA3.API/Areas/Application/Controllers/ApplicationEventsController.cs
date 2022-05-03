@@ -31,7 +31,7 @@ namespace FOAEA3.API.Areas.Application.Controllers
         {
             var values = new Dictionary<int, string>();
             foreach (var g in Enum.GetValues(typeof(EventQueue)))
-                values.Add((int)g, g.ToString().Replace("Event", "Evnt"));
+                values.Add((int)g, g?.ToString()?.Replace("Event", "Evnt"));
 
             return Ok(values);
         }

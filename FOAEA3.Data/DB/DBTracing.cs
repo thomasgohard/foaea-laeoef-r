@@ -204,7 +204,7 @@ namespace FOAEA3.Data.DB
             data.Prcs_RecType = (int)rdr["Val19"];
 
             var enfSrvCd = rdr["Val20"] as string;
-            switch (enfSrvCd.Trim())
+            switch (enfSrvCd?.Trim())
             {
                 case "HR01": data.EnfSrv_Cd = "UI00"; break;
                 case "EI02": data.EnfSrv_Cd = "EI00"; break;

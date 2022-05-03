@@ -67,7 +67,7 @@ namespace FOAEA3.Data.DB
             }
             catch (Exception e)
             {
-                if (Thread.CurrentPrincipal != null)
+                if ((Thread.CurrentPrincipal is not null) && (Thread.CurrentPrincipal.Identity is not null))
                     e.Data.Add("user", Thread.CurrentPrincipal.Identity.Name);
                 e.Data.Add("connection", connStr);
                 throw new ReferenceDataException("Could not load FoaMessages! ", e);

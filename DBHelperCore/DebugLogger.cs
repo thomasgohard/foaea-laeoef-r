@@ -32,6 +32,10 @@ namespace DBHelper
                 if (isOk)
                 {
                     string thisPath = Path.GetDirectoryName(filename);
+
+                    if (string.IsNullOrEmpty(thisPath))
+                        throw new Exception($"Could not get path for {filename}");
+
                     if (!Directory.Exists(thisPath))
                         Directory.CreateDirectory(thisPath);
                     Monitor.Exit(thisLock);
@@ -61,7 +65,7 @@ namespace DBHelper
                 if (isOk)
                 {
                     string thisPath = Path.GetDirectoryName(filename);
-                    if (!Directory.Exists(thisPath))
+                    if ((thisPath is not null) && (!Directory.Exists(thisPath)))
                         Directory.CreateDirectory(thisPath);
                     if (File.Exists(filename))
                         File.Delete(filename);

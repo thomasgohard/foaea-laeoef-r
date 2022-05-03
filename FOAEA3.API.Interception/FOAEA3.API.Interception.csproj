@@ -1,43 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup Label="Globals">
-    <SccProjectName>SAK</SccProjectName>
-    <SccProvider>SAK</SccProvider>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccLocalPath>SAK</SccLocalPath>
-  </PropertyGroup>
+	<PropertyGroup Label="Globals">
+		<SccProjectName>SAK</SccProjectName>
+		<SccProvider>SAK</SccProvider>
+		<SccAuxPath>SAK</SccAuxPath>
+		<SccLocalPath>SAK</SccLocalPath>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>warnings</Nullable>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;1591</NoWarn>
-    <DocumentationFile>C:\millennium\FLAS-IT Applications\FOAEA Applications\FOAEA\FOAEA3_Dev-Denis\FOAEA3.API.Interception\FOAEA3.API.Interception.xml</DocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702;1591</NoWarn>
+		<DocumentationFile>C:\millennium\FLAS-IT Applications\FOAEA Applications\FOAEA\FOAEA3_Dev-Denis\FOAEA3.API.Interception\FOAEA3.API.Interception.xml</DocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
-    <PackageReference Include="Serilog.Sinks.EventLog" Version="3.1.0" />
-    <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="5.7.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
+		<PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+		<PackageReference Include="Serilog.Sinks.EventLog" Version="3.1.0" />
+		<PackageReference Include="Serilog.Sinks.MSSqlServer" Version="5.7.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
-    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
-    <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
-    <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
-    <ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
-    <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
-    <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
-    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
+		<ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+		<ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
+		<ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
+		<ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
+		<ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
+		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
+	</ItemGroup>
 
 </Project>
