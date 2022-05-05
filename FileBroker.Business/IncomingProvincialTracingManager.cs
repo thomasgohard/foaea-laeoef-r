@@ -192,7 +192,7 @@ public class IncomingProvincialTracingManager
 
     private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
     {
-        if (tracingFile.TRCAPPIN99.ResponseCnt != tracingFile.TRCAPPIN20.Count)
+        if (int.Parse(tracingFile.TRCAPPIN99.ResponseCnt) != tracingFile.TRCAPPIN20.Count)
         {
             isValid = false;
             result.AddSystemError("Invalid ResponseCnt in section 99");
@@ -267,7 +267,7 @@ public class IncomingProvincialTracingManager
             Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.Date,
             Appl_Dbtr_Gendr_Cd = baseData.dat_Appl_Dbtr_Gendr_Cd.Trim() == "" ? "M" : baseData.dat_Appl_Dbtr_Gendr_Cd.Trim(),
             Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
-            Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme,
+            Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
             Appl_CommSubm_Text = baseData.dat_Appl_CommSubm_Text,
             Appl_Rcptfrm_Dte = baseData.dat_Appl_Rcptfrm_dte.Date,
             AppCtgy_Cd = baseData.dat_Appl_AppCtgy_Cd,

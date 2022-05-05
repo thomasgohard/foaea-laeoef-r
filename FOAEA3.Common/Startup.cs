@@ -103,7 +103,11 @@ namespace FOAEA3.Common
             if (ReferenceData.Instance().Messages.Count == 0)
                 ColourConsole.WriteLine("Reference Data Loaded Successfully.");
             else
+            {
                 ColourConsole.WriteLine("Reference Data Failed to Load !!!", ConsoleColor.Red);
+                foreach(var message in ReferenceData.Instance().Messages)
+                    ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
+            }
 
             // var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
             var api_url = configuration["Urls"];

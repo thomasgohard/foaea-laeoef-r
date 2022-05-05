@@ -16,10 +16,10 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class TracingFilesController : ControllerBase
+public class InterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]
-    public ActionResult<string> GetVersion() => Ok("TracingFiles API Version 1.0");
+    public ActionResult<string> GetVersion() => Ok("InterceptionFiles API Version 1.0");
 
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
@@ -38,14 +38,14 @@ public class TracingFilesController : ControllerBase
     private static string LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable,
                                                           out string lastFileName)
     {
-        var fileTableData = fileTable.GetFileTableDataForCategory("TRCAPPOUT")
+        var fileTableData = fileTable.GetFileTableDataForCategory("INTAPPOUT")
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 
         if (fileTableData is null)
         {
             lastFileName = "";
-            return $"Error: fileTableData is empty for category TRCAPPOUT.";
+            return $"Error: fileTableData is empty for category INTAPPOUT.";
         }
 
         var fileLocation = fileTableData.Path;
@@ -81,21 +81,20 @@ public class TracingFilesController : ControllerBase
             sourceTracingJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var schema = JsonSchema.FromType<MEPTracingFileData>();
+        var schema = JsonSchema.FromType<InterceptionApplicationData>();
         var errors = schema.Validate(sourceTracingJsonData);
         if (errors.Any())
         {
             return UnprocessableEntity(errors);
         }
 
-        //foreach (var error in errors)
-        //    Console.WriteLine(error.Path + ": " + error.Kind);
-
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
 
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
+
+        // TODO: change to interception code below
 
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
         var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper);

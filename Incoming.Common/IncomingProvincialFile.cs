@@ -70,13 +70,13 @@ namespace Incoming.Common
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
-                string jsonText = JsonConvert.SerializeXmlNode(doc); // convert xml to json
+                string jsonText = ConvertXmlToJson(doc); 
 
                 // send json to processor api
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
@@ -91,7 +91,7 @@ namespace Incoming.Common
                 }
                 else if (fileNameNoCycle == LicencingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
@@ -106,7 +106,7 @@ namespace Incoming.Common
                 }
                 else if (fileNameNoCycle == TracingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaTracingRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
@@ -134,5 +134,16 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
+        private static string ConvertXmlToJson(XmlDocument doc)
+        {
+            string result = JsonConvert.SerializeXmlNode(doc);
+
+            // clean up json to remove xml-specific artifacts
+
+            result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\"},", "");
+            result = result.Replace("\"@xsi:type\":\"NewDataSet\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
+
+            return result;
+        }
     }
 }

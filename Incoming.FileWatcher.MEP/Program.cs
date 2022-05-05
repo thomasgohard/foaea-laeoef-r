@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
@@ -80,7 +79,7 @@ namespace Incoming.FileWatcher.MEP
                                                                    licencingBaseName: licenceName);
 
             var allNewFiles = new List<string>();
-            foreach(string searchPath in searchPaths)
+            foreach (string searchPath in searchPaths)
                 provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
 
             if (allNewFiles.Count > 0)

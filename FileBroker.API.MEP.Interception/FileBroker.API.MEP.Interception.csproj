@@ -1,38 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup Label="Globals">
-    <SccProjectName>SAK</SccProjectName>
-    <SccProvider>SAK</SccProvider>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccLocalPath>SAK</SccLocalPath>
-    <Configurations>Debug;Release;Tests</Configurations>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="NJsonSchema" Version="10.6.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
     <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+    <ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
     <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
+    <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
     <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
+    <ProjectReference Include="..\FOAEA3.EmailTools\FOAEA3.EmailTools.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
-    <ProjectReference Include="..\TestData\TestData.csproj" />
+    <ProjectReference Include="..\Incoming.Common\Incoming.Common.csproj" />
   </ItemGroup>
 
 </Project>

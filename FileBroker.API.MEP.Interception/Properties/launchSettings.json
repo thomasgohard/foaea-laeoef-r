@@ -3,18 +3,18 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:7482",
+      "applicationUrl": "http://localhost:38063",
       "sslPort": 0
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "IIS Express": {
-      "commandName": "Project",
+      "commandName": "IISExpress",
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:13014"
+      "applicationUrl": "http://localhost:13012"
     },
-    "FileBroker.API.MEP.Tracing": {
+    "FileBroker.API.MEP.Interception": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger"
