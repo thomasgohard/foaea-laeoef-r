@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FileBroker.Business
 {
-    internal class IncomingProvincialLicenceDenialManager
+    public class IncomingProvincialLicenceDenialManager
     {
     }
 }

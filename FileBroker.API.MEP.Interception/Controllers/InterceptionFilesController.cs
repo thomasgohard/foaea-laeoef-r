@@ -75,14 +75,14 @@ public class InterceptionFilesController : ControllerBase
                                                    [FromHeader] string currentSubmitter,
                                                    [FromHeader] string currentSubject)
     {
-        string sourceTracingJsonData;
+        string sourceInterceptionJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            sourceTracingJsonData = reader.ReadToEndAsync().Result;
+            sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
         var schema = JsonSchema.FromType<InterceptionApplicationData>();
-        var errors = schema.Validate(sourceTracingJsonData);
+        var errors = schema.Validate(sourceInterceptionJsonData);
         if (errors.Any())
         {
             return UnprocessableEntity(errors);
@@ -96,12 +96,12 @@ public class InterceptionFilesController : ControllerBase
 
         // TODO: change to interception code below
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
-        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper);
+        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
+        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiHelper);
 
         var apis = new APIBrokerList
         {
-            TracingApplications = tracingApplicationAPIs
+            InterceptionApplications = interceptionApplicationAPIs
         };
 
         var repositories = new RepositoryList
@@ -111,13 +111,13 @@ public class InterceptionFilesController : ControllerBase
             MailServiceDB = mailService
         };
 
-        var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value);
+        var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData);
+            interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData);
             return Ok("File processed.");
         }
         else

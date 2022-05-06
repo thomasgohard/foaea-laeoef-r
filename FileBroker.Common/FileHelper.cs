@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 
 namespace FileBroker.Common
 {
@@ -25,5 +29,23 @@ namespace FileBroker.Common
                 return -1;
         }
 
+        public static string ConvertXmlToJson(XmlDocument doc, ref List<string> errors)
+        {
+            try
+            {
+                string result = JsonConvert.SerializeXmlNode(doc);
+
+                // clean up json to remove xml-specific artifacts
+                result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\"},", "");
+                result = result.Replace("\"@xsi:type\":\"NewDataSet\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                errors.Add(ex.Message);
+                return "";
+            }
+        }
     }
 }

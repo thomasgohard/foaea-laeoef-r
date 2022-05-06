@@ -1,11 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -55,12 +53,15 @@ namespace Incoming.Common
             string fileNameNoPath = Path.GetFileName(fullPath);
 
             if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
-            {                                                                                     
+            {
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
-                string jsonText = JsonConvert.SerializeXmlNode(doc); // convert xml to json
+                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors); // convert xml to json
+
+                if (errors.Any())
+                    return false;
 
                 var response = APIHelper.PostFlatFile($"api/v1/FederalLicenceDenialFiles?fileName={fileNameNoPath}",
                                                       jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);

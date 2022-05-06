@@ -7,7 +7,9 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NJsonSchema;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace FileBroker.API.Fed.LicenceDenial.Controllers
@@ -73,11 +75,16 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
                                                      [FromHeader] string currentSubmitter,
                                                      [FromHeader] string currentSubject)
         {
-            string flatFileContent;
+            string sourceLicenceDenialJsonData;
             using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
-                flatFileContent = reader.ReadToEndAsync().Result;
+                sourceLicenceDenialJsonData = reader.ReadToEndAsync().Result;
             }
+
+            var schema = JsonSchema.FromType<FedLicenceDenialFileData>();
+            var errors = schema.Validate(sourceLicenceDenialJsonData);
+            if (errors.Any())
+                return UnprocessableEntity(errors);
 
             if (string.IsNullOrEmpty(fileName))
                 return UnprocessableEntity("Missing fileName");
@@ -118,7 +125,7 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
             var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
             if (!fileTableData.IsLoading)
             {
-                licenceDenialManager.ProcessJsonFile(flatFileContent, fileName);
+                licenceDenialManager.ProcessJsonFile(sourceLicenceDenialJsonData, fileName);
                 return Ok("File processed.");
             }
             else

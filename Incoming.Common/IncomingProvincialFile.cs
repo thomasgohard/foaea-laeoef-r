@@ -1,11 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,14 +63,15 @@ namespace Incoming.Common
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
 
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
-            {                                            //                                                    ↑
+            {                                             //                                                    ↑
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
-                string jsonText = ConvertXmlToJson(doc); 
+                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors);
 
-                // send json to processor api
+                if (errors.Any())
+                    return false;
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
@@ -134,16 +133,5 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        private static string ConvertXmlToJson(XmlDocument doc)
-        {
-            string result = JsonConvert.SerializeXmlNode(doc);
-
-            // clean up json to remove xml-specific artifacts
-
-            result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\"},", "");
-            result = result.Replace("\"@xsi:type\":\"NewDataSet\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
-
-            return result;
-        }
     }
 }

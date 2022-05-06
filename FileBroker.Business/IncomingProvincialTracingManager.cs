@@ -73,9 +73,9 @@ public class IncomingProvincialTracingManager
                     {
                         var traceData = tracingFile.TRCAPPIN21.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
-                        var tracingMessage = new TracingMessageData
+                        var tracingMessage = new MessageData<TracingApplicationData>
                         {
-                            TracingApplication = GetTracingApplicationDataFromRequest(data, traceData),
+                            Application = GetTracingApplicationDataFromRequest(data, traceData),
                             MaintenanceAction = data.Maintenance_ActionCd,
                             MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                             NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
@@ -142,34 +142,34 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
-    public MessageDataList ProcessApplicationRequest(TracingMessageData tracingMessageData)
+    public MessageDataList ProcessApplicationRequest(MessageData<TracingApplicationData> tracingMessageData)
     {
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
         {
-            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.TracingApplication);
+            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
             switch (tracingMessageData.MaintenanceLifeState)
             {
                 case "00": // change
-                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.TracingApplication);
+                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
-                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.TracingApplication);
+                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.TracingApplication,
+                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
                                                                                   tracingMessageData.NewRecipientSubmitter,
                                                                                   tracingMessageData.NewIssuingSubmitter);
                     break;
 
                 default:
-                    tracing = tracingMessageData.TracingApplication;
+                    tracing = tracingMessageData.Application;
                     tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})" +
                                               $" for Maintenance_ActionCd ({tracingMessageData.MaintenanceAction})");
                     break;

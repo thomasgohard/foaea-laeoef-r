@@ -9,6 +9,8 @@ namespace FOAEA3.Common.Brokers
         public ITracingApplicationAPIBroker TracingApplications { get; set; }
         public ITraceResponseAPIBroker TracingResponses { get; set; }
 
+        public IInterceptionApplicationAPIBroker InterceptionApplications { get; set; }
+
         public ILicenceDenialEventAPIBroker LicenceDenialEvents { get; set; }
         public ILicenceDenialApplicationAPIBroker LicenceDenialApplications { get; set; }
         public ILicenceDenialTerminationApplicationAPIBroker LicenceDenialTerminationApplications { get; set; }

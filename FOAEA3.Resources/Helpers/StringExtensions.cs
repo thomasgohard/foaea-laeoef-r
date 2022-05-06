@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -95,5 +96,23 @@ namespace FOAEA3.Resources.Helpers
         {
             return keys.Any(m => m.Contains(value, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        public static T Convert<T>(this string input)
+        {
+            try
+            {
+                var converter = TypeDescriptor.GetConverter(typeof(T));
+                if (converter != null)
+                {
+                    return (T)converter.ConvertFromString(input);
+                }
+                return default;
+            }
+            catch (NotSupportedException)
+            {
+                return default;
+            }
+        }
+
     }
 }
