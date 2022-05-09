@@ -34,7 +34,7 @@ namespace FileBroker.Model
         public string dat_Appl_Medium_Cd;
         public string dat_Appl_Affdvt_Doc_TypCd;
         public string dat_Appl_Reas_Cd;
-        public DateTime dat_Appl_Reactv_Dte;
+        public DateTime? dat_Appl_Reactv_Dte;
         public string dat_Appl_LiSt_Cd;
         public string Maintenance_ActionCd;
         public string dat_New_Owner_RcptSubmCd;

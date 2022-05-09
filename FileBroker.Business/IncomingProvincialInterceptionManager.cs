@@ -316,7 +316,6 @@ namespace FileBroker.Business
             interceptionApplication.IntFinH.IntFinH_LmpSum_Money = financialData.dat_IntFinH_LmpSum_Money.Convert<decimal>();
             interceptionApplication.IntFinH.IntFinH_PerPym_Money = financialData.dat_IntFinH_Perpym_Money.Convert<decimal?>();
             interceptionApplication.IntFinH.PymPr_Cd = financialData.dat_PymPr_Cd;
-            interceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind = financialData.dat_IntFinH_CmlPrPym_Ind.Convert<byte?>();
             interceptionApplication.IntFinH.IntFinH_NextRecalcDate_Cd = financialData.dat_IntFinH_NextRecalc_Dte.Convert<int?>();
             interceptionApplication.IntFinH.HldbCtg_Cd = financialData.dat_HldbCtg_Cd;
             interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt = financialData.dat_IntFinH_DfHldbPrcnt.Convert<int?>();
@@ -326,6 +325,14 @@ namespace FileBroker.Business
                 interceptionApplication.IntFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? DateTime.Now;
 
             interceptionApplication.IntFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte;
+
+            interceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind = financialData.dat_IntFinH_CmlPrPym_Ind.Convert<byte?>();
+            if (interceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind.HasValue)
+            {
+                // XML Code indicating if periodic payments are cumulative: 1=no, 2=yes.
+                // In the database, though, 0=no and 1=yes, so we must substract 1 from received value, if any
+                interceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind--;
+            }
 
             foreach (var sourceSpecific in sourceSpecificData)
             {
