@@ -79,7 +79,8 @@ public class IncomingProvincialTracingManager
                             MaintenanceAction = data.Maintenance_ActionCd,
                             MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                             NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                            NewIssuingSubmitter = data.dat_New_Owner_SubmCd
+                            NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
+                            NewUpdateSubmitter = data.dat_Update_SubmCd
                         };
 
                         var messages = ProcessApplicationRequest(tracingMessage);
@@ -155,6 +156,7 @@ public class IncomingProvincialTracingManager
             switch (tracingMessageData.MaintenanceLifeState)
             {
                 case "00": // change
+                case "0": 
                     tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
@@ -203,7 +205,7 @@ public class IncomingProvincialTracingManager
     {
         bool validActionLifeState = true;
 
-        if ((data.Maintenance_ActionCd == "A") && (data.dat_Appl_LiSt_Cd != "00"))
+        if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
             validActionLifeState = false;
         else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
             validActionLifeState = false;

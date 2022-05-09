@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.ComponentModel;
 
 namespace FileBroker.Business
 {
@@ -83,7 +82,8 @@ namespace FileBroker.Business
                                 MaintenanceAction = data.Maintenance_ActionCd,
                                 MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                                 NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                                NewIssuingSubmitter = data.dat_New_Owner_SubmCd
+                                NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
+                                NewUpdateSubmitter = data.dat_Update_SubmCd
                             };
 
                             var messages = ProcessApplicationRequest(interceptionMessage);
@@ -159,6 +159,7 @@ namespace FileBroker.Business
                 switch (interceptionMessageData.MaintenanceLifeState)
                 {
                     case "00": // change
+                    case "0":
                         interception = APIs.InterceptionApplications.UpdateInterceptionApplication(interceptionMessageData.Application);
                         break;
 
@@ -179,7 +180,7 @@ namespace FileBroker.Business
                     default:
                         interception = interceptionMessageData.Application;
                         interception.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({interceptionMessageData.MaintenanceLifeState})" +
-                                                  $" for Maintenance_ActionCd ({interceptionMessageData.MaintenanceAction})");
+                                                       $" for Maintenance_ActionCd ({interceptionMessageData.MaintenanceAction})");
                         break;
                 }
             }
@@ -211,9 +212,9 @@ namespace FileBroker.Business
         {
             bool validActionLifeState = true;
 
-            if ((data.Maintenance_ActionCd == "A") && (data.dat_Appl_LiSt_Cd != "00"))
+            if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
                 validActionLifeState = false;
-            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
+            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "29")))
                 validActionLifeState = false;
             else if (data.Maintenance_ActionCd.NotIn("A", "C"))
                 validActionLifeState = false;
@@ -323,7 +324,7 @@ namespace FileBroker.Business
             interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period = financialData.dat_IntFinH_DefHldbAmn_Period;
             if (baseData.dat_Appl_LiSt_Cd == "17")
                 interceptionApplication.IntFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? DateTime.Now;
-            
+
             interceptionApplication.IntFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte;
 
             foreach (var sourceSpecific in sourceSpecificData)

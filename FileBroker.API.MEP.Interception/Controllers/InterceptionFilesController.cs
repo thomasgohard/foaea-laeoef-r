@@ -66,14 +66,14 @@ public class InterceptionFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessIncomingTracingFile([FromQuery] string fileName,
-                                                   [FromServices] IFileAuditRepository fileAuditDB,
-                                                   [FromServices] IFileTableRepository fileTableDB,
-                                                   [FromServices] IMailServiceRepository mailService,
-                                                   [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                                   [FromServices] IOptions<ApiConfig> apiConfig,
-                                                   [FromHeader] string currentSubmitter,
-                                                   [FromHeader] string currentSubject)
+    public ActionResult ProcessIncomingInterceptionFile([FromQuery] string fileName,
+                                                        [FromServices] IFileAuditRepository fileAuditDB,
+                                                        [FromServices] IFileTableRepository fileTableDB,
+                                                        [FromServices] IMailServiceRepository mailService,
+                                                        [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
+                                                        [FromServices] IOptions<ApiConfig> apiConfig,
+                                                        [FromHeader] string currentSubmitter,
+                                                        [FromHeader] string currentSubject)
     {
         string sourceInterceptionJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
@@ -81,7 +81,7 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var schema = JsonSchema.FromType<InterceptionApplicationData>();
+        var schema = JsonSchema.FromType<MEPInterceptionFileData>();
         var errors = schema.Validate(sourceInterceptionJsonData);
         if (errors.Any())
         {
@@ -93,8 +93,6 @@ public class InterceptionFilesController : ControllerBase
 
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
-
-        // TODO: change to interception code below
 
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
         var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiHelper);

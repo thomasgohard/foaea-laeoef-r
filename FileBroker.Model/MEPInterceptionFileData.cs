@@ -39,6 +39,7 @@ namespace FileBroker.Model
         public string Maintenance_ActionCd;
         public string dat_New_Owner_RcptSubmCd;
         public string dat_New_Owner_SubmCd;
+        public string dat_Update_SubmCd;
     }
 
     public struct MEPInterception_RecType11

@@ -14,6 +14,7 @@ namespace FileBroker.Model
         public T Application { get; set; }
         public string NewRecipientSubmitter { get; set; }
         public string NewIssuingSubmitter { get; set; }
+        public string NewUpdateSubmitter { get; set; }
         public string MaintenanceAction { get; set; }
         public string MaintenanceLifeState { get; set; }
     }

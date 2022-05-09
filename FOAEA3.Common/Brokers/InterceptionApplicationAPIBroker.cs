@@ -23,7 +23,8 @@ namespace FOAEA3.Common.Brokers
 
         public InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
-            var data = ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>("api/v1/Interceptions",
+            string apiCall = "api/v1/Interceptions";
+            var data = ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
                                                                                                interceptionApplication).Result;
             return data;
         }
@@ -34,23 +35,25 @@ namespace FOAEA3.Common.Brokers
             string apiCall = $"api/v1/interceptions/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
                                                                  $"&newIssuingSubmitter={newIssuingSubmitter}";
             var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                              interceptionApplication).Result;
+                                                                                               interceptionApplication).Result;
             return data;
         }
 
         public InterceptionApplicationData UpdateInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>($"api/v1/interceptions/{key}",
-                                                                                              interceptionApplication).Result;
+            string apiCall = $"api/v1/interceptions/{key}";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
             return data;
         }
 
         public InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>($"api/v1/interceptions/{key}/Vary",
-                                                                                              interceptionApplication).Result;
+            string apiCall = $"api/v1/interceptions/{key}/Vary";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
             return data;
         }
 
