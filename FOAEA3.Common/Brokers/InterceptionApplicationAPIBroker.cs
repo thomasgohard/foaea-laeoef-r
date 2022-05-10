@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class InterceptionApplicationAPIBroker : IInterceptionApplicationAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
 
         public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper)
         {

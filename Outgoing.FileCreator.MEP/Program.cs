@@ -60,9 +60,9 @@ namespace Outgoing.FileCreator.MEP
                 }
             }
 
-            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI);
-            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI);
-            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI);
+            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
             var apiBrokers = new APIBrokerList
             {
@@ -112,7 +112,8 @@ namespace Outgoing.FileCreator.MEP
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError(category, provincialOutgoingSource.Name, new Exception(error), false);
+                        repositories.ErrorTrackingDB.MessageBrokerError(category, provincialOutgoingSource.Name, 
+                                                                        new Exception(error), displayExceptionError: true);
                     }
             }
         }

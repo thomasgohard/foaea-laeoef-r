@@ -150,6 +150,8 @@ namespace FileBroker.Business
         {
             InterceptionApplicationData interception;
 
+            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.Application.Subm_SubmCd;
+
             if (interceptionMessageData.MaintenanceAction == "A")
             {
                 interception = APIs.InterceptionApplications.CreateInterceptionApplication(interceptionMessageData.Application);
@@ -267,6 +269,8 @@ namespace FileBroker.Business
                                                                                              MEPInterception_RecType12 financialData,
                                                                                              List<MEPInterception_RecType13> sourceSpecificData)
         {
+            DateTime now = DateTime.Now;
+
             var interceptionApplication = new InterceptionApplicationData
             {
                 Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
@@ -283,7 +287,7 @@ namespace FileBroker.Business
                 Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
                 Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
                 Appl_CommSubm_Text = baseData.dat_Appl_CommSubm_Text,
-                Appl_Rcptfrm_Dte = baseData.dat_Appl_Rcptfrm_dte.Date,
+                Appl_Rcptfrm_Dte = now, // as per spec, ignore the baseData.dat_Appl_Rcptfrm_dte.Date value
                 AppCtgy_Cd = baseData.dat_Appl_AppCtgy_Cd,
                 Appl_Group_Batch_Cd = baseData.dat_Appl_Group_Batch_Cd,
                 Medium_Cd = baseData.dat_Appl_Medium_Cd,
@@ -307,8 +311,6 @@ namespace FileBroker.Business
                 Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme,
                 Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte
             };
-
-            DateTime now = DateTime.Now;
 
             interceptionApplication.IntFinH.Appl_EnfSrv_Cd = interceptionApplication.Appl_EnfSrv_Cd;
             interceptionApplication.IntFinH.Appl_CtrlCd = interceptionApplication.Appl_CtrlCd;
@@ -334,9 +336,104 @@ namespace FileBroker.Business
                 interceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind--;
             }
 
+            // fix money
+            interceptionApplication.IntFinH.IntFinH_LmpSum_Money /= 100M;
+            if (interceptionApplication.IntFinH.IntFinH_PerPym_Money is not null) interceptionApplication.IntFinH.IntFinH_PerPym_Money /= 100M;
+            if (interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money is not null) interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money /= 100M;
+
+            if (interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt is null)
+                interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt = 0;
+
+            if (interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money is null)
+            {
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money = 0;
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period = null;
+            }
+
+            /*
+                If interceptionFinancialTermsRow.IsIntFinH_DefHldbPrcntNull Then
+                    interceptionFinancialTermsRow.IntFinH_DefHldbPrcnt = 0
+                ElseIf interceptionFinancialTermsRow.IntFinH_DefHldbPrcnt < 0 OrElse interceptionFinancialTermsRow.IntFinH_DefHldbPrcnt > 100 Then
+                    auditRow("ApplicationMessage") = Me.DataClass.Translate("Invalid percentage (<IntFinH_DefHldbPrcnt>) was submitted with an amount < 0 or > 100")
+                    'Me.AddBadData(interceptionFinancialTermsRow.Appl_EnfSrv_Cd, interceptionFinancialTermsRow.Appl_CtrlCd, LoadApplDataRow.Appl_Source_RfrNr, Me.DataClass.Translate("Invalid Percentage (<IntFinH_DefHldbPrcnt>) value"))
+                    invalidData = True
+
+                End If
+
+                If interceptionFinancialTermsRow.IsIntFinH_DefHldbAmn_MoneyNull Then
+                    interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Money = 0
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbAmn_PeriodNull()
+                Else
+                    If interceptionFinancialTermsRow.IsIntFinH_DefHldbAmn_PeriodNull Then
+                        auditRow("ApplicationMessage") = Me.DataClass.Translate("Default Holdback Amount (<IntFinH_DefHldbAmn_Money>) provided with no default holdback amount period code (<dat_IntFinH_DefHldbAmn_Period>)")
+                        invalidData = True
+                    Else
+                        Dim rEx As New Regex("^[C]$")
+                        If interceptionFinancialTermsRow.IsPymPr_CdNull Then
+                            If Not rEx.IsMatch(interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Period.ToUpper) Then
+                                auditRow("ApplicationMessage") = Me.DataClass.Translate("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)")
+                                invalidData = True
+                            End If
+                        Else
+                            If Not interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Period.ToUpper.Equals(interceptionFinancialTermsRow.PymPr_Cd.ToUpper) Then
+                                auditRow("ApplicationMessage") = Me.DataClass.Translate("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)")
+                                invalidData = True
+                            Else
+                                If Not rEx.IsMatch(interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Period.ToUpper) Then
+                                    auditRow("ApplicationMessage") = Me.DataClass.Translate("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)")
+                                    invalidData = True
+                                End If
+                                If Not rEx.IsMatch(interceptionFinancialTermsRow.PymPr_Cd.ToUpper) Then
+                                    auditRow("ApplicationMessage") = Me.DataClass.Translate("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)")
+                                    invalidData = True
+                                End If
+                            End If
+                        End If
+                    End If
+                End If             
+             */
+
+            // fix others
+            if (interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt is not null and 0 &&
+               interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money is not null and 0)
+            {
+                interceptionApplication.IntFinH.HldbTyp_Cd = null;
+                interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt = null;
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money = null;
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period = null;
+            }
+            else if (interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt is not null and > 0 &&
+                     interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money is not null and 0)
+            {
+                interceptionApplication.IntFinH.HldbTyp_Cd = "T";
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money = null;
+                interceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period = null;
+            }
+            else
+            {
+                interceptionApplication.IntFinH.HldbTyp_Cd = "P";
+                interceptionApplication.IntFinH.IntFinH_DefHldbPrcnt = null;
+            }
+
+            /*
+ If interceptionFinancialTermsRow.IntFinH_DefHldbPrcnt = 0 And interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Money = 0 Then
+                    interceptionFinancialTermsRow.SetHldbTyp_CdNull()
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbPrcntNull()
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbAmn_MoneyNull()
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbAmn_PeriodNull()
+                ElseIf interceptionFinancialTermsRow.IntFinH_DefHldbPrcnt > 0 And interceptionFinancialTermsRow.IntFinH_DefHldbAmn_Money = 0 Then
+                    interceptionFinancialTermsRow.HldbTyp_Cd = "T"
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbAmn_MoneyNull()
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbAmn_PeriodNull()
+                Else
+                    interceptionFinancialTermsRow.HldbTyp_Cd = "P"
+                    interceptionFinancialTermsRow.SetIntFinH_DefHldbPrcntNull()
+                End If             
+             */
+
             foreach (var sourceSpecific in sourceSpecificData)
             {
-                interceptionApplication.HldbCnd.Add(new HoldbackConditionData
+                var newHoldback = new HoldbackConditionData
                 {
                     Appl_CtrlCd = interceptionApplication.Appl_CtrlCd,
                     Appl_EnfSrv_Cd = interceptionApplication.Appl_EnfSrv_Cd,
@@ -346,8 +443,22 @@ namespace FileBroker.Business
                     HldbCnd_SrcHldbAmn_Money = sourceSpecific.dat_HldbCnd_Hldb_Amn_Money.Convert<decimal?>(),
                     HldbCnd_SrcHldbPrcnt = sourceSpecific.dat_HldbCnd_SrcHldbPrcnt.Convert<int?>(),
                     HldbCtg_Cd = sourceSpecific.dat_HldbCtg_Cd
-                });
+                };
+                // fix money
+                if (newHoldback.HldbCnd_MxmPerChq_Money is not null) newHoldback.HldbCnd_MxmPerChq_Money /= 100M;
+                if (newHoldback.HldbCnd_SrcHldbAmn_Money is not null) newHoldback.HldbCnd_SrcHldbAmn_Money /= 100M;
+
+                // other fixes
+                if ((newHoldback.HldbCnd_SrcHldbPrcnt is not null and 0) &&
+                    (newHoldback.HldbCtg_Cd == "1"))
+                {
+                    newHoldback.HldbCnd_SrcHldbPrcnt = null;
+                    newHoldback.HldbCtg_Cd = "0";
+                }
+
+                interceptionApplication.HldbCnd.Add(newHoldback);
             }
+
 
             return interceptionApplication;
         }

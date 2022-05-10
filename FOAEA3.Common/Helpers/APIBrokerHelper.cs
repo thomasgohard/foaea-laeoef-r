@@ -21,8 +21,8 @@ namespace FOAEA3.Common.Helpers
         private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 20, 0);
 
         private string _APIroot;
-        private readonly string CurrentSubmitter;
-        private readonly string CurrentUser;
+        public string CurrentSubmitter { get; set; }
+        public string CurrentUser { get; set; }
 
         public MessageDataList Messages { get; set; }
 
@@ -263,6 +263,8 @@ namespace FOAEA3.Common.Helpers
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
+            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
+            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
 
             using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
@@ -274,6 +276,8 @@ namespace FOAEA3.Common.Helpers
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
+            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
+            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
 
             using var content = new StringContent(flatFileData, Encoding.UTF8, "text/plain");
 

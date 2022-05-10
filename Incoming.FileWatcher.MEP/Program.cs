@@ -39,7 +39,7 @@ internal class Program
             string error = $"No items found in FileTable?";
             ColourConsole.WriteEmbeddedColorLine(error);
             errorTrackingDB.MessageBrokerError($"Incoming MEP File Processing", "Error starting MEP File Monitor",
-                                               new Exception(error), false);
+                                               new Exception(error), displayExceptionError: true);
             return;
         }
 
@@ -54,7 +54,7 @@ internal class Program
                              string.Join(", ", validProvinces + " or ALL");
             ColourConsole.WriteEmbeddedColorLine(error);
             errorTrackingDB.MessageBrokerError($"Incoming MEP File Processing", "Error starting MEP File Monitor",
-                                               new Exception(error), false);
+                                               new Exception(error), displayExceptionError: true);
             return;
         }
 
@@ -79,7 +79,7 @@ internal class Program
                 searchPaths.Add(thisPath);
         }
 
-        var apiAction = new APIBrokerHelper();
+        var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
         var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
         var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootData, apiAction,
                                                                interceptionBaseName: interceptionName,
@@ -102,7 +102,7 @@ internal class Program
                 provincialFileManager.ProcessNewFile(newFile, ref errors);
                 if (errors.Any())
                     foreach (var error in errors)
-                        errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), false);
+                        errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
             }
         }
         else

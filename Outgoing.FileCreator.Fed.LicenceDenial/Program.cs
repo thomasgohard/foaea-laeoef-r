@@ -42,14 +42,17 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
 
         private static void CreateOutgoingFederalLicenceDenialFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
         {
+            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI)),
-                Sins = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper),
+                Sins = new SinAPIBroker(applicationApiHelper)
             };
 
             var repositories = new RepositoryList
@@ -77,7 +80,8 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError("LICOUT", federalLicenceDenialOutgoingSource.Name, new Exception(error), false);
+                        repositories.ErrorTrackingDB.MessageBrokerError("LICOUT", federalLicenceDenialOutgoingSource.Name, 
+                                                                        new Exception(error), displayExceptionError: true);
                     }
             }
 

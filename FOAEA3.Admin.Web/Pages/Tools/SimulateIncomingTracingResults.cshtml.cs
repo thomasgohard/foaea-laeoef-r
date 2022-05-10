@@ -97,7 +97,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
                     // call Incoming Fed Tracing FileBroker API
 
-                    var apiHelper = new APIBrokerHelper();
+                    var apiHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
                     var broker = new IncomingFedTracingAPIbroker(apiHelper, ApiFilesConfig);
                     var result = broker.ProcessFlatFile(flatFileNameNoPath, flatFile.ToString());
                     if (result.IsSuccessStatusCode)

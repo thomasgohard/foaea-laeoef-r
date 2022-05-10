@@ -34,7 +34,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
             var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
             var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
-            var apiAction = new APIBrokerHelper();
+            var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
             FederalFileManager = new(fileBrokerDB, apiRootForFiles, apiAction);
 
@@ -55,7 +55,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
                     FederalFileManager.ProcessNewFile(newFile, ref errors);
                     if (errors.Any())
                         foreach(var error in errors)
-                            errorTrackingDB.MessageBrokerError("TRCIN", newFile, new Exception(error), false);
+                            errorTrackingDB.MessageBrokerError("TRCIN", newFile, new Exception(error), displayExceptionError: true);
 
                 }
             }
