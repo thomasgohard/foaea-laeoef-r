@@ -120,14 +120,12 @@ namespace FileBroker.Business
                                 if (messages.ContainsMessagesOfType(MessageType.Error))
                                 {
                                     var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-
                                     fileAuditData.ApplicationMessage = errors[0].Description;
                                     errorCount++;
                                 }
                                 else if (messages.ContainsMessagesOfType(MessageType.Warning))
                                 {
                                     var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-
                                     fileAuditData.ApplicationMessage = warnings[0].Description;
                                     warningCount++;
                                 }
@@ -136,11 +134,11 @@ namespace FileBroker.Business
                                     if (includeInfoInMessages)
                                     {
                                         var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-
                                         result.AddRange(infos);
                                     }
 
-                                    fileAuditData.ApplicationMessage = "Success";
+                                    if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
+                                        fileAuditData.ApplicationMessage = "Success";
                                     successCount++;
                                 }
                             }
