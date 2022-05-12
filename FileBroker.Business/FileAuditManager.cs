@@ -21,7 +21,7 @@ public class FileAuditManager
 
     public void GenerateAuditFile(string fileName, int errorCount, int warningCount, int successCount)
     {
-        string provCd = fileName.Substring(0, 2).ToUpper();
+        string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
         var auditFileContent = new StringBuilder();
 
