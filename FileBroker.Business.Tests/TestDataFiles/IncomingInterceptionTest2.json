@@ -1,0 +1,114 @@
+{
+  "NewDataSet": {
+    "INTAPPIN01": {
+      "RecType": "01",
+      "Cycle": "000001",
+      "FileDate": "2022-04-20T20:05:40-04:00",
+      "TermsAccepted": "The MEP of ON hereby confirms that it agrees to comply with the current terms and conditions of use of the FTP process."
+    },
+    "INTAPPIN10": [
+      {
+        "RecType": "10",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_Appl_Source_RfrNr": "0182682",
+        "dat_Appl_EnfSrvCd": "ON01",
+        "dat_Subm_Rcpt_SubmCd": "ON3D01",
+        "dat_Appl_Lgl_Dte": "2022-04-20T11:40:32-04:00",
+        "dat_Appl_Dbtr_SurNme": "BALL",
+        "dat_Appl_Dbtr_FrstNme": "PETER",
+        "dat_Appl_Dbtr_MddleNme": "BRUCE",
+        "dat_Appl_Dbtr_Brth_Dte": "1967-12-28T00:00:00-05:00",
+        "dat_Appl_Dbtr_Gendr_Cd": "M",
+        "dat_Appl_Dbtr_Entrd_SIN": "482748134",
+        "dat_Appl_Dbtr_Parent_SurNme_Birth": "",
+        "dat_Appl_Rcptfrm_dte": "2022-04-20T11:40:32-04:00",
+        "dat_Appl_AppCtgy_Cd": "I01",
+        "dat_Appl_Group_Batch_Cd": "002617",
+        "dat_Appl_Medium_Cd": "FTP",
+        "dat_Appl_Affdvt_Doc_TypCd": "IXX",
+        "dat_Appl_Reas_Cd": "11",
+        "dat_Appl_LiSt_Cd": "0",
+        "extra_tag": "tag",
+        "Maintenance_ActionCd": "A",
+        "dat_New_Owner_RcptSubmCd": "ON3D01"
+      }
+    ],
+    "INTAPPIN11": [
+      {
+        "RecType": "11",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_Appl_Dbtr_LngCd": "E",
+        "dat_Appl_Dbtr_Addr_Ln": "202 ST DAVID ST",
+        "dat_Appl_Dbtr_Addr_Ln1": "PO BOX 511",
+        "dat_Appl_Dbtr_Addr_CityNme": "MITCHELL",
+        "dat_Appl_Dbtr_Addr_CtryCd": "CAN",
+        "dat_Appl_Dbtr_Addr_PCd": "N0K 1N0",
+        "dat_Appl_Dbtr_Addr_PrvCd": "ON",
+        "dat_Appl_Crdtr_SurNme": "PUSHELBERG",
+        "dat_Appl_Crdtr_FrstNme": "SANDRA",
+        "dat_Appl_Crdtr_MddleNme": "LYNN",
+        "dat_Appl_Crdtr_Brth_Dte": "1968-07-19T00:00:00-04:00"
+      }
+    ],
+    "INTAPPIN12": [
+      {
+        "RecType": "12",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_IntFinH_LmpSum_Money": "0002029678",
+        "dat_IntFinH_CmlPrPym_Ind": "2",
+        "dat_HldbCtg_Cd": "1",
+        "dat_IntFinH_DfHldbPrcnt": "50"
+      }
+    ],
+    "INTAPPIN13": [
+      {
+        "RecType": "13",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_EnfSrv_Cd": "UI00",
+        "dat_HldbCtg_Cd": "1",
+        "dat_HldbCnd_SrcHldbPrcnt": "50"
+      },
+      {
+        "RecType": "13",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_EnfSrv_Cd": "CP00",
+        "dat_HldbCtg_Cd": "1",
+        "dat_HldbCnd_SrcHldbPrcnt": "50"
+      },
+      {
+        "RecType": "13",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_EnfSrv_Cd": "OA00",
+        "dat_HldbCtg_Cd": "1",
+        "dat_HldbCnd_SrcHldbPrcnt": "50"
+      },
+      {
+        "RecType": "13",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_EnfSrv_Cd": "RC00",
+        "dat_HldbCtg_Cd": "0",
+        "dat_HldbCnd_SrcHldbPrcnt": "0"
+      },
+      {
+        "RecType": "13",
+        "dat_Subm_SubmCd": "ON2D7W",
+        "dat_Appl_CtrlCd": "P82628",
+        "dat_EnfSrv_Cd": "TR00",
+        "dat_HldbCtg_Cd": "1",
+        "dat_HldbCnd_SrcHldbPrcnt": "50"
+      }
+    ],
+    "INTAPPIN99": {
+      "RecType": "99",
+      "ResponseCnt": "1"
+    }
+  }
+}
+

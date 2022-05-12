@@ -1,4 +1,5 @@
 ﻿using FileBroker.Business;
+using FileBroker.Business.Helpers;
 using FileBroker.Data;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
@@ -81,8 +82,7 @@ public class TracingFilesController : ControllerBase
             sourceTracingJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var schema = JsonSchema.FromType<MEPTracingFileData>();
-        var errors = schema.Validate(sourceTracingJsonData);
+        var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData);
         if (errors.Any())
         {
             return UnprocessableEntity(errors);

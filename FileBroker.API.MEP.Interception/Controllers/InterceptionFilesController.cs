@@ -1,4 +1,5 @@
 ﻿using FileBroker.Business;
+using FileBroker.Business.Helpers;
 using FileBroker.Data;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
@@ -82,12 +83,9 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var schema = JsonSchema.FromType<MEPInterceptionFileData>();
-        var errors = schema.Validate(sourceInterceptionJsonData);
+        var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData);
         if (errors.Any())
-        {
             return UnprocessableEntity(errors);
-        }
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
