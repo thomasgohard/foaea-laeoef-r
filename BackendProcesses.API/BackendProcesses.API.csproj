@@ -11,6 +11,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>461dff35-1f57-4d28-b254-2966ac530836</UserSecretsId>
+	  <Nullable>warnings</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

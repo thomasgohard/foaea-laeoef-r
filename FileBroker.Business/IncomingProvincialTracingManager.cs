@@ -73,13 +73,14 @@ public class IncomingProvincialTracingManager
                     {
                         var traceData = tracingFile.TRCAPPIN21.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
-                        var tracingMessage = new TracingMessageData
+                        var tracingMessage = new MessageData<TracingApplicationData>
                         {
-                            TracingApplication = GetTracingApplicationDataFromRequest(data, traceData),
+                            Application = GetTracingApplicationDataFromRequest(data, traceData),
                             MaintenanceAction = data.Maintenance_ActionCd,
                             MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                             NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                            NewIssuingSubmitter = data.dat_New_Owner_SubmCd
+                            NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
+                            NewUpdateSubmitter = data.dat_Update_SubmCd
                         };
 
                         var messages = ProcessApplicationRequest(tracingMessage);
@@ -142,35 +143,36 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
-    public MessageDataList ProcessApplicationRequest(TracingMessageData tracingMessageData)
+    public MessageDataList ProcessApplicationRequest(MessageData<TracingApplicationData> tracingMessageData)
     {
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
         {
-            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.TracingApplication);
+            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
             switch (tracingMessageData.MaintenanceLifeState)
             {
                 case "00": // change
-                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.TracingApplication);
+                case "0": 
+                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
-                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.TracingApplication);
+                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.TracingApplication,
+                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
                                                                                   tracingMessageData.NewRecipientSubmitter,
                                                                                   tracingMessageData.NewIssuingSubmitter);
                     break;
 
                 default:
-                    tracing = tracingMessageData.TracingApplication;
-                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})"+
+                    tracing = tracingMessageData.Application;
+                    tracing.Messages.AddError($"Unknown dat_Appl_LiSt_Cd ({tracingMessageData.MaintenanceLifeState})" +
                                               $" for Maintenance_ActionCd ({tracingMessageData.MaintenanceAction})");
                     break;
             }
@@ -192,7 +194,7 @@ public class IncomingProvincialTracingManager
 
     private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
     {
-        if (tracingFile.TRCAPPIN99.ResponseCnt != tracingFile.TRCAPPIN20.Count)
+        if (int.Parse(tracingFile.TRCAPPIN99.ResponseCnt) != tracingFile.TRCAPPIN20.Count)
         {
             isValid = false;
             result.AddSystemError("Invalid ResponseCnt in section 99");
@@ -203,7 +205,7 @@ public class IncomingProvincialTracingManager
     {
         bool validActionLifeState = true;
 
-        if ((data.Maintenance_ActionCd == "A") && (data.dat_Appl_LiSt_Cd != "00"))
+        if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
             validActionLifeState = false;
         else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
             validActionLifeState = false;
@@ -232,6 +234,8 @@ public class IncomingProvincialTracingManager
             try
             {
                 var single = JsonConvert.DeserializeObject<MEPTracingFileDataSingle>(sourceTracingData);
+                if (single is null) 
+                    throw new NullReferenceException("json conversion failed for MEPTracingFileDataSingle");
 
                 result = new MEPTracingFileData();
                 result.NewDataSet.TRCAPPIN01 = single.NewDataSet.TRCAPPIN01;
@@ -265,7 +269,7 @@ public class IncomingProvincialTracingManager
             Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.Date,
             Appl_Dbtr_Gendr_Cd = baseData.dat_Appl_Dbtr_Gendr_Cd.Trim() == "" ? "M" : baseData.dat_Appl_Dbtr_Gendr_Cd.Trim(),
             Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
-            Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme,
+            Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
             Appl_CommSubm_Text = baseData.dat_Appl_CommSubm_Text,
             Appl_Rcptfrm_Dte = baseData.dat_Appl_Rcptfrm_dte.Date,
             AppCtgy_Cd = baseData.dat_Appl_AppCtgy_Cd,

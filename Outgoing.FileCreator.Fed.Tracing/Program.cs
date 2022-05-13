@@ -42,13 +42,16 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
         private static void CreateOutgoingFederalTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
         {
+            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-                TracingApplications = new TracingApplicationAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingResponses = new TraceResponseAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                TracingEvents = new TracingEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI)),
-                Sins = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
+                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper),
+                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper),
+                TracingEvents = new TracingEventAPIBroker(tracingApiHelper),
+                Sins = new SinAPIBroker(applicationApiHelper)
             };
 
             var repositories = new RepositoryList
@@ -76,7 +79,8 @@ namespace Outgoing.FileCreator.Fed.Tracing
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name, new Exception(error), false);
+                        repositories.ErrorTrackingDB.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name, 
+                                                                        new Exception(error), displayExceptionError: true);
                     }
             }
 

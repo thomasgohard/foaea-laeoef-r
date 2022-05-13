@@ -63,6 +63,7 @@ namespace FOAEA3.Data.DB
                 { "Subm_SubmCd", application.Subm_SubmCd },
                 { "Subm_Recpt_SubmCd", application.Subm_Recpt_SubmCd },
                 { "Appl_CommSubm_Text", application.Appl_CommSubm_Text },
+                { "Appl_Lgl_Dte", application.Appl_Lgl_Dte },
                 { "Appl_Rcptfrm_Dte", application.Appl_Rcptfrm_Dte },
                 { "Appl_Group_Batch_Cd", application.Appl_Group_Batch_Cd },
                 { "Appl_Source_RfrNr", application.Appl_Source_RfrNr },
@@ -91,6 +92,7 @@ namespace FOAEA3.Data.DB
                 { "Appl_SIN_Cnfrmd_Ind", application.Appl_SIN_Cnfrmd_Ind },
                 { "AppCtgy_Cd", application.AppCtgy_Cd },
                 { "AppReas_Cd", application.AppReas_Cd },
+                { "Appl_Create_Dte", application.Appl_Create_Dte },
                 { "Appl_Create_Usr", application.Appl_Create_Usr },
                 { "Appl_LastUpdate_Usr", application.Appl_LastUpdate_Usr },
                 { "ActvSt_Cd", application.ActvSt_Cd },
@@ -101,7 +103,6 @@ namespace FOAEA3.Data.DB
             if (application.Appl_Dbtr_Brth_Dte is null) parameters.Add("Appl_Dbtr_Brth_Dte", DBNull.Value); else parameters.Add("Appl_Dbtr_Brth_Dte", application.Appl_Dbtr_Brth_Dte.Value);
             if ((application.Appl_Crdtr_Brth_Dte is null) || (application.Appl_Crdtr_Brth_Dte.Value == DateTime.MinValue)) parameters.Add("Appl_Crdtr_Brth_Dte", DBNull.Value); else parameters.Add("Appl_Crdtr_Brth_Dte", application.Appl_Crdtr_Brth_Dte.Value);
             if (application.Appl_RecvAffdvt_Dte is null) parameters.Add("Appl_RecvAffdvt_Dte", DBNull.Value); else parameters.Add("Appl_RecvAffdvt_Dte", application.Appl_RecvAffdvt_Dte.Value);
-            if (application.Appl_Lgl_Dte is null) parameters.Add("Appl_Lgl_Dte", DBNull.Value); else parameters.Add("Appl_Lgl_Dte", application.Appl_Lgl_Dte.Value);
             if (application.Appl_Reactv_Dte is null) parameters.Add("Appl_Reactv_Dte", DBNull.Value); else parameters.Add("Appl_Reactv_Dte", application.Appl_Reactv_Dte.Value);
 
             // replace empty strings with DBNull
@@ -130,7 +131,6 @@ namespace FOAEA3.Data.DB
 
             if (String.IsNullOrWhiteSpace(application.Appl_Create_Usr)) parameters["Appl_Create_Usr"] = application.Subm_SubmCd;
             if (String.IsNullOrWhiteSpace(application.Appl_LastUpdate_Usr)) parameters["Appl_LastUpdate_Usr"] = application.Subm_SubmCd;
-            if (application.Appl_Create_Dte is null) parameters.Add("Appl_Create_Dte", DateTime.Now); else parameters.Add("Appl_Create_Dte", application.Appl_Create_Dte.Value);
             if (application.Appl_LastUpdate_Dte is null) parameters.Add("Appl_LastUpdate_Dte", DateTime.Now); else parameters.Add("Appl_LastUpdate_Dte", application.Appl_LastUpdate_Dte.Value);
 
             return parameters;
@@ -371,14 +371,14 @@ namespace FOAEA3.Data.DB
             data.Appl_Source_RfrNr = rdr["Val_4"] as string;
             data.AppCtgy_Cd = rdr["Val_5"] as string;
             data.Subm_Recpt_SubmCd = rdr["Val_6"] as string;
-            data.Event_TimeStamp = (DateTime) rdr["Val_7"];
-            data.Event_TimeStamp2 = (DateTime) rdr["Val_8"];
+            data.Event_TimeStamp = (DateTime)rdr["Val_7"];
+            data.Event_TimeStamp2 = (DateTime)rdr["Val_8"];
             data.ActvSt_Cd = rdr["Val_9"] as string;
             data.AppLiSt_Cd = rdr["Val_10"] as string;
             data.Event_Priority_Ind = rdr["Val_11"] as string;
             data.Event_Reas_Cd = rdr["Val_12"] as string;
-            data.Event_Effctv_Dte = (DateTime) rdr["Val_13"];
-            data.Event_Compl_Dte = (DateTime) rdr["Val_14"];
+            data.Event_Effctv_Dte = (DateTime)rdr["Val_13"];
+            data.Event_Compl_Dte = (DateTime)rdr["Val_14"];
             data.Event_Reas_Text = rdr["Val_15"] as string;
         }
 
@@ -401,7 +401,7 @@ namespace FOAEA3.Data.DB
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
             data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
             data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
-            data.Appl_Lgl_Dte = rdr["Appl_Lgl_Dte"] as DateTime?; // can be null 
+            data.Appl_Lgl_Dte = (DateTime) rdr["Appl_Lgl_Dte"]; // should never be null 
             data.Appl_CommSubm_Text = rdr["Appl_CommSubm_Text"] as string; // can be null 
             data.Appl_Rcptfrm_Dte = (DateTime)rdr["Appl_Rcptfrm_Dte"];
             data.Appl_Group_Batch_Cd = rdr["Appl_Group_Batch_Cd"] as string; // can be null 
@@ -441,7 +441,7 @@ namespace FOAEA3.Data.DB
             data.Appl_SIN_Cnfrmd_Ind = (byte)rdr["Appl_SIN_Cnfrmd_Ind"];
             data.AppCtgy_Cd = rdr["AppCtgy_Cd"] as string;
             data.AppReas_Cd = (rdr["AppReas_Cd"] as string)?.TrimEnd();
-            data.Appl_Create_Dte = rdr["Appl_Create_Dte"] as DateTime?; // can be null 
+            data.Appl_Create_Dte = (DateTime) rdr["Appl_Create_Dte"]; // can be null 
             data.Appl_Create_Usr = rdr["Appl_Create_Usr"] as string; // can be null 
             data.Appl_LastUpdate_Dte = rdr["Appl_LastUpdate_Dte"] as DateTime?; // can be null 
             data.Appl_LastUpdate_Usr = rdr["Appl_LastUpdate_Usr"] as string; // can be null 

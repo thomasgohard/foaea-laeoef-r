@@ -269,7 +269,7 @@ namespace FOAEA3.Business.Areas.Application
                             }
                             else
                             {
-                                var DaysElapsed = (DateTime.Now - LicenceDenialApplication.Appl_Lgl_Dte.Value).TotalDays;
+                                var DaysElapsed = (DateTime.Now - LicenceDenialApplication.Appl_Lgl_Dte).TotalDays;
                                 if (LicenceDenialApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5) &&
                                    (Math.Abs(DaysElapsed) > 40))
                                 {

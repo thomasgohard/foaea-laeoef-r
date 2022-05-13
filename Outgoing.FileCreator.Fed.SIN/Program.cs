@@ -41,10 +41,12 @@ internal class Program
 
     private static void CreateOutgoingFederalSinFile(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
     {
+        var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+
         var apiBrokers = new APIBrokerList
         {
-            ApplicationEvents = new ApplicationEventAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI)),
-            Sins = new SinAPIBroker(new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI))
+            ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
+            Sins = new SinAPIBroker(applicationApiHelper)
         };
 
         var repositories = new RepositoryList
@@ -72,7 +74,8 @@ internal class Program
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    repositories.ErrorTrackingDB.MessageBrokerError("SINOUT", federalSinOutgoingSource.Name, new Exception(error), false);
+                    repositories.ErrorTrackingDB.MessageBrokerError("SINOUT", federalSinOutgoingSource.Name, 
+                                                                    new Exception(error), displayExceptionError: true);
                 }
         }
 

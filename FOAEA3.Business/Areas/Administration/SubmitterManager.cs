@@ -7,6 +7,7 @@ using FOAEA3.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FOAEA3.Business.Areas.Application;
 
 namespace FOAEA3.Business.Areas.Administration
 {
@@ -163,8 +164,10 @@ namespace FOAEA3.Business.Areas.Administration
             else
             {
                 EnfOffData offData = Repositories.EnfOffRepository.GetEnfOff(enfOffCode: data.EnfOff_City_LocCd, enfServCode: data.EnfSrv_Cd).FirstOrDefault();
-
-                middle = level + offData.EnfOff_AbbrCd;
+                if (offData is not null)
+                    middle = level + offData.EnfOff_AbbrCd;
+                else
+                    middle = "??";
             }
 
             string suffix;

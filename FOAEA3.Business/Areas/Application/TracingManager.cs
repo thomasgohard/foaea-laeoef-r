@@ -350,7 +350,7 @@ namespace FOAEA3.Business.Areas.Application
                         case EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION:
                             if (currentLifeState < ApplicationState.APPLICATION_REJECTED_9)
                             {
-                                var DaysElapsed = Math.Abs((DateTime.Now - TracingApplication.Appl_Lgl_Dte.Value).TotalDays);
+                                var DaysElapsed = Math.Abs((DateTime.Now - TracingApplication.Appl_Lgl_Dte).TotalDays);
 
                                 if (currentLifeState.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5) &&
                                    (DaysElapsed > 40))

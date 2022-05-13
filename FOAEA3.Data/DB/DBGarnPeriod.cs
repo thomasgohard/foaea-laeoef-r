@@ -109,7 +109,8 @@ namespace FOAEA3.Data.DB
             public decimal LumpDivertedTtl { get; set; }
         }
 
-        private void GetDivertedTotalsForVaryAccept(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate, ref decimal prdPymtDivertedTtl, ref decimal lumpDivertedTtl)
+        private void GetDivertedTotalsForVaryAccept(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate, 
+                                                    ref decimal prdPymtDivertedTtl, ref decimal lumpDivertedTtl)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -120,8 +121,11 @@ namespace FOAEA3.Data.DB
 
             var result = MainDB.GetDataFromStoredProc<UpdatedDiverts>("GetDivertedTotalsForVaryAccept", parameters, FillDataFromReader).FirstOrDefault();
 
-            prdPymtDivertedTtl = result.PrdPymtDivertedTtl;
-            lumpDivertedTtl = result.LumpDivertedTtl;
+            if (result is not null)
+            {
+                prdPymtDivertedTtl = result.PrdPymtDivertedTtl;
+                lumpDivertedTtl = result.LumpDivertedTtl;
+            }           
 
         }
 

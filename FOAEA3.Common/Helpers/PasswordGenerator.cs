@@ -34,7 +34,7 @@ namespace FOAEA3.Common.Helpers
 
             if (!((email ?? "") == (string.Empty ?? "")))
             {
-                return Regex.IsMatch(email, regexEmailPattern);
+                return Regex.IsMatch(email ?? "", regexEmailPattern);
             }
             else
             {

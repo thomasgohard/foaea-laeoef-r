@@ -1,4 +1,5 @@
 ﻿using FileBroker.Business;
+using FileBroker.Business.Helpers;
 using FileBroker.Data;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
@@ -7,6 +8,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NJsonSchema;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,6 +43,12 @@ public class TracingFilesController : ControllerBase
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 
+        if (fileTableData is null)
+        {
+            lastFileName = "";
+            return $"Error: fileTableData is empty for category TRCAPPOUT.";
+        }
+
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle;
 
@@ -68,11 +76,20 @@ public class TracingFilesController : ControllerBase
                                                    [FromHeader] string currentSubmitter,
                                                    [FromHeader] string currentSubject)
     {
-        string sourceTracingData;
+        string sourceTracingJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            sourceTracingData = reader.ReadToEndAsync().Result;
+            sourceTracingJsonData = reader.ReadToEndAsync().Result;
         }
+
+        var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData);
+        if (errors.Any())
+        {
+            return UnprocessableEntity(errors);
+        }
+
+        //foreach (var error in errors)
+        //    Console.WriteLine(error.Path + ": " + error.Kind);
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
@@ -101,7 +118,7 @@ public class TracingFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData);
+            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData);
             return Ok("File processed.");
         }
         else

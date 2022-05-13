@@ -148,7 +148,7 @@ namespace FOAEA3.Data.DB
                 { "rchrAppl_CtrlCd", eventData.Appl_CtrlCd },
                 { "rdtmTimeStamp", eventData.Event_TimeStamp },
                 { "rchrSubm_Recpt", eventData.Subm_Recpt_SubmCd },
-                { "dintReas_Cd", (int) eventData.Event_Reas_Cd.Value },
+                { "dintReas_Cd", (int) (eventData.Event_Reas_Cd ?? 0) },
                 { "dchrPriority_Ind", eventData.Event_Priority_Ind },
                 { "ddtmEffctv_Dte", eventData.Event_Effctv_Dte },
                 { "dchrActvSt_Cd", activeState },
@@ -226,7 +226,7 @@ namespace FOAEA3.Data.DB
                     parameters.Add("Appl_CtrlCd", eventData.Appl_CtrlCd);
                     parameters.Add("Event_TimeStamp", eventData.Event_TimeStamp);
                     parameters.Add("Subm_Recpt_SubmCd", eventData.Subm_Recpt_SubmCd);
-                    parameters.Add("Event_Reas_Cd", (int)eventData.Event_Reas_Cd.Value);
+                    parameters.Add("Event_Reas_Cd", (int) (eventData.Event_Reas_Cd ?? 0));
                     parameters.Add("Event_Priority_Ind", eventData.Event_Priority_Ind);
                     parameters.Add("Event_Effctv_Dte", eventData.Event_Effctv_Dte);
                     parameters.Add("ActvSt_Cd", eventData.ActvSt_Cd);

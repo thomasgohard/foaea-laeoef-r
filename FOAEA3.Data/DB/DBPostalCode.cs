@@ -35,12 +35,20 @@ namespace FOAEA3.Data.DB
             validProvCode = result["ValidProvCode"] as string;
             string validFlagString = result["Results"] as string;
 
-            validFlags = new PostalCodeFlag
-            {
-                IsPostalCodeValid = validFlagString[0] == '1',
-                IsProvinceValid = validFlagString[1] == '1',
-                IsCityNameValid = validFlagString[2] == '1',
-            };
+            if ((validFlagString is not null) && (validFlagString.Length >= 3))
+                validFlags = new PostalCodeFlag
+                {
+                    IsPostalCodeValid = validFlagString[0] == '1',
+                    IsProvinceValid = validFlagString[1] == '1',
+                    IsCityNameValid = validFlagString[2] == '1',
+                };
+            else
+                validFlags = new PostalCodeFlag
+                {
+                    IsPostalCodeValid = false,
+                    IsProvinceValid = false,
+                    IsCityNameValid = false,
+                };
 
             return validFlags.IsPostalCodeValid;
         }

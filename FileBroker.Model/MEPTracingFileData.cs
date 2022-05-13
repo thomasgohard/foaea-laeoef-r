@@ -26,7 +26,7 @@ namespace FileBroker.Model
 		public DateTime dat_Appl_Dbtr_Brth_Dte;
 		public string dat_Appl_Dbtr_Gendr_Cd;
 		public string dat_Appl_Dbtr_Entrd_SIN;
-		public string dat_Appl_Dbtr_Parent_SurNme; 
+		public string dat_Appl_Dbtr_Parent_SurNme_Birth; 
 		public string dat_Appl_CommSubm_Text;
 		public DateTime dat_Appl_Rcptfrm_dte;
 		public string dat_Appl_AppCtgy_Cd;
@@ -39,6 +39,7 @@ namespace FileBroker.Model
 		public string Maintenance_ActionCd;
 		public string dat_New_Owner_RcptSubmCd;
 		public string dat_New_Owner_SubmCd;
+		public string dat_Update_SubmCd;
 	}
 
 	public struct MEPTracing_RecType21
@@ -60,7 +61,7 @@ namespace FileBroker.Model
 	public struct MEPTracing_RecType99
     {
 		public string RecType;
-		public int ResponseCnt;
+		public string ResponseCnt;
     }
 
 	public struct MEPTracing_TracingDataSet

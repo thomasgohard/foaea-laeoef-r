@@ -14,15 +14,10 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:13014"
     },
-    "Incoming.API.MEP.Tracing": {
+    "FileBroker.API.MEP.Tracing": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": "true",
-      "applicationUrl": "http://localhost:5000"
+      "launchUrl": "swagger"
     }
   }
 }

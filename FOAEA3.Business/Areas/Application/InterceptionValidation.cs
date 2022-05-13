@@ -213,6 +213,14 @@ namespace FOAEA3.Business.Areas.Application
         {
             decimal maxAmntPeriodic = 0.0M;
 
+            if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money is null)
+            {
+                ApplicationManager.AddSystemError(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                                                  $"CalculateMaxAmountPeriodicForPeriodCode for {InterceptionApplication.Appl_EnfSrv_Cd}-{InterceptionApplication.Appl_CtrlCd}" +
+                                                  $" (with periodic code {paymentPeriodicCode}) was called even though IntFinH_PerPym_Money is null!");
+                return 0.0M;
+            }
+
             if (!string.IsNullOrEmpty(paymentPeriodicCode))
             {
                 switch (paymentPeriodicCode)

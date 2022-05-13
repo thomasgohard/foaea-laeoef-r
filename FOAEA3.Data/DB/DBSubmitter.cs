@@ -258,22 +258,22 @@ namespace FOAEA3.Data.DB
             data.Subm_LastUpdate_Usr = rdr["Subm_LastUpdate_Usr"] as string;
 
             // trim strings
-            data.Subm_SubmCd = data.Subm_SubmCd.Trim();
-            data.Subm_FrstNme = data.Subm_FrstNme.Trim();
+            data.Subm_SubmCd = data.Subm_SubmCd?.Trim();
+            data.Subm_FrstNme = data.Subm_FrstNme?.Trim();
             data.Subm_MddleNme = data.Subm_MddleNme?.Trim(); // can be null
-            data.Subm_SurNme = data.Subm_SurNme.Trim();
+            data.Subm_SurNme = data.Subm_SurNme?.Trim();
             data.Subm_Assg_Email = data.Subm_Assg_Email?.Trim(); // can be null
             data.Subm_IP_Addr = data.Subm_IP_Addr?.Trim(); // can be null
             data.Subm_Last_SeqNr = data.Subm_Last_SeqNr?.Trim(); // can be null
             data.Subm_Altrn_SubmCd = data.Subm_Altrn_SubmCd?.Trim(); // can be null
-            data.EnfSrv_Cd = data.EnfSrv_Cd.Trim();
-            data.EnfOff_City_LocCd = data.EnfOff_City_LocCd.Trim();
+            data.EnfSrv_Cd = data.EnfSrv_Cd?.Trim();
+            data.EnfOff_City_LocCd = data.EnfOff_City_LocCd?.Trim();
             data.Subm_Title = data.Subm_Title?.Trim(); // can be null
             data.Subm_SgnAuth_SubmCd = data.Subm_SgnAuth_SubmCd?.Trim(); // can be null
             data.Subm_Comments = data.Subm_Comments?.Trim(); // can be null
-            data.ActvSt_Cd = data.ActvSt_Cd.Trim();
+            data.ActvSt_Cd = data.ActvSt_Cd?.Trim();
             data.Subm_Class = data.Subm_Class?.Trim(); // can be null
-            data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr.Trim();
+            data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr?.Trim();
 
         }
 

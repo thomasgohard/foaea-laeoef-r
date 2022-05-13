@@ -143,6 +143,58 @@ namespace DBHelper
             return result;
         }
 
+        public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
+                                                           ActionOut<IDBHelperReader, Tdata> fillDataFromReader)
+        {
+
+            ValidateConfiguration();
+
+            var result = new List<Tdata>();
+
+            using (var con = new SqlConnection(ConnectionString))
+            {
+                using SqlCommand cmd = CreateCommand(procName, con);
+                if ((parameters != null) && (parameters.Count > 0))
+                {
+                    foreach (var item in parameters)
+                    {
+                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                    }
+                }
+
+                var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
+                retParameter.Direction = ParameterDirection.ReturnValue;
+
+                LastException = null;
+                try
+                {
+                    con.Open();
+
+                    using SqlDataReader rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
+                    {
+                        var dataReader = new DBHelperReader(rdr);
+                        fillDataFromReader(dataReader, out var data);
+
+                        result.Add(data);
+                    }
+
+                    rdr.Close();
+
+                    if (retParameter.Value is not null)
+                        LastReturnValue = (int)retParameter.Value;
+
+                }
+                catch (Exception e)
+                {
+                    LastException = e;
+                }
+
+            }
+
+            return result;
+        }
+
         public Tdata GetDataFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters)
         {
             ValidateConfiguration();
@@ -341,19 +393,19 @@ namespace DBHelper
                     }
                 }
 
-                foreach (var returnParam in returnParameters)
+                foreach (var (fieldName, returnedValue) in returnParameters)
                 {
-                    var returnType = returnParam.Value.Substring(0, 1) switch
+                    var returnType = returnedValue[0] switch
                     {
-                        "S" => SqlDbType.VarChar,
-                        "C" => SqlDbType.Char,
-                        "I" => SqlDbType.Int,
-                        _ => throw new Exception($"Unsupported DB type! ({returnParam.Value})"),
+                        'S' => SqlDbType.VarChar,
+                        'C' => SqlDbType.Char,
+                        'I' => SqlDbType.Int,
+                        _ => throw new Exception($"Unsupported DB type! ({returnedValue})"),
                     };
-                    var outParameter = cmd.Parameters.Add("@" + returnParam.Key, returnType);
-                    if (returnParam.Value.Substring(0, 1).In("S", "C"))
+                    var outParameter = cmd.Parameters.Add("@" + fieldName, returnType);
+                    if (returnedValue[0].In('S', 'C'))
                     {
-                        int length = int.Parse(returnParam.Value[1..]);
+                        int length = int.Parse(returnedValue[1..]);
                         outParameter.Size = length;
                     }
 
@@ -378,9 +430,9 @@ namespace DBHelper
                     LastException = e;
                 }
 
-                foreach (var returnParam in returnParameters)
+                foreach (var (fieldName, _) in returnParameters)
                 {
-                    result.Add(returnParam.Key, cmd.Parameters["@" + returnParam.Key].Value);
+                    result.Add(fieldName, cmd.Parameters["@" + fieldName].Value);
                 }
 
             }
@@ -751,7 +803,8 @@ namespace DBHelper
 
             foreach (var info in dataType.GetProperties())
             {
-                if (info.PropertyType.FullName.Contains("Nullable"))
+                if ((info.PropertyType is not null) && (info.PropertyType.FullName is not null) && 
+                    (info.PropertyType.FullName.Contains("Nullable")))
                 {
                     //     FullName: "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 
@@ -780,7 +833,7 @@ namespace DBHelper
                         newDataTable.Columns.Add(newColumn);
                     }
                 }
-                else
+                else if (info.PropertyType is not null)
                     newDataTable.Columns.Add(new DataColumn(info.Name, info.PropertyType));
             }
 

@@ -24,11 +24,11 @@ namespace FOAEA3.Business.Areas.Application
 
         protected ApplicationStateEngine StateEngine { get; }
 
-        protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd;
+        protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd.Trim();
 
-        protected string Appl_CtrlCd => Application.Appl_CtrlCd;
+        protected string Appl_CtrlCd => Application.Appl_CtrlCd.Trim();
 
-        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config, 
+        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
                                   ApplicationValidation applicationValidation = null)
         {
             this.config = config;
@@ -43,32 +43,31 @@ namespace FOAEA3.Business.Areas.Application
                 Validation = applicationValidation;
                 Validation.EventManager = EventManager;
             }
-            StateEngine = new ApplicationStateEngine
-            {
-                Process_00_InitialState = Process_00_InitialState,
-                Process_01_InvalidApplication = Process_01_InvalidApplication,
-                Process_02_AwaitingValidation = Process_02_AwaitingValidation,
-                Process_03_SinConfirmationPending = Process_03_SinConfirmationPending,
-                Process_04_SinConfirmed = Process_04_SinConfirmed,
-                Process_05_SinNotConfirmed = Process_05_SinNotConfirmed,
-                Process_06_PendingAcceptanceSwearing = Process_06_PendingAcceptanceSwearing,
-                Process_07_ValidAffidavitNotReceived = Process_07_ValidAffidavitNotReceived,
-                Process_09_ApplicationRejected = Process_09_ApplicationRejected,
-                Process_10_ApplicationAccepted = Process_10_ApplicationAccepted,
-                Process_11_ApplicationReinstated = Process_11_ApplicationReinstated,
-                Process_12_PartiallyServiced = Process_12_PartiallyServiced,
-                Process_13_FullyServiced = Process_13_FullyServiced,
-                Process_14_ManuallyTerminated = Process_14_ManuallyTerminated,
-                Process_15_Expired = Process_15_Expired,
-                Process_17_FinancialTermsVaried = Process_17_FinancialTermsVaried,
-                Process_19_AwaitingDocumentsForVariation = Process_19_AwaitingDocumentsForVariation,
-                Process_35_ApplicationSuspended = Process_35_ApplicationSuspended,
-                Process_91_InvalidVariationSource = Process_91_InvalidVariationSource,
-                Process_92_InvalidVariationFinTerms = Process_92_InvalidVariationFinTerms,
-                Process_93_ValidFinancialVariation = Process_93_ValidFinancialVariation,
 
-                InvalidStateChange = InvalidStateChange
-            };
+            StateEngine = new ApplicationStateEngine(
+                process_00_InitialState: Process_00_InitialState,
+                process_01_InvalidApplication: Process_01_InvalidApplication,
+                process_02_AwaitingValidation: Process_02_AwaitingValidation,
+                process_03_SinConfirmationPending: Process_03_SinConfirmationPending,
+                process_04_SinConfirmed: Process_04_SinConfirmed,
+                process_05_SinNotConfirmed: Process_05_SinNotConfirmed,
+                process_06_PendingAcceptanceSwearing: Process_06_PendingAcceptanceSwearing,
+                process_07_ValidAffidavitNotReceived: Process_07_ValidAffidavitNotReceived,
+                process_09_ApplicationRejected: Process_09_ApplicationRejected,
+                process_10_ApplicationAccepted: Process_10_ApplicationAccepted,
+                process_11_ApplicationReinstated: Process_11_ApplicationReinstated,
+                process_12_PartiallyServiced: Process_12_PartiallyServiced,
+                process_13_FullyServiced: Process_13_FullyServiced,
+                process_14_ManuallyTerminated: Process_14_ManuallyTerminated,
+                process_15_Expired: Process_15_Expired,
+                process_17_FinancialTermsVaried: Process_17_FinancialTermsVaried,
+                process_19_AwaitingDocumentsForVariation: Process_19_AwaitingDocumentsForVariation,
+                process_35_ApplicationSuspended: Process_35_ApplicationSuspended,
+                process_91_InvalidVariationSource: Process_91_InvalidVariationSource,
+                process_92_InvalidVariationFinTerms: Process_92_InvalidVariationFinTerms,
+                process_93_ValidFinancialVariation: Process_93_ValidFinancialVariation,
+                invalidStateChange: InvalidStateChange
+            );
         }
 
         public void SetNewStateTo(ApplicationState newState)
@@ -198,7 +197,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
-            
+
             Repositories.ApplicationRepository.UpdateApplication(Application);
             Repositories.SubmitterRepository.SubmitterMessageDelete(Application.Appl_LastUpdate_Usr);
 
@@ -444,6 +443,15 @@ namespace FOAEA3.Business.Areas.Application
             else
                 return "";
         }
-               
+
+        public static void AddSystemError(IRepositories repositories, MessageDataList messages, string recipients, string errorMessage)
+        {
+            messages.AddSystemError(errorMessage);
+
+            string subject = "System Error";
+            string message = $"<b>Error: </b>{errorMessage}";
+            repositories.NotificationRepository.SendEmail(subject, recipients, message);            
+        }
+
     }
 }

@@ -46,11 +46,11 @@ namespace FileBroker.Business.Tests
             throw new System.NotImplementedException();
         }
 
-        public MessageDataList ProcessApplicationRequest(TracingMessageData tracingMessageData)
+        public MessageDataList ProcessApplicationRequest(MessageData<TracingApplicationData> tracingMessageData)
         {
             var result = new MessageDataList();
 
-            string controlCode = tracingMessageData.TracingApplication.Appl_CtrlCd;
+            string controlCode = tracingMessageData.Application.Appl_CtrlCd;
 
             result.Add(new MessageData(EventCode.UNDEFINED, "Appl_CtrlCd", controlCode, MessageType.Information));
 

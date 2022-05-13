@@ -64,7 +64,8 @@ public class OutgoingFederalLicenceDenialManager
 
             Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", "Error creating outbound file", e, true);
+            Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;
         }

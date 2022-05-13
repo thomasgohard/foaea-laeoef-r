@@ -45,8 +45,8 @@ namespace FOAEA3.Business.Security
 
         public void AddAuditElements(int headerId, Dictionary<AccessAuditElement, string> elements)
         {
-            foreach (var element in elements)
-                AddAuditElement(headerId, element.Key, element.Value);
+            foreach (var (elementType, elementValue) in elements)
+                AddAuditElement(headerId, elementType, elementValue);
         }
 
     }

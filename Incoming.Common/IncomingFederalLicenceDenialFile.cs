@@ -1,11 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,10 +27,8 @@ namespace Incoming.Common
             FileTable = new DBFileTable(fileBrokerDB);
         }
 
-        public Dictionary<string, FileTableData> GetNewFiles(string rootPath)
+        public void AddNewFiles(string rootPath, ref List<string> newFiles)
         {
-            var newFiles = new Dictionary<string, FileTableData>();
-
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IL.*");
             var last31days = DateTime.Now.AddDays(-31);
@@ -46,10 +42,8 @@ namespace Incoming.Common
                 var fileTableData = FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName, fileTableData);
+                    newFiles.Add(fileInfo.FullName);
             }
-
-            return newFiles;
         }
 
         public bool ProcessNewFile(string fullPath, ref List<string> errors)
@@ -59,12 +53,15 @@ namespace Incoming.Common
             string fileNameNoPath = Path.GetFileName(fullPath);
 
             if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
-            {                                                                                     
+            {
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
-                string jsonText = JsonConvert.SerializeXmlNode(doc); // convert xml to json
+                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors); // convert xml to json
+
+                if (errors.Any())
+                    return false;
 
                 var response = APIHelper.PostFlatFile($"api/v1/FederalLicenceDenialFiles?fileName={fileNameNoPath}",
                                                       jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);

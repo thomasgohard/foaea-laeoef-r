@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -50,8 +51,8 @@ namespace FOAEA3.Resources.Helpers
 
             var result = data.GetEnvironmentVariablesAndValues();
 
-            foreach (var item in result)
-                data = data.Replace($"%{item.Key}%", $"{item.Value}");
+            foreach (var (oldValue, newValue) in result)
+                data = data.Replace($"%{oldValue}%", $"{newValue}");
 
             return data.Replace("|||", "");
         }
@@ -95,5 +96,23 @@ namespace FOAEA3.Resources.Helpers
         {
             return keys.Any(m => m.Contains(value, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        public static T Convert<T>(this string input)
+        {
+            try
+            {
+                var converter = TypeDescriptor.GetConverter(typeof(T));
+                if (converter != null)
+                {
+                    return (T)converter.ConvertFromString(input);
+                }
+                return default;
+            }
+            catch (NotSupportedException)
+            {
+                return default;
+            }
+        }
+
     }
 }

@@ -81,7 +81,13 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override void Process_11_ApplicationReinstated()
         {
-            base.Process_11_ApplicationReinstated();
+
+            if (TracingApplication.Appl_RecvAffdvt_Dte is null)
+            {
+                AddSystemError(Repositories, TracingApplication.Messages, config.SystemErrorRecipients,
+                               $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
+                return;
+            }
 
             DateTime quarterDate; // = DateTimeHelper.AddQuarter(ReinstateEffectiveDate, 1);
             int eventTraceCount = EventManager.GetTraceEventCount(
@@ -94,8 +100,8 @@ namespace FOAEA3.Business.Areas.Application
             switch (eventTraceCount)
             {
                 case 0:
-                    Repositories.NotificationRepository.SendEmail("Reinstate requested for T01 with no previous trace requests",
-                                                                  config.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
+                    AddSystemError(Repositories, TracingApplication.Messages, config.SystemErrorRecipients,
+                                   $"Reinstate requested for T01 ({Appl_EnfSrv_Cd}-{Appl_CtrlCd}) with no previous trace requests");
                     return;
                 case 1:
                 case 2:
@@ -111,6 +117,8 @@ namespace FOAEA3.Business.Areas.Application
                     quarterDate = ReinstateEffectiveDate.AddDays(14);
                     break;
             }
+
+            base.Process_11_ApplicationReinstated();
 
             TracingApplication.ActvSt_Cd = "A";
             TracingApplication.Appl_Reactv_Dte = ReinstateEffectiveDate;

@@ -1,11 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,7 +36,7 @@ namespace Incoming.Common
             LicencingBaseName = licencingBaseName;
         }
 
-        public Dictionary<string, FileTableData> GetNewFiles(string rootPath, ref Dictionary<string, FileTableData> newFiles)
+        public void AddNewFiles(string rootPath, ref List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*.xml");
@@ -53,10 +51,8 @@ namespace Incoming.Common
                 var fileTableData = FileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName, fileTableData);
+                    newFiles.Add(fileInfo.FullName);
             }
-
-            return newFiles;
         }
 
         public bool ProcessNewFile(string fullPath, ref List<string> errors)
@@ -67,18 +63,19 @@ namespace Incoming.Common
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
 
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
-            {                                            //                                                    ↑
+            {                                             //                                                    ↑
 
                 var doc = new XmlDocument(); // load xml file
                 doc.Load(fullPath);
 
-                string jsonText = JsonConvert.SerializeXmlNode(doc); // convert xml to json
+                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors);
 
-                // send json to processor api
+                if (errors.Any())
+                    return false;
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaInterceptionRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
@@ -93,7 +90,7 @@ namespace Incoming.Common
                 }
                 else if (fileNameNoCycle == LicencingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
@@ -108,7 +105,7 @@ namespace Incoming.Common
                 }
                 else if (fileNameNoCycle == TracingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FoaeaTracingRootAPI);
+                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");

@@ -17,7 +17,7 @@ namespace FOAEA3.Model
         public string Appl_CtrlCd { get; set; }
         public string Subm_SubmCd { get; set; }
         public string Subm_Recpt_SubmCd { get; set; }
-        public DateTime? Appl_Lgl_Dte { get; set; }
+        public DateTime Appl_Lgl_Dte { get; set; }
 
         [Display(Name = "APPL_COMMENT", ResourceType = typeof(LanguageResource))]
         public string Appl_CommSubm_Text { get; set; }
@@ -69,7 +69,7 @@ namespace FOAEA3.Model
         public byte Appl_SIN_Cnfrmd_Ind { get; set; }
         public string AppCtgy_Cd { get; set; }
         public string AppReas_Cd { get; set; }
-        public DateTime? Appl_Create_Dte { get; set; }
+        public DateTime Appl_Create_Dte { get; set; }
         public string Appl_Create_Usr { get; set; }
         public DateTime? Appl_LastUpdate_Dte { get; set; }
         public string Appl_LastUpdate_Usr { get; set; }
