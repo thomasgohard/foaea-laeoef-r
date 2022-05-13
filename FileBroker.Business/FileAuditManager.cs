@@ -19,7 +19,7 @@ public class FileAuditManager
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
 
-    public void GenerateAuditFile(string fileName, int errorCount, int warningCount, int successCount)
+    public void GenerateAuditFile(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
     {
         string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -33,10 +33,21 @@ public class FileAuditManager
                 auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-30}\t{auditRow.Appl_CtrlCd,-16}\t" +
                                             $"{auditRow.Appl_Source_RfrNr,-30}\t{auditRow.ApplicationMessage}");
 
+            if (unknownTags.Any())
+            {
+                auditFileContent.AppendLine($"Codes XML invalides: {fileName}");
+                foreach (var unknownTag in unknownTags)
+                    auditFileContent.AppendLine($"La section '{unknownTag.Section}' inclues le code invalide '{unknownTag.Tag}'");
+                auditFileContent.AppendLine($"");
+            }
+
             auditFileContent.AppendLine("");
             auditFileContent.AppendLine($"Nombre total de records: {errorCount + warningCount + successCount}");
             auditFileContent.AppendLine($"Nombre total avec succès: {successCount + warningCount}");
             auditFileContent.AppendLine($"Nombre total sans succès: {errorCount}");
+            if (unknownTags.Any())
+                auditFileContent.AppendLine($"Nombre total avec avertissements de validation XML: {unknownTags.Count}");
+
         }
         else
         {
@@ -45,19 +56,28 @@ public class FileAuditManager
                 auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
                                             $"{auditRow.Appl_Source_RfrNr,-23}\t{auditRow.ApplicationMessage}");
 
+            if (unknownTags.Any())
+            {
+                auditFileContent.AppendLine($"XML validation warnings: {fileName}");
+                foreach (var unknownTag in unknownTags)
+                    auditFileContent.AppendLine($"Section '{unknownTag.Section}' contains invalid tag '{unknownTag.Tag}'");
+                auditFileContent.AppendLine($"");
+            }
+
             auditFileContent.AppendLine("");
             auditFileContent.AppendLine($"Total records: {errorCount + warningCount + successCount}");
             auditFileContent.AppendLine($"Total success: {successCount + warningCount}");
             auditFileContent.AppendLine($"Total failed: {errorCount}");
+            if (unknownTags.Any())
+                auditFileContent.AppendLine($"Total XML validation warnings: {unknownTags.Count}");
         }
-
 
         // save file to proper location
         string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
         File.WriteAllText(fullFileName, auditFileContent.ToString());
     }
 
-    public void SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount, int successCount)
+    public void SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount, int successCount, int xmlWarningCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -71,6 +91,8 @@ public class FileAuditManager
                           @$"Nombre total avec succès: {successCount + warningCount}<br /><br />" +
                           @$"Nombre total sans succès: {errorCount}<br /><br />" +
                           @"Pour toutes questions concernant le contenu de ce courriel, SVP envoyez un courriel à <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
+            if (xmlWarningCount > 0)
+                bodyContent += $"Nombre total avec avertissements de validation XML: {xmlWarningCount}";
         }
         else
         {
@@ -79,6 +101,8 @@ public class FileAuditManager
                           @$"Total success: {successCount + warningCount}<br /><br />" +
                           @$"Total failed: {errorCount}<br /><br />" +
                           @"For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
+            if (xmlWarningCount > 0)
+                bodyContent += $"Total XML validation warnings: {xmlWarningCount}";
         }
 
         string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";

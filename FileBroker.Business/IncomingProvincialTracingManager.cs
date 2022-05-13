@@ -20,7 +20,7 @@ public class IncomingProvincialTracingManager
         AuditConfiguration = auditConfig;
     }
 
-    public MessageDataList ExtractAndProcessRequestsInFile(string sourceTracingData, bool includeInfoInMessages = false)
+    public MessageDataList ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
@@ -123,8 +123,9 @@ public class IncomingProvincialTracingManager
 
                 }
 
-                fileAuditManager.GenerateAuditFile(FileName, errorCount, warningCount, successCount);
-                fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, errorCount, warningCount, successCount);
+                fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
+                fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, 
+                                                        errorCount, warningCount, successCount, unknownTags.Count);
             }
 
         }

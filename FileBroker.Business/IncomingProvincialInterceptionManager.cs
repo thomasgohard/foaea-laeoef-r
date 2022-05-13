@@ -47,7 +47,7 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public MessageDataList ExtractAndProcessRequestsInFile(string sourceInterceptionData, bool includeInfoInMessages = false)
+        public MessageDataList ExtractAndProcessRequestsInFile(string sourceInterceptionData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
@@ -154,8 +154,9 @@ namespace FileBroker.Business
 
                     }
 
-                    fileAuditManager.GenerateAuditFile(FileName, errorCount, warningCount, successCount);
-                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, errorCount, warningCount, successCount);
+                    fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
+                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, 
+                                                            errorCount, warningCount, successCount, unknownTags.Count);
                 }
 
             }

@@ -9,6 +9,7 @@ using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,7 +83,7 @@ public class TracingFilesController : ControllerBase
             sourceTracingJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData);
+        var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
         if (errors.Any())
         {
             return UnprocessableEntity(errors);
@@ -118,7 +119,7 @@ public class TracingFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData);
+            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData, unknownTags);
             return Ok("File processed.");
         }
         else

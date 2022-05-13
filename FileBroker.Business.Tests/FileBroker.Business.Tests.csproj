@@ -49,6 +49,9 @@
     <None Update="TestDataFiles\HR3STSIT.000001">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="TestDataFiles\IncomingInterceptionTest3.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestDataFiles\IncomingInterceptionTest2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

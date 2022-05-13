@@ -9,6 +9,7 @@ using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -83,7 +84,7 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData);
+        var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
         if (errors.Any())
             return UnprocessableEntity(errors);
 
@@ -115,7 +116,7 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData);
+            interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
             return Ok("File processed.");
         }
         else
