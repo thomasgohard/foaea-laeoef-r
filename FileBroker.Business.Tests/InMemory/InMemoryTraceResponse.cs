@@ -5,7 +5,7 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace FileBroker.Business.Tests
+namespace FileBroker.Business.Tests.InMemory
 {
     public class InMemoryTraceResponse : ITraceResponseRepository
     {

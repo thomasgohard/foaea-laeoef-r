@@ -3,7 +3,7 @@ using FileBroker.Model.Interfaces;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace FileBroker.Business.Tests
+namespace FileBroker.Business.Tests.InMemory
 {
     public class InMemoryFileAudit : IFileAuditRepository
     {

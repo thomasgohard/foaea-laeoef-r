@@ -293,13 +293,13 @@ namespace FileBroker.Business
             return result;
         }
 
-        private InterceptionApplicationData GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
-                                                                             MEPInterception_RecType11 interceptionData,
-                                                                             MEPInterception_RecType12 financialData,
-                                                                             List<MEPInterception_RecType13> sourceSpecificData,
-                                                                             ref FileAuditData fileAuditData,
-                                                                             ref int errorCount,
-                                                                             out bool isValidData)
+        internal InterceptionApplicationData GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
+                                                                              MEPInterception_RecType11 interceptionData,
+                                                                              MEPInterception_RecType12 financialData,
+                                                                              List<MEPInterception_RecType13> sourceSpecificData,
+                                                                              ref FileAuditData fileAuditData,
+                                                                              ref int errorCount,
+                                                                              out bool isValidData)
         {
             DateTime now = DateTime.Now;
             bool isVariation = (baseData.dat_Appl_LiSt_Cd == "17");
