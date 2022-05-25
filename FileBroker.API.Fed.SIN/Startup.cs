@@ -38,9 +38,10 @@ namespace FileBroker.API.Fed.SIN
             string fileBrokerCON = Configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
 
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]FileBroker.API.Fed.SIN[/cyan]...");
-            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{fileBrokerCON}[/yellow]");
 
-            DataHelper.ConfigureDBServices(services, fileBrokerCON);
+            string actualConnection = DataHelper.ConfigureDBServices(services, fileBrokerCON);
+            
+            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{actualConnection}[/yellow]");
 
             services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));
         }

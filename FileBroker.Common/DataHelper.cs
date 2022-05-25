@@ -7,7 +7,7 @@ namespace FileBroker.Common
 {
     public static class DataHelper
     {
-        public static void ConfigureDBServices(IServiceCollection services, string fileBrokerConnectionString)
+        public static string ConfigureDBServices(IServiceCollection services, string fileBrokerConnectionString)
         {
             var fileBrokerDB = new DBTools(fileBrokerConnectionString);
 
@@ -19,6 +19,8 @@ namespace FileBroker.Common
             services.AddScoped<IOutboundAuditRepository>(m => ActivatorUtilities.CreateInstance<DBOutboundAudit>(m, fileBrokerDB));
             services.AddScoped<IErrorTrackingRepository>(m => ActivatorUtilities.CreateInstance<DBErrorTracking>(m, fileBrokerDB));
             services.AddScoped<IMailServiceRepository>(m => ActivatorUtilities.CreateInstance<DBMailService>(m, fileBrokerDB));
+
+            return fileBrokerDB.ConnectionString;
         }
     }
 }

@@ -68,7 +68,9 @@ namespace DBHelper
             {
                 string connectionString = _connectionString;
 
-                connectionString += ";Workstation ID=" + Environment.MachineName;
+                if (!connectionString.EndsWith(";"))
+                    connectionString += ";";
+                connectionString += "Workstation ID=" + Environment.MachineName;
 
                 if (!string.IsNullOrEmpty(UserId))
                     connectionString += "/" + UserId;
