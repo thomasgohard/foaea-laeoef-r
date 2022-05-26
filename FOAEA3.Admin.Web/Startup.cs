@@ -73,6 +73,8 @@ namespace FOAEA3.Admin.Web
             ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
             ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
             ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
+            ReferenceData.Instance().LoadProvinces(new DBProvince(repositories.MainDB));
+            ReferenceData.Instance().LoadMediums(new DBMedium(repositories.MainDB));
             ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
             ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
         }

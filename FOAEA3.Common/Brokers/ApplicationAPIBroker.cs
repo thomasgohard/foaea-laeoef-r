@@ -38,5 +38,11 @@ namespace FOAEA3.Common.Brokers
                                         $"&recipientCode={recipientCode}";
             return ApiHelper.GetDataAsync<List<StatsOutgoingProvincialData>>(apiCall).Result;
         }
+
+        public ApplicationData ValidateCoreValues(ApplicationData application)
+        {
+            string apiCall = "api/v1/Applications/ValidateCoreValues";
+            return ApiHelper.PutDataAsync<ApplicationData, ApplicationData>(apiCall, application).Result;
+        }
     }
 }

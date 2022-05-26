@@ -36,6 +36,8 @@ namespace BackendProcesses.CommandLine
             ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(mainDB));
             ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(mainDB));
             ReferenceData.Instance().LoadGenders(new DBGender(mainDB));
+            ReferenceData.Instance().LoadProvinces(new DBProvince(mainDB));
+            ReferenceData.Instance().LoadMediums(new DBMedium(mainDB));
             ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(mainDB));
             ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(mainDB));
 

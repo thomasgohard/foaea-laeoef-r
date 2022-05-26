@@ -108,8 +108,10 @@ namespace FOAEA3.Resources.Helpers
                 }
                 return default;
             }
-            catch (NotSupportedException)
+            catch (Exception)
             {
+                // log error?
+
                 return default;
             }
         }

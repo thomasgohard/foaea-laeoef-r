@@ -42,6 +42,23 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return NotFound();
         }
 
+        [HttpPut("ValidateCoreValues")]
+        public ActionResult<ApplicationData> ValidateCoreValues([FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+            var applManager = new ApplicationManager(appl, repositories, config);
+
+            bool isValid = applManager.AreCoreValuesValid();
+
+            if (isValid)
+                return Ok(appl);
+            else
+                return UnprocessableEntity(appl);
+        }
+
         [HttpGet("Stats")]
         public ActionResult<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
                                                                    [FromQuery] int maxRecords,

@@ -155,7 +155,7 @@ namespace FileBroker.Business
                     }
 
                     fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
-                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, 
+                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients,
                                                             errorCount, warningCount, successCount, unknownTags.Count);
                 }
 
@@ -245,7 +245,7 @@ namespace FileBroker.Business
 
             if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
                 validActionLifeState = false;
-            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "29")))
+            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "17", "29", "35")))
                 validActionLifeState = false;
             else if (data.Maintenance_ActionCd.NotIn("A", "C"))
                 validActionLifeState = false;
@@ -302,26 +302,76 @@ namespace FileBroker.Business
                                                                               out bool isValidData)
         {
             DateTime now = DateTime.Now;
-            bool isVariation = (baseData.dat_Appl_LiSt_Cd == "17");
+            bool isVariation = baseData.dat_Appl_LiSt_Cd == "17";
+            bool isCancelOrSuspend = baseData.dat_Appl_LiSt_Cd.In("14", "35");
 
             isValidData = true;
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            ExtractAndValidateDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
-                                                          now, interceptionApplication);
+            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && !isCancelOrSuspend)
+            {
+                ExtractAndValidateDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
+                                                              now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
 
-            foreach (var sourceSpecific in sourceSpecificData)
-                interceptionApplication.HldbCnd.Add(ExtractAndValidateSourceSpecificFinancialInformation(sourceSpecific,
-                                                                                                         fileAuditData,
-                                                                                                         ref isValidData,
-                                                                                                         now,
-                                                                                                         interceptionApplication));
+                foreach (var sourceSpecific in sourceSpecificData)
+                    interceptionApplication.HldbCnd.Add(ExtractAndValidateSourceSpecificFinancialInformation(sourceSpecific,
+                                                                                                             fileAuditData,
+                                                                                                             ref isValidData,
+                                                                                                             now,
+                                                                                                             interceptionApplication));
+            }
 
             if (!isValidData)
                 errorCount++;
 
             return interceptionApplication;
+        }
+
+        private bool IsValidAppl(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        {
+            var fieldErrors = new Dictionary<string, string>
+            {
+                {"Appl_Dbtr_Addr_PrvCd", "Invalid Debtor Address Province Code (<Appl_Dbtr_Addr_PrvCd>) value {0} for Country Code (<Appl_Dbtr_Addr_CtryCd>) value {1}"},
+                {"Medium_Cd", "Invalid Medium Code (<dat_Appl_Medium_Cd>) value"},
+                {"Appl_Dbtr_LngCd", "Invalid Debtor Language Code (<dat_Appl_Dbtr_LngCd>) value"},
+                {"Appl_Dbtr_Gendr_Cd", "Invalid Debtor Gender Code(<dat_Appl_Dbtr_Gendr_Cd>) value"},
+                {"Appl_EnfSrv_Cd", "Invalid Enforcement Service Code (<dat_Appl_EnfSrvCd>) value"},
+                {"Appl_Affdvt_DocTypCd", "Invalid Supporting Document Type (<dat_Appl_Affdvt_Doc_TypCd>) value"},
+                {"Appl_Dbtr_Addr_CtryCd", "Invalid Debtor Address Country Code (<dat_Appl_Dbtr_Addr_CtryCd>) value"},
+                {"AppReas_Cd", "Invalid Reason Code (<dat_Appl_Reas_Cd>) value"},
+                {"AppList_Cd", "Invalid Life State Code (<dat_Appl_LiSt_Cd>) value"},
+                {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
+            };
+
+            var application = APIs.Applications.ValidateCoreValues(interceptionApplication);
+
+            var errors = application.Messages.GetMessagesForType(MessageType.Error);
+
+            if (errors.Any())
+            {
+                foreach (var error in errors)
+                {
+                    if (fieldErrors.ContainsKey(error.Field))
+                    {
+                        if (error.Field == "Appl_Dbtr_Addr_PrvCd")
+                            fileAuditData.ApplicationMessage = String.Format(Translate(fieldErrors[error.Field]),
+                                                                             application.Appl_Dbtr_Addr_PrvCd,
+                                                                             application.Appl_Dbtr_Addr_CtryCd);
+                        else
+                            fileAuditData.ApplicationMessage = Translate(fieldErrors[error.Field]);
+                    }
+                    else
+                        fileAuditData.ApplicationMessage = error.Description;
+
+                    isValidData = false;
+                }
+
+                return false;
+            }
+
+            return true;
+
         }
 
         private static InterceptionApplicationData ExtractInterceptionBaseData(MEPInterception_RecType10 baseData, MEPInterception_RecType11 interceptionData, DateTime now)
@@ -374,7 +424,8 @@ namespace FileBroker.Business
                                                                    FileAuditData fileAuditData,
                                                                    ref bool isValidData,
                                                                    DateTime now,
-                                                                   InterceptionApplicationData interceptionApplication)
+                                                                   InterceptionApplicationData interceptionApplication,
+                                                                   string actionState)
         {
             isValidData = true;
 
@@ -464,7 +515,7 @@ namespace FileBroker.Business
                 fileAuditData.ApplicationMessage = Translate("Invalid percentage (<IntFinH_DefHldbPrcnt>) was submitted with an amount < 0 or > 100");
                 isValidData = false;
             }
-            
+
             if (intFinH.IntFinH_DefHldbPrcnt is 0 && intFinH.IntFinH_DefHldbAmn_Money is 0)
             {
                 intFinH.HldbTyp_Cd = null;

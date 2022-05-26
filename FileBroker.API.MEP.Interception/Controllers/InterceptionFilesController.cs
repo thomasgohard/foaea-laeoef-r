@@ -6,6 +6,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
@@ -116,7 +117,14 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
+            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
+
+            if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
+                if (info.ContainsSystemMessagesOfType(MessageType.Error))
+                    return UnprocessableEntity(info);
+                else
+                    return Ok(info);
+
             return Ok("File processed.");
         }
         else

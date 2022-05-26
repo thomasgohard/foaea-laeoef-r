@@ -7,7 +7,7 @@ using System;
 
 namespace FOAEA3.Data.DB
 {
-    internal class DBProvince : DBbase, IProvinceRepository
+    public class DBProvince : DBbase, IProvinceRepository
     {
         public DBProvince(IDBTools mainDB) : base(mainDB)
         {

@@ -208,7 +208,7 @@ public class IncomingProvincialTracingManager
 
         if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
             validActionLifeState = false;
-        else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
+        else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "29")))
             validActionLifeState = false;
         else if (data.Maintenance_ActionCd.NotIn("A", "C"))
             validActionLifeState = false;

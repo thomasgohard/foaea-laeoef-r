@@ -21,5 +21,10 @@ namespace FileBroker.Business.Tests.InMemory
         {
             throw new NotImplementedException();
         }
+
+        public ApplicationData ValidateCoreValues(ApplicationData application)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
