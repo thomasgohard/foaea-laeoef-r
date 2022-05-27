@@ -95,11 +95,15 @@ public class InterceptionFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
-        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiHelper);
+        var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
+        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper);
+
+        var apiInterceptionApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
+        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionApplHelper);
 
         var apis = new APIBrokerList
         {
+            Applications = applicationApplicationAPIs,
             InterceptionApplications = interceptionApplicationAPIs
         };
 

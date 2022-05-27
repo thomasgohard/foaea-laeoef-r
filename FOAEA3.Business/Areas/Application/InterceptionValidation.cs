@@ -340,9 +340,11 @@ namespace FOAEA3.Business.Areas.Application
 
             decimal maxTotalMoney = InterceptionApplication.IntFinH.IntFinH_MxmTtl_Money ?? 0.0M;
 
-            decimal maxAmntPeriodic = CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd);
+            decimal maxAmntPeriodic = (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.PymPr_Cd)) ?
+                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) : 
+                                        0.0M;
 
-            decimal maxAmnt = maxAmntPeriodic * InterceptionApplication.IntFinH.IntFinH_LmpSum_Money;
+            decimal maxAmnt = maxAmntPeriodic + InterceptionApplication.IntFinH.IntFinH_LmpSum_Money;
 
             if (maxTotalMoney > maxAmnt)
             {
@@ -378,6 +380,7 @@ namespace FOAEA3.Business.Areas.Application
 
             return isValid;
         }
+
         private decimal CalculateMaxAmountPeriodicForPeriodCode(string paymentPeriodicCode)
         {
             decimal maxAmntPeriodic = 0.0M;

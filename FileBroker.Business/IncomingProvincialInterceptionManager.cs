@@ -242,18 +242,20 @@ namespace FileBroker.Business
         private static void ValidateActionCode(MEPInterception_RecType10 data, ref MessageDataList result, ref bool isValid)
         {
             bool validActionLifeState = true;
+            string actionCode = data.Maintenance_ActionCd.Trim();
+            string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-            if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
+            if ((actionCode == "A") && actionState.NotIn("00", "0"))
                 validActionLifeState = false;
-            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "17", "29", "35")))
+            else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "17", "29", "35")))
                 validActionLifeState = false;
-            else if (data.Maintenance_ActionCd.NotIn("A", "C"))
+            else if (actionCode.NotIn("A", "C"))
                 validActionLifeState = false;
 
             if (!validActionLifeState)
             {
                 isValid = false;
-                result.AddSystemError($"Invalid MaintenanceAction [{data.Maintenance_ActionCd}] and MaintenanceLifeState [{data.dat_Appl_LiSt_Cd}] combination.");
+                result.AddSystemError($"Invalid MaintenanceAction [{actionCode}] and MaintenanceLifeState [{actionState}] combination.");
             }
 
         }
@@ -311,7 +313,7 @@ namespace FileBroker.Business
 
             if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && !isCancelOrSuspend)
             {
-                ExtractAndValidateDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
+                ExtractDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
                                                               now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
 
                 if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
@@ -369,6 +371,8 @@ namespace FileBroker.Business
                         fileAuditData.ApplicationMessage = error.Description;
 
                     isValidData = false;
+                    
+                    break;
                 }
 
                 return false;
@@ -392,6 +396,8 @@ namespace FileBroker.Business
                     fileAuditData.ApplicationMessage = Translate(error.Description);
 
                     isValidData = false;
+                    
+                    break;
                 }
 
                 return false;
@@ -446,7 +452,7 @@ namespace FileBroker.Business
             return interceptionApplication;
         }
 
-        private bool ExtractAndValidateDefaultFinancialInformation(bool isVariation,
+        private bool ExtractDefaultFinancialInformation(bool isVariation,
                                                                    MEPInterception_RecType12 financialData,
                                                                    FileAuditData fileAuditData,
                                                                    ref bool isValidData,

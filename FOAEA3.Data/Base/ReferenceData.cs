@@ -159,7 +159,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(applicationReasonRepository.Messages);
 
             foreach (var applicationReason in data.Items)
-                ApplicationReasons.Add(applicationReason.AppReas_Cd, applicationReason);
+                ApplicationReasons.Add(applicationReason.AppReas_Cd.Trim(), applicationReason);
         }
 
         public void LoadCountries(ICountryRepository countryRepository)

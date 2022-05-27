@@ -605,7 +605,7 @@ namespace FOAEA3.Business.Areas.Application
             var enfServices = Repositories.EnfSrvRepository.GetEnfService();
             if (enfServices != null)
             {
-                var service = enfServices.First(m => m.EnfSrv_Cd == Application.Appl_EnfSrv_Cd);
+                var service = enfServices.FirstOrDefault(m => m.EnfSrv_Cd.Trim() == Application.Appl_EnfSrv_Cd.Trim());
                 if (service is null)
                 {
                     Application.Messages.AddError("Code Value Error for Appl_EnfSrv_Cd", "Appl_EnfSrv_Cd");
@@ -625,15 +625,9 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!ReferenceData.Instance().ApplicationReasons.ContainsKey(Application.AppReas_Cd))
+            if (!ReferenceData.Instance().ApplicationReasons.ContainsKey(Application.AppReas_Cd.Trim()))
             {
                 Application.Messages.AddError("Code Value Error for AppReas_Cd", "AppReas_Cd");
-                return false;
-            }
-
-            if (!Enum.IsDefined(typeof(ApplicationState), (int)Application.AppLiSt_Cd))
-            {
-                Application.Messages.AddError("Code Value Error for AppLiSt_Cd", "AppLiSt_Cd");
                 return false;
             }
 
