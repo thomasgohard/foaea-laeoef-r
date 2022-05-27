@@ -29,6 +29,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application)
+        {
+            throw new NotImplementedException();
+        }
+
         public InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();

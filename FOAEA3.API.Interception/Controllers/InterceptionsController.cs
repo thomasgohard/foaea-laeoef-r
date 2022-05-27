@@ -131,6 +131,23 @@ namespace FOAEA3.API.Interception.Controllers
 
         }
 
+        [HttpPut("ValidateFinancialCoreValues")]
+        public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+            var interceptionValidation = new InterceptionValidation(appl, repositories, config);
+
+            bool isValid = interceptionValidation.ValidateFinancialCoreValues();
+
+            if (isValid)
+                return Ok(appl);
+            else
+                return UnprocessableEntity(appl);
+        }
+
         [HttpPut("{key}/SINbypass")]
         public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
                                                            [FromServices] IRepositories repositories,

@@ -7,6 +7,7 @@ using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -23,7 +24,8 @@ namespace FOAEA3.Business.Areas.Application
 
         public bool IsSystemGeneratedControlCode { get; set; }
 
-        public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager, IRepositories repositories, CustomConfig config)
+        public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
+                                     IRepositories repositories, CustomConfig config)
         {
             this.config = config;
             Application = application;
@@ -231,7 +233,7 @@ namespace FOAEA3.Business.Areas.Application
                 }
 
                 var postalCodeDB = Repositories.PostalCodeRepository;
-                if (!postalCodeDB.ValidatePostalCode(postalCode, provinceCode, cityName, 
+                if (!postalCodeDB.ValidatePostalCode(postalCode, provinceCode, cityName,
                                                      out string validProvCode, out PostalCodeFlag validFlags))
                 {
                     Application.Messages.AddError("Invalid Postal Code for Province/City");
@@ -564,6 +566,162 @@ namespace FOAEA3.Business.Areas.Application
             return revertedSomeFields;
         }
 
+        public bool ValidateCodeValues()
+        {
+            PostalCodeValidationInBound();
+
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            if (!string.IsNullOrEmpty(debtorCountry) &&
+                !string.IsNullOrEmpty(debtorProvince) &&
+                (debtorCountry != "USA"))
+            {
+                if (ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                {
+                    string countryForProvince = ReferenceData.Instance().Provinces[debtorProvince].PrvCtryCd;
+                    if (countryForProvince == "USA")
+                        Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                }
+            }
+
+            if (!ReferenceData.Instance().Mediums.ContainsKey(Application.Medium_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for Medium_Cd", "Medium_Cd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Languages.ContainsKey(Application.Appl_Dbtr_LngCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_LngCd", "Appl_Dbtr_LngCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Genders.ContainsKey(Application.Appl_Dbtr_Gendr_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Gendr_Cd", "Appl_Dbtr_Gendr_Cd");
+                return false;
+            }
+
+            var enfServices = Repositories.EnfSrvRepository.GetEnfService();
+            if (enfServices != null)
+            {
+                var service = enfServices.First(m => m.EnfSrv_Cd == Application.Appl_EnfSrv_Cd);
+                if (service is null)
+                {
+                    Application.Messages.AddError("Code Value Error for Appl_EnfSrv_Cd", "Appl_EnfSrv_Cd");
+                    return false;
+                }
+            }
+
+            if (!ReferenceData.Instance().DocumentTypes.ContainsKey(Application.Appl_Affdvt_DocTypCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Affdvt_DocTypCd", "Appl_Affdvt_DocTypCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Countries.ContainsKey(Application.Appl_Dbtr_Addr_CtryCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_CtryCd", "Appl_Dbtr_Addr_CtryCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().ApplicationReasons.ContainsKey(Application.AppReas_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for AppReas_Cd", "AppReas_Cd");
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(ApplicationState), (int)Application.AppLiSt_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for AppLiSt_Cd", "AppLiSt_Cd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().ApplicationCategories.ContainsKey(Application.AppCtgy_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for AppCtgy_Cd", "AppCtgy_Cd");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PostalCodeValidationInBound()
+        {
+            bool isProvValid = true;
+
+            //--------------------------------------------------------------------------------------------
+            // CR526/542 - This block of original code checks import province is in prv table...
+            // This is a bit redundant for postal code validation, but other things depend on it 
+            // so leave it alone...
+            //--------------------------------------------------------------------------------------------
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            string debtorCity = Application.Appl_Dbtr_Addr_CityNme.Trim();
+            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd.Replace(" ", "");
+
+            if (debtorCountry is "CAN")
+            {
+                if (string.IsNullOrEmpty(debtorProvince))
+                    isProvValid = false;
+                else
+                {
+                    if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                        isProvValid = false;
+                    else
+                    {
+                        var provinceData = ReferenceData.Instance().Provinces[debtorProvince];
+                        if (provinceData.PrvCtryCd != "CAN")
+                            isProvValid = false;
+                    }
+                }
+
+                if (!isProvValid && Application.AppLiSt_Cd.In(ApplicationState.MANUALLY_TERMINATED_14,
+                                                              ApplicationState.FINANCIAL_TERMS_VARIED_17,
+                                                              ApplicationState.APPLICATION_SUSPENDED_35))
+                {
+                    Application.Appl_Dbtr_Addr_PrvCd = null;
+                    if (Application.AppLiSt_Cd != ApplicationState.APPLICATION_SUSPENDED_35)
+                    {
+                        Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                        return;
+                    }
+                }
+            }
+
+            // CR526/542 CODE START:
+            // This new block is for the revamped postal code validation (new requirements).
+            // -----------------------------------------------------------------------------
+            bool canValidatePostalCode = false;
+
+            if (Application.AppLiSt_Cd.In(ApplicationState.INITIAL_STATE_0, ApplicationState.INVALID_APPLICATION_1,
+                                          ApplicationState.SIN_NOT_CONFIRMED_5))
+            {
+                canValidatePostalCode = true;
+            }
+
+            if ((debtorCountry is "CAN") && (canValidatePostalCode))
+            {
+                var postalCodeDB = Repositories.PostalCodeRepository;
+                postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity,
+                                                out string validProvCode, out PostalCodeFlag validFlags);
+
+                if (validFlags.IsPostalCodeValid)
+                {
+                    if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
+                        Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                }
+                else
+                {
+                    Application.Appl_Dbtr_Addr_PrvCd = null;
+                    Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                }
+
+            }
+
+        }
+        
     }
+
 }
 

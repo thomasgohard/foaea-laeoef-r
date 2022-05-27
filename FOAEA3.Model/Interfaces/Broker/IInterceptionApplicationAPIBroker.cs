@@ -10,5 +10,7 @@
         InterceptionApplicationData TransferInterceptionApplication(InterceptionApplicationData interceptionApplication,
                                                                  string newRecipientSubmitter,
                                                                  string newIssuingSubmitter);
+
+        InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application);
     }
 }

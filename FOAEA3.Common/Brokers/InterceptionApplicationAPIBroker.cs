@@ -57,5 +57,11 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application)
+        {
+            string apiCall = "api/v1/Interceptions/ValidateFinancialCoreValues";
+            return ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application).Result;
+        }
+
     }
 }

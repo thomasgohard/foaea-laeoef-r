@@ -278,55 +278,6 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public bool AreCoreValuesValid()
-        {
-            // TODO: PostalCodeValidationInBound
-
-            if (!string.IsNullOrEmpty(Application.Appl_Dbtr_Addr_CtryCd))
-            {
-                if (Application.Appl_Dbtr_Addr_CtryCd.ToUpper() != "USA")
-                {
-                    if (!string.IsNullOrEmpty(Application.Appl_Dbtr_Addr_PrvCd))
-                    {
-                        string province = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
-                        if (ReferenceData.Instance().Provinces.ContainsKey(province))
-                        {
-                            string country = ReferenceData.Instance().Provinces[province].PrvCtryCd;
-                            if (country == "USA")
-                                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
-                        }
-                    }
-                }
-            }
-
-            if (!ReferenceData.Instance().Mediums.ContainsKey(Application.Medium_Cd))
-            {
-                Application.Messages.AddError("Code Value Error for Medium_Cd", "Medium_Cd");
-                return false;
-            }
-
-            if (!ReferenceData.Instance().Languages.ContainsKey(Application.Appl_Dbtr_LngCd))
-            {
-                Application.Messages.AddError("Code Value Error for Appl_Dbtr_LngCd", "Appl_Dbtr_LngCd");
-                return false;
-            }
-
-            if (!ReferenceData.Instance().Genders.ContainsKey(Application.Appl_Dbtr_Gendr_Cd))
-            {
-                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Gendr_Cd", "Appl_Dbtr_Gendr_Cd");
-                return false;
-            }
-
-            // validate table EnfSrv col EnfSrv_Cd against Appl.Appl_EnfSrv_Cd
-            // validate table DocTyp col DocTyp_Cd against Appl.Appl_Affdvt_DocTypCd
-            // validate table Ctry col Ctry_Cd against Appl.Appl_Dbtr_Addr_CtryCd
-            // validate table AppReas col AppReas_Cd against Appl.AppReas_Cd
-            // validate table AppList col AppList_Cd against Appl.AppList_Cd
-            // validate table AppCtgy col AppCtgy_Cd against Appl.AppCtgy_Cd
-
-            return true;
-        }        
-
         public void TransferApplication(string applSelectedSubmitter, string applSelectedRecipient)
         {
 

@@ -49,9 +49,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
             var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-            var applManager = new ApplicationManager(appl, repositories, config);
+            var applicationValidation = new ApplicationValidation(appl, repositories, config);
 
-            bool isValid = applManager.AreCoreValuesValid();
+            bool isValid = applicationValidation.ValidateCodeValues();
 
             if (isValid)
                 return Ok(appl);

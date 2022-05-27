@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
@@ -15,6 +14,10 @@ namespace FOAEA3.Data.Base
         public Dictionary<string, ProvinceData> Provinces { get; }
         public Dictionary<string, MediumData> Mediums { get; }
         public Dictionary<string, LanguageData> Languages { get; }
+        public Dictionary<string, ApplicationCategoryData> ApplicationCategories { get; }
+        public Dictionary<string, ApplicationReasonData> ApplicationReasons { get; }
+        public Dictionary<string, CountryData> Countries { get; }
+        public Dictionary<string, DocumentTypeData> DocumentTypes { get; }
         public List<ApplicationCommentsData> ApplicationComments { get; }
         public FoaEventDataDictionary FoaEvents { get; }
 
@@ -31,6 +34,12 @@ namespace FOAEA3.Data.Base
             ApplicationLifeStates = new Dictionary<ApplicationState, ApplicationLifeStateData>();
             Genders = new Dictionary<string, GenderData>();
             Provinces = new Dictionary<string, ProvinceData>();
+            Mediums = new Dictionary<string, MediumData>();
+            Languages = new Dictionary<string, LanguageData>();
+            ApplicationCategories = new Dictionary<string, ApplicationCategoryData>();
+            ApplicationReasons = new Dictionary<string, ApplicationReasonData>();
+            Countries = new Dictionary<string, CountryData>();
+            DocumentTypes = new Dictionary<string, DocumentTypeData>();
             Configuration = new Dictionary<string, string>();
             ApplicationComments = new List<ApplicationCommentsData>();
             FoaEvents = new FoaEventDataDictionary();
@@ -85,8 +94,6 @@ namespace FOAEA3.Data.Base
             if (genderRepository.Messages.Count > 0)
                 Messages.AddRange(genderRepository.Messages);
 
-            data.Items.Sort();
-
             foreach (var gender in data.Items)
                 Genders.Add(gender.Gender_Cd, gender);
         }
@@ -94,8 +101,6 @@ namespace FOAEA3.Data.Base
         public void LoadProvinces(IProvinceRepository provinceRepository)
         {
             var data = provinceRepository.GetProvinces();
-
-            data.Sort();
 
             foreach (var province in data)
                 Provinces.Add(province.PrvCd, province);
@@ -108,8 +113,6 @@ namespace FOAEA3.Data.Base
             if (mediumRepository.Messages.Count > 0)
                 Messages.AddRange(mediumRepository.Messages);
 
-            data.Items.Sort();
-
             foreach (var medium in data.Items)
                 Mediums.Add(medium.Medium_Cd, medium);
         }
@@ -120,8 +123,6 @@ namespace FOAEA3.Data.Base
 
             if (languageRepository.Messages.Count > 0)
                 Messages.AddRange(languageRepository.Messages);
-
-            data.Items.Sort();
 
             foreach (var language in data.Items)
                 Languages.Add(language.Lng_Cd, language);
@@ -135,10 +136,52 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(data.Messages);
 
             foreach (var item in data.FoaEvents)
-            {
                 FoaEvents.FoaEvents.Add(item.Key, item.Value);
-            }
         }
 
+        public void LoadApplicationCategories(IApplicationCategoryRepository applicationCategoryRepository)
+        {
+            var data = applicationCategoryRepository.GetApplicationCategories();
+
+            if (applicationCategoryRepository.Messages.Count > 0)
+                Messages.AddRange(applicationCategoryRepository.Messages);
+
+            foreach (var applicationCategory in data.Items)
+                ApplicationCategories.Add(applicationCategory.AppCtgy_Cd, applicationCategory);
+
+        }
+
+        public void LoadApplicationReasons(IApplicationReasonRepository applicationReasonRepository)
+        {
+            var data = applicationReasonRepository.GetApplicationReasons();
+
+            if (applicationReasonRepository.Messages.Count > 0)
+                Messages.AddRange(applicationReasonRepository.Messages);
+
+            foreach (var applicationReason in data.Items)
+                ApplicationReasons.Add(applicationReason.AppReas_Cd, applicationReason);
+        }
+
+        public void LoadCountries(ICountryRepository countryRepository)
+        {
+            var data = countryRepository.GetCountries();
+
+            if (countryRepository.Messages.Count > 0)
+                Messages.AddRange(countryRepository.Messages);
+
+            foreach (var country in data.Items)
+                Countries.Add(country.Ctry_Cd, country);
+        }
+
+        public void LoadDocumentTypes(IDocumentTypeRepository documentTypeRepository)
+        {
+            var data = documentTypeRepository.GetDocumentTypes();
+
+            if (documentTypeRepository.Messages.Count > 0)
+                Messages.AddRange(documentTypeRepository.Messages);
+
+            foreach (var docType in data.Items)
+                DocumentTypes.Add(docType.DocTyp_Cd, docType);
+        }
     }
 }
