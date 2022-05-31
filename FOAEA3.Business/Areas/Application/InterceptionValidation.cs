@@ -320,13 +320,14 @@ namespace FOAEA3.Business.Areas.Application
         private bool ValidVariationIssueDate()
         {
 
-            bool isValid = InterceptionApplication.IntFinH.IntFinH_VarIss_Dte.HasValue &&
-                           (InterceptionApplication.IntFinH.IntFinH_VarIss_Dte.Value > DateTime.Now);
-
-            if (!isValid)
+            if ((InterceptionApplication.IntFinH.IntFinH_VarIss_Dte is null) || 
+                (InterceptionApplication.IntFinH.IntFinH_VarIss_Dte > DateTime.Now))
+            {
                 EventManager.AddEvent(EventCode.C55101_INVALID_VARIATION_ISSUE_DATE);
+                return false;
+            }
 
-            return isValid;
+            return true;
         }
 
         private bool HasPeriodPaymentAmount()

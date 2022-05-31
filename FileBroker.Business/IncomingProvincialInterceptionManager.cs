@@ -120,13 +120,13 @@ namespace FileBroker.Business
                                 if (messages.ContainsMessagesOfType(MessageType.Error))
                                 {
                                     var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                    fileAuditData.ApplicationMessage = errors[0].Description;
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors[0]);
                                     errorCount++;
                                 }
                                 else if (messages.ContainsMessagesOfType(MessageType.Warning))
                                 {
                                     var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                    fileAuditData.ApplicationMessage = warnings[0].Description;
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings[0]);
                                     warningCount++;
                                 }
                                 else
@@ -217,6 +217,17 @@ namespace FileBroker.Business
             }
 
             return interception.Messages;
+        }
+
+        private string BuildDescriptionForMessage(MessageData error)
+        {
+            var thisErrorDescription = string.Empty;
+            if (error.Code != EventCode.UNDEFINED)
+                thisErrorDescription += error.Code.ToString();
+            if (!string.IsNullOrEmpty(error.Description.Trim()))
+                thisErrorDescription += error.Description.Trim();
+
+            return thisErrorDescription;
         }
 
         private void ValidateHeader(MEPInterception_InterceptionDataSet interceptionFile, ref MessageDataList result, ref bool isValid)
@@ -475,9 +486,7 @@ namespace FileBroker.Business
             intFinH.IntFinH_DefHldbAmn_Money = financialData.dat_IntFinH_DefHldbAmn_Money.Convert<decimal?>();
             intFinH.IntFinH_DefHldbAmn_Period = financialData.dat_IntFinH_DefHldbAmn_Period;
             if (isVariation)
-                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? DateTime.Now;
-
-            intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte;
+                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? now;
 
             intFinH.IntFinH_CmlPrPym_Ind = financialData.dat_IntFinH_CmlPrPym_Ind.Convert<byte?>();
             if (intFinH.IntFinH_CmlPrPym_Ind.HasValue)
