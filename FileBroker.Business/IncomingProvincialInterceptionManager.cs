@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 
 namespace FileBroker.Business
 {
@@ -11,6 +10,7 @@ namespace FileBroker.Business
         private ProvincialAuditFileConfig AuditConfiguration { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
+        private string EnfSrv_Cd { get; }
 
         public IncomingProvincialInterceptionManager(string fileName,
                                                      APIBrokerList apis,
@@ -34,6 +34,8 @@ namespace FileBroker.Business
                 foreach (var translation in translations)
                     Translations.Add(translation.EnglishText, translation.FrenchText);
             }
+
+            EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
 
         }
 
@@ -157,6 +159,10 @@ namespace FileBroker.Business
                     fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
                     fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients,
                                                             errorCount, warningCount, successCount, unknownTags.Count);
+
+                    if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                        AutoAcceptVariations(EnfSrv_Cd);
+
                 }
 
             }
@@ -173,6 +179,20 @@ namespace FileBroker.Business
             Repositories.FileTable.SetNextCycleForFileType(fileTableData);
 
             return result;
+        }
+
+        public void AutoAcceptVariations(string enfService)
+        {
+            var prodAudit = APIs.ProductionAudits;
+
+            string processName = $"Process Auto Accept Variation {enfService}";
+            prodAudit.Insert(processName, "Divert Funds Started", "O");
+
+            var applAutomation = APIs.InterceptionApplications.GetApplicationsForVariationAutoAccept(enfService);
+            foreach (var appl in applAutomation)
+                APIs.InterceptionApplications.AcceptVariation(appl);
+
+            prodAudit.Insert(processName, "Ended", "O");
         }
 
         public MessageDataList ProcessApplicationRequest(MessageData<InterceptionApplicationData> interceptionMessageData)
@@ -347,7 +367,7 @@ namespace FileBroker.Business
         private bool IsValidAppl(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
         {
             var fieldErrors = new Dictionary<string, string>
-            { 
+            {
                 {"Appl_Dbtr_Addr_PrvCd", "Invalid Debtor Address Province Code (<Appl_Dbtr_Addr_PrvCd>) value {0} for Country Code (<Appl_Dbtr_Addr_CtryCd>) value {1}"},
                 {"Medium_Cd", "Invalid Medium Code (<dat_Appl_Medium_Cd>) value"},
                 {"Appl_Dbtr_LngCd", "Invalid Debtor Language Code (<dat_Appl_Dbtr_LngCd>) value"},
@@ -382,7 +402,7 @@ namespace FileBroker.Business
                         fileAuditData.ApplicationMessage = error.Description;
 
                     isValidData = false;
-                    
+
                     break;
                 }
 
@@ -392,7 +412,7 @@ namespace FileBroker.Business
             return true;
 
         }
-        
+
         private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
         {
             var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
@@ -407,7 +427,7 @@ namespace FileBroker.Business
                     fileAuditData.ApplicationMessage = Translate(error.Description);
 
                     isValidData = false;
-                    
+
                     break;
                 }
 

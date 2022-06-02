@@ -97,6 +97,7 @@ public class InterceptionFilesController : ControllerBase
 
         var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
         var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper);
+        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper);
 
         var apiInterceptionApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
         var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionApplHelper);
@@ -104,7 +105,8 @@ public class InterceptionFilesController : ControllerBase
         var apis = new APIBrokerList
         {
             Applications = applicationApplicationAPIs,
-            InterceptionApplications = interceptionApplicationAPIs
+            InterceptionApplications = interceptionApplicationAPIs,
+            ProductionAudits = productionAuditAPIs
         };
 
         var repositories = new RepositoryList

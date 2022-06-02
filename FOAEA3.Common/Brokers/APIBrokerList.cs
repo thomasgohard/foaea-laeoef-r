@@ -21,5 +21,7 @@ namespace FOAEA3.Common.Brokers
         public IApplicationAPIBroker Applications { get; set; }
 
         public ISinAPIBroker Sins { get; set; }
+
+        public IProductionAuditAPIBroker ProductionAudits { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace FOAEA3.API.Interception.Controllers
@@ -49,6 +50,21 @@ namespace FOAEA3.API.Interception.Controllers
             else
                 return NotFound();
 
+        }
+
+        [HttpGet("GetApplicationsForVariationAutoAccept")]
+        public ActionResult<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAccept(
+                                                                            [FromServices] IRepositories repositories,
+                                                                            [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                            [FromQuery] string enfService)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
+            var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
+
+            return Ok(data);
         }
 
         [HttpPost]

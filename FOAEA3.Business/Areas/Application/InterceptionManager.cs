@@ -224,7 +224,7 @@ namespace FOAEA3.Business.Areas.Application
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmry is null)
             {
-                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients,
                                $"No summsmry record was found for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot vary.");
                 return false;
             }
@@ -454,6 +454,19 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        {
+            var applications = Repositories.ApplicationRepository.GetApplicationsForAutomation(enfService, medium_Cd: null,
+                                                                        ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19,
+                                                                        "I01", "A");
+
+            var interceptions = new List<InterceptionApplicationData>();
+            foreach (var application in applications)
+                interceptions.Add(new InterceptionApplicationData(application));
+
+            return interceptions;
+        }
+
         public bool AcceptVariation(DateTime supportingDocsDate, bool isAutoAccept = false)
         {
             if (!IsValidCategory("I01"))
@@ -587,7 +600,7 @@ namespace FOAEA3.Business.Areas.Application
 
             InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
-            return true;            
+            return true;
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
@@ -631,7 +644,7 @@ namespace FOAEA3.Business.Areas.Application
                                 {
                                     DateTime dateForNextBF = DateTime.Now.AddDays(5);
                                     EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
-                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, 
+                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION,
                                                             effectiveTimestamp: dateForNextBF);
                                 }
                             }

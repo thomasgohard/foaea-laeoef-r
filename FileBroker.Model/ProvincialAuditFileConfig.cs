@@ -7,7 +7,9 @@ namespace FileBroker.Model
         private string auditRootPath;
         private string auditRecipients;
         private string[] frenchAuditProvinceCodes;
-        private string mailServer;
+        private string[] autoSwearEnfSrvCodes;
+        private string[] autoAcceptEnfSrvCodes;
+        private string[] esdSiteListEnfSrvCodes;
 
         public string AuditRootPath
         {
@@ -25,10 +27,22 @@ namespace FileBroker.Model
             set => frenchAuditProvinceCodes = value;
         }
 
-        public string MailServer
+        public string[] AutoSwearEnfSrvCodes
         {
-            get => mailServer;
-            set => mailServer = value.ReplaceVariablesWithEnvironmentValues();
+            get => autoSwearEnfSrvCodes;
+            set => autoSwearEnfSrvCodes = value;
+        }
+
+        public string[] AutoAcceptEnfSrvCodes
+        {
+            get => autoAcceptEnfSrvCodes;
+            set => autoAcceptEnfSrvCodes = value;
+        }
+
+        public string[] ESDSiteListEnfSrvCodes
+        {
+            get => esdSiteListEnfSrvCodes;
+            set => esdSiteListEnfSrvCodes = value;
         }
     }
 }

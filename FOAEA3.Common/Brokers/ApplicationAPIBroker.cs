@@ -41,7 +41,8 @@ namespace FOAEA3.Common.Brokers
 
         public ApplicationData ValidateCoreValues(ApplicationData application)
         {
-            string apiCall = "api/v1/Applications/ValidateCoreValues";
+            string key = ApplKey.MakeKey(application.Appl_EnfSrv_Cd, application.Appl_CtrlCd);
+            string apiCall = $"api/v1/Applications/{key}/ValidateCoreValues";
             return ApiHelper.PutDataAsync<ApplicationData, ApplicationData>(apiCall, application).Result;
         }
     }

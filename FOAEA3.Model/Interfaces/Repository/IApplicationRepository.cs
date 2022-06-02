@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Model.Base;
+using FOAEA3.Model.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -14,6 +15,9 @@ namespace FOAEA3.Model.Interfaces
         void UpdateApplication(ApplicationData application);
         string GenerateApplicationControlCode(string appl_EnfSrv_Cd);
         ApplicationData GetApplication(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        List<ApplicationData> GetApplicationsForAutomation(string appl_EnfSrv_Cd, string medium_Cd,
+                                                           ApplicationState appLiSt_Cd, string appCtgy_Cd,
+                                                           string actvSt_Cd);
         bool GetApplLocalConfirmedSINExists(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "");
         List<ApplicationConfirmedSINData> GetConfirmedSINOtherEnforcementOfficeExists(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN);
         (string errorSameEnfOFf, string errorDiffEnfOff) GetConfirmedSINRecords(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN);

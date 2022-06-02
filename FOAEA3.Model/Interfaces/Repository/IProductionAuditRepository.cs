@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -10,5 +8,6 @@ namespace FOAEA3.Model.Interfaces
         public string UserId { get; set; }
 
         public void Insert(string processName, string description, string audience, DateTime? completedDate = null);
+        public void Insert(ProductionAuditData productionAuditData);
     }
 }
