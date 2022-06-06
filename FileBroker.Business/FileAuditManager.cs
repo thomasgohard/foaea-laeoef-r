@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using FOAEA3.Resources;
+using System.Text;
 
 namespace FileBroker.Business;
 
@@ -26,15 +27,29 @@ public class FileAuditManager
         var auditFileContent = new StringBuilder();
 
         var auditData = FileAuditDB.GetFileAuditDataForFile(fileName);
+        var auditErrorsData = new List<FileAuditData>();
         if (isFrench)
         {
             auditFileContent.AppendLine($"Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application");
             foreach (var auditRow in auditData)
-                auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-30}\t{auditRow.Appl_CtrlCd,-16}\t" +
-                                            $"{auditRow.Appl_Source_RfrNr,-30}\t{auditRow.ApplicationMessage}");
+                if (auditRow.ApplicationMessage == LanguageResource.AUDIT_SUCCESS)
+                    auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-30}\t{auditRow.Appl_CtrlCd,-16}\t" +
+                                                $"{auditRow.Appl_Source_RfrNr,-30}\t{auditRow.ApplicationMessage}");
+                else
+                    auditErrorsData.Add(auditRow);
+
+            if (auditErrorsData.Any())
+            {
+                auditFileContent.AppendLine($"");
+                auditFileContent.AppendLine($"Entrées enlevées du fichier: {fileName}");
+                foreach (var auditError in auditErrorsData)
+                    auditFileContent.AppendLine($"{auditError.Appl_EnfSrv_Cd,-30}\t{auditError.Appl_CtrlCd,-16}\t" +
+                                                $"{auditError.Appl_Source_RfrNr,-30}\t{auditError.ApplicationMessage}");
+            }
 
             if (unknownTags.Any())
             {
+                auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"Codes XML invalides: {fileName}");
                 foreach (var unknownTag in unknownTags)
                     auditFileContent.AppendLine($"La section '{unknownTag.Section}' inclues le code invalide '{unknownTag.Tag}'");
@@ -53,11 +68,24 @@ public class FileAuditManager
         {
             auditFileContent.AppendLine($"Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message");
             foreach (var auditRow in auditData)
-                auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
+                if (auditRow.ApplicationMessage == LanguageResource.AUDIT_SUCCESS)
+                    auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
                                             $"{auditRow.Appl_Source_RfrNr,-23}\t{auditRow.ApplicationMessage}");
+                else
+                    auditErrorsData.Add(auditRow);
+
+            if (auditErrorsData.Any())
+            {
+                auditFileContent.AppendLine($"");
+                auditFileContent.AppendLine($"Records removed from file: {fileName}");
+                foreach (var auditError in auditErrorsData)
+                    auditFileContent.AppendLine($"{auditError.Appl_EnfSrv_Cd,-24}\t{auditError.Appl_CtrlCd,-12}\t" +
+                                                $"{auditError.Appl_Source_RfrNr,-23}\t{auditError.ApplicationMessage}");
+            }
 
             if (unknownTags.Any())
             {
+                auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"XML validation warnings: {fileName}");
                 foreach (var unknownTag in unknownTags)
                     auditFileContent.AppendLine($"Section '{unknownTag.Section}' contains invalid tag '{unknownTag.Tag}'");

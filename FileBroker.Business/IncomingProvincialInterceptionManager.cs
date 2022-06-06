@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FOAEA3.Resources;
+using Newtonsoft.Json;
 
 namespace FileBroker.Business
 {
@@ -140,7 +141,7 @@ namespace FileBroker.Business
                                     }
 
                                     if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                        fileAuditData.ApplicationMessage = "Success";
+                                        fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
                                     successCount++;
                                 }
                             }
