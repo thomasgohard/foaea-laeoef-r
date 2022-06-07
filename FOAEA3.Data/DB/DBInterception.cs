@@ -77,6 +77,19 @@ namespace FOAEA3.Data.DB
             return data.SingleOrDefault();
         }
 
+        public List<InterceptionFinancialHoldbackData> GetAllInterceptionFinancialTerms(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
+
+            var data = MainDB.GetDataFromStoredProc<InterceptionFinancialHoldbackData>("DefaultHoldbackGetHoldback", parameters, FillIntFinHDataFromReader);
+
+            return data;
+        }
+
         public void CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH)
         {
             var parameters = SetIntFinHParameters(intFinH);

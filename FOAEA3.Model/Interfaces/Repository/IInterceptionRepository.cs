@@ -17,6 +17,7 @@ namespace FOAEA3.Model.Interfaces
         bool IsVariationIncrease(string appl_EnfSrv_Cd, string appl_CtrlCd);
         
         InterceptionFinancialHoldbackData GetInterceptionFinancialTerms(string enfService, string controlCode, string activeState = "A");
+        List<InterceptionFinancialHoldbackData> GetAllInterceptionFinancialTerms(string appl_EnfSrv_Cd, string appl_CtrlCd);
         void CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
         void UpdateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
         void DeleteInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
