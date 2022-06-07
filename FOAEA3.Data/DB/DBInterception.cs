@@ -184,6 +184,18 @@ namespace FOAEA3.Data.DB
             return data.Where(m => m.ActvSt_Cd == activeState).ToList();
         }
 
+        public List<HoldbackConditionData> GetAllHoldbackConditions(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
+
+            var data = MainDB.GetDataFromStoredProc<HoldbackConditionData>("GetHldbCndForAppl", parameters, FillHldbCndDataFromReader);
+            return data;
+        }
+
         public void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions)
         {
             foreach (var holdbackCondition in holdbackConditions)

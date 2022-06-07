@@ -23,6 +23,7 @@ namespace FOAEA3.Model.Interfaces
         void DeleteInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
         
         List<HoldbackConditionData> GetHoldbackConditions(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A");
+        List<HoldbackConditionData> GetAllHoldbackConditions(string appl_EnfSrv_Cd, string appl_CtrlCd);
         void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void DeleteHoldbackConditions(List<HoldbackConditionData> holdbackConditions);

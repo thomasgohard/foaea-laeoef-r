@@ -11,48 +11,25 @@ namespace CompareOldAndNewData.CommandLine
         {
             var diffs = new List<DiffData>();
 
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " [A]";
+            var allIntFinHdata2 = repositories2.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd);
+            var allIntFinHdata3 = repositories3.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd);
 
-            // active only
-
-            var intFinH2 = repositories2.InterceptionRepository.GetInterceptionFinancialTerms(enfSrv, ctrlCd);
-            var intFinH3 = repositories3.InterceptionRepository.GetInterceptionFinancialTerms(enfSrv, ctrlCd);
-
-            if ((intFinH2 is null) && (intFinH3 is null))
-                return diffs;
-
-            if (intFinH2 is null)
-                diffs.Add(new DiffData(key: key, colName: "",
-                                       goodValue: "Not found in FOAEA 2!", badValue: ""));
-            else if (intFinH3 is null)
-                diffs.Add(new DiffData(key: key, colName: "",
-                                       goodValue: "", badValue: "Not found in FOAEA 3!"));
-            else
-                CompareData(intFinH2, intFinH3, ref diffs, key);
-
-            // all non-active
-
-            var allIntFinHdata2 = repositories2.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd)
-                                                                      .Where(m => m.ActvSt_Cd != "A").ToList();
-            var allIntFinHdata3 = repositories3.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd)
-                                                                      .Where(m => m.ActvSt_Cd != "A").ToList();
-
-            foreach (var intFinH2_notActive in allIntFinHdata2)
+            foreach (var intFinH2item in allIntFinHdata2)
             {
-                string nonActiveKey = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH2_notActive.ActvSt_Cd}]/[{intFinH2_notActive.IntFinH_Dte}]";
-                var intFinH3_notActive = allIntFinHdata3.Where(m => m.IntFinH_Dte == intFinH2_notActive.IntFinH_Dte).FirstOrDefault();
-                if (intFinH3_notActive is null)
-                    diffs.Add(new DiffData(key: nonActiveKey, colName: "", goodValue: "", badValue: "Missing in FOAEA 3!"));
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH2item.ActvSt_Cd}]/[{intFinH2item.IntFinH_Dte}]";
+                var intFinH3item = allIntFinHdata3.Where(m => (m.IntFinH_Dte == intFinH2item.IntFinH_Dte) || ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == intFinH2item.ActvSt_Cd))).FirstOrDefault();
+                if (intFinH3item is null)
+                    diffs.Add(new DiffData(key: key, colName: "", goodValue: "Missing in FOAEA 2!", badValue: ""));
                 else
-                    CompareData(intFinH2_notActive, intFinH3_notActive, ref diffs, nonActiveKey);
+                    CompareData(intFinH2item, intFinH3item, ref diffs, key);
             }
 
-            foreach (var intFinH3_notActive in allIntFinHdata3)
+            foreach (var intFinH3item in allIntFinHdata3)
             {
-                string nonActiveKey = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH3_notActive.ActvSt_Cd}]/[{intFinH3_notActive.IntFinH_Dte}]";
-                var intFinH2_notActive = allIntFinHdata3.Where(m => m.IntFinH_Dte == intFinH3_notActive.IntFinH_Dte).FirstOrDefault();
-                if (intFinH3_notActive is null)
-                    diffs.Add(new DiffData(key: nonActiveKey, colName: "", goodValue: "Missing in FOAEA 2!", badValue: ""));
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH3item.ActvSt_Cd}]/[{intFinH3item.IntFinH_Dte}]";
+                var intFinH2item = allIntFinHdata2.Where(m => (m.IntFinH_Dte == intFinH3item.IntFinH_Dte) || ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == intFinH3item.ActvSt_Cd))).FirstOrDefault();
+                if (intFinH2item is null)
+                    diffs.Add(new DiffData(key: key, colName: "", goodValue: "", badValue: "Missing in FOAEA 3!"));
             }
 
             return diffs;

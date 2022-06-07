@@ -42,8 +42,10 @@ diffs = CompareIntFinH.Run(repositories2, repositories3, enfSrv, ctrlCd);
 foreach (var diff in diffs)
     Console.WriteLine($"IntFinH\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
 
-
 // hldbCnd
+diffs = CompareHldbCnd.Run(repositories2, repositories3, enfSrv, ctrlCd);
+foreach (var diff in diffs)
+    Console.WriteLine($"HldbCnd\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
 
 // evntSubm
 
