@@ -6,7 +6,7 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareHldbCnd
     {
-        public static List<DiffData> Run(IRepositories repositories2, IRepositories repositories3,
+        public static List<DiffData> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd)
         {
             var diffs = new List<DiffData>();
@@ -18,37 +18,39 @@ namespace CompareOldAndNewData.CommandLine
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte}]/[{holdbackItem2.EnfSrv_Cd}]";
                 var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte == holdbackItem2.IntFinH_Dte) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) || 
-                                                          ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd))).FirstOrDefault();
+                                                          ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
+                                                          ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd))).FirstOrDefault();
                 if (holdbackItem3 is null)
-                    diffs.Add(new DiffData(key: key, colName: "", goodValue: "Missing in FOAEA 2!", badValue: ""));
+                    diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "", badValue: "Missing in FOAEA 3!"));
                 else
-                    CompareData(holdbackItem2, holdbackItem3, ref diffs, key);
+                    CompareData(tableName, holdbackItem2, holdbackItem3, ref diffs, key);
             }
 
             foreach (var holdbackItem3 in holdback3)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem3.ActvSt_Cd}]/[{holdbackItem3.IntFinH_Dte}]";
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem3.ActvSt_Cd}]/[{holdbackItem3.IntFinH_Dte}]/[{holdbackItem3.EnfSrv_Cd}]";
                 var holdbackItem2 = holdback2.Where(m => ((m.IntFinH_Dte == holdbackItem3.IntFinH_Dte) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd)) ||
-                                                          ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem3.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd))).FirstOrDefault();
+                                                          ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem3.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd)) ||
+                                                          ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem3.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd))).FirstOrDefault();
                 if (holdbackItem2 is null)
-                    diffs.Add(new DiffData(key: key, colName: "", goodValue: "", badValue: "Missing in FOAEA 3!"));
+                    diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "Missing in FOAEA 2!", badValue: ""));
             }
 
             return diffs;
         }
 
-        private static void CompareData(HoldbackConditionData holdback2, HoldbackConditionData holdback3, ref List<DiffData> diffs, string key)
+        private static void CompareData(string tableName, HoldbackConditionData holdback2, HoldbackConditionData holdback3, ref List<DiffData> diffs, string key)
         {
-            if (holdback2.Appl_EnfSrv_Cd != holdback3.Appl_EnfSrv_Cd) diffs.Add(new DiffData(key: key, colName: "Appl_EnfSrv_Cd", goodValue: holdback2.Appl_EnfSrv_Cd, badValue: holdback3.Appl_EnfSrv_Cd));
-            if (holdback2.Appl_CtrlCd != holdback3.Appl_CtrlCd) diffs.Add(new DiffData(key: key, colName: "Appl_CtrlCd", goodValue: holdback2.Appl_CtrlCd, badValue: holdback3.Appl_CtrlCd));
-            if (holdback2.IntFinH_Dte != holdback3.IntFinH_Dte) diffs.Add(new DiffData(key: key, colName: "IntFinH_Dte", goodValue: holdback2.IntFinH_Dte, badValue: holdback3.IntFinH_Dte));
-            if (holdback2.EnfSrv_Cd != holdback3.EnfSrv_Cd) diffs.Add(new DiffData(key: key, colName: "EnfSrv_Cd", goodValue: holdback2.EnfSrv_Cd, badValue: holdback3.EnfSrv_Cd));
-            if (holdback2.HldbCnd_MxmPerChq_Money != holdback3.HldbCnd_MxmPerChq_Money) diffs.Add(new DiffData(key: key, colName: "HldbCnd_MxmPerChq_Money", goodValue: holdback2.HldbCnd_MxmPerChq_Money, badValue: holdback3.HldbCnd_MxmPerChq_Money));
-            if (holdback2.HldbCnd_SrcHldbAmn_Money != holdback3.HldbCnd_SrcHldbAmn_Money) diffs.Add(new DiffData(key: key, colName: "HldbCnd_SrcHldbAmn_Money", goodValue: holdback2.HldbCnd_SrcHldbAmn_Money, badValue: holdback3.HldbCnd_SrcHldbAmn_Money));
-            if (holdback2.HldbCnd_SrcHldbPrcnt != holdback3.HldbCnd_SrcHldbPrcnt) diffs.Add(new DiffData(key: key, colName: "HldbCnd_SrcHldbPrcnt", goodValue: holdback2.HldbCnd_SrcHldbPrcnt, badValue: holdback3.HldbCnd_SrcHldbPrcnt));
-            if (holdback2.HldbCtg_Cd != holdback3.HldbCtg_Cd) diffs.Add(new DiffData(key: key, colName: "HldbCtg_Cd", goodValue: holdback2.HldbCtg_Cd, badValue: holdback3.HldbCtg_Cd));
-            if (holdback2.HldbCnd_LiStCd != holdback3.HldbCnd_LiStCd) diffs.Add(new DiffData(key: key, colName: "HldbCnd_LiStCd", goodValue: holdback2.HldbCnd_LiStCd, badValue: holdback3.HldbCnd_LiStCd));
-            if (holdback2.ActvSt_Cd != holdback3.ActvSt_Cd) diffs.Add(new DiffData(key: key, colName: "ActvSt_Cd ", goodValue: holdback2.ActvSt_Cd, badValue: holdback3.ActvSt_Cd));
+            if (holdback2.Appl_EnfSrv_Cd != holdback3.Appl_EnfSrv_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_EnfSrv_Cd", goodValue: holdback2.Appl_EnfSrv_Cd, badValue: holdback3.Appl_EnfSrv_Cd));
+            if (holdback2.Appl_CtrlCd != holdback3.Appl_CtrlCd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CtrlCd", goodValue: holdback2.Appl_CtrlCd, badValue: holdback3.Appl_CtrlCd));
+            if (holdback2.IntFinH_Dte != holdback3.IntFinH_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "IntFinH_Dte", goodValue: holdback2.IntFinH_Dte, badValue: holdback3.IntFinH_Dte));
+            if (holdback2.EnfSrv_Cd != holdback3.EnfSrv_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "EnfSrv_Cd", goodValue: holdback2.EnfSrv_Cd, badValue: holdback3.EnfSrv_Cd));
+            if (holdback2.HldbCnd_MxmPerChq_Money != holdback3.HldbCnd_MxmPerChq_Money) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_MxmPerChq_Money", goodValue: holdback2.HldbCnd_MxmPerChq_Money, badValue: holdback3.HldbCnd_MxmPerChq_Money));
+            if (holdback2.HldbCnd_SrcHldbAmn_Money != holdback3.HldbCnd_SrcHldbAmn_Money) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_SrcHldbAmn_Money", goodValue: holdback2.HldbCnd_SrcHldbAmn_Money, badValue: holdback3.HldbCnd_SrcHldbAmn_Money));
+            if (holdback2.HldbCnd_SrcHldbPrcnt != holdback3.HldbCnd_SrcHldbPrcnt) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_SrcHldbPrcnt", goodValue: holdback2.HldbCnd_SrcHldbPrcnt, badValue: holdback3.HldbCnd_SrcHldbPrcnt));
+            if (holdback2.HldbCtg_Cd != holdback3.HldbCtg_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCtg_Cd", goodValue: holdback2.HldbCtg_Cd, badValue: holdback3.HldbCtg_Cd));
+            if (holdback2.HldbCnd_LiStCd != holdback3.HldbCnd_LiStCd) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_LiStCd", goodValue: holdback2.HldbCnd_LiStCd, badValue: holdback3.HldbCnd_LiStCd));
+            if (holdback2.ActvSt_Cd != holdback3.ActvSt_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "ActvSt_Cd ", goodValue: holdback2.ActvSt_Cd, badValue: holdback3.ActvSt_Cd));
         }
     }
 }

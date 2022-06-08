@@ -16,38 +16,18 @@ IConfiguration configuration = new ConfigurationBuilder()
 
 var foaea2DB = new DBTools(configuration.GetConnectionString("Foaea2DB").ReplaceVariablesWithEnvironmentValues());
 var foaea3DB = new DBTools(configuration.GetConnectionString("Foaea3DB").ReplaceVariablesWithEnvironmentValues());
-
 var repositories2 = new DbRepositories(foaea2DB);
-var repositories2Finance = new DbRepositories_Finance(foaea2DB);
-
 var repositories3 = new DbRepositories(foaea3DB);
+var repositories2Finance = new DbRepositories_Finance(foaea2DB);
 var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 
-string enfSrv = "ON01";
-string ctrlCd = "P02862";
+var foaea2RunDate = (new DateTime(2022, 5, 25)).Date;
+var foaea3RunDate = (new DateTime(2022, 6, 6)).Date;
 
-// appl
-var diffs = CompareAppl.Run(repositories2, repositories3, enfSrv, ctrlCd);
-Console.WriteLine($"Table\tKey\tColumn\tGood\tBad");
-foreach (var diff in diffs)
-    Console.WriteLine($"Appl\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "ON01", "P02862", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "ON01", "O88291", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "ON01", "P02001", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "ON01", "P85061", foaea2RunDate, foaea3RunDate);
 
-// summSmry
-diffs = CompareSummSmry.Run(repositories2Finance, repositories3Finance, enfSrv, ctrlCd);
-foreach (var diff in diffs)
-    Console.WriteLine($"SummSmry\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
-
-// intFinH
-diffs = CompareIntFinH.Run(repositories2, repositories3, enfSrv, ctrlCd);
-foreach (var diff in diffs)
-    Console.WriteLine($"IntFinH\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
-
-// hldbCnd
-diffs = CompareHldbCnd.Run(repositories2, repositories3, enfSrv, ctrlCd);
-foreach (var diff in diffs)
-    Console.WriteLine($"HldbCnd\t{diff.Key}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
-
-// evntSubm
-
-// evntBF
 Console.WriteLine("\nFinished");
+
