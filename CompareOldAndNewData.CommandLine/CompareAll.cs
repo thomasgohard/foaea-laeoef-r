@@ -7,7 +7,7 @@ namespace CompareOldAndNewData.CommandLine
     {
         public static void Run(DbRepositories repositories2, DbRepositories_Finance repositories2Finance,
                                DbRepositories repositories3, DbRepositories_Finance repositories3Finance,
-                               string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate)
+                               string action, string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate)
         {
             var diffs = CompareAppl.Run("Appl", repositories2, repositories3, enfSrv, ctrlCd);
             diffs.AddRange(CompareSummSmry.Run("SummSmry", repositories2Finance, repositories3Finance, enfSrv, ctrlCd));
@@ -17,9 +17,10 @@ namespace CompareOldAndNewData.CommandLine
             diffs.AddRange(CompareEvents.Run("EvntBF", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBF));
             diffs.AddRange(CompareEvents.Run("EvntSIN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSIN));
 
-            Console.WriteLine($"Table\tKey\tColumn\tGood\tBad");
+            Console.WriteLine($"Action\tTable\tKey\tColumn\tGood\tBad\tDescription");
             string lastTable = string.Empty;
             string lastKey = string.Empty;
+            bool firstEntry = true;
             foreach (var diff in diffs)
             {
                 bool skipBecauseOfDateDiff = false;
@@ -52,7 +53,14 @@ namespace CompareOldAndNewData.CommandLine
                         thisTable = string.Empty;
                     }
 
-                    Console.WriteLine($"{thisTable}\t{thisKey}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}");
+                    Console.WriteLine($"{action}\t{thisTable}\t{thisKey}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}\t{diff.Description}");
+
+                    if (firstEntry)
+                    {
+                        firstEntry = false;
+                        action = string.Empty;
+                    }
+
                 }
             }
             Console.WriteLine("\n");
