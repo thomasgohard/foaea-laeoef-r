@@ -185,11 +185,13 @@ namespace FileBroker.Business
         public void AutoAcceptVariations(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
-
+            
             string processName = $"Process Auto Accept Variation {enfService}";
             prodAudit.Insert(processName, "Divert Funds Started", "O");
 
+            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
             var applAutomation = APIs.InterceptionApplications.GetApplicationsForVariationAutoAccept(enfService);
+
             foreach (var appl in applAutomation)
                 APIs.InterceptionApplications.AcceptVariation(appl);
 
@@ -200,7 +202,7 @@ namespace FileBroker.Business
         {
             InterceptionApplicationData interception;
 
-            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.Application.Subm_SubmCd;
+            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.NewUpdateSubmitter;
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {

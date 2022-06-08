@@ -74,7 +74,7 @@ namespace FOAEA3.Common.Brokers
         public InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
-            string apiCall = $"api/v1/interceptions/{key}/AcceptVariation";
+            string apiCall = $"api/v1/interceptions/{key}/AcceptVariation?autoAccept=true";
             var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
                                                                                            interceptionApplication).Result;
             return data;

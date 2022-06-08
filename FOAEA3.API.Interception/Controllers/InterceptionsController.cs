@@ -124,7 +124,10 @@ namespace FOAEA3.API.Interception.Controllers
             switch (command.ToLower())
             {
                 case "":
-                    interceptionManager.UpdateApplication();
+                    if (application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
+                        interceptionManager.CancelApplication();
+                    else
+                        interceptionManager.UpdateApplication();
                     break;
 
                 case "partiallyserviceapplication":
@@ -237,7 +240,8 @@ namespace FOAEA3.API.Interception.Controllers
         public ActionResult<InterceptionApplicationData> AcceptVariation([FromRoute] string key,
                                                                          [FromServices] IRepositories repositories,
                                                                          [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                         [FromQuery] DateTime supportingDocsReceiptDate)
+                                                                         [FromQuery] DateTime supportingDocsReceiptDate,
+                                                                         [FromQuery] bool autoAccept)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
@@ -251,7 +255,7 @@ namespace FOAEA3.API.Interception.Controllers
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-            if (appManager.AcceptVariation(supportingDocsReceiptDate))
+            if (appManager.AcceptVariation(supportingDocsReceiptDate, autoAccept))
                 return Ok(application);
             else
                 return UnprocessableEntity(application);

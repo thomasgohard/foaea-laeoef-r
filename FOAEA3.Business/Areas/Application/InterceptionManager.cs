@@ -206,6 +206,15 @@ namespace FOAEA3.Business.Areas.Application
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
+            // for FTP, also keep changes to address, phone # and ref code:
+            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
             if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
@@ -220,6 +229,17 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
+
+            if (InterceptionApplication.Medium_Cd == "FTP")
+            {
+                InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+                InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+                InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+                InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+                InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+                InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+                InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+            }
 
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmry is null)

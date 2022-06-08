@@ -22,12 +22,13 @@ var repositories2Finance = new DbRepositories_Finance(foaea2DB);
 var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 
 var foaea2RunDate = (new DateTime(2022, 5, 25)).Date;
-var foaea3RunDate = (new DateTime(2022, 6, 6)).Date;
+var foaea3RunDate = (new DateTime(2022, 6, 8)).Date;
 
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "P02862", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O88291", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P02001", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85061", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85105", foaea2RunDate, foaea3RunDate);
 
 Console.WriteLine("\nFinished");
 

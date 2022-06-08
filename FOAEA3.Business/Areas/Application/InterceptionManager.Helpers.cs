@@ -391,6 +391,12 @@ namespace FOAEA3.Business.Areas.Application
 
             defaultHoldback.IntFinH_LiStCd = intFinH_LifeStateCode;
 
+            if (newState == "A")
+            {
+                defaultHoldback.IntFinH_RcvtAffdvt_Dte = DateTime.Now;
+                defaultHoldback.IntFinH_Affdvt_SubmCd = "FO2SSS";
+            }
+
             var sourceSpecificHoldbacks = InterceptionApplication.HldbCnd ?? interceptionDB.GetHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd, intFinH_Date, oldState);
 
             foreach (var sourceSpecificHoldback in sourceSpecificHoldbacks)
