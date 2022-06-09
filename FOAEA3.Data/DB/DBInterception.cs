@@ -364,6 +364,32 @@ namespace FOAEA3.Data.DB
             return data["message"] as string;
         }
 
+        public List<ProcessEISOOUTHistoryData> GetEISOHistoryBySIN(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ConfirmedSIN", confirmedSIN}
+            };
+
+            var data = MainDB.GetDataFromStoredProc<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN", parameters, FillEISOOUTFromReader);
+
+            return data;
+        }
+
+        private void FillEISOOUTFromReader(IDBHelperReader rdr, ProcessEISOOUTHistoryData data)
+        {
+            data.TRANS_TYPE_CD = rdr["TRANS_TYPE_CD"] as string;
+            data.ACCT_NBR = rdr["ACCT_NBR"] as string;
+            data.TRANS_AMT = rdr["TRANS_AMT"] as string;
+            data.RQST_RFND_EID = rdr["RQST_RFND_EID"] as string;
+            data.OUTPUT_DEST_CD = rdr["OUTPUT_DEST_CD"] as string;
+            data.XREF_ACCT_NBR = rdr["XREF_ACCT_NBR"] as string;
+            data.FOA_DELETE_IND = rdr["FOA_DELETE_IND"] as string;
+            data.FOA_RECOUP_PRCNT = rdr["FOA_RECOUP_PRCNT"] as string;
+            data.BLANK_AREA = rdr["BLANK_AREA"] as string;
+            data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
+        }
+
         public void InsertESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,
                                       DateTime? esdReceivedDate = null)
         {

@@ -37,6 +37,7 @@ namespace FOAEA3.Model.Interfaces
         DateTime GetGarnisheeSummonsReceiptDate(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD);
         int GetTotalActiveSummons(string appl_EnfSrv_Cd, string enfOfficeCode);
         string EISOHistoryDeleteBySIN(string confirmedSIN, bool removeSIN);
+        List<ProcessEISOOUTHistoryData> GetEISOHistoryBySIN(string confirmedSIN);
         void InsertESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
         void UpdateESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
         void InsertBalanceSnapshot(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,

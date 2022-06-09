@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Data.Base;
 using FOAEA3.Model.Enums;
+using FOAEA3.Resources.Helpers;
 
 namespace CompareOldAndNewData.CommandLine
 {
@@ -16,25 +17,19 @@ namespace CompareOldAndNewData.CommandLine
             diffs.AddRange(CompareEvents.Run("EvntSubm", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSubm));
             diffs.AddRange(CompareEvents.Run("EvntBF", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBF));
             diffs.AddRange(CompareEvents.Run("EvntSIN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSIN));
+            diffs.AddRange(CompareEISOOUT.Run("Prcs_EISOOUT_History", repositories2, repositories3, enfSrv, ctrlCd));
 
-            Console.WriteLine($"Action\tTable\tKey\tColumn\tGood\tBad\tDescription");
-            string lastTable = string.Empty;
-            string lastKey = string.Empty;
-            bool firstEntry = true;
-            foreach (var diff in diffs)
+            diffs.RemoveAll(m => (m.GoodValue is DateTime goodValue) && (m.BadValue is DateTime badValue) &&
+                                 (goodValue.Date == foaea2RunDate) && (badValue.Date == foaea3RunDate));
+            diffs.RemoveAll(m => m.ColName.ToLower() == "event_id");
+
+            if (diffs.Any())
             {
-                bool skipBecauseOfDateDiff = false;
-                if ((diff.GoodValue is DateTime goodDate) && (diff.BadValue is DateTime badDate))
-                {
-                    if ((goodDate.Date == foaea2RunDate) && 
-                        (badDate.Date == foaea3RunDate))
-                        skipBecauseOfDateDiff = true;
-                }
-
-                if (diff.ColName.ToLower() == "event_id")
-                    skipBecauseOfDateDiff = true;
-
-                if (!skipBecauseOfDateDiff)
+                Console.WriteLine($"\nAction\tTable\tKey\tColumn\tGood\tBad\tDescription");
+                string lastTable = string.Empty;
+                string lastKey = string.Empty;
+                bool firstEntry = true;
+                foreach (var diff in diffs)
                 {
                     string currentTable = diff.TableName;
                     string currentKey = diff.Key;
@@ -60,10 +55,14 @@ namespace CompareOldAndNewData.CommandLine
                         firstEntry = false;
                         action = string.Empty;
                     }
-
                 }
+                Console.WriteLine("");
             }
-            Console.WriteLine("\n");
+            else
+            {
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+                Console.WriteLine($"{key}: No differences found.");
+            }
         }
     }
 }
