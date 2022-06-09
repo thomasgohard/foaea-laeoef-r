@@ -9,7 +9,7 @@ namespace FOAEA3.Business.Areas.Application
     {
         public void InvalidStateChange(ApplicationState oldState, ApplicationState newState)
         {
-            EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE, $"{(int) oldState} => {(int) newState}");
+            EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE, $"{(int)oldState} => {(int)newState}");
         }
 
         public virtual void Process_00_InitialState()
@@ -23,7 +23,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!Validation.IsValidMandatoryData())
             {
                 EventManager.AddEvent(EventCode.C50505_MISSING_MANDATORY_FIELDSDEFAULT_FIELD_USED);
-                newState = ApplicationState.INVALID_APPLICATION_1;                
+                newState = ApplicationState.INVALID_APPLICATION_1;
             }
 
             if (!ValidationHelper.IsValidSinNumberMod10(Application.Appl_Dbtr_Entrd_SIN, allowEmpty: true))
@@ -38,6 +38,16 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C50531_DEBTOR_MUST_BE_AT_LEAST_15_YEARS_OLD);
                 newState = ApplicationState.INVALID_APPLICATION_1;
                 Application.Messages.AddError(ReferenceData.Instance().FoaEvents[EventCode.C50531_DEBTOR_MUST_BE_AT_LEAST_15_YEARS_OLD].Description);
+            }
+
+            if (!Validation.IsValidPostalCode())
+            {
+                EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE);
+                if (Application.Medium_Cd != "FTP")
+                {
+                    newState = ApplicationState.INVALID_APPLICATION_1;
+                    Application.Messages.AddError(ReferenceData.Instance().FoaEvents[EventCode.C50772_INVALID_POSTAL_CODE].Description);
+                }
             }
 
             if (!Validation.IsValidGender())

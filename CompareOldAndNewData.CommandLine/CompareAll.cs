@@ -17,7 +17,7 @@ namespace CompareOldAndNewData.CommandLine
             diffs.AddRange(CompareEvents.Run("EvntSubm", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSubm));
             diffs.AddRange(CompareEvents.Run("EvntBF", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBF));
             diffs.AddRange(CompareEvents.Run("EvntSIN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSIN));
-            diffs.AddRange(CompareEISOOUT.Run("Prcs_EISOOUT_History", repositories2, repositories3, enfSrv, ctrlCd));
+           // diffs.AddRange(CompareEISOOUT.Run("Prcs_EISOOUT_History", repositories2, repositories3, enfSrv, ctrlCd));
 
             diffs.RemoveAll(m => (m.GoodValue is DateTime goodValue) && (m.BadValue is DateTime badValue) &&
                                  (goodValue.Date == foaea2RunDate) && (badValue.Date == foaea3RunDate));
@@ -61,7 +61,7 @@ namespace CompareOldAndNewData.CommandLine
             else
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd);
-                Console.WriteLine($"{key}: No differences found.");
+                Console.WriteLine($"{action}\t{key}: No differences found.");
             }
         }
     }

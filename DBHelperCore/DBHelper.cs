@@ -28,11 +28,11 @@ namespace DBHelper
                 if (value != null)
                     try
                     {
-                        LastError = value.Message;
+                        LastError = value.Message + ": " + value.InnerException?.Message;
 
                         using var con = new SqlConnection(ConnectionString);
                         using var cmd = CreateCommand("Logs_Insert", con);
-                        cmd.Parameters.AddWithValue("@Message", value.Message);
+                        cmd.Parameters.AddWithValue("@Message", LastError);
                         cmd.Parameters.AddWithValue("@Level", "");
                         cmd.Parameters.AddWithValue("@TimeStamp", DateTime.Now);
                         if (!string.IsNullOrEmpty(value.StackTrace))
@@ -137,7 +137,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
             }
@@ -189,7 +189,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
             }
@@ -234,7 +234,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
             }
@@ -283,7 +283,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
             }
 
@@ -323,7 +323,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
             }
@@ -366,7 +366,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
                 result = (Tdata)outParameter.Value;
@@ -429,7 +429,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception(procName, e);
                 }
 
                 foreach (var (fieldName, _) in returnParameters)
@@ -472,8 +472,8 @@ namespace DBHelper
 
                 }
                 catch (Exception e)
-                {
-                    LastException = e;
+                {                    
+                    LastException = new Exception(procName, e);
                 }
             }
 
@@ -506,7 +506,7 @@ namespace DBHelper
             catch (Exception e)
             {
                 tran?.Rollback();
-                LastException = e;
+                LastException = new Exception(procName, e);
             }
 
         }
@@ -550,7 +550,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception("GetAllData " + tableName, e);
                 }
             }
 
@@ -591,7 +591,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception("GetDataForKey " + tableName, e);
                 }
             }
 
@@ -632,7 +632,7 @@ namespace DBHelper
             }
             catch (Exception e)
             {
-                LastException = e;
+                LastException = new Exception("UpdateData " + tableName, e);
             }
 
         }
@@ -684,7 +684,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception("CreateData " + tableName, e);
                 }
             }
 
@@ -717,7 +717,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception("DeleteData " + tableName, e);
                 }
             }
             catch
@@ -755,7 +755,7 @@ namespace DBHelper
                 }
                 catch (Exception e)
                 {
-                    LastException = e;
+                    LastException = new Exception("DeleteDataCheckReturn " + tableName, e);
                 }
             }
             catch
@@ -794,7 +794,7 @@ namespace DBHelper
             catch (Exception e)
             {
                 tran?.Rollback();
-                LastException = e;
+                LastException = new Exception("BulkUpdate " + tableName, e);
             }
         }
 

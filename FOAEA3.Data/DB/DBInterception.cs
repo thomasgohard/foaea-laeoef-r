@@ -53,8 +53,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrvCd", appl_EnfSrv_Cd},
-                    {"CtrlCd", appl_CtrlCd }
+                    {"appl_enfsrvcd", appl_EnfSrv_Cd},
+                    {"appl_ctrlcd", appl_CtrlCd }
                 };
 
             int result = MainDB.GetDataFromStoredProc<int>("ApplVerifyVariationIncrease", parameters);
@@ -350,8 +350,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
             {
-                {"@SIN", confirmedSIN},
-                {"@removeSIN", removeSIN }
+                {"SIN", confirmedSIN},
+                {"removeSIN", removeSIN }
             };
 
             var returnParameters = new Dictionary<string, string>

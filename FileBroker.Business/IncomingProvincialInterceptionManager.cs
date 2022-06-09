@@ -113,7 +113,7 @@ namespace FileBroker.Business
                                 MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                                 NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
                                 NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
-                                NewUpdateSubmitter = data.dat_Update_SubmCd
+                                NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
                             };
 
                             if (isValidData)
@@ -340,25 +340,38 @@ namespace FileBroker.Business
             DateTime now = DateTime.Now;
             bool isVariation = baseData.dat_Appl_LiSt_Cd == "17";
             bool isCancelOrSuspend = baseData.dat_Appl_LiSt_Cd.In("14", "35");
+            bool isCreate = false;
+
+            if (baseData.Maintenance_ActionCd == "A")
+                isCreate = true;
 
             isValidData = true;
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && !isCancelOrSuspend)
+            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && 
+                !isCancelOrSuspend)
             {
-                ExtractDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
-                                                              now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
+                ExtractDefaultFinancialData(isVariation, financialData, fileAuditData, ref isValidData,
+                                            now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
 
                 if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
                 {
                     foreach (var sourceSpecific in sourceSpecificData)
-                        interceptionApplication.HldbCnd.Add(ExtractAndValidateSourceSpecificFinancialInformation(sourceSpecific,
-                                                                                                                 fileAuditData,
-                                                                                                                 ref isValidData,
-                                                                                                                 now,
-                                                                                                                 interceptionApplication));
+                    {
+                        var newSourceSpecificData = ExtractAndValidateSourceSpecificData(sourceSpecific, fileAuditData,
+                                                                                         ref isValidData, now,
+                                                                                         interceptionApplication);
+                        interceptionApplication.HldbCnd.Add(newSourceSpecificData);
+                    }
                 }
+            }
+
+            if (isCreate && (interceptionApplication != null) &&
+                (interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue))
+            {
+                fileAuditData.ApplicationMessage = "Missing financials!";
+                errorCount++;
             }
 
             if (!isValidData)
@@ -486,7 +499,7 @@ namespace FileBroker.Business
             return interceptionApplication;
         }
 
-        private bool ExtractDefaultFinancialInformation(bool isVariation,
+        private bool ExtractDefaultFinancialData(bool isVariation,
                                                                    MEPInterception_RecType12 financialData,
                                                                    FileAuditData fileAuditData,
                                                                    ref bool isValidData,
@@ -532,7 +545,7 @@ namespace FileBroker.Business
             return isValidData;
         }
 
-        private HoldbackConditionData ExtractAndValidateSourceSpecificFinancialInformation(MEPInterception_RecType13 sourceSpecific,
+        private HoldbackConditionData ExtractAndValidateSourceSpecificData(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
                                                                                            ref bool isValidData,
                                                                                            DateTime now,

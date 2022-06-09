@@ -187,11 +187,13 @@ namespace FOAEA3.Business.Areas.Application
         {
             base.UpdateApplicationNoValidation();
 
-            if (InterceptionApplication.IntFinH is not null)
+            if ((InterceptionApplication.IntFinH is not null) && (InterceptionApplication.IntFinH.IntFinH_Dte != DateTime.MinValue))
+            {
                 Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
 
-            if (InterceptionApplication.HldbCnd is not null)
-                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+                if ((InterceptionApplication.HldbCnd is not null) && (InterceptionApplication.HldbCnd.Count > 0))
+                    Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
         }
 
         public bool VaryApplication()

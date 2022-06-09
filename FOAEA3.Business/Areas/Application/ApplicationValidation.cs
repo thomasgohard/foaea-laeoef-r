@@ -220,7 +220,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (postalCode == "-")
             {
-                Application.Messages.AddError("Invalid Single Dash Postal Code");
+                if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Single Dash Postal Code");
                 return false;
             }
 
@@ -228,7 +228,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 if (!ValidationHelper.IsValidPostalCode(postalCode))
                 {
-                    Application.Messages.AddError("Invalid Postal Code Format");
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code Format");
                     return false;
                 }
 
@@ -236,7 +236,7 @@ namespace FOAEA3.Business.Areas.Application
                 if (!postalCodeDB.ValidatePostalCode(postalCode, provinceCode, cityName,
                                                      out string validProvCode, out PostalCodeFlag validFlags))
                 {
-                    Application.Messages.AddError("Invalid Postal Code for Province/City");
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
                     return false;
                 }
 
