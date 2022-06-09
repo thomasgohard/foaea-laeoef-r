@@ -347,8 +347,19 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd))
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            var newIntFinH = InterceptionApplication.IntFinH;
+            var newHldbCnd = InterceptionApplication.HldbCnd;
+
+            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
                 return false;
@@ -357,16 +368,19 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.IntFinH = newIntFinH;
+            InterceptionApplication.HldbCnd = newHldbCnd;
 
-            InterceptionApplication.Appl_Dbtr_Addr_Ln = interceptionCurrentlyInDB.Appl_Dbtr_Addr_Ln;
-            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = interceptionCurrentlyInDB.Appl_Dbtr_Addr_Ln1;
-            InterceptionApplication.Appl_Dbtr_Addr_PCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_PCd;
-            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_PrvCd;
-            InterceptionApplication.Appl_Dbtr_Addr_CityNme = interceptionCurrentlyInDB.Appl_Dbtr_Addr_CityNme;
-            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
 
-            if (interceptionCurrentlyInDB.ActvSt_Cd != "A")
+            if (InterceptionApplication.ActvSt_Cd != "A")
             {
                 EventManager.AddEvent(EventCode.C50841_CAN_ONLY_CANCEL_AN_ACTIVE_APPLICATION);
                 return false;
