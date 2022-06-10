@@ -3,6 +3,7 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using FOAEA3.Model.Base;
+using FOAEA3.Model.Enums;
 
 namespace TestData.TestDB
 {
@@ -27,6 +28,11 @@ namespace TestData.TestDB
         }
 
         public ApplicationData GetApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<ApplicationData> GetApplicationsForAutomation(string appl_EnfSrv_Cd, string medium_Cd, ApplicationState appLiSt_Cd, string appCtgy_Cd, string actvSt_Cd)
         {
             throw new NotImplementedException();
         }
