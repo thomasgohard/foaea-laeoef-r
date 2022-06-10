@@ -9,5 +9,7 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         List<StatsOutgoingProvincialData> GetOutgoingProvincialStatusData(int maxRecords, string activeState,
                                                                           string recipientCode);
+
+        ApplicationData ValidateCoreValues(ApplicationData application);
     }
 }

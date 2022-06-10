@@ -53,8 +53,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrvCd", appl_EnfSrv_Cd},
-                    {"CtrlCd", appl_CtrlCd }
+                    {"appl_enfsrvcd", appl_EnfSrv_Cd},
+                    {"appl_ctrlcd", appl_CtrlCd }
                 };
 
             int result = MainDB.GetDataFromStoredProc<int>("ApplVerifyVariationIncrease", parameters);
@@ -75,6 +75,19 @@ namespace FOAEA3.Data.DB
             var data = MainDB.GetDataFromStoredProc<InterceptionFinancialHoldbackData>("GetIntFinHtoActivateDeactivate", parameters, FillIntFinHDataFromReader);
 
             return data.SingleOrDefault();
+        }
+
+        public List<InterceptionFinancialHoldbackData> GetAllInterceptionFinancialTerms(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
+
+            var data = MainDB.GetDataFromStoredProc<InterceptionFinancialHoldbackData>("DefaultHoldbackGetHoldback", parameters, FillIntFinHDataFromReader);
+
+            return data;
         }
 
         public void CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH)
@@ -169,6 +182,18 @@ namespace FOAEA3.Data.DB
             var data = MainDB.GetDataFromStoredProc<HoldbackConditionData>("GetHldbCndToActivateDeactivate", parameters, FillHldbCndDataFromReader);
 
             return data.Where(m => m.ActvSt_Cd == activeState).ToList();
+        }
+
+        public List<HoldbackConditionData> GetAllHoldbackConditions(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
+
+            var data = MainDB.GetDataFromStoredProc<HoldbackConditionData>("GetHldbCndForAppl", parameters, FillHldbCndDataFromReader);
+            return data;
         }
 
         public void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions)
@@ -325,8 +350,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
             {
-                {"@SIN", confirmedSIN},
-                {"@removeSIN", removeSIN }
+                {"SIN", confirmedSIN},
+                {"removeSIN", removeSIN }
             };
 
             var returnParameters = new Dictionary<string, string>
@@ -337,6 +362,32 @@ namespace FOAEA3.Data.DB
             var data = MainDB.GetDataFromStoredProcViaReturnParameters("MessageBrokerDeleteEISOOUTHistoryBySIN", parameters, returnParameters);
 
             return data["message"] as string;
+        }
+
+        public List<ProcessEISOOUTHistoryData> GetEISOHistoryBySIN(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ConfirmedSIN", confirmedSIN}
+            };
+
+            var data = MainDB.GetDataFromStoredProc<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN", parameters, FillEISOOUTFromReader);
+
+            return data;
+        }
+
+        private void FillEISOOUTFromReader(IDBHelperReader rdr, ProcessEISOOUTHistoryData data)
+        {
+            data.TRANS_TYPE_CD = rdr["TRANS_TYPE_CD"] as string;
+            data.ACCT_NBR = rdr["ACCT_NBR"] as string;
+            data.TRANS_AMT = rdr["TRANS_AMT"] as string;
+            data.RQST_RFND_EID = rdr["RQST_RFND_EID"] as string;
+            data.OUTPUT_DEST_CD = rdr["OUTPUT_DEST_CD"] as string;
+            data.XREF_ACCT_NBR = rdr["XREF_ACCT_NBR"] as string;
+            data.FOA_DELETE_IND = rdr["FOA_DELETE_IND"] as string;
+            data.FOA_RECOUP_PRCNT = rdr["FOA_RECOUP_PRCNT"] as string;
+            data.BLANK_AREA = rdr["BLANK_AREA"] as string;
+            data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
         }
 
         public void InsertESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,

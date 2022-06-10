@@ -138,6 +138,9 @@
   <data name="ASSUME_ROLE" xml:space="preserve">
     <value>Assume Role</value>
   </data>
+  <data name="AUDIT_SUCCESS" xml:space="preserve">
+    <value>Success</value>
+  </data>
   <data name="CHANGE_PASSWORD_CONFIRM_LABEL" xml:space="preserve">
     <value>Confirm new password</value>
   </data>

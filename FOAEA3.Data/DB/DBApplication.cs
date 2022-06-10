@@ -32,6 +32,25 @@ namespace FOAEA3.Data.DB
 
         }
 
+        public List<ApplicationData> GetApplicationsForAutomation(string appl_EnfSrv_Cd, string medium_Cd, 
+                                                                  ApplicationState appLiSt_Cd, string appCtgy_Cd,
+                                                                  string actvSt_Cd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd},
+                    {"Medium_Cd", DBNull.Value},
+                    {"AppLiSt_Cd", (int) appLiSt_Cd},
+                    {"AppCtgy_Cd", appCtgy_Cd},
+                    {"ActvSt_Cd", actvSt_Cd}
+                };
+
+            List<ApplicationData> data = MainDB.GetDataFromStoredProc<ApplicationData>("GetApplProvinceAutomation", parameters, FillApplicationDataFromReader);
+
+            return data; 
+
+        }
+
         public bool CreateApplication(ApplicationData application)
         {
             var parameters = SetParameters(application);

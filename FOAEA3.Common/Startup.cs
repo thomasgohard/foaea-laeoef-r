@@ -97,6 +97,13 @@ namespace FOAEA3.Common
             ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
             ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
             ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
+            ReferenceData.Instance().LoadProvinces(new DBProvince(repositories.MainDB));
+            ReferenceData.Instance().LoadMediums(new DBMedium(repositories.MainDB));
+            ReferenceData.Instance().LoadLanguages(new DBLanguage(repositories.MainDB));
+            ReferenceData.Instance().LoadDocumentTypes(new DBDocumentType(repositories.MainDB));
+            ReferenceData.Instance().LoadCountries(new DBCountry(repositories.MainDB));
+            ReferenceData.Instance().LoadApplicationReasons(new DBApplicationReason(repositories.MainDB));
+            ReferenceData.Instance().LoadApplicationCategories(new DBApplicationCategory(repositories.MainDB));
             ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
             ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
 

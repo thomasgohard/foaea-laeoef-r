@@ -450,7 +450,7 @@ namespace FOAEA3.Business.Areas.Application
 
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
-            repositories.NotificationRepository.SendEmail(subject, recipients, message);            
+            repositories.NotificationRepository.SendEmail(subject, recipients, message);
         }
 
     }

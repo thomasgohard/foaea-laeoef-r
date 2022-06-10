@@ -3,7 +3,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
 
-namespace FileBroker.Business.Tests
+namespace FileBroker.Business.Tests.InMemory
 {
     public class InMemoryFileTable : IFileTableRepository
     {

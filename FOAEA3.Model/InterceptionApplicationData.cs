@@ -1,15 +1,10 @@
-﻿using FOAEA3.Model.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace FOAEA3.Model
 {
     public class InterceptionApplicationData : ApplicationData
     {
-        public InterceptionFinancialHoldbackData IntFinH { get; set; }
-
-        public List<HoldbackConditionData> HldbCnd { get; set; }
-
         public InterceptionApplicationData()
         {
             AppCtgy_Cd = "I01";
@@ -23,6 +18,15 @@ namespace FOAEA3.Model
             IntFinH = new InterceptionFinancialHoldbackData();
             HldbCnd = new List<HoldbackConditionData>();
         }
+
+        public InterceptionApplicationData(ApplicationData baseData) : this()
+        {
+            base.Merge(baseData);
+        }
+
+        public InterceptionFinancialHoldbackData IntFinH { get; set; }
+
+        public List<HoldbackConditionData> HldbCnd { get; set; }
 
     }
 }

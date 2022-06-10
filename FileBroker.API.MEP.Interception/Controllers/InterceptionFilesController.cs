@@ -6,9 +6,11 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -83,7 +85,7 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
-        var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData);
+        var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
         if (errors.Any())
             return UnprocessableEntity(errors);
 
@@ -93,12 +95,18 @@ public class InterceptionFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
-        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiHelper);
+        var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
+        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper);
+        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper);
+
+        var apiInterceptionApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
+        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionApplHelper);
 
         var apis = new APIBrokerList
         {
-            InterceptionApplications = interceptionApplicationAPIs
+            Applications = applicationApplicationAPIs,
+            InterceptionApplications = interceptionApplicationAPIs,
+            ProductionAudits = productionAuditAPIs
         };
 
         var repositories = new RepositoryList
@@ -115,7 +123,14 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData);
+            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
+
+            if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
+                if (info.ContainsSystemMessagesOfType(MessageType.Error))
+                    return UnprocessableEntity(info);
+                else
+                    return Ok(info);
+
             return Ok("File processed.");
         }
         else

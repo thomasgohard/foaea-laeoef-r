@@ -57,6 +57,14 @@ namespace FOAEA3.Data.DB
 
                     break;
 
+                case EventQueue.EventBF:
+                    data = MainDB.GetDataFromStoredProc<ApplicationEventData>("EvntBF_SelectForApplication",
+                                                                              parameters, FillEventDataFromReader);
+                    foreach (var item in data)
+                        item.Queue = EventQueue.EventSubm;
+
+                    break;
+
                 case EventQueue.EventTrace:
                     data = MainDB.GetDataFromStoredProc<ApplicationEventData>("EvntTrace_SelectForApplication",
                                                                               parameters, FillEventDataFromReader);

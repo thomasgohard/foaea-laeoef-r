@@ -15,6 +15,10 @@
     "Incoming.FileWatcher.MEP BC": {
       "commandName": "Project",
       "commandLineArgs": "BC"
+    },
+    "Incoming.FileWatcher.MEP QC": {
+      "commandName": "Project",
+      "commandLineArgs": "QC"
     }
   }
 }

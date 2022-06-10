@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,12 @@ namespace FOAEA3.Data.DB
                 parameters.Add("Compl_dte", DBNull.Value);
 
             _ = MainDB.ExecProc("ProductionAuditInsert", parameters);
+        }
+
+        public void Insert(ProductionAuditData productionAuditData)
+        {
+            Insert(productionAuditData.Process_name, productionAuditData.Description, productionAuditData.Audience,
+                   productionAuditData.Compl_dte);
         }
     }
 }

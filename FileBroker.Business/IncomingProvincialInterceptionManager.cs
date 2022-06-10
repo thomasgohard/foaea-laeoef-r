@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Text.RegularExpressions;
+﻿using FOAEA3.Resources;
+using Newtonsoft.Json;
 
 namespace FileBroker.Business
 {
@@ -11,6 +11,7 @@ namespace FileBroker.Business
         private ProvincialAuditFileConfig AuditConfiguration { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
+        private string EnfSrv_Cd { get; }
 
         public IncomingProvincialInterceptionManager(string fileName,
                                                      APIBrokerList apis,
@@ -35,6 +36,8 @@ namespace FileBroker.Business
                     Translations.Add(translation.EnglishText, translation.FrenchText);
             }
 
+            EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
+
         }
 
         private string Translate(string englishText)
@@ -47,7 +50,7 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public MessageDataList ExtractAndProcessRequestsInFile(string sourceInterceptionData, bool includeInfoInMessages = false)
+        public MessageDataList ExtractAndProcessRequestsInFile(string sourceInterceptionData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
@@ -110,7 +113,7 @@ namespace FileBroker.Business
                                 MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                                 NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
                                 NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
-                                NewUpdateSubmitter = data.dat_Update_SubmCd
+                                NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
                             };
 
                             if (isValidData)
@@ -120,13 +123,13 @@ namespace FileBroker.Business
                                 if (messages.ContainsMessagesOfType(MessageType.Error))
                                 {
                                     var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                    fileAuditData.ApplicationMessage = errors[0].Description;
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors[0]);
                                     errorCount++;
                                 }
                                 else if (messages.ContainsMessagesOfType(MessageType.Warning))
                                 {
                                     var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                    fileAuditData.ApplicationMessage = warnings[0].Description;
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings[0]);
                                     warningCount++;
                                 }
                                 else
@@ -138,7 +141,7 @@ namespace FileBroker.Business
                                     }
 
                                     if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                        fileAuditData.ApplicationMessage = "Success";
+                                        fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
                                     successCount++;
                                 }
                             }
@@ -154,8 +157,13 @@ namespace FileBroker.Business
 
                     }
 
-                    fileAuditManager.GenerateAuditFile(FileName, errorCount, warningCount, successCount);
-                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, errorCount, warningCount, successCount);
+                    fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
+                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients,
+                                                            errorCount, warningCount, successCount, unknownTags.Count);
+
+                    if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                        AutoAcceptVariations(EnfSrv_Cd);
+
                 }
 
             }
@@ -174,11 +182,27 @@ namespace FileBroker.Business
             return result;
         }
 
+        public void AutoAcceptVariations(string enfService)
+        {
+            var prodAudit = APIs.ProductionAudits;
+            
+            string processName = $"Process Auto Accept Variation {enfService}";
+            prodAudit.Insert(processName, "Divert Funds Started", "O");
+
+            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
+            var applAutomation = APIs.InterceptionApplications.GetApplicationsForVariationAutoAccept(enfService);
+
+            foreach (var appl in applAutomation)
+                APIs.InterceptionApplications.AcceptVariation(appl);
+
+            prodAudit.Insert(processName, "Ended", "O");
+        }
+
         public MessageDataList ProcessApplicationRequest(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
 
-            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.Application.Subm_SubmCd;
+            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.NewUpdateSubmitter;
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
@@ -218,6 +242,17 @@ namespace FileBroker.Business
             return interception.Messages;
         }
 
+        private string BuildDescriptionForMessage(MessageData error)
+        {
+            var thisErrorDescription = string.Empty;
+            if (error.Code != EventCode.UNDEFINED)
+                thisErrorDescription += error.Code.ToString();
+            if (!string.IsNullOrEmpty(error.Description.Trim()))
+                thisErrorDescription += error.Description.Trim();
+
+            return thisErrorDescription;
+        }
+
         private void ValidateHeader(MEPInterception_InterceptionDataSet interceptionFile, ref MessageDataList result, ref bool isValid)
         {
             int cycle = FileHelper.GetCycleFromFilename(FileName);
@@ -241,18 +276,20 @@ namespace FileBroker.Business
         private static void ValidateActionCode(MEPInterception_RecType10 data, ref MessageDataList result, ref bool isValid)
         {
             bool validActionLifeState = true;
+            string actionCode = data.Maintenance_ActionCd.Trim();
+            string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-            if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
+            if ((actionCode == "A") && actionState.NotIn("00", "0"))
                 validActionLifeState = false;
-            else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "0", "14", "29")))
+            else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "17", "29", "35")))
                 validActionLifeState = false;
-            else if (data.Maintenance_ActionCd.NotIn("A", "C"))
+            else if (actionCode.NotIn("A", "C"))
                 validActionLifeState = false;
 
             if (!validActionLifeState)
             {
                 isValid = false;
-                result.AddSystemError($"Invalid MaintenanceAction [{data.Maintenance_ActionCd}] and MaintenanceLifeState [{data.dat_Appl_LiSt_Cd}] combination.");
+                result.AddSystemError($"Invalid MaintenanceAction [{actionCode}] and MaintenanceLifeState [{actionState}] combination.");
             }
 
         }
@@ -292,35 +329,129 @@ namespace FileBroker.Business
             return result;
         }
 
-        private InterceptionApplicationData GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
-                                                                             MEPInterception_RecType11 interceptionData,
-                                                                             MEPInterception_RecType12 financialData,
-                                                                             List<MEPInterception_RecType13> sourceSpecificData,
-                                                                             ref FileAuditData fileAuditData,
-                                                                             ref int errorCount,
-                                                                             out bool isValidData)
+        internal InterceptionApplicationData GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
+                                                                              MEPInterception_RecType11 interceptionData,
+                                                                              MEPInterception_RecType12 financialData,
+                                                                              List<MEPInterception_RecType13> sourceSpecificData,
+                                                                              ref FileAuditData fileAuditData,
+                                                                              ref int errorCount,
+                                                                              out bool isValidData)
         {
             DateTime now = DateTime.Now;
-            bool isVariation = (baseData.dat_Appl_LiSt_Cd == "17");
+            bool isVariation = baseData.dat_Appl_LiSt_Cd == "17";
+            bool isCancelOrSuspend = baseData.dat_Appl_LiSt_Cd.In("14", "35");
+            bool isCreate = false;
+
+            if (baseData.Maintenance_ActionCd == "A")
+                isCreate = true;
 
             isValidData = true;
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            ExtractAndValidateDefaultFinancialInformation(isVariation, financialData, fileAuditData, ref isValidData,
-                                                          now, interceptionApplication);
+            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && 
+                !isCancelOrSuspend)
+            {
+                ExtractDefaultFinancialData(isVariation, financialData, fileAuditData, ref isValidData,
+                                            now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
 
-            foreach (var sourceSpecific in sourceSpecificData)
-                interceptionApplication.HldbCnd.Add(ExtractAndValidateSourceSpecificFinancialInformation(sourceSpecific,
-                                                                                                         fileAuditData,
-                                                                                                         ref isValidData,
-                                                                                                         now,
-                                                                                                         interceptionApplication));
+                if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
+                {
+                    foreach (var sourceSpecific in sourceSpecificData)
+                    {
+                        var newSourceSpecificData = ExtractAndValidateSourceSpecificData(sourceSpecific, fileAuditData,
+                                                                                         ref isValidData, now,
+                                                                                         interceptionApplication);
+                        interceptionApplication.HldbCnd.Add(newSourceSpecificData);
+                    }
+                }
+            }
+
+            if (isCreate && (interceptionApplication != null) &&
+                (interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue))
+            {
+                fileAuditData.ApplicationMessage = "Missing financials!";
+                errorCount++;
+            }
 
             if (!isValidData)
                 errorCount++;
 
             return interceptionApplication;
+        }
+
+        private bool IsValidAppl(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        {
+            var fieldErrors = new Dictionary<string, string>
+            {
+                {"Appl_Dbtr_Addr_PrvCd", "Invalid Debtor Address Province Code (<Appl_Dbtr_Addr_PrvCd>) value {0} for Country Code (<Appl_Dbtr_Addr_CtryCd>) value {1}"},
+                {"Medium_Cd", "Invalid Medium Code (<dat_Appl_Medium_Cd>) value"},
+                {"Appl_Dbtr_LngCd", "Invalid Debtor Language Code (<dat_Appl_Dbtr_LngCd>) value"},
+                {"Appl_Dbtr_Gendr_Cd", "Invalid Debtor Gender Code(<dat_Appl_Dbtr_Gendr_Cd>) value"},
+                {"Appl_EnfSrv_Cd", "Invalid Enforcement Service Code (<dat_Appl_EnfSrvCd>) value"},
+                {"Appl_Affdvt_DocTypCd", "Invalid Supporting Document Type (<dat_Appl_Affdvt_Doc_TypCd>) value"},
+                {"Appl_Dbtr_Addr_CtryCd", "Invalid Debtor Address Country Code (<dat_Appl_Dbtr_Addr_CtryCd>) value"},
+                {"AppReas_Cd", "Invalid Reason Code (<dat_Appl_Reas_Cd>) value"},
+                {"AppList_Cd", "Invalid Life State Code (<dat_Appl_LiSt_Cd>) value"},
+                {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
+            };
+
+            var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
+            interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
+
+            var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
+
+            if (errors.Any())
+            {
+                foreach (var error in errors)
+                {
+                    if (fieldErrors.ContainsKey(error.Field))
+                    {
+                        if (error.Field == "Appl_Dbtr_Addr_PrvCd")
+                            fileAuditData.ApplicationMessage = String.Format(Translate(fieldErrors[error.Field]),
+                                                                             validatedApplication.Appl_Dbtr_Addr_PrvCd,
+                                                                             validatedApplication.Appl_Dbtr_Addr_CtryCd);
+                        else
+                            fileAuditData.ApplicationMessage = Translate(fieldErrors[error.Field]);
+                    }
+                    else
+                        fileAuditData.ApplicationMessage = error.Description;
+
+                    isValidData = false;
+
+                    break;
+                }
+
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        {
+            var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
+            interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
+
+            var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
+
+            if (errors.Any())
+            {
+                foreach (var error in errors)
+                {
+                    fileAuditData.ApplicationMessage = Translate(error.Description);
+
+                    isValidData = false;
+
+                    break;
+                }
+
+                return false;
+            }
+
+            return true;
+
         }
 
         private static InterceptionApplicationData ExtractInterceptionBaseData(MEPInterception_RecType10 baseData, MEPInterception_RecType11 interceptionData, DateTime now)
@@ -368,12 +499,13 @@ namespace FileBroker.Business
             return interceptionApplication;
         }
 
-        private bool ExtractAndValidateDefaultFinancialInformation(bool isVariation,
+        private bool ExtractDefaultFinancialData(bool isVariation,
                                                                    MEPInterception_RecType12 financialData,
                                                                    FileAuditData fileAuditData,
                                                                    ref bool isValidData,
                                                                    DateTime now,
-                                                                   InterceptionApplicationData interceptionApplication)
+                                                                   InterceptionApplicationData interceptionApplication,
+                                                                   string actionState)
         {
             isValidData = true;
 
@@ -390,9 +522,7 @@ namespace FileBroker.Business
             intFinH.IntFinH_DefHldbAmn_Money = financialData.dat_IntFinH_DefHldbAmn_Money.Convert<decimal?>();
             intFinH.IntFinH_DefHldbAmn_Period = financialData.dat_IntFinH_DefHldbAmn_Period;
             if (isVariation)
-                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? DateTime.Now;
-
-            intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte;
+                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? now;
 
             intFinH.IntFinH_CmlPrPym_Ind = financialData.dat_IntFinH_CmlPrPym_Ind.Convert<byte?>();
             if (intFinH.IntFinH_CmlPrPym_Ind.HasValue)
@@ -409,169 +539,13 @@ namespace FileBroker.Business
             if (intFinH.IntFinH_DefHldbAmn_Money is not null)
                 intFinH.IntFinH_DefHldbAmn_Money /= 100M;
 
-            // fix and validate various options
-            if (intFinH.IntFinH_DefHldbAmn_Money is null)
-            {
-                intFinH.IntFinH_DefHldbAmn_Money = 0;
-                intFinH.IntFinH_DefHldbAmn_Period = null;
-            }
-            else
-            {
-                if (intFinH.IntFinH_DefHldbAmn_Period is null)
-                {
-                    fileAuditData.ApplicationMessage = Translate("Default Holdback Amount (<IntFinH_DefHldbAmn_Money>) provided with no default holdback amount period code (<dat_IntFinH_DefHldbAmn_Period>)");
-                    isValidData = false;
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(intFinH.PymPr_Cd))
-                    {
-                        if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
-                        {
-                            fileAuditData.ApplicationMessage = Translate("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
-                            isValidData = false;
-                        }
-                        else
-                        {
-                            if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() == intFinH.PymPr_Cd.ToUpper())
-                            {
-                                fileAuditData.ApplicationMessage = Translate("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)");
-                                isValidData = false;
-                            }
-                            else
-                            {
-                                if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
-                                {
-                                    fileAuditData.ApplicationMessage = Translate("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
-                                    isValidData = false;
-                                }
-                                if (intFinH.PymPr_Cd.ToUpper() != "C")
-                                {
-                                    fileAuditData.ApplicationMessage = Translate("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)");
-                                    isValidData = false;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (intFinH.IntFinH_DefHldbPrcnt is null)
-                intFinH.IntFinH_DefHldbPrcnt = 0;
-            else if (intFinH.IntFinH_DefHldbPrcnt is < 0 or > 100)
-            {
-                fileAuditData.ApplicationMessage = Translate("Invalid percentage (<IntFinH_DefHldbPrcnt>) was submitted with an amount < 0 or > 100");
-                isValidData = false;
-            }
-            
-            if (intFinH.IntFinH_DefHldbPrcnt is 0 && intFinH.IntFinH_DefHldbAmn_Money is 0)
-            {
-                intFinH.HldbTyp_Cd = null;
-                intFinH.IntFinH_DefHldbPrcnt = null;
-                intFinH.IntFinH_DefHldbAmn_Money = null;
-                intFinH.IntFinH_DefHldbAmn_Period = null;
-            }
-            else if (intFinH.IntFinH_DefHldbPrcnt is > 0 && intFinH.IntFinH_DefHldbAmn_Money is 0)
-            {
-                intFinH.HldbTyp_Cd = "T";
-                intFinH.IntFinH_DefHldbAmn_Money = null;
-                intFinH.IntFinH_DefHldbAmn_Period = null;
-            }
-            else
-            {
-                intFinH.HldbTyp_Cd = "P";
-                intFinH.IntFinH_DefHldbPrcnt = null;
-            }
-
-            if (intFinH.IntFinH_PerPym_Money is not null)
-            {
-                if (intFinH.IntFinH_PerPym_Money == 0)
-                {
-                    intFinH.IntFinH_PerPym_Money = null;
-                    intFinH.PymPr_Cd = null;
-                    intFinH.IntFinH_CmlPrPym_Ind = null;
-                    fileAuditData.ApplicationMessage = Translate("Success. Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was not submitted. All data for Periodic Payment Amount (<dat_IntFinH_Perpym_Money>), Frequency Payment Code (<PymPr_Cd>) and Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) has been removed");
-                }
-                else
-                {
-                    if (intFinH.PymPr_Cd is null)
-                    {
-                        fileAuditData.ApplicationMessage = Translate("Periodic Amount (<dat_IntFinH_Perpym_Money>) provided with no frequency payment code (<dat_PymPr_Cd>)");
-                        isValidData = false;
-                    }
-                    else
-                    {
-                        var rEx = new Regex("^[A-G]$");
-                        if (!rEx.IsMatch(intFinH.PymPr_Cd.ToUpper()))
-                        {
-                            fileAuditData.ApplicationMessage = Translate("Invalid Frequency Payment Code (<dat_PymPr_Cd>)");
-                            isValidData = false;
-                        }
-                    }
-                    if (intFinH.IntFinH_CmlPrPym_Ind is null)
-                    {
-                        fileAuditData.ApplicationMessage = Translate("Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was submitted with an amount > 0. Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) does not exist or is invalid");
-                        isValidData = false;
-                    }
-                }
-            }
-            else
-            {
-                if (intFinH.PymPr_Cd is not null)
-                {
-                    intFinH.IntFinH_PerPym_Money = null;
-                    intFinH.PymPr_Cd = null;
-                    intFinH.IntFinH_CmlPrPym_Ind = null;
-                    fileAuditData.ApplicationMessage = Translate("Success. Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was not submitter. All data for Periodic Payment Amount (<dat_IntFinH_Perpym_Money>), Frequency Payment Code (<PymPr_Cd>) and Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) has been removed");
-                }
-            }
-
-            // CR 672 - The amount in the arrears field (I01) should not be able to be negative via FTP (FTP) 
-            if (intFinH.IntFinH_LmpSum_Money < 0)
-            {
-                fileAuditData.ApplicationMessage = Translate("Lump Sum Amount (<dat_IntFinH_LmpSum_Money>) was submitted with an amount < 0");
-                isValidData = false;
-            }
-            // CR 672 - dat_IntFinH_LmpSum_Money and dat_IntFinH_Perpym_Money both have no value
-            if ((intFinH.IntFinH_LmpSum_Money == 0) && (intFinH.IntFinH_PerPym_Money is null))
-            {
-                fileAuditData.ApplicationMessage = Translate("Lump Sum Amount (<dat_IntFinH_LmpSum_Money>) and Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) both sent without a value.");
-                isValidData = false;
-            }
-
-            if (intFinH.IntFinH_NextRecalcDate_Cd is not null)
-            {
-                if ((intFinH.PymPr_Cd is null) || (intFinH.PymPr_Cd.ToUpper().NotIn("A", "B", "C")))
-                {
-                    fileAuditData.ApplicationMessage = Translate("Warning: Next Recalculation Date Code (<dat_IntFinH_NextRecalc_Dte>) can only be used if the payment period is monthly, weekly or bi-weekly. Value will be ignored.");
-                    intFinH.IntFinH_NextRecalcDate_Cd = null;
-                }
-                else
-                {
-                    int nextRecalcCode = intFinH.IntFinH_NextRecalcDate_Cd.Value;
-
-                    if ((intFinH.PymPr_Cd.ToUpper() == "A") && (nextRecalcCode is < 1 or > 7))
-                    {
-                        fileAuditData.ApplicationMessage = Translate("Warning: Invalid value for Next Recalculation Date Code (<dat_IntFinH_NextRecalc_Dte>). Must be between 1 and 7 for weekly the payment period. Value will be ignored.");
-                        intFinH.IntFinH_NextRecalcDate_Cd = null;
-                    }
-                    else if ((intFinH.PymPr_Cd.ToUpper() == "B") && (nextRecalcCode is < 1 or > 14))
-                    {
-                        fileAuditData.ApplicationMessage = Translate("Warning: Invalid value for Next Recalculation Date Code (<dat_IntFinH_NextRecalc_Dte>). Must be between 1 and 14 for bi-weekly the payment period. Value will be ignored.");
-                        intFinH.IntFinH_NextRecalcDate_Cd = null;
-                    }
-                    else if ((intFinH.PymPr_Cd.ToUpper() == "C") && (nextRecalcCode is < 1 or > 31))
-                    {
-                        fileAuditData.ApplicationMessage = Translate("Warning: Invalid value for Next Recalculation Date Code (<dat_IntFinH_NextRecalc_Dte>). Must be between 1 and 31 for monthly the payment period. Value will be ignored.");
-                        intFinH.IntFinH_NextRecalcDate_Cd = null;
-                    }
-                }
-            }
+            // TODO: validations should be moved to backend Interception manager/API
+            // Call API to validate financial info
 
             return isValidData;
         }
 
-        private HoldbackConditionData ExtractAndValidateSourceSpecificFinancialInformation(MEPInterception_RecType13 sourceSpecific,
+        private HoldbackConditionData ExtractAndValidateSourceSpecificData(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
                                                                                            ref bool isValidData,
                                                                                            DateTime now,

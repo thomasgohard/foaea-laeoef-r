@@ -2,6 +2,8 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
+using System;
+using System.Collections.Generic;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -57,5 +59,25 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application)
+        {
+            string apiCall = "api/v1/Interceptions/ValidateFinancialCoreValues";
+            return ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application).Result;
+        }
+
+        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        {
+            string apiCall = $"api/v1/interceptions/GetApplicationsForVariationAutoAccept?enfService={enfService}";
+            return ApiHelper.GetDataAsync<List<InterceptionApplicationData>>(apiCall).Result;
+        }
+
+        public InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication)
+        {
+            string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/interceptions/{key}/AcceptVariation?autoAccept=true";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                           interceptionApplication).Result;
+            return data;
+        }
     }
 }

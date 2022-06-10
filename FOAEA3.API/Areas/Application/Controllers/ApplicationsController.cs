@@ -4,7 +4,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
@@ -42,19 +41,24 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return NotFound();
         }
 
-        [HttpGet("Stats")]
-        public ActionResult<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
-                                                                   [FromQuery] int maxRecords,
-                                                                   [FromQuery] string activeState,
-                                                                   [FromQuery] string recipientCode)
-        { 
+        [HttpPut("{id}/ValidateCoreValues")]
+        public ActionResult<ApplicationData> ValidateCoreValues([FromRoute] string id, 
+                                                                [FromServices] IRepositories repositories)
+        {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var appl = new ApplicationData();
-            var applManager = new ApplicationManager(appl, repositories, config);
+            var applKey = new ApplKey(id);
 
-            return applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
+            var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+            var applicationValidation = new ApplicationValidation(appl, repositories, config);
+
+            bool isValid = applicationValidation.ValidateCodeValues();
+
+            if (isValid)
+                return Ok(appl);
+            else
+                return UnprocessableEntity(appl);
         }
 
         [HttpGet("{id}/SINresults")]
@@ -93,15 +97,15 @@ namespace FOAEA3.API.Areas.Application.Controllers
                 return NotFound();
         }
 
-        [HttpPut("{key}/SinConfirmation")]
-        public ActionResult<ApplicationData> SINconfirmation([FromRoute] string key,
+        [HttpPut("{id}/SinConfirmation")]
+        public ActionResult<ApplicationData> SINconfirmation([FromRoute] string id,
                                                              [FromServices] IRepositories repositories,
                                                              [FromServices] IRepositories_Finance repositoriesFinance)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
-            var applKey = new ApplKey(key);
+            var applKey = new ApplKey(id);
 
             var sinConfirmationData = APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
 
@@ -140,5 +144,22 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
             return Ok(application);
         }
+
+        [HttpGet("Stats")]
+        public ActionResult<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
+                                                                   [FromQuery] int maxRecords,
+                                                                   [FromQuery] string activeState,
+                                                                   [FromQuery] string recipientCode)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var appl = new ApplicationData();
+            var applManager = new ApplicationManager(appl, repositories, config);
+
+            return applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
+        }
+
+
     }
 }

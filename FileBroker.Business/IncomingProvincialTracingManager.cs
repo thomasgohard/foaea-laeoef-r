@@ -20,7 +20,7 @@ public class IncomingProvincialTracingManager
         AuditConfiguration = auditConfig;
     }
 
-    public MessageDataList ExtractAndProcessRequestsInFile(string sourceTracingData, bool includeInfoInMessages = false)
+    public MessageDataList ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
@@ -123,8 +123,9 @@ public class IncomingProvincialTracingManager
 
                 }
 
-                fileAuditManager.GenerateAuditFile(FileName, errorCount, warningCount, successCount);
-                fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, errorCount, warningCount, successCount);
+                fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
+                fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, 
+                                                        errorCount, warningCount, successCount, unknownTags.Count);
             }
 
         }
@@ -204,18 +205,20 @@ public class IncomingProvincialTracingManager
     private static void ValidateActionCode(MEPTracing_RecType20 data, ref MessageDataList result, ref bool isValid)
     {
         bool validActionLifeState = true;
+        string actionCode = data.Maintenance_ActionCd.Trim();
+        string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-        if ((data.Maintenance_ActionCd == "A") && data.dat_Appl_LiSt_Cd.NotIn("00", "0"))
+        if ((actionCode == "A") && actionState.NotIn("00", "0"))
             validActionLifeState = false;
-        else if ((data.Maintenance_ActionCd == "C") && (data.dat_Appl_LiSt_Cd.NotIn("00", "14", "29")))
+        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
             validActionLifeState = false;
-        else if (data.Maintenance_ActionCd.NotIn("A", "C"))
+        else if (actionCode.NotIn("A", "C"))
             validActionLifeState = false;
 
         if (!validActionLifeState)
         {
             isValid = false;
-            result.AddSystemError($"Invalid MaintenanceAction [{data.Maintenance_ActionCd}] and MaintenanceLifeState [{data.dat_Appl_LiSt_Cd}] combination.");
+            result.AddSystemError($"Invalid MaintenanceAction [{actionCode}] and MaintenanceLifeState [{actionState}] combination.");
         }
 
     }

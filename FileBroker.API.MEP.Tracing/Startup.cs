@@ -38,9 +38,10 @@ namespace FileBroker.API.MEP.Tracing
             string fileBrokerCON = Configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
 
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]FileBroker.API.MEP.Tracing[/cyan]...");
-            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{fileBrokerCON}[/yellow]");
 
-            DataHelper.ConfigureDBServices(services, fileBrokerCON);
+            string actualConnection = DataHelper.ConfigureDBServices(services, fileBrokerCON);
+
+            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{actualConnection}[/yellow]");
 
             services.Configure<ProvincialAuditFileConfig>(Configuration.GetSection("AuditConfig"));
             services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace FOAEA3.API.Interception.Controllers
@@ -49,6 +50,21 @@ namespace FOAEA3.API.Interception.Controllers
             else
                 return NotFound();
 
+        }
+
+        [HttpGet("GetApplicationsForVariationAutoAccept")]
+        public ActionResult<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAccept(
+                                                                            [FromServices] IRepositories repositories,
+                                                                            [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                            [FromQuery] string enfService)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
+            var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
+
+            return Ok(data);
         }
 
         [HttpPost]
@@ -108,7 +124,10 @@ namespace FOAEA3.API.Interception.Controllers
             switch (command.ToLower())
             {
                 case "":
-                    interceptionManager.UpdateApplication();
+                    if (application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
+                        interceptionManager.CancelApplication();
+                    else
+                        interceptionManager.UpdateApplication();
                     break;
 
                 case "partiallyserviceapplication":
@@ -129,6 +148,23 @@ namespace FOAEA3.API.Interception.Controllers
             else
                 return UnprocessableEntity(application);
 
+        }
+
+        [HttpPut("ValidateFinancialCoreValues")]
+        public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+            var interceptionValidation = new InterceptionValidation(appl, repositories, config);
+
+            bool isValid = interceptionValidation.ValidateFinancialCoreValues();
+
+            if (isValid)
+                return Ok(appl);
+            else
+                return UnprocessableEntity(appl);
         }
 
         [HttpPut("{key}/SINbypass")]
@@ -204,7 +240,8 @@ namespace FOAEA3.API.Interception.Controllers
         public ActionResult<InterceptionApplicationData> AcceptVariation([FromRoute] string key,
                                                                          [FromServices] IRepositories repositories,
                                                                          [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                         [FromQuery] DateTime supportingDocsReceiptDate)
+                                                                         [FromQuery] DateTime supportingDocsReceiptDate,
+                                                                         [FromQuery] bool autoAccept)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
@@ -218,7 +255,7 @@ namespace FOAEA3.API.Interception.Controllers
 
             var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-            if (appManager.AcceptVariation(supportingDocsReceiptDate))
+            if (appManager.AcceptVariation(supportingDocsReceiptDate, autoAccept))
                 return Ok(application);
             else
                 return UnprocessableEntity(application);

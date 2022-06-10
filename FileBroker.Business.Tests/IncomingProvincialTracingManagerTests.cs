@@ -1,10 +1,12 @@
 using DBHelper;
+using FileBroker.Business.Tests.InMemory;
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FileBroker.Model;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Resources.Helpers;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Xunit;
@@ -61,9 +63,10 @@ namespace FileBroker.Business.Tests
         {
             // Arrange
             SetupTestAndLoadFile("ON3D01IT.000001.xml");
+            var unknownTags = new List<UnknownTag>();
 
             // Act
-            var messages = tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData, includeInfoInMessages: true);
+            var messages = tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData, unknownTags, includeInfoInMessages: true);
 
             // Assert
             Assert.Equal("Success", fileAuditDB.FileAuditTable[0].ApplicationMessage);
@@ -76,9 +79,10 @@ namespace FileBroker.Business.Tests
         {
             // Arrange
             SetupTestAndLoadFile("ON3D01IT.000002.xml");
+            var unknownTags = new List<UnknownTag>();
 
             // Act
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData);
+            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData, unknownTags);
 
             // Assert
             Assert.Equal("Invalid MaintenanceAction [Z] and MaintenanceLifeState [00] combination.", fileAuditDB.FileAuditTable[0].ApplicationMessage);

@@ -1,4 +1,8 @@
-﻿namespace FOAEA3.Model.Interfaces.Broker
+﻿using FOAEA3.Model.Enums;
+using System;
+using System.Collections.Generic;
+
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface IInterceptionApplicationAPIBroker
     {
@@ -10,5 +14,10 @@
         InterceptionApplicationData TransferInterceptionApplication(InterceptionApplicationData interceptionApplication,
                                                                  string newRecipientSubmitter,
                                                                  string newIssuingSubmitter);
+
+        InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application);
+
+        List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService);
+        InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication);
     }
 }

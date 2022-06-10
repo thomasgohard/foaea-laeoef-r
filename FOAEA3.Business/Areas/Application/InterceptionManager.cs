@@ -187,11 +187,13 @@ namespace FOAEA3.Business.Areas.Application
         {
             base.UpdateApplicationNoValidation();
 
-            if (InterceptionApplication.IntFinH is not null)
+            if ((InterceptionApplication.IntFinH is not null) && (InterceptionApplication.IntFinH.IntFinH_Dte != DateTime.MinValue))
+            {
                 Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
 
-            if (InterceptionApplication.HldbCnd is not null)
-                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+                if ((InterceptionApplication.HldbCnd is not null) && (InterceptionApplication.HldbCnd.Count > 0))
+                    Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
         }
 
         public bool VaryApplication()
@@ -205,6 +207,15 @@ namespace FOAEA3.Business.Areas.Application
             string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
+
+            // for FTP, also keep changes to address, phone # and ref code:
+            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
 
             if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
@@ -221,10 +232,21 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
+            if (InterceptionApplication.Medium_Cd == "FTP")
+            {
+                InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+                InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+                InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+                InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+                InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+                InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+                InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+            }
+
             var summSmry = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmry is null)
             {
-                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients,
                                $"No summsmry record was found for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot vary.");
                 return false;
             }
@@ -327,8 +349,19 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            var applicationManagerCopy = new InterceptionManager(Repositories, RepositoriesFinance, config);
-            if (!applicationManagerCopy.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd))
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            var newIntFinH = InterceptionApplication.IntFinH;
+            var newHldbCnd = InterceptionApplication.HldbCnd;
+
+            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
                 InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
                 return false;
@@ -337,16 +370,19 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            var interceptionCurrentlyInDB = applicationManagerCopy.InterceptionApplication;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            InterceptionApplication.IntFinH = newIntFinH;
+            InterceptionApplication.HldbCnd = newHldbCnd;
 
-            InterceptionApplication.Appl_Dbtr_Addr_Ln = interceptionCurrentlyInDB.Appl_Dbtr_Addr_Ln;
-            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = interceptionCurrentlyInDB.Appl_Dbtr_Addr_Ln1;
-            InterceptionApplication.Appl_Dbtr_Addr_PCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_PCd;
-            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_PrvCd;
-            InterceptionApplication.Appl_Dbtr_Addr_CityNme = interceptionCurrentlyInDB.Appl_Dbtr_Addr_CityNme;
-            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = interceptionCurrentlyInDB.Appl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
 
-            if (interceptionCurrentlyInDB.ActvSt_Cd != "A")
+            if (InterceptionApplication.ActvSt_Cd != "A")
             {
                 EventManager.AddEvent(EventCode.C50841_CAN_ONLY_CANCEL_AN_ACTIVE_APPLICATION);
                 return false;
@@ -452,6 +488,19 @@ namespace FOAEA3.Business.Areas.Application
 
             return true;
 
+        }
+
+        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        {
+            var applications = Repositories.ApplicationRepository.GetApplicationsForAutomation(enfService, medium_Cd: null,
+                                                                        ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19,
+                                                                        "I01", "A");
+
+            var interceptions = new List<InterceptionApplicationData>();
+            foreach (var application in applications)
+                interceptions.Add(new InterceptionApplicationData(application));
+
+            return interceptions;
         }
 
         public bool AcceptVariation(DateTime supportingDocsDate, bool isAutoAccept = false)
@@ -587,7 +636,7 @@ namespace FOAEA3.Business.Areas.Application
 
             InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
-            return true;            
+            return true;
         }
 
         public override void ProcessBringForwards(ApplicationEventData bfEvent)
@@ -631,7 +680,7 @@ namespace FOAEA3.Business.Areas.Application
                                 {
                                     DateTime dateForNextBF = DateTime.Now.AddDays(5);
                                     EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
-                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, 
+                                    EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION,
                                                             effectiveTimestamp: dateForNextBF);
                                 }
                             }

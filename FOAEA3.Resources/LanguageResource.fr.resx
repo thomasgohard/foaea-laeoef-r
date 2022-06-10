@@ -396,4 +396,7 @@
   <data name="CONTROL_CODE" xml:space="preserve">
     <value>Code de controle</value>
   </data>
+  <data name="AUDIT_SUCCESS" xml:space="preserve">
+    <value>Succès</value>
+  </data>
 </root>

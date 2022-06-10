@@ -7,6 +7,7 @@ using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -23,7 +24,8 @@ namespace FOAEA3.Business.Areas.Application
 
         public bool IsSystemGeneratedControlCode { get; set; }
 
-        public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager, IRepositories repositories, CustomConfig config)
+        public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
+                                     IRepositories repositories, CustomConfig config)
         {
             this.config = config;
             Application = application;
@@ -210,15 +212,22 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual bool IsValidPostalCode()
+        public virtual bool IsValidPostalCode(out string reasonText)
         {
+            // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
+            // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
+            // 2-Postal code does not match the Province/Territory (if the Province associated to the postal code is not the same in the application VS the Canada Post file)
+            // 3-Postal code does not match City (if the City associated to the postal code is not the same in the application VS the two found in the Canada Post file)
+            // More than one of these can occur for the same triggering of Event 50772 (really just 2 and 3).
+
             string postalCode = Application.Appl_Dbtr_Addr_PCd;
             string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
             string cityName = Application.Appl_Dbtr_Addr_CityNme;
+            reasonText = string.Empty;
 
             if (postalCode == "-")
             {
-                Application.Messages.AddError("Invalid Single Dash Postal Code");
+                if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Single Dash Postal Code");
                 return false;
             }
 
@@ -226,15 +235,18 @@ namespace FOAEA3.Business.Areas.Application
             {
                 if (!ValidationHelper.IsValidPostalCode(postalCode))
                 {
-                    Application.Messages.AddError("Invalid Postal Code Format");
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code Format");
+                    reasonText = "1";
                     return false;
                 }
 
                 var postalCodeDB = Repositories.PostalCodeRepository;
-                if (!postalCodeDB.ValidatePostalCode(postalCode, provinceCode, cityName, 
-                                                     out string validProvCode, out PostalCodeFlag validFlags))
+                PostalCodeFlag validFlags;
+                if (!postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName,
+                                                     out string validProvCode, out validFlags))
                 {
-                    Application.Messages.AddError("Invalid Postal Code for Province/City");
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
+
                     return false;
                 }
 
@@ -250,6 +262,20 @@ namespace FOAEA3.Business.Areas.Application
                     };
                 }
 
+                if (!validFlags.IsPostalCodeValid)
+                    reasonText = "1";
+                else
+                {
+                    if (!validFlags.IsProvinceValid)
+                        reasonText = "2";
+
+                    if (!validFlags.IsCityNameValid)
+                        reasonText = "3";
+
+                    if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                        reasonText = "2,3";
+                }
+
                 if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid)
                     Application.Messages.AddWarning("Postal Code failed lookup province");
 
@@ -258,6 +284,9 @@ namespace FOAEA3.Business.Areas.Application
 
                 else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
                     Application.Messages.AddWarning("Postal Code failed lookup city and province");
+
+                if (!string.IsNullOrEmpty(reasonText))
+                    return false;
 
                 return true;
             }
@@ -564,6 +593,156 @@ namespace FOAEA3.Business.Areas.Application
             return revertedSomeFields;
         }
 
+        public bool ValidateCodeValues()
+        {
+            PostalCodeValidationInBound();
+
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            if (!string.IsNullOrEmpty(debtorCountry) &&
+                !string.IsNullOrEmpty(debtorProvince) &&
+                (debtorCountry != "USA"))
+            {
+                if (ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                {
+                    string countryForProvince = ReferenceData.Instance().Provinces[debtorProvince].PrvCtryCd;
+                    if (countryForProvince == "USA")
+                        Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                }
+            }
+
+            if (!ReferenceData.Instance().Mediums.ContainsKey(Application.Medium_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for Medium_Cd", "Medium_Cd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Languages.ContainsKey(Application.Appl_Dbtr_LngCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_LngCd", "Appl_Dbtr_LngCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Genders.ContainsKey(Application.Appl_Dbtr_Gendr_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Gendr_Cd", "Appl_Dbtr_Gendr_Cd");
+                return false;
+            }
+
+            var enfServices = Repositories.EnfSrvRepository.GetEnfService();
+            if (enfServices != null)
+            {
+                var service = enfServices.FirstOrDefault(m => m.EnfSrv_Cd.Trim() == Application.Appl_EnfSrv_Cd.Trim());
+                if (service is null)
+                {
+                    Application.Messages.AddError("Code Value Error for Appl_EnfSrv_Cd", "Appl_EnfSrv_Cd");
+                    return false;
+                }
+            }
+
+            if (!ReferenceData.Instance().DocumentTypes.ContainsKey(Application.Appl_Affdvt_DocTypCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Affdvt_DocTypCd", "Appl_Affdvt_DocTypCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().Countries.ContainsKey(Application.Appl_Dbtr_Addr_CtryCd))
+            {
+                Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_CtryCd", "Appl_Dbtr_Addr_CtryCd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().ApplicationReasons.ContainsKey(Application.AppReas_Cd.Trim()))
+            {
+                Application.Messages.AddError("Code Value Error for AppReas_Cd", "AppReas_Cd");
+                return false;
+            }
+
+            if (!ReferenceData.Instance().ApplicationCategories.ContainsKey(Application.AppCtgy_Cd))
+            {
+                Application.Messages.AddError("Code Value Error for AppCtgy_Cd", "AppCtgy_Cd");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PostalCodeValidationInBound()
+        {
+            bool isProvValid = true;
+
+            //--------------------------------------------------------------------------------------------
+            // CR526/542 - This block of original code checks import province is in prv table...
+            // This is a bit redundant for postal code validation, but other things depend on it 
+            // so leave it alone...
+            //--------------------------------------------------------------------------------------------
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            string debtorCity = Application.Appl_Dbtr_Addr_CityNme.Trim();
+            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd.Replace(" ", "");
+
+            if (debtorCountry is "CAN")
+            {
+                if (string.IsNullOrEmpty(debtorProvince))
+                    isProvValid = false;
+                else
+                {
+                    if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                        isProvValid = false;
+                    else
+                    {
+                        var provinceData = ReferenceData.Instance().Provinces[debtorProvince];
+                        if (provinceData.PrvCtryCd != "CAN")
+                            isProvValid = false;
+                    }
+                }
+
+                if (!isProvValid && Application.AppLiSt_Cd.In(ApplicationState.MANUALLY_TERMINATED_14,
+                                                              ApplicationState.FINANCIAL_TERMS_VARIED_17,
+                                                              ApplicationState.APPLICATION_SUSPENDED_35))
+                {
+                    Application.Appl_Dbtr_Addr_PrvCd = null;
+                    if (Application.AppLiSt_Cd != ApplicationState.APPLICATION_SUSPENDED_35)
+                    {
+                        Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                        return;
+                    }
+                }
+            }
+
+            // CR526/542 CODE START:
+            // This new block is for the revamped postal code validation (new requirements).
+            // -----------------------------------------------------------------------------
+            bool canValidatePostalCode = false;
+
+            if (Application.AppLiSt_Cd.In(ApplicationState.INITIAL_STATE_0, ApplicationState.INVALID_APPLICATION_1,
+                                          ApplicationState.SIN_NOT_CONFIRMED_5))
+            {
+                canValidatePostalCode = true;
+            }
+
+            if ((debtorCountry is "CAN") && (canValidatePostalCode))
+            {
+                var postalCodeDB = Repositories.PostalCodeRepository;
+                postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity,
+                                                out string validProvCode, out PostalCodeFlag validFlags);
+
+                if (validFlags.IsPostalCodeValid)
+                {
+                    if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
+                        Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                }
+                else
+                {
+                    Application.Appl_Dbtr_Addr_PrvCd = null;
+                    Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
+                }
+
+            }
+
+        }
+        
     }
+
 }
 
