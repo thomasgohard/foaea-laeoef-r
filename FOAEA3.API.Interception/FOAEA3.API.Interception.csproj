@@ -16,6 +16,10 @@
 		<NoWarn>1701;1702;1591</NoWarn>
 		<DocumentationFile>C:\millennium\FLAS-IT Applications\FOAEA Applications\FOAEA\FOAEA3_Dev-Denis\FOAEA3.API.Interception\FOAEA3.API.Interception.xml</DocumentationFile>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />

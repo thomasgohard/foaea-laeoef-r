@@ -12,6 +12,10 @@
 		<Nullable>warnings</Nullable>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>1701;1702;1591</NoWarn>
 		<DocumentationFile>C:\millennium\FLAS-IT Applications\FOAEA Applications\FOAEA\FOAEA3_Dev-Denis\FOAEA3.API\FOAEA3.API.xml</DocumentationFile>

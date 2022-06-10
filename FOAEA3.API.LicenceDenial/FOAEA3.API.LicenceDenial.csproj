@@ -17,6 +17,10 @@
 		<DocumentationFile>C:\millennium\FLAS-IT Applications\FOAEA Applications\FOAEA\FOAEA3_Dev-Denis\FOAEA3.API.LicenceDenial\FOAEA3.API.LicenceDenial.xml</DocumentationFile>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
