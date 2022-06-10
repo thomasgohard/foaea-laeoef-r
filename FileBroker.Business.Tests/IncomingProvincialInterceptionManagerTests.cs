@@ -62,8 +62,7 @@ namespace FileBroker.Business.Tests
             {
                 AuditRootPath = null,
                 AuditRecipients = null,
-                FrenchAuditProvinceCodes = null,
-                MailServer = null
+                FrenchAuditProvinceCodes = null
             };
 
             var interceptionManager = new IncomingProvincialInterceptionManager(fileName,

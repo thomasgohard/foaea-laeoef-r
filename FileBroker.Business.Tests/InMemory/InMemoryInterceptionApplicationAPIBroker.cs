@@ -2,6 +2,7 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using System;
+using System.Collections.Generic;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -9,12 +10,22 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
 
+        public InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication)
+        {
+            throw new NotImplementedException();
+        }
+
         public InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
         public InterceptionApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
         {
             throw new NotImplementedException();
         }

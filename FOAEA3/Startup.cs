@@ -127,11 +127,11 @@ namespace FOAEA3
             var applicationLifeStatesAPI = new ApplicationLifeStatesAPI();
             var applicationCommentsAPI = new ApplicationCommentsAPI();
 
-            ReferenceData.Instance().FoaEvents = foaEventsAPI.GetFoaEvents();
-            ReferenceData.Instance().ActiveStatuses = activeStatusesAPI.GetActiveStatuses();
-            ReferenceData.Instance().Genders = gendersAPI.GetGenders();
-            ReferenceData.Instance().ApplicationLifeStates = applicationLifeStatesAPI.GetApplicationLifeStates();
-            ReferenceData.Instance().ApplicationComments = applicationCommentsAPI.GetApplicationComments();
+            //ReferenceData.Instance().FoaEvents = foaEventsAPI.GetFoaEvents();
+            //ReferenceData.Instance().ActiveStatuses = activeStatusesAPI.GetActiveStatuses();
+            //ReferenceData.Instance().Genders = gendersAPI.GetGenders();
+            //ReferenceData.Instance().ApplicationLifeStates = applicationLifeStatesAPI.GetApplicationLifeStates();
+            //ReferenceData.Instance().ApplicationComments = applicationCommentsAPI.GetApplicationComments();
 
         }
 

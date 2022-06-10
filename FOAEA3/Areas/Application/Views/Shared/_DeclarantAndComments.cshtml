@@ -25,7 +25,7 @@
 <br />
 <div class="row">
 
-    <label class='control-label pl-3' for='@fieldName'>
+   @* <label class='control-label pl-3' for='@fieldName'>
         Comments&nbsp;
         @if ((SessionData.CurrentSubmitter.IsInternalUser()) && (!commentsDisabled) && (!isCreateMode))
         {
@@ -39,6 +39,6 @@
                 }
             </select>
         }
-    </label>
+    </label>*@
     <flas-comment table-prefix="@tablePrefix" asp-for="Appl_CommSubm_Text" no-offset disabled="commentsDisabled" no-label></flas-comment>
 </div>
