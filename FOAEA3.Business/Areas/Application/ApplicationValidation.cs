@@ -212,11 +212,18 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual bool IsValidPostalCode()
+        public virtual bool IsValidPostalCode(out string reasonText)
         {
+            // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
+            // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
+            // 2-Postal code does not match the Province/Territory (if the Province associated to the postal code is not the same in the application VS the Canada Post file)
+            // 3-Postal code does not match City (if the City associated to the postal code is not the same in the application VS the two found in the Canada Post file)
+            // More than one of these can occur for the same triggering of Event 50772 (really just 2 and 3).
+
             string postalCode = Application.Appl_Dbtr_Addr_PCd;
             string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
             string cityName = Application.Appl_Dbtr_Addr_CityNme;
+            reasonText = string.Empty;
 
             if (postalCode == "-")
             {
@@ -229,14 +236,17 @@ namespace FOAEA3.Business.Areas.Application
                 if (!ValidationHelper.IsValidPostalCode(postalCode))
                 {
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code Format");
+                    reasonText = "1";
                     return false;
                 }
 
                 var postalCodeDB = Repositories.PostalCodeRepository;
-                if (!postalCodeDB.ValidatePostalCode(postalCode, provinceCode, cityName,
-                                                     out string validProvCode, out PostalCodeFlag validFlags))
+                PostalCodeFlag validFlags;
+                if (!postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName,
+                                                     out string validProvCode, out validFlags))
                 {
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
+
                     return false;
                 }
 
@@ -252,6 +262,20 @@ namespace FOAEA3.Business.Areas.Application
                     };
                 }
 
+                if (!validFlags.IsPostalCodeValid)
+                    reasonText = "1";
+                else
+                {
+                    if (!validFlags.IsProvinceValid)
+                        reasonText = "2";
+
+                    if (!validFlags.IsCityNameValid)
+                        reasonText = "3";
+
+                    if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                        reasonText = "2,3";
+                }
+
                 if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid)
                     Application.Messages.AddWarning("Postal Code failed lookup province");
 
@@ -260,6 +284,9 @@ namespace FOAEA3.Business.Areas.Application
 
                 else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
                     Application.Messages.AddWarning("Postal Code failed lookup city and province");
+
+                if (!string.IsNullOrEmpty(reasonText))
+                    return false;
 
                 return true;
             }
@@ -282,6 +309,123 @@ namespace FOAEA3.Business.Areas.Application
                 return true;
             }
         }
+
+        /*
+    Public Function ValidatePostalCode(ByRef applData As Justice.FOAEA.Common.ApplicationData, Optional ByVal isEnlish As Boolean = True) As Boolean
+
+        Dim validPostalCode As Boolean = True
+        Dim validFlags As String = "000"
+        Dim validProvCode As String = String.Empty
+
+        Dim CreateEventForBadPostalCode As Boolean = False
+
+        Dim countryCodeIsNULL As Boolean = applData.Appl.Item(0).IsAppl_Dbtr_Addr_CtryCdNull()
+        Dim countryCode As String = applData.Appl.Item(0).Appl_Dbtr_Addr_CtryCd
+
+        Dim postalCodeIsNULL As Boolean = applData.Appl.Item(0).IsAppl_Dbtr_Addr_PCdNull()
+        Dim postalCode As String = applData.Appl.Item(0).Appl_Dbtr_Addr_PCd.ToString.ToUpper.Trim()
+
+        Dim cityName As String = applData.Appl.Item(0).Appl_Dbtr_Addr_CityNme
+        Dim provinceCode As String = applData.Appl.Item(0).Appl_Dbtr_Addr_PrvCd
+
+        Dim reasonText As String = String.Empty
+        Dim EventCode As Integer = VALID_POSTAL_CODE_RESULT
+
+        If Not countryCodeIsNULL Then
+            If (countryCode = "CAN" Or countryCode = "CA") Then
+                    If Not postalCodeIsNULL Then
+                        With New DataAccess.ValidatePostalCode(_connectionString)
+                            EventCode = 50772
+                            If Not .Validate(postalCode, provinceCode, cityName, validProvCode, validFlags) Then
+                                'cr526/542 - The validate method returned FALSE which means this 
+                                'postal code is bad value so generate 50772 (invalid application info.)
+                                'and carry on...
+                                CreateEventForBadPostalCode = True
+                                'eventReasonText_En = "Postal code does not exist"
+                                'eventReasonText_Fr = "Le code postal n’existe pas"
+                                reasonText = "1"
+                                validPostalCode = False
+                            Else
+                                'cr526/542 - The validate method returned TRUE in this case so 
+                                'the postal code is valid. Check the flags and further validate 
+                                'province code (blank, 77, 88, 99)
+
+                                If provinceCode = String.Empty Or provinceCode = "77" Or provinceCode = "88" Or provinceCode = "99" Then
+                                    'assign the valid province code returned from the validation function
+                                    applData.Appl.Item(0).Appl_Dbtr_Addr_PrvCd = validProvCode
+                                    'make sure province flag is set to valid
+                                    validFlags = validFlags.Substring(0, 1) & "1" & validFlags.Substring(2, 1)
+                                End If
+                                'Add event reason text to event 50772, and remove warning notifications related to the postal code from the audit.txt files
+                                If validFlags = "101" Then
+                                    'province not found, city(or subcity) found
+                                    CreateEventForBadPostalCode = True
+                                    'eventReasonText_En = "Postal code does not match the Province/Territory"
+                                    'eventReasonText_Fr = "Le code postal ne correspond pas à la province ou au territoire indiqué"
+                                    reasonText = "2"
+                                    validPostalCode = False
+                                ElseIf validFlags = "110" Then
+                                    'province found, city(or subcity) not found
+                                    CreateEventForBadPostalCode = True
+                                    'eventReasonText_En = "Postal code does not match City"
+                                    'eventReasonText_Fr = "Le code postal ne correspond pas à la ville indiquée"
+                                    reasonText = "3"
+                                    validPostalCode = False
+                                ElseIf validFlags = "100" Then
+                                    'province not found, city(or subcity) not found -- Message will be truncated, this issue will be fixed in Nov 2017
+                                    CreateEventForBadPostalCode = True
+                                    'eventReasonText_En = "Postal code does not match Province/Territory; Postal code does not match City"
+                                    'eventReasonText_Fr = "Le code postal ne correspond pas à la province ou au territoire indiqué; Le code postal ne correspond pas à la ville indiquée"
+                                    reasonText = "2,3"
+                                    validPostalCode = False
+                                Else
+                                    'province found and city(or subcity) found - All good!
+                                    validPostalCode = True
+                                End If
+                            End If
+                        End With
+                    End If
+                Else
+                    'Validate international Postal Code, create an event if postal code is invalid
+                    EventCode = ValidateInternationalPostalCode(countryCode, postalCode)
+                    If Not (EventCode = VALID_POSTAL_CODE_RESULT) Then
+                        'CreateSubmEvent(applData, EventCode)
+                        CreateEventForBadPostalCode = True
+                        validPostalCode = False
+                    End If
+                End If
+
+            End If
+        'End If ''CR875
+        If Not validPostalCode Then
+
+            If CreateEventForBadPostalCode = True Then
+                If reasonText <> String.Empty Then
+                    CreateSubmEvent(applData, EventCode, , , reasonText)
+                Else
+                    CreateSubmEvent(applData, EventCode)
+                End If
+
+            End If
+
+            'temporary fix to allow a bad postal code by FTP
+            'If applData.Appl.Item(0).Medium_Cd.ToUpper = "FTP" Then
+
+            validPostalCode = True
+            'cr526/542 - the above line REMAINS AS IS based on comments from E.G.
+            'If postal code is not found in allpostalcodes table lookup then
+            'the app does automatically NOT go to state 1, just the 50772 message...
+
+            'End If
+
+        End If
+
+        Return validPostalCode
+
+    End Function
+         
+         
+         */
 
         private bool ValidateInternationalPostalCode(string postalCode, string regEx, EventCode eventCode)
         {

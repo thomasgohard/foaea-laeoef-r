@@ -486,14 +486,17 @@ namespace FOAEA3.Business.Areas.Application
 
             foreach (var summSmryInfo in summSmryInfoForDebtor)
             {
-                if (summSmryInfo.ActualEnd_Dte.HasValue)
+                if (summSmryInfo.ActualEnd_Dte is null)
                     summSmryCount++;
             }
 
             summSmryCount--;
 
-            if (summSmryCount <= 0)
-                EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN);
+            if (summSmryCount <= 0) {
+                var effective10daysFromNow = DateTime.Now.AddDays(10);
+                EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN, 
+                                      effectiveDateTime: effective10daysFromNow);
+            }
 
             var summSmryForCurrentAppl = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
             if (summSmryForCurrentAppl is null)

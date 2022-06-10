@@ -40,9 +40,9 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Messages.AddError(ReferenceData.Instance().FoaEvents[EventCode.C50531_DEBTOR_MUST_BE_AT_LEAST_15_YEARS_OLD].Description);
             }
 
-            if (!Validation.IsValidPostalCode())
+            if (!Validation.IsValidPostalCode(out string reasonText))
             {
-                EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE);
+                EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
                 if (Application.Medium_Cd != "FTP")
                 {
                     newState = ApplicationState.INVALID_APPLICATION_1;

@@ -63,7 +63,7 @@ namespace CompareOldAndNewData.CommandLine
             if (evnt2.Event_Priority_Ind != evnt3.Event_Priority_Ind) diffs.Add(new DiffData(tableName, key: key, colName: "Event_Priority_Ind", goodValue: evnt2.Event_Priority_Ind, badValue: evnt3.Event_Priority_Ind, description: description));
             if (evnt2.Event_Effctv_Dte != evnt3.Event_Effctv_Dte)
             {
-                if (queue == EventQueue.EventBF)
+                if ((queue == EventQueue.EventBF) || (queue == EventQueue.EventBFN))
                 {
                     var daysDiff2 = (evnt2.Event_Effctv_Dte.Date - evnt2.Event_TimeStamp.Date).Days;
                     var daysDiff3 = (evnt3.Event_Effctv_Dte.Date - evnt3.Event_TimeStamp.Date).Days;
