@@ -24,16 +24,27 @@ var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 var foaea2RunDate = (new DateTime(2022, 5, 25)).Date;
 var foaea3RunDate = DateTime.Now.Date; // (new DateTime(2022, 6, 9)).Date;
 
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "P02862", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O88291", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O36284", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P02001", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P23642", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "O62858", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P75478", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85061", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85105", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85100", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "P02862", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O88291", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O36284", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P02001", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P23642", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "O62858", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P75478", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85061", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85105", foaea2RunDate, foaea3RunDate);
+//CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85100", foaea2RunDate, foaea3RunDate);
+
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "113352", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "102609", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "101265", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "QC01", "133007", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "QC01", "127804", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "QC01", "140178", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "QC01", "140180", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "QC01", "140179", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C35", "QC01", "109452", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C35", "QC01", "128706", foaea2RunDate, foaea3RunDate);
 
 Console.WriteLine("\nFinished");
 

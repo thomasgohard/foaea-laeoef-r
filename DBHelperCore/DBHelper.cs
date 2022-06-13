@@ -311,12 +311,14 @@ namespace DBHelper
                 {
                     con.Open();
                     var rdr = cmd.ExecuteReader();
-                    rdr.Read();
-                    result = (Tdata)rdr[0];
+                    if (rdr.Read())
+                        result = (Tdata)rdr[0];
+                    else
+                        result = default;
 
                     rdr.Close();
 
-                    if (retParameter.Value is not null)
+                    if (retParameter?.Value is not null)
                         LastReturnValue = (int)retParameter.Value;
 
                     con.Close();

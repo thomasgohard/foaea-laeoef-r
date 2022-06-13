@@ -108,6 +108,8 @@ internal class Program
         else
             ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
 
+        // Console.ReadKey();
+
     }
 
     private static string GetProvinceCodeBasedOnArgs(string[] args) => (args.Length > 0) ? args[0]?.ToUpper() : "ALL";

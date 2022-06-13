@@ -448,7 +448,7 @@ namespace FOAEA3.Data.DB
 
         public List<ExGratiaListData> GetExGratias()
         {
-            return MainDB.GetAllData<ExGratiaListData>("GetExGratiaList", FillExGratiaListFromReader);
+            return MainDB.GetAllData<ExGratiaListData>("ExGratiaList", FillExGratiaListFromReader);
         }
 
         public List<PaymentPeriodData> GetPaymentPeriods()

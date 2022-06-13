@@ -590,6 +590,12 @@ namespace FileBroker.Business
                 isValidData = false;
             }
 
+            if ((newHoldback.HldbCnd_SrcHldbPrcnt is 0) && (newHoldback.HldbCtg_Cd == "1"))
+            {
+                newHoldback.HldbCnd_SrcHldbPrcnt = null;
+                newHoldback.HldbCtg_Cd = "0";
+            }
+
             return newHoldback;
         }
 

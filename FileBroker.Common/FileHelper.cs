@@ -37,7 +37,9 @@ namespace FileBroker.Common
 
                 // clean up json to remove xml-specific artifacts
                 result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\"},", "");
+                result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"utf-8\"},", "");
                 result = result.Replace("\"@xsi:type\":\"NewDataSet\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
+                result = result.Replace("\"@xmlns:xsd\":\"http://www.w3.org/2001/XMLSchema\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
 
                 return result;
             }
