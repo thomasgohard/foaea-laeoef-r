@@ -154,7 +154,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
 
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 IncrementGarnSmry(isNewApplication: true);
 
@@ -297,7 +297,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 EventManager.SaveEvents();
 
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 return true;
             }
@@ -394,9 +394,55 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
+        }
+
+        public bool SuspendApplication()
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+                DeletePendingFinancialInformation();
+
+            SetNewStateTo(ApplicationState.APPLICATION_SUSPENDED_35);
+
+            UpdateApplicationNoValidation();
+
+            IncrementGarnSmry();
+
+            Repositories.InterceptionRepository.EISOHistoryDeleteBySIN(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
+
+            EventManager.SaveEvents();
+
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;
+        }
+
+        private void DeletePendingFinancialInformation()
+        {
+            var pendingIntFinHs = Repositories.InterceptionRepository.GetAllInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var pendingHoldbacks = Repositories.InterceptionRepository.GetAllHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            foreach (var pendingIntFinH in pendingIntFinHs)
+                if (pendingIntFinH.ActvSt_Cd == "P")
+                    Repositories.InterceptionRepository.DeleteInterceptionFinancialTerms(pendingIntFinH);
+
+            foreach (var pendingHoldback in pendingHoldbacks)
+                if (pendingHoldback.ActvSt_Cd == "P")
+                    Repositories.InterceptionRepository.DeleteHoldbackCondition(pendingHoldback);
         }
 
         public bool AcceptInterception(DateTime supportingDocsDate)
@@ -484,7 +530,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
 
@@ -570,7 +616,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
         }
@@ -588,7 +634,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
         }
 
         public bool RejectVariation(string applicationRejectReasons)
@@ -634,7 +680,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
         }

@@ -123,13 +123,13 @@ namespace FileBroker.Business
                                 if (messages.ContainsMessagesOfType(MessageType.Error))
                                 {
                                     var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors[0]);
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
                                     errorCount++;
                                 }
                                 else if (messages.ContainsMessagesOfType(MessageType.Warning))
                                 {
                                     var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings[0]);
+                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
                                     warningCount++;
                                 }
                                 else
@@ -137,7 +137,11 @@ namespace FileBroker.Business
                                     if (includeInfoInMessages)
                                     {
                                         var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-                                        result.AddRange(infos);
+                                        if (infos.Any())
+                                        {
+                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
+                                            result.AddRange(infos);
+                                        }
                                     }
 
                                     if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
@@ -201,6 +205,7 @@ namespace FileBroker.Business
         public MessageDataList ProcessApplicationRequest(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
+            var existingMessages = interceptionMessageData.Application.Messages;
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.NewUpdateSubmitter;
 
@@ -218,7 +223,7 @@ namespace FileBroker.Business
                         break;
 
                     case "14": // cancellation
-                        interception = APIs.InterceptionApplications.UpdateInterceptionApplication(interceptionMessageData.Application);
+                        interception = APIs.InterceptionApplications.CancelInterceptionApplication(interceptionMessageData.Application);
                         break;
 
                     case "17": // variation
@@ -227,8 +232,12 @@ namespace FileBroker.Business
 
                     case "29": // transfer
                         interception = APIs.InterceptionApplications.TransferInterceptionApplication(interceptionMessageData.Application,
-                                                                                      interceptionMessageData.NewRecipientSubmitter,
-                                                                                      interceptionMessageData.NewIssuingSubmitter);
+                                                                                                     interceptionMessageData.NewRecipientSubmitter,
+                                                                                                     interceptionMessageData.NewIssuingSubmitter);
+                        break;
+
+                    case "35": // suspend
+                        interception = APIs.InterceptionApplications.SuspendInterceptionApplication(interceptionMessageData.Application);
                         break;
 
                     default:
@@ -239,7 +248,8 @@ namespace FileBroker.Business
                 }
             }
 
-            return interception.Messages;
+            existingMessages.AddRange(interception.Messages);
+            return existingMessages;
         }
 
         private string BuildDescriptionForMessage(MessageData error)
@@ -352,8 +362,7 @@ namespace FileBroker.Business
             if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && 
                 !isCancelOrSuspend)
             {
-                ExtractDefaultFinancialData(isVariation, financialData, fileAuditData, ref isValidData,
-                                            now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
+                ExtractDefaultFinancialData(isVariation, financialData, ref isValidData, now, interceptionApplication);
 
                 if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
                 {
@@ -368,10 +377,10 @@ namespace FileBroker.Business
             }
 
             if (isCreate && (interceptionApplication != null) &&
-                (interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue))
+                ((interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue)))
             {
                 fileAuditData.ApplicationMessage = "Missing financials!";
-                errorCount++;
+                isValidData = false;
             }
 
             if (!isValidData)
@@ -429,7 +438,8 @@ namespace FileBroker.Business
 
         }
 
-        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, 
+                                                 ref bool isValidData)
         {
             var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
@@ -499,13 +509,8 @@ namespace FileBroker.Business
             return interceptionApplication;
         }
 
-        private bool ExtractDefaultFinancialData(bool isVariation,
-                                                                   MEPInterception_RecType12 financialData,
-                                                                   FileAuditData fileAuditData,
-                                                                   ref bool isValidData,
-                                                                   DateTime now,
-                                                                   InterceptionApplicationData interceptionApplication,
-                                                                   string actionState)
+        private static bool ExtractDefaultFinancialData(bool isVariation, MEPInterception_RecType12 financialData,
+                                                        ref bool isValidData, DateTime now, InterceptionApplicationData interceptionApplication)
         {
             isValidData = true;
 
@@ -568,6 +573,12 @@ namespace FileBroker.Business
             if (newHoldback.HldbCnd_SrcHldbAmn_Money is not null) newHoldback.HldbCnd_SrcHldbAmn_Money /= 100M;
 
             // other fixes
+            if ((newHoldback.HldbCnd_SrcHldbPrcnt is 0) && (newHoldback.HldbCtg_Cd == "1"))
+            {
+                newHoldback.HldbCnd_SrcHldbPrcnt = null;
+                newHoldback.HldbCtg_Cd = "0";
+            }
+
             if (newHoldback.HldbCnd_SrcHldbPrcnt is null)
                 newHoldback.HldbCnd_SrcHldbPrcnt = 0;
             else if (newHoldback.HldbCnd_SrcHldbPrcnt is < 0 or > 100)
@@ -588,12 +599,6 @@ namespace FileBroker.Business
                                                    " " +
                                                    Translate($"Source Specific Holdback amount in both fixed (<dat_HldbCnd_Hldb_Amn_Money>) value {newHoldback.HldbCnd_SrcHldbAmn_Money} and per transaction (<dat_HldbCnd_MxmPerChq_Money>) value {newHoldback.HldbCnd_MxmPerChq_Money}");
                 isValidData = false;
-            }
-
-            if ((newHoldback.HldbCnd_SrcHldbPrcnt is 0) && (newHoldback.HldbCtg_Cd == "1"))
-            {
-                newHoldback.HldbCnd_SrcHldbPrcnt = null;
-                newHoldback.HldbCtg_Cd = "0";
             }
 
             return newHoldback;

@@ -31,7 +31,10 @@ namespace FOAEA3.Resources.Helpers
 
         public static bool IsValidInteger(string number) => int.TryParse(number, out _);
 
-        public static bool IsValidPostalCode(string postalCode) => IsBaseRegexValid(postalCode, @"[A-Z]\d[A-Z] \d[A-Z]\d");
+        public static bool IsValidPostalCode(string postalCode)
+        {
+            return IsBaseRegexValid(postalCode, @"[A-Z]\d[A-Z][\s]?\d[A-Z]\d");
+        }
 
         public static bool IsValidSinNumberMod10(string sin, bool allowEmpty = false)
         {

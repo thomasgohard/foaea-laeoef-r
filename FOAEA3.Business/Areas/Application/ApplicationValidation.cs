@@ -241,9 +241,8 @@ namespace FOAEA3.Business.Areas.Application
                 }
 
                 var postalCodeDB = Repositories.PostalCodeRepository;
-                PostalCodeFlag validFlags;
                 if (!postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName,
-                                                     out string validProvCode, out validFlags))
+                                                     out string validProvCode, out PostalCodeFlag validFlags))
                 {
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
 

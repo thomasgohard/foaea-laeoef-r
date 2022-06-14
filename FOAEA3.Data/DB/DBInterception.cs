@@ -228,7 +228,7 @@ namespace FOAEA3.Data.DB
                 DeleteHoldbackCondition(holdbackCondition);
         }
 
-        private void DeleteHoldbackCondition(HoldbackConditionData holdbackCondition)
+        public void DeleteHoldbackCondition(HoldbackConditionData holdbackCondition)
         {
             var parameters = new Dictionary<string, object>
             {

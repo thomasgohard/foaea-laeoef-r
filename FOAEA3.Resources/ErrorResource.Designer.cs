@@ -268,6 +268,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Frequency Payment Code (&lt;dat_PymPr_Cd&gt;).
+        /// </summary>
+        public static string INVALID_FREQUENCY_PAYMENT_CODE {
+            get {
+                return ResourceManager.GetString("INVALID_FREQUENCY_PAYMENT_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Username provided.
         /// </summary>
         public static string INVALID_LOGIN {
@@ -448,11 +457,38 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Periodic Amount (&lt;dat_IntFinH_Perpym_Money&gt;) provided with no frequency payment code (&lt;dat_PymPr_Cd&gt;).
+        /// </summary>
+        public static string PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE {
+            get {
+                return ResourceManager.GetString("PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was submitted with an amount &gt; 0. Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) does not exist or is invalid.
+        /// </summary>
+        public static string PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR {
+            get {
+                return ResourceManager.GetString("PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value specified for the reference code must be alphanumeric.
         /// </summary>
         public static string REQUIRED_ALPHANUMERIC_CONTROL_CODE {
             get {
                 return ResourceManager.GetString("REQUIRED_ALPHANUMERIC_CONTROL_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success. Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was not submitted. All data for Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;), Frequency Payment Code (&lt;PymPr_Cd&gt;) and Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) has been removed.
+        /// </summary>
+        public static string SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING {
+            get {
+                return ResourceManager.GetString("SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING", resourceCulture);
             }
         }
         

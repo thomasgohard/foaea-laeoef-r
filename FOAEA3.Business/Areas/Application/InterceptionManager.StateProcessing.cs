@@ -307,7 +307,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.AppLiSt_Cd.In(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12,
                                                       ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19))
-                EventManager.AddEvent(EventCode.C51115_APPLICATION_SUSPENDED);
+                EventManager.AddEvent(EventCode.C51115_APPLICATION_SUSPENDED, appState: ApplicationState.APPLICATION_SUSPENDED_35);
             else
                 EventManager.AddEvent(EventCode.C55006_APPLICATION_NOT_IN_EFFECT);
 

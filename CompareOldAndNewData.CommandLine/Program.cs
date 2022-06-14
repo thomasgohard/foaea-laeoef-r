@@ -38,6 +38,7 @@ var foaea3RunDate = DateTime.Now.Date; // (new DateTime(2022, 6, 9)).Date;
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "113352", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "102609", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "101265", foaea2RunDate, foaea3RunDate);
+CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "QC01", "119894", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "QC01", "133007", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "QC01", "127804", foaea2RunDate, foaea3RunDate);
 CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "QC01", "140178", foaea2RunDate, foaea3RunDate);

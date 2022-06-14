@@ -50,6 +50,24 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        {
+            string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/interceptions/{key}/cancel";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
+            return data;
+        }
+
+        public InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        {
+            string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/interceptions/{key}/suspend";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
+            return data;
+        }
+
         public InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);

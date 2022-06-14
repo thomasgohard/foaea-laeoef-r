@@ -186,6 +186,9 @@
   <data name="INVALID_DEBTOR_SURNAME" xml:space="preserve">
     <value>Invalid Debtor Surname</value>
   </data>
+  <data name="INVALID_FREQUENCY_PAYMENT_CODE" xml:space="preserve">
+    <value>Invalid Frequency Payment Code (&lt;dat_PymPr_Cd&gt;)</value>
+  </data>
   <data name="INVALID_LOGIN" xml:space="preserve">
     <value>Invalid Username provided</value>
   </data>
@@ -246,8 +249,17 @@
   <data name="MISSING_SUBMITTER" xml:space="preserve">
     <value>The submitter must be specified</value>
   </data>
+  <data name="PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE" xml:space="preserve">
+    <value>Periodic Amount (&lt;dat_IntFinH_Perpym_Money&gt;) provided with no frequency payment code (&lt;dat_PymPr_Cd&gt;)</value>
+  </data>
+  <data name="PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR" xml:space="preserve">
+    <value>Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was submitted with an amount &gt; 0. Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) does not exist or is invalid</value>
+  </data>
   <data name="REQUIRED_ALPHANUMERIC_CONTROL_CODE" xml:space="preserve">
     <value>The value specified for the reference code must be alphanumeric</value>
+  </data>
+  <data name="SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING" xml:space="preserve">
+    <value>Success. Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was not submitted. All data for Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;), Frequency Payment Code (&lt;PymPr_Cd&gt;) and Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) has been removed</value>
   </data>
   <data name="WARNING_NO_DUTIES" xml:space="preserve">
     <value>No duties were selected</value>

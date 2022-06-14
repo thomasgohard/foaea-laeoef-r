@@ -198,7 +198,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 EventManager.SaveEvents();
 
-                TracingApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
             }
             else
             {

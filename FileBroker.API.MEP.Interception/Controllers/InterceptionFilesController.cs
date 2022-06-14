@@ -123,7 +123,7 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
+            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags, includeInfoInMessages: true);
 
             if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                 if (info.ContainsSystemMessagesOfType(MessageType.Error))

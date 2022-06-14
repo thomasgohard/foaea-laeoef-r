@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Linq;
@@ -235,13 +236,13 @@ namespace FOAEA3.Business.Areas.Application
                     intFinH.IntFinH_PerPym_Money = null;
                     intFinH.PymPr_Cd = null;
                     intFinH.IntFinH_CmlPrPym_Ind = null;
-                    appl.Messages.AddError("Success. Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was not submitted. All data for Periodic Payment Amount (<dat_IntFinH_Perpym_Money>), Frequency Payment Code (<PymPr_Cd>) and Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) has been removed");
+                    appl.Messages.AddInformation(ErrorResource.SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING);
                 }
                 else
                 {
                     if (intFinH.PymPr_Cd is null)
                     {
-                        appl.Messages.AddError("Periodic Amount (<dat_IntFinH_Perpym_Money>) provided with no frequency payment code (<dat_PymPr_Cd>)");
+                        appl.Messages.AddError(ErrorResource.PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE);
                         isValidData = false;
                     }
                     else
@@ -249,13 +250,13 @@ namespace FOAEA3.Business.Areas.Application
                         var rEx = new Regex("^[A-G]$");
                         if (!rEx.IsMatch(intFinH.PymPr_Cd.ToUpper()))
                         {
-                            appl.Messages.AddError("Invalid Frequency Payment Code (<dat_PymPr_Cd>)");
+                            appl.Messages.AddError(ErrorResource.INVALID_FREQUENCY_PAYMENT_CODE);
                             isValidData = false;
                         }
                     }
                     if (intFinH.IntFinH_CmlPrPym_Ind is null)
                     {
-                        appl.Messages.AddError("Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was submitted with an amount > 0. Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) does not exist or is invalid");
+                        appl.Messages.AddError(ErrorResource.PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR);
                         isValidData = false;
                     }
                 }
