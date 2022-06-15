@@ -177,30 +177,30 @@ namespace FOAEA3.Business.Areas.Application
                             appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
                             isValidData = false;
                         }
+                    }
+                    else
+                    {
+                        if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != intFinH.PymPr_Cd.ToUpper())
+                        {
+                            appl.Messages.AddError("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)");
+                            isValidData = false;
+                        }
                         else
                         {
-                            if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() == intFinH.PymPr_Cd.ToUpper())
+                            if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
                             {
-                                appl.Messages.AddError("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)");
+                                appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
                                 isValidData = false;
                             }
-                            else
+                            if (intFinH.PymPr_Cd.ToUpper() != "C")
                             {
-                                if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
-                                {
-                                    appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
-                                    isValidData = false;
-                                }
-                                if (intFinH.PymPr_Cd.ToUpper() != "C")
-                                {
-                                    appl.Messages.AddError("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)");
-                                    isValidData = false;
-                                }
+                                appl.Messages.AddError("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)");
+                                isValidData = false;
                             }
                         }
                     }
                 }
-            }
+            }           
 
             if (intFinH.IntFinH_DefHldbPrcnt is null)
                 intFinH.IntFinH_DefHldbPrcnt = 0;
@@ -321,7 +321,7 @@ namespace FOAEA3.Business.Areas.Application
         private bool ValidVariationIssueDate()
         {
 
-            if ((InterceptionApplication.IntFinH.IntFinH_VarIss_Dte is null) || 
+            if ((InterceptionApplication.IntFinH.IntFinH_VarIss_Dte is null) ||
                 (InterceptionApplication.IntFinH.IntFinH_VarIss_Dte > DateTime.Now))
             {
                 EventManager.AddEvent(EventCode.C55101_INVALID_VARIATION_ISSUE_DATE);
@@ -343,7 +343,7 @@ namespace FOAEA3.Business.Areas.Application
             decimal maxTotalMoney = InterceptionApplication.IntFinH.IntFinH_MxmTtl_Money ?? 0.0M;
 
             decimal maxAmntPeriodic = (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.PymPr_Cd)) ?
-                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) : 
+                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) :
                                         0.0M;
 
             decimal maxAmnt = maxAmntPeriodic + InterceptionApplication.IntFinH.IntFinH_LmpSum_Money;
