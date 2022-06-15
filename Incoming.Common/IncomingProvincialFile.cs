@@ -84,7 +84,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]InterceptionFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
                 }
@@ -99,7 +98,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]LicenceDenialFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
                 }
@@ -114,7 +112,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]TracingFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
 

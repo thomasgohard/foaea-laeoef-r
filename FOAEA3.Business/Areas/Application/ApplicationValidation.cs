@@ -275,13 +275,13 @@ namespace FOAEA3.Business.Areas.Application
                         reasonText = "2,3";
                 }
 
-                if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid)
+                if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup province");
 
-                else if (validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                else if (validFlags.IsProvinceValid && !validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup city");
 
-                else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup city and province");
 
                 if (!string.IsNullOrEmpty(reasonText))

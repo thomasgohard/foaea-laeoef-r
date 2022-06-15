@@ -270,7 +270,7 @@ namespace FileBroker.Business
             return existingMessages;
         }
 
-        private string BuildDescriptionForMessage(MessageData error)
+        private static string BuildDescriptionForMessage(MessageData error)
         {
             var thisErrorDescription = string.Empty;
             if (error.Code != EventCode.UNDEFINED)
@@ -344,7 +344,6 @@ namespace FileBroker.Business
                     result.NewDataSet.INTAPPIN10.Add(single.NewDataSet.INTAPPIN10);
                     result.NewDataSet.INTAPPIN11.Add(single.NewDataSet.INTAPPIN11);
                     result.NewDataSet.INTAPPIN12.Add(single.NewDataSet.INTAPPIN12);
-                    // result.NewDataSet.INTAPPIN13.Add(single.NewDataSet.INTAPPIN13);
                     result.NewDataSet.INTAPPIN99 = single.NewDataSet.INTAPPIN99;
                 }
                 catch (Exception ee)
@@ -397,7 +396,6 @@ namespace FileBroker.Business
             if (isCreate && (interceptionApplication != null) &&
                 ((interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue)))
             {
-                fileAuditData.ApplicationMessage = "Missing financials!";
                 isValidData = false;
             }
 
@@ -514,15 +512,15 @@ namespace FileBroker.Business
                 ActvSt_Cd = "A",
 
                 Appl_Dbtr_LngCd = interceptionData.dat_Appl_Dbtr_LngCd,
-                Appl_Dbtr_Addr_Ln = interceptionData.dat_Appl_Dbtr_Addr_Ln,
-                Appl_Dbtr_Addr_Ln1 = interceptionData.dat_Appl_Dbtr_Addr_Ln1,
-                Appl_Dbtr_Addr_CityNme = interceptionData.dat_Appl_Dbtr_Addr_CityNme,
-                Appl_Dbtr_Addr_CtryCd = interceptionData.dat_Appl_Dbtr_Addr_CtryCd,
-                Appl_Dbtr_Addr_PCd = interceptionData.dat_Appl_Dbtr_Addr_PCd,
-                Appl_Dbtr_Addr_PrvCd = interceptionData.dat_Appl_Dbtr_Addr_PrvCd,
-                Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme,
-                Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme,
-                Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme,
+                Appl_Dbtr_Addr_Ln = interceptionData.dat_Appl_Dbtr_Addr_Ln?.Trim(),
+                Appl_Dbtr_Addr_Ln1 = interceptionData.dat_Appl_Dbtr_Addr_Ln1?.Trim(),
+                Appl_Dbtr_Addr_CityNme = interceptionData.dat_Appl_Dbtr_Addr_CityNme?.Trim(),
+                Appl_Dbtr_Addr_CtryCd = interceptionData.dat_Appl_Dbtr_Addr_CtryCd?.Trim(),
+                Appl_Dbtr_Addr_PCd = interceptionData.dat_Appl_Dbtr_Addr_PCd?.Trim(),
+                Appl_Dbtr_Addr_PrvCd = interceptionData.dat_Appl_Dbtr_Addr_PrvCd?.Trim(),
+                Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme?.Trim(),
+                Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme?.Trim(),
+                Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme?.Trim(),
                 Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte
             };
             return interceptionApplication;

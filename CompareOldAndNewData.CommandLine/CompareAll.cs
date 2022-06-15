@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Data.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
+using System.Text;
 
 namespace CompareOldAndNewData.CommandLine
 {
@@ -8,7 +9,8 @@ namespace CompareOldAndNewData.CommandLine
     {
         public static void Run(DbRepositories repositories2, DbRepositories_Finance repositories2Finance,
                                DbRepositories repositories3, DbRepositories_Finance repositories3Finance,
-                               string action, string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate)
+                               string action, string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate,
+                               StringBuilder output)
         {
             var diffs = CompareAppl.Run("Appl", repositories2, repositories3, enfSrv, ctrlCd);
             diffs.AddRange(CompareSummSmry.Run("SummSmry", repositories2Finance, repositories3Finance, enfSrv, ctrlCd));
@@ -26,7 +28,7 @@ namespace CompareOldAndNewData.CommandLine
 
             if (diffs.Any())
             {
-                Console.WriteLine($"\nAction\tTable\tKey\tColumn\tGood\tBad\tDescription");
+                output.AppendLine($"\nAction\tTable\tKey\tColumn\tGood\tBad\tDescription");
                 string lastTable = string.Empty;
                 string lastKey = string.Empty;
                 bool firstEntry = true;
@@ -49,7 +51,7 @@ namespace CompareOldAndNewData.CommandLine
                         thisTable = string.Empty;
                     }
 
-                    Console.WriteLine($"{action}\t{thisTable}\t{thisKey}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}\t{diff.Description}");
+                    output.AppendLine($"{action}\t{thisTable}\t{thisKey}\t{diff.ColName}\t{diff.GoodValue}\t{diff.BadValue}\t{diff.Description}");
 
                     if (firstEntry)
                     {
@@ -57,12 +59,12 @@ namespace CompareOldAndNewData.CommandLine
                         action = string.Empty;
                     }
                 }
-                Console.WriteLine("");
+                output.AppendLine("");
             }
             else
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd);
-                Console.WriteLine($"{action}\t{key}: No differences found.");
+                output.AppendLine($"{action}\t{key}: No differences found.");
             }
         }
     }
