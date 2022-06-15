@@ -73,6 +73,7 @@ public class InterceptionFilesController : ControllerBase
                                                         [FromServices] IFileAuditRepository fileAuditDB,
                                                         [FromServices] IFileTableRepository fileTableDB,
                                                         [FromServices] ITranslationRepository translationDB,
+                                                        [FromServices] IRequestLogRepository requestLogDB,
                                                         [FromServices] IMailServiceRepository mailService,
                                                         [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                         [FromServices] IOptions<ApiConfig> apiConfig,
@@ -114,7 +115,8 @@ public class InterceptionFilesController : ControllerBase
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
             MailServiceDB = mailService,
-            TranslationDB = translationDB
+            TranslationDB = translationDB,
+            RequestLogDB = requestLogDB
         };
 
         var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);

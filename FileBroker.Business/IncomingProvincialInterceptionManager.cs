@@ -34,6 +34,8 @@ namespace FileBroker.Business
                 var translations = repositories.TranslationDB.GetTranslations();
                 foreach (var translation in translations)
                     Translations.Add(translation.EnglishText, translation.FrenchText);
+                APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
+                LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
             }
 
             EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
@@ -116,6 +118,8 @@ namespace FileBroker.Business
                                 NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
                             };
 
+                            AddRequestToAudit(interceptionMessage);
+
                             if (isValidData)
                             {
                                 var messages = ProcessApplicationRequest(interceptionMessage);
@@ -186,10 +190,24 @@ namespace FileBroker.Business
             return result;
         }
 
+        private void AddRequestToAudit(MessageData<InterceptionApplicationData> interceptionMessage)
+        {
+            var requestLogData = new RequestLogData
+            {
+                MaintenanceAction = interceptionMessage.MaintenanceAction,
+                MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
+                Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
+                Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
+                LoadedDateTime = DateTime.Now
+            };
+
+            _ = Repositories.RequestLogDB.Add(requestLogData);
+        }
+
         public void AutoAcceptVariations(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
-            
+
             string processName = $"Process Auto Accept Variation {enfService}";
             prodAudit.Insert(processName, "Divert Funds Started", "O");
 
@@ -359,7 +377,7 @@ namespace FileBroker.Business
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && 
+            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) &&
                 !isCancelOrSuspend)
             {
                 ExtractDefaultFinancialData(isVariation, financialData, ref isValidData, now, interceptionApplication);
@@ -438,11 +456,12 @@ namespace FileBroker.Business
 
         }
 
-        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, 
+        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData,
                                                  ref bool isValidData)
         {
             var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
+            interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 
             var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
 

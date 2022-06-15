@@ -94,6 +94,9 @@ internal class Program
         {
             ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file(s)");
 
+            var requestLogDB = new DBRequestLog(fileBrokerDB);
+            requestLogDB.DeleteAll();
+
             foreach (var newFile in allNewFiles)
             {
                 ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");

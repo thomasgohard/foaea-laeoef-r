@@ -497,6 +497,7 @@ namespace DBHelper
             {
                 con.Open();
                 tran = con.BeginTransaction();
+                cmd.Transaction = tran;
 
                 cmd.ExecuteNonQuery();
 

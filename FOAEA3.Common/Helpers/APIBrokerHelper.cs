@@ -23,6 +23,7 @@ namespace FOAEA3.Common.Helpers
         private string _APIroot;
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
+        public string CurrentLanguage { get; set; }
 
         public MessageDataList Messages { get; set; }
 
@@ -70,6 +71,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (!string.IsNullOrEmpty(CurrentLanguage))
+                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
                     var callResult = await httpClient.GetAsync(root + api);
 
@@ -119,6 +122,8 @@ namespace FOAEA3.Common.Helpers
                         httpClient.Timeout = DEFAULT_TIMEOUT;
                         httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                         httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                        if (!string.IsNullOrEmpty(CurrentLanguage))
+                            httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
                         var callResult = await httpClient.GetAsync(root + api);
 
@@ -198,6 +203,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (!string.IsNullOrEmpty(CurrentLanguage))
+                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
                     string keyData = JsonConvert.SerializeObject(data);
 
@@ -248,6 +255,8 @@ namespace FOAEA3.Common.Helpers
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            if (!string.IsNullOrEmpty(CurrentLanguage))
+                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
             HttpResponseMessage callResult;
             callResult = method switch
@@ -265,6 +274,8 @@ namespace FOAEA3.Common.Helpers
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            if (!string.IsNullOrEmpty(CurrentLanguage))
+                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
             using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
@@ -278,6 +289,8 @@ namespace FOAEA3.Common.Helpers
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            if (!string.IsNullOrEmpty(CurrentLanguage))
+                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
             using var content = new StringContent(flatFileData, Encoding.UTF8, "text/plain");
 
