@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Incoming.Common
@@ -55,10 +56,8 @@ namespace Incoming.Common
             if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. PA3SLSIL.001368.XML)
             {
 
-                var doc = new XmlDocument(); // load xml file
-                doc.Load(fullPath);
-
-                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors); // convert xml to json
+                string xmlData = File.ReadAllText(fullPath);
+                string jsonText = FileHelper.ConvertXmlToJson(xmlData, ref errors); // convert xml to json
 
                 if (errors.Any())
                     return false;
@@ -84,5 +83,6 @@ namespace Incoming.Common
 
             return fileProcessedSuccessfully;
         }
+
     }
 }

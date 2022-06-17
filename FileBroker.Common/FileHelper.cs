@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace FileBroker.Common
@@ -29,26 +30,41 @@ namespace FileBroker.Common
                 return -1;
         }
 
-        public static string ConvertXmlToJson(XmlDocument doc, ref List<string> errors)
-        {
+        public static string ConvertXmlToJson(string xmlData, ref List<string> errors)
+        {            
             try
             {
-                string result = JsonConvert.SerializeXmlNode(doc);
+                xmlData = FileHelper.RemoveXMLartifacts(xmlData);
+                var doc = new XmlDocument();
+                doc.LoadXml(xmlData);
 
-                // clean up json to remove xml-specific artifacts
-                result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\",\"@standalone\":\"yes\"},", "");
-                result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"UTF-8\"},", "");
-                result = result.Replace("\"?xml\":{\"@version\":\"1.0\",\"@encoding\":\"utf-8\"},", "");
-                result = result.Replace("\"@xsi:type\":\"NewDataSet\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
-                result = result.Replace("\"@xmlns:xsd\":\"http://www.w3.org/2001/XMLSchema\",\"@xmlns:xsi\":\"http://www.w3.org/2001/XMLSchema-instance\",", "");
-
-                return result;
+                return JsonConvert.SerializeXmlNode(doc);
             }
             catch (Exception ex)
             {
                 errors.Add(ex.Message);
                 return "";
-            }
+            }            
         }
+        
+        private static string RemoveXMLartifacts(string xmlData)
+        {
+            string result = xmlData;
+
+            string replacement = string.Empty;
+            string pattern = @"<\?xml.*\?>";
+            result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
+
+            replacement = ">";
+            pattern = @"[\t\s]+xmlns.*>";
+            result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
+
+            replacement = ">";
+            pattern = @"[\t\s]+xsi.*>";
+            result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
+
+            return result;
+        }
+
     }
 }

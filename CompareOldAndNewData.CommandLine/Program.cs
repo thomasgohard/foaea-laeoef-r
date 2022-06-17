@@ -34,7 +34,7 @@ foreach (var request in requests)
     var enfSrv = request.Appl_EnfSrv_Cd.Trim();
     var ctrlCd = request.Appl_CtrlCd.Trim();
 
-    var foaea2RunDate = (new DateTime(2022, 5, 25)).Date;
+    var foaea2RunDate = (new DateTime(2022, 6, 17)).Date;
     var foaea3RunDate = DateTime.Now.Date;
 
     ColourConsole.WriteEmbeddedColor($"Comparing [cyan]{enfSrv}-{ctrlCd}[/cyan]... ([green]{n}[/green] of [green]{requests.Count}[/green])\r");

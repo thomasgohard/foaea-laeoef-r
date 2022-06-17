@@ -420,7 +420,7 @@ namespace FileBroker.Business
                 {"AppList_Cd", "Invalid Life State Code (<dat_Appl_LiSt_Cd>) value"},
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
-
+                        
             var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
             interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 

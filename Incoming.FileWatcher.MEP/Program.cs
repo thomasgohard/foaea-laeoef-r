@@ -123,7 +123,7 @@ internal class Program
         }
 
         ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
-        // Console.ReadKey();
+         Console.ReadKey();
 
     }
 

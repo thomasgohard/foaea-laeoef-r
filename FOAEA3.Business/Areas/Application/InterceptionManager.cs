@@ -353,7 +353,7 @@ namespace FOAEA3.Business.Areas.Application
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
-            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            // var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
             var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
             var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
             var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
@@ -374,7 +374,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
-            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            //InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
             InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
             InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
             InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;

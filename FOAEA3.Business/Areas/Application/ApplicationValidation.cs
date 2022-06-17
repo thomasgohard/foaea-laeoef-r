@@ -457,7 +457,7 @@ namespace FOAEA3.Business.Areas.Application
                         )
                     {
                         EventManager.AddEvent(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
-                        Application.Messages.AddWarning(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
+                        if (Application.Medium_Cd != "FTP") Application.Messages.AddWarning(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
 
                         // revert
 
@@ -596,8 +596,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             PostalCodeValidationInBound();
 
-            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
-            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd?.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd?.ToUpper();
             if (!string.IsNullOrEmpty(debtorCountry) &&
                 !string.IsNullOrEmpty(debtorProvince) &&
                 (debtorCountry != "USA"))
@@ -675,10 +675,10 @@ namespace FOAEA3.Business.Areas.Application
             // This is a bit redundant for postal code validation, but other things depend on it 
             // so leave it alone...
             //--------------------------------------------------------------------------------------------
-            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
-            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
-            string debtorCity = Application.Appl_Dbtr_Addr_CityNme.Trim();
-            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd.Replace(" ", "");
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd?.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd?.ToUpper();
+            string debtorCity = Application.Appl_Dbtr_Addr_CityNme?.Trim();
+            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd?.Replace(" ", "");
 
             if (debtorCountry is "CAN")
             {
