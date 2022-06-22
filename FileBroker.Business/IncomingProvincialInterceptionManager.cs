@@ -422,7 +422,8 @@ namespace FileBroker.Business
             };
                         
             var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
-            interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
+            if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
+                interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
             var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
 

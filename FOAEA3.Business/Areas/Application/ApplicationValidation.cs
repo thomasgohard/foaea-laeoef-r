@@ -726,21 +726,23 @@ namespace FOAEA3.Business.Areas.Application
                 postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity,
                                                 out string validProvCode, out PostalCodeFlag validFlags);
 
-                if (validFlags.IsPostalCodeValid)
+                if (!string.IsNullOrEmpty(validProvCode))
                 {
-                    if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
-                        Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                    if (validFlags.IsPostalCodeValid)
+                    {
+                        if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
+                            Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                    }
                 }
-                else
+                else if (!isProvValid)
                 {
                     Application.Appl_Dbtr_Addr_PrvCd = null;
                     Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
                 }
-
             }
 
         }
-        
+
     }
 
 }

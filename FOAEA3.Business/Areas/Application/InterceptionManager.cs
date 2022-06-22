@@ -170,6 +170,20 @@ namespace FOAEA3.Business.Areas.Application
 
         public override void UpdateApplication()
         {
+            var current = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
+            bool isReset = current.InterceptionApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
+
+                        
+            if (isReset && !isCancelled) // reset
+            {   var now = DateTime.Now;
+                InterceptionApplication.IntFinH.IntFinH_Dte = now;
+                foreach (var holdback in InterceptionApplication.HldbCnd)
+                    holdback.IntFinH_Dte = now;
+            }
+
             base.UpdateApplication();
 
             Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
