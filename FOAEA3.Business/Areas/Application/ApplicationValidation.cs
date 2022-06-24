@@ -241,12 +241,11 @@ namespace FOAEA3.Business.Areas.Application
                 }
 
                 var postalCodeDB = Repositories.PostalCodeRepository;
-                PostalCodeFlag validFlags;
                 if (!postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName,
-                                                     out string validProvCode, out validFlags))
+                                                     out string validProvCode, out PostalCodeFlag validFlags))
                 {
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
-
+                    reasonText = "1";
                     return false;
                 }
 
@@ -260,6 +259,7 @@ namespace FOAEA3.Business.Areas.Application
                         IsProvinceValid = true,
                         IsCityNameValid = validFlags.IsCityNameValid
                     };
+                    reasonText = "1";
                 }
 
                 if (!validFlags.IsPostalCodeValid)
@@ -276,13 +276,13 @@ namespace FOAEA3.Business.Areas.Application
                         reasonText = "2,3";
                 }
 
-                if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid)
+                if (!validFlags.IsProvinceValid && validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup province");
 
-                else if (validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                else if (validFlags.IsProvinceValid && !validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup city");
 
-                else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid)
+                else if (!validFlags.IsProvinceValid && !validFlags.IsCityNameValid && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Postal Code failed lookup city and province");
 
                 if (!string.IsNullOrEmpty(reasonText))
@@ -458,7 +458,7 @@ namespace FOAEA3.Business.Areas.Application
                         )
                     {
                         EventManager.AddEvent(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
-                        Application.Messages.AddWarning(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
+                        if (Application.Medium_Cd != "FTP") Application.Messages.AddWarning(EventCode.C50621_ALLOWED_UPDATES_ACCEPTED_OTHERS_IGNORED_CONTACT_FOAEA_FOR_CLARIFICATION);
 
                         // revert
 
@@ -474,7 +474,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     // nothing can be changed
 
-                    Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
+                    if(Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
 
                     break;
 
@@ -597,8 +597,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             PostalCodeValidationInBound();
 
-            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
-            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd?.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd?.ToUpper();
             if (!string.IsNullOrEmpty(debtorCountry) &&
                 !string.IsNullOrEmpty(debtorProvince) &&
                 (debtorCountry != "USA"))
@@ -676,26 +676,17 @@ namespace FOAEA3.Business.Areas.Application
             // This is a bit redundant for postal code validation, but other things depend on it 
             // so leave it alone...
             //--------------------------------------------------------------------------------------------
-            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd.ToUpper();
-            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd.ToUpper();
-            string debtorCity = Application.Appl_Dbtr_Addr_CityNme.Trim();
-            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd.Replace(" ", "");
+            string debtorCountry = Application.Appl_Dbtr_Addr_CtryCd?.ToUpper();
+            string debtorProvince = Application.Appl_Dbtr_Addr_PrvCd?.ToUpper();
+            string debtorCity = Application.Appl_Dbtr_Addr_CityNme?.Trim();
+            string debtorPostalCode = Application.Appl_Dbtr_Addr_PCd?.Replace(" ", "");
 
             if (debtorCountry is "CAN")
             {
                 if (string.IsNullOrEmpty(debtorProvince))
                     isProvValid = false;
-                else
-                {
-                    if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
-                        isProvValid = false;
-                    else
-                    {
-                        var provinceData = ReferenceData.Instance().Provinces[debtorProvince];
-                        if (provinceData.PrvCtryCd != "CAN")
-                            isProvValid = false;
-                    }
-                }
+                else if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                    isProvValid = false;
 
                 if (!isProvValid && Application.AppLiSt_Cd.In(ApplicationState.MANUALLY_TERMINATED_14,
                                                               ApplicationState.FINANCIAL_TERMS_VARIED_17,
@@ -716,7 +707,8 @@ namespace FOAEA3.Business.Areas.Application
             bool canValidatePostalCode = false;
 
             if (Application.AppLiSt_Cd.In(ApplicationState.INITIAL_STATE_0, ApplicationState.INVALID_APPLICATION_1,
-                                          ApplicationState.SIN_NOT_CONFIRMED_5))
+                                          ApplicationState.SIN_NOT_CONFIRMED_5, ApplicationState.MANUALLY_TERMINATED_14,
+                                          ApplicationState.FINANCIAL_TERMS_VARIED_17, ApplicationState.APPLICATION_SUSPENDED_35))
             {
                 canValidatePostalCode = true;
             }
@@ -727,21 +719,23 @@ namespace FOAEA3.Business.Areas.Application
                 postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity,
                                                 out string validProvCode, out PostalCodeFlag validFlags);
 
-                if (validFlags.IsPostalCodeValid)
+                if (!string.IsNullOrEmpty(validProvCode))
                 {
-                    if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
-                        Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                    if (validFlags.IsPostalCodeValid)
+                    {
+                        if (string.IsNullOrEmpty(debtorProvince) || debtorProvince.In("99", "88", "77"))
+                            Application.Appl_Dbtr_Addr_PrvCd = validProvCode;
+                    }
                 }
-                else
+                else if (!isProvValid)
                 {
                     Application.Appl_Dbtr_Addr_PrvCd = null;
                     Application.Messages.AddError("Code Value Error for Appl_Dbtr_Addr_PrvCd", "Appl_Dbtr_Addr_PrvCd");
                 }
-
             }
 
         }
-        
+
     }
 
 }

@@ -186,6 +186,9 @@
   <data name="INVALID_DEBTOR_SURNAME" xml:space="preserve">
     <value>Nom du débiteur invalide</value>
   </data>
+  <data name="INVALID_FREQUENCY_PAYMENT_CODE" xml:space="preserve">
+    <value>Valeur du code de la période de versement (&lt;dat_PymPr_Cd&gt;) invalide</value>
+  </data>
   <data name="INVALID_LOGIN" xml:space="preserve">
     <value>Nom d'utilisateur fourni non valide.</value>
   </data>
@@ -246,8 +249,17 @@
   <data name="MISSING_SUBMITTER" xml:space="preserve">
     <value>Le code de requérant de l’émetteur de la demande doit être spécifié.</value>
   </data>
+  <data name="PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE" xml:space="preserve">
+    <value>Montant périodique  (&lt;dat_IntFinH_Perpym_Money&gt;) fourni sans code de fréquence de paiement</value>
+  </data>
+  <data name="PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR" xml:space="preserve">
+    <value>Montant du paiement périodique(&lt;dat_IntFinH_Perpym_Money&gt;) a été soumis avec une valeur &gt; 0. L'indicateur de paiement cumulatif (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) n'existe pas ou est invalide.</value>
+  </data>
   <data name="REQUIRED_ALPHANUMERIC_CONTROL_CODE" xml:space="preserve">
     <value>La valeur dans le code de contrôle doit être alphanumérique.</value>
+  </data>
+  <data name="SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING" xml:space="preserve">
+    <value>Succès. Le montant du paiement périodique (&lt;dat_IntFinH_Perpym_Money&gt;) n'a pas été soumis. Toutes les données pour le montant du paiementt périodique (&lt;dat_IntFinH_Perpym_Money&gt;), le code de fréquence de paiement (&lt;dat_PymPr_Cd&gt;) et l'indicateur de paiement cumulatif (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) ont été enlevées.</value>
   </data>
   <data name="WARNING_NO_DUTIES" xml:space="preserve">
     <value>Aucune tâche n'a été choisie</value>

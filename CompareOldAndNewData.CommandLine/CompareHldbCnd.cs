@@ -16,8 +16,8 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var holdbackItem2 in holdback2)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte}]/[{holdbackItem2.EnfSrv_Cd}]";
-                var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte == holdbackItem2.IntFinH_Dte) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) || 
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte.Date}]/[{holdbackItem2.EnfSrv_Cd}]";
+                var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte.Date == holdbackItem2.IntFinH_Dte.Date) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) || 
                                                           ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd))).FirstOrDefault();
                 if (holdbackItem3 is null)
@@ -28,8 +28,8 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var holdbackItem3 in holdback3)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem3.ActvSt_Cd}]/[{holdbackItem3.IntFinH_Dte}]/[{holdbackItem3.EnfSrv_Cd}]";
-                var holdbackItem2 = holdback2.Where(m => ((m.IntFinH_Dte == holdbackItem3.IntFinH_Dte) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd)) ||
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem3.ActvSt_Cd}]/[{holdbackItem3.IntFinH_Dte.Date}]/[{holdbackItem3.EnfSrv_Cd}]";
+                var holdbackItem2 = holdback2.Where(m => ((m.IntFinH_Dte.Date == holdbackItem3.IntFinH_Dte.Date) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem3.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem3.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem3.EnfSrv_Cd))).FirstOrDefault();
                 if (holdbackItem2 is null)
@@ -43,7 +43,7 @@ namespace CompareOldAndNewData.CommandLine
         {
             if (holdback2.Appl_EnfSrv_Cd != holdback3.Appl_EnfSrv_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_EnfSrv_Cd", goodValue: holdback2.Appl_EnfSrv_Cd, badValue: holdback3.Appl_EnfSrv_Cd));
             if (holdback2.Appl_CtrlCd != holdback3.Appl_CtrlCd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CtrlCd", goodValue: holdback2.Appl_CtrlCd, badValue: holdback3.Appl_CtrlCd));
-            if (holdback2.IntFinH_Dte != holdback3.IntFinH_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "IntFinH_Dte", goodValue: holdback2.IntFinH_Dte, badValue: holdback3.IntFinH_Dte));
+            if (holdback2.IntFinH_Dte.Date != holdback3.IntFinH_Dte.Date) diffs.Add(new DiffData(tableName, key: key, colName: "IntFinH_Dte", goodValue: holdback2.IntFinH_Dte, badValue: holdback3.IntFinH_Dte));
             if (holdback2.EnfSrv_Cd != holdback3.EnfSrv_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "EnfSrv_Cd", goodValue: holdback2.EnfSrv_Cd, badValue: holdback3.EnfSrv_Cd));
             if (holdback2.HldbCnd_MxmPerChq_Money != holdback3.HldbCnd_MxmPerChq_Money) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_MxmPerChq_Money", goodValue: holdback2.HldbCnd_MxmPerChq_Money, badValue: holdback3.HldbCnd_MxmPerChq_Money));
             if (holdback2.HldbCnd_SrcHldbAmn_Money != holdback3.HldbCnd_SrcHldbAmn_Money) diffs.Add(new DiffData(tableName, key: key, colName: "HldbCnd_SrcHldbAmn_Money", goodValue: holdback2.HldbCnd_SrcHldbAmn_Money, badValue: holdback3.HldbCnd_SrcHldbAmn_Money));

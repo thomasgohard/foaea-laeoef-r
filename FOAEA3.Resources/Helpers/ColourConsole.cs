@@ -181,6 +181,56 @@ namespace FOAEA3.Resources.Helpers
 
             Console.WriteLine();
         }
+        
+        /// <summary>
+        /// Allows a string to be written with embedded color values using:
+        /// This is [red]Red[/red] text and this is [cyan]Blue[/blue] text
+        /// </summary>
+        /// <param name="text">Text to display</param>
+        /// <param name="baseTextColor">Base text color</param>
+        public static void WriteEmbeddedColor(string text, ConsoleColor? baseTextColor = null)
+        {
+            if (baseTextColor == null)
+                baseTextColor = Console.ForegroundColor;
+
+            if (string.IsNullOrEmpty(text))
+            {
+                Write(string.Empty);
+                return;
+            }
+
+            int at = text.IndexOf("[");
+            int at2 = text.IndexOf("]");
+            if (at == -1 || at2 <= at)
+            {
+                Write(text, baseTextColor);
+                return;
+            }
+
+            while (true)
+            {
+                var match = colorBlockRegEx.Value.Match(text);
+                if (match.Length < 1)
+                {
+                    Write(text, baseTextColor);
+                    break;
+                }
+
+                // write up to expression
+                Write(text.Substring(0, match.Index), baseTextColor);
+
+                // strip out the expression
+                string highlightText = match.Groups["text"].Value;
+                string colorVal = match.Groups["color"].Value;
+
+                Write(highlightText, colorVal);
+
+                // remainder of string
+                text = text[(match.Index + match.Value.Length)..];
+            }
+
+//            Console.Write();
+        }
 
         #endregion
 

@@ -101,8 +101,6 @@ namespace FOAEA3.API.Interception.Controllers
         [Produces("application/json")]
         public ActionResult<InterceptionApplicationData> UpdateApplication(
                                                         [FromRoute] string key,
-                                                        [FromQuery] string command,
-                                                        [FromQuery] string enforcementServiceCode,
                                                         [FromServices] IRepositories repositories,
                                                         [FromServices] IRepositories_Finance repositoriesFinance)
         {
@@ -117,31 +115,59 @@ namespace FOAEA3.API.Interception.Controllers
                 return UnprocessableEntity(error);
 
             var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+            interceptionManager.UpdateApplication();
 
-            if (string.IsNullOrEmpty(command))
-                command = "";
+            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+                return Ok(application);
+            else
+                return UnprocessableEntity(application);
 
-            switch (command.ToLower())
-            {
-                case "":
-                    if (application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
-                        interceptionManager.CancelApplication();
-                    else
-                        interceptionManager.UpdateApplication();
-                    break;
+        }
 
-                case "partiallyserviceapplication":
-                    // TODO: interceptionManager.PartiallyServiceApplication(enforcementServiceCode);
-                    break;
+        [HttpPut("{key}/cancel")]
+        [Produces("application/json")]
+        public ActionResult<InterceptionApplicationData> CancelApplication([FromRoute] string key,
+                                                                           [FromServices] IRepositories repositories,
+                                                                           [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
 
-                case "fullyserviceapplication":
-                    // TODO: interceptionManager.FullyServiceApplication(enforcementServiceCode);
-                    break;
+            var applKey = new ApplKey(key);
 
-                default:
-                    application.Messages.AddSystemError($"Unknown command: {command}");
-                    return UnprocessableEntity(application);
-            }
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+            interceptionManager.CancelApplication();
+
+            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+                return Ok(application);
+            else
+                return UnprocessableEntity(application);
+
+        }
+
+        [HttpPut("{key}/suspend")]
+        [Produces("application/json")]
+        public ActionResult<InterceptionApplicationData> SuspendApplication([FromRoute] string key,
+                                                                            [FromServices] IRepositories repositories,
+                                                                            [FromServices] IRepositories_Finance repositoriesFinance)
+        {
+            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
+            APIHelper.PrepareResponseHeaders(Response.Headers);
+
+            var applKey = new ApplKey(key);
+
+            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+            if (!APIHelper.ValidateApplication(application, applKey, out string error))
+                return UnprocessableEntity(error);
+
+            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+            interceptionManager.SuspendApplication();
 
             if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
                 return Ok(application);

@@ -54,7 +54,7 @@ namespace FOAEA3.Business.Areas.Application
 
             ApplicationManager.LoadApplication(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
 
-            Application.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
         }
 

@@ -36,7 +36,7 @@ namespace CompareOldAndNewData.CommandLine
             if (summSmry2.Appl_JusticeNrSfx != summSmry3.Appl_JusticeNrSfx) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_JusticeNrSfx", goodValue: summSmry2.Appl_JusticeNrSfx, badValue: summSmry3.Appl_JusticeNrSfx));
             if (summSmry2.Start_Dte != summSmry3.Start_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "Start_Dte", goodValue: summSmry2.Start_Dte, badValue: summSmry3.Start_Dte));
             if (summSmry2.End_Dte != summSmry3.End_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "End_Dte", goodValue: summSmry2.End_Dte, badValue: summSmry3.End_Dte));
-            if (summSmry2.ActualEnd_Dte != summSmry3.ActualEnd_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "ActualEnd_Dte", goodValue: summSmry2.ActualEnd_Dte, badValue: summSmry3.ActualEnd_Dte));
+            if (summSmry2.ActualEnd_Dte?.Date != summSmry3.ActualEnd_Dte?.Date) diffs.Add(new DiffData(tableName, key: key, colName: "ActualEnd_Dte", goodValue: summSmry2.ActualEnd_Dte, badValue: summSmry3.ActualEnd_Dte));
             if (summSmry2.CourtRefNr != summSmry3.CourtRefNr) diffs.Add(new DiffData(tableName, key: key, colName: "CourtRefNr", goodValue: summSmry2.CourtRefNr, badValue: summSmry3.CourtRefNr));
             if (summSmry2.FeePaidTtl_Money != summSmry3.FeePaidTtl_Money) diffs.Add(new DiffData(tableName, key: key, colName: "FeePaidTtl_Money", goodValue: summSmry2.FeePaidTtl_Money, badValue: summSmry3.FeePaidTtl_Money));
             if (summSmry2.LmpSumPaidTtl_Money != summSmry3.LmpSumPaidTtl_Money) diffs.Add(new DiffData(tableName, key: key, colName: "LmpSumPaidTtl_Money", goodValue: summSmry2.LmpSumPaidTtl_Money, badValue: summSmry3.LmpSumPaidTtl_Money));
@@ -49,8 +49,8 @@ namespace CompareOldAndNewData.CommandLine
             if (summSmry2.FeeOwedTtl_Money != summSmry3.FeeOwedTtl_Money) diffs.Add(new DiffData(tableName, key: key, colName: "FeeOwedTtl_Money", goodValue: summSmry2.FeeOwedTtl_Money, badValue: summSmry3.FeeOwedTtl_Money));
             if (summSmry2.LmpSumOwedTtl_Money != summSmry3.LmpSumOwedTtl_Money) diffs.Add(new DiffData(tableName, key: key, colName: "LmpSumOwedTtl_Money", goodValue: summSmry2.LmpSumOwedTtl_Money, badValue: summSmry3.LmpSumOwedTtl_Money));
             if (summSmry2.PerPymOwedTtl_Money != summSmry3.PerPymOwedTtl_Money) diffs.Add(new DiffData(tableName, key: key, colName: "PerPymOwedTtl_Money", goodValue: summSmry2.PerPymOwedTtl_Money, badValue: summSmry3.PerPymOwedTtl_Money));
-            if (summSmry2.SummSmry_LastCalc_Dte != summSmry3.SummSmry_LastCalc_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "SummSmry_LastCalc_Dte", goodValue: summSmry2.SummSmry_LastCalc_Dte, badValue: summSmry3.SummSmry_LastCalc_Dte));
-            if (summSmry2.SummSmry_Recalc_Dte != summSmry3.SummSmry_Recalc_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "SummSmry_Recalc_Dte", goodValue: summSmry2.SummSmry_Recalc_Dte, badValue: summSmry3.SummSmry_Recalc_Dte));
+            if (summSmry2.SummSmry_LastCalc_Dte?.Date != summSmry3.SummSmry_LastCalc_Dte?.Date) diffs.Add(new DiffData(tableName, key: key, colName: "SummSmry_LastCalc_Dte", goodValue: summSmry2.SummSmry_LastCalc_Dte, badValue: summSmry3.SummSmry_LastCalc_Dte));
+            if (summSmry2.SummSmry_Recalc_Dte?.Date != summSmry3.SummSmry_Recalc_Dte?.Date) diffs.Add(new DiffData(tableName, key: key, colName: "SummSmry_Recalc_Dte", goodValue: summSmry2.SummSmry_Recalc_Dte, badValue: summSmry3.SummSmry_Recalc_Dte));
             if (summSmry2.SummSmry_Vary_Cnt != summSmry3.SummSmry_Vary_Cnt) diffs.Add(new DiffData(tableName, key: key, colName: "SummSmry_Vary_Cnt", goodValue: summSmry2.SummSmry_Vary_Cnt, badValue: summSmry3.SummSmry_Vary_Cnt));
 
             return diffs;

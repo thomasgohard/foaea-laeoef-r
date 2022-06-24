@@ -1,13 +1,12 @@
 ﻿using CompareOldAndNewData.CommandLine;
 using DBHelper;
+using FileBroker.Data.DB;
 using FOAEA3.Data.Base;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
+using System.Text;
 
-Console.WriteLine("Comparing Data From Old System with new System");
-Console.WriteLine("----------------------------------------------");
-
-string? aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 IConfiguration configuration = new ConfigurationBuilder()
         .AddJsonFile($"appsettings.json", optional: true)
@@ -16,24 +15,35 @@ IConfiguration configuration = new ConfigurationBuilder()
 
 var foaea2DB = new DBTools(configuration.GetConnectionString("Foaea2DB").ReplaceVariablesWithEnvironmentValues());
 var foaea3DB = new DBTools(configuration.GetConnectionString("Foaea3DB").ReplaceVariablesWithEnvironmentValues());
+var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+
 var repositories2 = new DbRepositories(foaea2DB);
 var repositories3 = new DbRepositories(foaea3DB);
 var repositories2Finance = new DbRepositories_Finance(foaea2DB);
 var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 
-var foaea2RunDate = (new DateTime(2022, 5, 25)).Date;
-var foaea3RunDate = DateTime.Now.Date; // (new DateTime(2022, 6, 9)).Date;
+var requestLogDB = new DBRequestLog(fileBrokerDB);
+var requests = requestLogDB.GetAll();
+int n = 1;
 
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "P02862", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O88291", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C17", "ON01", "O36284", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P02001", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P23642", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "O62858", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "C14", "ON01", "P75478", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85061", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85105", foaea2RunDate, foaea3RunDate);
-CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance, "A00", "ON01", "P85100", foaea2RunDate, foaea3RunDate);
+var output = new StringBuilder();
+
+foreach (var request in requests)
+{
+    var action = request.MaintenanceAction + request.MaintenanceLifeState;
+    var enfSrv = request.Appl_EnfSrv_Cd.Trim();
+    var ctrlCd = request.Appl_CtrlCd.Trim();
+
+    var foaea2RunDate = (new DateTime(2022, 6, 17)).Date;
+    var foaea3RunDate = DateTime.Now.Date;
+
+    ColourConsole.WriteEmbeddedColor($"Comparing [cyan]{enfSrv}-{ctrlCd}[/cyan]... ([green]{n}[/green] of [green]{requests.Count}[/green])\r");
+    CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance,
+                   action, enfSrv, ctrlCd, foaea2RunDate, foaea3RunDate, output);
+    n++;
+}
+
+File.WriteAllText(@"C:\work\Compare1.txt", output.ToString());
 
 Console.WriteLine("\nFinished");
 

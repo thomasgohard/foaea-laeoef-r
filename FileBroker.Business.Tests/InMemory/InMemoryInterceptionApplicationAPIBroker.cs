@@ -15,6 +15,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        {
+            throw new NotImplementedException();
+        }
+
         public InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
@@ -26,6 +31,11 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        {
+            throw new NotImplementedException();
+        }
+
+        public InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }

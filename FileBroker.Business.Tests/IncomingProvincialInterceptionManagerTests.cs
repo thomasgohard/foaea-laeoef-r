@@ -55,7 +55,8 @@ namespace FileBroker.Business.Tests
                 OutboundAuditDB = null,
                 ErrorTrackingDB = null,
                 MailServiceDB = null,
-                TranslationDB = null
+                TranslationDB = null,
+                RequestLogDB = null
             };
 
             var auditConfig = new ProvincialAuditFileConfig

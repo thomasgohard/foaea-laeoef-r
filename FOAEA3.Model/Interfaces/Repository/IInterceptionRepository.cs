@@ -27,6 +27,7 @@ namespace FOAEA3.Model.Interfaces
         void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
         void DeleteHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
+        void DeleteHoldbackCondition(HoldbackConditionData holdbackCondition);
 
         List<InterceptionApplicationData> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN,
                                                                  string activeState);

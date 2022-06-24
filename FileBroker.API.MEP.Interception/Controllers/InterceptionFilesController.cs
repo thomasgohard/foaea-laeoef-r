@@ -73,7 +73,9 @@ public class InterceptionFilesController : ControllerBase
                                                         [FromServices] IFileAuditRepository fileAuditDB,
                                                         [FromServices] IFileTableRepository fileTableDB,
                                                         [FromServices] ITranslationRepository translationDB,
+                                                        [FromServices] IRequestLogRepository requestLogDB,
                                                         [FromServices] IMailServiceRepository mailService,
+                                                        [FromServices] ILoadInboundAuditRepository loadInboundAuditData,
                                                         [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                         [FromServices] IOptions<ApiConfig> apiConfig,
                                                         [FromHeader] string currentSubmitter,
@@ -85,9 +87,28 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
         }
 
+
         var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
+        //if (errors.Any())
+        //{
+        //    errors.Clear();
+        //    errors = JsonHelper.Validate<MEPInterceptionFileDataSingle>(sourceInterceptionJsonData, out unknownTags);
+        //} 
+        //if (errors.Any())
+        //{
+        //    errors.Clear();
+        //    errors = JsonHelper.Validate<MEPInterceptionFileDataSingleSource>(sourceInterceptionJsonData, out unknownTags);
+        //}                             
+        //if (errors.Any())
+        //{
+        //    errors.Clear();
+        //    errors = JsonHelper.Validate<MEPInterceptionFileDataNoSource>(sourceInterceptionJsonData, out unknownTags);
+        //}
+
         if (errors.Any())
             return UnprocessableEntity(errors);
+
+        // return Ok(); // for testing only!!!
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
@@ -114,7 +135,9 @@ public class InterceptionFilesController : ControllerBase
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
             MailServiceDB = mailService,
-            TranslationDB = translationDB
+            TranslationDB = translationDB,
+            RequestLogDB = requestLogDB,
+            LoadInboundAuditDB = loadInboundAuditData
         };
 
         var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);
@@ -123,7 +146,7 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags);
+            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags, includeInfoInMessages: true);
 
             if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                 if (info.ContainsSystemMessagesOfType(MessageType.Error))

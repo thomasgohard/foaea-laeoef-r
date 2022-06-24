@@ -65,10 +65,8 @@ namespace Incoming.Common
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
             {                                             //                                                    ↑
 
-                var doc = new XmlDocument(); // load xml file
-                doc.Load(fullPath);
-
-                string jsonText = FileHelper.ConvertXmlToJson(doc, ref errors);
+                string xmlData = File.ReadAllText(fullPath);
+                string jsonText = FileHelper.ConvertXmlToJson(xmlData, ref errors);
 
                 if (errors.Any())
                     return false;
@@ -84,7 +82,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]InterceptionFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
                 }
@@ -99,7 +96,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]LicenceDenialFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
                 }
@@ -114,7 +110,6 @@ namespace Incoming.Common
                     }
                     else
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"[green]TracingFiles API succeeded.[/green]");
                         fileProcessedSuccessfully = true;
                     }
 

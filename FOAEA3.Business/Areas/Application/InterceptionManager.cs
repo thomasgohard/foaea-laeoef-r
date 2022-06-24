@@ -154,7 +154,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
 
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 IncrementGarnSmry(isNewApplication: true);
 
@@ -170,11 +170,43 @@ namespace FOAEA3.Business.Areas.Application
 
         public override void UpdateApplication()
         {
+            var current = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
+            bool isReset = current.InterceptionApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
+
+            // keep these stored values
+            InterceptionApplication.Appl_Create_Dte = current.InterceptionApplication.Appl_Create_Dte;
+            InterceptionApplication.Appl_Create_Usr = current.InterceptionApplication.Appl_Create_Usr;
+
             base.UpdateApplication();
 
-            Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+            if (isReset && !isCancelled) // reset
+            {
+                // delete any existing intfinh and hldbcnd records for this application and then recreate them with the new data
 
-            Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+                // IMPORTANT: must delete holdbacks first since they have a dependancy on IntFinH
+                var allHoldbacks = Repositories.InterceptionRepository.GetAllHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                foreach (var holdback in allHoldbacks)
+                    Repositories.InterceptionRepository.DeleteHoldbackCondition(holdback);
+
+                var allIntFinH = Repositories.InterceptionRepository.GetAllInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                foreach (var intFinH in allIntFinH)
+                    Repositories.InterceptionRepository.DeleteInterceptionFinancialTerms(intFinH);
+
+                InterceptionApplication.IntFinH.ActvSt_Cd = "P";
+                Repositories.InterceptionRepository.CreateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+
+                foreach (var holdback in InterceptionApplication.HldbCnd)
+                    holdback.ActvSt_Cd = "P";
+                Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
+            else
+            {
+                Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
 
         }
 
@@ -259,9 +291,19 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
+
             var currentInterceptionManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
             currentInterceptionManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
+
+            if (!StateEngine.IsValidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17))
+            {
+
+                InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
+                EventManager.SaveEvents();
+
+                return false;
+            }
 
             if (!InterceptionValidation.ValidNewFinancialTerms(currentInterceptionApplication))
                 return false;
@@ -297,7 +339,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 EventManager.SaveEvents();
 
-                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 return true;
             }
@@ -353,7 +395,7 @@ namespace FOAEA3.Business.Areas.Application
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
-            var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            // var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
             var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
             var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
             var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
@@ -374,7 +416,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
-            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            //InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
             InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
             InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
             InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
@@ -394,9 +436,55 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
+        }
+
+        public bool SuspendApplication()
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            if (!LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
+                DeletePendingFinancialInformation();
+
+            SetNewStateTo(ApplicationState.APPLICATION_SUSPENDED_35);
+
+            UpdateApplicationNoValidation();
+
+            IncrementGarnSmry();
+
+            Repositories.InterceptionRepository.EISOHistoryDeleteBySIN(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
+
+            EventManager.SaveEvents();
+
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;
+        }
+
+        private void DeletePendingFinancialInformation()
+        {
+            var pendingIntFinHs = Repositories.InterceptionRepository.GetAllInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var pendingHoldbacks = Repositories.InterceptionRepository.GetAllHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            foreach (var pendingIntFinH in pendingIntFinHs)
+                if (pendingIntFinH.ActvSt_Cd == "P")
+                    Repositories.InterceptionRepository.DeleteInterceptionFinancialTerms(pendingIntFinH);
+
+            foreach (var pendingHoldback in pendingHoldbacks)
+                if (pendingHoldback.ActvSt_Cd == "P")
+                    Repositories.InterceptionRepository.DeleteHoldbackCondition(pendingHoldback);
         }
 
         public bool AcceptInterception(DateTime supportingDocsDate)
@@ -484,7 +572,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
 
@@ -570,7 +658,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
         }
@@ -588,7 +676,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
         }
 
         public bool RejectVariation(string applicationRejectReasons)
@@ -634,7 +722,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.SaveEvents();
 
-            InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+            if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
         }

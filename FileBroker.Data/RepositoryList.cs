@@ -12,5 +12,7 @@ namespace FileBroker.Data
         public IErrorTrackingRepository ErrorTrackingDB { get; set; }
         public IMailServiceRepository MailServiceDB { get; set; }
         public ITranslationRepository TranslationDB { get; set; }
+        public IRequestLogRepository RequestLogDB { get; set; }
+        public ILoadInboundAuditRepository LoadInboundAuditDB { get; set; }
     }
 }

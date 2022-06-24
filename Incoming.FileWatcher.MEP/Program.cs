@@ -28,6 +28,8 @@ internal class Program
         IConfiguration configuration = builder.Build();
 
         var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+        var requestLogDB = new DBRequestLog(fileBrokerDB);
+        requestLogDB.DeleteAll();
 
         string provinceCode = GetProvinceCodeBasedOnArgs(args);
         var fileTableData = GetFileTableDataBasedOnArgs(args, new DBFileTable(fileBrokerDB));
@@ -62,51 +64,79 @@ internal class Program
 
         var provinceFilesData = fileTableData.Where(f => (f.Name[..2].ToUpper() == provinceCode) || (provinceCode == "ALL"))
                                              .ToList();
+        var provinces = (from data in provinceFilesData
+                         select data.Name[..2]).Distinct().ToList();
+
+        var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
         string tracingName = null;
         string interceptionName = null;
         string licenceName = null;
 
-        var searchPaths = new List<string>();
-        foreach (var provinceFileData in provinceFilesData)
+        int totalFilesFound = 0;
+        foreach (var itemProvince in provinces)
         {
-            if (provinceFileData.Category.ToUpper() == "TRCAPPIN") tracingName = provinceFileData.Name.Trim().ToUpper();
-            if (provinceFileData.Category.ToUpper() == "INTAPPIN") interceptionName = provinceFileData.Name.Trim().ToUpper();
-            if (provinceFileData.Category.ToUpper() == "LICAPPIN") licenceName = provinceFileData.Name.Trim().ToUpper();
+            var searchPaths = new List<string>();
 
-            string thisPath = provinceFileData.Path.ToUpper();
-            if (!searchPaths.Contains(thisPath))
-                searchPaths.Add(thisPath);
-        }
-
-        var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
-        var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootData, apiAction,
-                                                               interceptionBaseName: interceptionName,
-                                                               tracingBaseName: tracingName,
-                                                               licencingBaseName: licenceName);
-
-        var allNewFiles = new List<string>();
-        foreach (string searchPath in searchPaths)
-            provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
-
-        if (allNewFiles.Count > 0)
-        {
-            ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file(s)");
-
-            foreach (var newFile in allNewFiles)
+            var thisProvinceFilesData = provinceFilesData.Where(f => f.Name[..2].ToUpper() == itemProvince.ToUpper());
+            foreach (var provinceFileData in thisProvinceFilesData)
             {
-                ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                if (provinceFileData.Category.ToUpper() == "TRCAPPIN") tracingName = provinceFileData.Name.Trim().ToUpper();
+                if (provinceFileData.Category.ToUpper() == "INTAPPIN") interceptionName = provinceFileData.Name.Trim().ToUpper();
+                if (provinceFileData.Category.ToUpper() == "LICAPPIN") licenceName = provinceFileData.Name.Trim().ToUpper();
 
-                var errors = new List<string>();
-                provincialFileManager.ProcessNewFile(newFile, ref errors);
-                if (errors.Any())
-                    foreach (var error in errors)
-                        errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                string thisPath = provinceFileData.Path.ToUpper();
+                if (!searchPaths.Contains(thisPath))
+                    searchPaths.Add(thisPath);
             }
+
+            var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootData, apiAction,
+                                                                   interceptionBaseName: interceptionName,
+                                                                   tracingBaseName: tracingName,
+                                                                   licencingBaseName: licenceName);
+
+            bool finishedForProvince = false;
+            bool displayFoundZero = true;
+            while (!finishedForProvince)
+            {
+                var allNewFiles = new List<string>();
+                foreach (string searchPath in searchPaths)
+                    provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
+                totalFilesFound += allNewFiles.Count;
+
+                if (allNewFiles.Count > 0)
+                {
+                    displayFoundZero = false;
+                    string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
+                    ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+
+                    foreach (var newFile in allNewFiles)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+
+                        var errors = new List<string>();
+                        provincialFileManager.ProcessNewFile(newFile, ref errors);
+                        if (errors.Any())
+                        {
+                            foreach (var error in errors)
+                                errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                            finishedForProvince = true;
+                        }
+                    }
+                }
+                else
+                {
+                    finishedForProvince = true;
+                    if (displayFoundZero)
+                        ColourConsole.WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
+                }
+            }
+
         }
-        else
-            ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
+
+        ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+        Console.ReadKey();
 
     }
 

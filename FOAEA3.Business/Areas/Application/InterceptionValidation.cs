@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Linq;
@@ -176,30 +177,30 @@ namespace FOAEA3.Business.Areas.Application
                             appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
                             isValidData = false;
                         }
+                    }
+                    else
+                    {
+                        if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != intFinH.PymPr_Cd.ToUpper())
+                        {
+                            appl.Messages.AddError("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)");
+                            isValidData = false;
+                        }
                         else
                         {
-                            if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() == intFinH.PymPr_Cd.ToUpper())
+                            if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
                             {
-                                appl.Messages.AddError("Default Holdback Amount Period Code and Payment Period Code (both must be Monthly) (<dat_IntFinH_DefHldbAmn_Period> <dat_PymPr_Cd)");
+                                appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
                                 isValidData = false;
                             }
-                            else
+                            if (intFinH.PymPr_Cd.ToUpper() != "C")
                             {
-                                if (intFinH.IntFinH_DefHldbAmn_Period.ToUpper() != "C")
-                                {
-                                    appl.Messages.AddError("Invalid Default Holdback Amount Period Code (must be monthly) (<dat_IntFinH_DefHldbAmn_Period>)");
-                                    isValidData = false;
-                                }
-                                if (intFinH.PymPr_Cd.ToUpper() != "C")
-                                {
-                                    appl.Messages.AddError("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)");
-                                    isValidData = false;
-                                }
+                                appl.Messages.AddError("Invalid Payment Period Code (must be Monthly or N/A when a Default Fixed Amount is chosen) (<dat_PymPr_Cd>)");
+                                isValidData = false;
                             }
                         }
                     }
                 }
-            }
+            }           
 
             if (intFinH.IntFinH_DefHldbPrcnt is null)
                 intFinH.IntFinH_DefHldbPrcnt = 0;
@@ -235,13 +236,13 @@ namespace FOAEA3.Business.Areas.Application
                     intFinH.IntFinH_PerPym_Money = null;
                     intFinH.PymPr_Cd = null;
                     intFinH.IntFinH_CmlPrPym_Ind = null;
-                    appl.Messages.AddError("Success. Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was not submitted. All data for Periodic Payment Amount (<dat_IntFinH_Perpym_Money>), Frequency Payment Code (<PymPr_Cd>) and Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) has been removed");
+                    appl.Messages.AddInformation(ErrorResource.SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING);
                 }
                 else
                 {
                     if (intFinH.PymPr_Cd is null)
                     {
-                        appl.Messages.AddError("Periodic Amount (<dat_IntFinH_Perpym_Money>) provided with no frequency payment code (<dat_PymPr_Cd>)");
+                        appl.Messages.AddError(ErrorResource.PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE);
                         isValidData = false;
                     }
                     else
@@ -249,13 +250,13 @@ namespace FOAEA3.Business.Areas.Application
                         var rEx = new Regex("^[A-G]$");
                         if (!rEx.IsMatch(intFinH.PymPr_Cd.ToUpper()))
                         {
-                            appl.Messages.AddError("Invalid Frequency Payment Code (<dat_PymPr_Cd>)");
+                            appl.Messages.AddError(ErrorResource.INVALID_FREQUENCY_PAYMENT_CODE);
                             isValidData = false;
                         }
                     }
                     if (intFinH.IntFinH_CmlPrPym_Ind is null)
                     {
-                        appl.Messages.AddError("Periodic Payment Amount (<dat_IntFinH_Perpym_Money>) was submitted with an amount > 0. Cumulative Payment Indicator (<dat_IntFinH_CmlPrPym_Ind>) does not exist or is invalid");
+                        appl.Messages.AddError(ErrorResource.PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR);
                         isValidData = false;
                     }
                 }
@@ -320,7 +321,7 @@ namespace FOAEA3.Business.Areas.Application
         private bool ValidVariationIssueDate()
         {
 
-            if ((InterceptionApplication.IntFinH.IntFinH_VarIss_Dte is null) || 
+            if ((InterceptionApplication.IntFinH.IntFinH_VarIss_Dte is null) ||
                 (InterceptionApplication.IntFinH.IntFinH_VarIss_Dte > DateTime.Now))
             {
                 EventManager.AddEvent(EventCode.C55101_INVALID_VARIATION_ISSUE_DATE);
@@ -342,7 +343,7 @@ namespace FOAEA3.Business.Areas.Application
             decimal maxTotalMoney = InterceptionApplication.IntFinH.IntFinH_MxmTtl_Money ?? 0.0M;
 
             decimal maxAmntPeriodic = (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.PymPr_Cd)) ?
-                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) : 
+                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) :
                                         0.0M;
 
             decimal maxAmnt = maxAmntPeriodic + InterceptionApplication.IntFinH.IntFinH_LmpSum_Money;

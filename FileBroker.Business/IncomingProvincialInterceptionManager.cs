@@ -34,6 +34,8 @@ namespace FileBroker.Business
                 var translations = repositories.TranslationDB.GetTranslations();
                 foreach (var translation in translations)
                     Translations.Add(translation.EnglishText, translation.FrenchText);
+                APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
+                LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
             }
 
             EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
@@ -116,33 +118,53 @@ namespace FileBroker.Business
                                 NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
                             };
 
+                            AddRequestToAudit(interceptionMessage);
+
                             if (isValidData)
                             {
-                                var messages = ProcessApplicationRequest(interceptionMessage);
+                                var loadInboundDB = Repositories.LoadInboundAuditDB;
+                                var appl = interceptionMessage.Application;
+                                var fileName = FileName + ".XML";
 
-                                if (messages.ContainsMessagesOfType(MessageType.Error))
+                                if (!loadInboundDB.AlreadyExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
+                                                                 fileName))
                                 {
-                                    var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors[0]);
-                                    errorCount++;
-                                }
-                                else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                {
-                                    var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings[0]);
-                                    warningCount++;
-                                }
-                                else
-                                {
-                                    if (includeInfoInMessages)
+
+                                    loadInboundDB.AddNew(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
+                                    var messages = ProcessApplicationRequest(interceptionMessage);
+
+                                    if (messages.ContainsMessagesOfType(MessageType.Error))
                                     {
-                                        var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-                                        result.AddRange(infos);
+                                        var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
+                                        errorCount++;
+                                    }
+                                    else if (messages.ContainsMessagesOfType(MessageType.Warning))
+                                    {
+                                        var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
+                                        warningCount++;
+                                    }
+                                    else
+                                    {
+                                        if (includeInfoInMessages)
+                                        {
+                                            var infos = messages.FindAll(m => m.Severity == MessageType.Information);
+                                            if (infos.Any())
+                                            {
+                                                fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
+                                                result.AddRange(infos);
+                                            }
+                                        }
+
+                                        if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
+                                            fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
+                                        successCount++;
                                     }
 
-                                    if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                        fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
-                                    successCount++;
+                                    loadInboundDB.MarkAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
                                 }
                             }
 
@@ -182,10 +204,24 @@ namespace FileBroker.Business
             return result;
         }
 
+        private void AddRequestToAudit(MessageData<InterceptionApplicationData> interceptionMessage)
+        {
+            var requestLogData = new RequestLogData
+            {
+                MaintenanceAction = interceptionMessage.MaintenanceAction,
+                MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
+                Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
+                Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
+                LoadedDateTime = DateTime.Now
+            };
+
+            _ = Repositories.RequestLogDB.Add(requestLogData);
+        }
+
         public void AutoAcceptVariations(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
-            
+
             string processName = $"Process Auto Accept Variation {enfService}";
             prodAudit.Insert(processName, "Divert Funds Started", "O");
 
@@ -201,6 +237,7 @@ namespace FileBroker.Business
         public MessageDataList ProcessApplicationRequest(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
+            var existingMessages = interceptionMessageData.Application.Messages;
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.NewUpdateSubmitter;
 
@@ -218,7 +255,7 @@ namespace FileBroker.Business
                         break;
 
                     case "14": // cancellation
-                        interception = APIs.InterceptionApplications.UpdateInterceptionApplication(interceptionMessageData.Application);
+                        interception = APIs.InterceptionApplications.CancelInterceptionApplication(interceptionMessageData.Application);
                         break;
 
                     case "17": // variation
@@ -227,8 +264,12 @@ namespace FileBroker.Business
 
                     case "29": // transfer
                         interception = APIs.InterceptionApplications.TransferInterceptionApplication(interceptionMessageData.Application,
-                                                                                      interceptionMessageData.NewRecipientSubmitter,
-                                                                                      interceptionMessageData.NewIssuingSubmitter);
+                                                                                                     interceptionMessageData.NewRecipientSubmitter,
+                                                                                                     interceptionMessageData.NewIssuingSubmitter);
+                        break;
+
+                    case "35": // suspend
+                        interception = APIs.InterceptionApplications.SuspendInterceptionApplication(interceptionMessageData.Application);
                         break;
 
                     default:
@@ -239,10 +280,11 @@ namespace FileBroker.Business
                 }
             }
 
-            return interception.Messages;
+            existingMessages.AddRange(interception.Messages);
+            return existingMessages;
         }
 
-        private string BuildDescriptionForMessage(MessageData error)
+        private static string BuildDescriptionForMessage(MessageData error)
         {
             var thisErrorDescription = string.Empty;
             if (error.Code != EventCode.UNDEFINED)
@@ -316,7 +358,6 @@ namespace FileBroker.Business
                     result.NewDataSet.INTAPPIN10.Add(single.NewDataSet.INTAPPIN10);
                     result.NewDataSet.INTAPPIN11.Add(single.NewDataSet.INTAPPIN11);
                     result.NewDataSet.INTAPPIN12.Add(single.NewDataSet.INTAPPIN12);
-                    // result.NewDataSet.INTAPPIN13.Add(single.NewDataSet.INTAPPIN13);
                     result.NewDataSet.INTAPPIN99 = single.NewDataSet.INTAPPIN99;
                 }
                 catch (Exception ee)
@@ -349,11 +390,10 @@ namespace FileBroker.Business
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) && 
+            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) &&
                 !isCancelOrSuspend)
             {
-                ExtractDefaultFinancialData(isVariation, financialData, fileAuditData, ref isValidData,
-                                            now, interceptionApplication, baseData.dat_Appl_LiSt_Cd);
+                ExtractDefaultFinancialData(isVariation, financialData, ref isValidData, now, interceptionApplication);
 
                 if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
                 {
@@ -368,10 +408,9 @@ namespace FileBroker.Business
             }
 
             if (isCreate && (interceptionApplication != null) &&
-                (interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue))
+                ((interceptionApplication.IntFinH is null) || (interceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue)))
             {
-                fileAuditData.ApplicationMessage = "Missing financials!";
-                errorCount++;
+                isValidData = false;
             }
 
             if (!isValidData)
@@ -395,9 +434,10 @@ namespace FileBroker.Business
                 {"AppList_Cd", "Invalid Life State Code (<dat_Appl_LiSt_Cd>) value"},
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
-
+                        
             var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
-            interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
+            if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
+                interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
             var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
 
@@ -429,10 +469,12 @@ namespace FileBroker.Business
 
         }
 
-        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData,
+                                                 ref bool isValidData)
         {
             var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
+            interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 
             var errors = validatedApplication.Messages.GetMessagesForType(MessageType.Error);
 
@@ -485,27 +527,22 @@ namespace FileBroker.Business
                 ActvSt_Cd = "A",
 
                 Appl_Dbtr_LngCd = interceptionData.dat_Appl_Dbtr_LngCd,
-                Appl_Dbtr_Addr_Ln = interceptionData.dat_Appl_Dbtr_Addr_Ln,
-                Appl_Dbtr_Addr_Ln1 = interceptionData.dat_Appl_Dbtr_Addr_Ln1,
-                Appl_Dbtr_Addr_CityNme = interceptionData.dat_Appl_Dbtr_Addr_CityNme,
-                Appl_Dbtr_Addr_CtryCd = interceptionData.dat_Appl_Dbtr_Addr_CtryCd,
-                Appl_Dbtr_Addr_PCd = interceptionData.dat_Appl_Dbtr_Addr_PCd,
-                Appl_Dbtr_Addr_PrvCd = interceptionData.dat_Appl_Dbtr_Addr_PrvCd,
-                Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme,
-                Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme,
-                Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme,
+                Appl_Dbtr_Addr_Ln = interceptionData.dat_Appl_Dbtr_Addr_Ln?.Trim(),
+                Appl_Dbtr_Addr_Ln1 = interceptionData.dat_Appl_Dbtr_Addr_Ln1?.Trim(),
+                Appl_Dbtr_Addr_CityNme = interceptionData.dat_Appl_Dbtr_Addr_CityNme?.Trim(),
+                Appl_Dbtr_Addr_CtryCd = interceptionData.dat_Appl_Dbtr_Addr_CtryCd?.Trim(),
+                Appl_Dbtr_Addr_PCd = interceptionData.dat_Appl_Dbtr_Addr_PCd?.Trim(),
+                Appl_Dbtr_Addr_PrvCd = interceptionData.dat_Appl_Dbtr_Addr_PrvCd?.Trim(),
+                Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme?.Trim(),
+                Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme?.Trim(),
+                Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme?.Trim(),
                 Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte
             };
             return interceptionApplication;
         }
 
-        private bool ExtractDefaultFinancialData(bool isVariation,
-                                                                   MEPInterception_RecType12 financialData,
-                                                                   FileAuditData fileAuditData,
-                                                                   ref bool isValidData,
-                                                                   DateTime now,
-                                                                   InterceptionApplicationData interceptionApplication,
-                                                                   string actionState)
+        private static bool ExtractDefaultFinancialData(bool isVariation, MEPInterception_RecType12 financialData,
+                                                        ref bool isValidData, DateTime now, InterceptionApplicationData interceptionApplication)
         {
             isValidData = true;
 
@@ -568,6 +605,12 @@ namespace FileBroker.Business
             if (newHoldback.HldbCnd_SrcHldbAmn_Money is not null) newHoldback.HldbCnd_SrcHldbAmn_Money /= 100M;
 
             // other fixes
+            if ((newHoldback.HldbCnd_SrcHldbPrcnt is 0) && (newHoldback.HldbCtg_Cd == "1"))
+            {
+                newHoldback.HldbCnd_SrcHldbPrcnt = null;
+                newHoldback.HldbCtg_Cd = "0";
+            }
+
             if (newHoldback.HldbCnd_SrcHldbPrcnt is null)
                 newHoldback.HldbCnd_SrcHldbPrcnt = 0;
             else if (newHoldback.HldbCnd_SrcHldbPrcnt is < 0 or > 100)

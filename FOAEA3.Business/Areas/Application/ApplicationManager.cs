@@ -172,8 +172,8 @@ namespace FOAEA3.Business.Areas.Application
                     EventManager.SaveEvents();
 
                     // update messages for display in UI
-                    Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
-                    Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
                     Repositories.SubmitterRepository.SubmitterMessageDelete(Application.Subm_SubmCd);
                 }
@@ -216,19 +216,18 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
 
-            bool isCancelled = Application.ActvSt_Cd == "X";
-            bool isReset = Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
+            // load old data from database
+            var current = new ApplicationManager(new ApplicationData(), Repositories, config);
+            current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            bool isCancelled = current.Application.ActvSt_Cd == "X";
+            bool isReset = current.Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
 
             if (isReset && isCancelled)
             {
                 Application.Messages.AddError(EventCode.C50527_CHANGES_NOT_ALLOWED_ON_CANCELLED_APPLICATION);
                 return;
             }
-
-
-            // load old data from database
-            var current = new ApplicationManager(new ApplicationData(), Repositories, config);
-            current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             if (isReset) // reset
             {
@@ -267,8 +266,8 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.SaveEvents();
 
                 // update messages for display in UI
-                Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
-                Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
+                if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
+                if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
             }
             catch (Exception e)

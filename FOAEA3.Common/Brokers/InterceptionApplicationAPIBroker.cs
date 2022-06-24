@@ -2,7 +2,6 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
-using System;
 using System.Collections.Generic;
 
 namespace FOAEA3.Common.Brokers
@@ -45,6 +44,24 @@ namespace FOAEA3.Common.Brokers
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
+            return data;
+        }
+
+        public InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        {
+            string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/interceptions/{key}/cancel";
+            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication).Result;
+            return data;
+        }
+
+        public InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        {
+            string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/interceptions/{key}/suspend";
             var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
                                                                                                interceptionApplication).Result;
             return data;

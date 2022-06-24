@@ -17,10 +17,10 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var evntItem2 in evnt2)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem2.ActvSt_Cd}]/[{evntItem2.Event_TimeStamp}]/[{(int)evntItem2.Event_Reas_Cd}][{(int)evntItem2.AppLiSt_Cd}]";
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem2.ActvSt_Cd}]/[{evntItem2.Event_TimeStamp.Date}]/[{(int)evntItem2.Event_Reas_Cd}][{(int)evntItem2.AppLiSt_Cd}]";
                 string description = evntItem2.Event_Reas_Cd?.ToString() ?? "";
 
-                var evntItem3 = evnt3.Where(m => ((m.Event_TimeStamp == evntItem2.Event_TimeStamp) && (m.Event_Reas_Cd == evntItem2.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem2.AppLiSt_Cd)) ||
+                var evntItem3 = evnt3.Where(m => ((m.Event_TimeStamp.Date == evntItem2.Event_TimeStamp.Date) && (m.Event_Reas_Cd == evntItem2.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem2.AppLiSt_Cd)) ||
                                                   ((m.Event_Compl_Dte is null) && (evntItem2.Event_Compl_Dte is null) && (m.Event_Reas_Cd == evntItem2.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem2.AppLiSt_Cd))).FirstOrDefault();
                 if (evntItem3 is null)
                     diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "", badValue: "Missing in FOAEA 3!", description: description));
@@ -30,10 +30,10 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var evntItem3 in evnt3)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem3.ActvSt_Cd}]/[{evntItem3.Event_TimeStamp}]/[{(int)evntItem3.Event_Reas_Cd}][{(int)evntItem3.AppLiSt_Cd}]";
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem3.ActvSt_Cd}]/[{evntItem3.Event_TimeStamp.Date}]/[{(int)evntItem3.Event_Reas_Cd}][{(int)evntItem3.AppLiSt_Cd}]";
                 string description = evntItem3.Event_Reas_Cd?.ToString() ?? "";
 
-                var evntItem2 = evnt2.Where(m => ((m.Event_TimeStamp == evntItem3.Event_TimeStamp) && (m.Event_Reas_Cd == evntItem3.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem3.AppLiSt_Cd)) ||
+                var evntItem2 = evnt2.Where(m => ((m.Event_TimeStamp.Date == evntItem3.Event_TimeStamp.Date) && (m.Event_Reas_Cd == evntItem3.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem3.AppLiSt_Cd)) ||
                                                   ((m.Event_Compl_Dte is null) && (evntItem3.Event_Compl_Dte is null) && (m.Event_Reas_Cd == evntItem3.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem3.AppLiSt_Cd))).FirstOrDefault();
                 if (evntItem2 is null)
                     diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "Missing in FOAEA 2!", badValue: "", description: description));
@@ -54,14 +54,14 @@ namespace CompareOldAndNewData.CommandLine
             if (evnt2.Event_RecptSubm_ActvStCd != evnt3.Event_RecptSubm_ActvStCd) diffs.Add(new DiffData(tableName, key: key, colName: "Event_RecptSubm_ActvStCd", goodValue: evnt2.Event_RecptSubm_ActvStCd, badValue: evnt3.Event_RecptSubm_ActvStCd, description: description));
             if (evnt2.Appl_Rcptfrm_Dte != evnt3.Appl_Rcptfrm_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Rcptfrm_Dte", goodValue: evnt2.Appl_Rcptfrm_Dte, badValue: evnt3.Appl_Rcptfrm_Dte, description: description));
             if (evnt2.Subm_Update_SubmCd != evnt3.Subm_Update_SubmCd) diffs.Add(new DiffData(tableName, key: key, colName: "Subm_Update_SubmCd", goodValue: evnt2.Subm_Update_SubmCd, badValue: evnt3.Subm_Update_SubmCd, description: description));
-            if (evnt2.Event_TimeStamp != evnt3.Event_TimeStamp) diffs.Add(new DiffData(tableName, key: key, colName: "Event_TimeStamp", goodValue: evnt2.Event_TimeStamp, badValue: evnt3.Event_TimeStamp, description: description));
-            if (evnt2.Event_Compl_Dte != evnt3.Event_Compl_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "Event_Compl_Dte", goodValue: evnt2.Event_Compl_Dte, badValue: evnt3.Event_Compl_Dte, description: description));
+            if (evnt2.Event_TimeStamp.Date != evnt3.Event_TimeStamp.Date) diffs.Add(new DiffData(tableName, key: key, colName: "Event_TimeStamp", goodValue: evnt2.Event_TimeStamp, badValue: evnt3.Event_TimeStamp, description: description));
+            if (evnt2.Event_Compl_Dte?.Date != evnt3.Event_Compl_Dte?.Date) diffs.Add(new DiffData(tableName, key: key, colName: "Event_Compl_Dte", goodValue: evnt2.Event_Compl_Dte, badValue: evnt3.Event_Compl_Dte, description: description));
             if (evnt2.Event_Reas_Cd != evnt3.Event_Reas_Cd)
                 diffs.Add(new DiffData(tableName, key: key, colName: "Event_Reas_Cd", goodValue: evnt2.Event_Reas_Cd, badValue: evnt3.Event_Reas_Cd,
                                        description: (evnt2.Event_Reas_Cd?.ToString() ?? "") + " / " + (evnt3.Event_Reas_Cd?.ToString() ?? "")));
             if (evnt2.Event_Reas_Text != evnt3.Event_Reas_Text) diffs.Add(new DiffData(tableName, key: key, colName: "Event_Reas_Text", goodValue: evnt2.Event_Reas_Text, badValue: evnt3.Event_Reas_Text, description: description));
             if (evnt2.Event_Priority_Ind != evnt3.Event_Priority_Ind) diffs.Add(new DiffData(tableName, key: key, colName: "Event_Priority_Ind", goodValue: evnt2.Event_Priority_Ind, badValue: evnt3.Event_Priority_Ind, description: description));
-            if (evnt2.Event_Effctv_Dte != evnt3.Event_Effctv_Dte)
+            if (evnt2.Event_Effctv_Dte.Date != evnt3.Event_Effctv_Dte.Date)
             {
                 if ((queue == EventQueue.EventBF) || (queue == EventQueue.EventBFN))
                 {
