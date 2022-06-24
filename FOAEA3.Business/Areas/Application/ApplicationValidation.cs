@@ -473,7 +473,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     // nothing can be changed
 
-                    Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
+                    if(Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
 
                     break;
 
@@ -684,17 +684,8 @@ namespace FOAEA3.Business.Areas.Application
             {
                 if (string.IsNullOrEmpty(debtorProvince))
                     isProvValid = false;
-                else
-                {
-                    if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
-                        isProvValid = false;
-                    else
-                    {
-                        var provinceData = ReferenceData.Instance().Provinces[debtorProvince];
-                        if (provinceData.PrvCtryCd != "CAN")
-                            isProvValid = false;
-                    }
-                }
+                else if (!ReferenceData.Instance().Provinces.ContainsKey(debtorProvince))
+                    isProvValid = false;
 
                 if (!isProvValid && Application.AppLiSt_Cd.In(ApplicationState.MANUALLY_TERMINATED_14,
                                                               ApplicationState.FINANCIAL_TERMS_VARIED_17,
@@ -715,7 +706,8 @@ namespace FOAEA3.Business.Areas.Application
             bool canValidatePostalCode = false;
 
             if (Application.AppLiSt_Cd.In(ApplicationState.INITIAL_STATE_0, ApplicationState.INVALID_APPLICATION_1,
-                                          ApplicationState.SIN_NOT_CONFIRMED_5))
+                                          ApplicationState.SIN_NOT_CONFIRMED_5, ApplicationState.MANUALLY_TERMINATED_14,
+                                          ApplicationState.FINANCIAL_TERMS_VARIED_17, ApplicationState.APPLICATION_SUSPENDED_35))
             {
                 canValidatePostalCode = true;
             }

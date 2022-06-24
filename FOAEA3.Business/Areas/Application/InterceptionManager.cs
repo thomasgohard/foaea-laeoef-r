@@ -176,19 +176,37 @@ namespace FOAEA3.Business.Areas.Application
             bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
             bool isReset = current.InterceptionApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
 
-                        
-            if (isReset && !isCancelled) // reset
-            {   var now = DateTime.Now;
-                InterceptionApplication.IntFinH.IntFinH_Dte = now;
-                foreach (var holdback in InterceptionApplication.HldbCnd)
-                    holdback.IntFinH_Dte = now;
-            }
+            // keep these stored values
+            InterceptionApplication.Appl_Create_Dte = current.InterceptionApplication.Appl_Create_Dte;
+            InterceptionApplication.Appl_Create_Usr = current.InterceptionApplication.Appl_Create_Usr;
 
             base.UpdateApplication();
 
-            Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+            if (isReset && !isCancelled) // reset
+            {
+                // delete any existing intfinh and hldbcnd records for this application and then recreate them with the new data
 
-            Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+                // IMPORTANT: must delete holdbacks first since they have a dependancy on IntFinH
+                var allHoldbacks = Repositories.InterceptionRepository.GetAllHoldbackConditions(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                foreach (var holdback in allHoldbacks)
+                    Repositories.InterceptionRepository.DeleteHoldbackCondition(holdback);
+
+                var allIntFinH = Repositories.InterceptionRepository.GetAllInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                foreach (var intFinH in allIntFinH)
+                    Repositories.InterceptionRepository.DeleteInterceptionFinancialTerms(intFinH);
+
+                InterceptionApplication.IntFinH.ActvSt_Cd = "P";
+                Repositories.InterceptionRepository.CreateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+
+                foreach (var holdback in InterceptionApplication.HldbCnd)
+                    holdback.ActvSt_Cd = "P";
+                Repositories.InterceptionRepository.CreateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
+            else
+            {
+                Repositories.InterceptionRepository.UpdateInterceptionFinancialTerms(InterceptionApplication.IntFinH);
+                Repositories.InterceptionRepository.UpdateHoldbackConditions(InterceptionApplication.HldbCnd);
+            }
 
         }
 

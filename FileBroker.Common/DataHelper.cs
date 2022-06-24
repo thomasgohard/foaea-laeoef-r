@@ -20,6 +20,7 @@ namespace FileBroker.Common
             services.AddScoped<IOutboundAuditRepository>(m => ActivatorUtilities.CreateInstance<DBOutboundAudit>(m, fileBrokerDB));
             services.AddScoped<IErrorTrackingRepository>(m => ActivatorUtilities.CreateInstance<DBErrorTracking>(m, fileBrokerDB));
             services.AddScoped<IMailServiceRepository>(m => ActivatorUtilities.CreateInstance<DBMailService>(m, fileBrokerDB));
+            services.AddScoped<ILoadInboundAuditRepository>(m => ActivatorUtilities.CreateInstance<DBLoadInboundAudit>(m, fileBrokerDB));
 
             return fileBrokerDB.ConnectionString;
         }

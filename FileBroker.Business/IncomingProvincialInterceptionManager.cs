@@ -122,35 +122,49 @@ namespace FileBroker.Business
 
                             if (isValidData)
                             {
-                                var messages = ProcessApplicationRequest(interceptionMessage);
+                                var loadInboundDB = Repositories.LoadInboundAuditDB;
+                                var appl = interceptionMessage.Application;
+                                var fileName = FileName + ".XML";
 
-                                if (messages.ContainsMessagesOfType(MessageType.Error))
+                                if (!loadInboundDB.AlreadyExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
+                                                                 fileName))
                                 {
-                                    var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
-                                    errorCount++;
-                                }
-                                else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                {
-                                    var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
-                                    warningCount++;
-                                }
-                                else
-                                {
-                                    if (includeInfoInMessages)
+
+                                    loadInboundDB.AddNew(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
+                                    var messages = ProcessApplicationRequest(interceptionMessage);
+
+                                    if (messages.ContainsMessagesOfType(MessageType.Error))
                                     {
-                                        var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-                                        if (infos.Any())
+                                        var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
+                                        errorCount++;
+                                    }
+                                    else if (messages.ContainsMessagesOfType(MessageType.Warning))
+                                    {
+                                        var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
+                                        warningCount++;
+                                    }
+                                    else
+                                    {
+                                        if (includeInfoInMessages)
                                         {
-                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
-                                            result.AddRange(infos);
+                                            var infos = messages.FindAll(m => m.Severity == MessageType.Information);
+                                            if (infos.Any())
+                                            {
+                                                fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
+                                                result.AddRange(infos);
+                                            }
                                         }
+
+                                        if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
+                                            fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
+                                        successCount++;
                                     }
 
-                                    if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                        fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
-                                    successCount++;
+                                    loadInboundDB.MarkAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
                                 }
                             }
 

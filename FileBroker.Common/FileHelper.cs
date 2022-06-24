@@ -55,12 +55,12 @@ namespace FileBroker.Common
             string pattern = @"<\?xml.*\?>";
             result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
 
-            replacement = ">";
-            pattern = @"[\t\s]+xmlns.*>";
+            replacement = "";
+            pattern = @"[\t\s]+xmlns[^>]+";
             result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
 
-            replacement = ">";
-            pattern = @"[\t\s]+xsi.*>";
+            replacement = "";
+            pattern = @"[\t\s]+xsi[^>]+";
             result = Regex.Replace(result, pattern, replacement, RegexOptions.IgnoreCase);
 
             return result;

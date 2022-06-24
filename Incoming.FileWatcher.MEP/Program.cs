@@ -96,34 +96,47 @@ internal class Program
                                                                    tracingBaseName: tracingName,
                                                                    licencingBaseName: licenceName);
 
-            var allNewFiles = new List<string>();
-            foreach (string searchPath in searchPaths)
-                provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
-            totalFilesFound += allNewFiles.Count;
-
-            if (allNewFiles.Count > 0)
+            bool finishedForProvince = false;
+            bool displayFoundZero = true;
+            while (!finishedForProvince)
             {
-                string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
-                ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+                var allNewFiles = new List<string>();
+                foreach (string searchPath in searchPaths)
+                    provincialFileManager.AddNewFiles(searchPath, ref allNewFiles);
+                totalFilesFound += allNewFiles.Count;
 
-                foreach (var newFile in allNewFiles)
+                if (allNewFiles.Count > 0)
                 {
-                    ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                    displayFoundZero = false;
+                    string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
+                    ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
 
-                    var errors = new List<string>();
-                    provincialFileManager.ProcessNewFile(newFile, ref errors);
-                    if (errors.Any())
-                        foreach (var error in errors)
-                            errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                    foreach (var newFile in allNewFiles)
+                    {
+                        ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+
+                        var errors = new List<string>();
+                        provincialFileManager.ProcessNewFile(newFile, ref errors);
+                        if (errors.Any())
+                        {
+                            foreach (var error in errors)
+                                errorTrackingDB.MessageBrokerError($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                            finishedForProvince = true;
+                        }
+                    }
+                }
+                else
+                {
+                    finishedForProvince = true;
+                    if (displayFoundZero)
+                        ColourConsole.WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
                 }
             }
-            else
-                ColourConsole.WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
 
         }
 
         ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
-         Console.ReadKey();
+        Console.ReadKey();
 
     }
 
