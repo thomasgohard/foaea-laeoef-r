@@ -291,9 +291,19 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
+
             var currentInterceptionManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
             currentInterceptionManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
+
+            if (!StateEngine.IsValidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17))
+            {
+
+                InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
+                EventManager.SaveEvents();
+
+                return false;
+            }
 
             if (!InterceptionValidation.ValidNewFinancialTerms(currentInterceptionApplication))
                 return false;

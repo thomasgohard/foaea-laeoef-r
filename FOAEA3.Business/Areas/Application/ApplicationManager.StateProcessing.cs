@@ -9,7 +9,8 @@ namespace FOAEA3.Business.Areas.Application
     {
         public void InvalidStateChange(ApplicationState oldState, ApplicationState newState)
         {
-            EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE, $"{(int)oldState} => {(int)newState}");
+            EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE, 
+                                  $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C");
         }
 
         public virtual void Process_00_InitialState()

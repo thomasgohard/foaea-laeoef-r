@@ -245,7 +245,7 @@ namespace FOAEA3.Business.Areas.Application
                                                      out string validProvCode, out PostalCodeFlag validFlags))
                 {
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Postal Code for Province/City");
-
+                    reasonText = "1";
                     return false;
                 }
 
@@ -259,6 +259,7 @@ namespace FOAEA3.Business.Areas.Application
                         IsProvinceValid = true,
                         IsCityNameValid = validFlags.IsCityNameValid
                     };
+                    reasonText = "1";
                 }
 
                 if (!validFlags.IsPostalCodeValid)
