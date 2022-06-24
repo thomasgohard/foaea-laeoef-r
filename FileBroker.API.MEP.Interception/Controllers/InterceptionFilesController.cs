@@ -89,26 +89,9 @@ public class InterceptionFilesController : ControllerBase
 
 
         var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
-        //if (errors.Any())
-        //{
-        //    errors.Clear();
-        //    errors = JsonHelper.Validate<MEPInterceptionFileDataSingle>(sourceInterceptionJsonData, out unknownTags);
-        //} 
-        //if (errors.Any())
-        //{
-        //    errors.Clear();
-        //    errors = JsonHelper.Validate<MEPInterceptionFileDataSingleSource>(sourceInterceptionJsonData, out unknownTags);
-        //}                             
-        //if (errors.Any())
-        //{
-        //    errors.Clear();
-        //    errors = JsonHelper.Validate<MEPInterceptionFileDataNoSource>(sourceInterceptionJsonData, out unknownTags);
-        //}
 
         if (errors.Any())
             return UnprocessableEntity(errors);
-
-        // return Ok(); // for testing only!!!
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");

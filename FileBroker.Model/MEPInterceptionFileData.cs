@@ -57,7 +57,7 @@ namespace FileBroker.Model
         public string dat_Appl_Crdtr_SurNme;
         public string dat_Appl_Crdtr_FrstNme;
         public string dat_Appl_Crdtr_MddleNme;
-        public DateTime dat_Appl_Crdtr_Brth_Dte;
+        public DateTime? dat_Appl_Crdtr_Brth_Dte;
     }
 
     public struct MEPInterception_RecType12
