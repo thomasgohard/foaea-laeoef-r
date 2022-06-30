@@ -116,5 +116,23 @@ namespace FOAEA3.Resources.Helpers
             }
         }
 
+        public static DateTime? ConvertToDateTimeIgnoringTimeZone(this string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                int pos = value.LastIndexOf("-");
+                if (value.Contains('T') && (pos > 0))
+                {
+                    string valueWithoutTimezone = value[..pos];
+                    if (DateTime.TryParse(valueWithoutTimezone, out DateTime result))
+                        return result;
+                }
+                else if (DateTime.TryParse(value, out DateTime result))
+                    return result;
+            }
+
+            return null;
+        }
+
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace FileBroker.Model
 {
@@ -7,7 +6,7 @@ namespace FileBroker.Model
     {
         public string RecType;
         public string Cycle;
-        public DateTime FileDate;
+        public string FileDate;
         public string TermsAccepted;
     }
 
@@ -19,22 +18,22 @@ namespace FileBroker.Model
         public string dat_Appl_Source_RfrNr;
         public string dat_Appl_EnfSrvCd;
         public string dat_Subm_Rcpt_SubmCd;
-        public DateTime dat_Appl_Lgl_Dte;
+        public string dat_Appl_Lgl_Dte;
         public string dat_Appl_Dbtr_SurNme;
         public string dat_Appl_Dbtr_FrstNme;
         public string dat_Appl_Dbtr_MddleNme;
-        public DateTime dat_Appl_Dbtr_Brth_Dte;
+        public string dat_Appl_Dbtr_Brth_Dte;
         public string dat_Appl_Dbtr_Gendr_Cd;
         public string dat_Appl_Dbtr_Entrd_SIN;
         public string dat_Appl_Dbtr_Parent_SurNme_Birth;
         public string dat_Appl_CommSubm_Text;
-        public DateTime dat_Appl_Rcptfrm_dte;
+        public string dat_Appl_Rcptfrm_dte;
         public string dat_Appl_AppCtgy_Cd;
         public string dat_Appl_Group_Batch_Cd;
         public string dat_Appl_Medium_Cd;
         public string dat_Appl_Affdvt_Doc_TypCd;
         public string dat_Appl_Reas_Cd;
-        public DateTime? dat_Appl_Reactv_Dte;
+        public string dat_Appl_Reactv_Dte;
         public string dat_Appl_LiSt_Cd;
         public string Maintenance_ActionCd;
         public string dat_New_Owner_RcptSubmCd;
@@ -57,7 +56,7 @@ namespace FileBroker.Model
         public string dat_Appl_Crdtr_SurNme;
         public string dat_Appl_Crdtr_FrstNme;
         public string dat_Appl_Crdtr_MddleNme;
-        public DateTime dat_Appl_Crdtr_Brth_Dte;
+        public string dat_Appl_Crdtr_Brth_Dte;
     }
 
     public struct MEPInterception_RecType12
@@ -74,7 +73,7 @@ namespace FileBroker.Model
         public string dat_IntFinH_DfHldbPrcnt;
         public string dat_IntFinH_DefHldbAmn_Money;
         public string dat_IntFinH_DefHldbAmn_Period;
-        public DateTime? dat_IntFinH_VarIss_Dte;
+        public string dat_IntFinH_VarIss_Dte;
     }
 
     public struct MEPInterception_RecType13
