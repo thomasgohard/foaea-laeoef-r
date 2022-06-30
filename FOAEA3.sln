@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3", "FOAEA3\FOAEA3.csproj", "{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Tests", "FOAEA3.Tests\FOAEA3.Tests.csproj", "{3AB17541-A552-48ED-87CE-1916FE0B3D4F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Business", "FOAEA3.Business\FOAEA3.Business.csproj", "{BB5519AD-1886-4462-A89A-58AF824EE128}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Resources", "FOAEA3.Resources\FOAEA3.Resources.csproj", "{7D38C63D-F856-4E3A-9899-ED6534E80A64}"
@@ -119,7 +115,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{3710B1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompareOldAndNewData.CommandLine", "CompareOldAndNewData.CommandLine\CompareOldAndNewData.CommandLine.csproj", "{51E11DE1-5CA6-4910-B1E4-CA8F5960B4D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRegEx", "TestRegEx\TestRegEx.csproj", "{15441CD0-0ADB-4A72-A4F1-D67B3E4CE168}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRegEx", "TestRegEx\TestRegEx.csproj", "{15441CD0-0ADB-4A72-A4F1-D67B3E4CE168}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -132,27 +128,6 @@ Global
 		Tests|Any CPU = Tests|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.BackendProcesses Debug|Any CPU.ActiveCfg = BackendProcesses Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.FileBroker Debug|Any CPU.ActiveCfg = FileBroker Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.FileBroker Debug|Any CPU.Build.0 = FileBroker Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.FOAEA Debug|Any CPU.ActiveCfg = FOAEA Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.FOAEA Debug|Any CPU.Build.0 = FOAEA Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Ops Debug|Any CPU.ActiveCfg = Ops Debug|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D864E0B-8973-49EC-B792-2DB0EC8C0D52}.Tests|Any CPU.ActiveCfg = MessageBroker Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.FOAEA Debug|Any CPU.ActiveCfg = FOAEA Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Ops Debug|Any CPU.ActiveCfg = Ops Debug|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F}.Tests|Any CPU.Build.0 = Tests|Any CPU
 		{BB5519AD-1886-4462-A89A-58AF824EE128}.BackendProcesses Debug|Any CPU.ActiveCfg = BackendProcesses Debug|Any CPU
 		{BB5519AD-1886-4462-A89A-58AF824EE128}.BackendProcesses Debug|Any CPU.Build.0 = BackendProcesses Debug|Any CPU
 		{BB5519AD-1886-4462-A89A-58AF824EE128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -810,7 +785,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3AB17541-A552-48ED-87CE-1916FE0B3D4F} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 		{91A6A037-BD6B-4A16-94C3-9586FB4007CF} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 		{F132EC64-0905-4EC4-BFC8-858E80D2C24E} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 		{E0EFEAA6-6C98-4945-BA80-D010720D002F} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
