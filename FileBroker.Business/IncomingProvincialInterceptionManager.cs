@@ -434,7 +434,7 @@ namespace FileBroker.Business
                 {"AppList_Cd", "Invalid Life State Code (<dat_Appl_LiSt_Cd>) value"},
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
-                        
+
             var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
@@ -505,11 +505,11 @@ namespace FileBroker.Business
                 Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
                 Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
                 Subm_SubmCd = baseData.dat_Subm_SubmCd,
-                Appl_Lgl_Dte = baseData.dat_Appl_Lgl_Dte.Date,
+                Appl_Lgl_Dte = baseData.dat_Appl_Lgl_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date ?? DateTime.MinValue,
                 Appl_Dbtr_SurNme = baseData.dat_Appl_Dbtr_SurNme,
                 Appl_Dbtr_FrstNme = baseData.dat_Appl_Dbtr_FrstNme,
                 Appl_Dbtr_MddleNme = baseData.dat_Appl_Dbtr_MddleNme,
-                Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.Date,
+                Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date,
                 Appl_Dbtr_Gendr_Cd = baseData.dat_Appl_Dbtr_Gendr_Cd.Trim() == "" ? "M" : baseData.dat_Appl_Dbtr_Gendr_Cd.Trim(),
                 Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
                 Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
@@ -520,7 +520,7 @@ namespace FileBroker.Business
                 Medium_Cd = baseData.dat_Appl_Medium_Cd,
                 Appl_Affdvt_DocTypCd = baseData.dat_Appl_Affdvt_Doc_TypCd,
                 AppReas_Cd = baseData.dat_Appl_Reas_Cd,
-                Appl_Reactv_Dte = baseData.dat_Appl_Reactv_Dte,
+                Appl_Reactv_Dte = baseData.dat_Appl_Reactv_Dte.ConvertToDateTimeIgnoringTimeZone(),
 
                 AppLiSt_Cd = (ApplicationState)(baseData.dat_Appl_LiSt_Cd.Convert<int>()),
                 Appl_SIN_Cnfrmd_Ind = 0,
@@ -536,7 +536,7 @@ namespace FileBroker.Business
                 Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme?.Trim(),
                 Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme?.Trim(),
                 Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme?.Trim(),
-                Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte
+                Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone() 
             };
             return interceptionApplication;
         }
@@ -559,7 +559,7 @@ namespace FileBroker.Business
             intFinH.IntFinH_DefHldbAmn_Money = financialData.dat_IntFinH_DefHldbAmn_Money.Convert<decimal?>();
             intFinH.IntFinH_DefHldbAmn_Period = financialData.dat_IntFinH_DefHldbAmn_Period;
             if (isVariation)
-                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte ?? now;
+                intFinH.IntFinH_VarIss_Dte = financialData.dat_IntFinH_VarIss_Dte.ConvertToDateTimeIgnoringTimeZone() ?? now;
 
             intFinH.IntFinH_CmlPrPym_Ind = financialData.dat_IntFinH_CmlPrPym_Ind.Convert<byte?>();
             if (intFinH.IntFinH_CmlPrPym_Ind.HasValue)

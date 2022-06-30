@@ -348,15 +348,15 @@ namespace FOAEA3.Business.Areas.Application
                 switch (InterceptionApplication.AppLiSt_Cd)
                 {
                     case ApplicationState.INVALID_VARIATION_SOURCE_91:
-                        InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
+                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
                         break;
 
                     case ApplicationState.INVALID_VARIATION_FINTERMS_92:
-                        InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
+                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
                         break;
 
                     default:
-                        InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
+                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
                         break;
                 }
 
@@ -426,7 +426,8 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.ActvSt_Cd != "A")
             {
-                EventManager.AddEvent(EventCode.C50841_CAN_ONLY_CANCEL_AN_ACTIVE_APPLICATION);
+                EventManager.AddEvent(EventCode.C50841_CAN_ONLY_CANCEL_AN_ACTIVE_APPLICATION, activeState: "C");
+                EventManager.SaveEvents();
                 return false;
             }
 
@@ -623,14 +624,14 @@ namespace FOAEA3.Business.Areas.Application
             var amountOwedProcess = new AmountOwedProcess(Repositories, RepositoriesFinance);
             var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
+            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
             ChangeStateForFinancialTerms(oldState: "A", newState: "I", 12);
             ChangeStateForFinancialTerms(oldState: "P", newState: "A", 12);
 
             var activeFinTerms = Repositories.InterceptionRepository.GetInterceptionFinancialTerms(Appl_EnfSrv_Cd, Appl_CtrlCd, "A");
 
             VariationAction = VariationDocumentAction.AcceptVariationDocument;
-
-            SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
             // update application
 

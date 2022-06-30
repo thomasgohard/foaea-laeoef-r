@@ -37,7 +37,14 @@ namespace CompareOldAndNewData.CommandLine
             if (appl2.Subm_SubmCd != appl3.Subm_SubmCd) diffs.Add(new DiffData(tableName, key: key, colName: "Subm_SubmCd", goodValue: appl2.Subm_SubmCd, badValue: appl3.Subm_SubmCd));
             if (appl2.Subm_Recpt_SubmCd != appl3.Subm_Recpt_SubmCd) diffs.Add(new DiffData(tableName, key: key, colName: "Subm_Recpt_SubmCd", goodValue: appl2.Subm_Recpt_SubmCd, badValue: appl3.Subm_Recpt_SubmCd));
             if (appl2.Appl_Lgl_Dte != appl3.Appl_Lgl_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Lgl_Dte", goodValue: appl2.Appl_Lgl_Dte, badValue: appl3.Appl_Lgl_Dte));
-            if (appl2.Appl_CommSubm_Text != appl3.Appl_CommSubm_Text) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CommSubm_Text", goodValue: appl2.Appl_CommSubm_Text, badValue: appl3.Appl_CommSubm_Text));
+
+            if (appl2.Appl_CommSubm_Text != appl3.Appl_CommSubm_Text)
+            {
+                // known "bug" in old system where comments were not saved when application is cancelled, but new system does save it as it should -- only BC uses this
+                if (appl2.Appl_EnfSrv_Cd.Trim().ToUpper() != "BC01")
+                    diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CommSubm_Text", goodValue: appl2.Appl_CommSubm_Text, badValue: appl3.Appl_CommSubm_Text));
+            }
+            
             if (appl2.Appl_Rcptfrm_Dte.Date != appl3.Appl_Rcptfrm_Dte.Date) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Rcptfrm_Dte", goodValue: appl2.Appl_Rcptfrm_Dte, badValue: appl3.Appl_Rcptfrm_Dte));
             if (appl2.Appl_Group_Batch_Cd != appl3.Appl_Group_Batch_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Group_Batch_Cd", goodValue: appl2.Appl_Group_Batch_Cd, badValue: appl3.Appl_Group_Batch_Cd));
             if (appl2.Appl_Source_RfrNr != appl3.Appl_Source_RfrNr) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Source_RfrNr", goodValue: appl2.Appl_Source_RfrNr, badValue: appl3.Appl_Source_RfrNr));

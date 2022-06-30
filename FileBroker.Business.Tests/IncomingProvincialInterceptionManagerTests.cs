@@ -101,16 +101,16 @@ namespace FileBroker.Business.Tests
                 dat_Appl_Source_RfrNr = "",
                 dat_Appl_EnfSrvCd = enfSrv,
                 dat_Subm_Rcpt_SubmCd = "",
-                dat_Appl_Lgl_Dte = DateTime.Now,
+                dat_Appl_Lgl_Dte = DateTime.Now.ToString(),
                 dat_Appl_Dbtr_SurNme = "",
                 dat_Appl_Dbtr_FrstNme = "",
                 dat_Appl_Dbtr_MddleNme = "",
-                dat_Appl_Dbtr_Brth_Dte = DateTime.Now,
+                dat_Appl_Dbtr_Brth_Dte = DateTime.Now.ToString(),
                 dat_Appl_Dbtr_Gendr_Cd = "",
                 dat_Appl_Dbtr_Entrd_SIN = "",
                 dat_Appl_Dbtr_Parent_SurNme_Birth = "",
                 dat_Appl_CommSubm_Text = "",
-                dat_Appl_Rcptfrm_dte = DateTime.Now,
+                dat_Appl_Rcptfrm_dte = DateTime.Now.ToString(),
                 dat_Appl_AppCtgy_Cd = "",
                 dat_Appl_Group_Batch_Cd = "",
                 dat_Appl_Medium_Cd = "",
@@ -138,7 +138,7 @@ namespace FileBroker.Business.Tests
                 dat_Appl_Crdtr_SurNme = "",
                 dat_Appl_Crdtr_FrstNme = "",
                 dat_Appl_Crdtr_MddleNme = "",
-                dat_Appl_Crdtr_Brth_Dte = DateTime.Now,
+                dat_Appl_Crdtr_Brth_Dte = DateTime.Now.ToString(),
             };
             var financialData = new MEPInterception_RecType12
             {
@@ -154,7 +154,7 @@ namespace FileBroker.Business.Tests
                 dat_IntFinH_DfHldbPrcnt = "",
                 dat_IntFinH_DefHldbAmn_Money = "",
                 dat_IntFinH_DefHldbAmn_Period = "",
-                dat_IntFinH_VarIss_Dte = DateTime.Now,
+                dat_IntFinH_VarIss_Dte = DateTime.Now.ToString(),
             };
             var sourceSpecificData = new List<MEPInterception_RecType13>
             {
