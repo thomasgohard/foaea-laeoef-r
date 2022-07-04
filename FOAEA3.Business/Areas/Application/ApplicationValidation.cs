@@ -303,7 +303,7 @@ namespace FOAEA3.Business.Areas.Application
                     _ => true, // no validation yet for other countries
                 };
 
-                if (!isValid)
+                if ((!isValid) && (Application.Medium_Cd != "FTP"))
                     Application.Messages.AddWarning("Invalid international postal code");
 
                 return true;
