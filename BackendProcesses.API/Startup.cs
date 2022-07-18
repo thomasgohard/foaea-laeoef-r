@@ -50,6 +50,9 @@ namespace BackendProcesses.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
+            Console.WriteLine($"Starting BackendProcesses.API...");
+            Console.WriteLine($"Using .Net Code Environment = {env.EnvironmentName}");
+
             Log.Information("Using .Net Code Environment = {ASPNETCORE_ENVIRONMENT}", env.EnvironmentName);
             Log.Information("Machine Name = {MachineName}", Environment.MachineName);
 
