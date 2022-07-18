@@ -30,6 +30,8 @@ namespace BackendProcesses.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]BackendProcesses.API[/cyan]...");
+
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
@@ -45,13 +47,14 @@ namespace BackendProcesses.API
             services.Configure<CustomConfig>(Config.GetSection("CustomConfig"));
 
             Log.Information("Using MainDB = {MainDB}", mainDB.ConnectionString);
+            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
-            Console.WriteLine($"Starting BackendProcesses.API...");
-            Console.WriteLine($"Using .Net Code Environment = {env.EnvironmentName}");
+            ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");
 
             Log.Information("Using .Net Code Environment = {ASPNETCORE_ENVIRONMENT}", env.EnvironmentName);
             Log.Information("Machine Name = {MachineName}", Environment.MachineName);
@@ -103,6 +106,11 @@ namespace BackendProcesses.API
             {
                 endpoints.MapControllers();
             });
+
+            var api_url = Config["Urls"];
+
+            Console.WriteLine("");
+            ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]");
         }
 
     }
