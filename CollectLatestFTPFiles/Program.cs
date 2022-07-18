@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-string sourceRoot = @"\\otvfoaea5\FOAEAftpbackup\";
+﻿string sourceRoot = @"\\otvfoaea5\FOAEAftpbackup\";
 string destinationRoot = @"C:\FOAEA\FTProot\";
 var cyclesFound = new Dictionary<string, List<string>>();
 
@@ -8,7 +7,7 @@ foreach(var subfolder in subfolders)
 {
     var subfolderName = Path.GetFileName(subfolder);
     if (Directory.Exists(destinationRoot + subfolderName))
-        CopyTodaysFiles(subfolder, destinationRoot + subfolderName, cyclesFound);
+        CopyTodaysIncomingMEPInterceptionFiles(subfolder, destinationRoot + subfolderName, cyclesFound);
 }
 
 Console.WriteLine("");
@@ -27,7 +26,7 @@ foreach (var provinceCycles in cyclesFound)
     }
 }
 
-static void CopyTodaysFiles(string sourceFolder, string destinationFolder, Dictionary<string, List<string>> cyclesFound)
+static void CopyTodaysIncomingMEPInterceptionFiles(string sourceFolder, string destinationFolder, Dictionary<string, List<string>> cyclesFound)
 {
     var allFiles = Directory.GetFiles(sourceFolder, "*II.??????.xml", searchOption: SearchOption.TopDirectoryOnly);
     foreach(string filePath in allFiles)
