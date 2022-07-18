@@ -37,8 +37,6 @@ namespace BackendProcesses.API
             })
                 .AddXmlDataContractSerializerFormatters();
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
             var mainDB = new DBTools(Config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
             services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB)); // to access database procs
