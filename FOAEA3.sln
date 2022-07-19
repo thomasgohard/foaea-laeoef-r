@@ -117,7 +117,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRegEx", "TestRegEx\Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.Web", "FileBroker.Web\FileBroker.Web.csproj", "{1CEDB2AE-9528-46A5-AD60-B0DDDBD4A942}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectLatestFTPFiles", "CollectLatestFTPFiles\CollectLatestFTPFiles.csproj", "{ECD144E5-2411-4D01-ADF2-E6B01931A553}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollectLatestFTPFiles", "CollectLatestFTPFiles\CollectLatestFTPFiles.csproj", "{ECD144E5-2411-4D01-ADF2-E6B01931A553}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

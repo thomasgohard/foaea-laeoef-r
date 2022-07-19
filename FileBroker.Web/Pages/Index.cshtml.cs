@@ -1,18 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FileBroker.Web.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
-
-        public IndexModel(ILogger<IndexModel> logger)
+        public void OnPostImportFile()
         {
-            _logger = logger;
+            Response.Redirect("/Tasks/ImportFile");
         }
 
-        public void OnGet()
+        public void OnPostCreateOutbound()
+        {
+
+        }
+
+        public void OnNightlyProcess()
         {
 
         }

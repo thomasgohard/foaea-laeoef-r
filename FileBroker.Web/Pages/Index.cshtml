@@ -4,34 +4,35 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
+<form method="post">
+    <div class="text-center">
         <div class="row">
             <div class="col-md-4 text-left">
                 <h2>Tasks</h2>
-                <button class="btn btn-action btn-block">Import File</button>
-                <button class="btn btn-action btn-block">Create Outbound</button>
-                <button class="btn btn-action btn-block">Nightly Process</button>
-                <button class="btn btn-action btn-block">BF Process</button>
-                <button class="btn btn-action btn-block">Auto Swear</button>
-                <button class="btn btn-action btn-block">I01 Daily Job</button>
-                <button class="btn btn-action btn-block">Populate ESD database</button>
-                <button class="btn btn-action btn-block">ESD Processing</button>
-                <button class="btn btn-action btn-block">Postal Code Update</button>
-                <button class="btn btn-action btn-block">EI Loading Correction</button>
-                <button class="btn btn-action btn-block">Divert Funds by Batch ID</button>
-                <button class="btn btn-action btn-block">NETP Processing</button>
+                <button asp-page-handler="ImportFile" class="btn btn-action btn-block">Import File</button>
+                <button asp-page-handler="CreateOutbound" class="btn btn-action btn-block">Create Outbound</button>
+                <button asp-page-handler="NightlyProcess" class="btn btn-action btn-block">Nightly Process</button>
+                <button asp-page-handler="BFProcess" class="btn btn-action btn-block">BF Process</button>
+                <button asp-page-handler="AutoSwear" class="btn btn-action btn-block">Auto Swear</button>
+                <button asp-page-handler="I01DailyJob" class="btn btn-action btn-block">I01 Daily Job</button>
+                <button asp-page-handler="PopulateESDdatabase" class="btn btn-action btn-block">Populate ESD database</button>
+                <button asp-page-handler="ESDProcessing" class="btn btn-action btn-block">ESD Processing</button>
+                <button asp-page-handler="PostalCodeUpdate" class="btn btn-action btn-block">Postal Code Update</button>
+                <button asp-page-handler="EILoadingCorrection" class="btn btn-action btn-block">EI Loading Correction</button>
+                <button asp-page-handler="DivertFundsByBatchID" class="btn btn-action btn-block">Divert Funds by Batch ID</button>
+                <button asp-page-handler="NETPProcessing" class="btn btn-action btn-block">NETP Processing</button>
             </div>
             <div class="col-md-2">&nbsp;</div>
             <div class="col-md-4 text-left">
                 <h2>Tools</h2>
-                <button class="btn btn-action btn-block">Create XML files</button>
-                <button class="btn btn-action btn-block">Convert FlatFile to XML</button>
-                <button class="btn btn-action btn-block">Convert FlatFile to JSON</button>
-                <button class="btn btn-action btn-block">Convert XML to JSON</button>
-                <button class="btn btn-action btn-block">Compress File</button>
-                <button class="btn btn-action btn-block">Test Ops</button>
-                <button class="btn btn-action btn-block">Restart File Monitor</button>
+                <button asp-page-handler="CreateXMLfiles" class="btn btn-action btn-block">Create XML files</button>
+                <button asp-page-handler="ConvertFlatFiletoXML" class="btn btn-action btn-block">Convert FlatFile to XML</button>
+                <button asp-page-handler="ConvertFlatFileToJSON" class="btn btn-action btn-block">Convert FlatFile to JSON</button>
+                <button asp-page-handler="ConvertXMLtoJSON" class="btn btn-action btn-block">Convert XML to JSON</button>
+                <button asp-page-handler="CompressFile" class="btn btn-action btn-block">Compress File</button>
+                <button asp-page-handler="TestOps" class="btn btn-action btn-block">Test Ops</button>
+                <button asp-page-handler="RestartFileMonitor" class="btn btn-action btn-block">Restart File Monitor</button>
             </div>
         </div>
-
-</div>
+    </div>
+</form>

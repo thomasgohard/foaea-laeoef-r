@@ -1,0 +1,19 @@
+﻿@page
+@model FileBroker.Web.Pages.Tasks.ImportFileModel
+@{
+}
+
+<form enctype="multipart/form-data" method="post">
+    <dl>
+        <dt>
+            <label asp-for="FormFile"></label>
+        </dt>
+        <dd>
+            <input asp-for="FormFile" type="file">
+            <span asp-validation-for="FormFile"></span>
+        </dd>
+    </dl>
+    <input asp-page-handler="Upload" class="btn btn-action" type="submit" value="Upload" />
+</form>
+
+<h3>@Model.Message</h3>
