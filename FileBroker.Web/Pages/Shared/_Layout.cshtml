@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FileBroker.Web</title>
+    <title>File Broker Admin Tool</title>
     <link rel="stylesheet" href="~/theme-wet-boew/css/theme.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FileBroker.Web.styles.css" asp-append-version="true" />
@@ -20,36 +20,31 @@
                     </a>
                 </div>
                 <div class="col-md-offset-5 col-md-2">
-                    <ul class="lst-none">
-                        <li>
-                            <span>Français</span>
-                            <abbr title="Français">FR</abbr>
-                        </li>
-                        <li class="list-inline">
-                            <span>Logout</span>
-                        </li>
-                    </ul>
+                    &nbsp;
                 </div>
             </div>
         </div>
+        <br />
     </header>
 
+    <h1 class="container">FileBroker Admin Tool</h1>
     <main role="main" class="container">
         @RenderBody()
     </main>
 
     <footer id="wb-info" class="footer-spacing">
-        <div class="pagedetails">
+        <div class="pagedetails container">
             <dl id="wb-dtmd">
                 <dt>Version:</dt>
                 <dd>
                     <span id="foaeaVersion">version 3.0</span>
                     <environment exclude="Production">
-                        &nbsp;(<span id="dbInfo"></span>)
+                        <div>Database: <strong><span id="dbInfo">@ViewData["dbInfo"]</span></strong></div>
                     </environment>
                 </dd>
             </dl>
         </div>
+        <br />
         <div class="landscape">
             <nav class="container wb-navcurr">
                 <h2 class="sr-only">About government</h2>

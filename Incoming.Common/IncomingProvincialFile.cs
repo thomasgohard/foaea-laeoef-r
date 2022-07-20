@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
@@ -14,14 +15,14 @@ namespace Incoming.Common
 {
     public class IncomingProvincialFile
     {
-        private DBFileTable FileTableDB { get; }
+        private IFileTableRepository FileTableDB { get; }
         private string InterceptionBaseName { get; }
         private string TracingBaseName { get; }
         private string LicencingBaseName { get; }
         private ApiConfig ApiFilesConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
 
-        public IncomingProvincialFile(IDBTools mainDB,
+        public IncomingProvincialFile(IFileTableRepository fileTable,
                                       ApiConfig apiFilesConfig,
                                       IAPIBrokerHelper apiHelper,
                                       string interceptionBaseName,
@@ -30,7 +31,7 @@ namespace Incoming.Common
         {
             ApiFilesConfig = apiFilesConfig;
             APIHelper = apiHelper;
-            FileTableDB = new DBFileTable(mainDB);
+            FileTableDB = fileTable;
             InterceptionBaseName = interceptionBaseName;
             TracingBaseName = tracingBaseName;
             LicencingBaseName = licencingBaseName;
@@ -73,45 +74,15 @@ namespace Incoming.Common
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
-                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                        errors.Add($"InterceptionFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
-                        fileProcessedSuccessfully = false;
-                    }
-                    else
-                    {
-                        fileProcessedSuccessfully = true;
-                    }
+                    fileProcessedSuccessfully = ProcessMEPincomingInterceptionFile(errors, fileNameNoExtension, jsonText);
                 }
                 else if (fileNameNoCycle == LicencingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
-                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                        errors.Add($"LicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
-                        fileProcessedSuccessfully = false;
-                    }
-                    else
-                    {
-                        fileProcessedSuccessfully = true;
-                    }
+                    fileProcessedSuccessfully = ProcessMEPincomingLicencingFile(errors, fileNameNoExtension, jsonText);
                 }
                 else if (fileNameNoCycle == TracingBaseName)
                 {
-                    var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
-                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                        errors.Add($"TracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
-                        fileProcessedSuccessfully = false;
-                    }
-                    else
-                    {
-                        fileProcessedSuccessfully = true;
-                    }
+                    fileProcessedSuccessfully = ProcessMEPincomingTracingFile(errors, fileNameNoExtension, jsonText);
 
                 }
                 else
@@ -128,5 +99,58 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
+        public bool ProcessMEPincomingTracingFile(List<string> errors, string fileNameNoExtension, string jsonText)
+        {
+            bool fileProcessedSuccessfully;
+            var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                errors.Add($"TracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                fileProcessedSuccessfully = false;
+            }
+            else
+            {
+                fileProcessedSuccessfully = true;
+            }
+
+            return fileProcessedSuccessfully;
+        }
+
+        public bool ProcessMEPincomingLicencingFile(List<string> errors, string fileNameNoExtension, string jsonText)
+        {
+            bool fileProcessedSuccessfully;
+            var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                errors.Add($"LicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                fileProcessedSuccessfully = false;
+            }
+            else
+            {
+                fileProcessedSuccessfully = true;
+            }
+
+            return fileProcessedSuccessfully;
+        }
+
+        public bool ProcessMEPincomingInterceptionFile(List<string> errors, string fileNameWithCycle, string jsonText)
+        {
+            bool fileProcessedSuccessfully;
+            var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameWithCycle}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
+                errors.Add($"InterceptionFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                fileProcessedSuccessfully = false;
+            }
+            else
+            {
+                fileProcessedSuccessfully = true;
+            }
+
+            return fileProcessedSuccessfully;
+        }
     }
 }

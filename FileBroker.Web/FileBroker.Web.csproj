@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="appsettings.Denis.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="6.0.7" />
   </ItemGroup>
 
@@ -15,7 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="appsettings.Denis.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\Incoming.Common\Incoming.Common.csproj" />
   </ItemGroup>
 
 </Project>
