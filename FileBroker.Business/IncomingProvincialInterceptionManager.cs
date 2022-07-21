@@ -61,6 +61,17 @@ namespace FileBroker.Business
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
             var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
+            // check that it is the expected cycle
+            if (!FileHelper.IsExpectedCycle(fileTableData, FileName, out int expectedCycle, out int actualCycle))
+            {
+                if (actualCycle != -1)
+                    result.AddSystemError($"Error for file {FileName}: expecting cycle {expectedCycle} but trying to load cycle {actualCycle}.");
+                else
+                    result.AddSystemError($"Error for file {FileName}: invalid file cycle?");
+
+                return result;
+            }
+
             Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
             bool isValid = true;
@@ -536,7 +547,7 @@ namespace FileBroker.Business
                 Appl_Crdtr_SurNme = interceptionData.dat_Appl_Crdtr_SurNme?.Trim(),
                 Appl_Crdtr_FrstNme = interceptionData.dat_Appl_Crdtr_FrstNme?.Trim(),
                 Appl_Crdtr_MddleNme = interceptionData.dat_Appl_Crdtr_MddleNme?.Trim(),
-                Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone() 
+                Appl_Crdtr_Brth_Dte = interceptionData.dat_Appl_Crdtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone()
             };
             return interceptionApplication;
         }

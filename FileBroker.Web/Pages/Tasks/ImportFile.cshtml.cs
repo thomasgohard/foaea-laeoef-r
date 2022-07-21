@@ -18,7 +18,6 @@ namespace FileBroker.Web.Pages.Tasks
         private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
 
-
         public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig)
         {
             FileTable = fileTable;
@@ -29,7 +28,8 @@ namespace FileBroker.Web.Pages.Tasks
         [BindProperty]
         public IFormFile FormFile { get; set; }
 
-        public string Message { get; set; }
+        public string InfoMessage { get; set; }
+        public string ErrorMessage { get; set; }
 
         public void OnGet()
         {
@@ -43,23 +43,18 @@ namespace FileBroker.Web.Pages.Tasks
                 var fileSize = file.Length / 1024;
                 var fileName = file.FileName;
 
-                bool isXML = false;
                 if (fileName.EndsWith(".xml", StringComparison.InvariantCultureIgnoreCase))
-                {
                     fileName = Path.GetFileNameWithoutExtension(fileName); // remove XML extension first
-                    isXML = true;
-                }
                 var fileNameNoExt = Path.GetFileNameWithoutExtension(fileName); // remove cycle, if any
 
                 var incomingFileInfo = FileTable.GetFileTableDataForFileName(fileNameNoExt);
-
                 if (incomingFileInfo is null)
                 {
-                    Message = "Error: Could not identify type of file from FileTable";
+                    ErrorMessage = "Error: Could not identify type of file from FileTable";
                     return;
                 }
 
-                Message = $"Loading and processing {fileName} [category: {incomingFileInfo.Category}, size: {fileSize} KB]...";
+                InfoMessage = $"Loading and processing {fileName} [category: {incomingFileInfo.Category}, size: {fileSize} KB]...";
 
                 var provincialFileManager = new IncomingProvincialFile(FileTable, ApiConfig, APIHelper,
                                                                        interceptionBaseName: string.Empty,
@@ -89,24 +84,30 @@ namespace FileBroker.Web.Pages.Tasks
                             provincialFileManager.ProcessMEPincomingInterceptionFile(errors, fileName, fileContentAsJson);
                             if (errors.Any())
                             {
-                                Message = "Error(s): ";
+                                ErrorMessage = String.Empty;
+                                string lastError = errors.Last();
                                 foreach (string error in errors)
-                                    Message += error + "; ";
+                                {
+                                    ErrorMessage += error;
+                                    ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                                }
                             }
                             else
-                                Message = "File processed successfully.";
+                                InfoMessage = "File processed successfully.";
                             break;
                         default:
-                            Message = "Not able to process files of category: " + incomingFileInfo.Category;
+                            ErrorMessage = "Not able to process files of category: " + incomingFileInfo.Category;
                             return;
                     }
                 }
                 else
                 {
-                    Message = "Error: Cannot process files of content type: " + file.ContentType;
+                    ErrorMessage = "Error: Cannot process files of content type: " + file.ContentType;
                 }
 
             }
+
+            return; 
         }
     }
 }

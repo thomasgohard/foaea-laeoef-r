@@ -17,6 +17,10 @@ body {
     margin-bottom: 60px;
 }
 
+a.btn {
+    color: white !important;
+}
+
 .btn-action {
     color: #fff;
     background-color: #318000;

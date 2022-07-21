@@ -1,15 +1,14 @@
-﻿using DBHelper;
-using FileBroker.Common;
-using FileBroker.Data.DB;
+﻿using FileBroker.Common;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 namespace Incoming.Common
 {
@@ -141,8 +140,33 @@ namespace Incoming.Common
             var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameWithCycle}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                errors.Add($"InterceptionFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                string jsonData = response.Content?.ReadAsStringAsync().Result;
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(jsonData))
+                    {
+                        var errorMessages = JsonConvert.DeserializeObject<MessageDataList>(jsonData);
+
+                        if (errorMessages is not null)
+                            foreach (var error in errorMessages.GetSystemMessagesForType(MessageType.Error))
+                            {
+                                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {error.Description}[/red]");
+                                errors.Add(error.Description);
+                            }
+
+                        else {
+                            ColourConsole.WriteEmbeddedColorLine($"[red]Error: {jsonData}[/red]");
+                            errors.Add($"InterceptionFiles API failed with errors: {jsonData}");
+                        }
+                    }
+                }
+                catch
+                {
+                    ColourConsole.WriteEmbeddedColorLine($"[red]Error: {jsonData}[/red]");
+                    errors.Add($"InterceptionFiles API failed with errors: {jsonData}");
+                }
+
                 fileProcessedSuccessfully = false;
             }
             else
