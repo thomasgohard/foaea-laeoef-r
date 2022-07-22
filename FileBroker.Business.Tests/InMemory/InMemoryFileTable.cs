@@ -96,5 +96,9 @@ namespace FileBroker.Business.Tests.InMemory
             }
         }
 
+        public List<FileTableData> GetAllActive()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

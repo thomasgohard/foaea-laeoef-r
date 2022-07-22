@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
-namespace FileBroker.API.Fed.licenceDenial
+namespace FileBroker.API.Fed.LicenceDenial
 {
     public class Startup
     {

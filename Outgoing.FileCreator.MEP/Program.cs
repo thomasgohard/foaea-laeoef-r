@@ -98,7 +98,7 @@ namespace Outgoing.FileCreator.MEP
         }
 
         private static void CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
-                                                          IOutgoingProvincialFileManager outgoingProvincialFileManager)
+                                                          IOutgoingFileManager outgoingProvincialFileManager)
         {
             var provincialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory(category)
                                                                   .Where(s => s.Active == true);

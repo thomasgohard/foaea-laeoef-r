@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FileBroker.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,9 @@ namespace FileBroker.Common
 
         public static int GetCycleFromFilename(string fileName)
         {
+            if (string.IsNullOrEmpty(fileName))
+                return -1;
+
             if (fileName.ToUpper().EndsWith(".XML"))
                 fileName = Path.GetFileNameWithoutExtension(fileName);
 
@@ -30,8 +34,16 @@ namespace FileBroker.Common
                 return -1;
         }
 
+        public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, out int actualCycle)
+        {
+            expectedCycle = fileTableData.Cycle;
+            actualCycle = GetCycleFromFilename(fileName);
+
+            return (actualCycle == expectedCycle);
+        }
+
         public static string ConvertXmlToJson(string xmlData, ref List<string> errors)
-        {            
+        {
             try
             {
                 xmlData = FileHelper.RemoveXMLartifacts(xmlData);
@@ -44,9 +56,9 @@ namespace FileBroker.Common
             {
                 errors.Add(ex.Message);
                 return "";
-            }            
+            }
         }
-        
+
         private static string RemoveXMLartifacts(string xmlData)
         {
             string result = xmlData;

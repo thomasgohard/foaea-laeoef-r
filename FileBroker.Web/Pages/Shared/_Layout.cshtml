@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Broker Admin Tool</title>
+    <link rel="stylesheet" href="~/theme-wet-boew/css/theme.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/FileBroker.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5">
+                    <a href="https://www.canada.ca/en.html">
+                        <img src="https://www.canada.ca/etc/designs/canada/wet-boew/assets/sig-blk-en.svg" alt="canada logo">
+                        <span class="sr-only">Government of Canada</span>
+                    </a>
+                </div>
+                <div class="col-md-offset-5 col-md-2">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+        <br />
+    </header>
+
+    <h1 class="container">FileBroker Admin Tool</h1>
+    <main role="main" class="container">
+        @RenderBody()
+    </main>
+
+    <footer id="wb-info" class="footer-spacing">
+        <div class="pagedetails container">
+            <dl id="wb-dtmd">
+                <dt>Version:</dt>
+                <dd>
+                    <span id="foaeaVersion">version 3.0</span>
+                    <environment exclude="Production">
+                        <div>Database: <strong><span id="dbInfo">@ViewData["dbInfo"]</span></strong></div>
+                    </environment>
+                </dd>
+            </dl>
+        </div>
+        <br />
+        <div class="landscape">
+            <nav class="container wb-navcurr">
+                <h2 class="sr-only">About government</h2>
+                <ul class="list-unstyled colcount-sm-2 colcount-md-3">
+                    <li><a href="https://www.canada.ca/en/contact.html">Contact us</a></li>
+                    <li><a href="https://www.canada.ca/home.html">Canada Site</a></li>
+                    <li><a href="https://www.justice.gc.ca/">Justice Canada</a></li>
+                    <li><a href="https://www.canada.ca/en/transparency/reporting.html">Terms of Reference</a></li>
+                    <li><a href="https://pm.gc.ca/eng">About Us</a></li>
+                    <li><a asp-page="/WhatsNew">What's New</a></li>
+                    <li>&nbsp;</li>
+                </ul>
+            </nav>
+        </div>
+        <div class="brand">
+            <div class="container">
+                <div class="row">
+                    <nav class="col-lg-9 col-xl-10 ftr-urlt-lnk">
+                        <h2 class="sr-only">About this site</h2>
+                        <ul class="list-inline">
+                            <li class="list-inline-item"><a href="https://www.canada.ca/en/social.html">Social media</a></li>
+                            <li class="list-inline-item"><a href="https://www.canada.ca/en/mobile.html">Mobile applications</a></li>
+                            <li class="list-inline-item"><a href="https://www1.canada.ca/en/newsite.html">About Canada.ca</a></li>
+                            <li class="list-inline-item"><a href="https://www.canada.ca/en/transparency/terms.html">Terms and conditions</a></li>
+                            <li class="list-inline-item"><a href="https://www.canada.ca/en/transparency/privacy.html">Privacy</a></li>
+                        </ul>
+                    </nav>
+                    <div class="col-6 offset-6 offset-lg-0 col-lg-3 col-xl-2 text-right"> <img src="https://www.canada.ca/etc/designs/canada/wet-boew/assets/wmms-blk.svg" alt="Symbol of the Government of Canada"> </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/wet-boew/js/jquery/2.2.4/jquery.js"></script>
+    <script src="~/wet-boew/js/wet-boew.js"></script>
+    <script src="~/js/site.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

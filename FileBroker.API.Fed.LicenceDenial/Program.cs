@@ -1,4 +1,3 @@
-using FileBroker.API.Fed.licenceDenial;
 using FOAEA3.Common.Helpers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +22,7 @@ namespace FileBroker.API.Fed.LicenceDenial
 
             try
             {
-                Log.Information("Incoming.API.Fed.Tracing Starting.");
+                Log.Information("Incoming.API.Fed.Licencing Starting.");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

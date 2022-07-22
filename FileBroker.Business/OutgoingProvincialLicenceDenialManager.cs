@@ -2,7 +2,7 @@
 
 namespace FileBroker.Business;
 
-public class OutgoingProvincialLicenceDenialManager : IOutgoingProvincialFileManager
+public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList Repositories { get; }

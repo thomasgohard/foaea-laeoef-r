@@ -1,0 +1,38 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Tasks and Tools";
+}
+
+<form method="post">
+    <div class="text-center">
+        <div class="row">
+            <div class="col-md-4 text-left">
+                <h2>Tasks</h2>
+                <a href="~/Tasks/ImportFile" class="btn btn-action btn-block">Import File</a>
+                <a href="~/Tasks/CreateOutbound" class="btn btn-action btn-block">Create Outbound</a>
+                <a href="~/Tasks/NightlyProcess" class="btn btn-action btn-block disabled">Nightly Process</a>
+                <a href="~/Tasks/BFProcess" class="btn btn-action btn-block disabled">BF Process</a>
+                <a href="~/Tasks/AutoSwear" class="btn btn-action btn-block disabled">Auto Swear</a>
+                <a href="~/Tasks/I01DailyJob" class="btn btn-action btn-block disabled">I01 Daily Job</a>
+                <a href="~/Tasks/PopulateESDdatabase" class="btn btn-action btn-block disabled">Populate ESD database</a>
+                <a href="~/Tasks/ESDProcessing" class="btn btn-action btn-block disabled">ESD Processing</a>
+                <a href="~/Tasks/PostalCodeUpdate" class="btn btn-action btn-block disabled">Postal Code Update</a>
+                <a href="~/Tasks/EILoadingCorrection" class="btn btn-action btn-block disabled">EI Loading Correction</a>
+                <a href="~/Tasks/DivertFundsByBatchID" class="btn btn-action btn-block disabled">Divert Funds by Batch ID</a>
+                <a href="~/Tasks/NETPProcessing" class="btn btn-action btn-block disabled">NETP Processing</a>
+            </div>
+            <div class="col-md-2">&nbsp;</div>
+            <div class="col-md-4 text-left">
+                <h2>Tools</h2>
+                <a href="~/Tools/CreateXMLfiles" class="btn btn-action btn-block disabled">Create XML files</a>
+                <a href="~/Tools/ConvertFlatFiletoXML" class="btn btn-action btn-block disabled">Convert FlatFile to XML</a>
+                <a href="~/Tools/ConvertFlatFileToJSON" class="btn btn-action btn-block disabled">Convert FlatFile to JSON</a>
+                <a href="~/Tools/ConvertXMLtoJSON" class="btn btn-action btn-block">Convert XML to JSON</a>
+                <a href="~/Tools/CompressFile" class="btn btn-action btn-block disabled">Compress File</a>
+                <a href="~/Tools/TestOps" class="btn btn-action btn-block disabled">Test Ops</a>
+                <a href="~/Tools/RestartFileMonitor" class="btn btn-action btn-block disabled">Restart File Monitor</a>
+            </div>
+        </div>
+    </div>
+</form>

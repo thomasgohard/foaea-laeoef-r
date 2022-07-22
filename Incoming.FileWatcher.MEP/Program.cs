@@ -91,7 +91,8 @@ internal class Program
                     searchPaths.Add(thisPath);
             }
 
-            var provincialFileManager = new IncomingProvincialFile(fileBrokerDB, apiRootData, apiAction,
+            var fileTable = new DBFileTable(fileBrokerDB);
+            var provincialFileManager = new IncomingProvincialFile(fileTable, apiRootData, apiAction,
                                                                    interceptionBaseName: interceptionName,
                                                                    tracingBaseName: tracingName,
                                                                    licencingBaseName: licenceName);

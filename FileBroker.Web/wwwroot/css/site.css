@@ -1,0 +1,40 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+a.btn {
+    color: white !important;
+}
+
+.btn-action {
+    color: #fff;
+    background-color: #318000;
+    border-color: #458259;
+    font-size: 1em;
+    padding: .2em 1em;
+    margin-bottom: 5px;
+    text-shadow: 1px 2px #333;
+}
+
+.btn:focus, .btn.focus, .btn:active:focus, .btn:active.focus, .btn.active:focus, .btn.active.focus {
+    color: yellow !important;
+}
+
+.btn:hover, .btn:focus, .btn.focus {
+    color: yellow !important;
+}

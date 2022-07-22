@@ -1,0 +1,27 @@
+﻿@page
+@model FileBroker.Web.Pages.Tools.ConvertXMLtoJSONModel
+@{
+}
+
+<h2>Convert XML to JSON</h2>
+
+<form enctype="multipart/form-data" method="post">
+    <dl>
+        <dd>
+            <input asp-for="FormFile" type="file">
+            <span asp-validation-for="FormFile"></span>
+        </dd>
+    </dl>
+    <input asp-page-handler="Convert" class="btn btn-action" type="submit" value="Convert to JSON" />
+</form>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrEmpty(Model.InfoMessage))
+{
+    <div class="alert alert-info">@Model.InfoMessage</div>
+}
+
+

@@ -18,7 +18,8 @@ using System.Text;
 namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class InterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]
