@@ -2,7 +2,7 @@
 
 namespace FileBroker.Model.Interfaces
 {
-    public interface IOutgoingProvincialFileManager
+    public interface IOutgoingFileManager
     {
         string CreateOutputFile(string fileBaseName, out List<string> errors);
     }

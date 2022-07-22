@@ -1,12 +1,11 @@
 using FileBroker.Business;
 using FileBroker.Data;
-using FileBroker.Data.DB;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +13,6 @@ namespace FileBroker.Web.Pages.Tasks
 {
     public class CreateOutboundModel : PageModel
     {
-
         private IFileTableRepository FileTable { get; }
         private IFlatFileSpecificationRepository FlatFileSpecs { get; }
         private IOutboundAuditRepository OutboundAuditDB { get; }
@@ -22,15 +20,14 @@ namespace FileBroker.Web.Pages.Tasks
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
         private ApiConfig ApiConfig { get; }
-        private IAPIBrokerHelper APIHelper { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
         public List<FileTableData> ActiveOutgoingProcesses { get; set; }
 
-        public CreateOutboundModel(IFileTableRepository fileTable, 
-                                   IFlatFileSpecificationRepository flatFileSpecs, 
+        public CreateOutboundModel(IFileTableRepository fileTable,
+                                   IFlatFileSpecificationRepository flatFileSpecs,
                                    IOutboundAuditRepository outboundAuditDB,
                                    IErrorTrackingRepository errorTrackingDB,
                                    IProcessParameterRepository processParameterTable,
@@ -44,7 +41,6 @@ namespace FileBroker.Web.Pages.Tasks
             ProcessParameterTable = processParameterTable;
             MailServiceDB = mailServiceDB;
             ApiConfig = apiConfig.Value;
-            APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
         }
 
         public void OnGet()
@@ -54,7 +50,6 @@ namespace FileBroker.Web.Pages.Tasks
 
         public void OnPostCreateFiles(int[] selectedProcesses)
         {
-            // Category.In("TRCAPPOUT", "LICAPPOUT", "STATAPPOUT", "TRCOUT", "SINOUT", "LICOUT")
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -100,20 +95,45 @@ namespace FileBroker.Web.Pages.Tasks
                 if (processId != lastItem)
                     InfoMessage += "; ";
 
-                switch (thisProcess.Category)
+                List<string> errors = null;
+                string filePath = string.Empty;
+                if (thisProcess.Category.In("LICAPPOUT", "TRCAPPOUT", "STATAPPOUT", "TRCOUT", "SINOUT", "LICOUT"))
                 {
-                    case "STATAPPOUT":
-                        var manager = new OutgoingProvincialStatusManager(apiBrokers, repositories);
-                        
-                        string filePath = manager.CreateOutputFile(thisProcess.Name, out List<string> errors);
-                        if (errors.Count == 0)
-                            InfoMessage = $"Successfully created {filePath}";
-                        else
-                            foreach (var error in errors)
-                                ErrorMessage = $"Error creating {fileName}: {error}";
-                        break;
-                    default:
-                        break;
+                    IOutgoingFileManager outgoingFileManager = null;
+                    switch (thisProcess.Category)
+                    {
+                        case "LICAPPOUT":
+                            outgoingFileManager = new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories);
+                            break;
+                        case "TRCAPPOUT":
+                            outgoingFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+                            break;
+                        case "STATAPPOUT":
+                            outgoingFileManager = new OutgoingProvincialStatusManager(apiBrokers, repositories);
+                            break;
+                        case "TRCOUT":
+                            outgoingFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories);
+                            break;
+                        case "SINOUT":
+                            outgoingFileManager = new OutgoingFederalSinManager(apiBrokers, repositories);
+                            break;
+                        case "LICOUT":
+                            outgoingFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
+                            break;
+                    }
+
+                    filePath = outgoingFileManager.CreateOutputFile(thisProcess.Name, out errors);
+                }
+                else
+                    errors.Add($"Unsupported category [{thisProcess.Category}] for file {fileName}");
+
+                if (errors is not null)
+                {
+                    if (errors.Count == 0)
+                        InfoMessage = $"Successfully created {filePath}";
+                    else
+                        foreach (var error in errors)
+                            ErrorMessage = $"Error creating {fileName}: {error}";
                 }
             }
         }

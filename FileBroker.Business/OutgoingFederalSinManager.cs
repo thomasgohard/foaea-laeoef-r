@@ -1,14 +1,8 @@
-﻿using FileBroker.Data;
-using FileBroker.Model;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Model;
-using FOAEA3.Resources.Helpers;
-using System;
-using System.Text;
+﻿using System.Text;
 
 namespace FileBroker.Business;
 
-public class OutgoingFederalSinManager
+public class OutgoingFederalSinManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList Repositories { get; }
@@ -72,7 +66,7 @@ public class OutgoingFederalSinManager
 
             Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                              "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;

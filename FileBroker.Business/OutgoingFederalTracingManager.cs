@@ -2,7 +2,7 @@
 
 namespace FileBroker.Business;
 
-public class OutgoingFederalTracingManager
+public class OutgoingFederalTracingManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList Repositories { get; }
