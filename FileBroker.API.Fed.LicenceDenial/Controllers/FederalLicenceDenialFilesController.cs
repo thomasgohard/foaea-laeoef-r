@@ -21,7 +21,6 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("FederalLicenceDenialFiles API Version 1.4");
 
-        //GET api/v1/TraceRequests?partnerId=RC
         [HttpGet("")]
         public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
         {
