@@ -12,9 +12,8 @@ namespace FileBroker.Web.Pages.Tools
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
-        public string JsonContent { get; set; }
 
-        public void OnPostConvert()
+        public ActionResult OnPostConvert()
         {
             var file = FormFile;
             if (file is not null)
@@ -24,7 +23,7 @@ namespace FileBroker.Web.Pages.Tools
                 if (file.ContentType.ToLower() != "text/xml")
                 {
                     ErrorMessage = $"Source file [{fileName}] is not XML?";
-                    return;
+                    return null;
                 }
 
                 var xmlData = new StringBuilder();
@@ -35,7 +34,7 @@ namespace FileBroker.Web.Pages.Tools
                 }
 
                 var errors = new List<string>();
-                JsonContent = FileHelper.ConvertXmlToJson(xmlData.ToString(), ref errors);
+                string jsonContent = FileHelper.ConvertXmlToJson(xmlData.ToString(), ref errors);
 
                 if (errors.Any())
                 {
@@ -48,9 +47,16 @@ namespace FileBroker.Web.Pages.Tools
                     }
 
                 }
+                else
+                {
+                    byte[] bytes = Encoding.ASCII.GetBytes(jsonContent);
+                    string jsonFileName = Path.GetFileNameWithoutExtension(fileName) + ".json";
+                    InfoMessage = $"Successfully converted {fileName} to {jsonFileName}.";
+                    return File(bytes, "application/json", jsonFileName);
+                }
             }
 
-            return;
+            return null;
         }
     }
 }
