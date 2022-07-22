@@ -5,7 +5,11 @@
 @{
 }
 
-@if (!string.IsNullOrEmpty(Model.InfoMessage))
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrEmpty(Model.InfoMessage))
 {
     <div class="alert alert-info">@Model.InfoMessage</div>
 }
