@@ -28,7 +28,14 @@ namespace FileBroker.Data.DB
             var fileTableData = MainDB.GetAllData<FileTableData>("FileTable", FillFileTableDataFromReader);
 
             return fileTableData.Where(f => f.Category == category).ToList();
-        }   
+        }
+
+        public List<FileTableData> GetAllActive()
+        {
+            var fileTableData = MainDB.GetAllData<FileTableData>("FileTable", FillFileTableDataFromReader);
+
+            return fileTableData.Where(f => f.Active is true).ToList();
+        }
 
         public void SetNextCycleForFileType(FileTableData fileData, int length = 6)
         {

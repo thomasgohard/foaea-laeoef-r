@@ -1,0 +1,48 @@
+﻿@page
+@using FileBroker.Model
+@using FOAEA3.Resources.Helpers
+@model FileBroker.Web.Pages.Tasks.CreateOutboundModel
+@{
+}
+
+@if (!string.IsNullOrEmpty(Model.InfoMessage))
+{
+    <div class="alert alert-info">@Model.InfoMessage</div>
+}
+
+@if (Model.ActiveOutgoingProcesses is not null)
+{
+    <form method="post">
+
+        <fieldset class="gc-chckbxrdio">
+            <legend>Select Outgoing File(s) to create:</legend>
+            <div style="margin-left: 60px;">
+                <ul class="list-unstyled lst-spcd-2">
+                    @foreach (FileTableData activeProcess in Model.ActiveOutgoingProcesses)
+                    {
+                        string processDesc;
+                        if (activeProcess.IsXML)
+                            processDesc = $"[{activeProcess.PrcId}] {activeProcess.Name.Trim()}.{activeProcess.Cycle,6:D6}.XML";
+                        else
+                            processDesc = $"[{activeProcess.PrcId}] {activeProcess.Name.Trim()}.{activeProcess.Cycle,3:D3}";
+                        <li class="checkbox">
+                            @if (activeProcess.Category.In("TRCAPPOUT", "LICAPPOUT", "STATAPPOUT", "TRCOUT", "SINOUT", "LICOUT"))
+                            {
+                                <input type="checkbox" name="selectedProcesses" id="@activeProcess.PrcId" value="@activeProcess.PrcId">
+                                <label for="@activeProcess.PrcId">@processDesc</label>
+                            }
+                            else
+                            {
+                                <input type="checkbox" name="selectedProcesses" id="@activeProcess.PrcId" value="@activeProcess.PrcId" class="disabled">
+                                <label for="@activeProcess.PrcId" style="color:lightgray;">@processDesc</label>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </fieldset>
+
+        <input asp-page-handler="CreateFiles" class="btn btn-action" type="submit" value="Create File(s)" />
+
+    </form>
+}

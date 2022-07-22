@@ -5,7 +5,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Incoming.Common;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -18,21 +17,15 @@ namespace FileBroker.Web.Pages.Tasks
         private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
 
+        public IFormFile FormFile { get; set; }
+        public string InfoMessage { get; set; }
+        public string ErrorMessage { get; set; }
+
         public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig)
         {
             FileTable = fileTable;
             ApiConfig = apiConfig.Value;
             APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-        }
-
-        [BindProperty]
-        public IFormFile FormFile { get; set; }
-
-        public string InfoMessage { get; set; }
-        public string ErrorMessage { get; set; }
-
-        public void OnGet()
-        {
         }
 
         public void OnPostUpload()
@@ -93,7 +86,7 @@ namespace FileBroker.Web.Pages.Tasks
                                 }
                             }
                             else
-                                InfoMessage = "File processed successfully.";
+                                InfoMessage = $"File {fileName} processed successfully.";
                             break;
                         default:
                             ErrorMessage = "Not able to process files of category: " + incomingFileInfo.Category;
@@ -107,7 +100,7 @@ namespace FileBroker.Web.Pages.Tasks
 
             }
 
-            return; 
+            return;
         }
     }
 }
