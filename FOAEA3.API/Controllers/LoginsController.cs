@@ -14,6 +14,9 @@ namespace FOAEA3.API.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("CheckPreviousPasswords")]
         public ActionResult<string> CheckPreviousPasswords([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {

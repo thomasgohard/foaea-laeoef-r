@@ -5,6 +5,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
@@ -20,6 +21,9 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
     {
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("FederalLicenceDenialFiles API Version 1.4");
+
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
         [HttpGet("")]
         public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)

@@ -21,6 +21,9 @@ namespace FOAEA3.API.LicenceDenial.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("OutgoingFederalTracingRequests API Version 1.0");
 

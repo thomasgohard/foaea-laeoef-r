@@ -22,6 +22,9 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("OutgoingProvincialLicenceDenialResults API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("")]
         public ActionResult<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingData(
                                                                 [FromQuery] int maxRecords,

@@ -21,6 +21,9 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("LicenceDenialEvents API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("RequestedLICIN")]
         public ActionResult<ApplicationEventData> GetRequestedLICINTracingEvents([FromQuery] string enforcementServiceCode,
                                                                                  [FromQuery] string appl_EnfSrv_Cd, 

@@ -27,6 +27,9 @@ namespace FOAEA3.API.Interception.Controllers
         [HttpGet("Version")]
         public ActionResult<string> Version() => Ok("Interceptions API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("{key}")]
         public ActionResult<InterceptionApplicationData> GetApplication([FromRoute] string key,
                                                                         [FromServices] IRepositories repositories,

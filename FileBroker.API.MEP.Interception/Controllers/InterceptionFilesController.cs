@@ -25,6 +25,9 @@ public class InterceptionFilesController : ControllerBase
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("InterceptionFiles API Version 1.0");
 
+    [HttpGet("DB")]
+    public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
+
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
     public IActionResult GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
@@ -36,7 +39,8 @@ public class InterceptionFilesController : ControllerBase
 
         byte[] result = Encoding.UTF8.GetBytes(fileContent);
 
-        return File(result, "text/xml", lastFileName);
+        FileContentResult file = File(result, "text/xml", lastFileName);
+        return file;
     }
 
     private static string LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable,

@@ -1,0 +1,34 @@
+﻿@page
+@model FileBroker.Web.Pages.Tools.APIinfoModel
+@{
+}
+
+<table class="provisional gc-table table small" id="apiTable">
+    <caption>FOAEA 3 and File Broker APIs</caption>
+    <thead>
+        <tr>
+            <th>Core API</th>
+            <th>Path</th>
+            <th>Version</th>
+            <th>Connection</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var apiData in Model.ApiData)
+        {
+            <tr>
+                <td>@apiData.Key</td>
+                <td><a href="@apiData.Value.ApiRoot" target="_blank">@apiData.Value.ApiRoot</a></td>
+                @if (apiData.Value.IsError)
+                {
+                    <td class="text-danger nowrap" nowrap>@apiData.Value.ApiVersion</td>
+                }
+                else
+                {
+                    <td class="text-info nowrap">@apiData.Value.ApiVersion</td>
+                }
+                <td class="nowrap">@apiData.Value.ConnectionString</td>
+            </tr>
+        }
+    </tbody>
+</table>

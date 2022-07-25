@@ -25,6 +25,9 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("TracingEventDetails API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("{id}/SIN")]
         public ActionResult<List<ApplicationEventDetailData>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
         {

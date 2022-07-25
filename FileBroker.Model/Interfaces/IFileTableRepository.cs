@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using DBHelper;
+using System.Collections.Generic;
 
 namespace FileBroker.Model.Interfaces
 {
     public interface IFileTableRepository
     {
+        IDBTools MainDB { get; }
+
         FileTableData GetFileTableDataForFileName(string fileNameNoExt);
         List<FileTableData> GetFileTableDataForCategory(string category);
         List<FileTableData> GetAllActive();
