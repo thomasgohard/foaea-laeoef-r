@@ -19,6 +19,7 @@ namespace BackendProcesses.API.Controllers
             this.config = config.Value;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
