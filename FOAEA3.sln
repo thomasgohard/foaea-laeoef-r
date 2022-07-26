@@ -121,6 +121,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollectLatestFTPFiles", "Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.Fed.Interception", "FileBroker.API.Fed.Interception\FileBroker.API.Fed.Interception.csproj", "{70EC9CB3-8DDB-41FD-888A-9589709DFFB0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.MEP.LicenceDenial", "FileBroker.API.MEP.LicenceDenial\FileBroker.API.MEP.LicenceDenial.csproj", "{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BackendProcesses Debug|Any CPU = BackendProcesses Debug|Any CPU
@@ -812,6 +814,20 @@ Global
 		{70EC9CB3-8DDB-41FD-888A-9589709DFFB0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{70EC9CB3-8DDB-41FD-888A-9589709DFFB0}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{70EC9CB3-8DDB-41FD-888A-9589709DFFB0}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -847,6 +863,7 @@ Global
 		{1CEDB2AE-9528-46A5-AD60-B0DDDBD4A942} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{ECD144E5-2411-4D01-ADF2-E6B01931A553} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 		{70EC9CB3-8DDB-41FD-888A-9589709DFFB0} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{8827F98A-7DF2-4E2A-82E7-FA06988C30B8} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}
