@@ -30,7 +30,7 @@ internal class Program
 
         IConfiguration configuration = builder.Build();
 
-        string fileBrokerConnectionString = configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues();
+        string fileBrokerConnectionString = configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
         var fileBrokerDB = new DBTools(fileBrokerConnectionString);
         var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 

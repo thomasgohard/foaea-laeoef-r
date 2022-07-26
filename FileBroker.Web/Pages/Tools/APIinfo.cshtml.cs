@@ -88,9 +88,9 @@ namespace FileBroker.Web.Pages.Tools
             }
         }
 
-        private string GetDatabaseInfo(string connectionString)
+        private static string GetDatabaseInfo(string connectionString)
         {
-            if (string.IsNullOrEmpty(connectionString))
+            if (string.IsNullOrEmpty(connectionString.Trim()))
                 return string.Empty;
 
             static string GetDBValue(string info)

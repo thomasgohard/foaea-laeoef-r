@@ -20,7 +20,7 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers
     public class FederalLicenceDenialFilesController : ControllerBase
     {
         [HttpGet("Version")]
-        public ActionResult<string> GetVersion() => Ok("FederalLicenceDenialFiles API Version 1.4");
+        public ActionResult<string> GetVersion() => Ok("FederalLicenceDenialFiles API Version 1.0");
 
         [HttpGet("DB")]
         public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);

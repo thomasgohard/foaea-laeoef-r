@@ -18,7 +18,7 @@ namespace FileBroker.API.Fed.SIN.Controllers;
 public class SinFilesController : ControllerBase
 {
     [HttpGet("Version")]
-    public ActionResult<string> GetVersion() => Ok("SinFiles API Version 1.4");
+    public ActionResult<string> GetVersion() => Ok("SinFiles API Version 1.0");
 
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);

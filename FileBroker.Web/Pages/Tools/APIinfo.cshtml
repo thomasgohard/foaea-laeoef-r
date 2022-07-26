@@ -8,7 +8,7 @@
     <thead>
         <tr>
             <th>Core API</th>
-            <th>Path</th>
+            <th>Swagger</th>
             <th>Version</th>
             <th>Connection</th>
         </tr>
@@ -16,9 +16,10 @@
     <tbody>
         @foreach (var apiData in Model.ApiData)
         {
+            string apiRoot = apiData.Value.ApiRoot + "swagger";
             <tr>
                 <td>@apiData.Key</td>
-                <td><a href="@apiData.Value.ApiRoot" target="_blank">@apiData.Value.ApiRoot</a></td>
+                <td><a href="@apiRoot" target="_blank">@apiRoot</a></td>
                 @if (apiData.Value.IsError)
                 {
                     <td class="text-danger nowrap" nowrap>@apiData.Value.ApiVersion</td>

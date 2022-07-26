@@ -31,7 +31,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
             IConfiguration configuration = builder.Build();
 
-            var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
             var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");

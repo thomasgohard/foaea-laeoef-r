@@ -31,7 +31,7 @@ namespace Outgoing.FileCreator.MEP
 
             IConfiguration configuration = builder.Build();
 
-            var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             bool generateTracingFiles = true;
