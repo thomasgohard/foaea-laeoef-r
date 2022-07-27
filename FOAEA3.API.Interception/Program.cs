@@ -2,6 +2,7 @@ using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
 
 var config = builder.Configuration;
 var env = builder.Environment;

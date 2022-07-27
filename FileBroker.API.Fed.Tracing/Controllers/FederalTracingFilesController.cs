@@ -12,8 +12,8 @@ using System.Text;
 
 namespace FileBroker.API.Fed.Tracing.Controllers;
 
-[Route("api/v1/[controller]")]
 [ApiController]
+[Route("api/v1/[controller]")]
 public class FederalTracingFilesController : ControllerBase
 {
     [HttpGet("Version")]
