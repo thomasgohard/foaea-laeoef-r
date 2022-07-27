@@ -40,6 +40,7 @@ namespace FOAEA3.Common
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");
 
+            Log.Information("Starting API {apiName}", apiName);
             Log.Information("Using .Net Code Environment = {ASPNETCORE_ENVIRONMENT}", env.EnvironmentName);
             Log.Information("Machine Name = {MachineName}", Environment.MachineName);
 
@@ -67,7 +68,7 @@ namespace FOAEA3.Common
             else
             {
 
-                Log.Fatal("Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
+                Log.Fatal($"Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
                 Console.WriteLine($"Trying to use Production environment on non-production server {currentServer}");
                 Console.WriteLine("Application stopping...");
 

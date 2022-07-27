@@ -7,7 +7,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="NJsonSchema" Version="10.7.2" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
