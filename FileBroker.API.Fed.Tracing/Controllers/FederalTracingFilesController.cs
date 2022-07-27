@@ -12,12 +12,15 @@ using System.Text;
 
 namespace FileBroker.API.Fed.Tracing.Controllers;
 
-[Route("api/v1/[controller]")]
 [ApiController]
+[Route("api/v1/[controller]")]
 public class FederalTracingFilesController : ControllerBase
 {
     [HttpGet("Version")]
-    public ActionResult<string> GetVersion() => Ok("FederalTracingFiles API Version 1.4");
+    public ActionResult<string> GetVersion() => Ok("FederalTracingFiles API Version 1.0");
+
+    [HttpGet("DB")]
+    public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     //GET api/v1/TraceRequests?partnerId=RC
     [HttpGet]

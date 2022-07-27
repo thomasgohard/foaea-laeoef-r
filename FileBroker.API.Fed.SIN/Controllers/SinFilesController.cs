@@ -13,12 +13,15 @@ using System.Text;
 
 namespace FileBroker.API.Fed.SIN.Controllers;
 
-[Route("api/v1/[controller]")]
 [ApiController]
+[Route("api/v1/[controller]")]
 public class SinFilesController : ControllerBase
 {
     [HttpGet("Version")]
-    public ActionResult<string> GetVersion() => Ok("SinFiles API Version 1.4");
+    public ActionResult<string> GetVersion() => Ok("SinFiles API Version 1.0");
+
+    [HttpGet("DB")]
+    public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet]
     public IActionResult GetFile([FromServices] IFileTableRepository fileTable)

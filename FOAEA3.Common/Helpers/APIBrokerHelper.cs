@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -15,9 +16,6 @@ namespace FOAEA3.Common.Helpers
 {
     public class APIBrokerHelper : IAPIBrokerHelper
     {
-        private const int TIME_BETWEEN_RETRIES = 500; // in milliseconds
-        private const int MAX_RETRY_ATTEMPTS = 10;
-
         private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 20, 0);
 
         private string _APIroot;
@@ -51,7 +49,7 @@ namespace FOAEA3.Common.Helpers
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
         }
 
-        public async Task<string> GetStringAsync(string api, string root = "")
+        public async Task<string> GetStringAsync(string api, string root = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
         {
 
             string result = string.Empty;
@@ -62,7 +60,7 @@ namespace FOAEA3.Common.Helpers
             int attemptCount = 0;
             bool completed = false;
 
-            while ((attemptCount < MAX_RETRY_ATTEMPTS) && (!completed))
+            while ((attemptCount < maxAttempts) && (!completed))
             {
                 try
                 {
@@ -85,8 +83,8 @@ namespace FOAEA3.Common.Helpers
                 catch (Exception e)
                 {
                     attemptCount++;
-                    Thread.Sleep(TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                    if (attemptCount == MAX_RETRY_ATTEMPTS)
+                    Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
                         // log error
                         Messages = new MessageDataList();
@@ -114,7 +112,7 @@ namespace FOAEA3.Common.Helpers
                 int attemptCount = 0;
                 bool completed = false;
 
-                while ((attemptCount < MAX_RETRY_ATTEMPTS) && (!completed))
+                while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
                 {
                     try
                     {
@@ -142,8 +140,8 @@ namespace FOAEA3.Common.Helpers
                     catch (Exception e)
                     {
                         attemptCount++;
-                        Thread.Sleep(TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                        if (attemptCount == MAX_RETRY_ATTEMPTS)
+                        Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                        if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                         {
                             // log error
                             Messages = new MessageDataList();
@@ -194,7 +192,7 @@ namespace FOAEA3.Common.Helpers
             int attemptCount = 0;
             bool completed = false;
 
-            while ((attemptCount < MAX_RETRY_ATTEMPTS) && (!completed))
+            while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
             {
                 try
                 {
@@ -228,8 +226,8 @@ namespace FOAEA3.Common.Helpers
                 catch (Exception e)
                 {
                     attemptCount++;
-                    Thread.Sleep(TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                    if (attemptCount == MAX_RETRY_ATTEMPTS)
+                    Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
                         // log error
                         Messages = new MessageDataList();

@@ -1,18 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup Label="Globals">
-		<SccProjectName>SAK</SccProjectName>
-		<SccProvider>SAK</SccProvider>
-		<SccAuxPath>SAK</SccAuxPath>
-		<SccLocalPath>SAK</SccLocalPath>
-		<Configurations>Debug;Release;FOAEA Debug;MessageBroker Debug;Ops Debug;FileBroker Debug;BackendProcesses Debug;Tests</Configurations>
-	</PropertyGroup>
-
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 		<RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
 		<Nullable>warnings</Nullable>
+		<Version>1.0.0-alpha</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

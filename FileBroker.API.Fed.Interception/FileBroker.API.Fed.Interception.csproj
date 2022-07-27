@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>warnings</Nullable>
+		<Version>1.0.0-alpha</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+		<ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
+		<ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
+		<ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
+		<ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
+		<ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
+		<ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
+		<ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
+		<ProjectReference Include="..\FOAEA3.EmailTools\FOAEA3.EmailTools.csproj" />
+		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -36,7 +36,7 @@ namespace BackendProcesses.API
 
             try
             {
-                Log.Information("BackendProcess.API Starting.");
+                Log.Information("Starting API BackendProcesses");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

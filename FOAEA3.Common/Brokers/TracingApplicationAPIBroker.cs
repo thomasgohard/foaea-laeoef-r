@@ -2,17 +2,30 @@
 using FOAEA3.Resources.Helpers;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
 
-    public class TracingApplicationAPIBroker : ITracingApplicationAPIBroker
+    public class TracingApplicationAPIBroker : ITracingApplicationAPIBroker, IVersionSupport
     {
         private IAPIBrokerHelper ApiHelper { get; }
 
         public TracingApplicationAPIBroker(IAPIBrokerHelper apiHelper)
         {
             ApiHelper = apiHelper;
+        }
+
+        public string GetVersion()
+        {
+            string apiCall = $"api/v1/tracings/Version";
+            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+        }
+
+        public string GetConnection()
+        {
+            string apiCall = $"api/v1/tracings/DB";
+            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
         }
 
         public TracingApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)

@@ -12,8 +12,10 @@ namespace BackendProcess.API.Controllers
     public class ApplicationsAmountOwedController : ControllerBase
     {
         [HttpGet("Version")]
-        public ActionResult<string> Version([FromServices] IRepositories repositories) =>
-            Ok($"Applications Amount Owed API Version 1.5\nDB: {repositories.MainDB.ConnectionString}");
+        public ActionResult<string> Version() => Ok($"Applications Amount Owed API Version 1.5");
+
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpPut("")]
         public ActionResult<string> RunAmountOwed([FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)

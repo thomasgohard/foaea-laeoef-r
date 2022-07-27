@@ -22,7 +22,7 @@ var configuration = builder.Configuration;
 builder.Services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
 builder.Services.Configure<ApiConfig>(configuration.GetSection("APIroot"));
 
-string fileBrokerCON = configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues();
+string fileBrokerCON = configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
 
 string actualConnection = DataHelper.ConfigureDBServices(builder.Services, fileBrokerCON);
 var mainDB = new DBTools(actualConnection);
@@ -36,7 +36,7 @@ builder.Services.AddRazorPages()
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler("/Error");
 }

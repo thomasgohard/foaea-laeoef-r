@@ -6,13 +6,25 @@ using System.Collections.Generic;
 
 namespace FOAEA3.Common.Brokers
 {
-    public class InterceptionApplicationAPIBroker : IInterceptionApplicationAPIBroker
+    public class InterceptionApplicationAPIBroker : IInterceptionApplicationAPIBroker, IVersionSupport
     {
         public IAPIBrokerHelper ApiHelper { get; }
 
         public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper)
         {
             ApiHelper = apiHelper;
+        }
+
+        public string GetVersion()
+        {
+            string apiCall = $"api/v1/interceptions/Version";
+            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+        }
+
+        public string GetConnection()
+        {
+            string apiCall = $"api/v1/interceptions/DB";
+            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
         }
 
         public InterceptionApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)

@@ -1,16 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup Label="Globals">
-		<SccProjectName>SAK</SccProjectName>
-		<SccProvider>SAK</SccProvider>
-		<SccAuxPath>SAK</SccAuxPath>
-		<SccLocalPath>SAK</SccLocalPath>
-	</PropertyGroup>
-
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
 		<Nullable>warnings</Nullable>
+		<Version>1.0.0-alpha</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

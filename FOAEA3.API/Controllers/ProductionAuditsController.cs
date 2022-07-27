@@ -13,6 +13,8 @@ namespace FOAEA3.API.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("APIConfigurations API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpPost]
         public ActionResult<ProductionAuditData> InsertNotification([FromServices] IRepositories repositories)

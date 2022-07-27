@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,11 @@ namespace BackendProcesses.API
                 options.Filters.Add(new ActionAutoLoggerFilter());
             })
                 .AddXmlDataContractSerializerFormatters();
+            
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackendProcesses.API", Version = "v1" });
+            });
 
             var mainDB = new DBTools(Config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
@@ -67,9 +73,9 @@ namespace BackendProcesses.API
 
             if (!env.IsEnvironment("Production"))
             {
-                // return the developer exception page is any uncaught exceptions occurs
-
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BackendProcesses.API v1"));
             }
             else if (prodServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {

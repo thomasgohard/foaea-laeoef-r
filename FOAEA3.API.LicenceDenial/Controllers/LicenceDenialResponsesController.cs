@@ -25,6 +25,9 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("LicenceDenialResponses API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         //[HttpGet("{id}")]
         //public ActionResult<DataList<LicenceDenialResponseData>> GetLicenceDenialResults([FromRoute] string id,
         //                                                                                 [FromServices] IRepositories repositories)

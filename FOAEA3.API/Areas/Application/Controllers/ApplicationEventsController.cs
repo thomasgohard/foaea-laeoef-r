@@ -4,7 +4,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -25,6 +24,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("ApplicationEvents API Version 1.0");
+
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpGet("queues")]
         public ActionResult<Dictionary<int, string>> GetQueueNames()

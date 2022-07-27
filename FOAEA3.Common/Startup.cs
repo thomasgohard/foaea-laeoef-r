@@ -35,12 +35,12 @@ namespace FOAEA3.Common
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
         }
 
-        public static void ConfigureAPI(IApplicationBuilder app, IWebHostEnvironment env, IRepositories repositories,
-                                        IHostApplicationLifetime appLifetime, IConfiguration configuration, string apiName)
+        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
         {
-            Console.WriteLine($"Starting {apiName}...");
-            Console.WriteLine($"Using .Net Code Environment = {env.EnvironmentName}");
+            ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
+            ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");
 
+            Log.Information("Starting API {apiName}", apiName);
             Log.Information("Using .Net Code Environment = {ASPNETCORE_ENVIRONMENT}", env.EnvironmentName);
             Log.Information("Machine Name = {MachineName}", Environment.MachineName);
 
@@ -68,13 +68,13 @@ namespace FOAEA3.Common
             else
             {
 
-                Log.Fatal("Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
+                Log.Fatal($"Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
                 Console.WriteLine($"Trying to use Production environment on non-production server {currentServer}");
                 Console.WriteLine("Application stopping...");
 
                 Task.Delay(2000).Wait();
 
-                appLifetime.StopApplication();
+                app.Lifetime.StopApplication();
             }
 
             app.UseSwagger();
@@ -93,6 +93,10 @@ namespace FOAEA3.Common
             });
 
             Console.WriteLine("Loading Reference Data");
+
+            using IServiceScope serviceScope = app.Services.CreateScope();
+            var provider = serviceScope.ServiceProvider;
+            var repositories = provider.GetRequiredService<IRepositories>();
 
             ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
             ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
@@ -119,7 +123,8 @@ namespace FOAEA3.Common
             // var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
             var api_url = configuration["Urls"];
 
-            ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");
+
         }
 
         private static void AddDBServices(IServiceCollection services, string connectionString)

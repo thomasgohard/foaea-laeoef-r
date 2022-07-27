@@ -1,45 +1,18 @@
-using FOAEA3.Common.Helpers;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using System;
+using FileBroker.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
 
-namespace FileBroker.API.MEP.Interception;
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
 
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+var configuration = builder.Configuration;
+var env = builder.Environment;
+var apiName = env.ApplicationName;
 
-        var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-            .Build();
+Startup.ConfigureAPIServices(builder.Services, configuration, apiName);
 
-        LoggingHelper.SetupLogging(config, "FOAEA3-API", "FileBroker", "Logs-API-FileBroker");
+var app = builder.Build();
 
-        try
-        {
-            Log.Information("FileBroker.API.MEP.Interception Starting.");
-            CreateHostBuilder(args).Build().Run();
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "The API failed to start.");
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
-    }
+Startup.ConfigureAPI(app, env, configuration, apiName);
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .UseSerilog()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
-}
+app.Run();

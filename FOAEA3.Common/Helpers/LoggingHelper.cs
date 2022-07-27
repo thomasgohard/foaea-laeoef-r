@@ -10,13 +10,11 @@ namespace FOAEA3.Common.Helpers
 {
     public static class LoggingHelper
     {
-        public static void SetupLogging(IConfigurationRoot config, string sourceNameForEvents,
+        public static void SetupLogging(IConfiguration config, string sourceNameForEvents,
                                         string connName = "FOAEAMain", string apiTableName = "Logs-API")
         {
             string logPath = config["FileLogPath"];
             LoggerConfiguration logConfig = SetupLogConfiguration(config, sourceNameForEvents, connName, apiTableName);
-
-            // also log to a text file (if path is specified in appsettings)
 
             if (!string.IsNullOrEmpty(logPath))
                 logConfig = logConfig.WriteTo.File(logPath,
@@ -26,7 +24,7 @@ namespace FOAEA3.Common.Helpers
             Log.Logger = logConfig.CreateLogger();
         }
 
-        private static LoggerConfiguration SetupLogConfiguration(IConfigurationRoot config, string sourceName,
+        private static LoggerConfiguration SetupLogConfiguration(IConfiguration config, string sourceName,
                                                                  string connName, string apiTableName)
         {
             var logConfig = new LoggerConfiguration()

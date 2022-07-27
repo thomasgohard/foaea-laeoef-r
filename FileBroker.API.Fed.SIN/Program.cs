@@ -1,46 +1,18 @@
-using FOAEA3.Common.Helpers;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using System;
+using FileBroker.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
 
-namespace FileBroker.API.Fed.SIN
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
 
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .Build();
+var configuration = builder.Configuration;
+var env = builder.Environment;
+var apiName = env.ApplicationName;
 
-            LoggingHelper.SetupLogging(config, "FOAEA3-API", "FileBroker", "Logs-API-FileBroker");
+Startup.ConfigureAPIServices(builder.Services, configuration, apiName);
 
-            try
-            {
-                Log.Information("FileBroker.API.Fed.SIN Starting.");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "The API failed to start.");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+var app = builder.Build();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
-}
+Startup.ConfigureAPI(app, env, configuration, apiName);
+
+app.Run();

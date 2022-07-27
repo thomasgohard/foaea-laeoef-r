@@ -27,7 +27,7 @@ internal class Program
 
         IConfiguration configuration = builder.Build();
 
-        var fileBrokerDB = new DBTools(configuration.GetConnectionString("MessageBroker").ReplaceVariablesWithEnvironmentValues());
+        var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
         var requestLogDB = new DBRequestLog(fileBrokerDB);
         requestLogDB.DeleteAll();
 

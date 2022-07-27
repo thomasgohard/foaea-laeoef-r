@@ -25,6 +25,9 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("TraceResponses API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpGet("{id}")]
         public ActionResult<DataList<TraceResponseData>> GetTraceResults([FromRoute] string id,
                                                                          [FromServices] IRepositories repositories)

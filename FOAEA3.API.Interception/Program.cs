@@ -1,47 +1,24 @@
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using System;
 
-namespace FOAEA3.API.Interception
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+
+var config = builder.Configuration;
+var env = builder.Environment;
+var apiName = env.ApplicationName;
+
+LoggingHelper.SetupLogging(config, "FOAEA3-API-Interception");
+
+builder.Services.AddSwaggerGen(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = apiName, Version = "v1" });
+});
 
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .Build();
+Startup.ConfigureAPIServices(builder.Services, config);
 
-            LoggingHelper.SetupLogging(config, "FOAEA3-API-Interception");
+var app = builder.Build();
 
-            try
-            {
-                Log.Information("FOAEA3-API-Interception Starting.");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "The API failed to start.");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+Startup.ConfigureAPI(app, env, config, apiName);
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-
-    }
-}
+app.Run();

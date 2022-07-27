@@ -23,6 +23,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("ApplicationFederalSins API Version 1.0");
 
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
         [HttpPost("bulk")]
         public ActionResult<int> CreateSinResultBulk([FromServices] IRepositories repositories)
         {

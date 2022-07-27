@@ -9,7 +9,7 @@ namespace FileBroker.Data.DB
 {
     public class DBFileTable : IFileTableRepository
     {
-        private IDBTools MainDB { get; }
+        public IDBTools MainDB { get; }
 
         public DBFileTable(IDBTools mainDB)
         {

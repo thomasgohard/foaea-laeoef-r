@@ -3,7 +3,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
@@ -23,6 +22,9 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("OutgoingFederalSins API Version 1.0");
+
+        [HttpGet("DB")]
+        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpGet("")]
         public ActionResult<List<SINOutgoingFederalData>> GetFederalOutgoingData(

@@ -23,6 +23,9 @@ public class TracingFilesController : ControllerBase
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("TracingFiles API Version 1.0");
 
+    [HttpGet("DB")]
+    public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
+
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
     public IActionResult GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)

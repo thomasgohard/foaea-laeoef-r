@@ -1,4 +1,5 @@
-﻿using FileBroker.Model;
+﻿using DBHelper;
+using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public bool FileLoading { get; set; }
         public int NextCycle { get; set; }
+
+        public IDBTools MainDB => throw new System.NotImplementedException();
 
         public InMemoryFileTable()
         {
