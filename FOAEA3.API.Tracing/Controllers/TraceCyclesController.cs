@@ -32,9 +32,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                                 [FromQuery] string fileCycle,
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             var data = manager.GetTraceCycleQuantityData(enforcementServiceCode, fileCycle);

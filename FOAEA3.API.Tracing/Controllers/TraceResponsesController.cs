@@ -32,9 +32,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<DataList<TraceResponseData>> GetTraceResults([FromRoute] string id,
                                                                          [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var manager = new TracingManager(repositories, config);
@@ -48,9 +45,6 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpPost("bulk")]
         public ActionResult<int> CreateTraceResponsesBulk([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var responseData = APIBrokerHelper.GetDataFromRequestBody<List<TraceResponseData>>(Request);
 
             var tracingManager = new TracingManager(repositories, config);
@@ -67,9 +61,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<int> MarkTraceResponsesAsViewed([FromServices] IRepositories repositories,
                                                             [FromQuery] string enfService)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var tracingManager = new TracingManager(repositories, config);
 
             tracingManager.MarkResponsesAsViewed(enfService);

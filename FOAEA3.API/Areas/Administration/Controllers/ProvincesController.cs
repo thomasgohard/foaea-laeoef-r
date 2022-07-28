@@ -17,9 +17,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet]
         public ActionResult<List<ProvinceData>> GetProvinces([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.ProvinceRepository.GetProvinces());
         }
 

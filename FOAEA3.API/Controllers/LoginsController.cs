@@ -29,9 +29,6 @@ namespace FOAEA3.API.Controllers
         [HttpPut("SetPassword")]
         public ActionResult<string> SetNewPassword([FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var subject = APIBrokerHelper.GetDataFromRequestBody<SubjectData>(Request);
 
             var loginManager = new LoginManager(repositories);
@@ -43,9 +40,6 @@ namespace FOAEA3.API.Controllers
         [HttpPost("SendEmail")]
         public ActionResult<string> SendEmail([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var emailData = APIBrokerHelper.GetDataFromRequestBody<EmailData>(Request);
 
             var loginManager = new LoginManager(repositories);
@@ -58,9 +52,6 @@ namespace FOAEA3.API.Controllers
         [HttpGet("PostConfirmationCode")]
         public ActionResult<string> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var dbLogin = new DBLogin(repositories.MainDB);
 
             dbLogin.PostConfirmationCode(subjectId, confirmationCode);
@@ -71,9 +62,6 @@ namespace FOAEA3.API.Controllers
         [HttpGet("GetEmailByConfirmationCode")]
         public ActionResult<string> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var dbLogin = new DBLogin(repositories.MainDB);
 
             return Ok(dbLogin.GetEmailByConfirmationCode(confirmationCode));
@@ -82,9 +70,6 @@ namespace FOAEA3.API.Controllers
         [HttpGet("GetSubjectByConfirmationCode")]
         public ActionResult<SubjectData> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var dbSubject = new DBSubject(repositories.MainDB);
 
             return Ok(dbSubject.GetSubjectByConfirmationCode(confirmationCode));
@@ -93,9 +78,6 @@ namespace FOAEA3.API.Controllers
         [HttpPut("PostPassword")]
         public ActionResult<PasswordData> PostPassword([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var passwordData = APIBrokerHelper.GetDataFromRequestBody<PasswordData>(Request);
 
             var dbLogin = new DBLogin(repositories.MainDB);

@@ -19,9 +19,6 @@ namespace FOAEA3.API.Controllers
         [HttpPost]
         public ActionResult<ProductionAuditData> InsertNotification([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var productionAuditData = APIBrokerHelper.GetDataFromRequestBody<ProductionAuditData>(Request);
 
             var productionAuditManager = new ProductionAuditManager(repositories);

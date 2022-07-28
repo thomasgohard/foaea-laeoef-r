@@ -57,9 +57,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                                                  [FromQuery] string fileCycle,
                                                                                  [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             if (string.IsNullOrEmpty(enforcementServiceCode))
@@ -78,9 +75,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                                                      [FromQuery] string fileCycle,
                                                                                      [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             var result = manager.GetActiveTracingEventDetails(enforcementServiceCode, fileCycle);
@@ -90,9 +84,6 @@ namespace FOAEA3.API.Tracing.Controllers
 
         private ActionResult<List<ApplicationEventData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var manager = new ApplicationManager(new ApplicationData(), repositories, config);

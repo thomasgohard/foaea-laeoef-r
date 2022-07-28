@@ -34,9 +34,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
                                                                 [FromQuery] string enfServiceCode,
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var appl = new ApplicationData();
             var applManager = new ApplicationManager(appl, repositories, config);
             var manager = new ApplicationSINManager(appl, applManager);

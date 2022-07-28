@@ -34,9 +34,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                                 [FromQuery] bool isXML,
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             var data = manager.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);

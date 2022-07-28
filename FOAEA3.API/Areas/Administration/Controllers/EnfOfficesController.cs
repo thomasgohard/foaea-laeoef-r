@@ -19,9 +19,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
                                                             [FromQuery] string enfOffName = null, [FromQuery] string enfOffCode = null,
                                                             [FromQuery] string province = null, [FromQuery] string enfServCode = null)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.EnfOffRepository.GetEnfOff(enfOffName, enfOffCode, province, enfServCode));
         }
 

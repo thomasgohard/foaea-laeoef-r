@@ -17,9 +17,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet("{enfServiceCode}")]
         public ActionResult<EnfSrvData> GetEnforcementService([FromRoute] string enfServiceCode, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var enfSrvManager = new EnforcementServiceManager(repositories);
             EnfSrvData enfSrvData = enfSrvManager.GetEnforcementService(enfServiceCode);
 
@@ -34,9 +31,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
                                                                [FromQuery] string enforcementServiceCode = null, [FromQuery] string enforcementServiceName = null,
                                                                [FromQuery] string enforcementServiceProvince = null, [FromQuery] string enforcementServiceCategory = null)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.EnfSrvRepository.GetEnfService(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
         }
     }

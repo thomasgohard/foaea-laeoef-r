@@ -42,9 +42,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpPost("")]
         public ActionResult<ApplicationEventDetailData> SaveEventDetail([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applicationEventDetail = APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
 
             var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
@@ -63,9 +60,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
                                                                           [FromQuery] string enfSrvCode,
                                                                           [FromQuery] string writtenFile)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var eventIds = APIBrokerHelper.GetDataFromRequestBody<List<int>>(Request);
 
             var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
@@ -81,9 +75,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
         private ActionResult<List<ApplicationEventDetailData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var manager = new ApplicationManager(new ApplicationData(), repositories, config);

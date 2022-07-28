@@ -17,9 +17,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet("{submCd}")]
         public ActionResult<SubmitterProfileData> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterProfileManager = new SubmitterProfileManager(repositories);
             var submitter = submitterProfileManager.GetSubmitterProfile(submCd);
 

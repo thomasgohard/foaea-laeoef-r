@@ -29,9 +29,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpPost("bulk")]
         public ActionResult<int> CreateSinResultBulk([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var responseData = APIBrokerHelper.GetDataFromRequestBody<List<SINResultData>>(Request);
 
             var application = new ApplicationData();
@@ -50,9 +47,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         public ActionResult<List<ApplicationEventData>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
                                                                                         [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new ApplicationEventManager(new ApplicationData(), repositories);
 
             return manager.GetRequestedSINEventDataForFile("HR01", fileName).Items;
@@ -62,9 +56,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         public ActionResult<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
                                                                                               [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
             return manager.GetRequestedSINEventDetailDataForFile("HR01", fileName).Items;

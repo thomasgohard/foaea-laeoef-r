@@ -17,18 +17,12 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet]
         public ActionResult<List<SubjectRoleData>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.SubjectRoleRepository.GetSubjectRoles(subjectName));
         }
 
         [HttpGet("{subjectName}")]
         public ActionResult<List<string>> GetAssumedRolesForSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.SubjectRoleRepository.GetAssumedRolesForSubject(subjectName));
         }
     }
