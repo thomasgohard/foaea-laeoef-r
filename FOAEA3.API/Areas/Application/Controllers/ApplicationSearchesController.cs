@@ -20,14 +20,13 @@ namespace FOAEA3.API.Areas.Application.Controllers
         public ActionResult<List<ApplicationSearchResultData>> CreateApplicationSearchResultFromSearchCriteria([FromBody] QuickSearchData quickSearchCriteria,
                                                                                                                [FromServices] IRepositories repositories,
                                                                                                                [FromQuery] int page = 1,
-                                                                                                               [FromQuery] int perPage = 1000)
+                                                                                                               [FromQuery] int perPage = 20)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var searchManager = new ApplicationSearchManager(repositories);
             var result = searchManager.Search(quickSearchCriteria, out int totalCount, page, perPage);
 
+            Response.Headers.Add("Page", page.ToString());
+            Response.Headers.Add("PerPage", perPage.ToString());
             Response.Headers.Add("TotalCount", totalCount.ToString());
 
             return Ok(result);

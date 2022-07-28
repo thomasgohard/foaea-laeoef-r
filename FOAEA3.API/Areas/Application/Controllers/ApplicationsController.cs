@@ -30,9 +30,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("{id}")]
         public ActionResult<DataList<SINResultData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var appl = new ApplicationData();
@@ -48,9 +45,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         public ActionResult<ApplicationData> ValidateCoreValues([FromRoute] string id, 
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -67,9 +61,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("{id}/SINresults")]
         public ActionResult<DataList<SINResultData>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var appl = new ApplicationData();
@@ -85,9 +76,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("{id}/SINresultsWithHistory")]
         public ActionResult<DataList<SINResultWithHistoryData>> GetSINResultsWithHistory([FromRoute] string id, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var appl = new ApplicationData();
@@ -105,9 +93,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
                                                              [FromServices] IRepositories repositories,
                                                              [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var sinConfirmationData = APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
@@ -154,9 +139,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
                                                                    [FromQuery] string activeState,
                                                                    [FromQuery] string recipientCode)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var appl = new ApplicationData();
             var applManager = new ApplicationManager(appl, repositories, config);
 

@@ -30,9 +30,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
                                                                                  [FromQuery] string appl_CtrlCd,
                                                                                  [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new LicenceDenialManager(repositories, config);
 
             if (string.IsNullOrEmpty(enforcementServiceCode))

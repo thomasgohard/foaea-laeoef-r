@@ -32,9 +32,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         //public ActionResult<DataList<LicenceDenialResponseData>> GetLicenceDenialResults([FromRoute] string id,
         //                                                                                 [FromServices] IRepositories repositories)
         //{
-        //    APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-        //    APIHelper.PrepareResponseHeaders(Response.Headers);
-
         //    var applKey = new ApplKey(id);
 
         //    var manager = new LicenceDenialManager(repositories, config);
@@ -48,9 +45,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         [HttpPost("bulk")]
         public ActionResult<int> CreateLicenceDenialResponsesBulk([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var responseData = APIBrokerHelper.GetDataFromRequestBody<List<LicenceDenialResponseData>>(Request);
 
             var licenceDenialManager = new LicenceDenialManager(repositories, config);
@@ -67,9 +61,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<int> MarkLicenceDenialResponsesAsViewed([FromServices] IRepositories repositories,
                                                                     [FromQuery] string enfService)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var licenceDenialManager = new LicenceDenialManager(repositories, config);
 
             licenceDenialManager.MarkResponsesAsViewed(enfService);

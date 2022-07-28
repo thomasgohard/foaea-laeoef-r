@@ -25,9 +25,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
                                                                [FromQuery] string provCd = null, [FromQuery] string enfOffCode = null,
                                                                [FromQuery] string enfSrvCode = null, [FromQuery] string onlyActive = null)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterManager = new SubmitterManager(repositories);
 
             if ((enfSrvCode is null) && (enfOffCode is null))
@@ -39,9 +36,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet("{submCd}")]
         public ActionResult<SubmitterData> GetSubmitter([FromRoute] string submCd, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterManager = new SubmitterManager(repositories);
             var submitter = submitterManager.GetSubmitter(submCd);
 
@@ -59,9 +53,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet("{submCd}/Declarant")]
         public ActionResult<string> GetDeclarant([FromRoute] string submCd, [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterManager = new SubmitterManager(repositories);
             var submitter = submitterManager.GetSubmitter(submCd);
 
@@ -78,9 +69,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         public ActionResult<List<CommissionerData>> GetCommissioners([FromServices] IRepositories repositories,
                                                                      [FromRoute] string enfOffLocCode = null)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterManager = new SubmitterManager(repositories);
 
             return Ok(submitterManager.GetCommissioners(enfOffLocCode, repositories.CurrentSubmitter));
@@ -91,9 +79,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         public ActionResult<TracingApplicationData> CreateSubmitter([FromBody] string sourceSubmitterData, [FromQuery] string suffixCode, [FromQuery] string readOnlyAccess,
                                                                     [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterData = JsonConvert.DeserializeObject<SubmitterData>(sourceSubmitterData);
 
             var submitterManager = new SubmitterManager(repositories);
@@ -116,9 +101,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpPut]
         public ActionResult<TracingApplicationData> UpdateSubmitter([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var submitterData = APIBrokerHelper.GetDataFromRequestBody<SubmitterData>(Request);
 
             bool readOnly = ((submitterData.Subm_Class == "RO") || (submitterData.Subm_Class == "R1"));

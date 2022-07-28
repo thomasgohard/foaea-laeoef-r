@@ -24,15 +24,17 @@ namespace FOAEA3.Common
     {
         public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
         {
+            AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
+
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.Filters.Add(new ActionAutoLoggerFilter());
+                options.Filters.Add(new ActionProcessHeadersFilter());
             })
                .AddXmlDataContractSerializerFormatters();
 
-            AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
-            services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
         }
 
         public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -116,7 +118,7 @@ namespace FOAEA3.Common
             else
             {
                 ColourConsole.WriteLine("Reference Data Failed to Load !!!", ConsoleColor.Red);
-                foreach(var message in ReferenceData.Instance().Messages)
+                foreach (var message in ReferenceData.Instance().Messages)
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 

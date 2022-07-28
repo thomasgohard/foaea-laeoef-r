@@ -35,9 +35,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                         [FromServices] IRepositories repositories,
                                                                         [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var manager = new InterceptionManager(repositories, repositoriesFinance, config);
@@ -61,9 +58,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                             [FromServices] IRepositories_Finance repositoriesFinance,
                                                                             [FromQuery] string enfService)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
             var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
 
@@ -74,9 +68,6 @@ namespace FOAEA3.API.Interception.Controllers
         public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories,
                                                                            [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
             if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
@@ -107,9 +98,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                         [FromServices] IRepositories repositories,
                                                         [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -133,9 +121,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                            [FromServices] IRepositories repositories,
                                                                            [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -159,9 +144,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                             [FromServices] IRepositories repositories,
                                                                             [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -182,9 +164,6 @@ namespace FOAEA3.API.Interception.Controllers
         [HttpPut("ValidateFinancialCoreValues")]
         public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
             var interceptionValidation = new InterceptionValidation(appl, repositories, config);
 
@@ -201,9 +180,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                            [FromServices] IRepositories repositories,
                                                            [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
@@ -224,9 +200,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                               [FromServices] IRepositories repositories,
                                                               [FromServices] IRepositories_Finance repositoriesFinance)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -247,9 +220,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                             [FromServices] IRepositories_Finance repositoriesFinance,
                                                                             [FromQuery] DateTime supportingDocsReceiptDate)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -272,9 +242,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                          [FromQuery] DateTime supportingDocsReceiptDate,
                                                                          [FromQuery] bool autoAccept)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
@@ -296,9 +263,6 @@ namespace FOAEA3.API.Interception.Controllers
                                                                          [FromServices] IRepositories_Finance repositoriesFinance,
                                                                          [FromQuery] string applicationRejectReasons)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);

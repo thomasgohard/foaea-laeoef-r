@@ -34,9 +34,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key,
                                                                          [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var manager = new LicenceDenialManager(repositories, config);
@@ -58,9 +55,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory([FromRoute] string key,
                                                                                             [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var manager = new LicenceDenialManager(repositories, config);
@@ -85,9 +79,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         [HttpPost]
         public ActionResult<LicenceDenialApplicationData> CreateApplication([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
             if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
@@ -119,9 +110,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
                                                         [FromQuery] string enforcementServiceCode,
                                                         [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
@@ -156,9 +144,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<LicenceDenialApplicationData> SINbypass([FromRoute] string key,
                                                          [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
@@ -181,9 +166,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialResponse([FromRoute] string key,
                                                                                        [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = new LicenceDenialApplicationData();
@@ -199,9 +181,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<List<TraceCycleQuantityData>> GetLicenceDenialToApplData([FromQuery] string federalSource,
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new LicenceDenialManager(repositories, config);
 
             var data = manager.GetLicenceDenialToApplData(federalSource);

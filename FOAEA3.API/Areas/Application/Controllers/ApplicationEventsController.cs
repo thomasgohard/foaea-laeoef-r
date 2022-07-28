@@ -55,9 +55,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpPost]
         public ActionResult<ApplicationEventData> SaveEvent([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applicationEvent = APIBrokerHelper.GetDataFromRequestBody<ApplicationEventData>(Request);
 
             var eventManager = new ApplicationEventManager(new ApplicationData(), repositories);
@@ -70,9 +67,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
         private ActionResult<List<ApplicationEventData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(id);
 
             var manager = new ApplicationManager(new ApplicationData(), repositories, config);
@@ -86,9 +80,6 @@ namespace FOAEA3.API.Areas.Application.Controllers
         [HttpGet("GetLatestSinEventDataSummary")]
         public ActionResult<List<SinInboundToApplData>> GetLatestSinEventDataSummary([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applManager = new ApplicationEventManager(new ApplicationData(), repositories);
 
             return applManager.GetLatestSinEventDataSummary();

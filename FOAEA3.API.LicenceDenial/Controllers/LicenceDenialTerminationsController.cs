@@ -31,9 +31,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key, 
                                                                          [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var manager = new LicenceDenialTerminationManager(repositories, config);
@@ -56,9 +53,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
                                                                             [FromQuery] string controlCodeForL01,
                                                                             [FromQuery] DateTime requestDate)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
             if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
@@ -86,9 +80,6 @@ namespace FOAEA3.API.LicenceDenial.Controllers
         public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialTerminationResponse([FromRoute] string key,
                                                                                                   [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = new LicenceDenialApplicationData();

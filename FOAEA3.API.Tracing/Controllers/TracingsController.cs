@@ -35,9 +35,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<TracingApplicationData> GetApplication([FromRoute] string key,
                                                                    [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var manager = new TracingManager(repositories, config);
@@ -58,9 +55,6 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpPost]
         public ActionResult<TracingApplicationData> CreateApplication([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var tracingData = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
 
             if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
@@ -93,9 +87,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                                 [FromQuery] string enforcementServiceCode,
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
             
             var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
@@ -140,9 +131,6 @@ namespace FOAEA3.API.Tracing.Controllers
                                                              [FromQuery] string newRecipientSubmitter,
                                                              [FromQuery] string newIssuingSubmitter)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
@@ -161,9 +149,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<TracingApplicationData> SINbypass([FromRoute] string key,
                                                               [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
@@ -183,9 +168,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<TracingApplicationData> CertifyAffidavit([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var applKey = new ApplKey(key);
 
             var application = new TracingApplicationData();
@@ -202,9 +184,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavit(
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             var data = manager.GetApplicationsWaitingForAffidavit();
@@ -216,9 +195,6 @@ namespace FOAEA3.API.Tracing.Controllers
         public ActionResult<List<TraceCycleQuantityData>> GetTraceToApplData(
                                                                 [FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var manager = new TracingManager(repositories, config);
 
             var data = manager.GetTraceToApplData();

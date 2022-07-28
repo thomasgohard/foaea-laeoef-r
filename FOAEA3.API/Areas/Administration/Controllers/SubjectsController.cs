@@ -18,9 +18,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet]
         public ActionResult<List<SubjectData>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             if (submCd != null)
                 return Ok(repositories.SubjectRepository.GetSubjectsForSubmitter(submCd));
             else
@@ -30,9 +27,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet("{subjectName}")]
         public ActionResult<SubjectData> GetSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var data = repositories.SubjectRepository.GetSubject(subjectName);
             return Ok(data);
         }
@@ -40,9 +34,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpPut("AcceptTermsOfReference")]
         public ActionResult<SubjectData> AcceptTermsOfReference([FromServices] IRepositories repositories, [FromBody] SubjectData subject)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             var loginManager = new LoginManager(repositories);
             loginManager.AcceptNewTermsOfReferernce(subject.SubjectName);
 

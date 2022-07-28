@@ -17,9 +17,6 @@ namespace FOAEA3.API.Areas.Administration.Controllers
         [HttpGet]
         public ActionResult<List<InfoBankData>> GetInfoBanks([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.InfoBankRepository.GetInfoBanks());
         }
     }
