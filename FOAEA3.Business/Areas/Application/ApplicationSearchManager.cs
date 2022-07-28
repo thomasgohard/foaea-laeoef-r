@@ -18,12 +18,13 @@ namespace FOAEA3.Business.Areas.Application
             AuditManager = new AccessAuditManager(Repositories);
         }
 
-        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria, out int totalCount)
+        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria, out int totalCount, int page, int perPage)
         {
             int accessAuditId = AuditManager.AddAuditHeader(AccessAuditPage.ApplicationSearch);
             AddSearchCriteriaToAccessAudit(accessAuditId, searchCriteria);
 
-            var searchResults = Repositories.ApplicationSearchRepository.QuickSearch(searchCriteria, out totalCount);
+            var searchResults = Repositories.ApplicationSearchRepository.QuickSearch(searchCriteria, out totalCount,
+                                                                                     page, perPage);
 
             AddSearchResultsToAccessAudit(accessAuditId, searchResults);
 

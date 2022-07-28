@@ -18,7 +18,8 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount)
+        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount, 
+                                                             int page = 1, int perPage = 1000)
         {
             string firstName = searchData.FirstName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
             string middleName = searchData.MiddleName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
@@ -70,6 +71,9 @@ namespace FOAEA3.Data.DB
                 parameters.Add("IsInternalUser", true);
                 if (searchData.SearchOnlySinConfirmed) parameters.Add("OnlySINConfirmed", searchData.SearchOnlySinConfirmed);
             }
+
+            parameters.Add("Page", page);
+            parameters.Add("PerPage", perPage);
 
             var data = MainDB.GetDataFromStoredProc<ApplicationSearchResultData>("Appl_Search", parameters, FillDataFromReader);
 

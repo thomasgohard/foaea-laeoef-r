@@ -2,9 +2,7 @@
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace FOAEA3.API.Areas.Application.Controllers
 {
@@ -20,18 +18,19 @@ namespace FOAEA3.API.Areas.Application.Controllers
 
         [HttpPost]
         public ActionResult<List<ApplicationSearchResultData>> CreateApplicationSearchResultFromSearchCriteria([FromBody] QuickSearchData quickSearchCriteria,
-                                                                                                               [FromServices] IRepositories repositories)
+                                                                                                               [FromServices] IRepositories repositories,
+                                                                                                               [FromQuery] int page = 1,
+                                                                                                               [FromQuery] int perPage = 1000)
         {
             APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
             APIHelper.PrepareResponseHeaders(Response.Headers);
 
             var searchManager = new ApplicationSearchManager(repositories);
-            var result = searchManager.Search(quickSearchCriteria, out int totalCount);
+            var result = searchManager.Search(quickSearchCriteria, out int totalCount, page, perPage);
 
             Response.Headers.Add("TotalCount", totalCount.ToString());
 
             return Ok(result);
-
         }
 
     }
