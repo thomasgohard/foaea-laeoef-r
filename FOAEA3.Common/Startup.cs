@@ -30,10 +30,10 @@ namespace FOAEA3.Common
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
+                options.RespectBrowserAcceptHeader = true;
                 options.Filters.Add(new ActionAutoLoggerFilter());
                 options.Filters.Add(new ActionProcessHeadersFilter());
-            })
-               .AddXmlDataContractSerializerFormatters();
+            }).AddXmlSerializerFormatters();
 
         }
 

@@ -31,9 +31,10 @@ namespace FileBroker.Common
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
+                options.RespectBrowserAcceptHeader = true;
                 options.Filters.Add(new ActionAutoLoggerFilter());
-            })
-               .AddXmlDataContractSerializerFormatters();
+            }).AddXmlSerializerFormatters();
+
             services.AddEndpointsApiExplorer();
             services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
             services.Configure<ApiConfig>(configuration.GetSection("APIroot"));
