@@ -7,53 +7,52 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FOAEA3.Common.Filters
+namespace FOAEA3.Common.Filters;
+
+public class ActionProcessHeadersFilter : IActionFilter
 {
-    public class ActionProcessHeadersFilter : IActionFilter
+    public void OnActionExecuted(ActionExecutedContext context)
     {
-        public void OnActionExecuted(ActionExecutedContext context)
+        // do nothing
+    }
+
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        var repositories = context.HttpContext.RequestServices.GetService<IRepositories>();
+
+        ProcessRequestHeaders(context.HttpContext.Request.Headers, repositories);
+        ProcessResponseHeaders(context.HttpContext.Response.Headers);
+    }
+
+    private static void ProcessRequestHeaders(IDictionary<string, StringValues> headers, IRepositories repositories)
+    {
+        const string CURRENT_SUBMITTER = "CurrentSubmitter";
+        const string CURRENT_SUBJECT = "CurrentSubject";
+        const string ACCEPT_LANGUAGE = "Accept-Language";
+
+        if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBMITTER))
         {
-            // do nothing
+            string key = headers.Keys.First(m => m.Contains(CURRENT_SUBMITTER, StringComparison.InvariantCultureIgnoreCase));
+            repositories.CurrentSubmitter = headers[key];
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBJECT))
         {
-            var repositories = context.HttpContext.RequestServices.GetService<IRepositories>();
-
-            ProcessRequestHeaders(context.HttpContext.Request.Headers, repositories);
-            ProcessResponseHeaders(context.HttpContext.Response.Headers);
+            string key = headers.Keys.First(m => m.Contains(CURRENT_SUBJECT, StringComparison.InvariantCultureIgnoreCase));
+            repositories.CurrentUser = headers[key];
         }
 
-        private static void ProcessRequestHeaders(IDictionary<string, StringValues> headers, IRepositories repositories)
+        if (headers.Keys.ContainsCaseInsensitive(ACCEPT_LANGUAGE))
         {
-            const string CURRENT_SUBMITTER = "CurrentSubmitter";
-            const string CURRENT_SUBJECT = "CurrentSubject";
-            const string ACCEPT_LANGUAGE = "Accept-Language";
+            string key = headers.Keys.First(m => m.Contains(ACCEPT_LANGUAGE, StringComparison.InvariantCultureIgnoreCase));
+            string language = headers[key];
 
-            if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBMITTER))
-            {
-                string key = headers.Keys.First(m => m.Contains(CURRENT_SUBMITTER, StringComparison.InvariantCultureIgnoreCase));
-                repositories.CurrentSubmitter = headers[key];
-            }
-
-            if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBJECT))
-            {
-                string key = headers.Keys.First(m => m.Contains(CURRENT_SUBJECT, StringComparison.InvariantCultureIgnoreCase));
-                repositories.CurrentUser = headers[key];
-            }
-
-            if (headers.Keys.ContainsCaseInsensitive(ACCEPT_LANGUAGE))
-            {
-                string key = headers.Keys.First(m => m.Contains(ACCEPT_LANGUAGE, StringComparison.InvariantCultureIgnoreCase));
-                string language = headers[key];
-
-                LanguageHelper.SetLanguage(language);
-            }
+            LanguageHelper.SetLanguage(language);
         }
+    }
 
-        private static void ProcessResponseHeaders(IDictionary<string, StringValues> headers)
-        {
-            headers.Add("Content-Language", LanguageHelper.IsEnglish() ? "en" : "fr");
-        }
+    private static void ProcessResponseHeaders(IDictionary<string, StringValues> headers)
+    {
+        headers.Add("Content-Language", LanguageHelper.IsEnglish() ? "en" : "fr");
     }
 }

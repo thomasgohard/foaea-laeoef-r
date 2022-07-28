@@ -4,279 +4,274 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
-namespace FOAEA3.API.Interception.Controllers
+namespace FOAEA3.API.Interception.Controllers;
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class InterceptionsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class InterceptionsController : ControllerBase
+    private readonly CustomConfig config;
+
+    public InterceptionsController(IOptions<CustomConfig> config)
     {
-        private readonly CustomConfig config;
+        this.config = config.Value;
+    }
 
-        public InterceptionsController(IOptions<CustomConfig> config)
+    [HttpGet("Version")]
+    public ActionResult<string> Version() => Ok("Interceptions API Version 1.0");
+
+    [HttpGet("DB")]
+    public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
+    [HttpGet("{key}")]
+    public ActionResult<InterceptionApplicationData> GetApplication([FromRoute] string key,
+                                                                    [FromServices] IRepositories repositories,
+                                                                    [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var manager = new InterceptionManager(repositories, repositoriesFinance, config);
+
+        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        if (success)
         {
-            this.config = config.Value;
+            if (manager.InterceptionApplication.AppCtgy_Cd == "I01")
+                return Ok(manager.InterceptionApplication);
+            else
+                return NotFound($"Error: requested I01 application but found {manager.InterceptionApplication.AppCtgy_Cd} application.");
         }
+        else
+            return NotFound();
 
-        [HttpGet("Version")]
-        public ActionResult<string> Version() => Ok("Interceptions API Version 1.0");
+    }
 
-        [HttpGet("DB")]
-        public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
-
-        [HttpGet("{key}")]
-        public ActionResult<InterceptionApplicationData> GetApplication([FromRoute] string key,
+    [HttpGet("GetApplicationsForVariationAutoAccept")]
+    public ActionResult<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAccept(
                                                                         [FromServices] IRepositories repositories,
-                                                                        [FromServices] IRepositories_Finance repositoriesFinance)
+                                                                        [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                        [FromQuery] string enfService)
+    {
+        var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
+        var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
+
+        return Ok(data);
+    }
+
+    [HttpPost]
+    public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories,
+                                                                       [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
+            return UnprocessableEntity(error);
+
+        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+        bool isCreated = interceptionManager.CreateApplication();
+        if (isCreated)
         {
-            var applKey = new ApplKey(key);
+            var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
+            var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
+            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-            var manager = new InterceptionManager(repositories, repositoriesFinance, config);
-
-            bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
-            if (success)
-            {
-                if (manager.InterceptionApplication.AppCtgy_Cd == "I01")
-                    return Ok(manager.InterceptionApplication);
-                else
-                    return NotFound($"Error: requested I01 application but found {manager.InterceptionApplication.AppCtgy_Cd} application.");
-            }
-            else
-                return NotFound();
-
+            return Created(getURI, application);
         }
-
-        [HttpGet("GetApplicationsForVariationAutoAccept")]
-        public ActionResult<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAccept(
-                                                                            [FromServices] IRepositories repositories,
-                                                                            [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                            [FromQuery] string enfService)
+        else
         {
-            var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-            var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
-
-            return Ok(data);
-        }
-
-        [HttpPost]
-        public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories,
-                                                                           [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
-                return UnprocessableEntity(error);
-
-            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-
-            bool isCreated = interceptionManager.CreateApplication();
-            if (isCreated)
-            {
-                var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
-                var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-                var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
-
-                return Created(getURI, application);
-            }
-            else
-            {
-                return UnprocessableEntity(application);
-            }
-
-        }
-
-        [HttpPut("{key}")]
-        [Produces("application/json")]
-        public ActionResult<InterceptionApplicationData> UpdateApplication(
-                                                        [FromRoute] string key,
-                                                        [FromServices] IRepositories repositories,
-                                                        [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            interceptionManager.UpdateApplication();
-
-            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-
-        }
-
-        [HttpPut("{key}/cancel")]
-        [Produces("application/json")]
-        public ActionResult<InterceptionApplicationData> CancelApplication([FromRoute] string key,
-                                                                           [FromServices] IRepositories repositories,
-                                                                           [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            interceptionManager.CancelApplication();
-
-            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-
-        }
-
-        [HttpPut("{key}/suspend")]
-        [Produces("application/json")]
-        public ActionResult<InterceptionApplicationData> SuspendApplication([FromRoute] string key,
-                                                                            [FromServices] IRepositories repositories,
-                                                                            [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            interceptionManager.SuspendApplication();
-
-            if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-
-        }
-
-        [HttpPut("ValidateFinancialCoreValues")]
-        public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
-        {
-            var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-            var interceptionValidation = new InterceptionValidation(appl, repositories, config);
-
-            bool isValid = interceptionValidation.ValidateFinancialCoreValues();
-
-            if (isValid)
-                return Ok(appl);
-            else
-                return UnprocessableEntity(appl);
-        }
-
-        [HttpPut("{key}/SINbypass")]
-        public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
-                                                           [FromServices] IRepositories repositories,
-                                                           [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var applKey = new ApplKey(key);
-
-            var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
-
-            var application = new InterceptionApplicationData();
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
-
-            var sinManager = new ApplicationSINManager(application, appManager);
-            sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
-
-            return Ok(application);
-        }
-
-        [HttpPut("{key}/Vary")]
-        public ActionResult<InterceptionApplicationData> Vary([FromRoute] string key,
-                                                              [FromServices] IRepositories repositories,
-                                                              [FromServices] IRepositories_Finance repositoriesFinance)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-            if (appManager.VaryApplication())
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-        }
-
-        [HttpPut("{key}/AcceptApplication")]
-        public ActionResult<InterceptionApplicationData> AcceptInterception([FromRoute] string key,
-                                                                            [FromServices] IRepositories repositories,
-                                                                            [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                            [FromQuery] DateTime supportingDocsReceiptDate)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-
-            if (appManager.AcceptInterception(supportingDocsReceiptDate))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-        }
-
-        [HttpPut("{key}/AcceptVariation")]
-        public ActionResult<InterceptionApplicationData> AcceptVariation([FromRoute] string key,
-                                                                         [FromServices] IRepositories repositories,
-                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                         [FromQuery] DateTime supportingDocsReceiptDate,
-                                                                         [FromQuery] bool autoAccept)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-
-            if (appManager.AcceptVariation(supportingDocsReceiptDate, autoAccept))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
-        }
-
-        [HttpPut("{key}/RejectVariation")]
-        public ActionResult<InterceptionApplicationData> RejectVariation([FromRoute] string key,
-                                                                         [FromServices] IRepositories repositories,
-                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                         [FromQuery] string applicationRejectReasons)
-        {
-            var applKey = new ApplKey(key);
-
-            var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
-
-            if (!APIHelper.ValidateApplication(application, applKey, out string error))
-                return UnprocessableEntity(error);
-
-            var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-
-            if (appManager.RejectVariation(applicationRejectReasons))
-                return Ok(application);
-            else
-                return UnprocessableEntity(application);
+            return UnprocessableEntity(application);
         }
 
     }
+
+    [HttpPut("{key}")]
+    [Produces("application/json")]
+    public ActionResult<InterceptionApplicationData> UpdateApplication(
+                                                    [FromRoute] string key,
+                                                    [FromServices] IRepositories repositories,
+                                                    [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        interceptionManager.UpdateApplication();
+
+        if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+
+    }
+
+    [HttpPut("{key}/cancel")]
+    [Produces("application/json")]
+    public ActionResult<InterceptionApplicationData> CancelApplication([FromRoute] string key,
+                                                                       [FromServices] IRepositories repositories,
+                                                                       [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        interceptionManager.CancelApplication();
+
+        if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+
+    }
+
+    [HttpPut("{key}/suspend")]
+    [Produces("application/json")]
+    public ActionResult<InterceptionApplicationData> SuspendApplication([FromRoute] string key,
+                                                                        [FromServices] IRepositories repositories,
+                                                                        [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        interceptionManager.SuspendApplication();
+
+        if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+
+    }
+
+    [HttpPut("ValidateFinancialCoreValues")]
+    public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
+    {
+        var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var interceptionValidation = new InterceptionValidation(appl, repositories, config);
+
+        bool isValid = interceptionValidation.ValidateFinancialCoreValues();
+
+        if (isValid)
+            return Ok(appl);
+        else
+            return UnprocessableEntity(appl);
+    }
+
+    [HttpPut("{key}/SINbypass")]
+    public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
+                                                       [FromServices] IRepositories repositories,
+                                                       [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
+
+        var application = new InterceptionApplicationData();
+
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+
+        var sinManager = new ApplicationSINManager(application, appManager);
+        sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+
+        return Ok(application);
+    }
+
+    [HttpPut("{key}/Vary")]
+    public ActionResult<InterceptionApplicationData> Vary([FromRoute] string key,
+                                                          [FromServices] IRepositories repositories,
+                                                          [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        if (appManager.VaryApplication())
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+    }
+
+    [HttpPut("{key}/AcceptApplication")]
+    public ActionResult<InterceptionApplicationData> AcceptInterception([FromRoute] string key,
+                                                                        [FromServices] IRepositories repositories,
+                                                                        [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                        [FromQuery] DateTime supportingDocsReceiptDate)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+        if (appManager.AcceptInterception(supportingDocsReceiptDate))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+    }
+
+    [HttpPut("{key}/AcceptVariation")]
+    public ActionResult<InterceptionApplicationData> AcceptVariation([FromRoute] string key,
+                                                                     [FromServices] IRepositories repositories,
+                                                                     [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                     [FromQuery] DateTime supportingDocsReceiptDate,
+                                                                     [FromQuery] bool autoAccept)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+        if (appManager.AcceptVariation(supportingDocsReceiptDate, autoAccept))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+    }
+
+    [HttpPut("{key}/RejectVariation")]
+    public ActionResult<InterceptionApplicationData> RejectVariation([FromRoute] string key,
+                                                                     [FromServices] IRepositories repositories,
+                                                                     [FromServices] IRepositories_Finance repositoriesFinance,
+                                                                     [FromQuery] string applicationRejectReasons)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+
+        if (appManager.RejectVariation(applicationRejectReasons))
+            return Ok(application);
+        else
+            return UnprocessableEntity(application);
+    }
+
 }
