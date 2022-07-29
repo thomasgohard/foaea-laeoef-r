@@ -66,6 +66,8 @@ namespace FileBroker.Common
             if (!env.IsEnvironment("Production"))
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else if (prodServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {
@@ -77,6 +79,7 @@ namespace FileBroker.Common
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later");
                     });
                 });
+                app.UseHsts();
             }
             else
             {
@@ -88,12 +91,6 @@ namespace FileBroker.Common
                 Task.Delay(2000).Wait();
 
                 app.Lifetime.StopApplication();
-            }
-
-            if (!app.Environment.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
             }
 
             var api_url = configuration["Urls"];

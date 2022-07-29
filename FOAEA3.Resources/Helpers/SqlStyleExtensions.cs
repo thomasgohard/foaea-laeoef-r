@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace FOAEA3.Resources.Helpers
 {
@@ -18,6 +19,11 @@ namespace FOAEA3.Resources.Helpers
         public static bool NotIn<T>(this T source, params T[] items)
         {
             return !items.Contains(source);
+        }
+
+        public static bool IsValidOrderByClause(this string orderByClause)
+        {
+            return Regex.IsMatch(orderByClause, @"^[a-zA-Z]+[a-zA-Z ,]*$");
         }
     }
 }

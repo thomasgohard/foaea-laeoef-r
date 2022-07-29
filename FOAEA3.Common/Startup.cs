@@ -55,6 +55,12 @@ namespace FOAEA3.Common
             if (!env.IsEnvironment("Production"))
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
+                });
             }
             else if (prodServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {
@@ -66,10 +72,10 @@ namespace FOAEA3.Common
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later");
                     });
                 });
+                app.UseHsts();
             }
             else
             {
-
                 Log.Fatal($"Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
                 Console.WriteLine($"Trying to use Production environment on non-production server {currentServer}");
                 Console.WriteLine("Application stopping...");
@@ -79,14 +85,7 @@ namespace FOAEA3.Common
                 app.Lifetime.StopApplication();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
-            });
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -94,12 +94,22 @@ namespace TestData.TestDataBase
             throw new NotImplementedException();
         }
 
+        public List<Tdata> GetDataFromSql<Tdata>(string procName, Dictionary<string, object> parameters, Action<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
+        {
+            throw new NotImplementedException();
+        }
+
         public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters, ActionOut<IDBHelperReader, Tdata> fillDataFromReader)
         {
             throw new NotImplementedException();
         }
 
         public void UpdateData<Tdata, Tkey>(string tableName, Tdata data, string columnName, Tkey id, Action<Tdata, Dictionary<string, object>> SetParametersForData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Tdata GetDataFromSqlValue<Tdata>(string sql, Dictionary<string, object> parameters)
         {
             throw new NotImplementedException();
         }

@@ -12,19 +12,24 @@ namespace FOAEA3.Business.Areas.Application
         private readonly IRepositories Repositories;
         private readonly AccessAuditManager AuditManager;
 
+        public string LastError { get; set; }
+
         public ApplicationSearchManager(IRepositories repositories)
         {
             Repositories = repositories; 
             AuditManager = new AccessAuditManager(Repositories);
         }
 
-        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria, out int totalCount, int page, int perPage)
+        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria, out int totalCount, 
+                                                        int page, int perPage, string orderBy)
         {
             int accessAuditId = AuditManager.AddAuditHeader(AccessAuditPage.ApplicationSearch);
             AddSearchCriteriaToAccessAudit(accessAuditId, searchCriteria);
 
             var searchResults = Repositories.ApplicationSearchRepository.QuickSearch(searchCriteria, out totalCount,
-                                                                                     page, perPage);
+                                                                                     page, perPage, orderBy);
+
+            LastError = Repositories.ApplicationSearchRepository.LastError;
 
             AddSearchResultsToAccessAudit(accessAuditId, searchResults);
 

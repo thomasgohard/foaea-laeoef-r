@@ -16,19 +16,24 @@ public class ApplicationSearchesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpPost]
-    public ActionResult<List<ApplicationSearchResultData>> CreateApplicationSearchResultFromSearchCriteria([FromBody] QuickSearchData quickSearchCriteria,
-                                                                                                           [FromServices] IRepositories repositories,
-                                                                                                           [FromQuery] int page = 1,
-                                                                                                           [FromQuery] int perPage = 20)
+    public ActionResult<List<ApplicationSearchResultData>> DoSearch([FromBody] QuickSearchData quickSearchCriteria,
+                                                                    [FromServices] IRepositories repositories,
+                                                                    [FromQuery] int page = 1,
+                                                                    [FromQuery] int perPage = 1000,
+                                                                    [FromQuery] string orderBy = "EnforcementService, ControlCode")
     {
         var searchManager = new ApplicationSearchManager(repositories);
-        var result = searchManager.Search(quickSearchCriteria, out int totalCount, page, perPage);
+        var result = searchManager.Search(quickSearchCriteria, out int totalCount, page, perPage, orderBy);
 
         Response.Headers.Add("Page", page.ToString());
         Response.Headers.Add("PerPage", perPage.ToString());
+        Response.Headers.Add("OrderBy", orderBy);
         Response.Headers.Add("TotalCount", totalCount.ToString());
 
-        return Ok(result);
+        if (string.IsNullOrEmpty(searchManager.LastError))
+            return Ok(result);
+        else
+            return UnprocessableEntity(searchManager.LastError);
     }
 
 }
