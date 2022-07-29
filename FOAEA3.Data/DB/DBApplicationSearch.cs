@@ -44,24 +44,24 @@ namespace FOAEA3.Data.DB
                                     A.Appl_Dbtr_SurNme [DebtorSurname],
                                     A.Appl_Source_RfrNr [ReferenceNumber],
                                     A.Appl_JusticeNr [JusticeNumber],
-                                    A.ActvSt_Cd [ActiveState],
-                                    A.AppLiSt_Cd [ApplicationLifeState]";
+                                    A.ActvSt_Cd [Status],
+                                    A.AppLiSt_Cd [State]";
 
             var sqlTables = @" FROM    Appl AS A
                                LEFT JOIN SummSmry AS S ON S.Appl_CtrlCd = A.Appl_CtrlCd AND S.Appl_EnfSrv_Cd = A.Appl_EnfSrv_Cd ";
 
-            string firstName = searchData.FirstName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
-            string middleName = searchData.MiddleName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
-            string lastName = searchData.LastName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
+            string firstName = searchData.DebtorFirstName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
+            string middleName = searchData.DebtorMiddleName?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
+            string lastName = searchData.DebtorSurname?.Trim()?.FixApostropheForSQL()?.FixWildcardForSQL();
             string justiceNumber = searchData.JusticeNumber?.Trim()?.FixApostropheForSQL();
 
             var parameters = new Dictionary<string, object>();
 
             string sqlWhere = string.Empty;
 
-            if (!string.IsNullOrEmpty(searchData.EnfService))
+            if (!string.IsNullOrEmpty(searchData.EnforcementService))
             {
-                parameters.Add("Appl_EnfSrv_Cd", searchData.EnfService);
+                parameters.Add("Appl_EnfSrv_Cd", searchData.EnforcementService);
                 sqlWhere = AppendWhereClause(sqlWhere, "@Appl_EnfSrv_Cd = A.Appl_EnfSrv_Cd");
             }
             if (!string.IsNullOrEmpty(searchData.ControlCode))
@@ -118,9 +118,9 @@ namespace FOAEA3.Data.DB
                 parameters.Add("ActvSt_Cd", searchData.Status);
                 sqlWhere = AppendWhereClause(sqlWhere, "@ActvSt_Cd = A.ActvSt_Cd");
             }
-            if (!string.IsNullOrEmpty(searchData.EnfSourceRefNumber))
+            if (!string.IsNullOrEmpty(searchData.ReferenceNumber))
             {
-                parameters.Add("SourceReference", searchData.EnfSourceRefNumber);
+                parameters.Add("SourceReference", searchData.ReferenceNumber);
                 sqlWhere = AppendWhereClause(sqlWhere, "@SourceReference = A.Appl_Source_RfrNr");
             }
             if (!string.IsNullOrEmpty(justiceNumber))
@@ -129,9 +129,9 @@ namespace FOAEA3.Data.DB
                 sqlWhere = AppendWhereClause(sqlWhere, "A.Appl_JusticeNr LIKE @JusticeNr");
             }
 
-            if (!string.IsNullOrEmpty(searchData.Subm_SubmCd))
+            if (!string.IsNullOrEmpty(searchData.Submitter))
             {
-                parameters.Add("Subm_SubmCd", searchData.Subm_SubmCd);
+                parameters.Add("Subm_SubmCd", searchData.Submitter);
                 sqlWhere = AppendWhereClause(sqlWhere, "A.Subm_SubmCd LIKE @Subm_SubmCd");
             }
             else
@@ -144,24 +144,24 @@ namespace FOAEA3.Data.DB
                 }
             }
 
-            if (searchData.Appl_Dbtr_Brth_Dte_Start.HasValue && searchData.Appl_Dbtr_Brth_Dte_End.HasValue)
+            if (searchData.DebtorDateOfBirth_Start.HasValue && searchData.DebtorDateOfBirth_End.HasValue)
             {
-                parameters.Add("Appl_Dbtr_Brth_Dte_Start", searchData.Appl_Dbtr_Brth_Dte_Start);
-                parameters.Add("Appl_Dbtr_Brth_Dte_End", searchData.Appl_Dbtr_Brth_Dte_End);
+                parameters.Add("Appl_Dbtr_Brth_Dte_Start", searchData.DebtorDateOfBirth_Start);
+                parameters.Add("Appl_Dbtr_Brth_Dte_End", searchData.DebtorDateOfBirth_End);
                 sqlWhere = AppendWhereClause(sqlWhere, "A.Appl_Dbtr_Brth_Dte >= @Appl_Dbtr_Brth_Dte_Start AND A.Appl_Dbtr_Brth_Dte <= @Appl_Dbtr_Brth_Dte_End");
             }
 
-            if (searchData.Appl_Create_Dte_Start.HasValue && searchData.Appl_Create_Dte_End.HasValue)
+            if (searchData.CreatedDate_Start.HasValue && searchData.CreatedDate_End.HasValue)
             {
-                parameters.Add("Appl_Create_Dte_Start", searchData.Appl_Create_Dte_Start);
-                parameters.Add("Appl_Create_Dte_End", searchData.Appl_Create_Dte_End);
+                parameters.Add("Appl_Create_Dte_Start", searchData.CreatedDate_Start);
+                parameters.Add("Appl_Create_Dte_End", searchData.CreatedDate_End);
                 sqlWhere = AppendWhereClause(sqlWhere, "CONVERT(DATE, A.Appl_Create_Dte) >= @Appl_Create_Dte_Start AND CONVERT(DATE, A.Appl_Create_Dte) <= @Appl_Create_Dte_End");
             }
 
-            if (searchData.ActualEnd_Dte_Start.HasValue && searchData.ActualEnd_Dte_End.HasValue)
+            if (searchData.ActualEndDate_Start.HasValue && searchData.ActualEndDate_End.HasValue)
             {
-                parameters.Add("ActualEnd_Dte_Start", searchData.ActualEnd_Dte_Start);
-                parameters.Add("ActualEnd_Dte_End", searchData.ActualEnd_Dte_End);
+                parameters.Add("ActualEnd_Dte_Start", searchData.ActualEndDate_Start);
+                parameters.Add("ActualEnd_Dte_End", searchData.ActualEndDate_End);
                 sqlWhere = AppendWhereClause(sqlWhere, "CONVERT(DATE, IsNull(S.ActualEnd_Dte, S.End_Dte)) >= @ActualEnd_Dte_Start AND CONVERT(DATE, IsNull(S.ActualEnd_Dte, S.End_Dte)) <= @ActualEnd_Dte_End");
             }
 
@@ -240,8 +240,8 @@ namespace FOAEA3.Data.DB
             data.Appl_Dbtr_SurNme = rdr["DebtorSurname"] as string;
             data.Appl_Source_RfrNr = rdr["ReferenceNumber"] as string; // can be null 
             data.Appl_JusticeNr = rdr["JusticeNumber"] as string; // can be null 
-            data.ActvSt_Cd = ReferenceData.Instance().ActiveStatuses[rdr["ActiveState"] as string].ActvSt_Txt_E;
-            data.AppLiSt_Cd = (ApplicationState)rdr["ApplicationLifeState"];
+            data.ActvSt_Cd = ReferenceData.Instance().ActiveStatuses[rdr["Status"] as string].ActvSt_Txt_E;
+            data.AppLiSt_Cd = (ApplicationState)rdr["State"];
         }
 
     }
