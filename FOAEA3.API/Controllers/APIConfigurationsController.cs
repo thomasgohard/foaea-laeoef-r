@@ -19,9 +19,6 @@ namespace FOAEA3.API.Controllers
         [HttpGet("MainDBCconnectionString")]
         public ActionResult<string> MainDBConnectionString([FromServices] IRepositories repositories)
         {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
-
             return Ok(repositories.MainDB.ConnectionString);
         }
 

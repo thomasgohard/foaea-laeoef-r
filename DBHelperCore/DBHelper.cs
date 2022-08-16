@@ -145,6 +145,56 @@ namespace DBHelper
             return result;
         }
 
+        public List<Tdata> GetDataFromSql<Tdata>(string sql, Dictionary<string, object> parameters,
+                                                 Action<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
+        {
+
+            ValidateConfiguration();
+
+            var result = new List<Tdata>();
+
+            using (var con = new SqlConnection(ConnectionString))
+            {
+                using SqlCommand cmd = CreateCommandFromSql(sql, con);
+                if ((parameters != null) && (parameters.Count > 0))
+                {
+                    foreach (var item in parameters)
+                    {
+                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                    }
+                }
+
+                LastException = null;
+                try
+                {
+                    con.Open();
+
+                    using SqlDataReader rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
+                    {
+
+                        var data = new Tdata();
+                        var dataReader = new DBHelperReader(rdr);
+
+                        fillDataFromReader(dataReader, data);
+
+                        result.Add(data);
+
+                    }
+
+                    rdr.Close();
+
+                }
+                catch (Exception e)
+                {
+                    LastException = new Exception("sql", e);
+                }
+
+            }
+
+            return result;
+        }
+
         public List<Tdata> GetRecordsFromStoredProc<Tdata>(string procName, Dictionary<string, object> parameters,
                                                            ActionOut<IDBHelperReader, Tdata> fillDataFromReader)
         {
@@ -326,6 +376,42 @@ namespace DBHelper
                 catch (Exception e)
                 {
                     LastException = new Exception(procName, e);
+                }
+
+            }
+
+            return result;
+        }
+
+        public Tdata GetDataFromSqlSingleValue<Tdata>(string sql, Dictionary<string, object> parameters)
+        {
+            ValidateConfiguration();
+
+            Tdata result = default;
+
+            using (var con = new SqlConnection(ConnectionString))
+            {
+                using SqlCommand cmd = CreateCommandFromSql(sql, con);
+                if ((parameters != null) && (parameters.Count > 0))
+                    foreach (var item in parameters)
+                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+
+                LastException = null;
+                try
+                {
+                    con.Open();
+                    var rdr = cmd.ExecuteReader();
+                    if (rdr.Read())
+                        result = (Tdata)rdr[0];
+                    else
+                        result = default;
+
+                    rdr.Close();
+                    con.Close();
+                }
+                catch (Exception e)
+                {
+                    LastException = new Exception("error", e);
                 }
 
             }
@@ -872,6 +958,15 @@ namespace DBHelper
             return new SqlCommand(procName, con)
             {
                 CommandType = System.Data.CommandType.StoredProcedure,
+                CommandTimeout = 240
+            };
+        }
+
+        private static SqlCommand CreateCommandFromSql(string sql, SqlConnection con)
+        {
+            return new SqlCommand(sql, con)
+            {
+                CommandType = System.Data.CommandType.Text,
                 CommandTimeout = 240
             };
         }

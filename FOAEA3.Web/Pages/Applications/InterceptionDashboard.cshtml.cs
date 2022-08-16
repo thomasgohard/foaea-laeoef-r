@@ -55,15 +55,15 @@ namespace FOAEA3.Web.Pages.Applications
 
                 var quickSearch = new QuickSearchData
                 {
-                    FirstName = SearchCriteria.FirstName,
-                    LastName = SearchCriteria.LastName,
+                    DebtorFirstName = SearchCriteria.FirstName,
+                    DebtorSurname = SearchCriteria.LastName,
                     SIN = SearchCriteria.SIN,
                     State = SearchCriteria.State,
                     Status = SearchCriteria.Status,
                     Category = SearchCriteria.Category,
                     ControlCode = SearchCriteria.ControlCode,
-                    EnfService = "ON01",
-                    EnfSourceRefNumber = SearchCriteria.EnfSourceRefNumber,
+                    EnforcementService = "ON01",
+                    ReferenceNumber = SearchCriteria.EnfSourceRefNumber,
                     JusticeNumber = SearchCriteria.JusticeNumber
                 };
 
@@ -88,15 +88,15 @@ namespace FOAEA3.Web.Pages.Applications
 
                 var quickSearch = new QuickSearchData
                 {
-                    FirstName = MySearchCriteria.FirstName,
-                    LastName = MySearchCriteria.LastName,
+                    DebtorFirstName = MySearchCriteria.FirstName,
+                    DebtorSurname = MySearchCriteria.LastName,
                     SIN = MySearchCriteria.SIN,
                     State = MySearchCriteria.State,
                     Status = MySearchCriteria.Status,
                     Category = MySearchCriteria.Category,
                     ControlCode = MySearchCriteria.ControlCode,
-                    EnfService = "ON01",
-                    EnfSourceRefNumber = MySearchCriteria.EnfSourceRefNumber,
+                    EnforcementService = "ON01",
+                    ReferenceNumber = MySearchCriteria.EnfSourceRefNumber,
                     JusticeNumber = MySearchCriteria.JusticeNumber
                 };
 

@@ -24,15 +24,17 @@ namespace FOAEA3.Common
     {
         public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
         {
+            AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
+
             services.AddControllers(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
+                options.RespectBrowserAcceptHeader = true;
                 options.Filters.Add(new ActionAutoLoggerFilter());
-            })
-               .AddXmlDataContractSerializerFormatters();
+                options.Filters.Add(new ActionProcessHeadersFilter());
+            }).AddXmlSerializerFormatters();
 
-            AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
-            services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
         }
 
         public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -53,6 +55,12 @@ namespace FOAEA3.Common
             if (!env.IsEnvironment("Production"))
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
+                });
             }
             else if (prodServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {
@@ -64,10 +72,10 @@ namespace FOAEA3.Common
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later");
                     });
                 });
+                app.UseHsts();
             }
             else
             {
-
                 Log.Fatal($"Trying to use Production environment on non-production server {currentServer}. Application stopping!", currentServer);
                 Console.WriteLine($"Trying to use Production environment on non-production server {currentServer}");
                 Console.WriteLine("Application stopping...");
@@ -77,14 +85,7 @@ namespace FOAEA3.Common
                 app.Lifetime.StopApplication();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
-            });
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -116,7 +117,7 @@ namespace FOAEA3.Common
             else
             {
                 ColourConsole.WriteLine("Reference Data Failed to Load !!!", ConsoleColor.Red);
-                foreach(var message in ReferenceData.Instance().Messages)
+                foreach (var message in ReferenceData.Instance().Messages)
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 

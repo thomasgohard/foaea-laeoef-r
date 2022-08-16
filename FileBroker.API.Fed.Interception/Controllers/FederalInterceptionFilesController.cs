@@ -12,4 +12,15 @@ public class FederalInterceptionFilesController : ControllerBase
 
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
+
+    [HttpGet("Test")]
+    public ActionResult<string> TestDBFailure([FromServices] IFileTableRepository fileTable)
+    {
+        fileTable.MainDB.ExecProc("ThisDoesNotExists");
+
+        if (string.IsNullOrEmpty(fileTable.MainDB.LastError))
+            return Ok();
+        else
+            return UnprocessableEntity(fileTable.MainDB.LastError);
+    }
 }

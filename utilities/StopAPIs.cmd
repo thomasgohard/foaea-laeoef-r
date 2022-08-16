@@ -1,0 +1,12 @@
+taskkill /IM FileBroker.API.Fed.LicenceDenial.exe
+taskkill /IM FileBroker.API.Fed.Interception.exe
+taskkill /IM FileBroker.API.Fed.Tracing.exe
+taskkill /IM FileBroker.API.Fed.SIN.exe
+taskkill /IM FileBroker.API.MEP.Interception.exe
+taskkill /IM FileBroker.API.MEP.LicenceDenial.exe
+taskkill /IM FileBroker.API.MEP.Tracing.exe
+taskkill /IM BackendProcesses.API.exe
+taskkill /IM FOAEA3.API.exe
+taskkill /IM FOAEA3.API.Interception.exe
+taskkill /IM FOAEA3.API.LicenceDenial.exe
+taskkill /IM FOAEA3.API.Tracing.exe

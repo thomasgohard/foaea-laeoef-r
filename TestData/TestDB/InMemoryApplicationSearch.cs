@@ -11,7 +11,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount)
+        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
         {
             throw new NotImplementedException();
         }
