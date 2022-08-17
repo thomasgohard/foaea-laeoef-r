@@ -37,7 +37,7 @@
             <dl id="wb-dtmd">
                 <dt>Version:</dt>
                 <dd>
-                    <span id="foaeaVersion">version 3.0</span>
+                    <span id="foaeaVersion">version @GetType().Assembly.GetName().Version.ToString()</span>
                     <environment exclude="Production">
                         <div>Database: <strong><span id="dbInfo">@ViewData["dbInfo"]</span></strong></div>
                     </environment>
