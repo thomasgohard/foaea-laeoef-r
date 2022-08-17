@@ -10,6 +10,7 @@ namespace TestData.TestDB
     {
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
+        public string LastError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
         {
