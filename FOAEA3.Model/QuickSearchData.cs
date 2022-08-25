@@ -10,9 +10,9 @@ namespace FOAEA3.Model
         public string DebtorSurname { get; set; }
         public string DebtorMiddleName { get; set; }
         public string DebtorFirstName { get; set; }
-        public string Status { get; set; } // possible values: A, C, I, R, P or X
-        public ApplicationState State { get; set; } // possible values: 1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 15, 14, 15, 19 or 35
-        public string Category { get; set; } // possible values: T01, I01, L01 or L03
+        public string Status { get; set; } 
+        public ApplicationState State { get; set; } 
+        public string Category { get; set; } 
         public string SIN { get; set; }
         public string ReferenceNumber { get; set; }
         public string JusticeNumber { get; set; }
@@ -28,7 +28,7 @@ namespace FOAEA3.Model
 
         public QuickSearchData()
         {
-            State = ApplicationState.UNDEFINED; // default
+            State = ApplicationState.UNDEFINED; 
             ViewAllJurisdiction = false;
         }
     }

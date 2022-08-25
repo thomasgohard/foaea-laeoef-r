@@ -96,6 +96,7 @@ namespace FileBroker.Common
             var api_url = configuration["Urls"];
             ColourConsole.WriteEmbeddedColorLine($"\n[green]Waiting for API calls...[/green][yellow]{api_url}[/yellow]\n");
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
         }

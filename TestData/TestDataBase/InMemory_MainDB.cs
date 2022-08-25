@@ -113,5 +113,10 @@ namespace TestData.TestDataBase
         {
             throw new NotImplementedException();
         }
+
+        public Tdata GetDataFromSqlSingleValue<Tdata>(string sql, Dictionary<string, object> parameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

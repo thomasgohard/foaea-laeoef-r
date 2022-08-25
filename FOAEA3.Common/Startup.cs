@@ -22,7 +22,8 @@ namespace FOAEA3.Common
 {
     public static class Startup
     {
-        public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration) //,
+                                                                                                           //TokenOptions tokenOptions, SigningConfigurations signingConfigurations)
         {
             AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
@@ -35,6 +36,21 @@ namespace FOAEA3.Common
                 options.Filters.Add(new ActionProcessHeadersFilter());
             }).AddXmlSerializerFormatters();
 
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters =
+            //            new TokenValidationParameters()
+            //            {
+            //                ValidateAudience = true,
+            //                ValidateLifetime = true,
+            //                ValidateIssuerSigningKey = true,
+            //                ValidIssuer = tokenOptions.Issuer,
+            //                ValidAudience = tokenOptions.Audience,
+            //                IssuerSigningKey = signingConfigurations.SecurityKey,
+            //                ClockSkew = TimeSpan.Zero
+            //            };
+            //    });
         }
 
         public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -86,6 +102,7 @@ namespace FOAEA3.Common
             }
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
