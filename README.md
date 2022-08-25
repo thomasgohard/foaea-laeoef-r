@@ -1,5 +1,5 @@
 # foaea-laeoef-r
-## FOAEA Re-engineering / LAEOEF Réingénierie
+## FOAEA Re-engineering / AEOEF Réingénierie
 ### Setup
 In order to be able to run FOAEA, you need to set up a number of environment variables.
 You can do so by going into the Windows interface for System Environment variables, or
