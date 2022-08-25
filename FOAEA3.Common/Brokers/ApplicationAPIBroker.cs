@@ -3,10 +3,11 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
-    public class ApplicationAPIBroker : IApplicationAPIBroker, IVersionSupport
+    public class ApplicationAPIBroker : IApplicationAPIBroker, IVersionAsyncSupport
     {
         private IAPIBrokerHelper ApiHelper { get; }
 
@@ -15,16 +16,16 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public string GetVersion()
+        public async Task<string> GetVersionAsync()
         {
             string apiCall = $"api/v1/applications/Version";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public string GetConnection()
+        public async Task<string> GetConnectionAsync()
         {
             string apiCall = $"api/v1/applications/DB";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
         public ApplicationData GetApplication(string appl_EnfSrvCd, string appl_CtrlCd)

@@ -39,7 +39,7 @@ namespace FileBroker.Web.Pages.Tools
 
             var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
-            AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper));
+            AddAsyncVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper));
             AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper));
             AddVersionFor("FOAEA3.API.LicenceDenial", licenceDenialApiHelper, new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper));
             AddVersionFor("FOAEA3.API.Tracing", tracingApiHelper, new TracingApplicationAPIBroker(tracingApiHelper));
@@ -62,6 +62,24 @@ namespace FileBroker.Web.Pages.Tools
             string connectionString = string.Empty;
             if (!isError)
                 connectionString = broker.GetConnection();
+
+            var apiInfo = new ApiInfo
+            {
+                ApiRoot = helper.APIroot,
+                ApiVersion = versionDescription,
+                IsError = isError,
+                ConnectionString = GetDatabaseInfo(connectionString)
+            };
+
+            ApiData.Add(apiName, apiInfo);
+        }
+
+        private async void AddAsyncVersionFor(string apiName, IAPIBrokerHelper helper, IVersionAsyncSupport broker)
+        {
+            bool isError = !GetVersionDescription(await broker.GetVersionAsync(), out string versionDescription);
+            string connectionString = string.Empty;
+            if (!isError)
+                connectionString = await broker.GetConnectionAsync();
 
             var apiInfo = new ApiInfo
             {
