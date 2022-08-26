@@ -32,7 +32,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
             IConfiguration configuration = builder.Build();
 
-            var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
             var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -42,8 +42,8 @@ namespace Incoming.FileWatcher.Fed.Tracing
             string ftpRoot = configuration["FTProot"];
 
             var allNewFiles = new List<string>();
-            FederalFileManager.AddNewFiles(ftpRoot + @"\Tc3sls", ref allNewFiles); // Transport Canada Licence Denial
-            FederalFileManager.AddNewFiles(ftpRoot + @"\Pa3sls", ref allNewFiles); // Passport Canada Licence Denial
+            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
+            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {
@@ -55,7 +55,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
                     await FederalFileManager.ProcessNewFileAsync(newFile);
                     if (FederalFileManager.Errors.Any())
                         foreach (var error in errors)
-                            errorTrackingDB.MessageBrokerError("LICIN", newFile, new Exception(error), displayExceptionError: true);
+                            await errorTrackingDB.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
                 }
             }
             else

@@ -32,7 +32,7 @@ namespace Outgoing.FileCreator.MEP
 
             IConfiguration configuration = builder.Build();
 
-            var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             bool generateTracingFiles = true;
@@ -101,7 +101,7 @@ namespace Outgoing.FileCreator.MEP
         private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
                                                                 IOutgoingFileManager outgoingProvincialFileManager)
         {
-            var provincialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory(category)
+            var provincialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync(category))
                                                                   .Where(s => s.Active == true);
 
             foreach (var provincialOutgoingSource in provincialOutgoingSources)
@@ -114,7 +114,7 @@ namespace Outgoing.FileCreator.MEP
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError(category, provincialOutgoingSource.Name, 
+                        await repositories.ErrorTrackingDB.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name, 
                                                                         new Exception(error), displayExceptionError: true);
                     }
             }

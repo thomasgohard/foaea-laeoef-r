@@ -2,21 +2,22 @@
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Data.DB
 {
     public class DBTranslation : ITranslationRepository
     {
-        private IDBTools MainDB { get; }
+        private IDBToolsAsync MainDB { get; }
 
-        public DBTranslation(IDBTools mainDB)
+        public DBTranslation(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public List<TranslationData> GetTranslations()
+        public async Task<List<TranslationData>> GetTranslationsAsync()
         {
-            return MainDB.GetDataFromStoredProc<TranslationData>("", FillTranslationDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<TranslationData>("", FillTranslationDataFromReader);
         }
 
         private void FillTranslationDataFromReader(IDBHelperReader rdr, TranslationData data)

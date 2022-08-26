@@ -15,7 +15,7 @@ IConfiguration configuration = new ConfigurationBuilder()
 
 var foaea2DB = new DBTools(configuration.GetConnectionString("Foaea2DB").ReplaceVariablesWithEnvironmentValues());
 var foaea3DB = new DBTools(configuration.GetConnectionString("Foaea3DB").ReplaceVariablesWithEnvironmentValues());
-var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
 
 var repositories2 = new DbRepositories(foaea2DB);
 var repositories3 = new DbRepositories(foaea3DB);
@@ -23,7 +23,7 @@ var repositories2Finance = new DbRepositories_Finance(foaea2DB);
 var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 
 var requestLogDB = new DBRequestLog(fileBrokerDB);
-var requests = requestLogDB.GetAll();
+var requests = await requestLogDB.GetAllAsync();
 int n = 1;
 
 var output = new StringBuilder();

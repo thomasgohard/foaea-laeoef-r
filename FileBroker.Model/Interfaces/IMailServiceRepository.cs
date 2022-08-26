@@ -1,7 +1,9 @@
-﻿namespace FileBroker.Model.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace FileBroker.Model.Interfaces
 {
     public interface IMailServiceRepository
     {
-        string SendEmail(string subject, string recipients, string body, string attachmentPath = null);
+        Task<string> SendEmailAsync(string subject, string recipients, string body, string attachmentPath = null);
     }
 }

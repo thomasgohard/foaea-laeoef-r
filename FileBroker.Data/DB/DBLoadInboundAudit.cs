@@ -1,19 +1,20 @@
 ﻿using DBHelper;
 using FileBroker.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Data.DB
 {
     public class DBLoadInboundAudit : ILoadInboundAuditRepository
     {
-        private IDBTools MainDB { get; }
+        private IDBToolsAsync MainDB { get; }
 
-        public DBLoadInboundAudit(IDBTools mainDB)
+        public DBLoadInboundAudit(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public void AddNew(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task AddNewAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -23,10 +24,10 @@ namespace FileBroker.Data.DB
                 {"InboundFilename", inboundFileName }
             };
 
-            MainDB.ExecProc("LoadInboundAuditInsert", parameters);
+            await MainDB.ExecProcAsync("LoadInboundAuditInsert", parameters);
         }
 
-        public bool AlreadyExists(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task<bool> AlreadyExistsAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -36,12 +37,12 @@ namespace FileBroker.Data.DB
                 {"InboundFilename", inboundFileName }
             };
 
-            int count = MainDB.GetDataFromStoredProcViaReturnParameter<int>("LoadInboundAuditSearch", parameters, "found");
+            int count = await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("LoadInboundAuditSearch", parameters, "found");
 
             return (count > 0);
         }
 
-        public void MarkAsCompleted(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task MarkAsCompletedAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -51,7 +52,7 @@ namespace FileBroker.Data.DB
                 {"InboundFilename", inboundFileName }
             };
 
-            MainDB.ExecProc("LoadInboundAuditUpdate", parameters);
+            await MainDB.ExecProcAsync("LoadInboundAuditUpdate", parameters);
         }
     }
 }

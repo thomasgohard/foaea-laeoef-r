@@ -1,9 +1,11 @@
-﻿namespace FileBroker.Model.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace FileBroker.Model.Interfaces
 {
     public interface ILoadInboundAuditRepository
     {
-        void MarkAsCompleted(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
-        bool AlreadyExists(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
-        void AddNew(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
+        Task MarkAsCompletedAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
+        Task<bool> AlreadyExistsAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
+        Task AddNewAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName);
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Model.Interfaces
 {
     public interface ITranslationRepository
     {
-        List<TranslationData> GetTranslations();
+        Task<List<TranslationData>> GetTranslationsAsync();
     }
 }

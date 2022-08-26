@@ -20,7 +20,7 @@ namespace Incoming.Common
         private IAPIBrokerHelper APIHelper { get; }
         public List<string> Errors { get; }
 
-        public IncomingFederalTracingFile(IDBTools fileBrokerDB,
+        public IncomingFederalTracingFile(IDBToolsAsync fileBrokerDB,
                                           ApiConfig apiFilesConfig,
                                           IAPIBrokerHelper apiHelper)
         {
@@ -30,7 +30,7 @@ namespace Incoming.Common
             Errors = new List<string>();
         }
 
-        public void AddNewFiles(string rootPath, ref List<string> newFiles)
+        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IT.*");
@@ -41,7 +41,7 @@ namespace Incoming.Common
             {
                 int cycle = FileHelper.GetCycleFromFilename(fileInfo.Name);
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove cycle
-                var fileTableData = FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                var fileTableData = await FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
                     newFiles.Add(fileInfo.FullName);

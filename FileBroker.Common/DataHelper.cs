@@ -9,7 +9,7 @@ namespace FileBroker.Common
     {
         public static string ConfigureDBServices(IServiceCollection services, string fileBrokerConnectionString)
         {
-            var fileBrokerDB = new DBTools(fileBrokerConnectionString);
+            var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
 
             services.AddScoped<IFlatFileSpecificationRepository>(m => ActivatorUtilities.CreateInstance<DBFlatFileSpecification>(m, fileBrokerDB));
             services.AddScoped<IFileTableRepository>(m => ActivatorUtilities.CreateInstance<DBFileTable>(m, fileBrokerDB));

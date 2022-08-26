@@ -40,7 +40,7 @@ namespace FileBroker.Business.Tests
                 TracingApplications = tracingApplicationAPIs
             };
 
-            var fileBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var fileBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                            .ReplaceVariablesWithEnvironmentValues());
 
             var repositories = new RepositoryList

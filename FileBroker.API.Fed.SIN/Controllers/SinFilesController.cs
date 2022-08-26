@@ -25,9 +25,12 @@ public class SinFilesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet]
-    public IActionResult GetFile([FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetFileAsync([FromServices] IFileTableRepository fileTable)
     {
-        string fileContent = LoadLatestFederalSinFile(fileTable, out string lastFileName);
+        string fileContent;
+        string lastFileName;
+        
+        (fileContent, lastFileName) = await LoadLatestFederalSinFileAsync(fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -37,15 +40,16 @@ public class SinFilesController : ControllerBase
         return File(result, "text/plain", lastFileName);
     }
 
-    private static string LoadLatestFederalSinFile(IFileTableRepository fileTable, out string lastFileName)
+    private static async Task<(string, string)> LoadLatestFederalSinFileAsync(IFileTableRepository fileTable)
     {
-        var fileTableData = fileTable.GetFileTableDataForCategory("SINOUT")
-                                     .FirstOrDefault(m => m.Active.HasValue && m.Active.Value);
+        string lastFileName;
+        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("SINOUT"))
+                                 .FirstOrDefault(m => m.Active.HasValue && m.Active.Value);
 
         if (fileTableData is null)
         {
             lastFileName = "";
-            return $"Error: fileTableData is empty for category SINOUT.";
+            return ($"Error: fileTableData is empty for category SINOUT.", lastFileName);
         }
 
         var fileLocation = fileTableData.Path;
@@ -59,9 +63,9 @@ public class SinFilesController : ControllerBase
 
         string fullFilePath = $"{fileLocation}{lastFileName}";
         if (System.IO.File.Exists(fullFilePath))
-            return System.IO.File.ReadAllText(fullFilePath);
+            return (System.IO.File.ReadAllText(fullFilePath), lastFileName);
         else
-            return null;
+            return (null, null);
 
     }
 
@@ -110,7 +114,7 @@ public class SinFilesController : ControllerBase
         var sinManager = new IncomingFederalSinManager(apis, repositories);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
             var errors = await sinManager.ProcessFlatFileAsync(flatFileContent, fileName);

@@ -32,7 +32,7 @@ namespace FileBroker.Business
 
             if (IsFrench)
             {
-                var translations = repositories.TranslationDB.GetTranslations();
+                var translations = repositories.TranslationDB.GetTranslationsAsync().Result;
                 foreach (var translation in translations)
                     Translations.Add(translation.EnglishText, translation.FrenchText);
                 APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
@@ -60,7 +60,7 @@ namespace FileBroker.Business
             var fileAuditManager = new FileAuditManager(Repositories.FileAudit, AuditConfiguration, Repositories.MailServiceDB);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-            var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+            var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
             // check that it is the expected cycle
             if (!FileHelper.IsExpectedCycle(fileTableData, FileName, out int expectedCycle, out int actualCycle))
@@ -73,7 +73,7 @@ namespace FileBroker.Business
                 return result;
             }
 
-            Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
+            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
             bool isValid = true;
 
@@ -137,7 +137,7 @@ namespace FileBroker.Business
                             };
                             errorCount += thisErrorCount;
 
-                            AddRequestToAudit(interceptionMessage);
+                            await AddRequestToAuditAsync(interceptionMessage);
 
                             if (isValidData)
                             {
@@ -145,11 +145,11 @@ namespace FileBroker.Business
                                 var appl = interceptionMessage.Application;
                                 var fileName = FileName + ".XML";
 
-                                if (!loadInboundDB.AlreadyExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
-                                                                 fileName))
+                                if (!await loadInboundDB.AlreadyExistsAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
+                                                                            fileName))
                                 {
 
-                                    loadInboundDB.AddNew(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+                                    await loadInboundDB.AddNewAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
                                     var messages = await ProcessApplicationRequestAsync(interceptionMessage);
 
@@ -182,7 +182,7 @@ namespace FileBroker.Business
                                         successCount++;
                                     }
 
-                                    loadInboundDB.MarkAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+                                    await loadInboundDB.MarkAsCompletedAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
                                 }
                             }
@@ -194,13 +194,13 @@ namespace FileBroker.Business
                             errorCount++;
                         }
 
-                        Repositories.FileAudit.InsertFileAuditData(fileAuditData);
+                        await Repositories.FileAudit.InsertFileAuditDataAsync(fileAuditData);
 
                     }
 
-                    fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
-                    fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients,
-                                                            errorCount, warningCount, successCount, unknownTags.Count);
+                    await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
+                    await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
+                                                                       errorCount, warningCount, successCount, unknownTags.Count);
 
                     if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
                         await AutoAcceptVariationsAsync(EnfSrv_Cd);
@@ -213,17 +213,17 @@ namespace FileBroker.Business
             {
                 result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-                fileAuditManager.SendSystemErrorAuditEmail(FileName, AuditConfiguration.AuditRecipients, result);
+                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
             }
 
-            Repositories.FileAudit.MarkFileAuditCompletedForFile(FileName);
-            Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
-            Repositories.FileTable.SetNextCycleForFileType(fileTableData);
+            await Repositories.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
+            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+            await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
 
             return result;
         }
 
-        private void AddRequestToAudit(MessageData<InterceptionApplicationData> interceptionMessage)
+        private async Task AddRequestToAuditAsync(MessageData<InterceptionApplicationData> interceptionMessage)
         {
             var requestLogData = new RequestLogData
             {
@@ -234,7 +234,7 @@ namespace FileBroker.Business
                 LoadedDateTime = DateTime.Now
             };
 
-            _ = Repositories.RequestLogDB.Add(requestLogData);
+            _ = await Repositories.RequestLogDB.AddAsync(requestLogData);
         }
 
         public async Task AutoAcceptVariationsAsync(string enfService)
@@ -403,7 +403,7 @@ namespace FileBroker.Business
             if (baseData.Maintenance_ActionCd == "A")
                 isCreate = true;
 
-            bool isValidData = true;
+            bool isValidData;
             int errorCount = 0;
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
@@ -418,9 +418,12 @@ namespace FileBroker.Business
                 {
                     foreach (var sourceSpecific in sourceSpecificData)
                     {
-                        var newSourceSpecificData = ExtractAndValidateSourceSpecificData(sourceSpecific, fileAuditData,
-                                                                                         ref isValidData, now,
-                                                                                         interceptionApplication);
+                        bool isSourceSpecificDataValid;
+                        HoldbackConditionData newSourceSpecificData;
+                        (newSourceSpecificData, isSourceSpecificDataValid) = await ExtractAndValidateSourceSpecificDataAsync(sourceSpecific, fileAuditData,
+                                                                                                                        now, interceptionApplication);
+                        if (!isSourceSpecificDataValid)
+                            isValidData = false;
                         interceptionApplication.HldbCnd.Add(newSourceSpecificData);
                     }
                 }
@@ -596,12 +599,12 @@ namespace FileBroker.Business
             return isValidData;
         }
 
-        private HoldbackConditionData ExtractAndValidateSourceSpecificData(MEPInterception_RecType13 sourceSpecific,
+        private async Task<(HoldbackConditionData, bool)> ExtractAndValidateSourceSpecificDataAsync(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
-                                                                                           ref bool isValidData,
                                                                                            DateTime now,
                                                                                            InterceptionApplicationData interceptionApplication)
         {
+            bool isValidData = true;
             var newHoldback = new HoldbackConditionData
             {
                 Appl_CtrlCd = interceptionApplication.Appl_CtrlCd,
@@ -635,19 +638,19 @@ namespace FileBroker.Business
 
             if ((newHoldback.HldbCnd_MxmPerChq_Money is not null) && (newHoldback.HldbCnd_SrcHldbAmn_Money is not null))
             {
-                Repositories.ErrorTrackingDB.MessageBrokerError("Source Specific holdback amount in both fixed and per transaction",
-                                                                $"{interceptionApplication.Appl_EnfSrv_Cd.Trim()} {interceptionApplication.Appl_CtrlCd.Trim()}" +
-                                                                $" Source: {newHoldback.EnfSrv_Cd}" +
-                                                                $" Per Transaction: ${newHoldback.HldbCnd_MxmPerChq_Money}" +
-                                                                $" Fixed Amount: ${newHoldback.HldbCnd_SrcHldbAmn_Money}",
-                                                                null, displayExceptionError: false);
+                await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("Source Specific holdback amount in both fixed and per transaction",
+                                                                           $"{interceptionApplication.Appl_EnfSrv_Cd.Trim()} {interceptionApplication.Appl_CtrlCd.Trim()}" +
+                                                                           $" Source: {newHoldback.EnfSrv_Cd}" +
+                                                                           $" Per Transaction: ${newHoldback.HldbCnd_MxmPerChq_Money}" +
+                                                                           $" Fixed Amount: ${newHoldback.HldbCnd_SrcHldbAmn_Money}",
+                                                                           null, displayExceptionError: false);
                 fileAuditData.ApplicationMessage = Translate("Fixed Amount and Amount Garnisheed per Transaction values cannot be entered for the same source department.") +
                                                    " " +
                                                    Translate($"Source Specific Holdback amount in both fixed (<dat_HldbCnd_Hldb_Amn_Money>) value {newHoldback.HldbCnd_SrcHldbAmn_Money} and per transaction (<dat_HldbCnd_MxmPerChq_Money>) value {newHoldback.HldbCnd_MxmPerChq_Money}");
                 isValidData = false;
             }
 
-            return newHoldback;
+            return (newHoldback, isValidData);
         }
 
     }

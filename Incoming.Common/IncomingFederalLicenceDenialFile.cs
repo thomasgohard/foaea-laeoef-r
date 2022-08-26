@@ -19,7 +19,7 @@ namespace Incoming.Common
         private IAPIBrokerHelper APIHelper { get; }
         public List<string> Errors { get; }
 
-        public IncomingFederalLicenceDenialFile(IDBTools fileBrokerDB,
+        public IncomingFederalLicenceDenialFile(IDBToolsAsync fileBrokerDB,
                                                 ApiConfig apiFilesConfig,
                                                 IAPIBrokerHelper apiHelper)
         {
@@ -29,7 +29,7 @@ namespace Incoming.Common
             Errors = new List<string>();
         }
 
-        public void AddNewFiles(string rootPath, ref List<string> newFiles)
+        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IL.*");
@@ -41,7 +41,7 @@ namespace Incoming.Common
                 int cycle = FileHelper.GetCycleFromFilename(fileInfo.Name);
                 var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
-                var fileTableData = FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                var fileTableData = await FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
                     newFiles.Add(fileInfo.FullName);

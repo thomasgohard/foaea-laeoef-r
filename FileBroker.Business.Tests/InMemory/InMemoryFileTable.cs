@@ -3,6 +3,7 @@ using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -12,6 +13,8 @@ namespace FileBroker.Business.Tests.InMemory
         public int NextCycle { get; set; }
 
         public IDBTools MainDB => throw new System.NotImplementedException();
+
+        IDBToolsAsync IFileTableRepository.MainDB => throw new System.NotImplementedException();
 
         public InMemoryFileTable()
         {
@@ -100,6 +103,36 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public List<FileTableData> GetAllActive()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<List<FileTableData>> GetAllActiveAsync()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<bool> IsFileLoadingAsync(int processId)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SetIsFileLoadingValueAsync(int processId, bool newValue)
         {
             throw new System.NotImplementedException();
         }

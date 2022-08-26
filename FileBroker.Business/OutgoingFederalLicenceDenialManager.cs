@@ -19,12 +19,12 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
         bool fileCreated = false;
 
-        var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileBaseName);
+        var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
         string newCycle = (fileTableData.Cycle + 1).ToString("000000");
 
         try
         {
-            var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
+            var processCodes = await Repositories.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".XML";
             if (File.Exists(newFilePath))
@@ -45,10 +45,10 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
             File.WriteAllText(newFilePath, fileContent);
             fileCreated = true;
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+            await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                  "Outbound File created successfully.");
 
-            Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+            await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
             await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                              processCodes.EnfSrv_Cd,
@@ -62,10 +62,10 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            Repositories.OutboundAuditDB.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", 
-                                                                        "Error creating outbound file", e, displayExceptionError: true);
+            await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+                                                                       "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;
         }
@@ -75,7 +75,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
     private async Task<List<LicenceDenialOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                            int appLiSt_Cd, string enfSrvCode)
     {
-        var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
+        var recMax = await Repositories.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
         var data = await APIs.LicenceDenialApplications.GetOutgoingFederalLicenceDenialRequestsAsync(maxRecords, actvSt_Cd,

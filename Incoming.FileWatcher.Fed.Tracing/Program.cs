@@ -31,7 +31,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
 
             IConfiguration configuration = builder.Build();
 
-            var fileBrokerDB = new DBTools(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
             var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -41,9 +41,9 @@ namespace Incoming.FileWatcher.Fed.Tracing
             string ftpRoot = configuration["FTProot"];
 
             var allNewFiles = new List<string>();
-            FederalFileManager.AddNewFiles(ftpRoot + @"\EI3STS", ref allNewFiles); // NETP
-            FederalFileManager.AddNewFiles(ftpRoot + @"\HR3STS", ref allNewFiles); // EI Tracing
-            FederalFileManager.AddNewFiles(ftpRoot + @"\RC3STS", ref allNewFiles); // CRA Tracing
+            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\EI3STS", allNewFiles); // NETP
+            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\HR3STS", allNewFiles); // EI Tracing
+            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\RC3STS", allNewFiles); // CRA Tracing
 
             if (allNewFiles.Count > 0)
             {
@@ -55,7 +55,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
                     await FederalFileManager.ProcessNewFileAsync(newFile);
                     if (FederalFileManager.Errors.Any())
                         foreach (var error in FederalFileManager.Errors)
-                            errorTrackingDB.MessageBrokerError("TRCIN", newFile, new Exception(error), displayExceptionError: true);
+                            await errorTrackingDB.MessageBrokerErrorAsync("TRCIN", newFile, new Exception(error), displayExceptionError: true);
 
                 }
             }

@@ -25,7 +25,7 @@ public class FederalTracingFilesController : ControllerBase
 
     //GET api/v1/TraceRequests?partnerId=RC
     [HttpGet]
-    public IActionResult GetLastFederalTracingFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetLastFederalTracingFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {
         string fileName = partnerId + "3STSOT"; // e.g. RC3STSOT
 
@@ -33,7 +33,9 @@ public class FederalTracingFilesController : ControllerBase
         if (partnerId == "RC")
             fileCycleLength = 3;
 
-        string fileContent = LoadLatestFederalTracingFile(fileName, fileTable, fileCycleLength, out string lastFileCycleString);
+        string fileContent;
+        string lastFileCycleString;
+        (fileContent, lastFileCycleString) = await LoadLatestFederalTracingFileAsync(fileName, fileTable, fileCycleLength);
 
         if (fileContent == null)
             return NotFound();
@@ -43,10 +45,10 @@ public class FederalTracingFilesController : ControllerBase
         return File(result, "text/plain", fileName + "." + lastFileCycleString);
     }
 
-    private static string LoadLatestFederalTracingFile(string fileName, IFileTableRepository fileTable,
-                                                       int fileCycleLength, out string lastFileCycleString)
+    private static async Task<(string, string)> LoadLatestFederalTracingFileAsync(string fileName, IFileTableRepository fileTable,
+                                                       int fileCycleLength)
     {
-        var fileTableData = fileTable.GetFileTableDataForFileName(fileName);
+        var fileTableData = await fileTable.GetFileTableDataForFileNameAsync(fileName);
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle; // - 1;
         //if (lastFileCycle < 1)
@@ -57,13 +59,13 @@ public class FederalTracingFilesController : ControllerBase
         //}
 
         var lifeCyclePattern = new string('0', fileCycleLength);
-        lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);
+        string lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);
 
         string fullFilePath = $"{fileLocation}{fileName}.{lastFileCycleString}";
         if (System.IO.File.Exists(fullFilePath))
-            return System.IO.File.ReadAllText(fullFilePath);
+            return (System.IO.File.ReadAllText(fullFilePath), lastFileCycleString);
         else
-            return null;
+            return (null, null);
 
     }
 
@@ -109,7 +111,7 @@ public class FederalTracingFilesController : ControllerBase
         var tracingManager = new IncomingFederalTracingManager(apis, repositories);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
             await tracingManager.ProcessFlatFileAsync(flatFileContent, fileName);

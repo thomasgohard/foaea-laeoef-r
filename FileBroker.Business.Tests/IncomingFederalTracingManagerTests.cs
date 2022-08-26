@@ -9,6 +9,7 @@ using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FileBroker.Business.Tests
@@ -16,12 +17,12 @@ namespace FileBroker.Business.Tests
     public class IncomingFederalTracingManagerTests
     {
         [Fact]
-        public void ExtractNETPTracingDataFromFlatFile_Test1()
+        public async Task ExtractNETPTracingDataFromFlatFile_Test1()
         {
             // Arrange
 
             var fileTable = new InMemoryFileTable();
-            var messageBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                             .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
             var processId = fileTable.GetFileTableDataForFileName("EI3STSIT").PrcId;
@@ -40,7 +41,7 @@ namespace FileBroker.Business.Tests
             var netpTracingData = new FedTracingFileBase();
             netpTracingData.AddEmployerRecTypes("80", "81");
             var errors = new List<string>();
-            fileLoader.FillTracingFileDataFromFlatFile(netpTracingData, flatFile, ref errors);
+            await fileLoader.FillTracingFileDataFromFlatFileAsync(netpTracingData, flatFile, errors);
 
             // Assert
 
@@ -55,12 +56,12 @@ namespace FileBroker.Business.Tests
         }
 
         [Fact]
-        public void ExtractCRATracingDataFromFlatFile_Test1()
+        public async Task ExtractCRATracingDataFromFlatFile_Test1()
         {
             // Arrange
 
             var fileTable = new InMemoryFileTable();
-            var messageBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                             .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
             var processId = fileTable.GetFileTableDataForFileName("RC3STSIT").PrcId;
@@ -80,7 +81,7 @@ namespace FileBroker.Business.Tests
             craTracingData.AddEmployerRecTypes("04", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
                                                "33", "34", "35", "36");
             var errors = new List<string>();
-            fileLoader.FillTracingFileDataFromFlatFile(craTracingData, flatFile, ref errors);
+            await fileLoader.FillTracingFileDataFromFlatFileAsync(craTracingData, flatFile, errors);
 
             // Assert
 
@@ -94,12 +95,12 @@ namespace FileBroker.Business.Tests
         }
 
         [Fact]
-        public void ExtractEITracingDataFromFlatFile_Test1()
+        public async Task ExtractEITracingDataFromFlatFile_Test1()
         {
             // Arrange
 
             var fileTable = new InMemoryFileTable();
-            var messageBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                         .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
             var processId = fileTable.GetFileTableDataForFileName("HR3STSIT").PrcId;
@@ -119,7 +120,7 @@ namespace FileBroker.Business.Tests
             eiTracingData.AddResidentialRecTypes("03");
             eiTracingData.AddEmployerRecTypes("04");
             var errors = new List<string>();
-            fileLoader.FillTracingFileDataFromFlatFile(eiTracingData, flatFile, ref errors);
+            await fileLoader.FillTracingFileDataFromFlatFileAsync(eiTracingData, flatFile, errors);
 
             // Assert
 
@@ -133,12 +134,12 @@ namespace FileBroker.Business.Tests
         }
 
         [Fact]
-        public void CombineCRADataIntoTracingResponses_Test1()
+        public async Task CombineCRADataIntoTracingResponses_Test1()
         {
             // Arrange
 
             var fileTable = new InMemoryFileTable();
-            var messageBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                         .ReplaceVariablesWithEnvironmentValues());
             var foaeaDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FOAEA_DEV;Integrated Security=SSPI;Trust Server Certificate=true;"
                                         .ReplaceVariablesWithEnvironmentValues());
@@ -164,7 +165,7 @@ namespace FileBroker.Business.Tests
                 flatFile = streamReader.ReadToEnd();
 
             var errors = new List<string>();
-            fileLoader.FillTracingFileDataFromFlatFile(craTracingData, flatFile, ref errors);
+            await fileLoader.FillTracingFileDataFromFlatFileAsync(craTracingData, flatFile, errors);
 
             var cycles = tracingDB.GetTraceCycleQuantityData("RC01", Path.GetExtension("RC3STSIT.356"));
 
