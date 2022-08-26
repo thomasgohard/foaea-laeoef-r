@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Incoming.FileWatcher.Fed.Tracing
 {
@@ -17,7 +17,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
     {
         private static IncomingFederalTracingFile FederalFileManager;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
 
@@ -52,9 +52,9 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    FederalFileManager.ProcessNewFile(newFile, ref errors);
-                    if (errors.Any())
-                        foreach(var error in errors)
+                    await FederalFileManager.ProcessNewFileAsync(newFile);
+                    if (FederalFileManager.Errors.Any())
+                        foreach (var error in FederalFileManager.Errors)
                             errorTrackingDB.MessageBrokerError("TRCIN", newFile, new Exception(error), displayExceptionError: true);
 
                 }

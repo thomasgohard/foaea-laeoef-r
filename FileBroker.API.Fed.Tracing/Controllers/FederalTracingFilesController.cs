@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.API.Fed.Tracing.Controllers;
 
@@ -67,7 +68,7 @@ public class FederalTracingFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessTracingFile([FromQuery] string fileName,
+    public async Task<ActionResult> ProcessTracingFileAsync([FromQuery] string fileName,
                                            [FromServices] IFileAuditRepository fileAuditDB,
                                            [FromServices] IFileTableRepository fileTableDB,
                                            [FromServices] IMailServiceRepository mailService,
@@ -80,7 +81,7 @@ public class FederalTracingFilesController : ControllerBase
         string flatFileContent;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            flatFileContent = reader.ReadToEndAsync().Result;
+            flatFileContent = await reader.ReadToEndAsync();
         }
 
         if (string.IsNullOrEmpty(fileName))
@@ -111,7 +112,7 @@ public class FederalTracingFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            tracingManager.ProcessFlatFile(flatFileContent, fileName);
+            await tracingManager.ProcessFlatFileAsync(flatFileContent, fileName);
             return Ok("File processed.");
         }
         else

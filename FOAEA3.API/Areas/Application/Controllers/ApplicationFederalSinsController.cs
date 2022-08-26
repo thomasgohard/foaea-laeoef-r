@@ -25,9 +25,9 @@ public class ApplicationFederalSinsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpPost("bulk")]
-    public ActionResult<int> CreateSinResultBulk([FromServices] IRepositories repositories)
+    public async Task<ActionResult<int>> CreateSinResultBulk([FromServices] IRepositories repositories)
     {
-        var responseData = APIBrokerHelper.GetDataFromRequestBody<List<SINResultData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<SINResultData>>(Request);
 
         var application = new ApplicationData();
 

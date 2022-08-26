@@ -13,7 +13,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
         Repositories = repositories;
     }
 
-    public string CreateOutputFile(string fileBaseName, out List<string> errors)
+    public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
     {
         errors = new List<string>();
 
@@ -33,7 +33,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
                 return "";
             }
 
-            var outgoingData = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            var outgoingData = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                        processCodes.EnfSrv_Cd);
 
             var eventDetailIds = new List<int>();
@@ -50,7 +50,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                              processCodes.EnfSrv_Cd,
                                                              "OK: Written to " + newFilePath, eventDetailIds);
 
@@ -72,13 +72,13 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
     }
 
-    private List<LicenceDenialOutgoingFederalData> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,
+    private async Task<List<LicenceDenialOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                            int appLiSt_Cd, string enfSrvCode)
     {
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.LicenceDenialApplications.GetOutgoingFederalLicenceDenialRequests(maxRecords, actvSt_Cd,
+        var data = await APIs.LicenceDenialApplications.GetOutgoingFederalLicenceDenialRequestsAsync(maxRecords, actvSt_Cd,
                                                                                           appLiSt_Cd, enfSrvCode);
         return data;
     }

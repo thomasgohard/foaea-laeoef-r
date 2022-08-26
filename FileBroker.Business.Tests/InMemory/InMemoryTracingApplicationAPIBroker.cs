@@ -3,6 +3,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -11,76 +12,57 @@ namespace FileBroker.Business.Tests.InMemory
         public int Count { get; set; }
         public MessageDataList LastMessages { get; set; }
 
-        public TracingApplicationData CloseTracingApplication(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();
         }
 
-        public TracingApplicationData CreateTracingApplication(TracingApplicationData tracingData)
+        public Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData)
         {
             throw new System.NotImplementedException();
         }
 
-        public TracingApplicationData FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public TracingApplicationData PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public TracingApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle)
+        public Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<TraceToApplData> GetTraceToApplData()
+        public Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle)
         {
             throw new System.NotImplementedException();
         }
 
-        public MessageDataList ProcessApplicationRequest(MessageData<TracingApplicationData> tracingMessageData)
-        {
-            var result = new MessageDataList();
-
-            string controlCode = tracingMessageData.Application.Appl_CtrlCd;
-
-            result.Add(new MessageData(EventCode.UNDEFINED, "Appl_CtrlCd", controlCode, MessageType.Information));
-
-            Count++;
-            LastMessages = result;
-
-            return result;
-        }
-
-        public TracingApplicationData UpdateTracingApplication(TracingApplicationData tracingApplication)
+        public Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
             throw new System.NotImplementedException();
         }
 
-        public List<TracingOutgoingFederalData> GetOutgoingFederalTracingRequests(int maxRecords, string activeState, int lifeState, string enfServiceCode)
+        public Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords, string activeState, int lifeState, string enfServiceCode)
+        public Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords, string activeState, string recipientCode)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public TracingApplicationData TransferTracingApplication(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();
         }

@@ -47,11 +47,11 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<LicenceDenialApplicationData> CreateApplication([FromServices] IRepositories repositories,
+    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories repositories,
                                                                         [FromQuery] string controlCodeForL01,
                                                                         [FromQuery] DateTime requestDate)
     {
-        var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);

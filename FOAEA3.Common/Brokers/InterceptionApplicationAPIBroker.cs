@@ -3,6 +3,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -15,97 +16,97 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public string GetVersion()
+        public async Task<string> GetVersionAsync()
         {
             string apiCall = $"api/v1/interceptions/Version";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public string GetConnection()
+        public async Task<string> GetConnectionAsync()
         {
             string apiCall = $"api/v1/interceptions/DB";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public InterceptionApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public async Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(dat_Appl_EnfSrvCd, dat_Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}";
-            return ApiHelper.GetDataAsync<InterceptionApplicationData>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<InterceptionApplicationData>(apiCall);
         }
 
-        public InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string apiCall = "api/v1/Interceptions";
-            var data = ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData TransferInterceptionApplication(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public async Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
                                                                  $"&newIssuingSubmitter={newIssuingSubmitter}";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData UpdateInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}/cancel";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}/suspend";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}/Vary";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                               interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                               interceptionApplication);
             return data;
         }
 
-        public InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application)
+        public async Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
         {
             string apiCall = "api/v1/Interceptions/ValidateFinancialCoreValues";
-            return ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application).Result;
+            return await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application);
         }
 
-        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        public async Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
         {
             string apiCall = $"api/v1/interceptions/GetApplicationsForVariationAutoAccept?enfService={enfService}";
-            return ApiHelper.GetDataAsync<List<InterceptionApplicationData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<InterceptionApplicationData>>(apiCall);
         }
 
-        public InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication)
+        public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/interceptions/{key}/AcceptVariation?autoAccept=true";
-            var data = ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
-                                                                                           interceptionApplication).Result;
+            var data = await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
+                                                                                           interceptionApplication);
             return data;
         }
     }

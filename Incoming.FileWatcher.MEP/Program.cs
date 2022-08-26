@@ -10,12 +10,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Incoming.FileWatcher.MEP;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -117,7 +118,7 @@ internal class Program
                         ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
 
                         var errors = new List<string>();
-                        provincialFileManager.ProcessNewFile(newFile, ref errors);
+                        await provincialFileManager.ProcessNewFileAsync(newFile, errors);
                         if (errors.Any())
                         {
                             foreach (var error in errors)

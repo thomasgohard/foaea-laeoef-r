@@ -20,7 +20,7 @@ public class IncomingProvincialTracingManager
         AuditConfiguration = auditConfig;
     }
 
-    public MessageDataList ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+    public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
@@ -83,7 +83,7 @@ public class IncomingProvincialTracingManager
                             NewUpdateSubmitter = data.dat_Update_SubmCd
                         };
 
-                        var messages = ProcessApplicationRequest(tracingMessage);
+                        var messages = await ProcessApplicationRequestAsync(tracingMessage);
 
                         if (messages.ContainsMessagesOfType(MessageType.Error))
                         {
@@ -144,13 +144,13 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
-    public MessageDataList ProcessApplicationRequest(MessageData<TracingApplicationData> tracingMessageData)
+    public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<TracingApplicationData> tracingMessageData)
     {
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
         {
-            tracing = APIs.TracingApplications.CreateTracingApplication(tracingMessageData.Application);
+            tracing = await APIs.TracingApplications.CreateTracingApplicationAsync(tracingMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
@@ -158,15 +158,15 @@ public class IncomingProvincialTracingManager
             {
                 case "00": // change
                 case "0": 
-                    tracing = APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
+                    tracing = await APIs.TracingApplications.UpdateTracingApplicationAsync(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
-                    tracing = APIs.TracingApplications.CloseTracingApplication(tracingMessageData.Application);
+                    tracing = await APIs.TracingApplications.CloseTracingApplicationAsync(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    tracing = APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
+                    tracing = await APIs.TracingApplications.TransferTracingApplicationAsync(tracingMessageData.Application,
                                                                                   tracingMessageData.NewRecipientSubmitter,
                                                                                   tracingMessageData.NewIssuingSubmitter);
                     break;

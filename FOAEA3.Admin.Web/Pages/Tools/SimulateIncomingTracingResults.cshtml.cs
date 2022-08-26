@@ -11,6 +11,7 @@ using System.Text;
 using FOAEA3.Business.Areas.Application;
 using Microsoft.Extensions.Options;
 using FOAEA3.Model.Enums;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Admin.Web.Pages.Tools
 {
@@ -35,7 +36,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
             if (ModelState.IsValid)
             {
@@ -99,7 +100,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
                     var apiHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
                     var broker = new IncomingFedTracingAPIbroker(apiHelper, ApiFilesConfig);
-                    var result = broker.ProcessFlatFile(flatFileNameNoPath, flatFile.ToString());
+                    var result = await broker.ProcessFlatFileAsync(flatFileNameNoPath, flatFile.ToString());
                     if (result.IsSuccessStatusCode)
                         ViewData["Message"] = $"Successfully processed simulated trace results for {data.EnfService}-{data.ControlCode}";
                     else

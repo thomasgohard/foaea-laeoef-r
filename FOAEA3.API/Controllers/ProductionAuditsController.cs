@@ -17,9 +17,9 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpPost]
-        public ActionResult<ProductionAuditData> InsertNotification([FromServices] IRepositories repositories)
+        public async Task<ActionResult<ProductionAuditData>> InsertNotification([FromServices] IRepositories repositories)
         {
-            var productionAuditData = APIBrokerHelper.GetDataFromRequestBody<ProductionAuditData>(Request);
+            var productionAuditData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ProductionAuditData>(Request);
 
             var productionAuditManager = new ProductionAuditManager(repositories);
             productionAuditManager.Insert(productionAuditData);

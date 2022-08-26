@@ -42,7 +42,7 @@ namespace FileBroker.Common
             return (actualCycle == expectedCycle);
         }
 
-        public static string ConvertXmlToJson(string xmlData, ref List<string> errors)
+        public static string ConvertXmlToJson(string xmlData, List<string> errors)
         {
             try
             {

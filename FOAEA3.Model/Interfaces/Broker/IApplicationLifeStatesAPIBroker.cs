@@ -5,6 +5,6 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface IApplicationLifeStatesAPIBroker
     {
-        DataList<ApplicationLifeStateData> GetApplicationLifeStates();
+        Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync();
     }
 }

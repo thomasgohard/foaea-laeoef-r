@@ -8,6 +8,7 @@ using FOAEA3.Resources.Helpers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml;
 using Xunit;
 
@@ -59,14 +60,14 @@ namespace FileBroker.Business.Tests
         }
 
         [Fact]
-        public void Ontario_TwoRequests_GoodData()
+        public async Task Ontario_TwoRequests_GoodData()
         {
             // Arrange
             SetupTestAndLoadFile("ON3D01IT.000001.xml");
             var unknownTags = new List<UnknownTag>();
 
             // Act
-            var messages = tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData, unknownTags, includeInfoInMessages: true);
+            var messages = await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingData, unknownTags, includeInfoInMessages: true);
 
             // Assert
             Assert.Equal("Success", fileAuditDB.FileAuditTable[0].ApplicationMessage);
@@ -75,14 +76,14 @@ namespace FileBroker.Business.Tests
         }
 
         [Fact]
-        public void Ontario_OneRequest_BadMaintenanceActionValue()
+        public async Task Ontario_OneRequest_BadMaintenanceActionValue()
         {
             // Arrange
             SetupTestAndLoadFile("ON3D01IT.000002.xml");
             var unknownTags = new List<UnknownTag>();
 
             // Act
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingData, unknownTags);
+            await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingData, unknownTags);
 
             // Assert
             Assert.Equal("Invalid MaintenanceAction [Z] and MaintenanceLifeState [00] combination.", fileAuditDB.FileAuditTable[0].ApplicationMessage);

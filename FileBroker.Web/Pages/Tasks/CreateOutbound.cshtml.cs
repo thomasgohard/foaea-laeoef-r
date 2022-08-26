@@ -48,7 +48,7 @@ namespace FileBroker.Web.Pages.Tasks
             ActiveOutgoingProcesses = FileTable.GetAllActive().Where(m => m.Type.ToLower() == "out").ToList();
         }
 
-        public void OnPostCreateFiles(int[] selectedProcesses)
+        public async Task OnPostCreateFiles(int[] selectedProcesses)
         {
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -122,7 +122,7 @@ namespace FileBroker.Web.Pages.Tasks
                             break;
                     }
 
-                    filePath = outgoingFileManager.CreateOutputFile(thisProcess.Name, out errors);
+                    filePath = await outgoingFileManager.CreateOutputFileAsync(thisProcess.Name, errors);
                 }
                 else
                     errors.Add($"Unsupported category [{thisProcess.Category}] for file {fileName}");

@@ -49,9 +49,9 @@ public class TracingsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<TracingApplicationData> CreateApplication([FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories repositories)
     {
-        var tracingData = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+        var tracingData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
             return UnprocessableEntity(error);
@@ -77,7 +77,7 @@ public class TracingsController : ControllerBase
 
     [HttpPut("{key}")]
     [Produces("application/json")]
-    public ActionResult<TracingApplicationData> UpdateApplication(
+    public async Task<ActionResult<TracingApplicationData>> UpdateApplication(
                                                             [FromRoute] string key,
                                                             [FromQuery] string command,
                                                             [FromQuery] string enforcementServiceCode,
@@ -85,7 +85,7 @@ public class TracingsController : ControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -122,14 +122,14 @@ public class TracingsController : ControllerBase
     }
 
     [HttpPut("{key}/Transfer")]
-    public ActionResult<TracingApplicationData> Transfer([FromRoute] string key,
+    public async Task<ActionResult<TracingApplicationData>> Transfer([FromRoute] string key,
                                                          [FromServices] IRepositories repositories,
                                                          [FromQuery] string newRecipientSubmitter,
                                                          [FromQuery] string newIssuingSubmitter)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -142,12 +142,12 @@ public class TracingsController : ControllerBase
     }
 
     [HttpPut("{key}/SINbypass")]
-    public ActionResult<TracingApplicationData> SINbypass([FromRoute] string key,
+    public async Task<ActionResult<TracingApplicationData>> SINbypass([FromRoute] string key,
                                                           [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
-        var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
+        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINBypassData>(Request);
 
         var application = new TracingApplicationData();
 

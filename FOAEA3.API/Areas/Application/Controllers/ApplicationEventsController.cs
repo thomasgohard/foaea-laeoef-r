@@ -51,9 +51,9 @@ public class ApplicationEventsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<ApplicationEventData> SaveEvent([FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventData>> SaveEvent([FromServices] IRepositories repositories)
     {
-        var applicationEvent = APIBrokerHelper.GetDataFromRequestBody<ApplicationEventData>(Request);
+        var applicationEvent = await APIBrokerHelper.GetDataFromRequestBodyAsync<ApplicationEventData>(Request);
 
         var eventManager = new ApplicationEventManager(new ApplicationData(), repositories);
 

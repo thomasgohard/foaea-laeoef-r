@@ -1,8 +1,8 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -14,16 +14,16 @@ namespace FOAEA3.Common.Brokers
         {
             ApiHelper = apiHelper;
         }
-        
-        public void InsertBulkData(List<LicenceDenialResponseData> responseData)
+
+        public async Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData)
         {
-            _ = ApiHelper.PostDataAsync<LicenceDenialResponseData, List<LicenceDenialResponseData>>("api/v1/licenceDenialResponses/bulk",
-                                                                                                    responseData).Result;
+            _ = await ApiHelper.PostDataAsync<LicenceDenialResponseData, List<LicenceDenialResponseData>>("api/v1/licenceDenialResponses/bulk",
+                                                                                                    responseData);
         }
 
-        public void MarkTraceResultsAsViewed(string enfService)
+        public async Task MarkTraceResultsAsViewedAsync(string enfService)
         {
-            ApiHelper.SendCommand("api/v1/licenceDenialResponses/MarkResultsAsViewed?enfService=" + enfService);
+            await ApiHelper.SendCommandAsync("api/v1/licenceDenialResponses/MarkResultsAsViewed?enfService=" + enfService);
         }
     }
 }

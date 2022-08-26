@@ -1,6 +1,7 @@
 ﻿using FileBroker.Model.Interfaces.Broker;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using System.Threading.Tasks;
 
 namespace FileBroker.Common.Brokers
 {
@@ -13,22 +14,22 @@ namespace FileBroker.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public string GetVersion()
+        public async Task<string> GetVersionAsync()
         {
             string apiCall = $"api/v1/InterceptionFiles/Version";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public string GetConnection()
+        public async Task<string> GetConnectionAsync()
         {
             string apiCall = $"api/v1/InterceptionFiles/DB";
-            return ApiHelper.GetStringAsync(apiCall, maxAttempts: 1).Result;
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public string GetLatestProvincialFile(string partnerId)
+        public async Task<string> GetLatestProvincialFileAsync(string partnerId)
         {
             string apiCall = $"api/v1/InterceptionFiles?partnerId={partnerId}";
-            return ApiHelper.GetStringAsync(apiCall).Result;
+            return await ApiHelper.GetStringAsync(apiCall);
         }
 
     }

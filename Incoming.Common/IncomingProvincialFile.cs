@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Incoming.Common
 {
@@ -55,7 +56,7 @@ namespace Incoming.Common
             }
         }
 
-        public bool ProcessNewFile(string fullPath, ref List<string> errors)
+        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors)
         {
             bool fileProcessedSuccessfully = false;
 
@@ -66,22 +67,22 @@ namespace Incoming.Common
             {                                             //                                                    ↑
 
                 string xmlData = File.ReadAllText(fullPath);
-                string jsonText = FileHelper.ConvertXmlToJson(xmlData, ref errors);
+                string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
                 if (errors.Any())
                     return false;
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
-                    fileProcessedSuccessfully = ProcessMEPincomingInterceptionFile(errors, fileNameNoExtension, jsonText);
+                    fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, jsonText);
                 }
                 else if (fileNameNoCycle == LicencingBaseName)
                 {
-                    fileProcessedSuccessfully = ProcessMEPincomingLicencingFile(errors, fileNameNoExtension, jsonText);
+                    fileProcessedSuccessfully = await ProcessMEPincomingLicencingFileAsync(errors, fileNameNoExtension, jsonText);
                 }
                 else if (fileNameNoCycle == TracingBaseName)
                 {
-                    fileProcessedSuccessfully = ProcessMEPincomingTracingFile(errors, fileNameNoExtension, jsonText);
+                    fileProcessedSuccessfully = await ProcessMEPincomingTracingFileAsync(errors, fileNameNoExtension, jsonText);
 
                 }
                 else
@@ -98,14 +99,17 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public bool ProcessMEPincomingTracingFile(List<string> errors, string fileNameNoExtension, string jsonText)
+        public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
         {
             bool fileProcessedSuccessfully;
-            var response = APIHelper.PostJsonFile($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
+            var response = await APIHelper.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                errors.Add($"TracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                if (response.Content is not null)
+                    ColourConsole.WriteEmbeddedColorLine($"[red]Error: {await response.Content.ReadAsStringAsync()}[/red]");
+                else
+                    ColourConsole.WriteEmbeddedColorLine($"[red]Error[/red]");
+                errors.Add($"TracingFiles API failed with return code: {response.StatusCode}");
                 fileProcessedSuccessfully = false;
             }
             else
@@ -116,14 +120,17 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public bool ProcessMEPincomingLicencingFile(List<string> errors, string fileNameNoExtension, string jsonText)
+        public async Task<bool> ProcessMEPincomingLicencingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
         {
             bool fileProcessedSuccessfully;
-            var response = APIHelper.PostJsonFile($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
+            var response = await APIHelper.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                errors.Add($"LicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                if (response.Content is not null)
+                    ColourConsole.WriteEmbeddedColorLine($"[red]Error: {await response.Content.ReadAsStringAsync()}[/red]");
+                else
+                    ColourConsole.WriteEmbeddedColorLine($"[red]Error[/red]");
+                errors.Add($"LicenceDenialFiles API failed with return code: {response.StatusCode}");
                 fileProcessedSuccessfully = false;
             }
             else
@@ -134,13 +141,15 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public bool ProcessMEPincomingInterceptionFile(List<string> errors, string fileNameWithCycle, string jsonText)
+        public async Task<bool> ProcessMEPincomingInterceptionFileAsync(List<string> errors, string fileNameWithCycle, string jsonText)
         {
             bool fileProcessedSuccessfully;
-            var response = APIHelper.PostJsonFile($"api/v1/InterceptionFiles?fileName={fileNameWithCycle}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
+            var response = await APIHelper.PostJsonFileAsync($"api/v1/InterceptionFiles?fileName={fileNameWithCycle}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                string jsonData = response.Content?.ReadAsStringAsync().Result;
+                string jsonData = String.Empty;
+                if (response.Content is not null)
+                    jsonData = await response.Content.ReadAsStringAsync();
 
                 try
                 {
@@ -155,7 +164,8 @@ namespace Incoming.Common
                                 errors.Add(error.Description);
                             }
 
-                        else {
+                        else
+                        {
                             ColourConsole.WriteEmbeddedColorLine($"[red]Error: {jsonData}[/red]");
                             errors.Add($"InterceptionFiles API failed with errors: {jsonData}");
                         }

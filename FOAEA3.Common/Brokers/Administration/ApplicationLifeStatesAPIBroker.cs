@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers.Administration
 {
@@ -14,10 +15,10 @@ namespace FOAEA3.Common.Brokers.Administration
             ApiHelper = apiHelper;
         }
 
-        public DataList<ApplicationLifeStateData> GetApplicationLifeStates()
+        public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
         {
             string apiCall = $"api/v1/ApplicationLifeStates";
-            return ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall);
         }
 
     }

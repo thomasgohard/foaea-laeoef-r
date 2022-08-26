@@ -11,7 +11,7 @@ public class IncomingFederalSinManager
         Repositories = repositories;
     }
 
-    public List<string> ProcessFlatFile(string flatFileContent, string flatFileName)
+    public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
     {
         var fileTableData = GetFileTableData(flatFileName);
 
@@ -57,7 +57,7 @@ public class IncomingFederalSinManager
             {
                 var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-                SendSinResultsToFOAEA(sinResults, flatFileName, (short)processCodes.AppLiSt_Cd);
+                await SendSinResultsToFOAEAAsync(sinResults, flatFileName, (short)processCodes.AppLiSt_Cd);
             }
 
         }
@@ -75,23 +75,23 @@ public class IncomingFederalSinManager
         return errors;
     }
 
-    private void SendSinResultsToFOAEA(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
+    private async Task SendSinResultsToFOAEAAsync(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
-        var requestedEvents = APIs.ApplicationEvents.GetRequestedSINEventDataForFile(flatFileName);
-        var requestedEventDetails = APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFile(flatFileName);
+        var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
+        var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
 
         foreach (var sinResult in sinResults)
             UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
 
         UpdateSinResultTable(sinResults);
 
-        var latestUpdatedSinData = APIs.ApplicationEvents.GetLatestSinEventDataSummary();
+        var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
         foreach (var updatedSinDataSummary in latestUpdatedSinData)
-            UpdateApplicationBasedOnReceivedSinResult(updatedSinDataSummary, requestedEvents, requestedEventDetails);
+            await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
 
     }
 
-    private void UpdateStateForSinEvent(List<ApplicationEventData> requestedEvents, int eventId, string newState)
+    private async Task UpdateStateForSinEventAsync(List<ApplicationEventData> requestedEvents, int eventId, string newState)
     {
         var eventsForThisAppl = requestedEvents.Where(m => m.Event_Id == eventId).ToList();
 
@@ -99,24 +99,23 @@ public class IncomingFederalSinManager
         {
             var thisEvent = eventsForThisAppl.First();
             thisEvent.ActvSt_Cd = newState;
-            APIs.ApplicationEvents.SaveEvent(thisEvent);
+            await APIs.ApplicationEvents.SaveEventAsync(thisEvent);
         }
     }
 
-    private void UpdateApplicationBasedOnReceivedSinResult(SinInboundToApplData updatedSinDataSummary,
-                                        List<ApplicationEventData> requestedEvents,
-                                        List<ApplicationEventDetailData> requestedEventDetails)
+    private async Task UpdateApplicationBasedOnReceivedSinResultAsync(SinInboundToApplData updatedSinDataSummary,
+                                                                      List<ApplicationEventData> requestedEvents)
     {
         string appl_EnfSrv_Cd = updatedSinDataSummary.Appl_EnfSrv_Cd;
         string appl_CtrlCd = updatedSinDataSummary.Appl_CtrlCd;
 
         bool sourceModifiedSin = false;
 
-        var appl = APIs.Applications.GetApplication(appl_EnfSrv_Cd, appl_CtrlCd);
+        var appl = await APIs.Applications.GetApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
         if (appl.ActvSt_Cd != "A")
         {
-            UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "P"); // shouldn't this close the event???
+            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "P"); // shouldn't this close the event???
             return;
         }
 
@@ -127,7 +126,7 @@ public class IncomingFederalSinManager
                 sourceModifiedSin = true; // why only check when not at state 3 and why allowed to continue???
             else
             {
-                UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+                await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
                 AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50482_APPLICATION_STATE_WAS_NOT_AT_3_EVENT_WAS_MARKED_AS_INNACTIVE);
                 return;
             }
@@ -136,20 +135,20 @@ public class IncomingFederalSinManager
         if (!updatedSinDataSummary.ValStat_Cd.HasValue)
         {
             // this hasn't occurred since 1997 -- probably not needed anymore???
-            UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+           await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50483_NO_MATCHING_ACTIVE_DETAIL_EVENTS_WERE_FOUND_FOR_INBOUND_RECORD);
             return;
         }
 
         if (updatedSinDataSummary.Tot_Invalid > 0)
         {
-            UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             return;
         }
 
         if (updatedSinDataSummary.Tot_Childs != updatedSinDataSummary.Tot_Closed)
         {
-            UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "A");
+            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "A");
             return;
         }
 
@@ -164,7 +163,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = updatedSinDataSummary.SVR_SIN
             };
 
-            APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -174,14 +173,14 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = String.Empty
             };
 
-            APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,
                            $"SIN {updatedSinDataSummary.SVR_SIN} was not confirmed");
         }
 
-        UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "C");
+        await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "C");
     }
 
     private void AddSysEvent(string appl_EnfSrv_Cd, string appl_CtrlCd, EventCode eventCode)
@@ -200,7 +199,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEvents.SaveEvent(newSysEvent);
+        APIs.ApplicationEvents.SaveEventAsync(newSysEvent);
     }
 
     private void AddAMEvent(string appl_EnfSrv_Cd, string appl_CtrlCd, EventCode eventCode, string reasonText)
@@ -220,7 +219,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEvents.SaveEvent(newSysEvent);
+        APIs.ApplicationEvents.SaveEventAsync(newSysEvent);
     }
 
     private static bool IsSinConfirmed(SinInboundToApplData updatedSinDataSummary)
@@ -230,7 +229,7 @@ public class IncomingFederalSinManager
 
     private void UpdateSinResultTable(List<SINResultData> sinResults)
     {
-        APIs.Sins.InsertBulkData(sinResults);
+        APIs.Sins.InsertBulkDataAsync(sinResults);
     }
 
     private void UpdateSinEventTables(SINResultData sinResult,
@@ -246,7 +245,7 @@ public class IncomingFederalSinManager
             int eventId = eventForThisAppl.Event_Id;
             eventForThisAppl.ActvSt_Cd = "P";
             eventForThisAppl.Event_Compl_Dte = DateTime.Now;
-            APIs.ApplicationEvents.SaveEvent(eventForThisAppl);
+            APIs.ApplicationEvents.SaveEventAsync(eventForThisAppl);
 
             var eventDetailForThisAppl = requestedEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
 
@@ -262,7 +261,7 @@ public class IncomingFederalSinManager
                 eventDetailForThisAppl.ActvSt_Cd = "C";
                 eventDetailForThisAppl.Event_Compl_Dte = DateTime.Now;
 
-                APIs.ApplicationEvents.SaveEventDetail(eventDetailForThisAppl);
+                APIs.ApplicationEvents.SaveEventDetailAsync(eventDetailForThisAppl);
             }
         }
     }

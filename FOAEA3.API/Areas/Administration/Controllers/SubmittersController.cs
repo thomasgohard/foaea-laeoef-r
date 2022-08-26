@@ -95,9 +95,9 @@ public class SubmittersController : ControllerBase
     }
 
     [HttpPut]
-    public ActionResult<TracingApplicationData> UpdateSubmitter([FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> UpdateSubmitter([FromServices] IRepositories repositories)
     {
-        var submitterData = APIBrokerHelper.GetDataFromRequestBody<SubmitterData>(Request);
+        var submitterData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SubmitterData>(Request);
 
         bool readOnly = ((submitterData.Subm_Class == "RO") || (submitterData.Subm_Class == "R1"));
 

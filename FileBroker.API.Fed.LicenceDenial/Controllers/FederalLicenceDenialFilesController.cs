@@ -11,6 +11,7 @@ using NJsonSchema;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.API.Fed.LicenceDenial.Controllers;
 
@@ -66,7 +67,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessLicenceDenialFile([FromQuery] string fileName,
+    public async Task<ActionResult> ProcessLicenceDenialFileAsync([FromQuery] string fileName,
                                                  [FromServices] IFileAuditRepository fileAuditDB,
                                                  [FromServices] IFileTableRepository fileTableDB,
                                                  [FromServices] IMailServiceRepository mailService,
@@ -80,7 +81,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
         string sourceLicenceDenialJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            sourceLicenceDenialJsonData = reader.ReadToEndAsync().Result;
+            sourceLicenceDenialJsonData = await reader.ReadToEndAsync();
         }
 
         var schema = JsonSchema.FromType<FedLicenceDenialFileData>();
@@ -127,7 +128,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            licenceDenialManager.ProcessJsonFile(sourceLicenceDenialJsonData, fileName);
+            await licenceDenialManager.ProcessJsonFileAsync(sourceLicenceDenialJsonData, fileName);
             return Ok("File processed.");
         }
         else

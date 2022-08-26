@@ -28,7 +28,7 @@ namespace FileBroker.Web.Pages.Tasks
             APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
         }
 
-        public void OnPostUpload()
+        public async Task OnPostUpload()
         {
             var file = FormFile;
             if (file is not null)
@@ -67,14 +67,14 @@ namespace FileBroker.Web.Pages.Tasks
 
                     string fileContentAsJson;
                     if (file.ContentType.ToLower() == "text/xml")
-                        fileContentAsJson = FileHelper.ConvertXmlToJson(result.ToString(), ref errors);
+                        fileContentAsJson = FileHelper.ConvertXmlToJson(result.ToString(), errors);
                     else // else already json
                         fileContentAsJson = result.ToString();
 
                     switch (incomingFileInfo.Category)
                     {
                         case "INTAPPIN":
-                            provincialFileManager.ProcessMEPincomingInterceptionFile(errors, fileName, fileContentAsJson);
+                            await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson);
                             if (errors.Any())
                             {
                                 ErrorMessage = String.Empty;

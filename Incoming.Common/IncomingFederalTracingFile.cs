@@ -1,7 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Common;
 using FileBroker.Data.DB;
-using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
@@ -10,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Incoming.Common
 {
@@ -18,6 +18,7 @@ namespace Incoming.Common
         private DBFileTable FileTable { get; }
         private ApiConfig ApiFilesConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
+        public List<string> Errors { get; }
 
         public IncomingFederalTracingFile(IDBTools fileBrokerDB,
                                           ApiConfig apiFilesConfig,
@@ -26,6 +27,7 @@ namespace Incoming.Common
             ApiFilesConfig = apiFilesConfig;
             APIHelper = apiHelper;
             FileTable = new DBFileTable(fileBrokerDB);
+            Errors = new List<string>();
         }
 
         public void AddNewFiles(string rootPath, ref List<string> newFiles)
@@ -46,7 +48,7 @@ namespace Incoming.Common
             }
         }
 
-        public bool ProcessNewFile(string fullPath, ref List<string> errors)
+        public async Task<bool> ProcessNewFileAsync(string fullPath)
         {
             bool fileProcessedSuccessfully = false;
 
@@ -63,22 +65,23 @@ namespace Incoming.Common
 
                 // send json to processor api
 
-                var response = APIHelper.PostFlatFile($"api/v1/FederalTracingFiles?fileName={fileNameNoPath}", flatFile, ApiFilesConfig.FileBrokerFederalTracingRootAPI);
+                var response = await APIHelper.PostFlatFileAsync($"api/v1/FederalTracingFiles?fileName={fileNameNoPath}", flatFile, ApiFilesConfig.FileBrokerFederalTracingRootAPI);
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                    errors.Add($"FederalTracingFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                    if (response.Content is not null)
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {await response.Content.ReadAsStringAsync()}[/red]");
+                    else
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error[/red]");
+                    Errors.Add($"FederalTracingFiles API failed with return code: {response.StatusCode}");
                 }
-                else
-                    ColourConsole.WriteEmbeddedColorLine($"[green]{response.Content?.ReadAsStringAsync().Result}[/green]");
+                else if (response.Content is not null)
+                    ColourConsole.WriteEmbeddedColorLine($"[green]{await response.Content.ReadAsStringAsync()}[/green]");
 
                 fileProcessedSuccessfully = true;
 
             }
             else
-            {
-                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
-            }
+                Errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
 
             return fileProcessedSuccessfully;
         }

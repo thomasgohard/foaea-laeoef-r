@@ -38,12 +38,12 @@ namespace FOAEA3.Common.Helpers
             CurrentUser = currentUser;
         }
 
-        public static T GetDataFromRequestBody<T>(HttpRequest request)
+        public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
         {
             string bodyDataAsJSON;
             using (var reader = new StreamReader(request.Body, Encoding.UTF8))
             {
-                bodyDataAsJSON = reader.ReadToEndAsync().Result;
+                bodyDataAsJSON = await reader.ReadToEndAsync();
             }
 
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
@@ -127,12 +127,12 @@ namespace FOAEA3.Common.Helpers
 
                         if (callResult.IsSuccessStatusCode)
                         {
-                            string content = callResult.Content.ReadAsStringAsync().Result;
+                            string content = await callResult.Content.ReadAsStringAsync();
                             result = JsonConvert.DeserializeObject<T>(content);
                         }
                         else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
                         {
-                            string content = callResult.Content.ReadAsStringAsync().Result;
+                            string content = await callResult.Content.ReadAsStringAsync();
                             Messages = JsonConvert.DeserializeObject<MessageDataList>(content);
                         }
                         completed = true;
@@ -174,9 +174,9 @@ namespace FOAEA3.Common.Helpers
             return await SendDataAsync<T, P>(api, data, "PUT", root);
         }
 
-        public void SendCommand(string api, string root = "")
+        public async Task SendCommandAsync(string api, string root = "")
         {
-            SendCommand(api, "PUT", root);
+            await SendCommandAsync(api, "PUT", root);
         }
 
         private async Task<T> SendDataAsync<T, P>(string api, P data, string method, string root = "")
@@ -210,8 +210,8 @@ namespace FOAEA3.Common.Helpers
                     using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
                         callResult = method switch
                         {
-                            "POST" => httpClient.PostAsync(root + api, content).Result,
-                            "PUT" => httpClient.PutAsync(root + api, content).Result,
+                            "POST" => await httpClient.PostAsync(root + api, content),
+                            "PUT" => await httpClient.PutAsync(root + api, content),
                             _ => null,
                         };
 
@@ -244,7 +244,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        private void SendCommand(string api, string method, string root = "")
+        private async Task SendCommandAsync(string api, string method, string root = "")
         {
             if (root == "")
                 root = APIroot;
@@ -259,14 +259,14 @@ namespace FOAEA3.Common.Helpers
             HttpResponseMessage callResult;
             callResult = method switch
             {
-                "POST" => httpClient.PostAsync(root + api, null).Result,
-                "PUT" => httpClient.PutAsync(root + api, null).Result,
+                "POST" => await httpClient.PostAsync(root + api, null),
+                "PUT" => await httpClient.PutAsync(root + api, null),
                 _ => null,
             };
 
         }
 
-        public HttpResponseMessage PostJsonFile(string api, string jsonData, string rootAPI = null)
+        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, string rootAPI = null)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
@@ -278,10 +278,10 @@ namespace FOAEA3.Common.Helpers
             using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
             string root = rootAPI ?? APIroot;
-            return httpClient.PostAsync(root + api, content).Result;
+            return await httpClient.PostAsync(root + api, content);
         }
 
-        public HttpResponseMessage PostFlatFile(string api, string flatFileData, string rootAPI = null)
+        public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData, string rootAPI = null)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
@@ -293,7 +293,7 @@ namespace FOAEA3.Common.Helpers
             using var content = new StringContent(flatFileData, Encoding.UTF8, "text/plain");
 
             string root = rootAPI ?? APIroot;
-            return httpClient.PostAsync(root + api, content).Result;
+            return await httpClient.PostAsync(root + api, content);
         }
 
     }

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.API.MEP.Tracing.Controllers;
 
@@ -71,7 +72,7 @@ public class TracingFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessIncomingTracingFile([FromQuery] string fileName,
+    public async Task<ActionResult> ProcessIncomingTracingFileAsync([FromQuery] string fileName,
                                                    [FromServices] IFileAuditRepository fileAuditDB,
                                                    [FromServices] IFileTableRepository fileTableDB,
                                                    [FromServices] IMailServiceRepository mailService,
@@ -83,7 +84,7 @@ public class TracingFilesController : ControllerBase
         string sourceTracingJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            sourceTracingJsonData = reader.ReadToEndAsync().Result;
+            sourceTracingJsonData = await reader.ReadToEndAsync();
         }
 
         var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
@@ -122,7 +123,7 @@ public class TracingFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData, unknownTags);
+            await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingJsonData, unknownTags);
             return Ok("File processed.");
         }
         else

@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -13,21 +14,21 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public void CloseNETPTraceEvents()
+        public async Task CloseNETPTraceEventsAsync()
         {
-            ApiHelper.SendCommand($"api/v1/tracingEvents/CloseNETPTraceEvents");
+            await ApiHelper.SendCommandAsync($"api/v1/tracingEvents/CloseNETPTraceEvents");
         }
 
-        public List<ApplicationEventDetailData> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle)
+        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/Details/Active?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall);
         }
 
-        public List<ApplicationEventData> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle)
+        public async Task<List<ApplicationEventData>> GetRequestedTRCINEventsAsync(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/RequestedTRCIN?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall);
         }
     }
 }

@@ -61,10 +61,10 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<InterceptionApplicationData> CreateApplication([FromServices] IRepositories repositories,
-                                                                       [FromServices] IRepositories_Finance repositoriesFinance)
+    public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories repositories,
+                                                                                   [FromServices] IRepositories_Finance repositoriesFinance)
     {
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
@@ -89,14 +89,14 @@ public class InterceptionsController : ControllerBase
 
     [HttpPut("{key}")]
     [Produces("application/json")]
-    public ActionResult<InterceptionApplicationData> UpdateApplication(
+    public async Task<ActionResult<InterceptionApplicationData>> UpdateApplication(
                                                     [FromRoute] string key,
                                                     [FromServices] IRepositories repositories,
                                                     [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -113,13 +113,13 @@ public class InterceptionsController : ControllerBase
 
     [HttpPut("{key}/cancel")]
     [Produces("application/json")]
-    public ActionResult<InterceptionApplicationData> CancelApplication([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> CancelApplication([FromRoute] string key,
                                                                        [FromServices] IRepositories repositories,
                                                                        [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -136,13 +136,13 @@ public class InterceptionsController : ControllerBase
 
     [HttpPut("{key}/suspend")]
     [Produces("application/json")]
-    public ActionResult<InterceptionApplicationData> SuspendApplication([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> SuspendApplication([FromRoute] string key,
                                                                         [FromServices] IRepositories repositories,
                                                                         [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -158,9 +158,9 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("ValidateFinancialCoreValues")]
-    public ActionResult<ApplicationData> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationData>> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
     {
-        var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
         var interceptionValidation = new InterceptionValidation(appl, repositories, config);
 
         bool isValid = interceptionValidation.ValidateFinancialCoreValues();
@@ -172,13 +172,13 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("{key}/SINbypass")]
-    public ActionResult<InterceptionApplicationData> SINbypass([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> SINbypass([FromRoute] string key,
                                                        [FromServices] IRepositories repositories,
                                                        [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
-        var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
+        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINBypassData>(Request);
 
         var application = new InterceptionApplicationData();
 
@@ -192,13 +192,13 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("{key}/Vary")]
-    public ActionResult<InterceptionApplicationData> Vary([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> Vary([FromRoute] string key,
                                                           [FromServices] IRepositories repositories,
                                                           [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -211,14 +211,14 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("{key}/AcceptApplication")]
-    public ActionResult<InterceptionApplicationData> AcceptInterception([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> AcceptInterception([FromRoute] string key,
                                                                         [FromServices] IRepositories repositories,
                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
                                                                         [FromQuery] DateTime supportingDocsReceiptDate)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -232,7 +232,7 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("{key}/AcceptVariation")]
-    public ActionResult<InterceptionApplicationData> AcceptVariation([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> AcceptVariation([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories,
                                                                      [FromServices] IRepositories_Finance repositoriesFinance,
                                                                      [FromQuery] DateTime supportingDocsReceiptDate,
@@ -240,7 +240,7 @@ public class InterceptionsController : ControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -254,14 +254,14 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPut("{key}/RejectVariation")]
-    public ActionResult<InterceptionApplicationData> RejectVariation([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> RejectVariation([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories,
                                                                      [FromServices] IRepositories_Finance repositoriesFinance,
                                                                      [FromQuery] string applicationRejectReasons)
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);

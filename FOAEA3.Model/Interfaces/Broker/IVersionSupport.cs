@@ -1,8 +1,11 @@
-﻿namespace FOAEA3.Model.Interfaces.Broker
+﻿using System.Threading.Tasks;
+
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface IVersionSupport
     {
-        string GetVersion();
-        string GetConnection();
+        Task<string> GetVersionAsync();
+        Task<string> GetConnectionAsync();
     }
+
 }

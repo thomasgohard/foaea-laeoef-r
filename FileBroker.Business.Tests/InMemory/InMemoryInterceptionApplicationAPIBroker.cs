@@ -3,6 +3,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -10,52 +11,52 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
 
-        public InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService)
+        public Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData TransferInterceptionApplication(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData UpdateInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application)
+        public Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
         {
             throw new NotImplementedException();
         }
 
-        public InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }

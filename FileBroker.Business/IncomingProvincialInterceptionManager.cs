@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Resources;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FileBroker.Business
 {
@@ -52,7 +53,7 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public MessageDataList ExtractAndProcessRequestsInFile(string sourceInterceptionData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
@@ -118,16 +119,23 @@ namespace FileBroker.Business
                             var financialData = interceptionFile.INTAPPIN12.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
                             var sourceSpecificData = interceptionFile.INTAPPIN13.Where(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd).ToList();
 
+                            int thisErrorCount = 0;
+                            bool isValidData = true;
+                            InterceptionApplicationData thisApplication;
+                            (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequestAsync(
+                                                                                        data, interceptionData, 
+                                                                                        financialData, sourceSpecificData,
+                                                                                        fileAuditData);
                             var interceptionMessage = new MessageData<InterceptionApplicationData>
                             {
-                                Application = GetAndValidateAppDataFromRequest(data, interceptionData, financialData, sourceSpecificData,
-                                                                               ref fileAuditData, ref errorCount, out bool isValidData),
+                                Application = thisApplication,
                                 MaintenanceAction = data.Maintenance_ActionCd,
                                 MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                                 NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
                                 NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
                                 NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
                             };
+                            errorCount += thisErrorCount;
 
                             AddRequestToAudit(interceptionMessage);
 
@@ -143,7 +151,7 @@ namespace FileBroker.Business
 
                                     loadInboundDB.AddNew(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
-                                    var messages = ProcessApplicationRequest(interceptionMessage);
+                                    var messages = await ProcessApplicationRequestAsync(interceptionMessage);
 
                                     if (messages.ContainsMessagesOfType(MessageType.Error))
                                     {
@@ -195,7 +203,7 @@ namespace FileBroker.Business
                                                             errorCount, warningCount, successCount, unknownTags.Count);
 
                     if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
-                        AutoAcceptVariations(EnfSrv_Cd);
+                        await AutoAcceptVariationsAsync(EnfSrv_Cd);
 
                 }
 
@@ -229,23 +237,23 @@ namespace FileBroker.Business
             _ = Repositories.RequestLogDB.Add(requestLogData);
         }
 
-        public void AutoAcceptVariations(string enfService)
+        public async Task AutoAcceptVariationsAsync(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
 
             string processName = $"Process Auto Accept Variation {enfService}";
-            prodAudit.Insert(processName, "Divert Funds Started", "O");
+            await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
-            var applAutomation = APIs.InterceptionApplications.GetApplicationsForVariationAutoAccept(enfService);
+            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
 
             foreach (var appl in applAutomation)
-                APIs.InterceptionApplications.AcceptVariation(appl);
+                await APIs.InterceptionApplications.AcceptVariationAsync(appl);
 
-            prodAudit.Insert(processName, "Ended", "O");
+            await prodAudit.InsertAsync(processName, "Ended", "O");
         }
 
-        public MessageDataList ProcessApplicationRequest(MessageData<InterceptionApplicationData> interceptionMessageData)
+        public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
             var existingMessages = interceptionMessageData.Application.Messages;
@@ -254,7 +262,7 @@ namespace FileBroker.Business
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
-                interception = APIs.InterceptionApplications.CreateInterceptionApplication(interceptionMessageData.Application);
+                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application);
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
             {
@@ -262,25 +270,25 @@ namespace FileBroker.Business
                 {
                     case "00": // change
                     case "0":
-                        interception = APIs.InterceptionApplications.UpdateInterceptionApplication(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "14": // cancellation
-                        interception = APIs.InterceptionApplications.CancelInterceptionApplication(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "17": // variation
-                        interception = APIs.InterceptionApplications.VaryInterceptionApplication(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "29": // transfer
-                        interception = APIs.InterceptionApplications.TransferInterceptionApplication(interceptionMessageData.Application,
+                        interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interceptionMessageData.Application,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
                                                                                                      interceptionMessageData.NewIssuingSubmitter);
                         break;
 
                     case "35": // suspend
-                        interception = APIs.InterceptionApplications.SuspendInterceptionApplication(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     default:
@@ -381,13 +389,11 @@ namespace FileBroker.Business
             return result;
         }
 
-        internal InterceptionApplicationData GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
+        public async Task<(InterceptionApplicationData, int errorCount, bool isValidData)> GetAndValidateAppDataFromRequestAsync(MEPInterception_RecType10 baseData,
                                                                               MEPInterception_RecType11 interceptionData,
                                                                               MEPInterception_RecType12 financialData,
                                                                               List<MEPInterception_RecType13> sourceSpecificData,
-                                                                              ref FileAuditData fileAuditData,
-                                                                              ref int errorCount,
-                                                                              out bool isValidData)
+                                                                              FileAuditData fileAuditData)
         {
             DateTime now = DateTime.Now;
             bool isVariation = baseData.dat_Appl_LiSt_Cd == "17";
@@ -397,16 +403,18 @@ namespace FileBroker.Business
             if (baseData.Maintenance_ActionCd == "A")
                 isCreate = true;
 
-            isValidData = true;
+            bool isValidData = true;
+            int errorCount = 0;
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            if ((interceptionApplication is not null) && IsValidAppl(interceptionApplication, fileAuditData, ref isValidData) &&
-                !isCancelOrSuspend)
+            isValidData = await IsValidApplAsync(interceptionApplication, fileAuditData);
+            if ((interceptionApplication is not null) && isValidData && !isCancelOrSuspend)
             {
                 ExtractDefaultFinancialData(isVariation, financialData, ref isValidData, now, interceptionApplication);
 
-                if (IsValidFinancialInformation(interceptionApplication, fileAuditData, ref isValidData))
+                isValidData = await IsValidFinancialInformationAsync(interceptionApplication, fileAuditData);
+                if (isValidData)
                 {
                     foreach (var sourceSpecific in sourceSpecificData)
                     {
@@ -427,10 +435,10 @@ namespace FileBroker.Business
             if (!isValidData)
                 errorCount++;
 
-            return interceptionApplication;
+            return (interceptionApplication, errorCount, isValidData);
         }
 
-        private bool IsValidAppl(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData, ref bool isValidData)
+        private async Task<bool> IsValidApplAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
             var fieldErrors = new Dictionary<string, string>
             {
@@ -446,7 +454,7 @@ namespace FileBroker.Business
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
 
-            var validatedApplication = APIs.Applications.ValidateCoreValues(interceptionApplication);
+            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication);
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
@@ -468,8 +476,6 @@ namespace FileBroker.Business
                     else
                         fileAuditData.ApplicationMessage = error.Description;
 
-                    isValidData = false;
-
                     break;
                 }
 
@@ -480,10 +486,9 @@ namespace FileBroker.Business
 
         }
 
-        private bool IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData,
-                                                 ref bool isValidData)
+        private async Task<bool> IsValidFinancialInformationAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
-            var validatedApplication = APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
+            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
             interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 
@@ -494,8 +499,6 @@ namespace FileBroker.Business
                 foreach (var error in errors)
                 {
                     fileAuditData.ApplicationMessage = Translate(error.Description);
-
-                    isValidData = false;
 
                     break;
                 }

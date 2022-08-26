@@ -2,6 +2,7 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using System;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -14,7 +15,7 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public void Insert(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
             var productionAuditData = new ProductionAuditData
             {
@@ -24,14 +25,14 @@ namespace FOAEA3.Common.Brokers
                 Compl_dte = completedDate
             };
 
-            _ = ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
-                                                                                  productionAuditData).Result;
+            _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
+                                                                                  productionAuditData);
         }
 
-        public void Insert(ProductionAuditData productionAuditData)
+        public async Task InsertAsync(ProductionAuditData productionAuditData)
         {
-            _ = ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
-                                                                                  productionAuditData).Result;
+            _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
+                                                                                  productionAuditData);
         }
     }
 }

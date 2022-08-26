@@ -24,24 +24,10 @@ public class LicenceDenialResponsesController : ControllerBase
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
-    //[HttpGet("{id}")]
-    //public ActionResult<DataList<LicenceDenialResponseData>> GetLicenceDenialResults([FromRoute] string id,
-    //                                                                                 [FromServices] IRepositories repositories)
-    //{
-    //    var applKey = new ApplKey(id);
-
-    //    var manager = new LicenceDenialManager(repositories, config);
-
-    //    if (manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-    //        return Ok(manager.GetLicenceDenialResults());
-    //    else
-    //        return NotFound();
-    //}
-
     [HttpPost("bulk")]
-    public ActionResult<int> CreateLicenceDenialResponsesBulk([FromServices] IRepositories repositories)
+    public async Task<ActionResult<int>> CreateLicenceDenialResponsesBulk([FromServices] IRepositories repositories)
     {
-        var responseData = APIBrokerHelper.GetDataFromRequestBody<List<LicenceDenialResponseData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<LicenceDenialResponseData>>(Request);
 
         var licenceDenialManager = new LicenceDenialManager(repositories, config);
 

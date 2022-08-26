@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -14,19 +14,19 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public void InsertBulkData(List<SINResultData> resultData)
+        public async Task InsertBulkDataAsync(List<SINResultData> resultData)
         {
-            _ = ApiHelper.PostDataAsync<SINResultData, List<SINResultData>>("api/v1/applicationFederalSins/bulk",
-                                                                             resultData).Result;
+            _ = await ApiHelper.PostDataAsync<SINResultData, List<SINResultData>>("api/v1/applicationFederalSins/bulk",
+                                                                             resultData);
         }
 
-        public List<SINOutgoingFederalData> GetOutgoingFederalSins(int maxRecords, string activeState,
+        public async Task<List<SINOutgoingFederalData>> GetOutgoingFederalSinsAsync(int maxRecords, string activeState,
                                                                    int lifeState, string enfServiceCode)
         {
             string baseCall = "api/v1/OutgoingFederalSins";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                              $"&lifeState={lifeState}&enfServiceCode={enfServiceCode}";
-            return ApiHelper.GetDataAsync<List<SINOutgoingFederalData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<SINOutgoingFederalData>>(apiCall);
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -15,10 +16,10 @@ namespace FOAEA3.Common.Brokers
             ApiFilesConfig = apiConfig;
         }
 
-        public HttpResponseMessage ProcessFlatFile(string fileNameNoPath, string flatFile)
+        public async Task<HttpResponseMessage> ProcessFlatFileAsync(string fileNameNoPath, string flatFile)
         {
             string apiCall = $"api/v1/FederalTracingFiles?fileName={fileNameNoPath}";
-            return ApiHelper.PostFlatFile(apiCall, flatFile, rootAPI: ApiFilesConfig.FileBrokerFederalTracingRootAPI);
+            return await ApiHelper.PostFlatFileAsync(apiCall, flatFile, rootAPI: ApiFilesConfig.FileBrokerFederalTracingRootAPI);
         }
     }
 }

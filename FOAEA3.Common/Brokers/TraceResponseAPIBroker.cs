@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -13,15 +14,15 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public void InsertBulkData(List<TraceResponseData> responseData)
+        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
-            _ = ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
-                                                                                    responseData).Result;
+            _ = await ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
+                                                                                    responseData);
         }
 
-        public void MarkTraceResultsAsViewed(string enfService)
+        public async Task MarkTraceResultsAsViewedAsync(string enfService)
         {
-            ApiHelper.SendCommand("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService);
+            await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService);
         }
     }
 }

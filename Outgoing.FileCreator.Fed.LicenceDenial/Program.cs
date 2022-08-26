@@ -11,12 +11,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Outgoing.FileCreator.Fed.LicenceDenial
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Licence Denial Files Creator");
 
@@ -34,13 +35,13 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             var fileBrokerDB = new DBTools(fileBrokerConnectionString);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            CreateOutgoingFederalLicenceDenialFiles(fileBrokerDB, apiRootForFiles);
+            await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, apiRootForFiles);
 
             ColourConsole.Write("Completed.");
 
         }
 
-        private static void CreateOutgoingFederalLicenceDenialFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
+        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
         {
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -72,8 +73,9 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
 
             foreach (var federalLicenceDenialOutgoingSource in federalLicenceDenialOutgoingSources)
             {
-                string filePath = federalFileManager.CreateOutputFile(federalLicenceDenialOutgoingSource.Name,
-                                                                      out List<string> errors);
+                var errors = new List<string>();
+                string filePath = await federalFileManager.CreateOutputFileAsync(federalLicenceDenialOutgoingSource.Name,
+                                                                                 errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else
