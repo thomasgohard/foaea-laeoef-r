@@ -118,9 +118,12 @@
                                 <select class="form-control multiColControl" asp-for="SearchCriteria.State">
                                     @{
                                         <option value="">All</option>
-                                        foreach (var state in appLifeStates)
+                                        if (appLifeStates is not null)
                                         {
-                                            <option value="@state.AppLiSt_Cd">@state.Description</option>
+                                            foreach (var state in appLifeStates)
+                                            {
+                                                <option value="@state.AppLiSt_Cd">@state.Description</option>
+                                            }
                                         }
                                     }
                                 </select>
@@ -233,24 +236,26 @@
                 </thead>
                 <tbody>
                     @{
-
-                        foreach (var result in searchResult)
+                        if (appLifeStates is not null)
                         {
-                            var applListState = appLifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
+                            foreach (var result in searchResult)
+                            {
+                                var applListState = appLifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
 
-                            <tr class="gradeX">
-                                <td>@result.AppCtgy_Cd</td>
-                                <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
-                                <td>@result.Subm_SubmCd</td>
-                                <td>@result.Subm_Recpt_SubmCd</td>
-                                <td>@result.Appl_EnfSrv_Cd</td>
-                                <td>@result.Appl_CtrlCd</td>
-                                <td>@result.Appl_Dbtr_SurNme</td>
-                                <td>@result.Appl_Source_RfrNr</td>
-                                <td>@result.Appl_Expiry_Dte?.ToString("yyyy/MM/dd")</td>
-                                <td>@result.Appl_JusticeNr</td>
-                                <td style="white-space:nowrap;">@applListState.Description</td>
-                            </tr>
+                                <tr class="gradeX">
+                                    <td>@result.AppCtgy_Cd</td>
+                                    <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
+                                    <td>@result.Subm_SubmCd</td>
+                                    <td>@result.Subm_Recpt_SubmCd</td>
+                                    <td>@result.Appl_EnfSrv_Cd</td>
+                                    <td>@result.Appl_CtrlCd</td>
+                                    <td>@result.Appl_Dbtr_SurNme</td>
+                                    <td>@result.Appl_Source_RfrNr</td>
+                                    <td>@result.Appl_Expiry_Dte?.ToString("yyyy/MM/dd")</td>
+                                    <td>@result.Appl_JusticeNr</td>
+                                    <td style="white-space:nowrap;">@applListState?.Description</td>
+                                </tr>
+                            }
                         }
                     }
                 </tbody>

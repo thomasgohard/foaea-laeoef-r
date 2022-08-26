@@ -73,9 +73,9 @@ public class LicenceDenialsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<LicenceDenialApplicationData> CreateApplication([FromServices] IRepositories repositories)
+    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories repositories)
     {
-        var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
@@ -100,7 +100,7 @@ public class LicenceDenialsController : ControllerBase
 
     [HttpPut("{key}")]
     [Produces("application/json")]
-    public ActionResult<TracingApplicationData> UpdateApplication(
+    public async Task<ActionResult<TracingApplicationData>> UpdateApplication(
                                                     [FromRoute] string key,
                                                     [FromQuery] string command,
                                                     [FromQuery] string enforcementServiceCode,
@@ -108,7 +108,7 @@ public class LicenceDenialsController : ControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -137,12 +137,12 @@ public class LicenceDenialsController : ControllerBase
     }
 
     [HttpPut("{key}/SINbypass")]
-    public ActionResult<LicenceDenialApplicationData> SINbypass([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> SINbypass([FromRoute] string key,
                                                      [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
-        var sinBypassData = APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
+        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINBypassData>(Request);
 
         var application = new LicenceDenialApplicationData();
 

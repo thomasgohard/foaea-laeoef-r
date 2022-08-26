@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
-    public class ApplicationAPIBroker : IApplicationAPIBroker, IVersionAsyncSupport
+    public class ApplicationAPIBroker : IApplicationAPIBroker, IVersionSupport
     {
         private IAPIBrokerHelper ApiHelper { get; }
 
@@ -28,35 +28,35 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public ApplicationData GetApplication(string appl_EnfSrvCd, string appl_CtrlCd)
+        public async Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
             string apiCall = $"api/v1/applications/{key}";
-            return ApiHelper.GetDataAsync<ApplicationData>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<ApplicationData>(apiCall);
         }
 
-        public ApplicationData SinConfirmation(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
+        public async Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
         {
             string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
             string baseCall = "api/v1/Applications";
             string apiCall = $"{baseCall}/{key}/SinConfirmation";
-            return ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData).Result;
+            return await ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData);
         }
 
-        List<StatsOutgoingProvincialData> IApplicationAPIBroker.GetOutgoingProvincialStatusData(int maxRecords, 
+        public async Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, 
                                                                                     string activeState, string recipientCode)
         {
             string baseCall = "api/v1/Applications";
             string apiCall = $"{baseCall}/stats?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&recipientCode={recipientCode}";
-            return ApiHelper.GetDataAsync<List<StatsOutgoingProvincialData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<StatsOutgoingProvincialData>>(apiCall);
         }
 
-        public ApplicationData ValidateCoreValues(ApplicationData application)
+        public async Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application)
         {
             string key = ApplKey.MakeKey(application.Appl_EnfSrv_Cd, application.Appl_CtrlCd);
             string apiCall = $"api/v1/Applications/{key}/ValidateCoreValues";
-            return ApiHelper.PutDataAsync<ApplicationData, ApplicationData>(apiCall, application).Result;
+            return await ApiHelper.PutDataAsync<ApplicationData, ApplicationData>(apiCall, application);
         }
     }
 }

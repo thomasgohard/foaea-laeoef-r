@@ -27,9 +27,9 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("SetPassword")]
-        public ActionResult<string> SetNewPassword([FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> SetNewPassword([FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {
-            var subject = APIBrokerHelper.GetDataFromRequestBody<SubjectData>(Request);
+            var subject = await APIBrokerHelper.GetDataFromRequestBodyAsync<SubjectData>(Request);
 
             var loginManager = new LoginManager(repositories);
             var result = loginManager.CheckPreviousPasswords(subject.SubjectName, encryptedNewPassword);
@@ -38,9 +38,9 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPost("SendEmail")]
-        public ActionResult<string> SendEmail([FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> SendEmail([FromServices] IRepositories repositories)
         {
-            var emailData = APIBrokerHelper.GetDataFromRequestBody<EmailData>(Request);
+            var emailData = await APIBrokerHelper.GetDataFromRequestBodyAsync<EmailData>(Request);
 
             var loginManager = new LoginManager(repositories);
             loginManager.SendEmail(emailData.Subject, emailData.Recipient, emailData.Body, emailData.IsHTML);
@@ -76,9 +76,9 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("PostPassword")]
-        public ActionResult<PasswordData> PostPassword([FromServices] IRepositories repositories)
+        public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
-            var passwordData = APIBrokerHelper.GetDataFromRequestBody<PasswordData>(Request);
+            var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
 
             var dbLogin = new DBLogin(repositories.MainDB);
             dbLogin.PostPassword(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);

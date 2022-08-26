@@ -2,10 +2,6 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using FOAEA3.Resources.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
@@ -19,7 +15,7 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public LicenceDenialApplicationData ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<LicenceDenialApplicationData> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var appData = new LicenceDenialApplicationData
             {
@@ -29,7 +25,7 @@ namespace FOAEA3.Common.Brokers
             };
             string key = ApplKey.MakeKey(appl_EnfSrv_Cd, appl_CtrlCd);
             string apiCall = $"api/v1/licenceDenials/{key}/ProcessLicenceDenialTerminationResponse";
-            return ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData).Result;
+            return await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData);
         }
     }
 }

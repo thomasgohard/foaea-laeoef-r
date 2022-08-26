@@ -41,9 +41,9 @@ public class TraceResponsesController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public ActionResult<int> CreateTraceResponsesBulk([FromServices] IRepositories repositories)
+    public async Task<ActionResult<int>> CreateTraceResponsesBulk([FromServices] IRepositories repositories)
     {
-        var responseData = APIBrokerHelper.GetDataFromRequestBody<List<TraceResponseData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<TraceResponseData>>(Request);
 
         var tracingManager = new TracingManager(repositories, config);
 

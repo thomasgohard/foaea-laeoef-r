@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface ITraceResponseAPIBroker
     {
-        void InsertBulkData(List<TraceResponseData> responseData);
-        void MarkTraceResultsAsViewed(string enfService);
+        Task InsertBulkDataAsync(List<TraceResponseData> responseData);
+        Task MarkTraceResultsAsViewedAsync(string enfService);
     }
 }

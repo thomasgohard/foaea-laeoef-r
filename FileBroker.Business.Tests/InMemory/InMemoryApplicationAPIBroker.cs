@@ -2,27 +2,28 @@
 using FOAEA3.Model.Interfaces.Broker;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
     internal class InMemoryApplicationAPIBroker : IApplicationAPIBroker
     {
-        public ApplicationData GetApplication(string appl_EnfSrvCd, string appl_CtrlCd)
+        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public List<StatsOutgoingProvincialData> GetOutgoingProvincialStatusData(int maxRecords, string activeState, string recipientCode)
+        public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, string activeState, string recipientCode)
         {
             throw new NotImplementedException();
         }
 
-        public ApplicationData SinConfirmation(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
+        public Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
         {
             throw new NotImplementedException();
         }
 
-        public ApplicationData ValidateCoreValues(ApplicationData application)
+        public Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application)
         {
             throw new NotImplementedException();
         }

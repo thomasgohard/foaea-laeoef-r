@@ -11,12 +11,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Outgoing.FileCreator.Fed.Tracing
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
 
@@ -34,13 +35,13 @@ namespace Outgoing.FileCreator.Fed.Tracing
             var fileBrokerDB = new DBTools(fileBrokerConnectionString);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            CreateOutgoingFederalTracingFiles(fileBrokerDB, apiRootForFiles);
+            await CreateOutgoingFederalTracingFiles(fileBrokerDB, apiRootForFiles);
 
             ColourConsole.Write("Completed.");
 
         }
 
-        private static void CreateOutgoingFederalTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
+        private static async Task CreateOutgoingFederalTracingFiles(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
         {
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -71,8 +72,8 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
             foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
             {
-                string filePath = federalFileManager.CreateOutputFile(federalTraceOutgoingSource.Name,
-                                                                      out List<string> errors);
+                var errors = new List<string>();
+                string filePath = await federalFileManager.CreateOutputFileAsync(federalTraceOutgoingSource.Name, errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else

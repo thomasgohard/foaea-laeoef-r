@@ -34,7 +34,7 @@ namespace FileBroker.Web.Pages.Tools
                 }
 
                 var errors = new List<string>();
-                string jsonContent = FileHelper.ConvertXmlToJson(xmlData.ToString(), ref errors);
+                string jsonContent = FileHelper.ConvertXmlToJson(xmlData.ToString(), errors);
 
                 if (errors.Any())
                 {

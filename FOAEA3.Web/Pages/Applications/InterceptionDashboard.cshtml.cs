@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications
 {
@@ -30,7 +31,7 @@ namespace FOAEA3.Web.Pages.Applications
             var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
             var apiBroker = new ApplicationLifeStatesAPIBroker(apiHelper);
 
-            ApplLifeStates = apiBroker.GetApplicationLifeStates().Items;
+            ApplLifeStates = (apiBroker.GetApplicationLifeStatesAsync().Result).Items;
 
             SearchCriteria = new ApplicationSearchCriteriaData
             {
@@ -43,7 +44,7 @@ namespace FOAEA3.Web.Pages.Applications
             ViewData["ApplLifeStates"] = ApplLifeStates;
         }
 
-        public IActionResult OnPostAdvancedSearch()
+        public async Task<IActionResult> OnPostAdvancedSearch()
         {
             if (!ModelState.IsValid)
             {
@@ -67,7 +68,7 @@ namespace FOAEA3.Web.Pages.Applications
                     JusticeNumber = SearchCriteria.JusticeNumber
                 };
 
-                ViewData["SearchResult"] = apiBroker.Search(quickSearch);
+                ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
                 ViewData["ApplLifeStates"] = ApplLifeStates;
 
                 return Page();
@@ -76,7 +77,7 @@ namespace FOAEA3.Web.Pages.Applications
             return RedirectToPage("./Index");
         }
 
-        public IActionResult OnPostMySearch()
+        public async Task<IActionResult> OnPostMySearch()
         {
             if (!ModelState.IsValid)
             {
@@ -100,7 +101,7 @@ namespace FOAEA3.Web.Pages.Applications
                     JusticeNumber = MySearchCriteria.JusticeNumber
                 };
 
-                ViewData["SearchResult"] = apiBroker.Search(quickSearch);
+                ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
                 ViewData["ApplLifeStates"] = ApplLifeStates;
 
                 return Page();

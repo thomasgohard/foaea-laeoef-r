@@ -13,7 +13,7 @@ namespace FileBroker.Business
             Repositories = repositories;
         }
 
-        public string CreateOutputFile(string fileBaseName, out List<string> errors)
+        public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
         {
             errors = new List<string>();
 
@@ -34,7 +34,7 @@ namespace FileBroker.Business
                     return "";
                 }
 
-                var data = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
@@ -64,13 +64,13 @@ namespace FileBroker.Business
 
         }
 
-        private List<StatsOutgoingProvincialData> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,
+        private async Task<List<StatsOutgoingProvincialData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                                 string recipientCode)
         {
             var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
             int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-            var data = APIs.Applications.GetOutgoingProvincialStatusData(maxRecords, actvSt_Cd, recipientCode);
+            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode);
             return data;
         }
 
@@ -90,7 +90,7 @@ namespace FileBroker.Business
 
             result.AppendLine(GenerateFooterLine(data.Count));
 
-            result.Append("</ProvincialOutboundXMLFileTraceResults80>");
+            result.Append("</ProvincialOutboundXMLFileEvents90>");
 
             return result.ToString();
         }

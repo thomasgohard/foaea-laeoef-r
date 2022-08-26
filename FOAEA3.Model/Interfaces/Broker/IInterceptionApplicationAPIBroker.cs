@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
 {
@@ -6,19 +7,19 @@ namespace FOAEA3.Model.Interfaces.Broker
     {
         IAPIBrokerHelper ApiHelper { get; }
 
-        InterceptionApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
-        InterceptionApplicationData CreateInterceptionApplication(InterceptionApplicationData interceptionApplication);
-        InterceptionApplicationData UpdateInterceptionApplication(InterceptionApplicationData interceptionApplication);
-        InterceptionApplicationData CancelInterceptionApplication(InterceptionApplicationData interceptionApplication);
-        InterceptionApplicationData SuspendInterceptionApplication(InterceptionApplicationData interceptionApplication);
-        InterceptionApplicationData VaryInterceptionApplication(InterceptionApplicationData interceptionApplication);
-        InterceptionApplicationData TransferInterceptionApplication(InterceptionApplicationData interceptionApplication,
+        Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
+        Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication,
                                                                  string newRecipientSubmitter,
                                                                  string newIssuingSubmitter);
 
-        InterceptionApplicationData ValidateFinancialCoreValues(InterceptionApplicationData application);
+        Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application);
 
-        List<InterceptionApplicationData> GetApplicationsForVariationAutoAccept(string enfService);
-        InterceptionApplicationData AcceptVariation(InterceptionApplicationData interceptionApplication);
+        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
+        Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
     }
 }

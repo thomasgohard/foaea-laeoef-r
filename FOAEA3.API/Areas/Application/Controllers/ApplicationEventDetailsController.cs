@@ -39,9 +39,9 @@ public class ApplicationEventDetailsController : ControllerBase
     }
 
     [HttpPost("")]
-    public ActionResult<ApplicationEventDetailData> SaveEventDetail([FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailData>> SaveEventDetail([FromServices] IRepositories repositories)
     {
-        var applicationEventDetail = APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
+        var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBodyAsync<ApplicationEventDetailData>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
@@ -52,14 +52,14 @@ public class ApplicationEventDetailsController : ControllerBase
     }
 
     [HttpPut("")]
-    public ActionResult<ApplicationEventDetailData> UpdateEventDetail([FromServices] IRepositories repositories,
+    public async Task<ActionResult<ApplicationEventDetailData>> UpdateEventDetail([FromServices] IRepositories repositories,
                                                                       [FromQuery] string command,
                                                                       [FromQuery] string activeState,
                                                                       [FromQuery] string applicationState,
                                                                       [FromQuery] string enfSrvCode,
                                                                       [FromQuery] string writtenFile)
     {
-        var eventIds = APIBrokerHelper.GetDataFromRequestBody<List<int>>(Request);
+        var eventIds = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<int>>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 

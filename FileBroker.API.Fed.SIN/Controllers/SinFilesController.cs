@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.API.Fed.SIN.Controllers;
 
@@ -65,7 +66,7 @@ public class SinFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessSINFile([FromQuery] string fileName,
+    public async Task<ActionResult> ProcessSINFileAsync([FromQuery] string fileName,
                                        [FromServices] IFileAuditRepository fileAuditDB,
                                        [FromServices] IFileTableRepository fileTableDB,
                                        [FromServices] IMailServiceRepository mailService,
@@ -79,7 +80,7 @@ public class SinFilesController : ControllerBase
         string flatFileContent;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            flatFileContent = reader.ReadToEndAsync().Result;
+            flatFileContent = await reader.ReadToEndAsync();
         }
 
         if (string.IsNullOrEmpty(fileName))
@@ -112,7 +113,7 @@ public class SinFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            var errors = sinManager.ProcessFlatFile(flatFileContent, fileName);
+            var errors = await sinManager.ProcessFlatFileAsync(flatFileContent, fileName);
             if (errors.Any())
                 return UnprocessableEntity(errors);
             else

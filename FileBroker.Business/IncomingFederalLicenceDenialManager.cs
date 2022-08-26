@@ -7,13 +7,19 @@ namespace FileBroker.Business
         private APIBrokerList APIs { get; }
         private RepositoryList Repositories { get; }
 
+        private List<ApplicationEventData> ValidEvents { get; set; }
+
+        private List<ApplicationEventDetailData> ValidEventDetails { get; set; }
+
         public IncomingFederalLicenceDenialManager(APIBrokerList apiBrokers, RepositoryList repositories)
         {
             APIs = apiBrokers;
             Repositories = repositories;
+            ValidEvents = new List<ApplicationEventData>();
+            ValidEventDetails = new List<ApplicationEventDetailData>();
         }
 
-        public List<string> ProcessJsonFile(string jsonFileContent, string fileName)
+        public async Task<List<string>> ProcessJsonFileAsync(string jsonFileContent, string fileName)
         {
             var fileTableData = GetFileTableData(fileName);
 
@@ -56,22 +62,18 @@ namespace FileBroker.Business
 
                 ValidateHeader(licenceDenialResponses.NewDataSet, fileName, ref errors);
                 ValidateFooter(licenceDenialResponses.NewDataSet, ref errors);
-                ValidateDetails(licenceDenialResponses.NewDataSet, fedSource, ref errors, 
-                                out List<ApplicationEventData> validEvents, 
-                                out List<ApplicationEventDetailData> validEventDetails);
+                await ValidateDetailsAsync(licenceDenialResponses.NewDataSet, fedSource, errors);
 
                 if (errors.Any())
                     return errors;
 
                 var licenceDenialFoaeaResponseData = GenerateLicenceDenialResponseDataFromIncomingResponses(
                                                                                                     licenceDenialResponses,
-                                                                                                    fileName, fedSource,
-                                                                                                    validEvents);
+                                                                                                    fileName, fedSource);
 
                 if ((licenceDenialFoaeaResponseData != null) && (licenceDenialFoaeaResponseData.Count > 0))
                 {
-                    SendLicenceDenialResponsesToFOAEA(licenceDenialFoaeaResponseData, fedSource, fileName, 
-                                                      validEvents, validEventDetails, ref errors);
+                    await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
 
                     Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
                 }
@@ -121,15 +123,15 @@ namespace FileBroker.Business
             return result;
         }
 
-        private static List<LicenceDenialResponseData> GenerateLicenceDenialResponseDataFromIncomingResponses(
+        private List<LicenceDenialResponseData> GenerateLicenceDenialResponseDataFromIncomingResponses(
                                                            FedLicenceDenialFileData licenceDenialResponses, string fileName,
-                                                           string fedSource, List<ApplicationEventData> validEvents)
+                                                           string fedSource)
         {
             var responseData = new List<LicenceDenialResponseData>();
             short sequence = 0;
             foreach (var detail in licenceDenialResponses.NewDataSet.LICIN02)
             {
-                var existingEventsForAppl = validEvents.Where(m => m.Appl_EnfSrv_Cd.Equals(detail.Appl_EnfSrv_Cd) &&
+                var existingEventsForAppl = ValidEvents.Where(m => m.Appl_EnfSrv_Cd.Equals(detail.Appl_EnfSrv_Cd) &&
                                                                    m.Appl_CtrlCd.Equals(detail.Appl_CtrlCd)).FirstOrDefault();
 
                 var responseType = GetResponseType(existingEventsForAppl);
@@ -171,20 +173,18 @@ namespace FileBroker.Business
                 result.Add("Invalid ResponseCnt in section 99");
         }
 
-        private void ValidateDetails(FedLicenceDenial_DataSet newDataSet, string fedSource, ref List<string> result,
-                                     out List<ApplicationEventData> validEvents,
-                                     out List<ApplicationEventDetailData> validEventDetails)
+        private async Task ValidateDetailsAsync(FedLicenceDenial_DataSet newDataSet, string fedSource, List<string> result)
         {
             var invalidApplications = new List<string>();
-            validEvents = new List<ApplicationEventData>();
-            validEventDetails = new List<ApplicationEventDetailData>();
+            ValidEvents.Clear();
+            ValidEventDetails.Clear();
 
             foreach (var detail in newDataSet.LICIN02)
             {
                 string applEnfSrv = detail.Appl_EnfSrv_Cd;
                 string applControlCode = detail.Appl_CtrlCd;
 
-                var events = APIs.LicenceDenialEvents.GetRequestedLICINEvents(fedSource, applEnfSrv, applControlCode);
+                var events = await APIs.LicenceDenialEvents.GetRequestedLICINEventsAsync(fedSource, applEnfSrv, applControlCode);
                 if (events.Count == 0)
                 {
                     string errorMsg = $"type 02 {applEnfSrv} {applControlCode} no active event found. File was not loaded.";
@@ -193,11 +193,11 @@ namespace FileBroker.Business
                 }
                 else
                 {
-                    var existingEventsForAppl = validEvents.Where(m => m.Appl_EnfSrv_Cd.Equals(applEnfSrv) && m.Appl_CtrlCd.Equals(applControlCode));
+                    var existingEventsForAppl = ValidEvents.Where(m => m.Appl_EnfSrv_Cd.Equals(applEnfSrv) && m.Appl_CtrlCd.Equals(applControlCode));
                     if (!existingEventsForAppl.Any())
-                        validEvents.AddRange(events);
+                        ValidEvents.AddRange(events);
 
-                    var eventDetails = APIs.LicenceDenialEvents.GetRequestedLICINEventDetails(fedSource, applEnfSrv, applControlCode);
+                    var eventDetails = await APIs.LicenceDenialEvents.GetRequestedLICINEventDetailsAsync(fedSource, applEnfSrv, applControlCode);
                     if (eventDetails.Count == 0)
                     {
                         string errorMsg = $"type 02 {applEnfSrv} {applControlCode} no active event found. File was not loaded.";
@@ -210,7 +210,7 @@ namespace FileBroker.Business
                         {
                             var existingEventDetailsForAppl = eventDetails.Where(m => m.Event_Id == eventData.Event_Id).ToList();
                             if (existingEventDetailsForAppl.Any())
-                                validEventDetails.AddRange(existingEventDetailsForAppl);
+                                ValidEventDetails.AddRange(existingEventDetailsForAppl);
                         }
                     }
                 }
@@ -218,24 +218,22 @@ namespace FileBroker.Business
             }
         }
 
-        public void SendLicenceDenialResponsesToFOAEA(List<LicenceDenialResponseData> licenceDenialResponseData,
+        public async Task SendLicenceDenialResponsesToFOAEAAsync(List<LicenceDenialResponseData> licenceDenialResponseData,
                                                       string fedSource, string fileName, 
-                                                      List<ApplicationEventData> validEvents,
-                                                      List<ApplicationEventDetailData> validEventDetails,
-                                                      ref List<string> errors)
+                                                      List<string> errors)
         {
             try
             {
                 foreach (var item in licenceDenialResponseData)
-                    VerifyReceivedDataForErrors(item, fedSource, fileName, ref validEvents);
+                    VerifyReceivedDataForErrors(item, fedSource, fileName);
 
                 var dataToSave = licenceDenialResponseData.Where(m => (m.RqstStat_Cd != 5) || (fedSource != "PA01")).ToList();
-                APIs.LicenceDenialResponses.InsertBulkData(dataToSave);
+                await APIs.LicenceDenialResponses.InsertBulkDataAsync(dataToSave);
 
                 foreach (var item in licenceDenialResponseData)
-                    UpdateLicenceEventTables(item, newState: 2, fileName, validEvents, validEventDetails);
+                    await UpdateLicenceEventTablesAsync(item, newState: 2, fileName);
 
-                ProcessLicenceApplications(fedSource, fileName, validEvents, validEventDetails, ref errors);
+                await ProcessLicenceApplicationsAsync(fedSource, fileName, errors);
             }
             catch (Exception e)
             {
@@ -243,20 +241,18 @@ namespace FileBroker.Business
             }
         }
 
-        private void ProcessLicenceApplications(string fedSource, string fileName, List<ApplicationEventData> validEvents,
-                                                List<ApplicationEventDetailData> validEventDetails, ref List<string> errors)
+        private async Task ProcessLicenceApplicationsAsync(string fedSource, string fileName, List<string> errors)
         {
-            var dataToAppl = APIs.LicenceDenialApplications.GetLicenceDenialToApplData(fedSource);
+            var dataToAppl = await APIs.LicenceDenialApplications.GetLicenceDenialToApplDataAsync(fedSource);
 
             foreach (var item in dataToAppl)
-                UpdateLicenceApplication(item, fileName, validEvents, validEventDetails, ref errors);
+                await UpdateLicenceApplicationAsync(item, fileName, errors);
         }
 
-        private void UpdateLicenceApplication(LicenceDenialToApplData item, string fileName, List<ApplicationEventData> validEvents,
-                                              List<ApplicationEventDetailData> validEventDetails, ref List<string> errors)
+        private async Task UpdateLicenceApplicationAsync(LicenceDenialToApplData item, string fileName, List<string> errors)
         {
-            var licenceEvent = validEvents.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
-            var licenseDetailEvent = validEventDetails.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
+            var licenceEvent = ValidEvents.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
+            var licenseDetailEvent = ValidEventDetails.Where(m => m.Event_Id == item.Event_Id).FirstOrDefault();
 
             var responseType = GetResponseType(licenceEvent);
 
@@ -264,7 +260,7 @@ namespace FileBroker.Business
 
             if ((responseType == "L01") && (item.ActvSt_Cd == "A"))
             {
-                var applLicenceDenial = APIs.LicenceDenialApplications.ProcessLicenceDenialResponse(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+                var applLicenceDenial = await APIs.LicenceDenialApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
                 
                 if (applLicenceDenial.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
@@ -282,7 +278,7 @@ namespace FileBroker.Business
             }
             else if (responseType == "L03")
             {
-                var applLicenceDenialTermination = APIs.LicenceDenialTerminationApplications.ProcessLicenceDenialResponse(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+                var applLicenceDenialTermination = await APIs.LicenceDenialTerminationApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
                 
                 if (applLicenceDenialTermination.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
@@ -306,7 +302,7 @@ namespace FileBroker.Business
             {
                 licenceEvent.ActvSt_Cd = item.ActvSt_Cd;
                 licenceEvent.Event_Compl_Dte = DateTime.Now;
-                APIs.ApplicationEvents.SaveEvent(licenceEvent);
+                await APIs.ApplicationEvents.SaveEventAsync(licenceEvent);
             }
 
             if (licenseDetailEvent is not null)
@@ -314,15 +310,14 @@ namespace FileBroker.Business
                 licenseDetailEvent.ActvSt_Cd = item.ActvSt_Cd;
                 licenseDetailEvent.AppLiSt_Cd = item.Dtl_List;
                 licenseDetailEvent.Event_Compl_Dte = DateTime.Now;
-                APIs.ApplicationEvents.SaveEventDetail(licenseDetailEvent);
+                await APIs.ApplicationEvents.SaveEventDetailAsync(licenseDetailEvent);
             }
 
         }
 
-        private void VerifyReceivedDataForErrors(LicenceDenialResponseData item, string fedSource, string fileName,
-                                                 ref List<ApplicationEventData> validEvents)
+        private void VerifyReceivedDataForErrors(LicenceDenialResponseData item, string fedSource, string fileName)
         {
-            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
+            var eventForAppl = ValidEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
                                                       (m.Appl_CtrlCd == item.Appl_CtrlCd)).FirstOrDefault();
 
             if (eventForAppl is not null)
@@ -338,20 +333,19 @@ namespace FileBroker.Business
 
         }
 
-        private void UpdateLicenceEventTables(LicenceDenialResponseData item, short newState, string fileName,
-                                              List<ApplicationEventData> validEvents, List<ApplicationEventDetailData> validEventDetails)
+        private async Task UpdateLicenceEventTablesAsync(LicenceDenialResponseData item, short newState, string fileName)
         {
             string eventReason = $"[FileNm:{fileName}][RecPos:{item.LicRsp_SeqNr}][ErrDes:000000MSGBRO]" +
                                  $"[(EnfSrv:{item.Appl_EnfSrv_Cd.Trim()})(CtrlCd:{item.Appl_CtrlCd.Trim()})]" +
                                  $"[RqStat:{item.RqstStat_Cd}]";
 
-            var eventForAppl = validEvents.Where(m => (m.Appl_EnfSrv_Cd.Trim() == item.Appl_EnfSrv_Cd.Trim()) &&
+            var eventForAppl = ValidEvents.Where(m => (m.Appl_EnfSrv_Cd.Trim() == item.Appl_EnfSrv_Cd.Trim()) &&
                                                       (m.Appl_CtrlCd.Trim() == item.Appl_CtrlCd.Trim())).FirstOrDefault();
             if (eventForAppl != null)
             {
                 int eventId = eventForAppl.Event_Id;
 
-                var eventDetailForAppl = validEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
+                var eventDetailForAppl = ValidEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
                 if (eventDetailForAppl != null)
                 {
                     var responseType = GetResponseType(eventForAppl);
@@ -379,7 +373,7 @@ namespace FileBroker.Business
                             break;
                     }
 
-                    APIs.ApplicationEvents.SaveEventDetail(eventDetailForAppl);
+                    await APIs.ApplicationEvents.SaveEventDetailAsync(eventDetailForAppl);
                 }
             }
         }

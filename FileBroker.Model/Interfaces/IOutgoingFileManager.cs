@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Model.Interfaces
 {
     public interface IOutgoingFileManager
     {
-        string CreateOutputFile(string fileBaseName, out List<string> errors);
+        Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors);
     }
 }

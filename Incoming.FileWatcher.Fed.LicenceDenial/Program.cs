@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Incoming.FileWatcher.Fed.Tracing
 {
@@ -17,7 +18,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
     {
         private static IncomingFederalLicenceDenialFile FederalFileManager;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Licence Denial File Monitor");
 
@@ -51,8 +52,8 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    FederalFileManager.ProcessNewFile(newFile, ref errors);
-                    if (errors.Any())
+                    await FederalFileManager.ProcessNewFileAsync(newFile);
+                    if (FederalFileManager.Errors.Any())
                         foreach (var error in errors)
                             errorTrackingDB.MessageBrokerError("LICIN", newFile, new Exception(error), displayExceptionError: true);
                 }

@@ -12,12 +12,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Outgoing.FileCreator.MEP
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting MEP Outgoing File Creator");
 
@@ -88,24 +89,25 @@ namespace Outgoing.FileCreator.MEP
             };
 
             if (generateTracingFiles)
-                CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories));
 
             if (generateLicencingFiles)
-                CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories));
 
             if (generateStatsFiles)
-                CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories));
         }
 
-        private static void CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
-                                                          IOutgoingFileManager outgoingProvincialFileManager)
+        private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
+                                                                IOutgoingFileManager outgoingProvincialFileManager)
         {
             var provincialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory(category)
                                                                   .Where(s => s.Active == true);
 
             foreach (var provincialOutgoingSource in provincialOutgoingSources)
             {
-                string filePath = outgoingProvincialFileManager.CreateOutputFile(provincialOutgoingSource.Name, out List<string> errors);
+                var errors = new List<string>();
+                string filePath = await outgoingProvincialFileManager.CreateOutputFileAsync(provincialOutgoingSource.Name, errors);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else

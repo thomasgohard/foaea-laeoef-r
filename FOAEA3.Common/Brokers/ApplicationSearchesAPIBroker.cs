@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -13,10 +14,10 @@ namespace FOAEA3.Common.Brokers
             ApiHelper = apiHelper;
         }
 
-        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria)
+        public async Task<List<ApplicationSearchResultData>> SearchAsync(QuickSearchData searchCriteria)
         {
             string apiCall = $"api/v1/applicationSearches";
-            return ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria).Result;
+            return await ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria);
         }
     }
 }

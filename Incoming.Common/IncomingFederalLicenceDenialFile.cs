@@ -8,8 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Xml;
+using System.Threading.Tasks;
 
 namespace Incoming.Common
 {
@@ -18,6 +17,7 @@ namespace Incoming.Common
         private DBFileTable FileTable { get; }
         private ApiConfig ApiFilesConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
+        public List<string> Errors { get; }
 
         public IncomingFederalLicenceDenialFile(IDBTools fileBrokerDB,
                                                 ApiConfig apiFilesConfig,
@@ -26,6 +26,7 @@ namespace Incoming.Common
             ApiFilesConfig = apiFilesConfig;
             APIHelper = apiHelper;
             FileTable = new DBFileTable(fileBrokerDB);
+            Errors = new List<string>();
         }
 
         public void AddNewFiles(string rootPath, ref List<string> newFiles)
@@ -47,7 +48,7 @@ namespace Incoming.Common
             }
         }
 
-        public bool ProcessNewFile(string fullPath, ref List<string> errors)
+        public async Task<bool> ProcessNewFileAsync(string fullPath)
         {
             bool fileProcessedSuccessfully = false;
 
@@ -57,29 +58,33 @@ namespace Incoming.Common
             {
 
                 string xmlData = File.ReadAllText(fullPath);
-                string jsonText = FileHelper.ConvertXmlToJson(xmlData, ref errors); // convert xml to json
+                string jsonText = FileHelper.ConvertXmlToJson(xmlData, Errors); // convert xml to json
 
-                if (errors.Any())
+                if (Errors.Any())
                     return false;
 
-                var response = APIHelper.PostFlatFile($"api/v1/FederalLicenceDenialFiles?fileName={fileNameNoPath}",
+                var response = await APIHelper.PostFlatFileAsync($"api/v1/FederalLicenceDenialFiles?fileName={fileNameNoPath}",
                                                       jsonText, ApiFilesConfig.FileBrokerFederalLicenceDenialRootAPI);
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    ColourConsole.WriteEmbeddedColorLine($"[red]Error: {response.Content?.ReadAsStringAsync().Result}[/red]");
-                    errors.Add($"FederalLicenceDenialFiles API failed with return code: {response.Content?.ReadAsStringAsync().Result}");
+                    if (response.Content is not null)
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error: {await response.Content.ReadAsStringAsync()}[/red]");
+                    else
+                        ColourConsole.WriteEmbeddedColorLine($"[red]Error[/red]");
+                    Errors.Add($"FederalLicenceDenialFiles API failed with return code: {response.StatusCode}");
                 }
                 else
-                    ColourConsole.WriteEmbeddedColorLine($"[green]{response.Content?.ReadAsStringAsync().Result}[/green]");
+                {
+                    if (response.Content is not null)
+                        ColourConsole.WriteEmbeddedColorLine($"[green]{await response.Content.ReadAsStringAsync()}[/green]");
+                }
 
                 fileProcessedSuccessfully = true;
 
             }
             else
-            {
-                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
-            }
+                Errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
 
             return fileProcessedSuccessfully;
         }

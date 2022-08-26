@@ -1,7 +1,9 @@
-﻿namespace FileBroker.Model.Interfaces.Broker
+﻿using System.Threading.Tasks;
+
+namespace FileBroker.Model.Interfaces.Broker
 {
     public interface IMEPInterceptionAPIBroker
     {
-        string GetLatestProvincialFile(string partnerId);
+        Task<string> GetLatestProvincialFileAsync(string partnerId);
     }
 }

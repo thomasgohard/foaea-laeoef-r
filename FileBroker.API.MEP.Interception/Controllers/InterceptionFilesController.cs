@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.API.MEP.Tracing.Controllers;
 
@@ -73,7 +74,7 @@ public class InterceptionFilesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult ProcessIncomingInterceptionFile([FromQuery] string fileName,
+    public async Task<ActionResult> ProcessIncomingInterceptionFileAsync([FromQuery] string fileName,
                                                         [FromServices] IFileAuditRepository fileAuditDB,
                                                         [FromServices] IFileTableRepository fileTableDB,
                                                         [FromServices] ITranslationRepository translationDB,
@@ -88,7 +89,7 @@ public class InterceptionFilesController : ControllerBase
         string sourceInterceptionJsonData;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            sourceInterceptionJsonData = reader.ReadToEndAsync().Result;
+            sourceInterceptionJsonData = await reader.ReadToEndAsync();
         }
 
 
@@ -133,7 +134,7 @@ public class InterceptionFilesController : ControllerBase
         var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
-            var info = interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags, includeInfoInMessages: true);
+            var info = await interceptionManager.ExtractAndProcessRequestsInFileAsync(sourceInterceptionJsonData, unknownTags, includeInfoInMessages: true);
 
             if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                 if (info.ContainsSystemMessagesOfType(MessageType.Error))

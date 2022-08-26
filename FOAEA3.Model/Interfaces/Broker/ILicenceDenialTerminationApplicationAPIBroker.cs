@@ -1,7 +1,9 @@
-﻿namespace FOAEA3.Model.Interfaces.Broker
+﻿using System.Threading.Tasks;
+
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface ILicenceDenialTerminationApplicationAPIBroker
     {
-        LicenceDenialApplicationData ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<LicenceDenialApplicationData> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }
 }

@@ -2,8 +2,10 @@
 using FileBroker.Data;
 using FileBroker.Model;
 using FOAEA3.Common.Brokers;
+using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FileBroker.Business.Tests
@@ -12,7 +14,7 @@ namespace FileBroker.Business.Tests
     {
         
         [Fact]
-        public void GetAndValidateAppDataFromRequest_Test1()
+        public async Task GetAndValidateAppDataFromRequest_Test1()
         {
             // Arrange
             string enfService = "ON01";
@@ -72,13 +74,16 @@ namespace FileBroker.Business.Tests
                                                                                 auditConfig);
 
             // Act
-            var applicationData = interceptionManager.GetAndValidateAppDataFromRequest(coreData,
+            InterceptionApplicationData applicationData;
+            bool isValidData;
+            int thisErrorCount = 0;
+
+            (applicationData, thisErrorCount, isValidData) = await interceptionManager.GetAndValidateAppDataFromRequestAsync(coreData,
                                                                                        interceptionData,
                                                                                        financialData,
                                                                                        sourceSpecificData,
-                                                                                       ref fileAuditData,
-                                                                                       ref errorCount,
-                                                                                       out bool isValidData);
+                                                                                       fileAuditData);
+            errorCount += thisErrorCount;
 
             // Assert
             Assert.True(isValidData);

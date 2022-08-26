@@ -11,12 +11,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Outgoing.FileCreator.Fed.SIN;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing SIN File Creator");
 
@@ -34,12 +35,12 @@ internal class Program
         var fileBrokerDB = new DBTools(fileBrokerConnectionString);
         var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-        CreateOutgoingFederalSinFile(fileBrokerDB, apiRootForFiles);
+        await CreateOutgoingFederalSinFileAsync(fileBrokerDB, apiRootForFiles);
 
         ColourConsole.Write("Completed.\n");
     }
 
-    private static void CreateOutgoingFederalSinFile(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
+    private static async Task CreateOutgoingFederalSinFileAsync(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
     {
         var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
@@ -65,8 +66,8 @@ internal class Program
 
         foreach (var federalSinOutgoingSource in federalSinOutgoingSources)
         {
-            string filePath = federalFileManager.CreateOutputFile(federalSinOutgoingSource.Name,
-                                                                  out List<string> errors);
+            var errors = new List<string>();
+            string filePath = await federalFileManager.CreateOutputFileAsync(federalSinOutgoingSource.Name, errors);
 
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");

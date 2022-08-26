@@ -13,7 +13,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         Repositories = repositories;
     }
 
-    public string CreateOutputFile(string fileBaseName, out List<string> errors)
+    public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
     {
         errors = new List<string>();
 
@@ -38,7 +38,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 return "";
             }
 
-            var data = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                      processCodes.EnfSrv_Cd);
 
             var eventIds = new List<int>();
@@ -52,7 +52,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
             Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-            APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+            await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                      processCodes.EnfSrv_Cd,
                                                                      "OK: Written to " + newFilePath, eventIds);
 
@@ -74,14 +74,14 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
     }
 
-    private List<TracingOutgoingFederalData> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,
+    private async Task<List<TracingOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                            int appLiSt_Cd, string enfSrvCode)
     {
         var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = APIs.TracingApplications.GetOutgoingFederalTracingRequests(maxRecords, actvSt_Cd,
-                                                                                      appLiSt_Cd, enfSrvCode);
+        var data = await APIs.TracingApplications.GetOutgoingFederalTracingRequestsAsync(maxRecords, actvSt_Cd,
+                                                                                         appLiSt_Cd, enfSrvCode);
         return data;
     }
 

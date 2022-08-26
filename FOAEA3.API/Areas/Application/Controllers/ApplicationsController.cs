@@ -41,12 +41,12 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpPut("{id}/ValidateCoreValues")]
-    public ActionResult<ApplicationData> ValidateCoreValues([FromRoute] string id,
+    public async Task<ActionResult<ApplicationData>> ValidateCoreValues([FromRoute] string id,
                                                             [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
-        var appl = APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
+        var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
         var applicationValidation = new ApplicationValidation(appl, repositories, config);
 
         bool isValid = applicationValidation.ValidateCodeValues();
@@ -88,13 +88,13 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpPut("{id}/SinConfirmation")]
-    public ActionResult<ApplicationData> SINconfirmation([FromRoute] string id,
+    public async Task<ActionResult<ApplicationData>> SINconfirmation([FromRoute] string id,
                                                          [FromServices] IRepositories repositories,
                                                          [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(id);
 
-        var sinConfirmationData = APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
+        var sinConfirmationData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINConfirmationData>(Request);
 
         var application = new ApplicationData();
 
