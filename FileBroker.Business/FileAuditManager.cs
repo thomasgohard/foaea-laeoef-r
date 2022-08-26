@@ -20,13 +20,13 @@ public class FileAuditManager
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
 
-    public void GenerateAuditFile(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
+    public async Task GenerateAuditFileAsync(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
     {
         string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
         var auditFileContent = new StringBuilder();
 
-        var auditData = FileAuditDB.GetFileAuditDataForFile(fileName);
+        var auditData = await FileAuditDB.GetFileAuditDataForFileAsync(fileName);
         var auditErrorsData = new List<FileAuditData>();
         if (isFrench)
         {
@@ -103,10 +103,10 @@ public class FileAuditManager
 
         // save file to proper location
         string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
-        File.WriteAllText(fullFileName, auditFileContent.ToString());
+        await File.WriteAllTextAsync(fullFileName, auditFileContent.ToString());
     }
 
-    public void SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount, int successCount, int xmlWarningCount)
+    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount, int successCount, int xmlWarningCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -136,11 +136,11 @@ public class FileAuditManager
 
         string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
 
-        MailService.SendEmail($"Audit {fileName}.xml", recipients, bodyContent, auditFileLocation);
+        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent, auditFileLocation);
 
     }
 
-    public void SendSystemErrorAuditEmail(string fileName, string recipients, MessageDataList errors)
+    public async Task SendSystemErrorAuditEmailAsync(string fileName, string recipients, MessageDataList errors)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -165,7 +165,7 @@ public class FileAuditManager
             bodyContent += @"<br />For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
         }
 
-        MailService.SendEmail($"Audit {fileName}.xml", recipients, bodyContent);
+        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent);
 
     }
 }

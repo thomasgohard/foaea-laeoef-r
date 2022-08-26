@@ -11,9 +11,9 @@ public class IncomingFederalTracingFileLoader
         ProcessId = processId;
     }
 
-    public void FillTracingFileDataFromFlatFile(FedTracingFileBase fileData, string flatFile, ref List<string> errors)
+    public async Task FillTracingFileDataFromFlatFileAsync(FedTracingFileBase fileData, string flatFile, List<string> errors)
     {
-        var specs = FlatFileSpecs.GetFlatFileSpecificationsForFile(ProcessId);
+        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync (ProcessId);
 
         // extract data into object
         var flatFileLines = flatFile.Split("\n");

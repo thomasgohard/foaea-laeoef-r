@@ -29,9 +29,11 @@ public class TracingFilesController : ControllerBase
 
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
-    public IActionResult GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {
-        string fileContent = LoadLatestProvincialTracingFile(partnerId, fileTable, out string lastFileName);
+        string fileContent;
+        string lastFileName;
+        (fileContent, lastFileName) = await LoadLatestProvincialTracingFileAsync(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -41,17 +43,18 @@ public class TracingFilesController : ControllerBase
         return File(result, "text/xml", lastFileName);
     }
 
-    private static string LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable,
-                                                          out string lastFileName)
+    private static async Task<(string, string)> LoadLatestProvincialTracingFileAsync(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = fileTable.GetFileTableDataForCategory("TRCAPPOUT")
+        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("TRCAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
+
+        string lastFileName;
 
         if (fileTableData is null)
         {
             lastFileName = "";
-            return $"Error: fileTableData is empty for category TRCAPPOUT.";
+            return ($"Error: fileTableData is empty for category TRCAPPOUT.", lastFileName);
         }
 
         var fileLocation = fileTableData.Path;
@@ -65,9 +68,9 @@ public class TracingFilesController : ControllerBase
 
         string fullFilePath = $"{fileLocation}{lastFileName}";
         if (System.IO.File.Exists(fullFilePath))
-            return System.IO.File.ReadAllText(fullFilePath);
+            return (System.IO.File.ReadAllText(fullFilePath), lastFileName);
         else
-            return null;
+            return (null, null);
 
     }
 
@@ -120,7 +123,7 @@ public class TracingFilesController : ControllerBase
         var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
             await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingJsonData, unknownTags);

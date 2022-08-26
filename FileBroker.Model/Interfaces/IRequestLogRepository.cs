@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Model.Interfaces
 {
     public interface IRequestLogRepository
     {
-        int Add(RequestLogData requestLogData);
-        List<RequestLogData> GetAll();
-        void DeleteAll();
+        Task<int> AddAsync(RequestLogData requestLogData);
+        Task<List<RequestLogData>> GetAllAsync();
+        Task DeleteAllAsync();
     }
 }

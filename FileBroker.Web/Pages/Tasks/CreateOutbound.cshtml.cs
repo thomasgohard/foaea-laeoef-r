@@ -43,9 +43,9 @@ namespace FileBroker.Web.Pages.Tasks
             ApiConfig = apiConfig.Value;
         }
 
-        public void OnGet()
+        public async Task OnGet()
         {
-            ActiveOutgoingProcesses = FileTable.GetAllActive().Where(m => m.Type.ToLower() == "out").ToList();
+            ActiveOutgoingProcesses = (await FileTable.GetAllActiveAsync()).Where(m => m.Type.ToLower() == "out").ToList();
         }
 
         public async Task OnPostCreateFiles(int[] selectedProcesses)
@@ -77,7 +77,7 @@ namespace FileBroker.Web.Pages.Tasks
                 MailServiceDB = MailServiceDB
             };
 
-            var processData = FileTable.GetAllActive().Where(m => m.Type.ToLower() == "out").ToList();
+            var processData = (await FileTable.GetAllActiveAsync()).Where(m => m.Type.ToLower() == "out").ToList();
 
             InfoMessage = string.Empty;
             int lastItem = selectedProcesses.Last();

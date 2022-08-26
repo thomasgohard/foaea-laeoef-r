@@ -13,7 +13,7 @@ public class IncomingFederalSinManager
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
     {
-        var fileTableData = GetFileTableData(flatFileName);
+        var fileTableData = await GetFileTableDataAsync(flatFileName);
 
         var sinFileData = new FedSinFileBase();
 
@@ -35,12 +35,12 @@ public class IncomingFederalSinManager
             return errors;
         }
 
-        Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
+        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
         try
         {
             var fileLoader = new IncomingFederalSinFileLoader(Repositories.FlatFileSpecs, fileTableData.PrcId);
-            fileLoader.FillSinFileDataFromFlatFile(sinFileData, flatFileContent, ref errors);
+            await fileLoader.FillSinFileDataFromFlatFileAsync(sinFileData, flatFileContent, errors);
 
             if (errors.Any())
                 return errors;
@@ -55,7 +55,7 @@ public class IncomingFederalSinManager
 
             if ((sinResults != null) && (sinFileData.SININ02.Count > 0))
             {
-                var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
+                var processCodes = await Repositories.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
                 await SendSinResultsToFOAEAAsync(sinResults, flatFileName, (short)processCodes.AppLiSt_Cd);
             }
@@ -68,8 +68,8 @@ public class IncomingFederalSinManager
         finally
         {
             if (errors.Count == 0)
-                Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
-            Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+                await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
         }
 
         return errors;
@@ -295,11 +295,11 @@ public class IncomingFederalSinManager
         return sinResults;
     }
 
-    private FileTableData GetFileTableData(string flatFileName)
+    private async Task<FileTableData> GetFileTableDataAsync(string flatFileName)
     {
         string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
-        return Repositories.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+        return await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
     }
 
     private static void ValidateHeader(FedSin_RecType01 dataFromFile, string flatFileName, ref List<string> errors)

@@ -30,9 +30,11 @@ public class InterceptionFilesController : ControllerBase
 
     //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
-    public IActionResult GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {
-        string fileContent = LoadLatestProvincialTracingFile(partnerId, fileTable, out string lastFileName);
+        string fileContent;
+        string lastFileName;
+        (fileContent, lastFileName) = await LoadLatestProvincialTracingFileAsync(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -43,17 +45,18 @@ public class InterceptionFilesController : ControllerBase
         return file;
     }
 
-    private static string LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable,
-                                                          out string lastFileName)
+    private static async Task<(string, string)> LoadLatestProvincialTracingFileAsync(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = fileTable.GetFileTableDataForCategory("INTAPPOUT")
+        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("INTAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 
-        if (fileTableData is null)
+        string lastFileName;
+        
+        if(fileTableData is null)
         {
             lastFileName = "";
-            return $"Error: fileTableData is empty for category INTAPPOUT.";
+            return ($"Error: fileTableData is empty for category INTAPPOUT.", lastFileName);
         }
 
         var fileLocation = fileTableData.Path;
@@ -67,9 +70,9 @@ public class InterceptionFilesController : ControllerBase
 
         string fullFilePath = $"{fileLocation}{lastFileName}";
         if (System.IO.File.Exists(fullFilePath))
-            return System.IO.File.ReadAllText(fullFilePath);
+            return (System.IO.File.ReadAllText(fullFilePath), lastFileName);
         else
-            return null;
+            return (null, null);
 
     }
 
@@ -131,7 +134,7 @@ public class InterceptionFilesController : ControllerBase
         var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
             var info = await interceptionManager.ExtractAndProcessRequestsInFileAsync(sourceInterceptionJsonData, unknownTags, includeInfoInMessages: true);

@@ -32,7 +32,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             IConfiguration configuration = builder.Build();
 
             string fileBrokerConnectionString = configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
-            var fileBrokerDB = new DBTools(fileBrokerConnectionString);
+            var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, apiRootForFiles);
@@ -41,7 +41,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
 
         }
 
-        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBTools fileBrokerDB, ApiConfig apiRootForFiles)
+        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles)
         {
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -68,7 +68,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
 
             var federalFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
 
-            var federalLicenceDenialOutgoingSources = repositories.FileTable.GetFileTableDataForCategory("LICOUT")
+            var federalLicenceDenialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("LICOUT"))
                                                                   .Where(s => s.Active == true);
 
             foreach (var federalLicenceDenialOutgoingSource in federalLicenceDenialOutgoingSources)
@@ -82,8 +82,8 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        repositories.ErrorTrackingDB.MessageBrokerError("LICOUT", federalLicenceDenialOutgoingSource.Name, 
-                                                                        new Exception(error), displayExceptionError: true);
+                        await repositories.ErrorTrackingDB.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
+                                                                                   new Exception(error), displayExceptionError: true);
                     }
             }
 

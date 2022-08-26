@@ -27,9 +27,9 @@ public class IncomingProvincialTracingManager
         var fileAuditManager = new FileAuditManager(Repositories.FileAudit, AuditConfiguration, Repositories.MailServiceDB);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-        var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
-        Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
+        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
         bool isValid = true;
 
@@ -119,12 +119,12 @@ public class IncomingProvincialTracingManager
                         errorCount++;
                     }
 
-                    Repositories.FileAudit.InsertFileAuditData(fileAuditData);
+                    await Repositories.FileAudit.InsertFileAuditDataAsync(fileAuditData);
 
                 }
 
-                fileAuditManager.GenerateAuditFile(FileName, unknownTags, errorCount, warningCount, successCount);
-                fileAuditManager.SendStandardAuditEmail(FileName, AuditConfiguration.AuditRecipients, 
+                await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
+                await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, 
                                                         errorCount, warningCount, successCount, unknownTags.Count);
             }
 
@@ -134,12 +134,12 @@ public class IncomingProvincialTracingManager
         {
             result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-            fileAuditManager.SendSystemErrorAuditEmail(FileName, AuditConfiguration.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
         }
 
-        Repositories.FileAudit.MarkFileAuditCompletedForFile(FileName);
-        Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
-        Repositories.FileTable.SetNextCycleForFileType(fileTableData);
+        await Repositories.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
+        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+        await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
 
         return result;
     }

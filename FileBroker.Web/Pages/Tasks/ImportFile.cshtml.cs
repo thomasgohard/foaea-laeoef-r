@@ -40,7 +40,7 @@ namespace FileBroker.Web.Pages.Tasks
                     fileName = Path.GetFileNameWithoutExtension(fileName); // remove XML extension first
                 var fileNameNoExt = Path.GetFileNameWithoutExtension(fileName); // remove cycle, if any
 
-                var incomingFileInfo = FileTable.GetFileTableDataForFileName(fileNameNoExt);
+                var incomingFileInfo = await FileTable.GetFileTableDataForFileNameAsync(fileNameNoExt);
                 if (incomingFileInfo is null)
                 {
                     ErrorMessage = "Error: Could not identify type of file from FileTable";

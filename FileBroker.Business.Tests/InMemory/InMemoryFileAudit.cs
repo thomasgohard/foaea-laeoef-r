@@ -2,6 +2,7 @@
 using FileBroker.Model.Interfaces;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -14,7 +15,7 @@ namespace FileBroker.Business.Tests.InMemory
             FileAuditTable = new List<FileAuditData>();
         }
 
-        public List<FileAuditData> GetFileAuditDataForFile(string fileName)
+        public List<FileAuditData> GetFileAuditDataForFileAsync(string fileName)
         {
             return FileAuditTable;
         }
@@ -38,6 +39,26 @@ namespace FileBroker.Business.Tests.InMemory
                                                  (m.Appl_CtrlCd == data.Appl_CtrlCd)).FirstOrDefault();
             if (item != null)
                 item.IsCompleted = true;
+        }
+
+        Task<List<FileAuditData>> IFileAuditRepository.GetFileAuditDataForFileAsync(string fileName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task InsertFileAuditDataAsync(FileAuditData data)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task MarkFileAuditCompletedForFileAsync(string fileName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task MarkFileAuditCompletedForItemAsync(FileAuditData data)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -4,20 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.Data.DB
 {
 
     public class DBErrorTracking : IErrorTrackingRepository
     {
-        private IDBTools MainDB { get; }
+        private IDBToolsAsync MainDB { get; }
 
-        public DBErrorTracking(IDBTools mainDB)
+        public DBErrorTracking(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public void MessageBrokerError(string errorType, string errorSubject, Exception e, bool displayExceptionError,
+        public async Task MessageBrokerErrorAsync(string errorType, string errorSubject, Exception e, bool displayExceptionError,
                                        DataRow row = null)
         {
             var rowValues = new StringBuilder();
@@ -44,7 +45,7 @@ namespace FileBroker.Data.DB
                 {"errorSubject", errorSubject }
             };
 
-            MainDB.ExecProc("MessageBrokerError", parameters);
+            await MainDB.ExecProcAsync("MessageBrokerError", parameters);
         }
 
     }

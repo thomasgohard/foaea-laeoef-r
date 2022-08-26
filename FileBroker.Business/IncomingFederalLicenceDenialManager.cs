@@ -21,7 +21,7 @@ namespace FileBroker.Business
 
         public async Task<List<string>> ProcessJsonFileAsync(string jsonFileContent, string fileName)
         {
-            var fileTableData = GetFileTableData(fileName);
+            var fileTableData = await GetFileTableDataAsync(fileName);
 
             var errors = new List<string>();
 
@@ -48,7 +48,7 @@ namespace FileBroker.Business
             if (errors.Any())
                 return errors;
 
-            Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
+            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
             string fileCycle = Path.GetExtension(fileName)[1..];
             try
@@ -75,7 +75,7 @@ namespace FileBroker.Business
                 {
                     await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
 
-                    Repositories.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
+                    await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
                 }
 
             }
@@ -85,7 +85,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                Repositories.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+                await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
             }
 
             return errors;
@@ -153,11 +153,11 @@ namespace FileBroker.Business
             return responseData;
         }
 
-        private FileTableData GetFileTableData(string fileName)
+        private async Task<FileTableData> GetFileTableDataAsync(string fileName)
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
 
-            return Repositories.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+            return await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         }
 
         private static void ValidateHeader(FedLicenceDenial_DataSet licenceDenialFile, string fileName, ref List<string> result)
@@ -225,7 +225,7 @@ namespace FileBroker.Business
             try
             {
                 foreach (var item in licenceDenialResponseData)
-                    VerifyReceivedDataForErrors(item, fedSource, fileName);
+                    await VerifyReceivedDataForErrorsAsync(item, fedSource, fileName);
 
                 var dataToSave = licenceDenialResponseData.Where(m => (m.RqstStat_Cd != 5) || (fedSource != "PA01")).ToList();
                 await APIs.LicenceDenialResponses.InsertBulkDataAsync(dataToSave);
@@ -270,8 +270,8 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            Repositories.ErrorTrackingDB.MessageBrokerError("MessageBrokerService", "File Broker Service Error",
-                                                                            new Exception(errorMsg), displayExceptionError: true);
+                            await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                                                                                       new Exception(errorMsg), displayExceptionError: true);
                         }
                     }
                 }
@@ -288,8 +288,8 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            Repositories.ErrorTrackingDB.MessageBrokerError("MessageBrokerService", "File Broker Service Error",
-                                                                            new Exception(errorMsg), displayExceptionError: true);
+                            await  Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                                                                                        new Exception(errorMsg), displayExceptionError: true);
                         }
                     }
                 }
@@ -315,7 +315,7 @@ namespace FileBroker.Business
 
         }
 
-        private void VerifyReceivedDataForErrors(LicenceDenialResponseData item, string fedSource, string fileName)
+        private async Task VerifyReceivedDataForErrorsAsync(LicenceDenialResponseData item, string fedSource, string fileName)
         {
             var eventForAppl = ValidEvents.Where(m => (m.Appl_EnfSrv_Cd == item.Appl_EnfSrv_Cd) &&
                                                       (m.Appl_CtrlCd == item.Appl_CtrlCd)).FirstOrDefault();
@@ -326,7 +326,7 @@ namespace FileBroker.Business
                 if ((item.RqstStat_Cd == 5) && (fedSource == "PA01"))
                 {
                     string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} code 05 not loaded Data In Foaea. File Name: {fileName}";
-                    Repositories.ErrorTrackingDB.MessageBrokerError("MessageBrokerService", "File Broker Service Error",
+                    await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                     new Exception(errorMsg), displayExceptionError: true);
                 }
             }

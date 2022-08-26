@@ -26,13 +26,16 @@ public class FederalLicenceDenialFilesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet("")]
-    public IActionResult GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {
         string fileName = partnerId + "3SLSOL"; // e.g. PA3SLSOL
 
         int fileCycleLength = 6; // TODO: should come from FileTable
 
-        string fileContent = LoadLatestFederalLicenceDenialFile(fileName, fileTable, fileCycleLength, out string lastFileCycleString);
+        string fileContent;
+        string lastFileCycleString;
+
+        (fileContent, lastFileCycleString) = await LoadLatestFederalLicenceDenialFileAsync(fileName, fileTable, fileCycleLength);
 
         if (fileContent == null)
             return NotFound();
@@ -42,10 +45,10 @@ public class FederalLicenceDenialFilesController : ControllerBase
         return File(result, "text/xml", fileName + "." + lastFileCycleString + ".XML");
     }
 
-    private static string LoadLatestFederalLicenceDenialFile(string fileName, IFileTableRepository fileTable,
-                                                             int fileCycleLength, out string lastFileCycleString)
+    private static async Task<(string, string)> LoadLatestFederalLicenceDenialFileAsync(string fileName, IFileTableRepository fileTable,
+                                                             int fileCycleLength)
     {
-        var fileTableData = fileTable.GetFileTableDataForFileName(fileName);
+        var fileTableData = await fileTable.GetFileTableDataForFileNameAsync(fileName);
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle; // - 1;
                                                  //if (lastFileCycle < 1)
@@ -56,13 +59,13 @@ public class FederalLicenceDenialFilesController : ControllerBase
                                                  //}
 
         var lifeCyclePattern = new string('0', fileCycleLength);
-        lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);
+        string lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);
 
         string fullFilePath = $"{fileLocation}{fileName}.{lastFileCycleString}.XML";
         if (System.IO.File.Exists(fullFilePath))
-            return System.IO.File.ReadAllText(fullFilePath);
+            return (System.IO.File.ReadAllText(fullFilePath), lastFileCycleString);
         else
-            return null;
+            return (null, null);
 
     }
 
@@ -125,7 +128,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
         var licenceDenialManager = new IncomingFederalLicenceDenialManager(apis, repositories);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = fileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         if (!fileTableData.IsLoading)
         {
             await licenceDenialManager.ProcessJsonFileAsync(sourceLicenceDenialJsonData, fileName);

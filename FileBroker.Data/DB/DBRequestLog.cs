@@ -3,21 +3,22 @@ using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Data.DB
 {
     public class DBRequestLog : IRequestLogRepository
     {
-        private IDBTools MainDB { get; }
+        private IDBToolsAsync MainDB { get; }
 
-        public DBRequestLog(IDBTools mainDB)
+        public DBRequestLog(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public int Add(RequestLogData requestLogData)
+        public async Task<int> AddAsync(RequestLogData requestLogData)
         {
-            return MainDB.CreateData<RequestLogData, int>("RequestLog", requestLogData, "RequestLogId", SetParametersForData, default);
+            return await MainDB.CreateDataAsync<RequestLogData, int>("RequestLog", requestLogData, "RequestLogId", SetParametersForData, default);
         }
 
         private void SetParametersForData(RequestLogData data, Dictionary<string, object> parameters)
@@ -29,14 +30,14 @@ namespace FileBroker.Data.DB
             parameters.Add("LoadedDateTime", data.LoadedDateTime);
         }
 
-        public List<RequestLogData> GetAll()
+        public async Task<List<RequestLogData>> GetAllAsync()
         {
-            return MainDB.GetAllData<RequestLogData>("RequestLog", FillRequestLogDataFromReader);
+            return await MainDB.GetAllDataAsync<RequestLogData>("RequestLog", FillRequestLogDataFromReader);
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync()
         {
-            MainDB.ExecProc("RequestLog_DeleteAll");
+            await MainDB.ExecProcAsync("RequestLog_DeleteAll");
         }
 
         private void FillRequestLogDataFromReader(IDBHelperReader rdr, RequestLogData data)

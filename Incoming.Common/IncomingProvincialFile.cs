@@ -37,7 +37,7 @@ namespace Incoming.Common
             LicencingBaseName = licencingBaseName;
         }
 
-        public void AddNewFiles(string rootPath, ref List<string> newFiles)
+        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*.xml");
@@ -49,7 +49,7 @@ namespace Incoming.Common
                 var fileNameNoFileType = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove .XML
                 int cycle = FileHelper.GetCycleFromFilename(fileNameNoFileType);
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoFileType); // remove cycle
-                var fileTableData = FileTableDB.GetFileTableDataForFileName(fileNameNoCycle);
+                var fileTableData = await FileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
                     newFiles.Add(fileInfo.FullName);
