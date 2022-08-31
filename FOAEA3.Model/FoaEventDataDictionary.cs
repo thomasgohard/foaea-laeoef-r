@@ -28,13 +28,13 @@ namespace FOAEA3.Model
 
         public FoaEventData this[EventCode code]
         {
-            get => FoaEvents[code.ToString()];
-            set => FoaEvents[code.ToString()] = value;
+            get => FoaEvents[((int) code).ToString()];
+            set => FoaEvents[((int) code).ToString()] = value;
         }
 
         public bool ContainsKey(EventCode code)
         {
-            return FoaEvents.ContainsKey(code.ToString());
+            return FoaEvents.ContainsKey(((int) code).ToString());
         }
 
     }

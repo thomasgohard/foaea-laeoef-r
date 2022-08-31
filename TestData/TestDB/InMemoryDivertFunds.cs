@@ -12,28 +12,32 @@ namespace TestData.TestDB
 
         public async Task<decimal> GetTotalDivertedForPeriodAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
         {
-            await Task.Run(() => { });
-            var result = 0.0M;
+            return await Task.Run(() =>
+            {
+                var result = 0.0M;
 
-            var data = InMemData.GarnPeriodTestData.FindAll(m => (m.Appl_CtrlCd == appl_CtrlCd) && (m.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (m.Period_no == period));
+                var data = InMemData.GarnPeriodTestData.FindAll(m => (m.Appl_CtrlCd == appl_CtrlCd) && (m.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (m.Period_no == period));
 
-            if (data.Count == 1)
-                result = data[0].Garn_Amt;
+                if (data.Count == 1)
+                    result = data[0].Garn_Amt;
 
-            return result;
+                return result;
+            });
         }
 
         public async Task<decimal> GetTotalFeesDivertedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
         {
-            await Task.Run(() => { });
-            var lastAnniversaryDate = GetApplicationLastAnniversaryDate(appl_CtrlCd, appl_EnfSrv_Cd);
+            return await Task.Run(() =>
+            {
+                var lastAnniversaryDate = GetApplicationLastAnniversaryDate(appl_CtrlCd, appl_EnfSrv_Cd);
 
-            var result = (from df in InMemData.SummDFTestData
-                          join fa in InMemData.SummFAFRTestData on new { df.SummFAFR_Id } equals new { fa.SummFAFR_Id }
-                          where (fa.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (fa.Appl_CtrlCd == appl_CtrlCd) && (df.SummDF_Divert_Dte >= lastAnniversaryDate)
-                          select df.SummDF_FeeAmt_Money).Sum();
+                var result = (from df in InMemData.SummDFTestData
+                              join fa in InMemData.SummFAFRTestData on new { df.SummFAFR_Id } equals new { fa.SummFAFR_Id }
+                              where (fa.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (fa.Appl_CtrlCd == appl_CtrlCd) && (df.SummDF_Divert_Dte >= lastAnniversaryDate)
+                              select df.SummDF_FeeAmt_Money).Sum();
 
-            return result ?? 0.0M;
+                return result ?? 0.0M;
+            });
         }
 
         public static DateTime GetApplicationLastAnniversaryDate(string appl_CtrlCd, string appl_EnfSrv_Cd)

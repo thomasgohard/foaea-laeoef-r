@@ -24,63 +24,67 @@ namespace FileBroker.Business.Tests.InMemory
 
         public async Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
         {
-            await Task.Run(() => { });
-            var result = new FileTableData();
-
-            switch (fileNameNoExt)
+            return await Task.Run(() =>
             {
-                case "RC3STSIT": // NETP
-                    result.PrcId = 2;
-                    result.Cycle = 1;
-                    result.Address = "dsarrazi@justice.gc.ca";
-                    break;
-                case "HR3STSIT": // EI 
-                    result.PrcId = 3;
-                    result.Cycle = 1;
-                    result.Address = "dsarrazi@justice.gc.ca";
-                    break;
-                case "EI3STSIT": // CRA 
-                    result.PrcId = 23;
-                    result.Cycle = 1;
-                    result.Address = "dsarrazi@justice.gc.ca";
-                    break;
-            }
+                var result = new FileTableData();
 
-            return result;
+                switch (fileNameNoExt)
+                {
+                    case "RC3STSIT": // NETP
+                        result.PrcId = 2;
+                        result.Cycle = 1;
+                        result.Address = "dsarrazi@justice.gc.ca";
+                        break;
+                    case "HR3STSIT": // EI 
+                        result.PrcId = 3;
+                        result.Cycle = 1;
+                        result.Address = "dsarrazi@justice.gc.ca";
+                        break;
+                    case "EI3STSIT": // CRA 
+                        result.PrcId = 23;
+                        result.Cycle = 1;
+                        result.Address = "dsarrazi@justice.gc.ca";
+                        break;
+                }
+
+                return result;
+            });
         }
 
         public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
-            await Task.Run(() => { });
-            return new List<FileTableData>
+            return await Task.Run(() =>
             {
-                new FileTableData
+                return new List<FileTableData>
                 {
-                    Name = "RC3STSOT",
-                    PrcId = 17,
-                    Cycle = 1,
-                    Path = "C:\\Work",
-                    Address = "dsarrazi@justice.gc.ca"
-                },
+                    new FileTableData
+                    {
+                        Name = "RC3STSOT",
+                        PrcId = 17,
+                        Cycle = 1,
+                        Path = "C:\\Work",
+                        Address = "dsarrazi@justice.gc.ca"
+                    },
 
-                new FileTableData
-                {
-                    Name = "HR3STSIT",
-                    PrcId = 18,
-                    Cycle = 1,
-                    Path = "C:\\Work",
-                    Address = "dsarrazi@justice.gc.ca"
-                },
+                    new FileTableData
+                    {
+                        Name = "HR3STSIT",
+                        PrcId = 18,
+                        Cycle = 1,
+                        Path = "C:\\Work",
+                        Address = "dsarrazi@justice.gc.ca"
+                    },
 
-                new FileTableData
-                {
-                    Name = "EI3STSIT",
-                    PrcId = 24,
-                    Cycle = 1,
-                    Path = "C:\\Work",
-                    Address = "dsarrazi@justice.gc.ca"
-                }
-            };
+                    new FileTableData
+                    {
+                        Name = "EI3STSIT",
+                        PrcId = 24,
+                        Cycle = 1,
+                        Path = "C:\\Work",
+                        Address = "dsarrazi@justice.gc.ca"
+                    }
+                };
+            });
         }
 
         public async Task<List<FileTableData>> GetAllActiveAsync()
@@ -91,26 +95,32 @@ namespace FileBroker.Business.Tests.InMemory
 
         public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
         {
-            await Task.Run(() => { });
-            if (fileData.PrcId.In(2, 3, 23))
+            await Task.Run(() =>
             {
-                NextCycle++;
-                if (NextCycle.ToString().Trim().Length > length)
-                    NextCycle = 1;
-            }
+                if (fileData.PrcId.In(2, 3, 23))
+                {
+                    NextCycle++;
+                    if (NextCycle.ToString().Trim().Length > length)
+                        NextCycle = 1;
+                }
+            });
         }
 
         public async Task<bool> IsFileLoadingAsync(int processId)
         {
-            await Task.Run(() => { });
-            return FileLoading;
+            return await Task.Run(() =>
+            {
+                return FileLoading;
+            });
         }
 
         public async Task SetIsFileLoadingValueAsync(int processId, bool newValue)
         {
-            await Task.Run(() => { });
-            if (processId.In(2, 3, 23))
-                FileLoading = newValue;
+            await Task.Run(() =>
+            {
+                if (processId.In(2, 3, 23))
+                    FileLoading = newValue;
+            });
         }
     }
 }

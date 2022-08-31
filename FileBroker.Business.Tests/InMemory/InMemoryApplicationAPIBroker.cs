@@ -28,8 +28,7 @@ namespace FileBroker.Business.Tests.InMemory
 
         public async Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application)
         {
-            await Task.Run(() => { });
-            throw new NotImplementedException();
+            return await Task.Run(() => { return application; });
         }
     }
 }

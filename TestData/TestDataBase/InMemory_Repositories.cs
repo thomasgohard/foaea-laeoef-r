@@ -53,11 +53,11 @@ namespace TestData.TestDataBase
 
         public IInfoBankRepository InfoBankTable => throw new System.NotImplementedException();
 
-        public IInterceptionRepository InterceptionTable => throw new System.NotImplementedException();
+        public IInterceptionRepository InterceptionTable { get; }
 
         public INotificationRepository NotificationService => throw new System.NotImplementedException();
 
-        public IApplicationEventDetailRepository ApplicationEventDetailTable => throw new System.NotImplementedException();
+        public IApplicationEventDetailRepository ApplicationEventDetailTable { get; }
 
         public ICaseManagementRepository CaseManagementTable => throw new System.NotImplementedException();
 
@@ -76,7 +76,9 @@ namespace TestData.TestDataBase
             CurrentSubmitter = "ON2D68";
 
             ApplicationTable = new InMemoryApplication();
+            InterceptionTable = new InMemoryInterception();
             ApplicationEventTable = new InMemoryApplicationEvent();
+            ApplicationEventDetailTable = new InMemoryApplicationEventDetail();
             // EventSINDetailRepository = new InMemoryEventSINDetail();
             ApplicationSearchTable = new InMemoryApplicationSearch();
             SubmitterTable = new InMemorySubmitter();

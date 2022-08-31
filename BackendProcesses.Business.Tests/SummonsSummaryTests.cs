@@ -9,7 +9,7 @@ namespace BackendProcesses.Business.Tests
     {
         public SummonsSummaryTests()
         {
-            ApplicationTestData.SetupApplicationTestData();
+            ApplicationTestData.SetupApplicationTestData(2);
             InterceptionFinHoldbackTestData.SetupInterceptionFinHoldbackTestData();
             SummSmryTestData.SetupAmountOwedTestData();
 

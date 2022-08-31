@@ -61,8 +61,7 @@ namespace FileBroker.Business.Tests.InMemory
 
         public async Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
         {
-            await Task.Run(() => { });
-            throw new NotImplementedException();
+            return await Task.Run(() => { return application; });
         }
 
         public async Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)

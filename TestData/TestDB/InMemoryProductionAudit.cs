@@ -14,8 +14,10 @@ namespace TestData.TestDB
 
         public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
-            await Task.Run(() => { });
-            InMemData.ProductionAuditData.Add($"{processName}({DateTime.Now}): {description}");
+            await Task.Run(() =>
+            {
+                InMemData.ProductionAuditData.Add($"{processName}({DateTime.Now}): {description}");
+            });
         }
 
         public async Task InsertAsync(ProductionAuditData productionAuditData)

@@ -18,8 +18,7 @@ namespace FileBroker.Business.Tests.InMemory
 
         public async Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData)
         {
-            await Task.Run(() => { });
-            throw new System.NotImplementedException();
+            return await Task.Run(() => { return tracingData; });
         }
 
         public async Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)

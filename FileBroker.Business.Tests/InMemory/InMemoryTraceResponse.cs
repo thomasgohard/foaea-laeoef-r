@@ -30,11 +30,7 @@ namespace FileBroker.Business.Tests.InMemory
         public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
             await Task.Run(() => { });
-            //var db = new DBTools("");
-
-            //var newDataTable = db.CreateAndFillDataTable<TraceResponseData>(responseData);
-
-            //int count = newDataTable.Rows.Count;
+            throw new NotImplementedException();
         }
 
         public async Task MarkResponsesAsViewedAsync(string enfService)
