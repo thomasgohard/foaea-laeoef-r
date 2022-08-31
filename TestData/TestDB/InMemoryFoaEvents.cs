@@ -24,10 +24,10 @@ namespace TestData.TestDB
 
         public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
         {
-            var result = new FoaEventDataDictionary();
-
-            await Task.Run(() =>
+            return await Task.Run(() =>
             {
+                var result = new FoaEventDataDictionary();
+
                 foreach (var eventData in FoaMessages)
                 {
                     EventCode eventCode = (EventCode)eventData.Error;
@@ -48,9 +48,9 @@ namespace TestData.TestDB
                     else
                         result[eventCode].Description_f = eventData.Description;
                 }
+                return result;
             });
 
-            return result;
         }
 
         private readonly List<FoaMessageData> FoaMessages = new()

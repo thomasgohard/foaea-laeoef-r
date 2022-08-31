@@ -35,7 +35,7 @@ namespace FileBroker.Business.Tests
             };
             int errorCount = 0;
 
-            string fileName = "";
+            string fileName = "ON3D01II.000001.xml";
 
             var interceptionApplications = new InMemoryInterceptionApplicationAPIBroker();
             var applicationEvents = new InMemoryApplicationEventAPIBroker();

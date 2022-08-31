@@ -28,7 +28,7 @@ namespace FileBroker.Business
             // load translations
 
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = auditConfig.FrenchAuditProvinceCodes.Contains(provinceCode);
+            IsFrench = auditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
             if (IsFrench)
             {

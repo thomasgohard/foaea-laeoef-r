@@ -30,7 +30,7 @@ namespace FOAEA3.Data.Tests.Helpers
             var applKey = new ApplKey(value);
 
             // assert
-            Assert.True(applKey.EnfSrv == "1234" && applKey.CtrlCd is null);
+            Assert.True(applKey.EnfSrv == string.Empty && applKey.CtrlCd == string.Empty);
         }
 
     }

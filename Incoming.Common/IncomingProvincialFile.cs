@@ -40,7 +40,7 @@ namespace Incoming.Common
         public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
-            var allFiles = directory.GetFiles("*.xml");
+            var allFiles = await Task.Run(() => { return directory.GetFiles("*.xml"); });
             var last31days = DateTime.Now.AddDays(-31);
             var files = allFiles.Where(f => f.LastWriteTime > last31days).OrderByDescending(f => f.LastWriteTime);
 

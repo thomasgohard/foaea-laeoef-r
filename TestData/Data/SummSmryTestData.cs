@@ -10,7 +10,7 @@ namespace TestData.Data
         {
             InMemData.SummSmryTestData.Clear();
 
-            var calculatedCreationDate = PeriodHelper.AdjustNowForPeriod(DateTime.Now, periodCount, periodicPaymentCode);
+            var calculatedCreationDate = PeriodHelper.AdjustNowForPeriod(DateTime.Now.AddDays(-35), periodCount, periodicPaymentCode);
             var calculatedStartDate = calculatedCreationDate.AddDays(35);
 
             InMemData.SummSmryTestData.Add(new SummonsSummaryData

@@ -19,9 +19,11 @@ namespace TestData.TestDB
 
         public async Task CreateSubmitterAsync(SubmitterData newSubmitter)
         {
-            await Task.Run(() => { });
-            newSubmitter.Subm_Create_Usr = "Test";
-            newSubmitter.Subm_CourtUsr_Ind = true;
+            await Task.Run(() =>
+            {
+                newSubmitter.Subm_Create_Usr = "Test";
+                newSubmitter.Subm_CourtUsr_Ind = true;
+            });
         }
 
         public async Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
