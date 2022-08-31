@@ -6,7 +6,7 @@ public class IncomingProvincialTracingManager
 {
     private string FileName { get; }
     private APIBrokerList APIs { get; }
-    private RepositoryList Repositories { get; }
+    private RepositoryList DB { get; }
     private ProvincialAuditFileConfig AuditConfiguration { get; }
 
     public IncomingProvincialTracingManager(string fileName,
@@ -16,7 +16,7 @@ public class IncomingProvincialTracingManager
     {
         FileName = fileName;
         APIs = apis;
-        Repositories = repositories;
+        DB = repositories;
         AuditConfiguration = auditConfig;
     }
 
@@ -24,12 +24,12 @@ public class IncomingProvincialTracingManager
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(Repositories.FileAudit, AuditConfiguration, Repositories.MailServiceDB);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfiguration, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-        var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
-        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
         bool isValid = true;
 
@@ -119,7 +119,7 @@ public class IncomingProvincialTracingManager
                         errorCount++;
                     }
 
-                    await Repositories.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                    await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
 
                 }
 
@@ -137,9 +137,9 @@ public class IncomingProvincialTracingManager
             await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
         }
 
-        await Repositories.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
-        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
-        await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+        await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
+        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+        await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
 
         return result;
     }

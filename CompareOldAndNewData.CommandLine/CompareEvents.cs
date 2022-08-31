@@ -12,8 +12,8 @@ namespace CompareOldAndNewData.CommandLine
         {
             var diffs = new List<DiffData>();
 
-            var evnt2 = await repositories2.ApplicationEventRepository.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
-            var evnt3 = await repositories3.ApplicationEventRepository.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
+            var evnt2 = await repositories2.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
+            var evnt3 = await repositories3.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
 
             foreach (var evntItem2 in evnt2)
             {

@@ -16,7 +16,7 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationValidation
     {
-        protected IRepositories Repositories { get; }
+        protected IRepositories DB { get; }
         private ApplicationData Application { get; }
 
         protected readonly CustomConfig config;
@@ -30,7 +30,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             this.config = config;
             Application = application;
-            Repositories = repositories;
+            DB = repositories;
             EventManager = eventManager;
         }
 
@@ -38,7 +38,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             this.config = config;
             Application = application;
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public virtual void VerifyPresets()
@@ -61,7 +61,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                var existingApp = new ApplicationManager(new ApplicationData(), Repositories, config);
+                var existingApp = new ApplicationManager(new ApplicationData(), DB, config);
                 if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
                     // update
@@ -241,7 +241,7 @@ namespace FOAEA3.Business.Areas.Application
                     return (false, reasonText);
                 }
 
-                var postalCodeDB = Repositories.PostalCodeRepository;
+                var postalCodeDB = DB.PostalCodeTable;
                 bool isValid;
                 string validProvCode;
                 PostalCodeFlag validFlags;
@@ -340,9 +340,9 @@ namespace FOAEA3.Business.Areas.Application
             bool doesLocalSINExists;
 
             if (Application.AppCtgy_Cd == "I01")
-                doesLocalSINExists = await Repositories.ApplicationRepository.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
             else
-                doesLocalSINExists = await Repositories.ApplicationRepository.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
 
             if (!isTempSIN && doesLocalSINExists)
             {
@@ -361,7 +361,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!String.IsNullOrEmpty(Application.Appl_Dbtr_Entrd_SIN))
             {
-                var applications = await Repositories.ApplicationRepository.GetDailyApplCountBySINAsync(
+                var applications = await DB.ApplicationTable.GetDailyApplCountBySINAsync(
                                                                             Application.Appl_Dbtr_Entrd_SIN,
                                                                             Application.Appl_EnfSrv_Cd,
                                                                             Application.Appl_CtrlCd,
@@ -377,16 +377,16 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task AddDuplicateSINWarningEventsAsync()
         {
-            (string errorSameEnfOFf, string errorDiffEnfOff) = await Repositories.ApplicationRepository.GetConfirmedSINRecordsAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+            (string errorSameEnfOFf, string errorDiffEnfOff) = await DB.ApplicationTable.GetConfirmedSINRecordsAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
             if (!String.IsNullOrEmpty(errorSameEnfOFf) &&
-                (await Repositories.ApplicationRepository.GetConfirmedSINSameEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
+                (await DB.ApplicationTable.GetConfirmedSINSameEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
             {
                 EventManager.AddEvent(EventCode.C50931_MORE_THAN_ONE_ACTIVE_APPL_FOR_THIS_DEBTOR_WITHIN_YOUR_JURISDIC, errorSameEnfOFf);
             }
 
             if (!String.IsNullOrEmpty(errorDiffEnfOff))
             {
-                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await Repositories.ApplicationRepository.GetConfirmedSINOtherEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await DB.ApplicationTable.GetConfirmedSINOtherEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
@@ -414,7 +414,7 @@ namespace FOAEA3.Business.Areas.Application
         public async Task AddDuplicateCreditorWarningEventsAsync()
         {
 
-            var applicationList = await Repositories.ApplicationRepository.GetSameCreditorForAppCtgyAsync(Application.Appl_CtrlCd, Application.Subm_SubmCd,
+            var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgyAsync(Application.Appl_CtrlCd, Application.Subm_SubmCd,
                                                                                      Application.Appl_Dbtr_Entrd_SIN,
                                                                                      Application.Appl_SIN_Cnfrmd_Ind,
                                                                                      Application.ActvSt_Cd,
@@ -635,7 +635,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var enfServices = await Repositories.EnfSrvRepository.GetEnfServiceAsync();
+            var enfServices = await DB.EnfSrvTable.GetEnfServiceAsync();
             if (enfServices != null)
             {
                 var service = enfServices.FirstOrDefault(m => m.EnfSrv_Cd.Trim() == Application.Appl_EnfSrv_Cd.Trim());
@@ -721,7 +721,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if ((debtorCountry is "CAN") && (canValidatePostalCode))
             {
-                var postalCodeDB = Repositories.PostalCodeRepository;
+                var postalCodeDB = DB.PostalCodeTable;
                 string validProvCode;
                 PostalCodeFlag validFlags;
                 (_, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCodeAsync(debtorPostalCode, debtorProvince ?? "", debtorCity);

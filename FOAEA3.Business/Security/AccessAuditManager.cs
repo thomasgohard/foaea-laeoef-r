@@ -9,19 +9,19 @@ namespace FOAEA3.Business.Security
 {
     public class AccessAuditManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private readonly Dictionary<AccessAuditElement, AccessAuditElementTypeData> AccessAuditElements;
         public readonly List<string> Errors;
 
         public AccessAuditManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
             Errors = new List<string>();
 
             // load all values from database
             AccessAuditElements = new Dictionary<AccessAuditElement, AccessAuditElementTypeData>();
 
-            var allElementTypes = Repositories.AccessAuditRepository.GetAllElementAccessTypeAsync().Result;
+            var allElementTypes = DB.AccessAuditTable.GetAllElementAccessTypeAsync().Result;
             foreach (var elementType in allElementTypes)
             {
                 if (Enum.IsDefined(typeof(AccessAuditElement), elementType.AccessAuditDataElementValueType_ID))
@@ -33,15 +33,15 @@ namespace FOAEA3.Business.Security
 
         public async Task<int> AddAuditHeaderAsync(AccessAuditPage page)
         {
-            string subject_submitter = $"{Repositories.CurrentUser} ({Repositories.CurrentSubmitter})";
+            string subject_submitter = $"{DB.CurrentUser} ({DB.CurrentSubmitter})";
 
-            return await Repositories.AccessAuditRepository.SaveDataPageInfoAsync(page, subject_submitter);
+            return await DB.AccessAuditTable.SaveDataPageInfoAsync(page, subject_submitter);
         }
 
         public async Task AddAuditElementAsync(int headerId, AccessAuditElement elementType, string elementValue)
         {
             string elementName = AccessAuditElements[elementType].ElementName;
-            await Repositories.AccessAuditRepository.SaveDataValueAsync(headerId, elementName, elementValue);
+            await DB.AccessAuditTable.SaveDataValueAsync(headerId, elementName, elementValue);
         }
 
         public async Task AddAuditElementsAsync(int headerId, Dictionary<AccessAuditElement, string> elements)

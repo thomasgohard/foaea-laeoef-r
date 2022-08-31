@@ -8,11 +8,11 @@ namespace FileBroker.Data
         public IFileTableRepository FileTable { get; set; }
         public IFileAuditRepository FileAudit { get; set; }
         public IProcessParameterRepository ProcessParameterTable { get; set; }
-        public IOutboundAuditRepository OutboundAuditDB { get; set; }
-        public IErrorTrackingRepository ErrorTrackingDB { get; set; }
-        public IMailServiceRepository MailServiceDB { get; set; }
-        public ITranslationRepository TranslationDB { get; set; }
-        public IRequestLogRepository RequestLogDB { get; set; }
-        public ILoadInboundAuditRepository LoadInboundAuditDB { get; set; }
+        public IOutboundAuditRepository OutboundAuditTable { get; set; }
+        public IErrorTrackingRepository ErrorTrackingTable { get; set; }
+        public IMailServiceRepository MailService { get; set; }
+        public ITranslationRepository TranslationTable { get; set; }
+        public IRequestLogRepository RequestLogTable { get; set; }
+        public ILoadInboundAuditRepository LoadInboundAuditTable { get; set; }
     }
 }

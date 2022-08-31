@@ -117,7 +117,7 @@ public class TracingFilesController : ControllerBase
         {
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService
+            MailService = mailService
         };
 
         var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value);

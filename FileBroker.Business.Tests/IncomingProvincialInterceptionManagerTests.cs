@@ -54,11 +54,11 @@ namespace FileBroker.Business.Tests
                 FileTable = null,
                 FileAudit = null,
                 ProcessParameterTable = null,
-                OutboundAuditDB = null,
-                ErrorTrackingDB = null,
-                MailServiceDB = null,
-                TranslationDB = null,
-                RequestLogDB = null
+                OutboundAuditTable = null,
+                ErrorTrackingTable = null,
+                MailService = null,
+                TranslationTable = null,
+                RequestLogTable = null
             };
 
             var auditConfig = new ProvincialAuditFileConfig

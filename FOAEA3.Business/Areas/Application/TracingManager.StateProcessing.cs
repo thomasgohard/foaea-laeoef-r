@@ -24,7 +24,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await Validation.AddDuplicateSINWarningEventsAsync();
 
-            string signAuthority = await Repositories.SubmitterRepository.GetSignAuthorityForSubmitterAsync(TracingApplication.Subm_SubmCd);
+            string signAuthority = await DB.SubmitterTable.GetSignAuthorityForSubmitterAsync(TracingApplication.Subm_SubmCd);
 
             EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
                                   recipientSubm: signAuthority);
@@ -85,7 +85,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (TracingApplication.Appl_RecvAffdvt_Dte is null)
             {
-                await AddSystemErrorAsync(Repositories, TracingApplication.Messages, config.SystemErrorRecipients,
+                await AddSystemErrorAsync(DB, TracingApplication.Messages, config.SystemErrorRecipients,
                                $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
                 return;
             }
@@ -101,7 +101,7 @@ namespace FOAEA3.Business.Areas.Application
             switch (eventTraceCount)
             {
                 case 0:
-                    await AddSystemErrorAsync(Repositories, TracingApplication.Messages, config.SystemErrorRecipients,
+                    await AddSystemErrorAsync(DB, TracingApplication.Messages, config.SystemErrorRecipients,
                                    $"Reinstate requested for T01 ({Appl_EnfSrv_Cd}-{Appl_CtrlCd}) with no previous trace requests");
                     return;
                 case 1:
@@ -141,7 +141,7 @@ namespace FOAEA3.Business.Areas.Application
                     }
                     else
                     {
-                        await Repositories.NotificationRepository.SendEmailAsync("Trace Cycle requests exceed yearly limit",
+                        await DB.NotificationTable.SendEmailAsync("Trace Cycle requests exceed yearly limit",
                                                                       config.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
                         await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }

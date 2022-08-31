@@ -39,7 +39,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<string> GenerateDebtorIDAsync(string debtorLastName)
         {
-            return await Repositories.InterceptionRepository.GetDebtorIDAsync(DebtorPrefix(debtorLastName)); ;
+            return await DB.InterceptionTable.GetDebtorIDAsync(DebtorPrefix(debtorLastName)); ;
         }
 
         private async Task<string> NextJusticeIDAsync(string justiceID)
@@ -56,7 +56,7 @@ namespace FOAEA3.Business.Areas.Application
 
             string newJusticeNumber = debtorID.Trim() + justiceSuffix.Trim();
 
-            bool isAlreadyUser = await Repositories.InterceptionRepository.IsAlreadyUsedJusticeNumberAsync(newJusticeNumber);
+            bool isAlreadyUser = await DB.InterceptionTable.IsAlreadyUsedJusticeNumberAsync(newJusticeNumber);
 
             if (isAlreadyUser)
                 justiceSuffix = await NextJusticeIDAsync(justiceSuffix);
@@ -86,7 +86,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessSummSmryBFNAsync(string debtorId, EventCode eventBFNreasonCode)
         {
-            var summSmryData = await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(debtorId: debtorId);
+            var summSmryData = await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(debtorId: debtorId);
 
             foreach (var summSmryItem in summSmryData)
                 if ((summSmryItem.Appl_EnfSrv_Cd != Appl_EnfSrv_Cd) && (summSmryItem.Appl_CtrlCd != Appl_CtrlCd))
@@ -95,10 +95,10 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var thisApplicationManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            var thisApplicationManager = new InterceptionManager(DB, DBfinance, config);
             var thisApplication = thisApplicationManager.InterceptionApplication;
-            var applEventManager = new ApplicationEventManager(thisApplication, Repositories);
-            var applEventDetailManager = new ApplicationEventDetailManager(thisApplication, Repositories);
+            var applEventManager = new ApplicationEventManager(thisApplication, DB);
+            var applEventDetailManager = new ApplicationEventDetailManager(thisApplication, DB);
 
             var eventBFNs = (await applEventManager.GetApplicationEventsForQueueAsync(EventQueue.EventBFN))
                                 .Where(m => m.ActvSt_Cd == "A");
@@ -155,8 +155,8 @@ namespace FOAEA3.Business.Areas.Application
             DateTime currDateTime = variationCalcDate;
             DateTime ctrlFaDtePayable = currDateTime;
 
-            var summSmry = await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-            var workActSummons = await RepositoriesFinance.ActiveSummonsRepository.GetActiveSummonsCoreAsync(ctrlFaDtePayable, Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var summSmry = await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var workActSummons = await DBfinance.ActiveSummonsRepository.GetActiveSummonsCoreAsync(ctrlFaDtePayable, Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             if (workActSummons is not null)
             {
@@ -187,7 +187,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     if (InterceptionApplication.Appl_RecvAffdvt_Dte is null)
                     {
-                        await AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients, 
                                        $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot recalculate fixed amount recalc date after variation!");
                         return fixedAmountRecalcDate;
                     }
@@ -277,7 +277,7 @@ namespace FOAEA3.Business.Areas.Application
         private async Task IncrementGarnSmryAsync(bool isNewApplication = false)
         {
 
-            var garnSmryDB = RepositoriesFinance.GarnSummaryRepository;
+            var garnSmryDB = DBfinance.GarnSummaryRepository;
 
             if (isNewApplication || InterceptionApplication.AppLiSt_Cd.In(ApplicationState.SIN_NOT_CONFIRMED_5,
                                                                           ApplicationState.APPLICATION_REJECTED_9,
@@ -293,7 +293,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 if (garnSummaryData.Count == 0)
                 {
-                    int totalActiveSummonsCount = await Repositories.InterceptionRepository.GetTotalActiveSummonsAsync(Appl_EnfSrv_Cd, enfOfficeCode);
+                    int totalActiveSummonsCount = await DB.InterceptionTable.GetTotalActiveSummonsAsync(Appl_EnfSrv_Cd, enfOfficeCode);
                     thisGarnSmryData = new GarnSummaryData
                     {
                         EnfSrv_Cd = Appl_EnfSrv_Cd,
@@ -384,7 +384,7 @@ namespace FOAEA3.Business.Areas.Application
         private async Task<DateTime> ChangeStateForFinancialTermsAsync(string oldState, string newState, short intFinH_LifeStateCode)
         {
 
-            var interceptionDB = Repositories.InterceptionRepository;
+            var interceptionDB = DB.InterceptionTable;
 
             var defaultHoldback = InterceptionApplication.IntFinH ?? await interceptionDB.GetInterceptionFinancialTermsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, oldState);
 
@@ -418,7 +418,7 @@ namespace FOAEA3.Business.Areas.Application
         private async Task DeletePendingFinancialTermsAsync()
         {
 
-            var interceptionDB = Repositories.InterceptionRepository;
+            var interceptionDB = DB.InterceptionTable;
 
             var defaultHoldback = await interceptionDB.GetInterceptionFinancialTermsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
 
@@ -432,7 +432,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<DateTime> GetLastVariationDateAsync()
         {
-            var interceptionDB = Repositories.InterceptionRepository;
+            var interceptionDB = DB.InterceptionTable;
 
             var defaultHoldback = await interceptionDB.GetInterceptionFinancialTermsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, "P");
 
@@ -452,18 +452,18 @@ namespace FOAEA3.Business.Areas.Application
                 SummSmry_Recalc_Dte = startDate
             };
 
-            var existingData = await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var existingData = await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             if (!existingData.Any())
-                await RepositoriesFinance.SummonsSummaryRepository.CreateSummonsSummaryAsync(summSummary);
+                await DBfinance.SummonsSummaryRepository.CreateSummonsSummaryAsync(summSummary);
             else
                 // TODO: should we get a warning that instead of creating we are updating an existing summsmry?
-                await RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSummary);
+                await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSummary);
         }
 
         private async Task NotifyMatchingActiveApplicationsAsync(EventCode eventCode)
         {
-            var matchedApplications = await Repositories.InterceptionRepository.FindMatchingActiveApplicationsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd,
+            var matchedApplications = await DB.InterceptionTable.FindMatchingActiveApplicationsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd,
                                                                                                 InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
                                                                                                 InterceptionApplication.Appl_Crdtr_FrstNme,
                                                                                                 InterceptionApplication.Appl_Crdtr_SurNme);
@@ -485,7 +485,7 @@ namespace FOAEA3.Business.Areas.Application
             string debtorID = GetDebtorID(InterceptionApplication.Appl_JusticeNr);
             int summSmryCount = 0;
 
-            var summSmryInfoForDebtor = await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(debtorId: debtorID);
+            var summSmryInfoForDebtor = await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(debtorId: debtorID);
 
             foreach (var summSmryInfo in summSmryInfoForDebtor)
             {
@@ -501,11 +501,11 @@ namespace FOAEA3.Business.Areas.Application
                                       effectiveDateTime: effective10daysFromNow);
             }
 
-            var summSmryForCurrentAppl = (await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
+            var summSmryForCurrentAppl = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                                             .FirstOrDefault();
             if (summSmryForCurrentAppl is null)
             {
-                await AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
                                $"Could not find summSmry record for {Appl_EnfSrv_Cd}-{Appl_CtrlCd} in StopBlockFunds!");
                 return;
             }
@@ -523,9 +523,9 @@ namespace FOAEA3.Business.Areas.Application
                     break;
             }
 
-            await RepositoriesFinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
+            await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
 
-            await Repositories.InterceptionRepository.EISOHistoryDeleteBySINAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
+            await DB.InterceptionTable.EISOHistoryDeleteBySINAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
 
         }
 

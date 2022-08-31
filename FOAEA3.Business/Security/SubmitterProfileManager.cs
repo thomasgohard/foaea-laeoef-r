@@ -6,16 +6,16 @@ namespace FOAEA3.Business.Security
 {
     internal class SubmitterProfileManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
 
         public SubmitterProfileManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
         {
-            return await Repositories.SubmitterProfileRepository.GetSubmitterProfileAsync(submitterCode);
+            return await DB.SubmitterProfileTable.GetSubmitterProfileAsync(submitterCode);
         }
 
     }

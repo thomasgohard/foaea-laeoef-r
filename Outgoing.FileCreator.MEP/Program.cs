@@ -82,10 +82,10 @@ namespace Outgoing.FileCreator.MEP
             {
                 FileTable = new DBFileTable(fileBrokerDB),
                 FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditDB = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingDB = new DBErrorTracking(fileBrokerDB),
+                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
                 ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailServiceDB = new DBMailService(fileBrokerDB)
+                MailService = new DBMailService(fileBrokerDB)
             };
 
             if (generateTracingFiles)
@@ -114,7 +114,7 @@ namespace Outgoing.FileCreator.MEP
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingDB.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name, 
+                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name, 
                                                                         new Exception(error), displayExceptionError: true);
                     }
             }

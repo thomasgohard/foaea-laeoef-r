@@ -3,7 +3,7 @@
 public class IncomingFederalTracingManager
 {
     private APIBrokerList APIs { get; }
-    private RepositoryList Repositories { get; }
+    private RepositoryList DB { get; }
 
     public enum EFederalSource
     {
@@ -16,7 +16,7 @@ public class IncomingFederalTracingManager
     public IncomingFederalTracingManager(APIBrokerList apiBrokers, RepositoryList repositories)
     {
         APIs = apiBrokers;
-        Repositories = repositories;
+        DB = repositories;
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
@@ -36,12 +36,12 @@ public class IncomingFederalTracingManager
         if (errors.Any())
             return errors;
 
-        await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
         string fileCycle = Path.GetExtension(flatFileName)[1..];
         try
         {
-            var fileLoader = new IncomingFederalTracingFileLoader(Repositories.FlatFileSpecs, fileTableData.PrcId);
+            var fileLoader = new IncomingFederalTracingFileLoader(DB.FlatFileSpecs, fileTableData.PrcId);
             await fileLoader.FillTracingFileDataFromFlatFileAsync(tracingFileData, flatFileContent, errors);
 
             if (errors.Any())
@@ -75,8 +75,8 @@ public class IncomingFederalTracingManager
         }
         finally
         {
-            await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
-            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
         }
 
         return errors;
@@ -87,7 +87,7 @@ public class IncomingFederalTracingManager
     {
         string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
-        return await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
     }
 
     private static (string enfSrvCd, EFederalSource fedSource) ConfigureTracingFileData(
@@ -144,7 +144,7 @@ public class IncomingFederalTracingManager
     {
         try
         {
-            string cutOffDaysValue = await Repositories.ProcessParameterTable.GetValueForParameterAsync(processId, "evnt_cutoff");
+            string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameterAsync(processId, "evnt_cutoff");
             int cutOffDays = int.Parse(cutOffDaysValue);
 
             var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle);

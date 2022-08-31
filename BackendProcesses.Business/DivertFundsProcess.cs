@@ -8,19 +8,19 @@ namespace BackendProcesses.Business
 {
     public class DivertFundsProcess
     {
-        private readonly IRepositories Repositories;
-        private readonly IRepositories_Finance RepositoriesFinance;
+        private readonly IRepositories DB;
+        private readonly IRepositories_Finance DBfinance;
         private readonly DateTime _currentTime = DateTime.Now;
 
         public DivertFundsProcess(IRepositories repositories, IRepositories_Finance repositoriesFinance)
         {
-            Repositories = repositories;
-            RepositoriesFinance = repositoriesFinance;
+            DB = repositories;
+            DBfinance = repositoriesFinance;
         }
 
         public async Task RunAsync(string source = "", string FABatchID = "")
         {
-            var prodAudit = Repositories.ProductionAuditRepository;
+            var prodAudit = DB.ProductionAuditTable;
 
             await prodAudit.InsertAsync("Divert Funds", "Divert Funds Started", "O");
 
@@ -38,7 +38,7 @@ namespace BackendProcesses.Business
         private async Task ExecDivertFundsAsync(DataList<ControlBatchData> controlBatchList)
         {
             bool _flagErrorInDFBatch = false;
-            var prodAudit = Repositories.ProductionAuditRepository;
+            var prodAudit = DB.ProductionAuditTable;
 
             foreach (var rowDAFABatch in controlBatchList.Items)
             {
@@ -213,9 +213,9 @@ namespace BackendProcesses.Business
 
         private async Task ProcessFRBatchesAsync(int summFAFR_Id)
         {
-            var summFAFR_DE_DB = RepositoriesFinance.SummFAFR_DERepository;
-            var summFAFR_DB = RepositoriesFinance.SummFAFRRepository;
-            var summDF_DB = RepositoriesFinance.SummDFRepository;
+            var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
+            var summFAFR_DB = DBfinance.SummFAFRRepository;
+            var summDF_DB = DBfinance.SummDFRepository;
 
             var summFAFR_DE_List = await summFAFR_DE_DB.GetSummFaFrDeAsync(summFAFR_Id);
             var summFAFR_List = await summFAFR_DB.GetSummFaFrListAsync(summFAFR_DE_List.Items);
@@ -259,21 +259,21 @@ namespace BackendProcesses.Business
 
         private async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDEBatchesAsync(ControlBatchData rowDAFABatch)
         {
-            var summFAFR_DE_DB = RepositoriesFinance.SummFAFR_DERepository;
+            var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
 
             return await summFAFR_DE_DB.GetSummFaFrDeReadyBatchesAsync(rowDAFABatch.EnfSrv_Src_Cd, rowDAFABatch.Batch_Id);
         }
 
         public async Task<DataList<ControlBatchData>> GetDAFAReadyBatchesAsync(string source = "", string FABatchID = "")
         {
-            var controlBatchDB = RepositoriesFinance.ControlBatchRepository;
+            var controlBatchDB = DBfinance.ControlBatchRepository;
 
             return await controlBatchDB.GetFADAReadyBatchAsync(source, FABatchID);
         }
 
         private async Task<string> GetDFBatchIDAsync(ControlBatchData rowDAFABatch)
         {
-            var controlBatchDB = RepositoriesFinance.ControlBatchRepository;
+            var controlBatchDB = DBfinance.ControlBatchRepository;
 
             var values = new ControlBatchData()
             {

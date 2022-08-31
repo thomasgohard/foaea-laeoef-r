@@ -59,10 +59,10 @@ namespace Outgoing.FileCreator.Fed.Tracing
             {
                 FileTable = new DBFileTable(fileBrokerDB),
                 FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditDB = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingDB = new DBErrorTracking(fileBrokerDB),
+                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
                 ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailServiceDB = new DBMailService(fileBrokerDB)
+                MailService = new DBMailService(fileBrokerDB)
             };
 
             var federalFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories);
@@ -80,7 +80,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingDB.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name, 
+                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name, 
                                                                                    new Exception(error), displayExceptionError: true);
                     }
             }

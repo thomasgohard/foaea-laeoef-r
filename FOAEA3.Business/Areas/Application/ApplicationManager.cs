@@ -16,7 +16,7 @@ namespace FOAEA3.Business.Areas.Application
     {
         private readonly ApplicationData Application;
 
-        public IRepositories Repositories { get; }
+        public IRepositories DB { get; }
         public ApplicationEventManager EventManager { get; }
         public ApplicationEventDetailManager EventDetailManager { get; }
 
@@ -36,9 +36,9 @@ namespace FOAEA3.Business.Areas.Application
             Application = applicationData;
             EventManager = new ApplicationEventManager(Application, repositories);
             EventDetailManager = new ApplicationEventDetailManager(Application, repositories);
-            Repositories = repositories;
+            DB = repositories;
             if (applicationValidation is null)
-                Validation = new ApplicationValidation(Application, EventManager, Repositories, config);
+                Validation = new ApplicationValidation(Application, EventManager, DB, config);
             else
             {
                 Validation = applicationValidation;
@@ -101,7 +101,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool isSuccess = false;
 
-            ApplicationData data = await Repositories.ApplicationRepository.GetApplicationAsync(enfService, controlCode);
+            var data = await DB.ApplicationTable.GetApplicationAsync(enfService, controlCode);
 
             if (data != null)
             {
@@ -116,7 +116,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (!String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                return await Repositories.ApplicationRepository.ApplicationExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                return await DB.ApplicationTable.ApplicationExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
             }
             else
                 return false;
@@ -135,14 +135,14 @@ namespace FOAEA3.Business.Areas.Application
             MakeUpperCase();
 
             Application.Appl_Create_Dte = DateTime.Now;
-            Application.Appl_Create_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_Create_Usr = DB.CurrentSubmitter;
             Application.Appl_LastUpdate_Dte = DateTime.Now;
-            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                Application.Appl_CtrlCd = await Repositories.ApplicationRepository.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
+                Application.Appl_CtrlCd = await DB.ApplicationTable.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
             }
 
@@ -162,7 +162,7 @@ namespace FOAEA3.Business.Areas.Application
             try
             {
                 // save the application to the database
-                isSuccess = await Repositories.ApplicationRepository.CreateApplicationAsync(Application);
+                isSuccess = await DB.ApplicationTable.CreateApplicationAsync(Application);
 
                 if (isSuccess)
                 {
@@ -176,7 +176,7 @@ namespace FOAEA3.Business.Areas.Application
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
-                    await Repositories.SubmitterRepository.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
+                    await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
                 }
 
             }
@@ -197,10 +197,10 @@ namespace FOAEA3.Business.Areas.Application
         public virtual async Task UpdateApplicationNoValidationAsync()
         {
             Application.Appl_LastUpdate_Dte = DateTime.Now;
-            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
-            await Repositories.ApplicationRepository.UpdateApplicationAsync(Application);
-            await Repositories.SubmitterRepository.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
+            await DB.ApplicationTable.UpdateApplicationAsync(Application);
+            await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
 
             await EventManager.SaveEventsAsync();
         }
@@ -215,10 +215,10 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             Application.Appl_LastUpdate_Dte = DateTime.Now;
-            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
             // load old data from database
-            var current = new ApplicationManager(new ApplicationData(), Repositories, config);
+            var current = new ApplicationManager(new ApplicationData(), DB, config);
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";
@@ -258,7 +258,7 @@ namespace FOAEA3.Business.Areas.Application
             try
             {
                 // save the application to the database
-                await Repositories.ApplicationRepository.UpdateApplicationAsync(Application);
+                await DB.ApplicationTable.UpdateApplicationAsync(Application);
 
                 // update submitter code with last control code used
                 await UpdateSubmitterDefaultControlCodeAsync();
@@ -282,7 +282,7 @@ namespace FOAEA3.Business.Areas.Application
         {
 
             Application.Subm_SubmCd = applSelectedSubmitter;
-            Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             if (Application.Medium_Cd == "ONL")
                 Application.Subm_Recpt_SubmCd = applSelectedRecipient;
 
@@ -294,7 +294,7 @@ namespace FOAEA3.Business.Areas.Application
                 Subm_Recpt_SubmCd = applSelectedRecipient,
                 Subm_SubmCd = applSelectedSubmitter
             };
-            await Repositories.CaseManagementRepository.CreateCaseManagementAsync(caseManagementData);
+            await DB.CaseManagementTable.CreateCaseManagementAsync(caseManagementData);
 
             EventManager.AddEvent(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
@@ -309,7 +309,7 @@ namespace FOAEA3.Business.Areas.Application
                                                                      string recipientCode,
                                                                      bool isXML = true)
         {
-            var applicationDB = Repositories.ApplicationRepository;
+            var applicationDB = DB.ApplicationTable;
             var data = await applicationDB.GetStatsProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
             return data;
         }
@@ -338,7 +338,7 @@ namespace FOAEA3.Business.Areas.Application
 
         protected async Task UpdateSubmitterDefaultControlCodeAsync()
         {
-            await Repositories.ApplicationRepository.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
+            await DB.ApplicationTable.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
         }
 
         protected void TrimTrailingSpaces()
@@ -388,7 +388,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             string result = string.Empty;
 
-            var data = await Repositories.SINResultRepository.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            var data = await DB.SINResultTable.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
             var sinData = data.Items.FirstOrDefault();
 
             if (sinData != null)
@@ -451,7 +451,7 @@ namespace FOAEA3.Business.Areas.Application
 
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
-            await repositories.NotificationRepository.SendEmailAsync(subject, recipients, message);
+            await repositories.NotificationTable.SendEmailAsync(subject, recipients, message);
         }
 
     }

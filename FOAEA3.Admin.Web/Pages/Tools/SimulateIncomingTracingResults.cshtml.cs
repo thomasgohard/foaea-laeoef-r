@@ -21,13 +21,13 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         public SimulateIncomingTracingResultsData SimulateIncomingTracingResults { get; set; }
 
         private ApiConfig ApiFilesConfig { get; }
-        private IRepositories Repositories { get; }
+        private IRepositories DB { get; }
         private readonly CustomConfig config;
 
         public SimulateIncomingTracingResultsModel(IOptions<ApiConfig> apiConfig, IRepositories repositories, IOptions<CustomConfig> config)
         {
             ApiFilesConfig = apiConfig.Value;
-            Repositories = repositories;
+            DB = repositories;
             this.config = config.Value;
         }
 
@@ -43,7 +43,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
                 var data = SimulateIncomingTracingResults;
 
                 // TODO: check if application exists and is in proper state
-                var appManager = new TracingManager(Repositories, config);
+                var appManager = new TracingManager(DB, config);
                 if (await appManager.LoadApplicationAsync(data.EnfService, data.ControlCode))
                 {
                     if (appManager.TracingApplication.AppCtgy_Cd != "T01")

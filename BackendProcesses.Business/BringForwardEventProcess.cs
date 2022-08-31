@@ -8,20 +8,20 @@ namespace BackendProcesses.Business
     public class BringForwardEventProcess
     {
         private readonly CustomConfig config;
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
 
         public BringForwardEventProcess(IRepositories repositories, CustomConfig config)
         {
             this.config = config;
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public async Task RunAsync()
         {
-            var prodAudit = Repositories.ProductionAuditRepository;
-            var dbApplicationEvent = Repositories.ApplicationEventRepository;
-            var dbApplication = Repositories.ApplicationRepository; // use ApplicationManager() instead?
-            var dbNotification = Repositories.NotificationRepository;
+            var prodAudit = DB.ProductionAuditTable;
+            var dbApplicationEvent = DB.ApplicationEventTable;
+            var dbApplication = DB.ApplicationTable; // use ApplicationManager() instead?
+            var dbNotification = DB.NotificationTable;
 
             await prodAudit.InsertAsync("BF Events Process", "BF Events Process Started", "O");
 
@@ -41,7 +41,7 @@ namespace BackendProcesses.Business
                             var tracingData = new TracingApplicationData();
                             tracingData.Merge(application);
                             // TODO: call API instead?
-                            //var tracingManager = new TracingManager(tracingData, Repositories, config);
+                            //var tracingManager = new TracingManager(tracingData, DB, config);
                             //tracingManager.ProcessBringForwards(bfEvent);
                             break;
 
@@ -49,7 +49,7 @@ namespace BackendProcesses.Business
                             var licencingData = new LicenceDenialApplicationData();
                             licencingData.Merge(application);
                             // TODO: call API instead?
-                            //var licencingManager = new LicenceDenialManager(licencingData, Repositories, config);
+                            //var licencingManager = new LicenceDenialManager(licencingData, DB, config);
                             //licencingManager.ProcessBringForwards(bfEvent);
                             break;
 

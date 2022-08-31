@@ -19,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             Application = applicationData;
             Events = new List<ApplicationEventData>();
-            EventDB = repositories.ApplicationEventRepository;
+            EventDB = repositories.ApplicationEventTable;
         }
 
         public async Task<List<ApplicationEventData>> GetApplicationEventsForQueueAsync(EventQueue queue)

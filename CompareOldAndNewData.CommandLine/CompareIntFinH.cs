@@ -11,8 +11,8 @@ namespace CompareOldAndNewData.CommandLine
         {
             var diffs = new List<DiffData>();
 
-            var allIntFinHdata2 = await repositories2.InterceptionRepository.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
-            var allIntFinHdata3 = await repositories3.InterceptionRepository.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
+            var allIntFinHdata2 = await repositories2.InterceptionTable.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
+            var allIntFinHdata3 = await repositories3.InterceptionTable.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
 
             foreach (var intFinH2item in allIntFinHdata2)
             {

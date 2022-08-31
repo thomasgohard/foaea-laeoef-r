@@ -125,10 +125,10 @@ public class InterceptionFilesController : ControllerBase
         {
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService,
-            TranslationDB = translationDB,
-            RequestLogDB = requestLogDB,
-            LoadInboundAuditDB = loadInboundAuditData
+            MailService = mailService,
+            TranslationTable = translationDB,
+            RequestLogTable = requestLogDB,
+            LoadInboundAuditTable = loadInboundAuditData
         };
 
         var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);

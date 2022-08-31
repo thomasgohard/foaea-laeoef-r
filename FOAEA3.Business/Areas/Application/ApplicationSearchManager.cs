@@ -10,15 +10,15 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationSearchManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private readonly AccessAuditManager AuditManager;
 
         public string LastError { get; set; }
 
         public ApplicationSearchManager(IRepositories repositories)
         {
-            Repositories = repositories; 
-            AuditManager = new AccessAuditManager(Repositories);
+            DB = repositories; 
+            AuditManager = new AccessAuditManager(DB);
         }
 
         public async Task<(List<ApplicationSearchResultData>, int)> SearchAsync(QuickSearchData searchCriteria, 
@@ -29,10 +29,10 @@ namespace FOAEA3.Business.Areas.Application
 
             List<ApplicationSearchResultData> searchResults;
             int totalCount;
-            (searchResults, totalCount) = await Repositories.ApplicationSearchRepository.QuickSearchAsync(searchCriteria,
+            (searchResults, totalCount) = await DB.ApplicationSearchTable.QuickSearchAsync(searchCriteria,
                                                                                          page, perPage, orderBy);
 
-            LastError = Repositories.ApplicationSearchRepository.LastError;
+            LastError = DB.ApplicationSearchTable.LastError;
 
             await AddSearchResultsToAccessAuditAsync(accessAuditId, searchResults);
 

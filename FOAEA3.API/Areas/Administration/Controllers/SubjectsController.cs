@@ -16,7 +16,7 @@ public class SubjectsController : ControllerBase
     public async Task<ActionResult<List<SubjectData>>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
     {
         if (submCd != null)
-            return Ok(await repositories.SubjectRepository.GetSubjectsForSubmitterAsync(submCd));
+            return Ok(await repositories.SubjectTable.GetSubjectsForSubmitterAsync(submCd));
         else
             return UnprocessableEntity("Missing submCd parameter"); // not allowed to get all subjects currently
     }
@@ -24,7 +24,7 @@ public class SubjectsController : ControllerBase
     [HttpGet("{subjectName}")]
     public async Task<ActionResult<SubjectData>> GetSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        var data = await repositories.SubjectRepository.GetSubjectAsync(subjectName);
+        var data = await repositories.SubjectTable.GetSubjectAsync(subjectName);
         return Ok(data);
     }
 

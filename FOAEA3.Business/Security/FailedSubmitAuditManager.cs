@@ -7,21 +7,21 @@ namespace FOAEA3.Business.Security
 {
     public class FailedSubmitAuditManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private readonly ApplicationData Application;
 
         public FailedSubmitAuditManager(IRepositories repositories, ApplicationData application)
         {
-            Repositories = repositories;
+            DB = repositories;
             Application = application;
         }
 
         public async Task AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType activityType)
         {
-            string subject_submitter = $"{Repositories.CurrentUser} ({Repositories.CurrentSubmitter})";
+            string subject_submitter = $"{DB.CurrentUser} ({DB.CurrentSubmitter})";
 
             foreach (var errorInfo in Application.Messages.GetMessagesForType(MessageType.Error))
-                await Repositories.FailedSubmitAuditRepository.AppendFiledSubmitAuditAsync(subject_submitter, activityType, errorInfo.Description);
+                await DB.FailedSubmitAuditTable.AppendFiledSubmitAuditAsync(subject_submitter, activityType, errorInfo.Description);
 
         }
 
