@@ -143,7 +143,7 @@ namespace FOAEA3.Data.DB
             data.Appl_Dbtr_FrstNme = rdr["Appl_Dbtr_FrstNme"] as string; // can be null 
             data.Appl_Dbtr_MddleNme = rdr["Appl_Dbtr_MddleNme"] as string; // can be null 
             data.Appl_Dbtr_SurNme = rdr["Appl_Dbtr_SurNme"] as string; // can be null 
-            data.Appl_Dbtr_MotherMaiden_SurNme = rdr["Appl_Dbtr_MotherMaiden_SurNme"] as string; // can be null 
+            data.Appl_Dbtr_Parent_SurNme = rdr["Appl_Dbtr_Parent_SurNme"] as string; // can be null 
             data.Appl_Dbtr_Gendr_Cd = rdr["Appl_Dbtr_Gendr_Cd"] as string; // can be null 
             data.Appl_Dbtr_Entrd_SIN = rdr["Appl_Dbtr_Entrd_SIN"] as string; // can be null 
         }
