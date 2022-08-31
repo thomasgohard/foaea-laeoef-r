@@ -27,15 +27,15 @@ public class ApplicationEventDetailsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]
-    public ActionResult<List<ApplicationEventDetailData>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
-        return GetEventsForQueue(id, repositories, EventQueue.EventSIN_dtl);
+        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventSIN_dtl);
     }
 
     [HttpGet("{id}/Trace")]
-    public ActionResult<List<ApplicationEventDetailData>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
-        return GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
+        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventTrace_dtl);
     }
 
     [HttpPost("")]
@@ -45,7 +45,7 @@ public class ApplicationEventDetailsController : ControllerBase
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        eventDetailManager.SaveEventDetail(applicationEventDetail);
+        await eventDetailManager.SaveEventDetailAsync(applicationEventDetail);
 
         return Ok();
 
@@ -65,21 +65,21 @@ public class ApplicationEventDetailsController : ControllerBase
 
         if (command?.ToLower() == "markoutboundprocessed")
         {
-            eventDetailManager.UpdateOutboundEventDetail(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
+            await eventDetailManager.UpdateOutboundEventDetailAsync(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
         }
 
         return Ok();
 
     }
 
-    private ActionResult<List<ApplicationEventDetailData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
 
-        if (manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(manager.EventDetailManager.GetApplicationEventDetailsForQueue(queue));
+        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));
         else
             return NotFound();
     }

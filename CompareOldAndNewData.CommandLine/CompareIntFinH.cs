@@ -6,13 +6,13 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareIntFinH
     {
-        public static List<DiffData> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
+        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd)
         {
             var diffs = new List<DiffData>();
 
-            var allIntFinHdata2 = repositories2.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd);
-            var allIntFinHdata3 = repositories3.InterceptionRepository.GetAllInterceptionFinancialTerms(enfSrv, ctrlCd);
+            var allIntFinHdata2 = await repositories2.InterceptionRepository.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
+            var allIntFinHdata3 = await repositories3.InterceptionRepository.GetAllInterceptionFinancialTermsAsync(enfSrv, ctrlCd);
 
             foreach (var intFinH2item in allIntFinHdata2)
             {

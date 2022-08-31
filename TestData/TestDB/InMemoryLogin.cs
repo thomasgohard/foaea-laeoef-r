@@ -3,6 +3,7 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -15,47 +16,35 @@ namespace TestData.TestDB
         {
 
         }
-        public void SendEmail(string subject, string recipient, string body, int isHTML = 1)
+
+        public async Task<bool> IsLoginExpiredAsync(string subjectName)
         {
-            throw new NotImplementedException();
-        }
-        //public SubjectData GetSubjectLoginCredentials(string subjectName)
-        //{
-        //    throw new NotImplementedException();
-        //}
-        public SubjectData GetSubject(int subjectId)
-        {
-            throw new NotImplementedException();
-        }
-        public SubjectData GetSubject(string subjectName)
-        {
-            throw new NotImplementedException();
-        }
-        public SubjectData GetSubjectByConfirmationCode(string confirmationCode)
-        {
-            throw new NotImplementedException();
-        }
-        public bool IsLoginExpired(string subjectName)
-        {
-            throw new NotImplementedException();
-        }
-        public void AcceptNewTermsOfReferernce(string subjectName)
-        {
-            throw new NotImplementedException();
-        }
-        public bool CheckPreviousPasswords(int subjectId, string newPassword)
-        {
-            throw new NotImplementedException();
-        }
-        public void GetAllowedAccess(string username, ref bool IsAllowed)
-        {
-            throw new NotImplementedException();
-        }
-        public void SetPassword(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
-        {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
+        public async Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword)
+        {
+            await Task.Run(() => { });
+            throw new NotImplementedException();
+        }
 
+        public async Task<bool> GetAllowedAccessAsync(string username)
+        {
+            await Task.Run(() => { });
+            throw new NotImplementedException();
+        }
+
+        public async Task AcceptNewTermsOfReferernceAsync(string username)
+        {
+            await Task.Run(() => { });
+            throw new NotImplementedException();
+        }
+
+        public async Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
+        {
+            await Task.Run(() => { });
+            throw new NotImplementedException();
+        }
     }
 }

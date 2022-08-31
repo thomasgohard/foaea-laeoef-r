@@ -13,7 +13,7 @@ public class ApplicationCommentsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("ApplicationComments API Version 1.0");
 
     [HttpGet]
-    public ActionResult<DataList<ApplicationCommentsData>> GetApplicationComments([FromServices] IApplicationCommentsRepository applicationCommentsRepository)
+    public async Task<ActionResult<DataList<ApplicationCommentsData>>> GetApplicationComments([FromServices] IApplicationCommentsRepository applicationCommentsRepository)
     {
         if (Request.Headers.ContainsKey("CurrentSubmitter"))
             applicationCommentsRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
@@ -21,6 +21,6 @@ public class ApplicationCommentsController : ControllerBase
         if (Request.Headers.ContainsKey("CurrentSubject"))
             applicationCommentsRepository.UserId = Request.Headers["CurrentSubject"];
 
-        return Ok(applicationCommentsRepository.GetApplicationComments());
+        return Ok(await applicationCommentsRepository.GetApplicationCommentsAsync());
     }
 }

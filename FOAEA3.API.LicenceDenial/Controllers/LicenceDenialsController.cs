@@ -27,14 +27,14 @@ public class LicenceDenialsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}")]
-    public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> GetApplication([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
         var manager = new LicenceDenialManager(repositories, config);
 
-        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
@@ -48,19 +48,19 @@ public class LicenceDenialsController : ControllerBase
     }
 
     [HttpGet("{key}/LicenceSuspensionHistory")]
-    public ActionResult<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory([FromRoute] string key,
+    public async Task<ActionResult<List<LicenceSuspensionHistoryData>>> GetLicenceSuspensionHistory([FromRoute] string key,
                                                                                         [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
         var manager = new LicenceDenialManager(repositories, config);
 
-        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
             {
-                var suspensionHistory = manager.GetLicenceSuspensionHistory();
+                var suspensionHistory = manager.GetLicenceSuspensionHistoryAsync();
 
                 return Ok(suspensionHistory);
             }
@@ -82,7 +82,7 @@ public class LicenceDenialsController : ControllerBase
 
         var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
 
-        bool isCreated = licenceDenialManager.CreateApplication();
+        bool isCreated = await licenceDenialManager.CreateApplicationAsync();
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -121,7 +121,7 @@ public class LicenceDenialsController : ControllerBase
         switch (command.ToLower())
         {
             case "":
-                licenceDenialManager.UpdateApplication();
+                await licenceDenialManager.UpdateApplicationAsync();
                 break;
 
             default:
@@ -147,19 +147,19 @@ public class LicenceDenialsController : ControllerBase
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialManager(application, repositories, config);
-        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
         if (!APIHelper.ValidateApplication(appManager.LicenceDenialApplication, applKey, out string error))
             return UnprocessableEntity(error);
 
         var sinManager = new ApplicationSINManager(application, appManager);
-        sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+        await sinManager.SINconfirmationBypassAsync(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
         return Ok(application);
     }
 
     [HttpPut("{key}/ProcessLicenceDenialResponse")]
-    public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialResponse([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> ProcessLicenceDenialResponse([FromRoute] string key,
                                                                                    [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
@@ -167,19 +167,19 @@ public class LicenceDenialsController : ControllerBase
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialManager(application, repositories, config);
-        if (appManager.ProcessLicenceDenialResponse(applKey.EnfSrv, applKey.CtrlCd))
+        if (await appManager.ProcessLicenceDenialResponseAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(application);
         else
             return UnprocessableEntity(application);
     }
 
     [HttpGet("LicenceDenialToApplication")]
-    public ActionResult<List<TraceCycleQuantityData>> GetLicenceDenialToApplData([FromQuery] string federalSource,
+    public async Task<ActionResult<List<TraceCycleQuantityData>>> GetLicenceDenialToApplData([FromQuery] string federalSource,
                                                             [FromServices] IRepositories repositories)
     {
         var manager = new LicenceDenialManager(repositories, config);
 
-        var data = manager.GetLicenceDenialToApplData(federalSource);
+        var data = await manager.GetLicenceDenialToApplDataAsync(federalSource);
 
         return Ok(data);
 

@@ -12,9 +12,9 @@ public class ProvincesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Provinces API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<ProvinceData>> GetProvinces([FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<ProvinceData>>> GetProvinces([FromServices] IRepositories repositories)
     {
-        return Ok(repositories.ProvinceRepository.GetProvinces());
+        return Ok(await repositories.ProvinceRepository.GetProvincesAsync());
     }
 
 }

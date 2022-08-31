@@ -19,7 +19,7 @@ namespace FileBroker.Data.Tests
             var mailService = new DBMailService(fileBrokerDB);
 
             string attachmentContent = "This is an attachment";
-            File.WriteAllText(@"C:\Work\MyFile.txt", attachmentContent);
+            await File.WriteAllTextAsync(@"C:\Work\MyFile.txt", attachmentContent);
 
             // act
             string error = await mailService.SendEmailAsync(body: "This is the body1", recipients: "dsarrazi@justice.gc.ca",

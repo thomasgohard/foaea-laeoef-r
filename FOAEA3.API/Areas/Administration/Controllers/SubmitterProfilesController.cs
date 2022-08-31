@@ -14,10 +14,10 @@ public class SubmitterProfilesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("SubmitterProfiles API Version 1.0");
 
     [HttpGet("{submCd}")]
-    public ActionResult<SubmitterProfileData> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<SubmitterProfileData>> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterProfileManager = new SubmitterProfileManager(repositories);
-        var submitter = submitterProfileManager.GetSubmitterProfile(submCd);
+        var submitter = await submitterProfileManager.GetSubmitterProfileAsync(submCd);
 
         if (submitter != null)
         {

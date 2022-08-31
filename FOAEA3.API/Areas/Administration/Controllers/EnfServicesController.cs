@@ -13,10 +13,10 @@ public class EnfServicesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("EnfServices API Version 1.0");
 
     [HttpGet("{enfServiceCode}")]
-    public ActionResult<EnfSrvData> GetEnforcementService([FromRoute] string enfServiceCode, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<EnfSrvData>> GetEnforcementService([FromRoute] string enfServiceCode, [FromServices] IRepositories repositories)
     {
         var enfSrvManager = new EnforcementServiceManager(repositories);
-        EnfSrvData enfSrvData = enfSrvManager.GetEnforcementService(enfServiceCode);
+        EnfSrvData enfSrvData = await enfSrvManager.GetEnforcementServiceAsync(enfServiceCode);
 
         if (enfSrvData != null)
             return Ok(enfSrvData);
@@ -25,10 +25,10 @@ public class EnfServicesController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<EnfSrvData> GetEnforcementServices([FromServices] IRepositories repositories,
+    public async Task<ActionResult<EnfSrvData>> GetEnforcementServices([FromServices] IRepositories repositories,
                                                            [FromQuery] string enforcementServiceCode = null, [FromQuery] string enforcementServiceName = null,
                                                            [FromQuery] string enforcementServiceProvince = null, [FromQuery] string enforcementServiceCategory = null)
     {
-        return Ok(repositories.EnfSrvRepository.GetEnfService(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
+        return Ok(await repositories.EnfSrvRepository.GetEnfServiceAsync(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
     }
 }

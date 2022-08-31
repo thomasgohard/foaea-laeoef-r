@@ -4,6 +4,7 @@ using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace BackendProcess.API.Controllers
 {
@@ -18,14 +19,14 @@ namespace BackendProcess.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpPut("")]
-        public ActionResult<string> RunAmountOwed([FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
+        public async Task<ActionResult<string>> RunAmountOwed([FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
         {
             repositories.CurrentSubmitter = "";
 
             var startTime = DateTime.Now;
 
             var amountOwedProcess = new AmountOwedProcess(repositories, repositoriesFinance);
-            amountOwedProcess.Run();
+            await amountOwedProcess.RunAsync();
 
             var endTime = DateTime.Now;
 
@@ -35,7 +36,7 @@ namespace BackendProcess.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult<SummonsSummaryData> CalculateAmountOwed(string id, [FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
+        public async Task<ActionResult<SummonsSummaryData>> CalculateAmountOwed(string id, [FromServices] IRepositories repositories, [FromServices] IRepositories_Finance repositoriesFinance)
         {
             repositories.CurrentSubmitter = "";
 
@@ -46,7 +47,7 @@ namespace BackendProcess.API.Controllers
                 string ctrlCd = values[1];
 
                 var amountOwedProcess = new AmountOwedProcess(repositories, repositoriesFinance);
-                var (summSmryNewData, _) = amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(enfSrv, ctrlCd);
+                var (summSmryNewData, _) = await amountOwedProcess.CalculateAndUpdateAmountOwedForVariationAsync(enfSrv, ctrlCd);
 
                 if (summSmryNewData != null)
                 {

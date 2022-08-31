@@ -1,5 +1,6 @@
 using FOAEA3.Resources.Helpers;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FOAEA3.EmailTools.Tests
@@ -33,13 +34,13 @@ namespace FOAEA3.EmailTools.Tests
         }
 
         [Fact]
-        public void SendEmailWithAttachmentTest1()
+        public async Task SendEmailWithAttachmentTest1()
         {
             // arrange
             var mailService = new EWSMailService("https://%MAIL_SERVER%/EWS/Exchange.asmx".ReplaceVariablesWithEnvironmentValues());
 
             string attachmentContent = "This is an attachment";
-            File.WriteAllText(@"C:\MyFile.txt", attachmentContent);
+            await File.WriteAllTextAsync(@"C:\MyFile.txt", attachmentContent);
 
             // act
             string result = mailService.SendMail("This is the body", "This is the subject", "dsarrazi@justice.gc.ca",

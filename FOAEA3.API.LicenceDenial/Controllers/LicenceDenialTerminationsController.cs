@@ -26,14 +26,14 @@ public class LicenceDenialTerminationsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}")]
-    public ActionResult<LicenceDenialApplicationData> GetApplication([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> GetApplication([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
         var manager = new LicenceDenialTerminationManager(repositories, config);
 
-        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialTerminationApplication.AppCtgy_Cd == "L03")
@@ -58,7 +58,7 @@ public class LicenceDenialTerminationsController : ControllerBase
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, repositories, config);
 
-        bool isCreated = licenceDenialTerminationManager.CreateApplication(controlCodeForL01, requestDate);
+        bool isCreated = await licenceDenialTerminationManager.CreateApplicationAsync(controlCodeForL01, requestDate);
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -75,7 +75,7 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpPut("{key}/ProcessLicenceDenialTerminationResponse")]
-    public ActionResult<LicenceDenialApplicationData> ProcessLicenceDenialTerminationResponse([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> ProcessLicenceDenialTerminationResponse([FromRoute] string key,
                                                                                               [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
@@ -83,7 +83,7 @@ public class LicenceDenialTerminationsController : ControllerBase
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config);
-        if (appManager.ProcessLicenceDenialTerminationResponse(applKey.EnfSrv, applKey.CtrlCd))
+        if (await appManager.ProcessLicenceDenialTerminationResponseAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(application);
         else
             return UnprocessableEntity(application);

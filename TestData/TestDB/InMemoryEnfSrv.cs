@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,8 +11,9 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<EnfSrvData> GetEnfService(string enforcementServiceCode = null, string enforcementServiceName = null, string enforcementServiceProvince = null, string enforcementServiceCategory = null)
+        public async Task<List<EnfSrvData>> GetEnfServiceAsync(string enforcementServiceCode = null, string enforcementServiceName = null, string enforcementServiceProvince = null, string enforcementServiceCategory = null)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

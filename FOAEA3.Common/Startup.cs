@@ -53,7 +53,7 @@ namespace FOAEA3.Common
             //    });
         }
 
-        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
+        public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
         {
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");
@@ -116,18 +116,18 @@ namespace FOAEA3.Common
             var provider = serviceScope.ServiceProvider;
             var repositories = provider.GetRequiredService<IRepositories>();
 
-            ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
-            ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
-            ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
-            ReferenceData.Instance().LoadProvinces(new DBProvince(repositories.MainDB));
-            ReferenceData.Instance().LoadMediums(new DBMedium(repositories.MainDB));
-            ReferenceData.Instance().LoadLanguages(new DBLanguage(repositories.MainDB));
-            ReferenceData.Instance().LoadDocumentTypes(new DBDocumentType(repositories.MainDB));
-            ReferenceData.Instance().LoadCountries(new DBCountry(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationReasons(new DBApplicationReason(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationCategories(new DBApplicationCategory(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
+            await ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(repositories.MainDB));
+            await ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(repositories.MainDB));
+            await ReferenceData.Instance().LoadGendersAsync(new DBGender(repositories.MainDB));
+            await ReferenceData.Instance().LoadProvincesAsync(new DBProvince(repositories.MainDB));
+            await ReferenceData.Instance().LoadMediumsAsync(new DBMedium(repositories.MainDB));
+            await ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(repositories.MainDB));
+            await ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(repositories.MainDB));
+            await ReferenceData.Instance().LoadCountriesAsync(new DBCountry(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(repositories.MainDB));
 
             if (ReferenceData.Instance().Messages.Count == 0)
                 ColourConsole.WriteLine("Reference Data Loaded Successfully.");
@@ -147,9 +147,9 @@ namespace FOAEA3.Common
 
         private static void AddDBServices(IServiceCollection services, string connectionString)
         {
-            var mainDB = new DBTools(connectionString);
+            var mainDB = new DBToolsAsync(connectionString);
 
-            services.AddScoped<IDBTools>(m => ActivatorUtilities.CreateInstance<DBTools>(m, mainDB)); // used to display the database name at top of page
+            services.AddScoped<IDBToolsAsync>(m => ActivatorUtilities.CreateInstance<DBToolsAsync>(m, mainDB)); // used to display the database name at top of page
             services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB));
             services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
             services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<DBFoaMessage>(m, mainDB));

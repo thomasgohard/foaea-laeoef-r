@@ -25,7 +25,7 @@ public class OutgoingFederalTracingRequestsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("")]
-    public ActionResult<List<TracingOutgoingFederalData>> GetFederalOutgoingData(
+    public async Task<ActionResult<List<TracingOutgoingFederalData>>> GetFederalOutgoingData(
                                                             [FromQuery] int maxRecords,
                                                             [FromQuery] string activeState,
                                                             [FromQuery] int lifeState,
@@ -34,7 +34,7 @@ public class OutgoingFederalTracingRequestsController : ControllerBase
     {
         var manager = new TracingManager(repositories, config);
 
-        var data = manager.GetFederalOutgoingData(maxRecords, activeState, (ApplicationState)lifeState,
+        var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState,
                                                   enfServiceCode);
 
         return Ok(data);

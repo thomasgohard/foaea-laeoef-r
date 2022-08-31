@@ -24,7 +24,7 @@ public class LicenceDenialEventsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("RequestedLICIN")]
-    public ActionResult<ApplicationEventData> GetRequestedLICINTracingEvents([FromQuery] string enforcementServiceCode,
+    public async Task<ActionResult<ApplicationEventData>> GetRequestedLICINTracingEvents([FromQuery] string enforcementServiceCode,
                                                                              [FromQuery] string appl_EnfSrv_Cd,
                                                                              [FromQuery] string appl_CtrlCd,
                                                                              [FromServices] IRepositories repositories)
@@ -40,7 +40,7 @@ public class LicenceDenialEventsController : ControllerBase
         if (string.IsNullOrEmpty(appl_CtrlCd))
             return BadRequest("Missing appl_CtrlCd parameter");
 
-        var result = manager.GetRequestedLICINLicenceDenialEvents(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
+        var result = await manager.GetRequestedLICINLicenceDenialEventsAsync(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
         return Ok(result);
 
     }

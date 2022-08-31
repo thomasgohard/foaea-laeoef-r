@@ -9,7 +9,7 @@ namespace TestData.TestDataBase
 {
     public class InMemory_RepositoriesFinance : IRepositories_Finance
     {
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
 
         public InMemory_RepositoriesFinance()
         {

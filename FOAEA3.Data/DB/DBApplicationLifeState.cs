@@ -1,23 +1,23 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
+using FOAEA3.Model;
+using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
-using System.Collections.Generic;
-using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     public class DBApplicationLifeState : DBbase, IApplicationLifeStateRepository
     {
-        public DBApplicationLifeState(IDBTools mainDB) : base(mainDB)
+        public DBApplicationLifeState(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public DataList<ApplicationLifeStateData> GetApplicationLifeStates()
+        public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
         {
-            var data = MainDB.GetAllData<ApplicationLifeStateData>("AppLiSt", FillApplicationLifeStateDataFromReader);
+            var data = await MainDB.GetAllDataAsync<ApplicationLifeStateData>("AppLiSt", FillApplicationLifeStateDataFromReader);
 
             return new DataList<ApplicationLifeStateData>(data, MainDB.LastError);
         }

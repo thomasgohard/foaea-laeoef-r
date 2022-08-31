@@ -4,6 +4,7 @@ using FOAEA3.Model.Enums;
 using System.Collections.Generic;
 using FOAEA3.Business.Security;
 using FOAEA3.Resources.Helpers;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -20,23 +21,25 @@ namespace FOAEA3.Business.Areas.Application
             AuditManager = new AccessAuditManager(Repositories);
         }
 
-        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria, out int totalCount, 
-                                                        int page, int perPage, string orderBy)
+        public async Task<(List<ApplicationSearchResultData>, int)> SearchAsync(QuickSearchData searchCriteria, 
+                                                                           int page, int perPage, string orderBy)
         {
-            int accessAuditId = AuditManager.AddAuditHeader(AccessAuditPage.ApplicationSearch);
-            AddSearchCriteriaToAccessAudit(accessAuditId, searchCriteria);
+            int accessAuditId = await AuditManager.AddAuditHeaderAsync(AccessAuditPage.ApplicationSearch);
+            await AddSearchCriteriaToAccessAuditAsync(accessAuditId, searchCriteria);
 
-            var searchResults = Repositories.ApplicationSearchRepository.QuickSearch(searchCriteria, out totalCount,
-                                                                                     page, perPage, orderBy);
+            List<ApplicationSearchResultData> searchResults;
+            int totalCount;
+            (searchResults, totalCount) = await Repositories.ApplicationSearchRepository.QuickSearchAsync(searchCriteria,
+                                                                                         page, perPage, orderBy);
 
             LastError = Repositories.ApplicationSearchRepository.LastError;
 
-            AddSearchResultsToAccessAudit(accessAuditId, searchResults);
+            await AddSearchResultsToAccessAuditAsync(accessAuditId, searchResults);
 
-            return searchResults;
+            return (searchResults, totalCount);
         }
 
-        private void AddSearchCriteriaToAccessAudit(int accessAuditId, QuickSearchData searchCriteria)
+        private async Task AddSearchCriteriaToAccessAuditAsync(int accessAuditId, QuickSearchData searchCriteria)
         {
             var items = new Dictionary<AccessAuditElement, string>();
 
@@ -61,15 +64,15 @@ namespace FOAEA3.Business.Areas.Application
             if (searchCriteria.ViewAllJurisdiction) items.Add(AccessAuditElement.ViewAllJurisdictions, searchCriteria.ViewAllJurisdiction.ToString());
             if (searchCriteria.SearchOnlySinConfirmed) items.Add(AccessAuditElement.SINConfirmed, searchCriteria.SearchOnlySinConfirmed.ToString());
 
-            AuditManager.AddAuditElements(accessAuditId, items);
+            await AuditManager.AddAuditElementsAsync(accessAuditId, items);
         }
 
-        private void AddSearchResultsToAccessAudit(int accessAuditId, List<ApplicationSearchResultData> searchResults)
+        private async Task AddSearchResultsToAccessAuditAsync(int accessAuditId, List<ApplicationSearchResultData> searchResults)
         {
             foreach (var searchResult in searchResults)
             {
                 string key = $"{searchResult.Appl_EnfSrv_Cd.Trim()}-{searchResult.Appl_CtrlCd.Trim()}";
-                AuditManager.AddAuditElement(accessAuditId, AccessAuditElement.ApplicationID, key);
+                await AuditManager.AddAuditElementAsync(accessAuditId, AccessAuditElement.ApplicationID, key);
             }
         }
 

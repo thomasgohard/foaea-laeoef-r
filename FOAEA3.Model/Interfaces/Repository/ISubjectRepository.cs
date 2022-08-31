@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface ISubjectRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        List<SubjectData> GetSubjectsForSubmitter(string submCd);
-        SubjectData GetSubject(string subjectName);
-        SubjectData GetSubjectByConfirmationCode(string confirmationCode);
+        Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd);
+        Task<SubjectData> GetSubjectAsync(string subjectName);
+        Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode);
 
     }
 }

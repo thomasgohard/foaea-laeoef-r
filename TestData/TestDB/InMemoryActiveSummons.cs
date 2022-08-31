@@ -4,6 +4,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -12,8 +13,9 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public ActiveSummonsCoreData GetActiveSummonsCore(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<ActiveSummonsCoreData> GetActiveSummonsCoreAsync(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
+            await Task.Run(() => { });
             var data = (from s in InMemData.SummSmryTestData
                         join a in InMemData.ApplicationTestData on new { s.Appl_EnfSrv_Cd, s.Appl_CtrlCd } equals new { a.Appl_EnfSrv_Cd, a.Appl_CtrlCd }
                         where (s.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (s.Appl_CtrlCd == appl_CtrlCd) && (payableDate.Date.IsBetween(s.Start_Dte.Date, s.End_Dte.Date))
@@ -29,8 +31,9 @@ namespace TestData.TestDB
 
         }
 
-        public ActiveSummonsData GetActiveSummonsData(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
+        public async Task<ActiveSummonsData> GetActiveSummonsDataAsync(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
         {
+            await Task.Run(() => { });
             var data = (from a in InMemData.ApplicationTestData
                         join i in InMemData.IntFinHoldbackTestData on new { a.Appl_EnfSrv_Cd, a.Appl_CtrlCd } equals new { i.Appl_EnfSrv_Cd, i.Appl_CtrlCd }
                         join s in InMemData.SummSmryTestData on new { a.Appl_EnfSrv_Cd, a.Appl_CtrlCd } equals new { s.Appl_EnfSrv_Cd, s.Appl_CtrlCd }
@@ -104,8 +107,9 @@ namespace TestData.TestDB
 
         }
 
-        public DateTime GetLegalDate(string appl_CtrlCd, string appl_EnfSrv_Cd)
+        public async Task<DateTime> GetLegalDateAsync(string appl_CtrlCd, string appl_EnfSrv_Cd)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

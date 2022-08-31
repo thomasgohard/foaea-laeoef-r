@@ -6,7 +6,7 @@ namespace FOAEA3.Data.Base
 {
     public class DbRepositories_Finance : IRepositories_Finance
     {
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
         private ISummonsSummaryRepository summonsSummaryDB;
         private IActiveSummonsRepository activeSummonsDB;
         private IGarnPeriodRepository garnPeriodDB;
@@ -30,7 +30,7 @@ namespace FOAEA3.Data.Base
             set => MainDB.UserId = value;
         }
 
-        public DbRepositories_Finance(IDBTools mainDB)
+        public DbRepositories_Finance(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }

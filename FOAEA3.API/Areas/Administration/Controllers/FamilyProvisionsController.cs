@@ -12,8 +12,8 @@ public class FamilyProvisionsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("FamilyProvisions API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<FamilyProvisionData>> GetFamilyProvisions([FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<FamilyProvisionData>>> GetFamilyProvisions([FromServices] IRepositories repositories)
     {
-        return Ok(repositories.FamilyProvisionRepository.GetFamilyProvisions());
+        return Ok(await repositories.FamilyProvisionRepository.GetFamilyProvisionsAsync());
     }
 }

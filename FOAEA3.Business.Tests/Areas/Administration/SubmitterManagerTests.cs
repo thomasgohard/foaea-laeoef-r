@@ -4,6 +4,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model;
 using System;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.Tests.Areas.Administration
 {
@@ -48,14 +49,14 @@ namespace FOAEA3.Data.Tests.Areas.Administration
         }
 
         [Fact]
-        public void TestCreateRegularSubmitter()
+        public async Task TestCreateRegularSubmitter()
         {
 
             SubmitterManager submitterManager = new SubmitterManager(new InMemory_Repositories());
 
             SubmitterData submitterData = CreateTestSubmitter("ON01", "DOW1");
 
-            SubmitterData newSubmitter = submitterManager.CreateSubmitter(submitterData, string.Empty, false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, string.Empty, false);
 
             ValidateResult("ON2D03", newSubmitter);
 
@@ -63,21 +64,21 @@ namespace FOAEA3.Data.Tests.Areas.Administration
 
         //[Trait("Category", "SkipWhenLiveUnitTesting")]
         [Fact]
-        public void TestCreateFLASSubmitter()
+        public async Task TestCreateFLASSubmitter()
         {
 
             SubmitterManager submitterManager = new SubmitterManager(new InMemory_Repositories());
 
             SubmitterData submitterData = CreateTestSubmitter("FO01", "OTT1");
 
-            SubmitterData newSubmitter = submitterManager.CreateSubmitter(submitterData, "DS", false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, "DS", false);
 
             ValidateResult("FO2XDS", newSubmitter);
 
         }
 
         [Fact]
-        public void TestCreateCourtSubmitter()
+        public async Task TestCreateCourtSubmitter()
         {
 
             SubmitterManager submitterManager = new SubmitterManager(new InMemory_Repositories());
@@ -85,7 +86,7 @@ namespace FOAEA3.Data.Tests.Areas.Administration
             SubmitterData submitterData = CreateTestSubmitter("ON02", "ON15");
             submitterData.Subm_CourtUsr_Ind = true;
 
-            SubmitterData newSubmitter = submitterManager.CreateSubmitter(submitterData, string.Empty, false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, string.Empty, false);
 
             ValidateResult("ONC003", newSubmitter);
 

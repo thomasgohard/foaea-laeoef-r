@@ -1,6 +1,6 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
-using System.Collections.Generic;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Utilities
 {
@@ -13,10 +13,10 @@ namespace FOAEA3.Business.Utilities
             Repositories = repositories;
         }
 
-        internal EnfSrvData GetEnforcementService(string enfSrvCd)
+        public async Task<EnfSrvData> GetEnforcementServiceAsync(string enfSrvCd)
         {
             IEnfSrvRepository db = Repositories.EnfSrvRepository;
-            List<EnfSrvData> result = db.GetEnfService(enfSrvCd);
+            var result = await db.GetEnfServiceAsync(enfSrvCd);
             if (result.Count == 1)
                 return result[0];
             else

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Admin.Web
 {
@@ -33,7 +34,7 @@ namespace FOAEA3.Admin.Web
                         options.Filters.Add(new RazorPageActionFilter(Configuration, mainDB));
                     });
 
-            services.AddScoped<IDBTools>(m => ActivatorUtilities.CreateInstance<DBTools>(m, mainDB)); // used to display the database name at top of page
+            services.AddScoped<IDBToolsAsync>(m => ActivatorUtilities.CreateInstance<DBToolsAsync>(m, mainDB)); // used to display the database name at top of page
             services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB));
             services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
             services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<DBFoaMessage>(m, mainDB));
@@ -43,12 +44,11 @@ namespace FOAEA3.Admin.Web
             services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
 
             services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));
-           // services.AddScoped<ApiConfig>(m => ActivatorUtilities.CreateInstance<ApiConfig>(m));
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IRepositories repositories)
+        public async Task Configure(IApplicationBuilder app, IWebHostEnvironment env, IRepositories repositories)
         {
             if (!env.IsProduction())
             {
@@ -70,18 +70,18 @@ namespace FOAEA3.Admin.Web
                 endpoints.MapRazorPages();
             });
 
-            ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
-            ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
-            ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
-            ReferenceData.Instance().LoadProvinces(new DBProvince(repositories.MainDB));
-            ReferenceData.Instance().LoadMediums(new DBMedium(repositories.MainDB));
-            ReferenceData.Instance().LoadLanguages(new DBLanguage(repositories.MainDB));
-            ReferenceData.Instance().LoadDocumentTypes(new DBDocumentType(repositories.MainDB));
-            ReferenceData.Instance().LoadCountries(new DBCountry(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationReasons(new DBApplicationReason(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationCategories(new DBApplicationCategory(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
+            await ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(repositories.MainDB));
+            await ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(repositories.MainDB));
+            await ReferenceData.Instance().LoadGendersAsync(new DBGender(repositories.MainDB));
+            await ReferenceData.Instance().LoadProvincesAsync(new DBProvince(repositories.MainDB));
+            await ReferenceData.Instance().LoadMediumsAsync(new DBMedium(repositories.MainDB));
+            await ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(repositories.MainDB));
+            await ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(repositories.MainDB));
+            await ReferenceData.Instance().LoadCountriesAsync(new DBCountry(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(repositories.MainDB));
+            await ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(repositories.MainDB));
         }
     }
 }

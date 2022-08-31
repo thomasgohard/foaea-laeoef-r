@@ -3,6 +3,7 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -10,14 +11,14 @@ namespace FOAEA3.Data.DB
     {
         public MessageDataList Messages { get; set; }
 
-        public DBLanguage(IDBTools mainDB) : base(mainDB)
+        public DBLanguage(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public DataList<LanguageData> GetLanguages()
+        public async Task<DataList<LanguageData>> GetLanguagesAsync()
         {
-            var data = MainDB.GetAllData<LanguageData>("Lng", FillLanguageDataFromReader);
+            var data = await MainDB.GetAllDataAsync<LanguageData>("Lng", FillLanguageDataFromReader);
 
             return new DataList<LanguageData>(data, MainDB.LastError);
         }

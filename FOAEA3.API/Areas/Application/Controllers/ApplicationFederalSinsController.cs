@@ -34,7 +34,7 @@ public class ApplicationFederalSinsController : ControllerBase
         var applManager = new ApplicationManager(application, repositories, config);
         var sinManager = new ApplicationSINManager(application, applManager);
 
-        sinManager.CreateResultData(responseData);
+        await sinManager.CreateResultDataAsync(responseData);
 
         var rootPath = "http://" + HttpContext.Request.Host.ToString();
 
@@ -42,21 +42,21 @@ public class ApplicationFederalSinsController : ControllerBase
     }
 
     [HttpGet("RequestedEventsForFile")]
-    public ActionResult<List<ApplicationEventData>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<List<ApplicationEventData>>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
                                                                                     [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        return manager.GetRequestedSINEventDataForFile("HR01", fileName).Items;
+        return (await manager.GetRequestedSINEventDataForFileAsync("HR01", fileName)).Items;
     }
 
     [HttpGet("RequestedEventDetailsForFile")]
-    public ActionResult<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
                                                                                           [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        return manager.GetRequestedSINEventDetailDataForFile("HR01", fileName).Items;
+        return (await manager.GetRequestedSINEventDetailDataForFileAsync("HR01", fileName)).Items;
     }
 
 }

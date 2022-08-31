@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace BackendProcesses.Business
 {
@@ -15,21 +16,21 @@ namespace BackendProcesses.Business
             Repositories = repositories;
         }
 
-        public void Run()
+        public async Task RunAsync()
         {
             var prodAudit = Repositories.ProductionAuditRepository;
             var dbApplicationEvent = Repositories.ApplicationEventRepository;
             var dbApplication = Repositories.ApplicationRepository; // use ApplicationManager() instead?
             var dbNotification = Repositories.NotificationRepository;
 
-            prodAudit.Insert("BF Events Process", "BF Events Process Started", "O");
+            await prodAudit.InsertAsync("BF Events Process", "BF Events Process Started", "O");
 
-            var bfEventList = dbApplicationEvent.GetActiveEventBFs();
+            var bfEventList = await dbApplicationEvent.GetActiveEventBFsAsync();
             foreach (var bfEvent in bfEventList)
             {
                 try
                 {
-                    var application = dbApplication.GetApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                    var application = await dbApplication.GetApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
 
                     switch (application.AppCtgy_Cd)
                     {
@@ -59,13 +60,13 @@ namespace BackendProcesses.Business
                 }
                 catch (Exception e)
                 {
-                    dbNotification.SendEmail("BF Error",
+                    await dbNotification.SendEmailAsync("BF Error",
                         "", // System.Configuration.ConfigurationManager.AppSettings("EmailRecipients")
                         e.Message + Environment.NewLine + Environment.NewLine + e.StackTrace);
                 }
             }
 
-            prodAudit.Insert("BF Events Process", "BF Events Process Completed", "O");
+            await prodAudit.InsertAsync("BF Events Process", "BF Events Process Completed", "O");
         }
     }
 }

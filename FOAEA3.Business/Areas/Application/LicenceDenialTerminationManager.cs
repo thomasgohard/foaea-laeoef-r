@@ -5,6 +5,7 @@ using FOAEA3.Business.Security;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -24,16 +25,16 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public override bool LoadApplication(string enfService, string controlCode)
+        public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
             // get data from Appl
-            bool isSuccess = base.LoadApplication(enfService, controlCode);
+            bool isSuccess = await base.LoadApplicationAsync(enfService, controlCode);
 
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
                 var licenceDenialDB = Repositories.LicenceDenialRepository;
-                var data = licenceDenialDB.GetLicenceDenialData(enfService, appl_L03_CtrlCd: controlCode);
+                var data = await licenceDenialDB.GetLicenceDenialDataAsync(enfService, appl_L03_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialTerminationApplication.Merge(data);
@@ -42,29 +43,29 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public bool CreateApplication(string controlCodeForL01, DateTime requestDate)
+        public async Task<bool> CreateApplicationAsync(string controlCodeForL01, DateTime requestDate)
         {
             if (!IsValidCategory("L03"))
                 return false;
 
             // bool success = base.CreateApplication();
-            bool success = CreateLicenceDenialTermination(controlCodeForL01, requestDate);
+            bool success = await CreateLicenceDenialTerminationAsync(controlCodeForL01, requestDate);
 
             if (!success)
             {
                 var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, LicenceDenialTerminationApplication);
-                failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.L03);
+                await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L03);
             }
 
             return success;
         }
 
-        private bool CreateLicenceDenialTermination(string controlCodeForL01, DateTime requestDate)
+        private async Task<bool> CreateLicenceDenialTerminationAsync(string controlCodeForL01, DateTime requestDate)
         {
-            SetNewStateTo(ApplicationState.INVALID_APPLICATION_1);
+            await SetNewStateTo(ApplicationState.INVALID_APPLICATION_1);
 
             var licenceDenialManager = new LicenceDenialManager(Repositories, config);
-            if (!licenceDenialManager.LoadApplication(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd, controlCodeForL01))
+            if (!await licenceDenialManager.LoadApplicationAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd, controlCodeForL01))
             {
                 LicenceDenialTerminationApplication.Messages.AddError("Cannot create an L03 for an L01 that doesn't exist.");
                 return false;
@@ -84,7 +85,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.Appl_CtrlCd) && (ApplicationExists()))
+            if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.Appl_CtrlCd) && (await ApplicationExistsAsync()))
             {
                 LicenceDenialTerminationApplication.Messages.AddError("Application already exists in database.");
                 return false;
@@ -94,18 +95,18 @@ namespace FOAEA3.Business.Areas.Application
 
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                LicenceDenialTerminationApplication.Appl_CtrlCd = Repositories.ApplicationRepository.GenerateApplicationControlCode(Appl_EnfSrv_Cd);
+                LicenceDenialTerminationApplication.Appl_CtrlCd = await Repositories.ApplicationRepository.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
             }
 
             TrimTrailingSpaces();
             MakeUpperCase();
 
-            Repositories.ApplicationRepository.CreateApplication(LicenceDenialTerminationApplication);
+            await Repositories.ApplicationRepository.CreateApplicationAsync(LicenceDenialTerminationApplication);
 
             if (LicenceDenialTerminationApplication.AppLiSt_Cd != ApplicationState.INVALID_APPLICATION_1)
             {
-                licenceDenialManager.CancelApplication();
+                await licenceDenialManager.CancelApplicationAsync();
             }
 
             switch (LicenceDenialTerminationApplication.AppLiSt_Cd)
@@ -123,11 +124,11 @@ namespace FOAEA3.Business.Areas.Application
                     break;
             }
 
-            Repositories.LicenceDenialRepository.CloseSameDayLicenceEvent(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd,
+            await Repositories.LicenceDenialRepository.CloseSameDayLicenceEventAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd,
                                                                           originalL01.Appl_CtrlCd,
                                                                           LicenceDenialTerminationApplication.Appl_CtrlCd);
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
 
             if (Repositories.CurrentSubmitter != "MSGBRO")
             {
@@ -142,9 +143,9 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        public bool ProcessLicenceDenialTerminationResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> ProcessLicenceDenialTerminationResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            if (!LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
+            if (!await LoadApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd))
             {
                 LicenceDenialTerminationApplication.Messages.AddError(SystemMessage.APPLICATION_NOT_FOUND);
                 return false;
@@ -159,7 +160,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var lastResponse = Repositories.LicenceDenialResponseRepository.GetLastResponseData(appl_EnfSrv_Cd, appl_CtrlCd);
+            var lastResponse = await Repositories.LicenceDenialResponseRepository.GetLastResponseDataAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
             LicenceDenialTerminationApplication.Appl_LastUpdate_Dte = DateTime.Now;
             LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
@@ -174,13 +175,13 @@ namespace FOAEA3.Business.Areas.Application
                 LicenceDenialTerminationApplication.ActvSt_Cd = "C";
             }
 
-            UpdateApplicationNoValidation();
+            await UpdateApplicationNoValidationAsync();
 
-            Repositories.LicenceDenialRepository.UpdateLicenceDenialData(LicenceDenialTerminationApplication);
+            await Repositories.LicenceDenialRepository.UpdateLicenceDenialDataAsync(LicenceDenialTerminationApplication);
 
             EventManager.AddEvent(EventCode.C50828_LICENSE_RESPONSE_RECEIVED, lastResponse.EnfSrv_Cd);
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
 
             return (LicenceDenialTerminationApplication.AppLiSt_Cd == ApplicationState.EXPIRED_15);
 

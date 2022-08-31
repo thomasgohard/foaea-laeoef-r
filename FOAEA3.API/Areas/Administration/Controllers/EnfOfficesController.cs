@@ -12,11 +12,11 @@ public class EnfOfficesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("EnfOffices API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<EnfOffData>> GetEnfOffices([FromServices] IRepositories repositories,
+    public async Task<ActionResult<List<EnfOffData>>> GetEnfOffices([FromServices] IRepositories repositories,
                                                         [FromQuery] string enfOffName = null, [FromQuery] string enfOffCode = null,
                                                         [FromQuery] string province = null, [FromQuery] string enfServCode = null)
     {
-        return Ok(repositories.EnfOffRepository.GetEnfOff(enfOffName, enfOffCode, province, enfServCode));
+        return Ok(await repositories.EnfOffRepository.GetEnfOffAsync(enfOffName, enfOffCode, province, enfServCode));
     }
 
 }

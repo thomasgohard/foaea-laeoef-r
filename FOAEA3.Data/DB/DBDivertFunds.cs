@@ -2,17 +2,18 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBDivertFunds : DBbase, IDivertFundsRepository
     {
-        public DBDivertFunds(IDBTools mainDB) : base(mainDB)
+        public DBDivertFunds(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public decimal GetTotalDivertedForPeriod(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
+        public async Task<decimal> GetTotalDivertedForPeriodAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -21,10 +22,10 @@ namespace FOAEA3.Data.DB
                     {"chrAppl_CtrlCd", appl_CtrlCd }
                 };
 
-            return MainDB.GetDataFromStoredProc<decimal>("GetTtlPymDivertedForCurrPeriod", parameters);
+            return await MainDB.GetDataFromStoredProcAsync<decimal>("GetTtlPymDivertedForCurrPeriod", parameters);
         }
 
-        public decimal GetTotalFeesDiverted(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
+        public async Task<decimal> GetTotalFeesDivertedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -33,9 +34,9 @@ namespace FOAEA3.Data.DB
                 };
 
             if (isCumulativeFees)
-                return MainDB.GetDataFromStoredProc<decimal>("GetTtlFeesDiverted", parameters);
+                return await MainDB.GetDataFromStoredProcAsync<decimal>("GetTtlFeesDiverted", parameters);
             else
-                return MainDB.GetDataFromStoredProc<decimal>("GetTtlFeesDivertedNonCumulative", parameters);
+                return await MainDB.GetDataFromStoredProcAsync<decimal>("GetTtlFeesDivertedNonCumulative", parameters);
         }
     }
 }

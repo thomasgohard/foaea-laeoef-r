@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,17 +11,21 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<SubjectData> GetSubjectsForSubmitter(string submCd)
+        public async Task<SubjectData> GetSubjectAsync(string subjectName)
         {
-            throw new NotImplementedException();
-        }
-        public SubjectData GetSubject(string submCd)
-        {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public SubjectData GetSubjectByConfirmationCode(string confirmationCode)
+        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
+            await Task.Run(() => { });
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
+        {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

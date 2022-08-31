@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
+using System.Threading.Tasks;
 
 namespace BackendProcesses.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace BackendProcesses.API.Controllers
         public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4"); 
         
         [HttpPut("")]
-        public ActionResult<string> RunBringForward([FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> RunBringForward([FromServices] IRepositories repositories)
         {
             repositories.CurrentSubmitter = "";
 
@@ -39,7 +40,7 @@ namespace BackendProcesses.API.Controllers
             var startTime = DateTime.Now;
 
             var bringForwardProcess = new BringForwardEventProcess(repositories, config);
-            bringForwardProcess.Run();
+            await bringForwardProcess.RunAsync();
 
             var endTime = DateTime.Now;
 

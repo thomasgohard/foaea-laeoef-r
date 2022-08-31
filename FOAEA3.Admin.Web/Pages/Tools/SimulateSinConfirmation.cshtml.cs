@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Admin.Web.Pages.Tools
 {
@@ -27,7 +28,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         {
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
 
             if (ModelState.IsValid)
@@ -36,7 +37,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
                 try
                 {
-                    var success = adminManager.ManuallyConfirmSIN(SimulateSinConfirmation.EnfService, SimulateSinConfirmation.ControlCode,
+                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService, SimulateSinConfirmation.ControlCode,
                                                                   SimulateSinConfirmation.Sin);
 
                     if (success)

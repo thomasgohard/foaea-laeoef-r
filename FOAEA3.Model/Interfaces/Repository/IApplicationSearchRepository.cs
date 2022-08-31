@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -8,7 +9,7 @@ namespace FOAEA3.Model.Interfaces
         string UserId { get; set; }
         string LastError { get; set; }
 
-        List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount,
+        Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData,
                                                       int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd");
     }
 

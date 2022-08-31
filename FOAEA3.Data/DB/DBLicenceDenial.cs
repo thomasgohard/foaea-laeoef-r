@@ -6,17 +6,18 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBLicenceDenial : DBbase, ILicenceDenialRepository
     {
-        public DBLicenceDenial(IDBTools mainDB) : base(mainDB)
+        public DBLicenceDenial(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null , string appl_L03_CtrlCd = null)
+        public async Task<LicenceDenialApplicationData> GetLicenceDenialDataAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null , string appl_L03_CtrlCd = null)
         {
 
 
@@ -31,14 +32,14 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(appl_L03_CtrlCd))
                 parameters.Add("appl_L03_CtrlCd", appl_L03_CtrlCd);
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<LicenceDenialApplicationData>("LicSusp_Select", parameters, FillDataFromReader);
 
             var result = data.FirstOrDefault();
 
             return result; 
         }
 
-        public List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -46,27 +47,27 @@ namespace FOAEA3.Data.DB
                         {"EnforcementServiceCode", appl_EnfSrv_Cd}
                     };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceSuspensionHistoryData>("LicSuspApplGetLicenseSuspensionHist", parameters, FillSuspensionHistoryDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<LicenceSuspensionHistoryData>("LicSuspApplGetLicenseSuspensionHist", parameters, FillSuspensionHistoryDataFromReader);
 
             return data;
         }
 
-        public void CreateLicenceDenialData(LicenceDenialApplicationData data)
+        public async Task CreateLicenceDenialDataAsync(LicenceDenialApplicationData data)
         {
             var parameters = SetParameters(data);
 
-            MainDB.ExecProc("LicSuspInsert", parameters);
+            await MainDB.ExecProcAsync("LicSuspInsert", parameters);
 
         }
 
-        public void UpdateLicenceDenialData(LicenceDenialApplicationData data)
+        public async Task UpdateLicenceDenialDataAsync(LicenceDenialApplicationData data)
         {
             var parameters = SetParameters(data);
 
-            MainDB.ExecProc("LicSuspUpdate", parameters);
+            await MainDB.ExecProcAsync("LicSuspUpdate", parameters);
         }
 
-        public bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
+        public async Task<bool> CloseSameDayLicenceEventAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -75,7 +76,7 @@ namespace FOAEA3.Data.DB
                 { "L03Appl_CtrlCd", appl_L03_CtrlCd }
             };
 
-            return MainDB.GetDataFromStoredProcViaReturnParameter<bool>("CloseSameDayLicenseEvent", parameters, "L01Event");
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<bool>("CloseSameDayLicenseEvent", parameters, "L01Event");
         }
 
         private static Dictionary<string, object> SetParameters(LicenceDenialApplicationData data)
@@ -140,7 +141,7 @@ namespace FOAEA3.Data.DB
             return parameters;
         }
 
-        public List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                       string activeState,
                                                                       ApplicationState lifeState,
                                                                       string enfServiceCode)
@@ -154,23 +155,23 @@ namespace FOAEA3.Data.DB
                 { "chrEnfSrv_Cd", enfServiceCode }
             };
 
-            return MainDB.GetDataFromStoredProc<LicenceDenialOutgoingFederalData>("MessageBrokerGetLICOUTOutboundData",
+            return await MainDB.GetDataFromStoredProcAsync<LicenceDenialOutgoingFederalData>("MessageBrokerGetLICOUTOutboundData",
                                                                             parameters, FillLicenceDenialOutgoingFederalData);
 
         }
 
-        public List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource)
+        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string fedSource)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "chrEnfSrv_Cd", fedSource }
             };
 
-            return MainDB.GetDataFromStoredProc<LicenceDenialToApplData>("MessageBrokerGetLICENSEInboundToApplData", 
+            return await MainDB.GetDataFromStoredProcAsync<LicenceDenialToApplData>("MessageBrokerGetLICENSEInboundToApplData", 
                                                                          parameters, FillLicenceDenialToApplDataFromReader);
         }
 
-        public List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -180,7 +181,7 @@ namespace FOAEA3.Data.DB
                 { "isXML", isXML ? 1 : 0 }
             };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialOutgoingProvincialData>("MessageBrokerGetLICAPPOUTOutboundData",
+            var data = await MainDB.GetDataFromStoredProcAsync<LicenceDenialOutgoingProvincialData>("MessageBrokerGetLICAPPOUTOutboundData",
                                                                                  parameters, FillLicenceDenialOutgoingProvincialData);
             return data;
 

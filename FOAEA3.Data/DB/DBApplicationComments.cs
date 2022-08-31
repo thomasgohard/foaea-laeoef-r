@@ -6,22 +6,23 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     public class DBApplicationComments: DBbase, IApplicationCommentsRepository
     {
-        public DBApplicationComments(IDBTools mainDB) : base(mainDB)
+        public DBApplicationComments(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
         public MessageDataList Messages { get; set; }
 
-        public DataList<ApplicationCommentsData> GetApplicationComments()
+        public async Task<DataList<ApplicationCommentsData>> GetApplicationCommentsAsync()
         {
 
-            var data = MainDB.GetAllData<ApplicationCommentsData>("ApplicationComments", FillDataFromReader);
+            var data = await MainDB.GetAllDataAsync<ApplicationCommentsData>("ApplicationComments", FillDataFromReader);
 
             return new DataList<ApplicationCommentsData>(data, MainDB.LastError);
 

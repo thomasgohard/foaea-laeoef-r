@@ -5,24 +5,26 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+
 namespace FOAEA3.Data.DB
 {
     internal class DBSubjectRole: DBbase, ISubjectRoleRepository
     {
-        public DBSubjectRole(IDBTools mainDB) : base(mainDB)
+        public DBSubjectRole(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
-        public List<SubjectRoleData> GetAllSubjectRoles()
+        public async Task<List<SubjectRoleData>> GetAllSubjectRolesAsync()
         {
-            return MainDB.GetAllData<SubjectRoleData>("SubjectRole", FillSubjectRoleData);
+            return await MainDB.GetAllDataAsync<SubjectRoleData>("SubjectRole", FillSubjectRoleData);
         }
 
-        public List<string> GetAssumedRolesForSubject(string subjectName)
+        public async Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
         {
             var assumedRoles = new List<string>();
 
-            foreach (SubjectRoleData subjectRoleData in GetSubjectRoles(subjectName))
+            foreach (SubjectRoleData subjectRoleData in await GetSubjectRolesAsync(subjectName))
             {
                 assumedRoles.Add(subjectRoleData.RoleName);
             }
@@ -30,14 +32,14 @@ namespace FOAEA3.Data.DB
             return assumedRoles;
         }
 
-        public List<SubjectRoleData> GetSubjectRoles(string subjectName)
+        public async Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "SubjectName", subjectName }
             };
 
-            return MainDB.GetDataFromStoredProc<SubjectRoleData>("UserGetRoleNames", parameters, FillSubjectRoleData);
+            return await MainDB.GetDataFromStoredProcAsync<SubjectRoleData>("UserGetRoleNames", parameters, FillSubjectRoleData);
             
         }
         private void FillSubjectRoleData(IDBHelperReader rdr, SubjectRoleData data)

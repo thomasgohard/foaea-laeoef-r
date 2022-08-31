@@ -2,6 +2,7 @@
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -21,30 +22,33 @@ namespace TestData.TestDB
 
         public MessageDataList Messages { get; set; }
 
-        public FoaEventDataDictionary GetAllFoaMessages()
+        public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
         {
             var result = new FoaEventDataDictionary();
 
-            foreach (var eventData in FoaMessages)
+            await Task.Run(() =>
             {
-                EventCode eventCode = (EventCode)eventData.Error;
-                if (!result.ContainsKey(eventCode))
+                foreach (var eventData in FoaMessages)
                 {
-                    var newEventData = new FoaEventData
+                    EventCode eventCode = (EventCode)eventData.Error;
+                    if (!result.ContainsKey(eventCode))
                     {
-                        Error = eventData.Error,
-                        Dlevel = eventData.Dlevel,
-                        Severity = eventData.Severity,
-                    };
+                        var newEventData = new FoaEventData
+                        {
+                            Error = eventData.Error,
+                            Dlevel = eventData.Dlevel,
+                            Severity = eventData.Severity,
+                        };
 
-                    result.FoaEvents.Add(eventData.Error.ToString(), newEventData);
+                        result.FoaEvents.Add(eventData.Error.ToString(), newEventData);
+                    }
+
+                    if (eventData.MsgLangId == 1033)
+                        result[eventCode].Description_e = eventData.Description;
+                    else
+                        result[eventCode].Description_f = eventData.Description;
                 }
-
-                if (eventData.MsgLangId == 1033)
-                    result[eventCode].Description_e = eventData.Description;
-                else
-                    result[eventCode].Description_f = eventData.Description;
-            }
+            });
 
             return result;
         }

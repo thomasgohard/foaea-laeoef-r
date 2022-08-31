@@ -6,32 +6,20 @@ using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBLicenceDenialResponse : DBbase, ILicenceDenialResponseRepository
     {
-        public DBLicenceDenialResponse(IDBTools mainDB) : base(mainDB)
+        public DBLicenceDenialResponse(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
         public MessageDataList Messages => throw new NotImplementedException();
 
-        //public DataList<LicenceDenialResponseData> GetLicenceDenialResponseForApplication(string applEnfSrvCd, string applCtrlCd)
-        //{
-        //    var parameters = new Dictionary<string, object>
-        //        {
-        //            {"EnfSrv_Cd", applEnfSrvCd },
-        //            {"CtrlCd", applCtrlCd }
-        //        };
-
-        //    var data = MainDB.GetDataFromStoredProc<LicenceDenialResponseData>("LicenceDenialResultsGetLicenceDenial", parameters, FillLicenceDenialResultDataFromReader);
-
-        //    return new DataList<LicenceDenialResponseData>(data, MainDB.LastError);
-        //}
-
-        public LicenceDenialResponseData GetLastResponseData(string applEnfSrvCd, string applCtrlCd)
+        public async Task<LicenceDenialResponseData> GetLastResponseDataAsync(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -39,72 +27,26 @@ namespace FOAEA3.Data.DB
                     {"CtrlCd", applCtrlCd }
                 };
 
-            var data = MainDB.GetDataFromStoredProc<LicenceDenialResponseData>("GetLastLicenseResponse", parameters, FillLicenceDenialResultDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<LicenceDenialResponseData>("GetLastLicenseResponse", parameters, FillLicenceDenialResultDataFromReader);
 
             return data.FirstOrDefault();
         }
 
-        //public DataList<LicenceDenialResponseData> GetLicenceDenialResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
-        //{
-        //    var parameters = new Dictionary<string, object>
-        //        {
-        //            {"EnfSrv_Cd", applEnfSrvCd },
-        //            {"CtrlCd", applCtrlCd },
-        //            {"chkCycle", checkCycle }
-        //        };
-
-        //    var data = MainDB.GetDataFromStoredProc<LicenceDenialResponseData>("TraceResultsGetTrace", parameters, FillLicenceDenialResultDataFromReader);
-
-        //    return new DataList<LicenceDenialResponseData>(data, MainDB.LastError);
-        //}
-
-        public void InsertBulkData(List<LicenceDenialResponseData> responseData)
+        public async Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData)
         {
-            MainDB.BulkUpdate<LicenceDenialResponseData>(responseData, "LicRsp");
+            await MainDB.BulkUpdateAsync<LicenceDenialResponseData>(responseData, "LicRsp");
         }
 
-        public void MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewedAsync(string enfService)
         {
             var parameters = new Dictionary<string, object>
             {
                 {"chrRecptCd", enfService }
             };
 
-            MainDB.ExecProc("LicAPPLicUpdate", parameters);
+            await MainDB.ExecProcAsync("LicAPPLicUpdate", parameters);
 
         }
-
-        /*
-         
-         Public Function GetLastLicRsp(ByVal applicationEnforcementServiceCode As String, ByVal applicationControlCode As String) As Common.LicenseResponseData
-        Dim licenceData As New Common.LicenseResponseData
-
-        Dim command As New SqlClient.SqlCommand
-        With command
-            .Connection = New SqlClient.SqlConnection(_connectionString)
-            .CommandText = "GetLastLicenseResponse"
-            .CommandType = CommandType.StoredProcedure
-
-            'Add the parameters to the SqlCommand object.
-            .Parameters.Add("@Appl_EnfSrv_Cd", SqlDbType.Char)
-            .Parameters.Add("@Appl_CtrlCd", SqlDbType.Char)
-
-            'Assign the parameters.
-            .Parameters("@Appl_EnfSrv_Cd").Value = IIf(applicationEnforcementServiceCode Is Nothing, _
-                                                       DBNull.Value, applicationEnforcementServiceCode)
-            .Parameters("@Appl_CtrlCd").Value = IIf(applicationControlCode Is Nothing, _
-                                                    DBNull.Value, applicationControlCode)
-        End With
-
-        With New SqlClient.SqlDataAdapter(command)
-            .Fill(licenceData.LicRsp)
-        End With
-
-        command.Connection.Close()
-
-        Return licenceData
-    End Function
-         */
 
         private void FillLicenceDenialResultDataFromReader(IDBHelperReader rdr, LicenceDenialResponseData data)
         {

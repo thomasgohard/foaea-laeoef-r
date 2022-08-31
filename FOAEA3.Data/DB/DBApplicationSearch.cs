@@ -6,6 +6,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -14,15 +15,16 @@ namespace FOAEA3.Data.DB
     {
         public string LastError { get; set; }
 
-        public DBApplicationSearch(IDBTools mainDB) : base(mainDB)
+        public DBApplicationSearch(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount,
+        public async Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData,
                                                              int page = 1, int perPage = 1000, 
                                                              string orderBy = "EnforcementService, ControlCode")
         {
+            int totalCount = 0;
             var emptyResult = new List<ApplicationSearchResultData>();
 
             LastError = string.Empty;
@@ -30,8 +32,7 @@ namespace FOAEA3.Data.DB
             if (!orderBy.IsValidOrderByClause())
             {
                 LastError = "Invalid Order By Clause: " + orderBy;
-                totalCount = 0;
-                return emptyResult;
+                return (emptyResult, totalCount);
             }
 
             var sqlBase = @"SELECT  A.AppCtgy_Cd [Category], 
@@ -136,7 +137,7 @@ namespace FOAEA3.Data.DB
             }
             else
             {
-                var searchRange = BuildSearchRangeForSubmitter(MainDB.Submitter);
+                var searchRange = await BuildSearchRangeForSubmitterAsync(MainDB.Submitter);
                 if (!string.IsNullOrEmpty(searchRange))
                 {
                     parameters.Add("Subm_SubmCd", searchRange);
@@ -174,42 +175,42 @@ namespace FOAEA3.Data.DB
 
             string sql = sqlBase + sqlTables + sqlWhere + sqlSort;
 
-            var data = MainDB.GetDataFromSql<ApplicationSearchResultData>(sql, parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromSqlAsync<ApplicationSearchResultData>(sql, parameters, FillDataFromReader);
             if (!string.IsNullOrEmpty(MainDB.LastError))
             {
                 LastError = MainDB.LastError;
                 totalCount = 0;
-                return emptyResult;
+                return (emptyResult, totalCount);
             }
 
             string sqlCount = "SELECT Count(*) " + sqlTables + sqlWhere;
 
-            totalCount = MainDB.GetDataFromSqlSingleValue<int>(sqlCount, parameters);
+            totalCount = await MainDB.GetDataFromSqlSingleValueAsync<int>(sqlCount, parameters);
             if (!string.IsNullOrEmpty(MainDB.LastError))
             {
                 LastError = MainDB.LastError;
                 totalCount = 0;
-                return emptyResult;
+                return (emptyResult, totalCount);
             }
 
-            return data;
+            return (data, totalCount);
         }
 
         private static string AppendWhereClause(string sqlWhere, string clause)
         {
             if (string.IsNullOrEmpty(sqlWhere))
-                return sqlWhere = " WHERE " + clause;
+                return " WHERE " + clause;
             else
                 return sqlWhere += " AND " + clause;
         }
 
-        private string BuildSearchRangeForSubmitter(string submitter)
+        private async Task<string> BuildSearchRangeForSubmitterAsync(string submitter)
         {
             var searchRange = "";
 
             var submitterDB = new DBSubmitterProfile(MainDB);
 
-            var submitterData = submitterDB.GetSubmitterProfile(submitter);
+            var submitterData = await submitterDB.GetSubmitterProfileAsync(submitter);
             string submClass = submitterData.Subm_Class.ToLower();
 
             if (submClass == "sm")

@@ -27,14 +27,14 @@ public class ApplicationsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}")]
-    public ActionResult<DataList<SINResultData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<DataList<SINResultData>>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
 
-        if (applManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
+        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(appl);
         else
             return NotFound();
@@ -49,7 +49,7 @@ public class ApplicationsController : ControllerBase
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
         var applicationValidation = new ApplicationValidation(appl, repositories, config);
 
-        bool isValid = applicationValidation.ValidateCodeValues();
+        bool isValid = await applicationValidation.ValidateCodeValues();
 
         if (isValid)
             return Ok(appl);
@@ -58,7 +58,7 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet("{id}/SINresults")]
-    public ActionResult<DataList<SINResultData>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<DataList<SINResultData>>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
@@ -66,14 +66,14 @@ public class ApplicationsController : ControllerBase
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (applManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(sinManager.GetSINResults());
+        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await sinManager.GetSINResultsAsync());
         else
             return NotFound();
     }
 
     [HttpGet("{id}/SINresultsWithHistory")]
-    public ActionResult<DataList<SINResultWithHistoryData>> GetSINResultsWithHistory([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<DataList<SINResultWithHistoryData>>> GetSINResultsWithHistory([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
@@ -81,8 +81,8 @@ public class ApplicationsController : ControllerBase
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (applManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(sinManager.GetSINResultsWithHistory());
+        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await sinManager.GetSINResultsWithHistoryAsync());
         else
             return NotFound();
     }
@@ -99,7 +99,7 @@ public class ApplicationsController : ControllerBase
         var application = new ApplicationData();
 
         var appManager = new ApplicationManager(application, repositories, config);
-        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
         ApplicationSINManager sinManager;
 
@@ -107,17 +107,17 @@ public class ApplicationsController : ControllerBase
         {
             case "T01":
                 var tracingManager = new TracingManager(repositories, config);
-                tracingManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                await tracingManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
                 sinManager = new ApplicationSINManager(tracingManager.TracingApplication, tracingManager);
                 break;
             case "I01":
                 var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-                interceptionManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                await interceptionManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
             case "L01":
                 var licenceDenialManager = new LicenceDenialManager(repositories, config);
-                licenceDenialManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+                await licenceDenialManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
                 sinManager = new ApplicationSINManager(licenceDenialManager.LicenceDenialApplication, licenceDenialManager);
                 break;
             default:
@@ -125,15 +125,15 @@ public class ApplicationsController : ControllerBase
                 break;
         }
 
-        sinManager.SINconfirmation(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
-                                   confirmedSin: sinConfirmationData.ConfirmedSIN,
-                                   lastUpdateUser: repositories.CurrentSubmitter);
+        await sinManager.SINconfirmationAsync(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
+                                              confirmedSin: sinConfirmationData.ConfirmedSIN,
+                                              lastUpdateUser: repositories.CurrentSubmitter);
 
         return Ok(application);
     }
 
     [HttpGet("Stats")]
-    public ActionResult<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
+    public async Task<ActionResult<List<StatsOutgoingProvincialData>>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
                                                                [FromQuery] int maxRecords,
                                                                [FromQuery] string activeState,
                                                                [FromQuery] string recipientCode)
@@ -141,7 +141,7 @@ public class ApplicationsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
 
-        return applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
+        return await applManager.GetProvincialStatsOutgoingDataAsync(maxRecords, activeState, recipientCode);
     }
 
 

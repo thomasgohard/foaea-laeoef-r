@@ -20,14 +20,16 @@ public class ApplicationSearchesController : ControllerBase
 
     [HttpPost]
     //[Authorize]
-    public ActionResult<List<ApplicationSearchResultData>> DoSearch([FromBody] QuickSearchData quickSearchCriteria,
-                                                                    [FromServices] IRepositories repositories,
-                                                                    [FromQuery] int page = 1,
-                                                                    [FromQuery] int perPage = 1000,
-                                                                    [FromQuery] string orderBy = "EnforcementService, ControlCode")
+    public async Task<ActionResult<List<ApplicationSearchResultData>>> DoSearch([FromBody] QuickSearchData quickSearchCriteria,
+                                                                                [FromServices] IRepositories repositories,
+                                                                                [FromQuery] int page = 1,
+                                                                                [FromQuery] int perPage = 1000,
+                                                                                [FromQuery] string orderBy = "EnforcementService, ControlCode")
     {
         var searchManager = new ApplicationSearchManager(repositories);
-        var result = searchManager.Search(quickSearchCriteria, out int totalCount, page, perPage, orderBy);
+        List<ApplicationSearchResultData> result;
+        int totalCount;
+        (result, totalCount) = await searchManager.SearchAsync(quickSearchCriteria, page, perPage, orderBy);
 
         Response.Headers.Add("Page", page.ToString());
         Response.Headers.Add("PerPage", perPage.ToString());

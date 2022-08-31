@@ -6,21 +6,20 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSINResult : DBbase, ISINResultRepository
     {
-        public DBSINResult(IDBTools mainDB) : base(mainDB)
+        public DBSINResult(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
         public MessageDataList Messages { get; set; }
 
-        public void CreateSINResults(SINResultData resultData)
+        public async Task CreateSINResultsAsync(SINResultData resultData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -52,11 +51,11 @@ namespace FOAEA3.Data.DB
             if (resultData.SVR_Gendr_TolCd.HasValue)
                 parameters.Add("SVR_Gendr_TolCd", resultData.SVR_Gendr_TolCd);
 
-            MainDB.ExecProc("SINValRslt_Insert", parameters);
+            await MainDB.ExecProcAsync("SINValRslt_Insert", parameters);
 
         }
 
-        public DataList<SINResultData> GetSINResults(string applEnfSrvCd, string applCtrlCd)
+        public async Task<DataList<SINResultData>> GetSINResultsAsync(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -64,12 +63,12 @@ namespace FOAEA3.Data.DB
                     {"applCtrlCd", applCtrlCd}
                 };
 
-            var data = MainDB.GetDataFromStoredProc<SINResultData>("DataModGetSINValData", parameters, FillSINResultDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SINResultData>("DataModGetSINValData", parameters, FillSINResultDataFromReader);
 
             return new DataList<SINResultData>(data, MainDB.LastError);
         }
 
-        public DataList<SINResultWithHistoryData> GetSINResultsWithHistory(string applEnfSrvCd, string applCtrlCd)
+        public async Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistoryAsync(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -77,12 +76,12 @@ namespace FOAEA3.Data.DB
                     {"Appl_CtrlCd", applCtrlCd}
                 };
 
-            var data = MainDB.GetDataFromStoredProc<SINResultWithHistoryData>("SummAccGetSINVerificationResultsList", parameters, FillSINResultWithHistoryDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SINResultWithHistoryData>("SummAccGetSINVerificationResultsList", parameters, FillSINResultWithHistoryDataFromReader);
 
             return new DataList<SINResultWithHistoryData>(data, MainDB.LastError);
         }
 
-        public List<SINOutgoingFederalData> GetFederalSINOutgoingData(int maxRecords,
+        public async Task<List<SINOutgoingFederalData>> GetFederalSINOutgoingDataAsync(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
@@ -96,13 +95,13 @@ namespace FOAEA3.Data.DB
                 { "chrEnfSrv_Cd", enfServiceCode }
             };
 
-            return MainDB.GetDataFromStoredProc<SINOutgoingFederalData>("MessageBrokerGetSINOUTOutboundData",
+            return await MainDB.GetDataFromStoredProcAsync<SINOutgoingFederalData>("MessageBrokerGetSINOUTOutboundData",
                                                                         parameters, FillSINOutgoingFederalData);
         }
 
-        public void InsertBulkData(List<SINResultData> responseData)
+        public async Task InsertBulkDataAsync(List<SINResultData> responseData)
         {
-            MainDB.BulkUpdate<SINResultData>(responseData, "SINValRslt");
+            await MainDB.BulkUpdateAsync<SINResultData>(responseData, "SINValRslt");
         }
 
         private void FillSINOutgoingFederalData(IDBHelperReader rdr, SINOutgoingFederalData data)
@@ -161,7 +160,7 @@ namespace FOAEA3.Data.DB
             data.SVR_MddlNme_TolCd = rdr["SVR_MddlNme_TolCd"] as short?; // can be null 
             data.SVR_SurNme_TolCd = rdr["SVR_SurNme_TolCd"] as short?; // can be null 
             data.SVR_MotherNme_TolCd = rdr["SVR_ParentNme_TolCd"] as short?; // can be null 
-           // data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as short?; // can be null 
+                                                                             // data.SVR_MotherNme_TolCd = rdr["SVR_MotherNme_TolCd"] as short?; // can be null 
             data.SVR_Gendr_TolCd = rdr["SVR_Gendr_TolCd"] as short?; // can be null 
             data.ValStat_Cd = (short)rdr["ValStat_Cd"];
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;

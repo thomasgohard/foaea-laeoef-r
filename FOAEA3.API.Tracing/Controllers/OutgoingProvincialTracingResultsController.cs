@@ -24,7 +24,7 @@ public class OutgoingProvincialTracingResultsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("")]
-    public ActionResult<List<TracingOutgoingProvincialData>> GetProvincialOutgoingData(
+    public async Task<ActionResult<List<TracingOutgoingProvincialData>>> GetProvincialOutgoingData(
                                                             [FromQuery] int maxRecords,
                                                             [FromQuery] string activeState,
                                                             [FromQuery] string recipientCode,
@@ -33,7 +33,7 @@ public class OutgoingProvincialTracingResultsController : ControllerBase
     {
         var manager = new TracingManager(repositories, config);
 
-        var data = manager.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+        var data = await manager.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
 
         return Ok(data);
     }

@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 
 namespace FOAEA3.Business.Areas.Application

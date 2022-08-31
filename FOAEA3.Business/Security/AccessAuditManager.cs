@@ -3,6 +3,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Security
 {
@@ -20,7 +21,7 @@ namespace FOAEA3.Business.Security
             // load all values from database
             AccessAuditElements = new Dictionary<AccessAuditElement, AccessAuditElementTypeData>();
 
-            var allElementTypes = Repositories.AccessAuditRepository.GetAllElementAccessType();
+            var allElementTypes = Repositories.AccessAuditRepository.GetAllElementAccessTypeAsync().Result;
             foreach (var elementType in allElementTypes)
             {
                 if (Enum.IsDefined(typeof(AccessAuditElement), elementType.AccessAuditDataElementValueType_ID))
@@ -30,23 +31,23 @@ namespace FOAEA3.Business.Security
             }
         }
 
-        public int AddAuditHeader(AccessAuditPage page)
+        public async Task<int> AddAuditHeaderAsync(AccessAuditPage page)
         {
             string subject_submitter = $"{Repositories.CurrentUser} ({Repositories.CurrentSubmitter})";
 
-            return Repositories.AccessAuditRepository.SaveDataPageInfo(page, subject_submitter);
+            return await Repositories.AccessAuditRepository.SaveDataPageInfoAsync(page, subject_submitter);
         }
 
-        public void AddAuditElement(int headerId, AccessAuditElement elementType, string elementValue)
+        public async Task AddAuditElementAsync(int headerId, AccessAuditElement elementType, string elementValue)
         {
             string elementName = AccessAuditElements[elementType].ElementName;
-            Repositories.AccessAuditRepository.SaveDataValue(headerId, elementName, elementValue);
+            await Repositories.AccessAuditRepository.SaveDataValueAsync(headerId, elementName, elementValue);
         }
 
-        public void AddAuditElements(int headerId, Dictionary<AccessAuditElement, string> elements)
+        public async Task AddAuditElementsAsync(int headerId, Dictionary<AccessAuditElement, string> elements)
         {
             foreach (var (elementType, elementValue) in elements)
-                AddAuditElement(headerId, elementType, elementValue);
+                await AddAuditElementAsync(headerId, elementType, elementValue);
         }
 
     }

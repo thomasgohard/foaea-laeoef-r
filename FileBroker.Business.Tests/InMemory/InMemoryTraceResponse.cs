@@ -4,6 +4,7 @@ using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FileBroker.Business.Tests.InMemory
 {
@@ -14,18 +15,21 @@ namespace FileBroker.Business.Tests.InMemory
 
         public MessageDataList Messages => throw new NotImplementedException();
 
-        public void DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        public async Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public DataList<TraceResponseData> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public void InsertBulkData(List<TraceResponseData> responseData)
+        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
+            await Task.Run(() => { });
             //var db = new DBTools("");
 
             //var newDataTable = db.CreateAndFillDataTable<TraceResponseData>(responseData);
@@ -33,8 +37,9 @@ namespace FileBroker.Business.Tests.InMemory
             //int count = newDataTable.Rows.Count;
         }
 
-        public void MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewedAsync(string enfService)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

@@ -4,17 +4,18 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBProductionAudit : DBbase, IProductionAuditRepository
     {
-        public DBProductionAudit(IDBTools mainDB) : base(mainDB)
+        public DBProductionAudit(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public void Insert(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -29,13 +30,13 @@ namespace FOAEA3.Data.DB
             else
                 parameters.Add("Compl_dte", DBNull.Value);
 
-            _ = MainDB.ExecProc("ProductionAuditInsert", parameters);
+            _ = await MainDB.ExecProcAsync("ProductionAuditInsert", parameters);
         }
 
-        public void Insert(ProductionAuditData productionAuditData)
+        public async Task InsertAsync(ProductionAuditData productionAuditData)
         {
-            Insert(productionAuditData.Process_name, productionAuditData.Description, productionAuditData.Audience,
-                   productionAuditData.Compl_dte);
+            await InsertAsync(productionAuditData.Process_name, productionAuditData.Description, productionAuditData.Audience,
+                              productionAuditData.Compl_dte);
         }
     }
 }
