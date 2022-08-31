@@ -757,7 +757,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 if (bfEvent.Event_Reas_Cd.HasValue)
                 {
-                    var dbNotification = DB.NotificationTable;
+                    var dbNotification = DB.NotificationService;
                     switch (bfEvent.Event_Reas_Cd)
                     {
                         case EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION:

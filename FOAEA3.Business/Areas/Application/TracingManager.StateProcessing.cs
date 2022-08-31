@@ -141,7 +141,7 @@ namespace FOAEA3.Business.Areas.Application
                     }
                     else
                     {
-                        await DB.NotificationTable.SendEmailAsync("Trace Cycle requests exceed yearly limit",
+                        await DB.NotificationService.SendEmailAsync("Trace Cycle requests exceed yearly limit",
                                                                       config.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
                         await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }

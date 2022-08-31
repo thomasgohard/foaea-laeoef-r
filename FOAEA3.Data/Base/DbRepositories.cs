@@ -228,7 +228,7 @@ namespace FOAEA3.Data.Base
             }
         }
 
-        public INotificationRepository NotificationTable
+        public INotificationRepository NotificationService
         {
             get
             {

@@ -27,7 +27,7 @@ namespace FOAEA3.Model.Interfaces
         ILicenceDenialResponseRepository LicenceDenialResponseTable { get; }
         IAffidavitRepository AffidavitTable { get; }
         ILoginRepository LoginTable { get; }
-        INotificationRepository NotificationTable { get; }
+        INotificationRepository NotificationService { get; }
         //IUserProfileRepository UserProfileRepository { get; }
         ISubjectRoleRepository SubjectRoleTable { get; }
         ISubmitterProfileRepository SubmitterProfileTable { get; }

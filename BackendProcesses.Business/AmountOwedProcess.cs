@@ -195,7 +195,7 @@ namespace BackendProcesses.Business
                     else
                     {
                         // send email notification about error in amount owed periodic calculations
-                        var dbNotification = DB.NotificationTable;
+                        var dbNotification = DB.NotificationService;
                         await dbNotification.SendEmailAsync(subject: "Amount Owed Periodic Calculation Error",
                                                  recipient: ReferenceData.Instance().Configuration["emailRecipients"],
                                                  body: $"{enfSrvCd}-{ctrlCd}: Invalid periodic amounts \n" +

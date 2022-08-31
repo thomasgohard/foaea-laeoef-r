@@ -26,7 +26,7 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C50600_INVALID_APPLICATION,
                                       eventReasonText: "Awaiting Action by FOAEA / En attente d’une action par AEOEF");
 
-                var dbNotification = DB.NotificationTable;
+                var dbNotification = DB.NotificationService;
 
                 string subject = "Application blocked due to ExGratia process";
                 string body = "Application has been blocked because of: ";
