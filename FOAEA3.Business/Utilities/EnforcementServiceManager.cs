@@ -6,16 +6,16 @@ namespace FOAEA3.Business.Utilities
 {
     internal class EnforcementServiceManager
     {
-        private IRepositories Repositories { get; }
+        private IRepositories DB { get; }
 
         public EnforcementServiceManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public async Task<EnfSrvData> GetEnforcementServiceAsync(string enfSrvCd)
         {
-            IEnfSrvRepository db = Repositories.EnfSrvRepository;
+            IEnfSrvRepository db = DB.EnfSrvTable;
             var result = await db.GetEnfServiceAsync(enfSrvCd);
             if (result.Count == 1)
                 return result[0];

@@ -105,7 +105,7 @@ public class FederalTracingFilesController : ControllerBase
             FlatFileSpecs = flatFileSpecs,
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService
+            MailService = mailService
         };
 
         var tracingManager = new IncomingFederalTracingManager(apis, repositories);

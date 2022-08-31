@@ -5,12 +5,12 @@ namespace FileBroker.Business;
 public class OutgoingFederalTracingManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
-    private RepositoryList Repositories { get; }
+    private RepositoryList DB { get; }
 
     public OutgoingFederalTracingManager(APIBrokerList apiBrokers, RepositoryList repositories)
     {
         APIs = apiBrokers;
-        Repositories = repositories;
+        DB = repositories;
     }
 
     public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -19,9 +19,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         bool fileCreated = false;
 
-        var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
 
-        var processCodes = await Repositories.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+        var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
         string newCycle;
         if (processCodes.EnfSrv_Cd == "RC01") // TODO: should be a flag in the FileTable...
@@ -47,10 +47,10 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             await File.WriteAllTextAsync(newFilePath, fileContent);
             fileCreated = true;
 
-            await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                  "Outbound File created successfully.");
 
-            await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
             await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                      processCodes.EnfSrv_Cd,
@@ -64,9 +64,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
                                                              "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;
@@ -77,7 +77,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
     private async Task<List<TracingOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                            int appLiSt_Cd, string enfSrvCode)
     {
-        var recMax = await Repositories.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
         var data = await APIs.TracingApplications.GetOutgoingFederalTracingRequestsAsync(maxRecords, actvSt_Cd,

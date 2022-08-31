@@ -121,7 +121,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
             FlatFileSpecs = flatFileSpecs,
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailServiceDB = mailService,
+            MailService = mailService,
             ProcessParameterTable = processParameterDB
         };
 

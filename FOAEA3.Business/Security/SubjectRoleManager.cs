@@ -7,20 +7,20 @@ namespace FOAEA3.Business.Security
 {
     internal class SubjectRoleManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
 
 
         public SubjectRoleManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
         public async Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
         {
-            return await Repositories.SubjectRoleRepository.GetSubjectRolesAsync(subjectName);
+            return await DB.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
         }
         public async Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
         {
-            return await Repositories.SubjectRoleRepository.GetAssumedRolesForSubjectAsync(subjectName);
+            return await DB.SubjectRoleTable.GetAssumedRolesForSubjectAsync(subjectName);
         }
     }
 }

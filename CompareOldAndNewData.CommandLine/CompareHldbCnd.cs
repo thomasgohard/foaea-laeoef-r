@@ -11,8 +11,8 @@ namespace CompareOldAndNewData.CommandLine
         {
             var diffs = new List<DiffData>();
 
-            var holdback2 = await repositories2.InterceptionRepository.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
-            var holdback3 = await repositories3.InterceptionRepository.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
+            var holdback2 = await repositories2.InterceptionTable.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
+            var holdback3 = await repositories3.InterceptionTable.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
 
             foreach (var holdbackItem2 in holdback2)
             {

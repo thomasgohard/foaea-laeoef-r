@@ -71,10 +71,10 @@ namespace FileBroker.Web.Pages.Tasks
             {
                 FileTable = FileTable,
                 FlatFileSpecs = FlatFileSpecs,
-                OutboundAuditDB = OutboundAuditDB,
-                ErrorTrackingDB = ErrorTrackingDB,
+                OutboundAuditTable = OutboundAuditDB,
+                ErrorTrackingTable = ErrorTrackingDB,
                 ProcessParameterTable = ProcessParameterTable,
-                MailServiceDB = MailServiceDB
+                MailService = MailServiceDB
             };
 
             var processData = (await FileTable.GetAllActiveAsync()).Where(m => m.Type.ToLower() == "out").ToList();

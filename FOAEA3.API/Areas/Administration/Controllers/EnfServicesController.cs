@@ -29,6 +29,6 @@ public class EnfServicesController : ControllerBase
                                                            [FromQuery] string enforcementServiceCode = null, [FromQuery] string enforcementServiceName = null,
                                                            [FromQuery] string enforcementServiceProvince = null, [FromQuery] string enforcementServiceCategory = null)
     {
-        return Ok(await repositories.EnfSrvRepository.GetEnfServiceAsync(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
+        return Ok(await repositories.EnfSrvTable.GetEnfServiceAsync(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
     }
 }

@@ -16,7 +16,7 @@ public class EnfOfficesController : ControllerBase
                                                         [FromQuery] string enfOffName = null, [FromQuery] string enfOffCode = null,
                                                         [FromQuery] string province = null, [FromQuery] string enfServCode = null)
     {
-        return Ok(await repositories.EnfOffRepository.GetEnfOffAsync(enfOffName, enfOffCode, province, enfServCode));
+        return Ok(await repositories.EnfOffTable.GetEnfOffAsync(enfOffName, enfOffCode, province, enfServCode));
     }
 
 }

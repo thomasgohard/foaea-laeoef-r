@@ -1,18 +1,17 @@
-﻿using FOAEA3.Resources.Helpers;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationSINManager
     {
-        private IRepositories Repositories { get; }
+        private IRepositories DB { get; }
 
         private ApplicationData Application { get; }
         private ApplicationManager ApplicationManager { get; }
@@ -20,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public ApplicationSINManager(ApplicationData application, ApplicationManager manager)
         {
-            Repositories = manager.Repositories;
+            DB = manager.DB;
             Application = application;
             ApplicationManager = manager;
         }
@@ -28,7 +27,7 @@ namespace FOAEA3.Business.Areas.Application
         public async Task<List<SINOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords, string activeState, ApplicationState lifeState,
                                                                    string enfServiceCode)
         {
-            var sinDB = Repositories.SINResultRepository;
+            var sinDB = DB.SINResultTable;
             return await sinDB.GetFederalSINOutgoingDataAsync(maxRecords, activeState, lifeState, enfServiceCode);
         }
 
@@ -109,7 +108,7 @@ namespace FOAEA3.Business.Areas.Application
             await ApplicationManager.UpdateApplicationNoValidationAsync();
 
             await UpdateSINChangeHistoryAsync(HRDCcomments);
-           
+
             await EventManager.SaveEventsAsync();
         }
 
@@ -141,24 +140,24 @@ namespace FOAEA3.Business.Areas.Application
                     EventManager.AddEvent(EventCode.C50650_SIN_CONFIRMED, eventReasonText: await ApplicationManager.GetSINResultsEventTextAsync());
                 }
 
-                await Repositories.SINChangeHistoryRepository.CreateSINChangeHistoryAsync(sinChangeHistoryData);
+                await DB.SINChangeHistoryTable.CreateSINChangeHistoryAsync(sinChangeHistoryData);
             }
 
         }
 
         public async Task<DataList<SINResultData>> GetSINResultsAsync()
         {
-            return await Repositories.SINResultRepository.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            return await DB.SINResultTable.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
         }
 
         public async Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistoryAsync()
         {
-            return await Repositories.SINResultRepository.GetSINResultsWithHistoryAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            return await DB.SINResultTable.GetSINResultsWithHistoryAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
         }
 
         public async Task CreateResultDataAsync(List<SINResultData> resultData)
         {
-            var responsesDB = Repositories.SINResultRepository;
+            var responsesDB = DB.SINResultTable;
             await responsesDB.InsertBulkDataAsync(resultData);
         }
 

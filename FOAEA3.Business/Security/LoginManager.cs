@@ -7,35 +7,35 @@ namespace FOAEA3.Business.Security
 {
     internal class LoginManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private const int PASSWORD_EXPIRY_DAYS = 180;
         private const int PASSWORD_FORMAT = 1;
 
         public LoginManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
         public static bool ValidateLogins = true;
 
         public async Task<bool> LoginIsAccountExpiredAsync(string subjectName)
         {
-            return await Repositories.LoginRepository.IsLoginExpiredAsync(subjectName);
+            return await DB.LoginTable.IsLoginExpiredAsync(subjectName);
         }
 
         public async Task<bool> CheckPreviousPasswordsAsync(string subjectName, string newPassword)
         {
             SubjectData subject = await GetSubjectAsync(subjectName);
-            return await Repositories.LoginRepository.CheckPreviousPasswordsAsync(subject.SubjectId, newPassword);
+            return await DB.LoginTable.CheckPreviousPasswordsAsync(subject.SubjectId, newPassword);
 
         }
         public async Task<bool> GetAllowedAccessAsync(string username)
         {
-            return await Repositories.LoginRepository.GetAllowedAccessAsync(username);
+            return await DB.LoginTable.GetAllowedAccessAsync(username);
         }
 
         public async Task AcceptNewTermsOfReferernceAsync(string username)
         {
-            await Repositories.LoginRepository.AcceptNewTermsOfReferernceAsync(username);
+            await DB.LoginTable.AcceptNewTermsOfReferernceAsync(username);
         }
 
         public async Task<bool> SetPasswordAsync(string username, string password, string passwordSalt)
@@ -47,7 +47,7 @@ namespace FOAEA3.Business.Security
             }
             else
             {
-                await Repositories.LoginRepository.SetPasswordAsync(username, password, PASSWORD_FORMAT, passwordSalt, PASSWORD_EXPIRY_DAYS);
+                await DB.LoginTable.SetPasswordAsync(username, password, PASSWORD_FORMAT, passwordSalt, PASSWORD_EXPIRY_DAYS);
                 return true;
             }
 
@@ -55,20 +55,20 @@ namespace FOAEA3.Business.Security
 
         public async Task SendEmailAsync(string subject, string recipient, string body, int isHTML = 1)
         {
-            var dbNotification = new DBNotification(Repositories.MainDB);
+            var dbNotification = new DBNotification(DB.MainDB);
             await dbNotification.SendEmailAsync(subject, recipient, body, isHTML);
         }
 
         public async Task<SubjectData> GetSubjectAsync(string subjectName)
         {
             //int subjectID = GetSubjectLoginCredentials(subjectName).SubjectId;
-            return (await Repositories.SubjectRepository.GetSubjectAsync(subjectName));
+            return (await DB.SubjectTable.GetSubjectAsync(subjectName));
         }
 
         public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
             //int subjectID = GetSubjectLoginCredentials(subjectName).SubjectId;
-            return (await Repositories.SubjectRepository.GetSubjectByConfirmationCodeAsync(confirmationCode));
+            return (await DB.SubjectTable.GetSubjectByConfirmationCodeAsync(confirmationCode));
         }
 
     }

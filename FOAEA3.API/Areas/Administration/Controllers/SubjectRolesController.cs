@@ -14,12 +14,12 @@ public class SubjectRolesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<SubjectRoleData>>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
     {
-        return Ok(await repositories.SubjectRoleRepository.GetSubjectRolesAsync(subjectName));
+        return Ok(await repositories.SubjectRoleTable.GetSubjectRolesAsync(subjectName));
     }
 
     [HttpGet("{subjectName}")]
     public async Task<ActionResult<List<string>>> GetAssumedRolesForSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        return Ok(await repositories.SubjectRoleRepository.GetAssumedRolesForSubjectAsync(subjectName));
+        return Ok(await repositories.SubjectRoleTable.GetAssumedRolesForSubjectAsync(subjectName));
     }
 }

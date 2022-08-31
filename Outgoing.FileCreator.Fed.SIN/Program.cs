@@ -54,8 +54,8 @@ internal class Program
         {
             FileTable = new DBFileTable(fileBrokerDB),
             FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-            OutboundAuditDB = new DBOutboundAudit(fileBrokerDB),
-            ErrorTrackingDB = new DBErrorTracking(fileBrokerDB),
+            OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+            ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
             ProcessParameterTable = new DBProcessParameter(fileBrokerDB) 
         };
 
@@ -75,7 +75,7 @@ internal class Program
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingDB.MessageBrokerErrorAsync("SINOUT", federalSinOutgoingSource.Name, 
+                    await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("SINOUT", federalSinOutgoingSource.Name, 
                                                                                new Exception(error), displayExceptionError: true);
                 }
         }

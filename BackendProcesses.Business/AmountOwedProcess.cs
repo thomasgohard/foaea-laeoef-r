@@ -14,20 +14,20 @@ namespace BackendProcesses.Business
 {
     public class AmountOwedProcess
     {
-        private readonly IRepositories Repositories;
-        private readonly IRepositories_Finance RepositoriesFinance;
+        private readonly IRepositories DB;
+        private readonly IRepositories_Finance DBfinance;
 
         public AmountOwedProcess(IRepositories repositories, IRepositories_Finance repositoriesFinance)
         {
-            Repositories = repositories;
-            RepositoriesFinance = repositoriesFinance;
+            DB = repositories;
+            DBfinance = repositoriesFinance;
         }
 
         public async Task RunAsync()
         {
 
-            var prodAudit = Repositories.ProductionAuditRepository;
-            var dbSummonsSummary = RepositoriesFinance.SummonsSummaryRepository;
+            var prodAudit = DB.ProductionAuditTable;
+            var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
             await prodAudit.InsertAsync("Amount Owed", "Amount Owed Started", "O");
 
@@ -39,14 +39,14 @@ namespace BackendProcesses.Business
 
         public async Task<SummonsSummaryData> GetSummonsSummaryDataAsync(string enfSrv, string applCtrl)
         {
-            var dbSummonsSummary = RepositoriesFinance.SummonsSummaryRepository;
+            var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
             return (await dbSummonsSummary.GetSummonsSummaryAsync(enfSrv, applCtrl)).FirstOrDefault();
         }
 
         public async Task<(SummonsSummaryData summSmryNewData, SummonsSummaryFixedAmountData summSmryFixedAmountNewData)> CalculateAndUpdateAmountOwedForVariationAsync(string enfSrv, string applCtrl)
         {
-            var dbSummonsSummary = RepositoriesFinance.SummonsSummaryRepository;
+            var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
             var summSmryData = await dbSummonsSummary.GetSummonsSummaryAsync(enfSrv, applCtrl);
             (SummonsSummaryData summSmryNewData, 
@@ -59,7 +59,7 @@ namespace BackendProcesses.Business
                                                          DateTime? payableDateOverride = null,
                                                          bool isVariation = false)
         {
-            var prodAudit = Repositories.ProductionAuditRepository;
+            var prodAudit = DB.ProductionAuditTable;
 
             SummonsSummaryData summSmryNewData = null;
             SummonsSummaryFixedAmountData summSmryFixedAmountNewData = null;
@@ -114,7 +114,7 @@ namespace BackendProcesses.Business
 
         public async Task<AmountOwedRecalcInfo> CalculateActualAmountOwedAsync(string enfSrvCd, string ctrlCd, DateTime payableDate, short summSmry_Vary_Cnt, DateTime start_Dte, bool isVariation)
         {
-            var dbActiveSummons = RepositoriesFinance.ActiveSummonsRepository;
+            var dbActiveSummons = DBfinance.ActiveSummonsRepository;
 
             if (await dbActiveSummons.GetActiveSummonsCoreAsync(payableDate, enfSrvCd, ctrlCd) != default)
             {
@@ -148,7 +148,7 @@ namespace BackendProcesses.Business
 
                         if (isVariation)
                         {
-                            var dbGarnPeriod = RepositoriesFinance.GarnPeriodRepository;
+                            var dbGarnPeriod = DBfinance.GarnPeriodRepository;
 
                             var lmpSumDivertedTtl_Money = activeSummonsData.LmpSumDivertedTtl_Money;
                             var perPymDivertedTtl_Money = activeSummonsData.PerPymDivertedTtl_Money;
@@ -195,7 +195,7 @@ namespace BackendProcesses.Business
                     else
                     {
                         // send email notification about error in amount owed periodic calculations
-                        var dbNotification = Repositories.NotificationRepository;
+                        var dbNotification = DB.NotificationTable;
                         await dbNotification.SendEmailAsync(subject: "Amount Owed Periodic Calculation Error",
                                                  recipient: ReferenceData.Instance().Configuration["emailRecipients"],
                                                  body: $"{enfSrvCd}-{ctrlCd}: Invalid periodic amounts \n" +
@@ -262,9 +262,9 @@ namespace BackendProcesses.Business
                                                     DateTime payableDate,
                                                     DateTime acceptedDate, DateTime? periodRecalcDate)
         {
-            var dbSummonsSummary = RepositoriesFinance.SummonsSummaryRepository;
-            var dbInterception = Repositories.InterceptionRepository;
-            var dbDivertFunds = RepositoriesFinance.DivertFundsRepository;
+            var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
+            var dbInterception = DB.InterceptionTable;
+            var dbDivertFunds = DBfinance.DivertFundsRepository;
 
             bool isFeeCumulative = await dbInterception.IsFeeCumulativeForApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
@@ -636,8 +636,8 @@ namespace BackendProcesses.Business
                                      decimal? newLumpSumDivertedTotal, decimal? newPerDivertedTotal,
                                      PeriodInfo periodData, DateTime payableDate, bool isVariation)
         {
-            var dbSummSmry = RepositoriesFinance.SummonsSummaryRepository;
-            var dbSummSmryFixedAmount = RepositoriesFinance.SummonsSummaryFixedAmountRepository;
+            var dbSummSmry = DBfinance.SummonsSummaryRepository;
+            var dbSummSmryFixedAmount = DBfinance.SummonsSummaryFixedAmountRepository;
 
             // update summSmry owed amounts
 

@@ -47,7 +47,7 @@ namespace FileBroker.Business.Tests
             {
                 FileAudit = fileAuditDB,
                 FileTable = fileTableDB,
-                MailServiceDB = new DBMailService(fileBrokerDB)
+                MailService = new DBMailService(fileBrokerDB)
             };
 
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);

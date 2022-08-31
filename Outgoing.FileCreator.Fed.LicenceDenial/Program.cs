@@ -60,10 +60,10 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             {
                 FileTable = new DBFileTable(fileBrokerDB),
                 FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditDB = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingDB = new DBErrorTracking(fileBrokerDB),
+                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
                 ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailServiceDB = new DBMailService(fileBrokerDB)
+                MailService = new DBMailService(fileBrokerDB)
             };
 
             var federalFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
@@ -82,7 +82,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingDB.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
+                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
                                                                                    new Exception(error), displayExceptionError: true);
                     }
             }

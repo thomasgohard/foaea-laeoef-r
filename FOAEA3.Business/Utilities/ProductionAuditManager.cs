@@ -7,21 +7,21 @@ namespace FOAEA3.Business.Utilities
 {
     internal class ProductionAuditManager
     {
-        private IRepositories Repositories { get; }
+        private IRepositories DB { get; }
 
         public ProductionAuditManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
-            await Repositories.ProductionAuditRepository.InsertAsync(processName, description, audience, completedDate);
+            await DB.ProductionAuditTable.InsertAsync(processName, description, audience, completedDate);
         }
 
         public async Task InsertAsync(ProductionAuditData productionAuditData)
         {
-            await Repositories.ProductionAuditRepository.InsertAsync(productionAuditData);
+            await DB.ProductionAuditTable.InsertAsync(productionAuditData);
         }
     }
 }

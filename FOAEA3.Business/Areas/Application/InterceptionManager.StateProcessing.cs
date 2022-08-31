@@ -10,7 +10,7 @@ namespace FOAEA3.Business.Areas.Application
     {
         protected override async Task Process_02_AwaitingValidation()
         {
-            var exGratias = await Repositories.InterceptionRepository.GetExGratiasAsync();
+            var exGratias = await DB.InterceptionTable.GetExGratiasAsync();
 
             string appEnteredSIN = InterceptionApplication.Appl_Dbtr_Entrd_SIN;
             string appRefNumber = InterceptionApplication.Appl_Source_RfrNr;
@@ -26,7 +26,7 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C50600_INVALID_APPLICATION,
                                       eventReasonText: "Awaiting Action by FOAEA / En attente d’une action par AEOEF");
 
-                var dbNotification = Repositories.NotificationRepository;
+                var dbNotification = DB.NotificationTable;
 
                 string subject = "Application blocked due to ExGratia process";
                 string body = "Application has been blocked because of: ";
@@ -63,7 +63,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await Validation.AddDuplicateSINWarningEventsAsync();
 
-            var submitterDB = Repositories.SubmitterRepository;
+            var submitterDB = DB.SubmitterTable;
             string signAuthority = await submitterDB.GetSignAuthorityForSubmitterAsync(InterceptionApplication.Subm_SubmCd);
 
             EventManager.AddEvent(EventCode.C50701_WAITING_ACCEPTANCE_OF_GARNISHEE_SUMMONS_AT_FOAEA, recipientSubm: signAuthority);
@@ -117,14 +117,14 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (GarnisheeSummonsReceiptDate is null)
             {
-                await AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.EmailRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
                                $"GarnisheeSummonsReceiptDate is null. Cannot accept application {Appl_EnfSrv_Cd}-{Appl_CtrlCd}.");
                 return;
             }
 
             await base.Process_10_ApplicationAccepted();
 
-            var interceptionDB = Repositories.InterceptionRepository;
+            var interceptionDB = DB.InterceptionTable;
 
             string justiceID = await interceptionDB.GetApplicationJusticeNumberAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
                                                                                                Appl_EnfSrv_Cd, Appl_CtrlCd);
@@ -157,7 +157,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period))
             {
-                var fixedAmountDB = RepositoriesFinance.SummonsSummaryFixedAmountRepository;
+                var fixedAmountDB = DBfinance.SummonsSummaryFixedAmountRepository;
                 var fixedAmountData = await fixedAmountDB.GetSummonsSummaryFixedAmountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
                 if (fixedAmountData is null)
@@ -202,13 +202,13 @@ namespace FOAEA3.Business.Areas.Application
                 if (VariationAction == VariationDocumentAction.AcceptVariationDocument)
                 {
                     EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
-                    var interceptionDB = Repositories.InterceptionRepository;
+                    var interceptionDB = DB.InterceptionTable;
                     if (await interceptionDB.IsVariationIncreaseAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                         EventManager.AddEvent(EventCode.C51113_VARIATION_ACCEPTED_WITH_AN_ARREARS_VALUE_SIGNIFICANTLY_GREATER_THAN_THE_PREVIOUS_ARREARS);
                 }
                 else // reject variation
                 {
-                    var summonsSummaryData = (await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
+                    var summonsSummaryData = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                                                 .FirstOrDefault();
 
                     var recalcDate = summonsSummaryData?.SummSmry_Recalc_Dte;
@@ -269,7 +269,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_17_FinancialTermsVaried();
 
-            var currentApplicationManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
+            var currentApplicationManager = new InterceptionManager(DB, DBfinance, config);
             await currentApplicationManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             var currentApplInfo = currentApplicationManager.InterceptionApplication;

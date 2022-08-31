@@ -15,13 +15,13 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         [BindProperty]
         public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
 
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private readonly CustomConfig config;
 
         public SimulateSinConfirmationModel(IRepositories repositories, IOptions<CustomConfig> config)
         {
             this.config = config.Value;
-            Repositories = repositories;
+            DB = repositories;
         }
 
         public void OnGet()
@@ -33,7 +33,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
             if (ModelState.IsValid)
             {
-                var adminManager = new AdminManager(Repositories, config);
+                var adminManager = new AdminManager(DB, config);
 
                 try
                 {

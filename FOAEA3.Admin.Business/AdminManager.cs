@@ -12,14 +12,14 @@ namespace FOAEA3.Admin.Business
 {
     internal class AdminManager
     {
-        private readonly IRepositories Repositories;
+        private readonly IRepositories DB;
         private readonly CustomConfig config;
         public string LastError { get; set; }
 
         public AdminManager(IRepositories repositories, CustomConfig config)
         {
             this.config = config;
-            Repositories = repositories;
+            DB = repositories;
             LastError = string.Empty;
         }
 
@@ -34,7 +34,7 @@ namespace FOAEA3.Admin.Business
             {
                 var applicationData = new ApplicationData();
 
-                var applManager = new ApplicationManager(applicationData, Repositories, config);
+                var applManager = new ApplicationManager(applicationData, DB, config);
                 if (!await applManager.LoadApplicationAsync(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
 
@@ -54,7 +54,7 @@ namespace FOAEA3.Admin.Business
                         break;
 
                     case "T01":
-                        var tracingManager = new TracingManager(Repositories, config);
+                        var tracingManager = new TracingManager(DB, config);
                         await tracingManager.LoadApplicationAsync(enfService, controlCode);
                         tracingManager.TracingApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         tracingManager.TracingApplication.Appl_SIN_Cnfrmd_Ind = 1;
@@ -90,7 +90,7 @@ namespace FOAEA3.Admin.Business
             mostRecentEventSIN.Event_Compl_Dte = DateTime.Now;
             await applManager.EventManager.SaveEventAsync(mostRecentEventSIN);
 
-            var mostRecentEventSINdetails = await Repositories.ApplicationEventDetailRepository.GetEventSINDetailDataForEventIDAsync(mostRecentEventSIN.Event_Id);
+            var mostRecentEventSINdetails = await DB.ApplicationEventDetailTable.GetEventSINDetailDataForEventIDAsync(mostRecentEventSIN.Event_Id);
             mostRecentEventSINdetails.ActvSt_Cd = "C";
             mostRecentEventSINdetails.Event_Compl_Dte = DateTime.Now;
             await applManager.EventDetailManager.SaveEventDetailAsync(mostRecentEventSINdetails);
@@ -115,7 +115,7 @@ namespace FOAEA3.Admin.Business
                 ValStat_Cd = 0,
                 ActvSt_Cd = "C"
             };
-            await Repositories.SINResultRepository.CreateSINResultsAsync(sinResult);
+            await DB.SINResultTable.CreateSINResultsAsync(sinResult);
         }
 
 

@@ -5,7 +5,7 @@ namespace FileBroker.Business
     public class IncomingFederalLicenceDenialManager
     {
         private APIBrokerList APIs { get; }
-        private RepositoryList Repositories { get; }
+        private RepositoryList DB { get; }
 
         private List<ApplicationEventData> ValidEvents { get; set; }
 
@@ -14,7 +14,7 @@ namespace FileBroker.Business
         public IncomingFederalLicenceDenialManager(APIBrokerList apiBrokers, RepositoryList repositories)
         {
             APIs = apiBrokers;
-            Repositories = repositories;
+            DB = repositories;
             ValidEvents = new List<ApplicationEventData>();
             ValidEventDetails = new List<ApplicationEventDetailData>();
         }
@@ -48,7 +48,7 @@ namespace FileBroker.Business
             if (errors.Any())
                 return errors;
 
-            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
             string fileCycle = Path.GetExtension(fileName)[1..];
             try
@@ -75,7 +75,7 @@ namespace FileBroker.Business
                 {
                     await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
 
-                    await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
                 }
 
             }
@@ -85,7 +85,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+                await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
             }
 
             return errors;
@@ -157,7 +157,7 @@ namespace FileBroker.Business
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
 
-            return await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         }
 
         private static void ValidateHeader(FedLicenceDenial_DataSet licenceDenialFile, string fileName, ref List<string> result)
@@ -270,7 +270,7 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                            await DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                                        new Exception(errorMsg), displayExceptionError: true);
                         }
                     }
@@ -288,7 +288,7 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            await  Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                            await  DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                                         new Exception(errorMsg), displayExceptionError: true);
                         }
                     }
@@ -326,7 +326,7 @@ namespace FileBroker.Business
                 if ((item.RqstStat_Cd == 5) && (fedSource == "PA01"))
                 {
                     string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} code 05 not loaded Data In Foaea. File Name: {fileName}";
-                    await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                     new Exception(errorMsg), displayExceptionError: true);
                 }
             }

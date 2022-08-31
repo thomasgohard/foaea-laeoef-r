@@ -14,7 +14,7 @@ public class ProvincesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ProvinceData>>> GetProvinces([FromServices] IRepositories repositories)
     {
-        return Ok(await repositories.ProvinceRepository.GetProvincesAsync());
+        return Ok(await repositories.ProvinceTable.GetProvincesAsync());
     }
 
 }

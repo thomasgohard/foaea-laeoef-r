@@ -8,7 +8,7 @@ namespace FileBroker.Business
     {
         private string FileName { get; }
         private APIBrokerList APIs { get; }
-        private RepositoryList Repositories { get; }
+        private RepositoryList DB { get; }
         private ProvincialAuditFileConfig AuditConfiguration { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
@@ -21,7 +21,7 @@ namespace FileBroker.Business
         {
             FileName = fileName;
             APIs = apis;
-            Repositories = repositories;
+            DB = repositories;
             AuditConfiguration = auditConfig;
             Translations = new Dictionary<string, string>();
 
@@ -32,7 +32,7 @@ namespace FileBroker.Business
 
             if (IsFrench)
             {
-                var translations = repositories.TranslationDB.GetTranslationsAsync().Result;
+                var translations = repositories.TranslationTable.GetTranslationsAsync().Result;
                 foreach (var translation in translations)
                     Translations.Add(translation.EnglishText, translation.FrenchText);
                 APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
@@ -57,10 +57,10 @@ namespace FileBroker.Business
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(Repositories.FileAudit, AuditConfiguration, Repositories.MailServiceDB);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfiguration, DB.MailService);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-            var fileTableData = await Repositories.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
             // check that it is the expected cycle
             if (!FileHelper.IsExpectedCycle(fileTableData, FileName, out int expectedCycle, out int actualCycle))
@@ -73,7 +73,7 @@ namespace FileBroker.Business
                 return result;
             }
 
-            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
             bool isValid = true;
 
@@ -141,7 +141,7 @@ namespace FileBroker.Business
 
                             if (isValidData)
                             {
-                                var loadInboundDB = Repositories.LoadInboundAuditDB;
+                                var loadInboundDB = DB.LoadInboundAuditTable;
                                 var appl = interceptionMessage.Application;
                                 var fileName = FileName + ".XML";
 
@@ -194,7 +194,7 @@ namespace FileBroker.Business
                             errorCount++;
                         }
 
-                        await Repositories.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                        await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
 
                     }
 
@@ -216,9 +216,9 @@ namespace FileBroker.Business
                 await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
             }
 
-            await Repositories.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
-            await Repositories.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
-            await Repositories.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+            await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
+            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
 
             return result;
         }
@@ -234,7 +234,7 @@ namespace FileBroker.Business
                 LoadedDateTime = DateTime.Now
             };
 
-            _ = await Repositories.RequestLogDB.AddAsync(requestLogData);
+            _ = await DB.RequestLogTable.AddAsync(requestLogData);
         }
 
         public async Task AutoAcceptVariationsAsync(string enfService)
@@ -638,7 +638,7 @@ namespace FileBroker.Business
 
             if ((newHoldback.HldbCnd_MxmPerChq_Money is not null) && (newHoldback.HldbCnd_SrcHldbAmn_Money is not null))
             {
-                await Repositories.ErrorTrackingDB.MessageBrokerErrorAsync("Source Specific holdback amount in both fixed and per transaction",
+                await DB.ErrorTrackingTable.MessageBrokerErrorAsync("Source Specific holdback amount in both fixed and per transaction",
                                                                            $"{interceptionApplication.Appl_EnfSrv_Cd.Trim()} {interceptionApplication.Appl_CtrlCd.Trim()}" +
                                                                            $" Source: {newHoldback.EnfSrv_Cd}" +
                                                                            $" Per Transaction: ${newHoldback.HldbCnd_MxmPerChq_Money}" +

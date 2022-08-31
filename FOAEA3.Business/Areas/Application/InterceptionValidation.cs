@@ -88,7 +88,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task CheckCreditorSurnameAsync()
         {
-            var applications = await Repositories.InterceptionRepository.GetSameCreditorForI01Async(InterceptionApplication.Appl_CtrlCd,
+            var applications = await DB.InterceptionTable.GetSameCreditorForI01Async(InterceptionApplication.Appl_CtrlCd,
                                                                                          InterceptionApplication.Subm_SubmCd,
                                                                                          InterceptionApplication.Appl_Dbtr_Entrd_SIN,
                                                                                          InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
@@ -390,7 +390,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money is null)
             {
-                await ApplicationManager.AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await ApplicationManager.AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
                                                   $"CalculateMaxAmountPeriodicForPeriodCode for {InterceptionApplication.Appl_EnfSrv_Cd}-{InterceptionApplication.Appl_CtrlCd}" +
                                                   $" (with periodic code {paymentPeriodicCode}) was called even though IntFinH_PerPym_Money is null!");
                 return 0.0M;
@@ -511,13 +511,13 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<bool> ValidPaymentPeriodAsync(string paymentPeriodCode)
         {
-            var paymentPeriods = await Repositories.InterceptionRepository.GetPaymentPeriodsAsync();
+            var paymentPeriods = await DB.InterceptionTable.GetPaymentPeriodsAsync();
             return paymentPeriods.Any(m => (m.PymPr_Cd == paymentPeriodCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 
         private async Task<bool> ValidHoldbackTypeAsync(string holdbackTypeCode)
         {
-            var holdbackTypes = await Repositories.InterceptionRepository.GetHoldbackTypesAsync();
+            var holdbackTypes = await DB.InterceptionTable.GetHoldbackTypesAsync();
             return holdbackTypes.Any(m => (m.HldbTyp_Cd == holdbackTypeCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 

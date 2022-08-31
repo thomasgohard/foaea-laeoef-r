@@ -33,7 +33,7 @@ namespace FOAEA3.Business.Areas.Application
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                var licenceDenialDB = Repositories.LicenceDenialRepository;
+                var licenceDenialDB = DB.LicenceDenialTable;
                 var data = await licenceDenialDB.GetLicenceDenialDataAsync(enfService, appl_L03_CtrlCd: controlCode);
 
                 if (data != null)
@@ -53,7 +53,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!success)
             {
-                var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, LicenceDenialTerminationApplication);
+                var failedSubmitterManager = new FailedSubmitAuditManager(DB, LicenceDenialTerminationApplication);
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L03);
             }
 
@@ -64,7 +64,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await SetNewStateTo(ApplicationState.INVALID_APPLICATION_1);
 
-            var licenceDenialManager = new LicenceDenialManager(Repositories, config);
+            var licenceDenialManager = new LicenceDenialManager(DB, config);
             if (!await licenceDenialManager.LoadApplicationAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd, controlCodeForL01))
             {
                 LicenceDenialTerminationApplication.Messages.AddError("Cannot create an L03 for an L01 that doesn't exist.");
@@ -95,14 +95,14 @@ namespace FOAEA3.Business.Areas.Application
 
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                LicenceDenialTerminationApplication.Appl_CtrlCd = await Repositories.ApplicationRepository.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
+                LicenceDenialTerminationApplication.Appl_CtrlCd = await DB.ApplicationTable.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
             }
 
             TrimTrailingSpaces();
             MakeUpperCase();
 
-            await Repositories.ApplicationRepository.CreateApplicationAsync(LicenceDenialTerminationApplication);
+            await DB.ApplicationTable.CreateApplicationAsync(LicenceDenialTerminationApplication);
 
             if (LicenceDenialTerminationApplication.AppLiSt_Cd != ApplicationState.INVALID_APPLICATION_1)
             {
@@ -124,13 +124,13 @@ namespace FOAEA3.Business.Areas.Application
                     break;
             }
 
-            await Repositories.LicenceDenialRepository.CloseSameDayLicenceEventAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd,
+            await DB.LicenceDenialTable.CloseSameDayLicenceEventAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd,
                                                                           originalL01.Appl_CtrlCd,
                                                                           LicenceDenialTerminationApplication.Appl_CtrlCd);
 
             await EventManager.SaveEventsAsync();
 
-            if (Repositories.CurrentSubmitter != "MSGBRO")
+            if (DB.CurrentSubmitter != "MSGBRO")
             {
                 if (LicenceDenialTerminationApplication.AppLiSt_Cd.NotIn(ApplicationState.INVALID_APPLICATION_1,
                                                                          ApplicationState.APPLICATION_REJECTED_9))
@@ -160,10 +160,10 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var lastResponse = await Repositories.LicenceDenialResponseRepository.GetLastResponseDataAsync(appl_EnfSrv_Cd, appl_CtrlCd);
+            var lastResponse = await DB.LicenceDenialResponseTable.GetLastResponseDataAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
             LicenceDenialTerminationApplication.Appl_LastUpdate_Dte = DateTime.Now;
-            LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
             if (LicenceDenialTerminationApplication.AppLiSt_Cd == ApplicationState.APPLICATION_ACCEPTED_10)
             {
@@ -177,7 +177,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await UpdateApplicationNoValidationAsync();
 
-            await Repositories.LicenceDenialRepository.UpdateLicenceDenialDataAsync(LicenceDenialTerminationApplication);
+            await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialTerminationApplication);
 
             EventManager.AddEvent(EventCode.C50828_LICENSE_RESPONSE_RECEIVED, lastResponse.EnfSrv_Cd);
 
@@ -197,10 +197,10 @@ namespace FOAEA3.Business.Areas.Application
             newL03.LicSusp_TermRequestDte = requestDate;
 
             string appl_CommSubm_Text = LicenceDenialTerminationApplication.Appl_CommSubm_Text;
-            if ((Repositories.CurrentSubmitter != originalL01.Subm_SubmCd) &&
+            if ((DB.CurrentSubmitter != originalL01.Subm_SubmCd) &&
                 (newL03.Appl_EnfSrv_Cd.Trim() != originalL01.Appl_EnfSrv_Cd.Trim()))
             {
-                appl_CommSubm_Text = $"*** LO3 submitted by {Repositories.CurrentSubmitter} ***\n" + appl_CommSubm_Text;
+                appl_CommSubm_Text = $"*** LO3 submitted by {DB.CurrentSubmitter} ***\n" + appl_CommSubm_Text;
             }
 
             newL03.Appl_Dbtr_SurNme = originalL01.Appl_Dbtr_SurNme;
@@ -244,15 +244,15 @@ namespace FOAEA3.Business.Areas.Application
             newL03.Appl_Affdvt_DocTypCd = null;
             newL03.Appl_Dbtr_RtrndBySrc_SIN = null;
 
-            newL03.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
+            newL03.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             newL03.Appl_LastUpdate_Dte = DateTime.Now;
 
-            newL03.Appl_Create_Usr = Repositories.CurrentSubmitter;
+            newL03.Appl_Create_Usr = DB.CurrentSubmitter;
             newL03.Appl_Create_Dte = DateTime.Now;
 
             newL03.Appl_CommSubm_Text = appl_CommSubm_Text;
 
-            if (Repositories.CurrentSubmitter.IsInternalUser())
+            if (DB.CurrentSubmitter.IsInternalUser())
             {
                 newL03.Medium_Cd = "PAP";
             }
