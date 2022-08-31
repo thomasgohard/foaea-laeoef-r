@@ -25,9 +25,9 @@ namespace FOAEA3.Business.Areas.Application
 
         protected ApplicationStateEngine StateEngine { get; }
 
-        protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd.Trim();
+        protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd?.Trim();
 
-        protected string Appl_CtrlCd => Application.Appl_CtrlCd.Trim();
+        protected string Appl_CtrlCd => Application.Appl_CtrlCd?.Trim();
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
                                   ApplicationValidation applicationValidation = null)

@@ -15,8 +15,8 @@ public static class APIHelper
             return false;
         }
 
-        application.Appl_EnfSrv_Cd = application.Appl_EnfSrv_Cd.Trim();
-        application.Appl_CtrlCd = application.Appl_CtrlCd.Trim();
+        application.Appl_EnfSrv_Cd = application.Appl_EnfSrv_Cd?.Trim();
+        application.Appl_CtrlCd = application.Appl_CtrlCd?.Trim();
 
         if (applKey is not null)
             if ((applKey.EnfSrv != application.Appl_EnfSrv_Cd) || (applKey.CtrlCd != application.Appl_CtrlCd))
