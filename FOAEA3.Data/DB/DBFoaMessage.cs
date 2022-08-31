@@ -55,7 +55,7 @@ namespace FOAEA3.Data.DB
 
                         var thisCode = (EventCode)eventData.Error;
 
-                        result.FoaEvents.Add(thisCode.ToString(), newEventData);
+                        result.FoaEvents.Add(((int) thisCode).ToString(), newEventData);
                     }
 
                     if (eventData.MsgLangId == 1033)
