@@ -3,6 +3,7 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -10,14 +11,14 @@ namespace FOAEA3.Data.DB
     {
         public MessageDataList Messages { get; set; }
 
-        public DBCountry(IDBTools mainDB) : base(mainDB)
+        public DBCountry(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public DataList<CountryData> GetCountries()
+        public async Task<DataList<CountryData>> GetCountriesAsync()
         {
-            var data = MainDB.GetAllData<CountryData>("Ctry", FillCountryDataFromReader);
+            var data = await MainDB.GetAllDataAsync<CountryData>("Ctry", FillCountryDataFromReader);
 
             return new DataList<CountryData>(data, MainDB.LastError);
         }

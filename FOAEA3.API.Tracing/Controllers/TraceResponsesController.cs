@@ -27,15 +27,15 @@ public class TraceResponsesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}")]
-    public ActionResult<DataList<TraceResponseData>> GetTraceResults([FromRoute] string id,
+    public async Task<ActionResult<DataList<TraceResponseData>>> GetTraceResults([FromRoute] string id,
                                                                      [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
         var manager = new TracingManager(repositories, config);
 
-        if (manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(manager.GetTraceResults());
+        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await manager.GetTraceResultsAsync());
         else
             return NotFound();
     }
@@ -47,7 +47,7 @@ public class TraceResponsesController : ControllerBase
 
         var tracingManager = new TracingManager(repositories, config);
 
-        tracingManager.CreateResponseData(responseData);
+        await tracingManager.CreateResponseDataAsync(responseData);
 
         var rootPath = "http://" + HttpContext.Request.Host.ToString();
 
@@ -56,12 +56,12 @@ public class TraceResponsesController : ControllerBase
     }
 
     [HttpPut("MarkResultsAsViewed")]
-    public ActionResult<int> MarkTraceResponsesAsViewed([FromServices] IRepositories repositories,
-                                                        [FromQuery] string enfService)
+    public async Task<ActionResult<int>> MarkTraceResponsesAsViewed([FromServices] IRepositories repositories,
+                                                                    [FromQuery] string enfService)
     {
         var tracingManager = new TracingManager(repositories, config);
 
-        tracingManager.MarkResponsesAsViewed(enfService);
+        await tracingManager.MarkResponsesAsViewedAsync(enfService);
 
         return Ok();
     }

@@ -12,8 +12,8 @@ public class InfoBanksController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("InfoBanks API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<InfoBankData>> GetInfoBanks([FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<InfoBankData>>> GetInfoBanks([FromServices] IRepositories repositories)
     {
-        return Ok(repositories.InfoBankRepository.GetInfoBanks());
+        return Ok(await repositories.InfoBankRepository.GetInfoBanksAsync());
     }
 }

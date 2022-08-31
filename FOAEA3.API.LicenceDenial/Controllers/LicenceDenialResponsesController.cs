@@ -31,7 +31,7 @@ public class LicenceDenialResponsesController : ControllerBase
 
         var licenceDenialManager = new LicenceDenialManager(repositories, config);
 
-        licenceDenialManager.CreateResponseData(responseData);
+        await licenceDenialManager.CreateResponseDataAsync(responseData);
 
         var rootPath = "http://" + HttpContext.Request.Host.ToString();
 
@@ -40,12 +40,12 @@ public class LicenceDenialResponsesController : ControllerBase
     }
 
     [HttpPut("MarkResultsAsViewed")]
-    public ActionResult<int> MarkLicenceDenialResponsesAsViewed([FromServices] IRepositories repositories,
+    public async Task<ActionResult<int>> MarkLicenceDenialResponsesAsViewed([FromServices] IRepositories repositories,
                                                                 [FromQuery] string enfService)
     {
         var licenceDenialManager = new LicenceDenialManager(repositories, config);
 
-        licenceDenialManager.MarkResponsesAsViewed(enfService);
+        await licenceDenialManager.MarkResponsesAsViewedAsync(enfService);
 
         return Ok();
     }

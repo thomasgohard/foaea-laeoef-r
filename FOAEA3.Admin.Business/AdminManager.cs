@@ -6,6 +6,7 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Admin.Business
 {
@@ -23,7 +24,7 @@ namespace FOAEA3.Admin.Business
         }
 
 
-        public bool ManuallyConfirmSIN(string enfService, string controlCode, string sin)
+        public async Task<bool> ManuallyConfirmSINAsync(string enfService, string controlCode, string sin)
         {
             // manually move application from state 3 to state 6 by adding SIN confirmation information to database
             // and processing the state as per normal
@@ -34,7 +35,7 @@ namespace FOAEA3.Admin.Business
                 var applicationData = new ApplicationData();
 
                 var applManager = new ApplicationManager(applicationData, Repositories, config);
-                if (!applManager.LoadApplication(enfService, controlCode))
+                if (!await applManager.LoadApplicationAsync(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
 
                 if (applManager.GetState() != ApplicationState.SIN_CONFIRMATION_PENDING_3)
@@ -43,9 +44,9 @@ namespace FOAEA3.Admin.Business
                 if (!ValidationHelper.IsValidSinNumberMod10(sin))
                     throw new Exception("Invalid SIN!");
 
-                CloseActiveSinEventAndDetailsForApplication(applManager);
+                await CloseActiveSinEventAndDetailsForApplicationAsync(applManager);
 
-                CreateSinResults(enfService, controlCode, sin);
+                await CreateSinResultsAsync(enfService, controlCode, sin);
 
                 switch (applManager.GetCategory())
                 {
@@ -54,13 +55,13 @@ namespace FOAEA3.Admin.Business
 
                     case "T01":
                         var tracingManager = new TracingManager(Repositories, config);
-                        tracingManager.LoadApplication(enfService, controlCode);
+                        await tracingManager.LoadApplicationAsync(enfService, controlCode);
                         tracingManager.TracingApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         tracingManager.TracingApplication.Appl_SIN_Cnfrmd_Ind = 1;
                         tracingManager.TracingApplication.Appl_LastUpdate_Usr = "SYSTEM";
                         tracingManager.TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-                        tracingManager.ApplySINconfirmation();
+                        await tracingManager.ApplySINconfirmation();
 
                         break;
 
@@ -80,23 +81,23 @@ namespace FOAEA3.Admin.Business
             return success;
         }
 
-        private void CloseActiveSinEventAndDetailsForApplication(ApplicationManager applManager)
+        private async Task CloseActiveSinEventAndDetailsForApplicationAsync(ApplicationManager applManager)
         {
-            var sinEvents = applManager.EventManager.GetApplicationEventsForQueue(EventQueue.EventSIN);
+            var sinEvents = await applManager.EventManager.GetApplicationEventsForQueueAsync(EventQueue.EventSIN);
             var mostRecentEventSIN = sinEvents.OrderByDescending(m => m.Event_TimeStamp)
                                               .First(m => (m.Event_Reas_Cd == EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION));
             mostRecentEventSIN.ActvSt_Cd = "C";
             mostRecentEventSIN.Event_Compl_Dte = DateTime.Now;
-            applManager.EventManager.SaveEvent(mostRecentEventSIN);
+            await applManager.EventManager.SaveEventAsync(mostRecentEventSIN);
 
-            var mostRecentEventSINdetails = Repositories.ApplicationEventDetailRepository.GetEventSINDetailDataForEventID(mostRecentEventSIN.Event_Id);
+            var mostRecentEventSINdetails = await Repositories.ApplicationEventDetailRepository.GetEventSINDetailDataForEventIDAsync(mostRecentEventSIN.Event_Id);
             mostRecentEventSINdetails.ActvSt_Cd = "C";
             mostRecentEventSINdetails.Event_Compl_Dte = DateTime.Now;
-            applManager.EventDetailManager.SaveEventDetail(mostRecentEventSINdetails);
+            await applManager.EventDetailManager.SaveEventDetailAsync(mostRecentEventSINdetails);
 
         }
 
-        private void CreateSinResults(string enfService, string controlCode, string sin)
+        private async Task CreateSinResultsAsync(string enfService, string controlCode, string sin)
         {
             var sinResult = new SINResultData
             {
@@ -114,7 +115,7 @@ namespace FOAEA3.Admin.Business
                 ValStat_Cd = 0,
                 ActvSt_Cd = "C"
             };
-            Repositories.SINResultRepository.CreateSINResults(sinResult);
+            await Repositories.SINResultRepository.CreateSINResultsAsync(sinResult);
         }
 
 

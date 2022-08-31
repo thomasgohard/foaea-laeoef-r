@@ -25,7 +25,7 @@ public class OutgoingFederalLicenceDenialRequestsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("OutgoingFederalTracingRequests API Version 1.0");
 
     [HttpGet("")]
-    public ActionResult<List<TracingOutgoingFederalData>> GetFederalOutgoingData(
+    public async Task<ActionResult<List<TracingOutgoingFederalData>>> GetFederalOutgoingData(
                                                             [FromQuery] int maxRecords,
                                                             [FromQuery] string activeState,
                                                             [FromQuery] int lifeState,
@@ -34,8 +34,8 @@ public class OutgoingFederalLicenceDenialRequestsController : ControllerBase
     {
         var manager = new LicenceDenialManager(repositories, config);
 
-        var data = manager.GetFederalOutgoingData(maxRecords, activeState, (ApplicationState)lifeState,
-                                                  enfServiceCode);
+        var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState,
+                                                             enfServiceCode);
 
         return Ok(data);
     }

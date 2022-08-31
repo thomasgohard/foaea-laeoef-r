@@ -37,7 +37,7 @@ public class ApplicationEventsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public ActionResult<List<ApplicationEventData>> GetEvents([FromRoute] string id,
+    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] string id,
                                                               [FromQuery] int? queue,
                                                               [FromServices] IRepositories repositories)
     {
@@ -47,7 +47,7 @@ public class ApplicationEventsController : ControllerBase
         else
             eventQueue = EventQueue.EventSubm;
 
-        return GetEventsForQueue(id, repositories, eventQueue);
+        return await GetEventsForQueueAsync(id, repositories, eventQueue);
     }
 
     [HttpPost]
@@ -57,30 +57,30 @@ public class ApplicationEventsController : ControllerBase
 
         var eventManager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        eventManager.SaveEvent(applicationEvent);
+        await eventManager.SaveEventAsync(applicationEvent);
 
         return Ok();
 
     }
 
-    private ActionResult<List<ApplicationEventData>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
 
-        if (manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(manager.EventManager.GetApplicationEventsForQueue(queue));
+        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await manager.EventManager.GetApplicationEventsForQueueAsync(queue));
         else
             return NotFound();
     }
 
     [HttpGet("GetLatestSinEventDataSummary")]
-    public ActionResult<List<SinInboundToApplData>> GetLatestSinEventDataSummary([FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<SinInboundToApplData>>> GetLatestSinEventDataSummary([FromServices] IRepositories repositories)
     {
         var applManager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        return applManager.GetLatestSinEventDataSummary();
+        return await applManager.GetLatestSinEventDataSummaryAsync();
     }
 
 }

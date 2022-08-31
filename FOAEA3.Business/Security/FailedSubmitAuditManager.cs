@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Security
 {
@@ -15,12 +16,12 @@ namespace FOAEA3.Business.Security
             Application = application;
         }
 
-        public void AddToFailedSubmitAudit(FailedSubmitActivityAreaType activityType)
+        public async Task AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType activityType)
         {
             string subject_submitter = $"{Repositories.CurrentUser} ({Repositories.CurrentSubmitter})";
 
             foreach (var errorInfo in Application.Messages.GetMessagesForType(MessageType.Error))
-                Repositories.FailedSubmitAuditRepository.AppendFiledSubmitAudit(subject_submitter, activityType, errorInfo.Description);
+                await Repositories.FailedSubmitAuditRepository.AppendFiledSubmitAuditAsync(subject_submitter, activityType, errorInfo.Description);
 
         }
 

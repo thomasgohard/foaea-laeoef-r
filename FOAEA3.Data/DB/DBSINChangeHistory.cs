@@ -12,12 +12,12 @@ namespace FOAEA3.Data.DB
 {
     internal class DBSINChangeHistory : DBbase, ISINChangeHistoryRepository
     {
-        public DBSINChangeHistory(IDBTools mainDB) : base(mainDB)
+        public DBSINChangeHistory(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
         
-        public bool CreateSINChangeHistory(SINChangeHistoryData data)
+        public async Task<bool> CreateSINChangeHistoryAsync(SINChangeHistoryData data)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -34,7 +34,7 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(data.SINChangeHistoryUser))
                 parameters.Add("SINChangeHistoryUser", data.SINChangeHistoryUser);
 
-            MainDB.ExecProc("InsertSINChangeHistory", parameters);
+            await MainDB.ExecProcAsync("InsertSINChangeHistory", parameters);
 
             if (!string.IsNullOrEmpty(MainDB.LastError))
             {

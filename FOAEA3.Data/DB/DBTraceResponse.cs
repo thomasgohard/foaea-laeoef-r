@@ -6,19 +6,20 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBTraceResponse : DBbase, ITraceResponseRepository
     {
-        public DBTraceResponse(IDBTools mainDB) : base(mainDB)
+        public DBTraceResponse(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
         public MessageDataList Messages { get; set; }
 
-        public DataList<TraceResponseData> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -27,28 +28,28 @@ namespace FOAEA3.Data.DB
                     {"chkCycle", checkCycle }
                 };
 
-            var data = MainDB.GetDataFromStoredProc<TraceResponseData>("TraceResultsGetTrace", parameters, FillTraceResultDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<TraceResponseData>("TraceResultsGetTrace", parameters, FillTraceResultDataFromReader);
 
             return new DataList<TraceResponseData>(data, MainDB.LastError);
         }
 
-        public void InsertBulkData(List<TraceResponseData> responseData)
+        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
-            MainDB.BulkUpdate<TraceResponseData>(responseData, "TrcRsp");
+            await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
         }
 
-        public void MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewedAsync(string enfService)
         {
             var parameters = new Dictionary<string, object>
             {
                 {"chrRecptCd", enfService }
             };
 
-            MainDB.ExecProc("TrcAPPTraceUpdate", parameters);
+            await MainDB.ExecProcAsync("TrcAPPTraceUpdate", parameters);
 
         }
 
-        public void DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        public async Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -57,7 +58,7 @@ namespace FOAEA3.Data.DB
                 { "enfSrvCode", enfSrvCd.Substring(0,2) }
             };
 
-            MainDB.ExecProc("DeleteCanceledApplTrcRspData", parameters);
+            await MainDB.ExecProcAsync("DeleteCanceledApplTrcRspData", parameters);
         }
 
         private void FillTraceResultDataFromReader(IDBHelperReader rdr, TraceResponseData data)

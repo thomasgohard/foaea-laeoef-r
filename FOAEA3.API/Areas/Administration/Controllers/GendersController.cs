@@ -13,7 +13,7 @@ public class GendersController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Genders API Version 1.0");
 
     [HttpGet]
-    public ActionResult<DataList<GenderData>> GetGenders([FromServices] IGenderRepository genderRepository)
+    public async Task<ActionResult<DataList<GenderData>>> GetGenders([FromServices] IGenderRepository genderRepository)
     {
         if (Request.Headers.ContainsKey("CurrentSubmitter"))
             genderRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
@@ -21,7 +21,7 @@ public class GendersController : ControllerBase
         if (Request.Headers.ContainsKey("CurrentSubject"))
             genderRepository.UserId = Request.Headers["CurrentSubject"];
 
-        var data = genderRepository.GetGenders();
+        var data = await genderRepository.GetGendersAsync();
 
         return Ok(data);
     }

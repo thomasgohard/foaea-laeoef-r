@@ -5,15 +5,15 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareAppl
     {
-        public static List<DiffData> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
+        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd)
         {
             var diffs = new List<DiffData>();
 
             string key = ApplKey.MakeKey(enfSrv, ctrlCd);
 
-            var appl2 = repositories2.ApplicationRepository.GetApplication(enfSrv, ctrlCd);
-            var appl3 = repositories3.ApplicationRepository.GetApplication(enfSrv, ctrlCd);
+            var appl2 = await repositories2.ApplicationRepository.GetApplicationAsync(enfSrv, ctrlCd);
+            var appl3 = await repositories3.ApplicationRepository.GetApplicationAsync(enfSrv, ctrlCd);
 
             if ((appl2 is null) && (appl3 is null))
                 return diffs;

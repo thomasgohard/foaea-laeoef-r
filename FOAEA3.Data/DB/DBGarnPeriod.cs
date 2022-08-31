@@ -4,29 +4,30 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBGarnPeriod : DBbase, IGarnPeriodRepository
     {
-        public DBGarnPeriod(IDBTools mainDB) : base(mainDB)
+        public DBGarnPeriod(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
-        
-        public void UpdateGarnPeriod(string applEnfSrvCd,
-                                       string applCtrlCd,
-                                       decimal finTrmLumpSumAmt,
-                                       decimal finTrmPerPymAmt,
-                                       DateTime calcStartDate,
-                                       ref decimal lumpDivertedTtl,
-                                       ref decimal prdPymtDivertedTtl)
+
+        public async Task<(decimal, decimal)> UpdateGarnPeriodAsync(string applEnfSrvCd,
+                                                                    string applCtrlCd,
+                                                                    decimal finTrmLumpSumAmt,
+                                                                    decimal finTrmPerPymAmt,
+                                                                    DateTime calcStartDate,
+                                                                    decimal lumpDivertedTtl,
+                                                                    decimal prdPymtDivertedTtl)
         {
 
-            GetDivertedTotalsForVaryAccept(applEnfSrvCd, applCtrlCd, calcStartDate, ref prdPymtDivertedTtl, ref lumpDivertedTtl);
+            (prdPymtDivertedTtl, lumpDivertedTtl) = await GetDivertedTotalsForVaryAcceptAsync(applEnfSrvCd, applCtrlCd, calcStartDate, prdPymtDivertedTtl, lumpDivertedTtl);
 
-            InsertGarnPeriodVary(applEnfSrvCd, applCtrlCd);
-            DeleteGarnPeriod(applEnfSrvCd, applCtrlCd);
+            await InsertGarnPeriodVaryAsync(applEnfSrvCd, applCtrlCd);
+            await DeleteGarnPeriodAsync(applEnfSrvCd, applCtrlCd);
 
             if (finTrmLumpSumAmt < lumpDivertedTtl)
             {
@@ -47,7 +48,7 @@ namespace FOAEA3.Data.DB
                 while (distPymtDivAmt > 0)
                 {
                     decimal perAmt;
-                    if(distPymtDivAmt > finTrmPerPymAmt)
+                    if (distPymtDivAmt > finTrmPerPymAmt)
                     {
                         perAmt = finTrmPerPymAmt;
                         distPymtDivAmt -= perAmt;
@@ -58,16 +59,18 @@ namespace FOAEA3.Data.DB
                         distPymtDivAmt = 0;
                     }
 
-                    InsertGarnPeriod(applEnfSrvCd, applCtrlCd, 0, loopIndex, perAmt);
+                    await InsertGarnPeriodAsync(applEnfSrvCd, applCtrlCd, 0, loopIndex, perAmt);
 
                     loopIndex += 1;
                 }
 
             }
 
+            return (lumpDivertedTtl, prdPymtDivertedTtl);
+
         }
 
-        private void InsertGarnPeriod(string applEnfSrvCd, string applCtrlCd, int summFAFRId, int periodcnt, decimal garnAmt)
+        private async Task InsertGarnPeriodAsync(string applEnfSrvCd, string applCtrlCd, int summFAFRId, int periodcnt, decimal garnAmt)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -78,10 +81,10 @@ namespace FOAEA3.Data.DB
                 {"GarnAmt",  garnAmt}
             };
 
-            MainDB.ExecProc("GarnPeriodInsert", parameters);
+            await MainDB.ExecProcAsync("GarnPeriodInsert", parameters);
         }
 
-        private void DeleteGarnPeriod(string applEnfSrvCd, string applCtrlCd)
+        private async Task DeleteGarnPeriodAsync(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -89,10 +92,10 @@ namespace FOAEA3.Data.DB
                 {"chrAppl_CtrlCd", applCtrlCd}
             };
 
-            MainDB.ExecProc("GarnPeriodDeleteForAppl", parameters);
+            await MainDB.ExecProcAsync("GarnPeriodDeleteForAppl", parameters);
         }
 
-        private void InsertGarnPeriodVary(string applEnfSrvCd, string applCtrlCd)
+        private async Task InsertGarnPeriodVaryAsync(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -100,7 +103,7 @@ namespace FOAEA3.Data.DB
                 {"chrAppl_CtrlCd", applCtrlCd}
             };
 
-            MainDB.ExecProc("GarnPeriodVaryInsert", parameters);
+            await MainDB.ExecProcAsync("GarnPeriodVaryInsert", parameters);
         }
 
         private class UpdatedDiverts
@@ -109,8 +112,8 @@ namespace FOAEA3.Data.DB
             public decimal LumpDivertedTtl { get; set; }
         }
 
-        private void GetDivertedTotalsForVaryAccept(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate, 
-                                                    ref decimal prdPymtDivertedTtl, ref decimal lumpDivertedTtl)
+        private async Task<(decimal, decimal)> GetDivertedTotalsForVaryAcceptAsync(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate,
+                                                          decimal prdPymtDivertedTtl, decimal lumpDivertedTtl)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -119,20 +122,22 @@ namespace FOAEA3.Data.DB
                 {"calcStartDate", calcStartDate}
             };
 
-            var result = MainDB.GetDataFromStoredProc<UpdatedDiverts>("GetDivertedTotalsForVaryAccept", parameters, FillDataFromReader).FirstOrDefault();
+            var result = (await MainDB.GetDataFromStoredProcAsync<UpdatedDiverts>("GetDivertedTotalsForVaryAccept", parameters, FillDataFromReader)).FirstOrDefault();
 
             if (result is not null)
             {
                 prdPymtDivertedTtl = result.PrdPymtDivertedTtl;
                 lumpDivertedTtl = result.LumpDivertedTtl;
-            }           
+            }
+
+            return (prdPymtDivertedTtl, lumpDivertedTtl);
 
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, UpdatedDiverts data)
         {
-            data.PrdPymtDivertedTtl = (decimal) rdr["prdPymtDivertedTtl"] ;
-            data.LumpDivertedTtl = (decimal) rdr["lumpDivertedTtl"];
+            data.PrdPymtDivertedTtl = (decimal)rdr["prdPymtDivertedTtl"];
+            data.LumpDivertedTtl = (decimal)rdr["lumpDivertedTtl"];
         }
     }
 }

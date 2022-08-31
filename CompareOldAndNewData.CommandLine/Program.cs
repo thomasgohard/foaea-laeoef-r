@@ -13,8 +13,8 @@ IConfiguration configuration = new ConfigurationBuilder()
         .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true)
         .Build();
 
-var foaea2DB = new DBTools(configuration.GetConnectionString("Foaea2DB").ReplaceVariablesWithEnvironmentValues());
-var foaea3DB = new DBTools(configuration.GetConnectionString("Foaea3DB").ReplaceVariablesWithEnvironmentValues());
+var foaea2DB = new DBToolsAsync(configuration.GetConnectionString("Foaea2DB").ReplaceVariablesWithEnvironmentValues());
+var foaea3DB = new DBToolsAsync(configuration.GetConnectionString("Foaea3DB").ReplaceVariablesWithEnvironmentValues());
 var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
 
 var repositories2 = new DbRepositories(foaea2DB);
@@ -38,8 +38,8 @@ foreach (var request in requests)
     var foaea3RunDate = DateTime.Now.Date;
 
     ColourConsole.WriteEmbeddedColor($"Comparing [cyan]{enfSrv}-{ctrlCd}[/cyan]... ([green]{n}[/green] of [green]{requests.Count}[/green])\r");
-    CompareAll.Run(repositories2, repositories2Finance, repositories3, repositories3Finance,
-                   action, enfSrv, ctrlCd, foaea2RunDate, foaea3RunDate, output);
+    await CompareAll.RunAsync(repositories2, repositories2Finance, repositories3, repositories3Finance,
+                              action, enfSrv, ctrlCd, foaea2RunDate, foaea3RunDate, output);
     n++;
 }
 

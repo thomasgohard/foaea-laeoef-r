@@ -44,7 +44,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
                 // TODO: check if application exists and is in proper state
                 var appManager = new TracingManager(Repositories, config);
-                if (appManager.LoadApplication(data.EnfService, data.ControlCode))
+                if (await appManager.LoadApplicationAsync(data.EnfService, data.ControlCode))
                 {
                     if (appManager.TracingApplication.AppCtgy_Cd != "T01")
                     {

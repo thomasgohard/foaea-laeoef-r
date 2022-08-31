@@ -7,7 +7,7 @@ namespace TestData.TestDataBase
 {
     public class InMemory_Repositories : IRepositories
     {
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
 
         public string CurrentSubmitter { get; set; }
 

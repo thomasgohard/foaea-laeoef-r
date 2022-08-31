@@ -27,7 +27,7 @@ public class InterceptionsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}")]
-    public ActionResult<InterceptionApplicationData> GetApplication([FromRoute] string key,
+    public async Task<ActionResult<InterceptionApplicationData>> GetApplication([FromRoute] string key,
                                                                     [FromServices] IRepositories repositories,
                                                                     [FromServices] IRepositories_Finance repositoriesFinance)
     {
@@ -35,7 +35,7 @@ public class InterceptionsController : ControllerBase
 
         var manager = new InterceptionManager(repositories, repositoriesFinance, config);
 
-        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.InterceptionApplication.AppCtgy_Cd == "I01")
@@ -49,13 +49,13 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpGet("GetApplicationsForVariationAutoAccept")]
-    public ActionResult<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAccept(
+    public async Task<ActionResult<List<InterceptionApplicationData>>> GetApplicationsForVariationAutoAccept(
                                                                         [FromServices] IRepositories repositories,
                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
                                                                         [FromQuery] string enfService)
     {
         var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-        var data = interceptionManager.GetApplicationsForVariationAutoAccept(enfService);
+        var data = await interceptionManager.GetApplicationsForVariationAutoAcceptAsync(enfService);
 
         return Ok(data);
     }
@@ -71,7 +71,7 @@ public class InterceptionsController : ControllerBase
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-        bool isCreated = interceptionManager.CreateApplication();
+        bool isCreated = await interceptionManager.CreateApplicationAsync();
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -102,7 +102,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-        interceptionManager.UpdateApplication();
+        await interceptionManager.UpdateApplicationAsync();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -125,7 +125,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-        interceptionManager.CancelApplication();
+        await interceptionManager.CancelApplication();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -148,7 +148,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-        interceptionManager.SuspendApplication();
+        await interceptionManager.SuspendApplicationAsync();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -183,10 +183,10 @@ public class InterceptionsController : ControllerBase
         var application = new InterceptionApplicationData();
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
         var sinManager = new ApplicationSINManager(application, appManager);
-        sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+        await sinManager.SINconfirmationBypassAsync(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
         return Ok(application);
     }
@@ -204,7 +204,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
-        if (appManager.VaryApplication())
+        if (await appManager.VaryApplicationAsync())
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -225,7 +225,7 @@ public class InterceptionsController : ControllerBase
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-        if (appManager.AcceptInterception(supportingDocsReceiptDate))
+        if (await appManager.AcceptInterceptionAsync(supportingDocsReceiptDate))
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -247,7 +247,7 @@ public class InterceptionsController : ControllerBase
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-        if (appManager.AcceptVariation(supportingDocsReceiptDate, autoAccept))
+        if (await appManager.AcceptVariationAsync(supportingDocsReceiptDate, autoAccept))
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -268,7 +268,7 @@ public class InterceptionsController : ControllerBase
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
 
-        if (appManager.RejectVariation(applicationRejectReasons))
+        if (await appManager.RejectVariationAsync(applicationRejectReasons))
             return Ok(application);
         else
             return UnprocessableEntity(application);

@@ -18,10 +18,10 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [HttpGet("CheckPreviousPasswords")]
-        public ActionResult<string> CheckPreviousPasswords([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> CheckPreviousPasswordsAsync([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {
             var loginManager = new LoginManager(repositories);
-            var result = loginManager.CheckPreviousPasswords(subjectName, encryptedNewPassword);
+            var result = await loginManager.CheckPreviousPasswordsAsync(subjectName, encryptedNewPassword);
 
             return Ok(result ? "true" : "false");
         }
@@ -32,7 +32,7 @@ namespace FOAEA3.API.Controllers
             var subject = await APIBrokerHelper.GetDataFromRequestBodyAsync<SubjectData>(Request);
 
             var loginManager = new LoginManager(repositories);
-            var result = loginManager.CheckPreviousPasswords(subject.SubjectName, encryptedNewPassword);
+            var result = await loginManager.CheckPreviousPasswordsAsync(subject.SubjectName, encryptedNewPassword);
 
             return Ok(result ? "true" : "false");
         }
@@ -43,36 +43,36 @@ namespace FOAEA3.API.Controllers
             var emailData = await APIBrokerHelper.GetDataFromRequestBodyAsync<EmailData>(Request);
 
             var loginManager = new LoginManager(repositories);
-            loginManager.SendEmail(emailData.Subject, emailData.Recipient, emailData.Body, emailData.IsHTML);
+            await loginManager.SendEmailAsync(emailData.Subject, emailData.Recipient, emailData.Body, emailData.IsHTML);
 
             return Ok(emailData);
 
         }
 
         [HttpGet("PostConfirmationCode")]
-        public ActionResult<string> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
 
-            dbLogin.PostConfirmationCode(subjectId, confirmationCode);
+            await dbLogin.PostConfirmationCodeAsync(subjectId, confirmationCode);
 
             return Ok(string.Empty);
         }
 
         [HttpGet("GetEmailByConfirmationCode")]
-        public ActionResult<string> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
 
-            return Ok(dbLogin.GetEmailByConfirmationCode(confirmationCode));
+            return Ok(await dbLogin.GetEmailByConfirmationCodeAsync(confirmationCode));
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
-        public ActionResult<SubjectData> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbSubject = new DBSubject(repositories.MainDB);
 
-            return Ok(dbSubject.GetSubjectByConfirmationCode(confirmationCode));
+            return Ok(await dbSubject.GetSubjectByConfirmationCodeAsync(confirmationCode));
         }
 
         [HttpPut("PostPassword")]
@@ -81,7 +81,7 @@ namespace FOAEA3.API.Controllers
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
 
             var dbLogin = new DBLogin(repositories.MainDB);
-            dbLogin.PostPassword(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
+            await dbLogin.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
 
             return Ok(passwordData);
         }

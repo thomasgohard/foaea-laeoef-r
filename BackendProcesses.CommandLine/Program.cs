@@ -6,12 +6,13 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace BackendProcesses.CommandLine
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // read configuration
             string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -26,25 +27,25 @@ namespace BackendProcesses.CommandLine
 
             // set up access to database and load some reference tables into memory
 
-            var mainDB = new DBTools(configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            var mainDB = new DBToolsAsync(configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
             var repositories = new DbRepositories(mainDB);
             var repositoriesFinance = new DbRepositories_Finance(mainDB);
 
             // preload reference data
 
-            ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(mainDB));
-            ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(mainDB));
-            ReferenceData.Instance().LoadGenders(new DBGender(mainDB));
-            ReferenceData.Instance().LoadProvinces(new DBProvince(mainDB));
-            ReferenceData.Instance().LoadMediums(new DBMedium(mainDB));
-            ReferenceData.Instance().LoadLanguages(new DBLanguage(mainDB));
-            ReferenceData.Instance().LoadDocumentTypes(new DBDocumentType(mainDB));
-            ReferenceData.Instance().LoadCountries(new DBCountry(mainDB));
-            ReferenceData.Instance().LoadApplicationReasons(new DBApplicationReason(mainDB));
-            ReferenceData.Instance().LoadApplicationCategories(new DBApplicationCategory(mainDB));
-            ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(mainDB));
-            ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(mainDB));
+            await ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(mainDB));
+            await ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(mainDB));
+            await ReferenceData.Instance().LoadGendersAsync(new DBGender(mainDB));
+            await ReferenceData.Instance().LoadProvincesAsync(new DBProvince(mainDB));
+            await ReferenceData.Instance().LoadMediumsAsync(new DBMedium(mainDB));
+            await ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(mainDB));
+            await ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(mainDB));
+            await ReferenceData.Instance().LoadCountriesAsync(new DBCountry(mainDB));
+            await ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(mainDB));
+            await ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(mainDB));
+            await ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(mainDB));
+            await ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(mainDB));
 
             ReferenceData.Instance().Configuration.Add("emailRecipients", configuration.GetSection("emailRecipients").Value);
 
@@ -73,7 +74,7 @@ namespace BackendProcesses.CommandLine
             if (option == "1")
             {
                 var amountOwedProcess = new AmountOwedProcess(repositories, repositoriesFinance);
-                amountOwedProcess.Run();
+                await amountOwedProcess.RunAsync();
             }
 
             Console.WriteLine("Exiting... Press any key to continue...");

@@ -12,14 +12,14 @@ namespace FOAEA3.Data.DB
 {
     internal class DBInfoBank : DBbase, IInfoBankRepository
     {
-        public DBInfoBank(IDBTools mainDB) : base(mainDB)
+        public DBInfoBank(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<InfoBankData> GetInfoBanks()
+        public async Task<List<InfoBankData>> GetInfoBanksAsync()
         {
-            return MainDB.GetAllData<InfoBankData>("InfoBank", FillDataFromReader);
+            return await MainDB.GetAllDataAsync<InfoBankData>("InfoBank", FillDataFromReader);
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, InfoBankData data)

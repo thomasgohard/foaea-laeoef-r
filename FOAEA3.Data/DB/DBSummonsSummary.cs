@@ -4,34 +4,35 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSummonsSummary : DBbase, ISummonsSummaryRepository
     {
-        public DBSummonsSummary(IDBTools mainDB) : base(mainDB)
+        public DBSummonsSummary(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
-        public List<SummonsSummaryData> GetSummonsSummary(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        public async Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
         {
             var parameters = new Dictionary<string, object>();
             if (!string.IsNullOrEmpty(appl_EnfSrv_Cd)) parameters.Add("Appl_Enfsrv_Cd", appl_EnfSrv_Cd);
             if (!string.IsNullOrEmpty(appl_CtrlCd)) parameters.Add("Appl_CtrlCd", appl_CtrlCd);
             if (!string.IsNullOrEmpty(debtorId)) parameters.Add("DebtorId", debtorId);
 
-            List<SummonsSummaryData> data = MainDB.GetDataFromStoredProc<SummonsSummaryData>("GetSummSmryInfo", parameters, FillDataFromReader);
+            List<SummonsSummaryData> data = await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetSummSmryInfo", parameters, FillDataFromReader);
 
             return data;
 
         }
 
-        public List<SummonsSummaryData> GetAmountOwedRecords()
+        public async Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync()
         {
-            return MainDB.GetDataFromStoredProc<SummonsSummaryData>("GetAmountOwedRecords", FillDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetAmountOwedRecords", FillDataFromReader);
         }
 
-        public decimal GetFeesOwedTotal(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
+        public async Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -40,12 +41,12 @@ namespace FOAEA3.Data.DB
                 };
 
             if (isFeeCumulative)
-                return MainDB.GetDataFromStoredProc<decimal>("GetFeesOwedTtl", parameters);
+                return await MainDB.GetDataFromStoredProcAsync<decimal>("GetFeesOwedTtl", parameters);
             else
-                return MainDB.GetDataFromStoredProc<decimal>("GetFeesOwedTtlNonCumulative", parameters);
+                return await MainDB.GetDataFromStoredProcAsync<decimal>("GetFeesOwedTtlNonCumulative", parameters);
         }
 
-        public void CreateSummonsSummary(SummonsSummaryData summSmryData)
+        public async Task CreateSummonsSummaryAsync(SummonsSummaryData summSmryData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -79,10 +80,10 @@ namespace FOAEA3.Data.DB
             if (summSmryData.SummSmry_LastCalc_Dte.HasValue)
                 parameters.Add("SummSmry_LastCalc_Dte", summSmryData.SummSmry_LastCalc_Dte);
 
-            MainDB.ExecProc("SummSmry_Insert", parameters);
+            _ = await MainDB.ExecProcAsync("SummSmry_Insert", parameters);
         }
 
-        public void UpdateSummonsSummary(SummonsSummaryData summSmryData)
+        public async Task UpdateSummonsSummaryAsync(SummonsSummaryData summSmryData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -133,7 +134,7 @@ namespace FOAEA3.Data.DB
                 parameters.Add("SummSmry_Recalc_Dte", DBNull.Value);
 
 
-            _ = MainDB.ExecProc("SummSmryUpdate", parameters);
+            _ = await MainDB.ExecProcAsync("SummSmryUpdate", parameters);
 
         }
 

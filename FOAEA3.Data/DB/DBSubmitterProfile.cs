@@ -5,23 +5,24 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSubmitterProfile : DBbase, ISubmitterProfileRepository
     {
 
-        public DBSubmitterProfile(IDBTools mainDB) : base(mainDB)
+        public DBSubmitterProfile(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
-        public SubmitterProfileData GetSubmitterProfile(string submitterCode)
+        public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
         {
             var parameters = new Dictionary<string, object>
                 {
                     {"Subm_SubmCd", submitterCode}
                 };
-            return MainDB.GetDataFromStoredProc<SubmitterProfileData>("UserGetSubmData", parameters, FillUserDataFromReader).ElementAt(0);
+            return (await MainDB.GetDataFromStoredProcAsync<SubmitterProfileData>("UserGetSubmData", parameters, FillUserDataFromReader)).ElementAt(0);
         }
 
         private void FillUserDataFromReader(IDBHelperReader rdr, SubmitterProfileData data)

@@ -28,14 +28,14 @@ public class TracingsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}")]
-    public ActionResult<TracingApplicationData> GetApplication([FromRoute] string key,
+    public async Task<ActionResult<TracingApplicationData>> GetApplication([FromRoute] string key,
                                                                [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
         var manager = new TracingManager(repositories, config);
 
-        bool success = manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.TracingApplication.AppCtgy_Cd == "T01")
@@ -59,7 +59,7 @@ public class TracingsController : ControllerBase
         var tracingManager = new TracingManager(tracingData, repositories, config);
         var appl = tracingManager.TracingApplication;
 
-        bool isCreated = tracingManager.CreateApplication();
+        bool isCreated = await tracingManager.CreateApplicationAsync();
         if (isCreated)
         {
             var appKey = $"{appl.Appl_EnfSrv_Cd}-{appl.Appl_CtrlCd}";
@@ -98,15 +98,15 @@ public class TracingsController : ControllerBase
         switch (command.ToLower())
         {
             case "":
-                tracingManager.UpdateApplication();
+                await tracingManager.UpdateApplicationAsync();
                 break;
 
             case "partiallyserviceapplication":
-                tracingManager.PartiallyServiceApplication(enforcementServiceCode);
+                await tracingManager.PartiallyServiceApplicationAsync(enforcementServiceCode);
                 break;
 
             case "fullyserviceapplication":
-                tracingManager.FullyServiceApplication(enforcementServiceCode);
+                await tracingManager.FullyServiceApplicationAsync(enforcementServiceCode);
                 break;
 
             default:
@@ -136,7 +136,7 @@ public class TracingsController : ControllerBase
 
         var appManager = new TracingManager(application, repositories, config);
 
-        appManager.TransferApplication(newIssuingSubmitter, newRecipientSubmitter);
+        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
 
         return Ok(application);
     }
@@ -152,16 +152,16 @@ public class TracingsController : ControllerBase
         var application = new TracingApplicationData();
 
         var appManager = new TracingManager(application, repositories, config);
-        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
         var sinManager = new ApplicationSINManager(application, appManager);
-        sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+        await sinManager.SINconfirmationBypassAsync(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
         return Ok(application);
     }
 
     [HttpPut("{key}/CertifyAffidavit")]
-    public ActionResult<TracingApplicationData> CertifyAffidavit([FromRoute] string key,
+    public async Task<ActionResult<TracingApplicationData>> CertifyAffidavit([FromRoute] string key,
                                                                  [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
@@ -169,34 +169,33 @@ public class TracingsController : ControllerBase
         var application = new TracingApplicationData();
 
         var appManager = new TracingManager(application, repositories, config);
-        appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
-        appManager.CertifyAffidavit(repositories.CurrentSubmitter);
+        await appManager.CertifyAffidavitAsync(repositories.CurrentSubmitter);
 
         return Ok(application);
     }
 
     [HttpGet("WaitingForAffidavits")]
-    public ActionResult<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavit(
+    public async Task<ActionResult<DataList<TracingApplicationData>>> GetApplicationsWaitingForAffidavit(
                                                             [FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config);
 
-        var data = manager.GetApplicationsWaitingForAffidavit();
+        var data = await manager.GetApplicationsWaitingForAffidavitAsync();
 
         return Ok(data);
     }
 
     [HttpGet("TraceToApplication")]
-    public ActionResult<List<TraceCycleQuantityData>> GetTraceToApplData(
+    public async Task<ActionResult<List<TraceCycleQuantityData>>> GetTraceToApplData(
                                                             [FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config);
 
-        var data = manager.GetTraceToApplData();
+        var data = await manager.GetTraceToApplDataAsync();
 
         return Ok(data);
-
     }
 
 }

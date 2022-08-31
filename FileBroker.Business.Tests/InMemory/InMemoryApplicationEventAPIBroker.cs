@@ -8,33 +8,39 @@ namespace FileBroker.Business.Tests.InMemory
 {
     public class InMemoryApplicationEventAPIBroker : IApplicationEventAPIBroker
     {
-        public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName)
+        public async Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName)
+        public async Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public Task SaveEventAsync(ApplicationEventData eventData)
+        public async Task SaveEventAsync(ApplicationEventData eventData)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public Task SaveEventDetailAsync(ApplicationEventDetailData activeTraceEventDetail)
+        public async Task SaveEventDetailAsync(ApplicationEventDetailData activeTraceEventDetail)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
+        public async Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

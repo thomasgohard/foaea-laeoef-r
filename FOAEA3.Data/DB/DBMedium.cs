@@ -3,6 +3,7 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -10,14 +11,14 @@ namespace FOAEA3.Data.DB
     {
         public MessageDataList Messages { get; set; }
 
-        public DBMedium(IDBTools mainDB) : base(mainDB)
+        public DBMedium(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public DataList<MediumData> GetMediums()
+        public async Task<DataList<MediumData>> GetMediumsAsync()
         {
-            var data = MainDB.GetAllData<MediumData>("Medium", FillMediumDataFromReader);
+            var data = await MainDB.GetAllDataAsync<MediumData>("Medium", FillMediumDataFromReader);
 
             return new DataList<MediumData>(data, MainDB.LastError);
         }

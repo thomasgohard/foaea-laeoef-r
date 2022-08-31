@@ -13,7 +13,8 @@ public class ApplicationLifeStatesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("ApplicationLifeStates API Version 1.0");
 
     [HttpGet]
-    public ActionResult<DataList<ApplicationLifeStateData>> GetApplicationLifeStates([FromServices] IApplicationLifeStateRepository applicationLifeStateRepository)
+    public async Task<ActionResult<DataList<ApplicationLifeStateData>>> GetApplicationLifeStates(
+                            [FromServices] IApplicationLifeStateRepository applicationLifeStateRepository)
     {
         if (Request.Headers.ContainsKey("CurrentSubmitter"))
             applicationLifeStateRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
@@ -21,6 +22,6 @@ public class ApplicationLifeStatesController : ControllerBase
         if (Request.Headers.ContainsKey("CurrentSubject"))
             applicationLifeStateRepository.UserId = Request.Headers["CurrentSubject"];
 
-        return Ok(applicationLifeStateRepository.GetApplicationLifeStates());
+        return Ok(await applicationLifeStateRepository.GetApplicationLifeStatesAsync());
     }
 }

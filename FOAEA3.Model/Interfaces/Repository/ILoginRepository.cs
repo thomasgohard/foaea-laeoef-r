@@ -1,14 +1,16 @@
-﻿namespace FOAEA3.Model.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace FOAEA3.Model.Interfaces
 {
     public interface ILoginRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        bool IsLoginExpired(string subjectName);
-        bool CheckPreviousPasswords(int subjectId, string newPassword);
-        void GetAllowedAccess(string username, ref bool IsAllowed);
-        void AcceptNewTermsOfReferernce(string username);
-        void SetPassword(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays);
+        Task<bool> IsLoginExpiredAsync(string subjectName);
+        Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword);
+        Task<bool> GetAllowedAccessAsync(string username);
+        Task AcceptNewTermsOfReferernceAsync(string username);
+        Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays);
     }
 }

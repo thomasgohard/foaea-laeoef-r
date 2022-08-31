@@ -37,7 +37,7 @@ namespace FOAEA3.Data.Base
         private IFailedSubmitAuditRepository failedSubmitAuditDB;
         private IPostalCodeRepository postalCodeDB;
 
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
 
         //private string currentSubmitter = string.Empty;
 
@@ -53,7 +53,7 @@ namespace FOAEA3.Data.Base
             set => MainDB.UserId = value;
         }
 
-        public DbRepositories(IDBTools mainDB)
+        public DbRepositories(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }

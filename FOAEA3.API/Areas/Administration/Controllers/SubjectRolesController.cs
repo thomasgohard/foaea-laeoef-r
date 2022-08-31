@@ -12,14 +12,14 @@ public class SubjectRolesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("SubjectRoles API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<SubjectRoleData>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
+    public async Task<ActionResult<List<SubjectRoleData>>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
     {
-        return Ok(repositories.SubjectRoleRepository.GetSubjectRoles(subjectName));
+        return Ok(await repositories.SubjectRoleRepository.GetSubjectRolesAsync(subjectName));
     }
 
     [HttpGet("{subjectName}")]
-    public ActionResult<List<string>> GetAssumedRolesForSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
+    public async Task<ActionResult<List<string>>> GetAssumedRolesForSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        return Ok(repositories.SubjectRoleRepository.GetAssumedRolesForSubject(subjectName));
+        return Ok(await repositories.SubjectRoleRepository.GetAssumedRolesForSubjectAsync(subjectName));
     }
 }

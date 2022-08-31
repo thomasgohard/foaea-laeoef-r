@@ -8,6 +8,7 @@ using System;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -70,9 +71,9 @@ namespace FOAEA3.Business.Areas.Application
             );
         }
 
-        public void SetNewStateTo(ApplicationState newState)
+        public async Task SetNewStateTo(ApplicationState newState)
         {
-            StateEngine.SetNewStateTo(Application.AppLiSt_Cd, newState);
+            await StateEngine.SetNewStateTo(Application.AppLiSt_Cd, newState);
         }
 
         public ApplicationState GetState()
@@ -96,11 +97,11 @@ namespace FOAEA3.Business.Areas.Application
                 return true;
         }
 
-        public virtual bool LoadApplication(string enfService, string controlCode)
+        public virtual async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
             bool isSuccess = false;
 
-            ApplicationData data = Repositories.ApplicationRepository.GetApplication(enfService, controlCode);
+            ApplicationData data = await Repositories.ApplicationRepository.GetApplicationAsync(enfService, controlCode);
 
             if (data != null)
             {
@@ -111,19 +112,19 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public bool ApplicationExists()
+        public async Task<bool> ApplicationExistsAsync()
         {
             if (!String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                return Repositories.ApplicationRepository.ApplicationExists(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                return await Repositories.ApplicationRepository.ApplicationExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
             }
             else
                 return false;
         }
 
-        public virtual bool CreateApplication()
+        public virtual async Task<bool> CreateApplicationAsync()
         {
-            if (ApplicationExists())
+            if (await ApplicationExistsAsync())
             {
                 Application.Messages.AddError(ErrorResource.CANT_CREATE_APPLICATION_ALREADY_EXISTS);
                 return false;
@@ -141,7 +142,7 @@ namespace FOAEA3.Business.Areas.Application
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
-                Application.Appl_CtrlCd = Repositories.ApplicationRepository.GenerateApplicationControlCode(Appl_EnfSrv_Cd);
+                Application.Appl_CtrlCd = await Repositories.ApplicationRepository.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
             }
 
@@ -149,7 +150,7 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
 
             // validate data and decide on what state to bring the application to
-            Process_00_InitialState();
+            await Process_00_InitialState();
 
             if (Application.Messages.ContainsMessagesOfType(MessageType.Error))
             {
@@ -161,21 +162,21 @@ namespace FOAEA3.Business.Areas.Application
             try
             {
                 // save the application to the database
-                isSuccess = Repositories.ApplicationRepository.CreateApplication(Application);
+                isSuccess = await Repositories.ApplicationRepository.CreateApplicationAsync(Application);
 
                 if (isSuccess)
                 {
                     // update submitter code with last control code used
-                    UpdateSubmitterDefaultControlCode();
+                    await UpdateSubmitterDefaultControlCodeAsync();
 
                     // save the events for the newly created application
-                    EventManager.SaveEvents();
+                    await EventManager.SaveEventsAsync();
 
                     // update messages for display in UI
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
-                    Repositories.SubmitterRepository.SubmitterMessageDelete(Application.Subm_SubmCd);
+                    await Repositories.SubmitterRepository.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
                 }
 
             }
@@ -193,21 +194,21 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public virtual void UpdateApplicationNoValidation()
+        public virtual async Task UpdateApplicationNoValidationAsync()
         {
             Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = Repositories.CurrentSubmitter;
 
-            Repositories.ApplicationRepository.UpdateApplication(Application);
-            Repositories.SubmitterRepository.SubmitterMessageDelete(Application.Appl_LastUpdate_Usr);
+            await Repositories.ApplicationRepository.UpdateApplicationAsync(Application);
+            await Repositories.SubmitterRepository.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
         }
 
-        public virtual void UpdateApplication()
+        public virtual async Task UpdateApplicationAsync()
         {
 
-            if (!ApplicationExists())
+            if (!(await ApplicationExistsAsync()))
             {
                 Application.Messages.AddError(ErrorResource.CANT_UPDATE_APPLICATION_DOES_NOT_EXISTS);
                 return;
@@ -218,7 +219,7 @@ namespace FOAEA3.Business.Areas.Application
 
             // load old data from database
             var current = new ApplicationManager(new ApplicationData(), Repositories, config);
-            current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";
             bool isReset = current.Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
@@ -235,7 +236,7 @@ namespace FOAEA3.Business.Areas.Application
                 TrimTrailingSpaces();
                 MakeUpperCase();
 
-                Process_00_InitialState();
+                await Process_00_InitialState();
             }
             else // regular update
             {
@@ -257,13 +258,13 @@ namespace FOAEA3.Business.Areas.Application
             try
             {
                 // save the application to the database
-                Repositories.ApplicationRepository.UpdateApplication(Application);
+                await Repositories.ApplicationRepository.UpdateApplicationAsync(Application);
 
                 // update submitter code with last control code used
-                UpdateSubmitterDefaultControlCode();
+                await UpdateSubmitterDefaultControlCodeAsync();
 
                 // save the events for the newly created application
-                EventManager.SaveEvents();
+                await EventManager.SaveEventsAsync();
 
                 // update messages for display in UI
                 if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
@@ -277,7 +278,7 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public void TransferApplication(string applSelectedSubmitter, string applSelectedRecipient)
+        public async Task TransferApplicationAsync(string applSelectedSubmitter, string applSelectedRecipient)
         {
 
             Application.Subm_SubmCd = applSelectedSubmitter;
@@ -293,28 +294,29 @@ namespace FOAEA3.Business.Areas.Application
                 Subm_Recpt_SubmCd = applSelectedRecipient,
                 Subm_SubmCd = applSelectedSubmitter
             };
-            Repositories.CaseManagementRepository.CreateCaseManagement(caseManagementData);
+            await Repositories.CaseManagementRepository.CreateCaseManagementAsync(caseManagementData);
 
             EventManager.AddEvent(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
             Application.Messages.AddInformation(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
-            UpdateApplication();
+            await UpdateApplicationAsync();
 
         }
 
-        public List<StatsOutgoingProvincialData> GetProvincialStatsOutgoingData(int maxRecords,
+        public async Task<List<StatsOutgoingProvincialData>> GetProvincialStatsOutgoingDataAsync(int maxRecords,
                                                                      string activeState,
                                                                      string recipientCode,
                                                                      bool isXML = true)
         {
             var applicationDB = Repositories.ApplicationRepository;
-            var data = applicationDB.GetStatsProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            var data = await applicationDB.GetStatsProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
             return data;
         }
 
-        public virtual void ProcessBringForwards(ApplicationEventData bfEvent)
+        public virtual async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
+            await Task.Run(() => { });
             throw new NotImplementedException("ProcessBringForwards has not been implemented!");
         }
 
@@ -334,9 +336,9 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        protected void UpdateSubmitterDefaultControlCode()
+        protected async Task UpdateSubmitterDefaultControlCodeAsync()
         {
-            Repositories.ApplicationRepository.UpdateSubmitterDefaultControlCode(Application.Subm_SubmCd, Application.Appl_CtrlCd);
+            await Repositories.ApplicationRepository.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
         }
 
         protected void TrimTrailingSpaces()
@@ -382,11 +384,11 @@ namespace FOAEA3.Business.Areas.Application
             Application.ActvSt_Cd = Application.ActvSt_Cd?.ToUpper();
         }
 
-        public string GetSINResultsEventText()
+        public async Task<string> GetSINResultsEventTextAsync()
         {
             string result = string.Empty;
 
-            var data = Repositories.SINResultRepository.GetSINResults(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            var data = await Repositories.SINResultRepository.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
             var sinData = data.Items.FirstOrDefault();
 
             if (sinData != null)
@@ -443,13 +445,13 @@ namespace FOAEA3.Business.Areas.Application
                 return "";
         }
 
-        public static void AddSystemError(IRepositories repositories, MessageDataList messages, string recipients, string errorMessage)
+        public static async Task AddSystemErrorAsync(IRepositories repositories, MessageDataList messages, string recipients, string errorMessage)
         {
             messages.AddSystemError(errorMessage);
 
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
-            repositories.NotificationRepository.SendEmail(subject, recipients, message);
+            await repositories.NotificationRepository.SendEmailAsync(subject, recipients, message);
         }
 
     }

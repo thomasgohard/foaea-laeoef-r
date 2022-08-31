@@ -6,6 +6,7 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -26,7 +27,7 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication = interceptionApplication;
         }
 
-        public bool ValidVariationDefaultHoldbacks()
+        public async Task<bool> ValidVariationDefaultHoldbacksAsync()
         {
             bool isValid = true;
 
@@ -36,13 +37,13 @@ namespace FOAEA3.Business.Areas.Application
             if (!ValidVariationIssueDate())
                 isValid = false;
 
-            if (!ValidPaymentPeriodicCode())
+            if (!await ValidPaymentPeriodicCodeAsync())
                 isValid = false;
 
             if (!ValidPeriodicPaymentAmount())
                 isValid = false;
 
-            if (!ValidLumpSumAmount())
+            if (!await ValidLumpSumAmountAsync())
                 isValid = false;
 
             var intFinHdata = InterceptionApplication.IntFinH;
@@ -54,7 +55,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!ValidHoldbackCategory(intFinHdata.HldbCtg_Cd, defHldbAmount, defHldbPercent))
                 isValid = false;
 
-            if (!ValidHoldbackTypeCode(intFinHdata.HldbTyp_Cd, defHldbAmount, defHldbPercent))
+            if (!await ValidHoldbackTypeCodeAsync(intFinHdata.HldbTyp_Cd, defHldbAmount, defHldbPercent))
                 isValid = false;
 
             return isValid;
@@ -85,9 +86,9 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public void CheckCreditorSurname()
+        public async Task CheckCreditorSurnameAsync()
         {
-            var applications = Repositories.InterceptionRepository.GetSameCreditorForI01(InterceptionApplication.Appl_CtrlCd,
+            var applications = await Repositories.InterceptionRepository.GetSameCreditorForI01Async(InterceptionApplication.Appl_CtrlCd,
                                                                                          InterceptionApplication.Subm_SubmCd,
                                                                                          InterceptionApplication.Appl_Dbtr_Entrd_SIN,
                                                                                          InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
@@ -336,14 +337,14 @@ namespace FOAEA3.Business.Areas.Application
             return InterceptionApplication.IntFinH.IntFinH_PerPym_Money.HasValue && (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.Value > 0.0M);
         }
 
-        private bool ValidLumpSumAmount()
+        private async Task<bool> ValidLumpSumAmountAsync()
         {
             bool isValid = true;
 
             decimal maxTotalMoney = InterceptionApplication.IntFinH.IntFinH_MxmTtl_Money ?? 0.0M;
 
             decimal maxAmntPeriodic = (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.PymPr_Cd)) ?
-                                        CalculateMaxAmountPeriodicForPeriodCode(InterceptionApplication.IntFinH.PymPr_Cd) :
+                                        await CalculateMaxAmountPeriodicForPeriodCodeAsync(InterceptionApplication.IntFinH.PymPr_Cd) :
                                         0.0M;
 
             decimal maxAmnt = maxAmntPeriodic + InterceptionApplication.IntFinH.IntFinH_LmpSum_Money;
@@ -357,13 +358,13 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        private bool ValidPaymentPeriodicCode()
+        private async Task<bool> ValidPaymentPeriodicCodeAsync()
         {
             bool isValid = true;
 
             if (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.PymPr_Cd))
             {
-                if (!ValidPaymentPeriod(InterceptionApplication.IntFinH.PymPr_Cd))
+                if (!await ValidPaymentPeriodAsync(InterceptionApplication.IntFinH.PymPr_Cd))
                 {
                     EventManager.AddEvent(EventCode.C55102_INVALID_PERIODIC_INDICATOR);
                     isValid = false;
@@ -383,13 +384,13 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        private decimal CalculateMaxAmountPeriodicForPeriodCode(string paymentPeriodicCode)
+        private async Task<decimal> CalculateMaxAmountPeriodicForPeriodCodeAsync(string paymentPeriodicCode)
         {
             decimal maxAmntPeriodic = 0.0M;
 
             if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money is null)
             {
-                ApplicationManager.AddSystemError(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await ApplicationManager.AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.SystemErrorRecipients,
                                                   $"CalculateMaxAmountPeriodicForPeriodCode for {InterceptionApplication.Appl_EnfSrv_Cd}-{InterceptionApplication.Appl_CtrlCd}" +
                                                   $" (with periodic code {paymentPeriodicCode}) was called even though IntFinH_PerPym_Money is null!");
                 return 0.0M;
@@ -508,25 +509,25 @@ namespace FOAEA3.Business.Areas.Application
         }
 
 
-        private bool ValidPaymentPeriod(string paymentPeriodCode)
+        private async Task<bool> ValidPaymentPeriodAsync(string paymentPeriodCode)
         {
-            var paymentPeriods = Repositories.InterceptionRepository.GetPaymentPeriods();
+            var paymentPeriods = await Repositories.InterceptionRepository.GetPaymentPeriodsAsync();
             return paymentPeriods.Any(m => (m.PymPr_Cd == paymentPeriodCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 
-        private bool ValidHoldbackType(string holdbackTypeCode)
+        private async Task<bool> ValidHoldbackTypeAsync(string holdbackTypeCode)
         {
-            var holdbackTypes = Repositories.InterceptionRepository.GetHoldbackTypes();
+            var holdbackTypes = await Repositories.InterceptionRepository.GetHoldbackTypesAsync();
             return holdbackTypes.Any(m => (m.HldbTyp_Cd == holdbackTypeCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 
-        private bool ValidHoldbackTypeCode(string holdbackTypeCode, decimal defHldbAmount, int defHldbPercent)
+        private async Task<bool> ValidHoldbackTypeCodeAsync(string holdbackTypeCode, decimal defHldbAmount, int defHldbPercent)
         {
             bool isValid = true;
 
             if (!string.IsNullOrEmpty(holdbackTypeCode))
             {
-                if (!ValidHoldbackType(holdbackTypeCode))
+                if (!await ValidHoldbackTypeAsync(holdbackTypeCode))
                 {
                     EventManager.AddEvent(EventCode.C55108_INVALID_HOLDBACK_CATEGORY_CODES);
                     isValid = false;

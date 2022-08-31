@@ -22,8 +22,9 @@ namespace FileBroker.Business.Tests.InMemory
             NextCycle = 1;
         }
 
-        public FileTableData GetFileTableDataForFileName(string fileNameNoExt)
+        public async Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
         {
+            await Task.Run(() => { });
             var result = new FileTableData();
 
             switch (fileNameNoExt)
@@ -48,8 +49,9 @@ namespace FileBroker.Business.Tests.InMemory
             return result;
         }
 
-        public List<FileTableData> GetFileTableDataForCategory(string category)
+        public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
+            await Task.Run(() => { });
             return new List<FileTableData>
             {
                 new FileTableData
@@ -81,19 +83,15 @@ namespace FileBroker.Business.Tests.InMemory
             };
         }
 
-        public bool IsFileLoading(int processId)
+        public async Task<List<FileTableData>> GetAllActiveAsync()
         {
-            return FileLoading;
+            await Task.Run(() => { });
+            throw new System.NotImplementedException();
         }
 
-        public void SetIsFileLoadingValue(int processId, bool newValue)
+        public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
         {
-            if (processId.In(2, 3, 23))
-                FileLoading = newValue;
-        }
-
-        public void SetNextCycleForFileType(FileTableData fileData, int length = 6)
-        {
+            await Task.Run(() => { });
             if (fileData.PrcId.In(2, 3, 23))
             {
                 NextCycle++;
@@ -102,39 +100,17 @@ namespace FileBroker.Business.Tests.InMemory
             }
         }
 
-        public List<FileTableData> GetAllActive()
+        public async Task<bool> IsFileLoadingAsync(int processId)
         {
-            throw new System.NotImplementedException();
+            await Task.Run(() => { });
+            return FileLoading;
         }
 
-        public Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
+        public async Task SetIsFileLoadingValueAsync(int processId, bool newValue)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<FileTableData>> GetAllActiveAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<bool> IsFileLoadingAsync(int processId)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task SetIsFileLoadingValueAsync(int processId, bool newValue)
-        {
-            throw new System.NotImplementedException();
+            await Task.Run(() => { });
+            if (processId.In(2, 3, 23))
+                FileLoading = newValue;
         }
     }
 }

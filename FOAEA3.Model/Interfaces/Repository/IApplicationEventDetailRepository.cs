@@ -1,25 +1,26 @@
 ﻿using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface IApplicationEventDetailRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        bool SaveEventDetail(ApplicationEventDetailData eventDetailData);
-        bool SaveEventDetails(List<ApplicationEventDetailData> eventDetailsData);
-        void UpdateOutboundEventDetail(string activeState, string applicationState, string enfSrvCode, string writtenFile, List<int> eventIds);
+        Task<bool> SaveEventDetailAsync(ApplicationEventDetailData eventDetailData);
+        Task<bool> SaveEventDetailsAsync(List<ApplicationEventDetailData> eventDetailsData);
+        Task UpdateOutboundEventDetailAsync(string activeState, string applicationState, string enfSrvCode, string writtenFile, List<int> eventIds);
 
-        List<ApplicationEventDetailData> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle);
+        Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrv_Cd, string cycle);
 
-        List<ApplicationEventDetailData> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetailsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                 string appl_CtrlCd);
 
-        DataList<ApplicationEventDetailData> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName);
-        public ApplicationEventDetailData GetEventSINDetailDataForEventID(int eventID);
-        List<ApplicationEventDetailData> GetApplicationEventDetails(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null);
+        Task<DataList<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string enfSrv_Cd, string fileName);
+        Task<ApplicationEventDetailData> GetEventSINDetailDataForEventIDAsync(int eventID);
+        Task<List<ApplicationEventDetailData>> GetApplicationEventDetailsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null);
     }
 }

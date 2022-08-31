@@ -7,13 +7,13 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareEvents
     {
-        public static List<DiffData> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
+        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd, EventQueue queue)
         {
             var diffs = new List<DiffData>();
 
-            var evnt2 = repositories2.ApplicationEventRepository.GetApplicationEvents(enfSrv, ctrlCd, queue);
-            var evnt3 = repositories3.ApplicationEventRepository.GetApplicationEvents(enfSrv, ctrlCd, queue);
+            var evnt2 = await repositories2.ApplicationEventRepository.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
+            var evnt3 = await repositories3.ApplicationEventRepository.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
 
             foreach (var evntItem2 in evnt2)
             {

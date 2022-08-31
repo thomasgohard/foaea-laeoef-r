@@ -12,13 +12,13 @@ namespace FOAEA3.Data.DB
 {
     internal class DBFamilyProvision : DBbase, IFamilyProvisionRepository
     {
-        public DBFamilyProvision(IDBTools mainDB) : base(mainDB)
+        public DBFamilyProvision(IDBToolsAsync mainDB) : base(mainDB)
         {
         }
 
-        public List<FamilyProvisionData> GetFamilyProvisions()
+        public async Task<List<FamilyProvisionData>> GetFamilyProvisionsAsync()
         {
-            return MainDB.GetAllData<FamilyProvisionData>("FamPro", FillDataFromReader);
+            return await MainDB.GetAllDataAsync<FamilyProvisionData>("FamPro", FillDataFromReader);
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, FamilyProvisionData data)

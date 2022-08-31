@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FOAEA3.Business.Areas.Application;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Administration
 {
@@ -20,40 +21,41 @@ namespace FOAEA3.Business.Areas.Administration
             Repositories = repositories;
         }
 
-        internal SubmitterData GetSubmitter(string submCd)
+        internal async Task<SubmitterData> GetSubmitterAsync(string submCd)
         {
-            return (Repositories.SubmitterRepository.GetSubmitter(submCode: submCd).FirstOrDefault());
+            return (await Repositories.SubmitterRepository.GetSubmitterAsync(submCode: submCd))
+                        .FirstOrDefault();
         }
 
-        internal string GetSignAuthorityForSubmitter(string submCd)
+        internal async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
         {
-            return Repositories.SubmitterRepository.GetSignAuthorityForSubmitter(submCd);
+            return await Repositories.SubmitterRepository.GetSignAuthorityForSubmitterAsync(submCd);
         }
 
-        internal List<SubmitterData> GetSubmittersForProvince(string provCd, bool onlyActive)
+        internal async Task<List<SubmitterData>> GetSubmittersForProvinceAsync(string provCd, bool onlyActive)
         {
             List<SubmitterData> submitterData = null;
-            submitterData = Repositories.SubmitterRepository.GetSubmitter(prov: provCd);
+            submitterData = await Repositories.SubmitterRepository.GetSubmitterAsync(prov: provCd);
 
             return onlyActive ? submitterData.FindAll(m => m.ActvSt_Cd == "A") : submitterData;
 
         }
 
-        internal List<SubmitterData> GetSubmittersForProvinceAndOffice(string provCd, string enfOff, string enfSrv, bool onlyActive)
+        internal async Task<List<SubmitterData>> GetSubmittersForProvinceAndOfficeAsync(string provCd, string enfOff, string enfSrv, bool onlyActive)
         {
             List<SubmitterData> submitterData = null;
-            submitterData = Repositories.SubmitterRepository.GetSubmitter(prov: provCd, enfOffCode: enfOff, enfServCode: enfSrv);
+            submitterData = await Repositories.SubmitterRepository.GetSubmitterAsync(prov: provCd, enfOffCode: enfOff, enfServCode: enfSrv);
 
             return onlyActive ? submitterData.FindAll(m => m.ActvSt_Cd == "A") : submitterData;
         }
 
-        internal SubmitterData CreateSubmitter(SubmitterData submitterData, string suffixCode, bool readOnlyAccess)
+        internal async Task<SubmitterData> CreateSubmitterAsync(SubmitterData submitterData, string suffixCode, bool readOnlyAccess)
         {
             if (submitterData.Subm_Create_Usr is null)
                 submitterData.Subm_Create_Usr = Repositories.CurrentSubmitter;
 
             if (string.IsNullOrEmpty(submitterData.Subm_SubmCd))
-                submitterData.Subm_SubmCd = GenerateSubmitterCode(submitterData, suffixCode);
+                submitterData.Subm_SubmCd = await GenerateSubmitterCodeAsync(submitterData, suffixCode);
             submitterData.Subm_Class = CalculateSubm_Class(submitterData, readOnlyAccess);
 
             submitterData.Messages.Clear();
@@ -61,7 +63,7 @@ namespace FOAEA3.Business.Areas.Administration
 
             if (!submitterData.Messages.ContainsMessagesOfType(MessageType.Error))
             {
-                Repositories.SubmitterRepository.CreateSubmitter(submitterData);
+                await Repositories.SubmitterRepository.CreateSubmitterAsync(submitterData);
             }
             else
                 submitterData.Subm_SubmCd = string.Empty;
@@ -69,7 +71,7 @@ namespace FOAEA3.Business.Areas.Administration
             return submitterData;
         }
 
-        internal SubmitterData UpdateSubmitter(SubmitterData submitterData, bool readOnly)
+        internal async Task<SubmitterData> UpdateSubmitterAsync(SubmitterData submitterData, bool readOnly)
         {
             submitterData.Subm_Class = CalculateSubm_Class(submitterData, readOnly);
 
@@ -78,19 +80,19 @@ namespace FOAEA3.Business.Areas.Administration
 
             if (!submitterData.Messages.ContainsMessagesOfType(MessageType.Error))
             {
-                Repositories.SubmitterRepository.UpdateSubmitter(submitterData);
+                await Repositories.SubmitterRepository.UpdateSubmitterAsync(submitterData);
             }
 
             return submitterData;
         }
-        internal DateTime UpdateSubmitterLastLogin(string submCd)
+        internal async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
         {
-            return Repositories.SubmitterRepository.UpdateSubmitterLastLogin(submCd);
+            return await Repositories.SubmitterRepository.UpdateSubmitterLastLoginAsync(submCd);
         }
 
-        internal List<CommissionerData> GetCommissioners(string enfOffLocCode, string currentSubmitter)
+        internal async Task<List<CommissionerData>> GetCommissionersAsync(string enfOffLocCode, string currentSubmitter)
         {
-            return Repositories.SubmitterRepository.GetCommissioners(enfOffLocCode, currentSubmitter);
+            return await Repositories.SubmitterRepository.GetCommissionersAsync(enfOffLocCode, currentSubmitter);
         }
 
         private static void Validate(SubmitterData newSubmitter)
@@ -151,7 +153,7 @@ namespace FOAEA3.Business.Areas.Administration
 
         }
 
-        private string GenerateSubmitterCode(SubmitterData data, string suffixCode)
+        private async Task<string> GenerateSubmitterCodeAsync(SubmitterData data, string suffixCode)
         {
             string level = CalcLevel(data).ToString();
 
@@ -163,7 +165,8 @@ namespace FOAEA3.Business.Areas.Administration
                 middle = "C0";
             else
             {
-                EnfOffData offData = Repositories.EnfOffRepository.GetEnfOff(enfOffCode: data.EnfOff_City_LocCd, enfServCode: data.EnfSrv_Cd).FirstOrDefault();
+                EnfOffData offData = (await Repositories.EnfOffRepository.GetEnfOffAsync(enfOffCode: data.EnfOff_City_LocCd, enfServCode: data.EnfSrv_Cd))
+                                        .FirstOrDefault();
                 if (offData is not null)
                     middle = level + offData.EnfOff_AbbrCd;
                 else
@@ -173,7 +176,7 @@ namespace FOAEA3.Business.Areas.Administration
             string suffix;
             if (prefix != "FO")
             {
-                string maxCourtSubmitterCode = Repositories.SubmitterRepository.GetMaxSubmitterCode(prefix + middle);
+                string maxCourtSubmitterCode = await Repositories.SubmitterRepository.GetMaxSubmitterCodeAsync(prefix + middle);
                 suffix = CalculateLastTwoChars(maxCourtSubmitterCode);
             }
             else

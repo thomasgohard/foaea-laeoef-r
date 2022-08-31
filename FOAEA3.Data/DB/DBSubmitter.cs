@@ -6,17 +6,18 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSubmitter : DBbase, ISubmitterRepository
     {
-        public DBSubmitter(IDBTools mainDB) : base(mainDB)
+        public DBSubmitter(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<SubmitterData> GetSubmitter(string submCode = null,
+        public async Task<List<SubmitterData>> GetSubmitterAsync(string submCode = null,
                                                 string submName = null,
                                                 string enfOffCode = null,
                                                 string enfServCode = null,
@@ -35,14 +36,14 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(submFName)) { parameters["Subm_MddleNme"] = submMName; }
             if (!string.IsNullOrEmpty(prov)) { parameters["ProvCode"] = prov; }
 
-            return MainDB.GetDataFromStoredProc<SubmitterData>("SubmGetSubm", parameters, FillSubmitterData);
+            return await MainDB.GetDataFromStoredProcAsync<SubmitterData>("SubmGetSubm", parameters, FillSubmitterData);
 
         }
 
-        public List<CommissionerData> GetCommissioners(string locationCode, string currentSubmitter)
+        public async Task<List<CommissionerData>> GetCommissionersAsync(string locationCode, string currentSubmitter)
         {
 
-            var submittersForLocation = GetSubmitter(enfOffCode: locationCode);
+            var submittersForLocation = await GetSubmitterAsync(enfOffCode: locationCode);
             var commissioners = (from s in submittersForLocation
                                  where (s.Subm_LglSgnAuth_Ind && (s.Subm_SubmCd != currentSubmitter) && (s.ActvSt_Cd == "A"))
                                  select new CommissionerData
@@ -55,45 +56,45 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public string GetSignAuthorityForSubmitter(string submCd)
+        public async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "Subm_SubmCd", submCd }
             };
 
-            return MainDB.GetDataFromStoredProc<string>("GetSignAuthorityForSubmCd", parameters);
+            return await MainDB.GetDataFromStoredProcAsync<string>("GetSignAuthorityForSubmCd", parameters);
         }
 
-        public string GetMaxSubmitterCode(string submCodePart)
+        public async Task<string> GetMaxSubmitterCodeAsync(string submCodePart)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "submCodePart", submCodePart }
             };
 
-            return MainDB.GetDataFromStoredProc<string>("SubmGetMaxSubmitterCode", parameters);
+            return await MainDB.GetDataFromStoredProcAsync<string>("SubmGetMaxSubmitterCode", parameters);
         }
 
-        public void CreateSubmitter(SubmitterData newSubmitter)
+        public async Task CreateSubmitterAsync(SubmitterData newSubmitter)
         {
             var parameters = GetParametersForSubmitterData2(newSubmitter);
 
-            MainDB.ExecProc("SubmInsert", parameters);
+            await MainDB.ExecProcAsync("SubmInsert", parameters);
         }
 
 
 
-        public void UpdateSubmitter(SubmitterData newSubmitter)
+        public async Task UpdateSubmitterAsync(SubmitterData newSubmitter)
         {
             // if update, then call new CRUD proc "Subm_Update"
-            MainDB.UpdateData<SubmitterData, string>("Subm", newSubmitter, "Subm_SubmCd", newSubmitter.Subm_SubmCd, SetParametersForUpdateSubmitterData);
+            await MainDB.UpdateDataAsync<SubmitterData, string>("Subm", newSubmitter, "Subm_SubmCd", newSubmitter.Subm_SubmCd, SetParametersForUpdateSubmitterData);
 
             if (!String.IsNullOrEmpty(MainDB.LastError))
                 newSubmitter.Messages.AddSystemError("Database Error: " + MainDB.LastError);
 
         }
-        public DateTime UpdateSubmitterLastLogin(string submCd)
+        public async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
         {
             DateTime loginDate = DateTime.Now;
 
@@ -104,7 +105,7 @@ namespace FOAEA3.Data.DB
 
             };
 
-            MainDB.ExecProc("SubmUpdateLastLogin", parameters);
+            await MainDB.ExecProcAsync("SubmUpdateLastLogin", parameters);
 
             return loginDate;
         }
@@ -279,26 +280,17 @@ namespace FOAEA3.Data.DB
 
         #region SubmitterMessage
 
-        public void SubmitterMessageDelete(string submitterID)
+        public async Task SubmitterMessageDeleteAsync(string submitterID)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "SubmitterID", submitterID }
             };
 
-            MainDB.ExecProc("SubmMsgDeleteSubmMsg", parameters);
+            await MainDB.ExecProcAsync("SubmMsgDeleteSubmMsg", parameters);
         }
 
-
-        // exec SubmMsgInsert @Subm_SubmCd='ON2D68',
-        //                    @Appl_EnfSrv_Cd='ON01',
-        //                    @Appl_CtrlCd='E440',
-        //                    @AppLiSt_Cd=3,
-        //                    @Msg_Nr=50620,
-        //                    @Owner_EnfSrv_Cd='ON01',
-        //                    @Owner_SubmCd='ON2D68'
-
-        public void CreateSubmitterMessage(SubmitterMessageData submitterMessage)
+        public async Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -311,12 +303,12 @@ namespace FOAEA3.Data.DB
                 { "Owner_SubmCd", submitterMessage.Owner_SubmCd }
             };
 
-            MainDB.ExecProc("SubmMsgInsert", parameters);
+            await MainDB.ExecProcAsync("SubmMsgInsert", parameters);
         }
 
         // exec SubmMsgGetSubmMsg @UserID=N'ON2D68',@LanguageCode=1033
 
-        public List<SubmitterMessageData> GetSubmitterMessageForSubmitter(string submitterID, int languageCode)
+        public async Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -324,7 +316,7 @@ namespace FOAEA3.Data.DB
                 { "LanguageCode", languageCode }
             };
 
-            return MainDB.GetDataFromStoredProc<SubmitterMessageData>("SubmMsgGetSubmMsg", parameters, FillSubmitterMessageData);
+            return await MainDB.GetDataFromStoredProcAsync<SubmitterMessageData>("SubmMsgGetSubmMsg", parameters, FillSubmitterMessageData);
 
         }
 

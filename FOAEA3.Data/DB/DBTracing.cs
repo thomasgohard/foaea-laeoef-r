@@ -7,18 +7,19 @@ using System.Collections.Generic;
 using System.Linq;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
 
     internal class DBTracing : DBbase, ITracingRepository
     {
-        public DBTracing(IDBTools mainDB) : base(mainDB)
+        public DBTracing(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public TracingApplicationData GetTracingData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
 
             var parameters = new Dictionary<string, object>
@@ -27,13 +28,13 @@ namespace FOAEA3.Data.DB
                         {"Appl_CtrlCd", appl_CtrlCd }
                     };
 
-            List<TracingApplicationData> data = MainDB.GetDataFromStoredProc<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader);
+            List<TracingApplicationData> data = await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader);
 
             return data.FirstOrDefault(); // returns null if no data found
 
         }
 
-        public List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle)
+        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -41,21 +42,21 @@ namespace FOAEA3.Data.DB
                 {"cycle", cycle}
             };
 
-            return MainDB.GetDataFromStoredProc<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters,
+            return await MainDB.GetDataFromStoredProcAsync<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters,
                                                                         FillTraceCycleQuantityDataFromReader);
         }
 
-        public void CreateTracingData(TracingApplicationData data)
+        public async Task CreateTracingDataAsync(TracingApplicationData data)
         {
-            ChangeTracingData(data, "TrcApplDtlInsert");
+            await ChangeTracingDataAsync(data, "TrcApplDtlInsert");
         }
 
-        public void UpdateTracingData(TracingApplicationData data)
+        public async Task UpdateTracingDataAsync(TracingApplicationData data)
         {
-            ChangeTracingData(data, "TrcApplDtlUpdate");
+            await ChangeTracingDataAsync(data, "TrcApplDtlUpdate");
         }
 
-        private void ChangeTracingData(TracingApplicationData data, string procName)
+        private async Task ChangeTracingDataAsync(TracingApplicationData data, string procName)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -73,11 +74,11 @@ namespace FOAEA3.Data.DB
                         {"InfoBank_Cd", (object) data.InfoBank_Cd ?? DBNull.Value }
                     };
 
-            MainDB.ExecProc(procName, parameters);
+            await MainDB.ExecProcAsync(procName, parameters);
 
         }
 
-        public bool TracingDataExists(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -85,29 +86,26 @@ namespace FOAEA3.Data.DB
                         {"Appl_CtrlCd", appl_CtrlCd }
                     };
 
-            int count = MainDB.GetDataFromStoredProc<int>("TrcApplRecordExistsInTrcTable", parameters);
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("TrcApplRecordExistsInTrcTable", parameters);
 
             return count > 0;
         }
 
-        public DataList<TracingApplicationData> GetApplicationsWaitingForAffidavit()
+        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
         {
             var result = new DataList<TracingApplicationData>();
 
             var appDB = new DBApplication(MainDB);
-            var data = appDB.GetApplicationsWaitingForAffidavit("T01");
+            var data = await appDB.GetApplicationsWaitingForAffidavitAsync("T01");
 
-            var provinceCode = CurrentSubmitter.AsSpan(0, 2);
-            //var provinceCode = CurrentSubmitter.Substring(0, 2).ToLower();
+            string provinceCode = CurrentSubmitter[0..2];
 
             var tracingData = new List<TracingApplicationData>();
             foreach (var item in data.Items)
             {
-                var firstTwoCharacters = item.Appl_EnfSrv_Cd.AsSpan(0, 2);
-                //var firstTwoCharacters = item.Appl_EnfSrv_Cd.Substring(0, 2).ToLower();
+                string firstTwoCharacters = item.Appl_EnfSrv_Cd[0..2].ToLower();
 
-                //if (firstTwoCharacters == provinceCode) {
-                if (firstTwoCharacters.CompareTo(provinceCode, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (firstTwoCharacters == provinceCode)
                 {
                     var tracing = new TracingApplicationData();
                     tracing.Merge(item);
@@ -120,12 +118,12 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public List<TraceToApplData> GetTraceToApplData()
+        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
-            return MainDB.GetAllData<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
+            return await MainDB.GetAllDataAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
         }
 
-        public List<TracingOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
@@ -139,7 +137,7 @@ namespace FOAEA3.Data.DB
                 { "chrEnfSrv_Cd", enfServiceCode }
             };
 
-            return MainDB.GetRecordsFromStoredProc<TracingOutgoingFederalData>("MessageBrokerGetTRCOUTOutboundData",
+            return await MainDB.GetRecordsFromStoredProcAsync<TracingOutgoingFederalData>("MessageBrokerGetTRCOUTOutboundData",
                                                                                parameters, FillTracingOutgoingFederalRecord);
 
         }
@@ -147,19 +145,19 @@ namespace FOAEA3.Data.DB
         private void FillTracingOutgoingFederalRecord(IDBHelperReader rdr, out TracingOutgoingFederalData data)
         {
             data = new TracingOutgoingFederalData(
-                Event_dtl_Id : (int)rdr["Event_dtl_Id"],
-                Event_Reas_Cd : (rdr["Event_Reas_Cd"] != null) ? (int)rdr["Event_Reas_Cd"] : default,
-                Event_Reas_Text : (rdr["Event_Reas_Text"] != null) ? rdr["Event_Reas_Text"] as string : default,
-                ActvSt_Cd : rdr["ActvSt_Cd"] as string,
-                Recordtype : rdr["Recordtype"] as string,
-                Appl_Dbtr_Cnfrmd_SIN : rdr["Val_1"] as string,
-                Appl_EnfSrv_Cd : rdr["Val_2"] as string,
-                Appl_CtrlCd : rdr["Val_3"] as string,
-                ReturnType : (int)rdr["Val_4"]
+                Event_dtl_Id: (int)rdr["Event_dtl_Id"],
+                Event_Reas_Cd: (rdr["Event_Reas_Cd"] != null) ? (int)rdr["Event_Reas_Cd"] : default,
+                Event_Reas_Text: (rdr["Event_Reas_Text"] != null) ? rdr["Event_Reas_Text"] as string : default,
+                ActvSt_Cd: rdr["ActvSt_Cd"] as string,
+                Recordtype: rdr["Recordtype"] as string,
+                Appl_Dbtr_Cnfrmd_SIN: rdr["Val_1"] as string,
+                Appl_EnfSrv_Cd: rdr["Val_2"] as string,
+                Appl_CtrlCd: rdr["Val_3"] as string,
+                ReturnType: (int)rdr["Val_4"]
             );
         }
 
-        public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+        public async Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)
@@ -173,7 +171,7 @@ namespace FOAEA3.Data.DB
                 { "isXML", isXML ? 1 : 0 }
             };
 
-            var data = MainDB.GetDataFromStoredProc<TracingOutgoingProvincialData>("MessageBrokerGetTRCAPPOUTOutboundData",
+            var data = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialData>("MessageBrokerGetTRCAPPOUTOutboundData",
                                                                                parameters, FillTracingOutgoingProvincialData);
             return data;
 
@@ -213,21 +211,6 @@ namespace FOAEA3.Data.DB
                     break;
             }
         }
-
-        //private void FillTracingOutgoingFederalData(IDBHelperReader rdr, TracingOutgoingFederalData data)
-        //{
-        //    data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];
-        //    if (rdr["Event_Reas_Cd"] != null)
-        //        data.Event_Reas_Cd = (int)rdr["Event_Reas_Cd"];
-        //    if (rdr["Event_Reas_Text"] != null)
-        //        data.Event_Reas_Text = rdr["Event_Reas_Text"] as string;
-        //    data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
-        //    data.Recordtype = rdr["Recordtype"] as string;
-        //    data.Appl_Dbtr_Cnfrmd_SIN = rdr["Val_1"] as string;
-        //    data.Appl_EnfSrv_Cd = rdr["Val_2"] as string;
-        //    data.Appl_CtrlCd = rdr["Val_3"] as string;
-        //    data.ReturnType = (int)rdr["Val_4"];
-        //}
 
         private void FillTraceToApplDataFromReader(IDBHelperReader rdr, TraceToApplData data)
         {

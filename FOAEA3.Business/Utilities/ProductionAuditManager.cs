@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Utilities
 {
@@ -13,14 +14,14 @@ namespace FOAEA3.Business.Utilities
             Repositories = repositories;
         }
 
-        public void Insert(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
-            Repositories.ProductionAuditRepository.Insert(processName, description, audience, completedDate);
+            await Repositories.ProductionAuditRepository.InsertAsync(processName, description, audience, completedDate);
         }
 
-        public void Insert(ProductionAuditData productionAuditData)
+        public async Task InsertAsync(ProductionAuditData productionAuditData)
         {
-            Repositories.ProductionAuditRepository.Insert(productionAuditData);
+            await Repositories.ProductionAuditRepository.InsertAsync(productionAuditData);
         }
     }
 }

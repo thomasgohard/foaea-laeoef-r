@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface IEnfOffRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        List<EnfOffData> GetEnfOff(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null);
+        Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null);
     }
 }

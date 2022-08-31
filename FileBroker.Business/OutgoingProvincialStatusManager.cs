@@ -38,7 +38,7 @@ namespace FileBroker.Business
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                File.WriteAllText(newFilePath, fileContent);
+                await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
                 await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,

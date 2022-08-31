@@ -5,46 +5,48 @@ using FOAEA3.Model;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     public class DBSubject : DBbase, ISubjectRepository
     {
-        public DBSubject(IDBTools mainDB) : base(mainDB)
+        public DBSubject(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public SubjectData GetSubject(string subjectName)
+        public async Task<SubjectData> GetSubjectAsync(string subjectName)
         {
             var parameters = new Dictionary<string, object>
                 {
                     {"SubjectName", subjectName}
                 };
 
-            var data = MainDB.GetDataFromStoredProc<SubjectData>("Subject_SelectBySubjectName", parameters, FillSubjectDataFromReader).FirstOrDefault();
+            var data = (await MainDB.GetDataFromStoredProcAsync<SubjectData>("Subject_SelectBySubjectName", parameters, FillSubjectDataFromReader))
+                            .FirstOrDefault();
 
             return data;
         }
 
-        public List<SubjectData> GetSubjectsForSubmitter(string submCd)
+        public async Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "RoleName", submCd }
             };
 
-            return MainDB.GetDataFromStoredProc<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
         }
 
-        public SubjectData GetSubjectByConfirmationCode(string confirmationCode)
+        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
                 {
                     {"ConfirmationCode", confirmationCode}
                 };
-            return MainDB.GetDataFromStoredProc<SubjectData>("Subject_SelectByConfirmationCode", parameters, FillSubjectDataFromReader).ElementAt(0);
-            //return MainDB.GetDataForKey<SubjectData, string>("Subject", subjectName, "SubjectName", FillSubjectDataFromReader);
+            return (await MainDB.GetDataFromStoredProcAsync<SubjectData>("Subject_SelectByConfirmationCode", parameters, FillSubjectDataFromReader))
+                        .ElementAt(0);
         }
 
         private void FillSubmitterSubjectDataFromReader(IDBHelperReader rdr, SubjectData data)

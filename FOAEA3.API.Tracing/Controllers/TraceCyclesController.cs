@@ -24,14 +24,14 @@ public class TraceCyclesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("")]
-    public ActionResult<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(
+    public async Task<ActionResult<List<TraceCycleQuantityData>>> GetTraceCycleQuantityData(
                                                             [FromQuery] string enforcementServiceCode,
                                                             [FromQuery] string fileCycle,
                                                             [FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config);
 
-        var data = manager.GetTraceCycleQuantityData(enforcementServiceCode, fileCycle);
+        var data = await manager.GetTraceCycleQuantityDataAsync(enforcementServiceCode, fileCycle);
 
         return Ok(data);
 

@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Security
 {
@@ -7,14 +8,14 @@ namespace FOAEA3.Business.Security
     {
         private readonly IRepositories Repositories;
 
-        internal SubmitterProfileManager(IRepositories repositories)
+        public SubmitterProfileManager(IRepositories repositories)
         {
             Repositories = repositories;
         }
 
-        internal SubmitterProfileData GetSubmitterProfile(string submitterCode)
+        public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
         {
-            return Repositories.SubmitterProfileRepository.GetSubmitterProfile(submitterCode);
+            return await Repositories.SubmitterProfileRepository.GetSubmitterProfileAsync(submitterCode);
         }
 
     }

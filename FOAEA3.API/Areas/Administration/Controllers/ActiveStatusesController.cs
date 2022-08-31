@@ -13,7 +13,7 @@ public class ActiveStatusesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("ActiveStatuses API Version 1.0");
 
     [HttpGet]
-    public ActionResult<DataList<ActiveStatusData>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
+    public async Task<ActionResult<DataList<ActiveStatusData>>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
     {
         if (Request.Headers.ContainsKey("CurrentSubmitter"))
             activeStatusRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
@@ -21,7 +21,7 @@ public class ActiveStatusesController : ControllerBase
         if (Request.Headers.ContainsKey("CurrentSubject"))
             activeStatusRepository.UserId = Request.Headers["CurrentSubject"];
 
-        var data = activeStatusRepository.GetActiveStatus();
+        var data = await activeStatusRepository.GetActiveStatusAsync();
 
         return Ok(data);
     }

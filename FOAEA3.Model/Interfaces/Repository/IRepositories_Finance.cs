@@ -1,13 +1,10 @@
 ﻿using DBHelper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface IRepositories_Finance
     {
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
 
         public string CurrentSubmitter { get; set; }
 

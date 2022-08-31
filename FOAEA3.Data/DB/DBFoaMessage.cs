@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using FOAEA3.Model.Enums;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -23,19 +24,19 @@ namespace FOAEA3.Data.DB
             public short? MsgLangId { get; set; }
         }
 
-        public DBFoaMessage(IDBTools mainDB) : base(mainDB)
+        public DBFoaMessage(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public FoaEventDataDictionary GetAllFoaMessages()
+        public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
         {
             var result = new FoaEventDataDictionary();
 
             string connStr = MainDB.ConnectionString;
             try
             {
-                var data = MainDB.GetAllData<FoaMessageData>("FoaMessages", FillFoaMessageDataFromReader);
+                var data = await MainDB.GetAllDataAsync<FoaMessageData>("FoaMessages", FillFoaMessageDataFromReader);
 
                 if (!string.IsNullOrEmpty(MainDB.LastError))
                     Messages.AddSystemError(MainDB.LastError);

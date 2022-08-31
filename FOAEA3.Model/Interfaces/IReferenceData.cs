@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -21,17 +22,17 @@ namespace FOAEA3.Model.Interfaces
 
         public Dictionary<string, string> Configuration { get; }
 
-        public void LoadActiveStatuses(IActiveStatusRepository activeStatusRepository);
-        public void LoadApplicationLifeStates(IApplicationLifeStateRepository applicationLifeStateRepository);
-        public void LoadFoaEvents(IFoaEventsRepository foaMessageRepository);
-        public void LoadGenders(IGenderRepository genderRepository);
-        public void LoadProvinces(IProvinceRepository provinceRepository);
-        public void LoadMediums(IMediumRepository mediumRepository);
-        public void LoadLanguages(ILanguageRepository languageRepository);
-        public void LoadApplicationCategories(IApplicationCategoryRepository applicationCategoryRepository);
-        public void LoadApplicationReasons(IApplicationReasonRepository applicationReasonRepository);
-        public void LoadCountries(ICountryRepository countryRepository);
-        public void LoadDocumentTypes(IDocumentTypeRepository documentTypeRepository);
-        public void LoadApplicationComments(IApplicationCommentsRepository applicationCommentsRepository);
+        public Task LoadActiveStatusesAsync(IActiveStatusRepository activeStatusRepository);
+        public Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository);
+        public Task LoadFoaEventsAsync(IFoaEventsRepository foaMessageRepository);
+        public Task LoadGendersAsync(IGenderRepository genderRepository);
+        public Task LoadProvincesAsync(IProvinceRepository provinceRepository);
+        public Task LoadMediumsAsync(IMediumRepository mediumRepository);
+        public Task LoadLanguagesAsync(ILanguageRepository languageRepository);
+        public Task LoadApplicationCategoriesAsync(IApplicationCategoryRepository applicationCategoryRepository);
+        public Task LoadApplicationReasonsAsync(IApplicationReasonRepository applicationReasonRepository);
+        public Task LoadCountriesAsync(ICountryRepository countryRepository);
+        public Task LoadDocumentTypesAsync(IDocumentTypeRepository documentTypeRepository);
+        public Task LoadApplicationCommentsAsync(IApplicationCommentsRepository applicationCommentsRepository);
     }
 }

@@ -1,12 +1,13 @@
 ﻿using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ILanguageRepository : IMessageList
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        DataList<LanguageData> GetLanguages();
+        Task<DataList<LanguageData>> GetLanguagesAsync();
     }
 }

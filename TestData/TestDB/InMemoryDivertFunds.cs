@@ -1,9 +1,7 @@
-﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Model.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -12,8 +10,9 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public decimal GetTotalDivertedForPeriod(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
+        public async Task<decimal> GetTotalDivertedForPeriodAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
         {
+            await Task.Run(() => { });
             var result = 0.0M;
 
             var data = InMemData.GarnPeriodTestData.FindAll(m => (m.Appl_CtrlCd == appl_CtrlCd) && (m.Appl_EnfSrv_Cd == appl_EnfSrv_Cd) && (m.Period_no == period));
@@ -24,8 +23,9 @@ namespace TestData.TestDB
             return result;
         }
 
-        public decimal GetTotalFeesDiverted(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
+        public async Task<decimal> GetTotalFeesDivertedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
         {
+            await Task.Run(() => { });
             var lastAnniversaryDate = GetApplicationLastAnniversaryDate(appl_CtrlCd, appl_EnfSrv_Cd);
 
             var result = (from df in InMemData.SummDFTestData

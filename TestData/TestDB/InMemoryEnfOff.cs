@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -9,8 +10,9 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<EnfOffData> GetEnfOff(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null)
+        public async Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null)
         {
+            await Task.Run(() => { });
             var data = new List<EnfOffData>
             {
                 new EnfOffData { EnfSrv_Cd = "ON01", EnfOff_City_LocCd = "DOW1", EnfOff_AbbrCd = "D", EnfOff_Nme = "Family Responsibility Off", ActvSt_Cd = "A" },

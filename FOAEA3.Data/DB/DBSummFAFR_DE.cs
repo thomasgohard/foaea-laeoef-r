@@ -7,36 +7,37 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSummFAFR_DE : DBbase, ISummFAFR_DERepository
     {
-        public DBSummFAFR_DE(IDBTools mainDB) : base(mainDB)
+        public DBSummFAFR_DE(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public DataList<SummFAFR_DE_Data> GetSummFaFrDe(int summFAFR_Id)
+        public async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDeAsync(int summFAFR_Id)
         {
             var parameters = new Dictionary<string, object>() {
                 { "CtrlSummFaFrId", summFAFR_Id }
             };
 
-            var data = MainDB.GetDataFromStoredProc<SummFAFR_DE_Data>("GetSummFaFrDEForDivertFunds", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SummFAFR_DE_Data>("GetSummFaFrDEForDivertFunds", parameters, FillDataFromReader);
             
             return new DataList<SummFAFR_DE_Data>(data, MainDB.LastError);
 
         }
 
-        public DataList<SummFAFR_DE_Data> GetSummFaFrDeReadyBatches(string enfSrv_Src_Cd, string DAFABatchId)
+        public async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDeReadyBatchesAsync(string enfSrv_Src_Cd, string DAFABatchId)
         {
             var parameters = new Dictionary<string, object>() {
                 { "chrEnfSrv_Src_Cd", enfSrv_Src_Cd },
                 { "chrReadyBatchId", DAFABatchId }
             };
 
-            var data = MainDB.GetDataFromStoredProc<SummFAFR_DE_Data>("SummFaFrDeGetReadyBatches", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SummFAFR_DE_Data>("SummFaFrDeGetReadyBatches", parameters, FillDataFromReader);
 
             return new DataList<SummFAFR_DE_Data>(data, MainDB.LastError);
 

@@ -13,26 +13,26 @@ public class SubjectsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Subjects API Version 1.0");
 
     [HttpGet]
-    public ActionResult<List<SubjectData>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
+    public async Task<ActionResult<List<SubjectData>>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
     {
         if (submCd != null)
-            return Ok(repositories.SubjectRepository.GetSubjectsForSubmitter(submCd));
+            return Ok(await repositories.SubjectRepository.GetSubjectsForSubmitterAsync(submCd));
         else
             return UnprocessableEntity("Missing submCd parameter"); // not allowed to get all subjects currently
     }
 
     [HttpGet("{subjectName}")]
-    public ActionResult<SubjectData> GetSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
+    public async Task<ActionResult<SubjectData>> GetSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        var data = repositories.SubjectRepository.GetSubject(subjectName);
+        var data = await repositories.SubjectRepository.GetSubjectAsync(subjectName);
         return Ok(data);
     }
 
     [HttpPut("AcceptTermsOfReference")]
-    public ActionResult<SubjectData> AcceptTermsOfReference([FromServices] IRepositories repositories, [FromBody] SubjectData subject)
+    public async Task<ActionResult<SubjectData>> AcceptTermsOfReference([FromServices] IRepositories repositories, [FromBody] SubjectData subject)
     {
         var loginManager = new LoginManager(repositories);
-        loginManager.AcceptNewTermsOfReferernce(subject.SubjectName);
+        await loginManager.AcceptNewTermsOfReferernceAsync(subject.SubjectName);
 
         return Ok(subject);
     }

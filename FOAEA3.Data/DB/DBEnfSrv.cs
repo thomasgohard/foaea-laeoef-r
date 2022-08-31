@@ -4,18 +4,21 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBEnfSrv : DBbase, IEnfSrvRepository
     {
-        public DBEnfSrv(IDBTools mainDB) : base(mainDB)
+        public DBEnfSrv(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<EnfSrvData> GetEnfService(string enforcementServiceCode = null, string enforcementServiceName = null,
-                                          string enforcementServiceProvince = null, string enforcementServiceCategory = null)
+        public async Task<List<EnfSrvData>> GetEnfServiceAsync(string enforcementServiceCode = null, 
+                                                string enforcementServiceName = null,
+                                                string enforcementServiceProvince = null, 
+                                                string enforcementServiceCategory = null)
         {
             var parameters = new Dictionary<string, object>();
 
@@ -39,7 +42,7 @@ namespace FOAEA3.Data.DB
             else
                 parameters["EnfCtgy_Cd"] = DBNull.Value;
 
-            return MainDB.GetDataFromStoredProc<EnfSrvData>("EnfSrvGetEnfService", parameters, FillEnfSrvDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<EnfSrvData>("EnfSrvGetEnfService", parameters, FillEnfSrvDataFromReader);
         }
 
         private void FillEnfSrvDataFromReader(IDBHelperReader rdr, EnfSrvData data)

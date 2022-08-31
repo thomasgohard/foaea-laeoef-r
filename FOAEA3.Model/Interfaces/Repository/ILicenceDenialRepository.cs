@@ -1,29 +1,30 @@
 ﻿using FOAEA3.Model.Enums;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface ILicenceDenialRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        LicenceDenialApplicationData GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null);
-        List<LicenceSuspensionHistoryData> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<LicenceDenialApplicationData> GetLicenceDenialDataAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null);
+        Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
 
-        void CreateLicenceDenialData(LicenceDenialApplicationData data);
-        void UpdateLicenceDenialData(LicenceDenialApplicationData data);
+        Task CreateLicenceDenialDataAsync(LicenceDenialApplicationData data);
+        Task UpdateLicenceDenialDataAsync(LicenceDenialApplicationData data);
 
-        bool CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
+        Task<bool> CloseSameDayLicenceEventAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
 
-        List<LicenceDenialOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+        Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                 string activeState,
                                                                 ApplicationState lifeState,
                                                                 string enfServiceCode);
 
-        List<LicenceDenialToApplData> GetLicenceDenialToApplData(string fedSource);
+        Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string fedSource);
 
-        List<LicenceDenialOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+        Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                             string activeState,
                                                                             string recipientCode,
                                                                             bool isXML = true);

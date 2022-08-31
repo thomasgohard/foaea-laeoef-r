@@ -5,6 +5,7 @@ using FOAEA3.Model;
 using System.Collections.Generic;
 using System;
 using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -13,14 +14,14 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages { get; set;  }
 
-        public DBActiveStatus(IDBTools mainDB) : base(mainDB)
+        public DBActiveStatus(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public DataList<ActiveStatusData> GetActiveStatus()
+        public async Task<DataList<ActiveStatusData>> GetActiveStatusAsync()
         {
-            var data = MainDB.GetAllData<ActiveStatusData>("ActvSt", FillActiveStatusDataFromReader);
+            var data = await MainDB.GetAllDataAsync<ActiveStatusData>("ActvSt", FillActiveStatusDataFromReader);
 
             return new DataList<ActiveStatusData>(data, MainDB.LastError);
         }

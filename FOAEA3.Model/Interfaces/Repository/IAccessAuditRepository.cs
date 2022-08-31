@@ -1,15 +1,16 @@
 ﻿using FOAEA3.Model.Enums;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
     public interface IAccessAuditRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        int SaveDataPageInfo(AccessAuditPage auditPage, string subject_submitter);
-        void SaveDataValue(int pageId, string key, string value);
-        List<AccessAuditElementTypeData> GetAllElementAccessType();
+        Task<int> SaveDataPageInfoAsync(AccessAuditPage auditPage, string subject_submitter);
+        Task SaveDataValueAsync(int pageId, string key, string value);
+        Task<List<AccessAuditElementTypeData>> GetAllElementAccessTypeAsync();
     }
 }

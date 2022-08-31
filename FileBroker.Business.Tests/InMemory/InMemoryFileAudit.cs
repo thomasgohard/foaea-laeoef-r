@@ -15,50 +15,34 @@ namespace FileBroker.Business.Tests.InMemory
             FileAuditTable = new List<FileAuditData>();
         }
 
-        public List<FileAuditData> GetFileAuditDataForFileAsync(string fileName)
+        public async Task<List<FileAuditData>> GetFileAuditDataForFileAsync(string fileName)
         {
+            await Task.Run(() => { });
             return FileAuditTable;
         }
 
-        public void InsertFileAuditData(FileAuditData data)
+        public async Task InsertFileAuditDataAsync(FileAuditData data)
         {
+            await Task.Run(() => { });
             FileAuditTable.Add(data);
         }
 
-        public void MarkFileAuditCompletedForFile(string fileName)
+        public async Task MarkFileAuditCompletedForFileAsync(string fileName)
         {
+            await Task.Run(() => { });
             foreach (var auditItem in FileAuditTable)
                 if (auditItem.InboundFilename == fileName)
                     auditItem.IsCompleted = true;
         }
 
-        public void MarkFileAuditCompletedForItem(FileAuditData data)
+        public async Task MarkFileAuditCompletedForItemAsync(FileAuditData data)
         {
-            var item = FileAuditTable.Where(m => (m.InboundFilename == data.InboundFilename) && 
-                                                 (m.Appl_EnfSrv_Cd == data.Appl_EnfSrv_Cd) &&
-                                                 (m.Appl_CtrlCd == data.Appl_CtrlCd)).FirstOrDefault();
+            await Task.Run(() => { });
+            var item = FileAuditTable.Where(m => (m.InboundFilename == data.InboundFilename) &&
+                                     (m.Appl_EnfSrv_Cd == data.Appl_EnfSrv_Cd) &&
+                                     (m.Appl_CtrlCd == data.Appl_CtrlCd)).FirstOrDefault();
             if (item != null)
                 item.IsCompleted = true;
-        }
-
-        Task<List<FileAuditData>> IFileAuditRepository.GetFileAuditDataForFileAsync(string fileName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task InsertFileAuditDataAsync(FileAuditData data)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task MarkFileAuditCompletedForFileAsync(string fileName)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task MarkFileAuditCompletedForItemAsync(FileAuditData data)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

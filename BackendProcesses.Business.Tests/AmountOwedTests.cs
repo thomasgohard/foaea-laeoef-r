@@ -6,6 +6,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
 using FOAEA3.Resources.Helpers;
+using System.Threading.Tasks;
 
 namespace BackendProcesses.Business.Tests
 {
@@ -54,7 +55,7 @@ namespace BackendProcesses.Business.Tests
         [InlineData(2, 13, "E")] // "E" => semi-annually
         [InlineData(2, 13, "F")] // "F" => annually
         //[InlineData(4, 13, "G")] // "G" => semi-monthly
-        public void VariousPeriod_NoDivertReceived_PeriodicOwed_Test(int periodCount, decimal periodicPaymentOwed, string periodicPaymentCode)
+        public async Task VariousPeriod_NoDivertReceived_PeriodicOwed_Test(int periodCount, decimal periodicPaymentOwed, string periodicPaymentCode)
         {
             // Arrange
             ResetTestData(periodCount, periodicPaymentOwed, periodicPaymentCode);
@@ -62,8 +63,8 @@ namespace BackendProcesses.Business.Tests
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: Initial Data", "ON01", "00002", periodicPaymentCode);
 
             // Act
-            backendProcess.Run();
-            var data = backendProcess.GetSummonsSummaryData("ON01", "00002");
+            await backendProcess.RunAsync();
+            var data = await backendProcess.GetSummonsSummaryDataAsync("ON01", "00002");
 
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: After Amount Owed Recalc", "ON01", "00002", periodicPaymentCode);
 

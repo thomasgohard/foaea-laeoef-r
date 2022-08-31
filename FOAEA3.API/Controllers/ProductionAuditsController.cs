@@ -22,7 +22,7 @@ namespace FOAEA3.API.Controllers
             var productionAuditData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ProductionAuditData>(Request);
 
             var productionAuditManager = new ProductionAuditManager(repositories);
-            productionAuditManager.Insert(productionAuditData);
+            await productionAuditManager.InsertAsync(productionAuditData);
 
             return Ok(productionAuditData);
         }

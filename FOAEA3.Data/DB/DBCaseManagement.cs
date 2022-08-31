@@ -3,17 +3,18 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     public class DBCaseManagement : DBbase, ICaseManagementRepository
     {
-        public DBCaseManagement(IDBTools mainDB) : base(mainDB)
+        public DBCaseManagement(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public void CreateCaseManagement(CaseManagementData caseManagementData)
+        public async Task CreateCaseManagementAsync(CaseManagementData caseManagementData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -24,7 +25,7 @@ namespace FOAEA3.Data.DB
                 {"Subm_Recpt_SubmCd", caseManagementData.Subm_Recpt_SubmCd }
             };
 
-            MainDB.ExecProc("CaseMgmnt_Insert", parameters);
+            await MainDB.ExecProcAsync("CaseMgmnt_Insert", parameters);
         }
     }
 }

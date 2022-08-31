@@ -3,6 +3,7 @@ using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -12,8 +13,9 @@ namespace TestData.TestDB
         public string UserId { get; set; }
         public string LastError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public List<ApplicationSearchResultData> QuickSearch(QuickSearchData searchData, out int totalCount, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
+        public async Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

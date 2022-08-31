@@ -1,12 +1,13 @@
 ﻿using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IApplicationCategoryRepository : IMessageList
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        DataList<ApplicationCategoryData> GetApplicationCategories();
+        Task<DataList<ApplicationCategoryData>> GetApplicationCategoriesAsync();
     }
 }

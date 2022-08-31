@@ -4,18 +4,19 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
 
     internal class DBAffidavit : DBbase, IAffidavitRepository
     {
-        public DBAffidavit(IDBTools mainDB) : base(mainDB)
+        public DBAffidavit(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public AffidavitData GetAffidavitData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<AffidavitData> GetAffidavitDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -23,7 +24,7 @@ namespace FOAEA3.Data.DB
                     {"Appl_CtrlCd", appl_CtrlCd }
                 };
 
-            List<AffidavitData> data = MainDB.GetDataFromStoredProc<AffidavitData>("GetAffidavitSwearingData",
+            List<AffidavitData> data = await MainDB.GetDataFromStoredProcAsync< AffidavitData >("GetAffidavitSwearingData",
                                                                                    parameters, FillDataFromReader);
             if (data.Count > 0)
                 return data[0];

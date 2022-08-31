@@ -5,17 +5,18 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSummonsSummaryFixedAmount : DBbase, ISummonsSummaryFixedAmountRepository
     {
-        public DBSummonsSummaryFixedAmount(IDBTools mainDB) : base(mainDB)
+        public DBSummonsSummaryFixedAmount(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public SummonsSummaryFixedAmountData GetSummonsSummaryFixedAmount(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<SummonsSummaryFixedAmountData> GetSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -23,7 +24,7 @@ namespace FOAEA3.Data.DB
                     {"Appl_CtrlCd", appl_CtrlCd }
                 };
 
-            List<SummonsSummaryFixedAmountData> data = MainDB.GetDataFromStoredProc<SummonsSummaryFixedAmountData>("GetSummSmryFixedAmountRecalcDateData", parameters, FillDataFromReader);
+            List<SummonsSummaryFixedAmountData> data = await MainDB.GetDataFromStoredProcAsync<SummonsSummaryFixedAmountData>("GetSummSmryFixedAmountRecalcDateData", parameters, FillDataFromReader);
 
             return data.FirstOrDefault(); // returns null if no data found
 
@@ -37,7 +38,7 @@ namespace FOAEA3.Data.DB
             data.SummSmry_FixedAmount_Recalc_Dte = (DateTime)rdr["SummSmry_FixedAmount_Recalc_Dte"];
         }
 
-        public void CreateSummonsSummaryFixedAmount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime fixedAmountRecalcDate)
+        public async Task CreateSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime fixedAmountRecalcDate)
         {
             var parameters = new Dictionary<string, object> {
                 { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
@@ -46,11 +47,11 @@ namespace FOAEA3.Data.DB
                 { "SummSmry_FixedAmount_Recalc_Dte", fixedAmountRecalcDate }
             };
 
-            _ = MainDB.ExecProc("SummSmryFixedAmountRecalcDate_Insert", parameters);
+            _ = await MainDB.ExecProcAsync("SummSmryFixedAmountRecalcDate_Insert", parameters);
 
         }
 
-        public void UpdateSummonsSummaryFixedAmount(SummonsSummaryFixedAmountData summSmryFixedAmount)
+        public async Task UpdateSummonsSummaryFixedAmountAsync(SummonsSummaryFixedAmountData summSmryFixedAmount)
         {
             var parameters = new Dictionary<string, object> {
                 { "Appl_EnfSrv_Cd", summSmryFixedAmount.Appl_EnfSrv_Cd },
@@ -59,17 +60,17 @@ namespace FOAEA3.Data.DB
                 { "SummSmry_FixedAmount_Recalc_Dte", summSmryFixedAmount.SummSmry_FixedAmount_Recalc_Dte }
             };
 
-            _ = MainDB.ExecProc("SummSmryFixedAmountRecalcDate_Update", parameters);
+            _ = await MainDB.ExecProcAsync("SummSmryFixedAmountRecalcDate_Update", parameters);
         }
 
-        public void DeleteSummSmryFixedAmountRecalcDate(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task DeleteSummSmryFixedAmountRecalcDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object> {
                 { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
                 { "Appl_CtrlCd" , appl_CtrlCd }
             };
 
-            _ = MainDB.ExecProc("DeleteSummSmryFixedAmountRecalcDateData", parameters);
+            _ = await MainDB.ExecProcAsync("DeleteSummSmryFixedAmountRecalcDateData", parameters);
         }
         
     }

@@ -1,16 +1,16 @@
-﻿using FOAEA3.Model;
-using FOAEA3.Model.Enums;
+﻿using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal partial class InterceptionManager : ApplicationManager
     {
-        protected override void Process_02_AwaitingValidation()
+        protected override async Task Process_02_AwaitingValidation()
         {
-            var exGratias = Repositories.InterceptionRepository.GetExGratias();
+            var exGratias = await Repositories.InterceptionRepository.GetExGratiasAsync();
 
             string appEnteredSIN = InterceptionApplication.Appl_Dbtr_Entrd_SIN;
             string appRefNumber = InterceptionApplication.Appl_Source_RfrNr;
@@ -36,40 +36,40 @@ namespace FOAEA3.Business.Areas.Application
 
                 body += $"\n\n{Appl_EnfSrv_Cd}-{Appl_CtrlCd}";
 
-                dbNotification.SendEmail(subject, config.ExGratiaRecipients, body);
+                await dbNotification.SendEmailAsync(subject, config.ExGratiaRecipients, body);
             }
             else
             {
 
                 if (String.IsNullOrEmpty(InterceptionApplication.Appl_Dbtr_Entrd_SIN))
-                    InterceptionValidation.CheckCreditorSurname();
+                    await InterceptionValidation.CheckCreditorSurnameAsync();
 
-                base.Process_02_AwaitingValidation();
+                await base.Process_02_AwaitingValidation();
 
             }
         }
 
-        protected override void Process_04_SinConfirmed()
+        protected override async Task Process_04_SinConfirmed()
         {
-            base.Process_04_SinConfirmed();
+            await base.Process_04_SinConfirmed();
 
             InterceptionApplication.Appl_Affdvt_DocTypCd = I01_AFFITDAVIT_DOCUMENT_CODE;
-            SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
+            await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
         }
 
-        protected override void Process_06_PendingAcceptanceSwearing()
+        protected override async Task Process_06_PendingAcceptanceSwearing()
         {
-            base.Process_06_PendingAcceptanceSwearing();
+            await base.Process_06_PendingAcceptanceSwearing();
 
-            Validation.AddDuplicateSINWarningEvents();
+            await Validation.AddDuplicateSINWarningEventsAsync();
 
             var submitterDB = Repositories.SubmitterRepository;
-            string signAuthority = submitterDB.GetSignAuthorityForSubmitter(InterceptionApplication.Subm_SubmCd);
+            string signAuthority = await submitterDB.GetSignAuthorityForSubmitterAsync(InterceptionApplication.Subm_SubmCd);
 
             EventManager.AddEvent(EventCode.C50701_WAITING_ACCEPTANCE_OF_GARNISHEE_SUMMONS_AT_FOAEA, recipientSubm: signAuthority);
         }
 
-        protected override void Process_07_ValidAffidavitNotReceived()
+        protected override async Task Process_07_ValidAffidavitNotReceived()
         {
             var expectedNextState = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
 
@@ -78,17 +78,19 @@ namespace FOAEA3.Business.Areas.Application
             else
                 expectedNextState = ApplicationState.APPLICATION_ACCEPTED_10;
 
-            SendDebtorLetter();
+            await SendDebtorLetterAsync();
 
-            SetNewStateTo(expectedNextState);
+            await SetNewStateTo(expectedNextState);
         }
 
-        protected override void Process_09_ApplicationRejected()
+        protected override async Task Process_09_ApplicationRejected()
         {
-            //base.Process_09_ApplicationRejected();
-            InterceptionApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
-            InterceptionApplication.ActvSt_Cd = "J";
-
+            await Task.Run(() =>
+            {
+                InterceptionApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
+                InterceptionApplication.ActvSt_Cd = "J";
+            });
+            
             if (!AcceptedWithin30Days.HasValue)
                 AcceptedWithin30Days = true;
 
@@ -108,22 +110,23 @@ namespace FOAEA3.Business.Areas.Application
             }
             else
                 EventManager.AddEvent(EventCode.C50591_REJECTED_APPLICATION);
+
         }
 
-        protected override void Process_10_ApplicationAccepted()
+        protected override async Task Process_10_ApplicationAccepted()
         {
             if (GarnisheeSummonsReceiptDate is null)
             {
-                AddSystemError(Repositories, InterceptionApplication.Messages, config.EmailRecipients, 
+                await AddSystemErrorAsync(Repositories, InterceptionApplication.Messages, config.EmailRecipients,
                                $"GarnisheeSummonsReceiptDate is null. Cannot accept application {Appl_EnfSrv_Cd}-{Appl_CtrlCd}.");
                 return;
             }
 
-            base.Process_10_ApplicationAccepted();
+            await base.Process_10_ApplicationAccepted();
 
             var interceptionDB = Repositories.InterceptionRepository;
 
-            string justiceID = interceptionDB.GetApplicationJusticeNumber(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
+            string justiceID = await interceptionDB.GetApplicationJusticeNumberAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN,
                                                                                                Appl_EnfSrv_Cd, Appl_CtrlCd);
             justiceID = justiceID.Trim();
 
@@ -134,33 +137,33 @@ namespace FOAEA3.Business.Areas.Application
             if (string.IsNullOrEmpty(justiceID))
             {
                 eventBFNreasonCode = EventCode.C56001_NEW_BFN_FOR_NEW_DEBTOR;
-                debtorID = GenerateDebtorID(InterceptionApplication.Appl_Dbtr_SurNme);
+                debtorID = await GenerateDebtorIDAsync(InterceptionApplication.Appl_Dbtr_SurNme);
                 justiceSuffix = "A";
             }
             else
             {
                 eventBFNreasonCode = EventCode.C56002_NEW_BFN_FOR_EXISTING_DEBTOR;
                 debtorID = GetDebtorID(justiceID);
-                ProcessSummSmryBFN(debtorID, ref eventBFNreasonCode);
+                await ProcessSummSmryBFNAsync(debtorID, eventBFNreasonCode);
                 nextJusticeID_callCount = 0;
-                justiceSuffix = NextJusticeID(justiceID);
+                justiceSuffix = await NextJusticeIDAsync(justiceID);
             }
 
-            ChangeStateForFinancialTerms(oldState: "P", newState: "A", 10);
+            await ChangeStateForFinancialTermsAsync(oldState: "P", newState: "A", 10);
 
             DateTime startDate = GarnisheeSummonsReceiptDate.Value.Date.AddDays(35);
 
-            CreateSummonsSummary(debtorID, justiceSuffix, startDate);
+            await CreateSummonsSummaryAsync(debtorID, justiceSuffix, startDate);
 
             if (!string.IsNullOrEmpty(InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period))
             {
                 var fixedAmountDB = RepositoriesFinance.SummonsSummaryFixedAmountRepository;
-                var fixedAmountData = fixedAmountDB.GetSummonsSummaryFixedAmount(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                var fixedAmountData = await fixedAmountDB.GetSummonsSummaryFixedAmountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
                 if (fixedAmountData is null)
                 {
                     // create fixed amount data
-                    fixedAmountDB.CreateSummonsSummaryFixedAmount(Appl_EnfSrv_Cd, Appl_CtrlCd, startDate);
+                    await fixedAmountDB.CreateSummonsSummaryFixedAmountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, startDate);
                 }
                 else
                 {
@@ -168,7 +171,7 @@ namespace FOAEA3.Business.Areas.Application
                     fixedAmountData.SummSmry_LastFixedAmountCalc_Dte = DateTime.Now;
                     fixedAmountData.SummSmry_FixedAmount_Recalc_Dte = startDate;
 
-                    fixedAmountDB.UpdateSummonsSummaryFixedAmount(fixedAmountData);
+                    await fixedAmountDB.UpdateSummonsSummaryFixedAmountAsync(fixedAmountData);
                 }
             }
 
@@ -185,27 +188,28 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED, eventReasonText: reasonText, activeState: "I");
 
-            NotifyMatchingActiveApplications(EventCode.C50934_AN_APPLICATION_HAS_BEEN_ACCEPTED_FOR_THE_SAME_DEBTOR___CREDITOR_FROM_ANOTHER_JURISDICTION);
+            await NotifyMatchingActiveApplicationsAsync(EventCode.C50934_AN_APPLICATION_HAS_BEEN_ACCEPTED_FOR_THE_SAME_DEBTOR___CREDITOR_FROM_ANOTHER_JURISDICTION);
         }
 
-        protected override void Process_12_PartiallyServiced()
+        protected override async Task Process_12_PartiallyServiced()
         {
             var currentState = InterceptionApplication.AppLiSt_Cd;
 
             if (currentState == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
             {
-                base.Process_12_PartiallyServiced();
+                await base.Process_12_PartiallyServiced();
 
                 if (VariationAction == VariationDocumentAction.AcceptVariationDocument)
                 {
                     EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
                     var interceptionDB = Repositories.InterceptionRepository;
-                    if (interceptionDB.IsVariationIncrease(Appl_EnfSrv_Cd, Appl_CtrlCd))
+                    if (await interceptionDB.IsVariationIncreaseAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                         EventManager.AddEvent(EventCode.C51113_VARIATION_ACCEPTED_WITH_AN_ARREARS_VALUE_SIGNIFICANTLY_GREATER_THAN_THE_PREVIOUS_ARREARS);
                 }
                 else // reject variation
                 {
-                    var summonsSummaryData = RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummary(Appl_EnfSrv_Cd, Appl_CtrlCd).FirstOrDefault();
+                    var summonsSummaryData = (await RepositoriesFinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
+                                                .FirstOrDefault();
 
                     var recalcDate = summonsSummaryData?.SummSmry_Recalc_Dte;
                     if ((recalcDate.HasValue) && (recalcDate.Value.Year == 3000) && (recalcDate.Value.Month == 1) && (recalcDate.Value.Day == 1))
@@ -216,29 +220,29 @@ namespace FOAEA3.Business.Areas.Application
             }
             else if (currentState == ApplicationState.APPLICATION_ACCEPTED_10)
             {
-                base.Process_12_PartiallyServiced();
+                await base.Process_12_PartiallyServiced();
 
                 EventManager.AddEvent(EventCode.C50826_MONEY_HAS_BEEN_RECEIVED);
             }
 
         }
 
-        protected override void Process_13_FullyServiced()
+        protected override async Task Process_13_FullyServiced()
         {
-            base.Process_13_FullyServiced();
+            await base.Process_13_FullyServiced();
 
-            StopBlockFunds(ApplicationState.FULLY_SERVICED_13);
+            await StopBlockFundsAsync(ApplicationState.FULLY_SERVICED_13);
 
             InterceptionApplication.ActvSt_Cd = "C";
 
             EventManager.AddEvent(EventCode.C50850_APPLICATION_FINANCIALLY_SATISFIED);
         }
 
-        protected override void Process_14_ManuallyTerminated()
+        protected override async Task Process_14_ManuallyTerminated()
         {
             var previousState = InterceptionApplication.AppLiSt_Cd;
 
-            StopBlockFunds(ApplicationState.MANUALLY_TERMINATED_14);
+            await StopBlockFundsAsync(ApplicationState.MANUALLY_TERMINATED_14);
 
             InterceptionApplication.ActvSt_Cd = "X";
             InterceptionApplication.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
@@ -250,23 +254,23 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        protected override void Process_15_Expired()
+        protected override async Task Process_15_Expired()
         {
             InterceptionApplication.AppLiSt_Cd = ApplicationState.EXPIRED_15;
 
             EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED, activeState: "I");
 
-            StopBlockFunds(ApplicationState.EXPIRED_15);
+            await StopBlockFundsAsync(ApplicationState.EXPIRED_15);
 
             InterceptionApplication.ActvSt_Cd = "C";
         }
 
-        protected override void Process_17_FinancialTermsVaried()
+        protected override async Task Process_17_FinancialTermsVaried()
         {
-            base.Process_17_FinancialTermsVaried();
+            await base.Process_17_FinancialTermsVaried();
 
             var currentApplicationManager = new InterceptionManager(Repositories, RepositoriesFinance, config);
-            currentApplicationManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            await currentApplicationManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             var currentApplInfo = currentApplicationManager.InterceptionApplication;
 
@@ -276,14 +280,14 @@ namespace FOAEA3.Business.Areas.Application
                 case ApplicationState.PARTIALLY_SERVICED_12:
                 case ApplicationState.APPLICATION_SUSPENDED_35:
 
-                    if (!InterceptionValidation.ValidVariationDefaultHoldbacks())
-                        SetNewStateTo(ApplicationState.INVALID_VARIATION_FINTERMS_92);
+                    if (!await InterceptionValidation.ValidVariationDefaultHoldbacksAsync())
+                        await SetNewStateTo(ApplicationState.INVALID_VARIATION_FINTERMS_92);
 
                     else if (!InterceptionValidation.ValidVariationSourceSpecificHoldbacks())
-                        SetNewStateTo(ApplicationState.INVALID_VARIATION_SOURCE_91);
+                        await SetNewStateTo(ApplicationState.INVALID_VARIATION_SOURCE_91);
 
                     else
-                        SetNewStateTo(ApplicationState.VALID_FINANCIAL_VARIATION_93);
+                        await SetNewStateTo(ApplicationState.VALID_FINANCIAL_VARIATION_93);
 
                     break;
 
@@ -295,46 +299,45 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        protected override void Process_19_AwaitingDocumentsForVariation()
+        protected override async Task Process_19_AwaitingDocumentsForVariation()
         {
-            base.Process_19_AwaitingDocumentsForVariation();
+            await base.Process_19_AwaitingDocumentsForVariation();
 
             EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, effectiveTimestamp: DateTime.Now.AddDays(5));
         }
 
-        protected override void Process_35_ApplicationSuspended()
+        protected override async Task Process_35_ApplicationSuspended()
         {
-
             if (InterceptionApplication.AppLiSt_Cd.In(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12,
                                                       ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19))
                 EventManager.AddEvent(EventCode.C51115_APPLICATION_SUSPENDED, appState: ApplicationState.APPLICATION_SUSPENDED_35);
             else
                 EventManager.AddEvent(EventCode.C55006_APPLICATION_NOT_IN_EFFECT);
 
-            base.Process_35_ApplicationSuspended();
+            await base.Process_35_ApplicationSuspended();
         }
 
-        protected override void Process_91_InvalidVariationSource()
+        protected override async Task Process_91_InvalidVariationSource()
         {
-            base.Process_91_InvalidVariationSource();
+            await base.Process_91_InvalidVariationSource();
 
             EventManager.AddEvent(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
-        protected override void Process_92_InvalidVariationFinTerms()
+        protected override async Task Process_92_InvalidVariationFinTerms()
         {
-            base.Process_92_InvalidVariationFinTerms();
+            await base.Process_92_InvalidVariationFinTerms();
 
             EventManager.AddEvent(EventCode.C55002_INVALID_FINANCIAL_TERMS);
             EventManager.AddEvent(EventCode.C55000_INVALID_VARIATION);
         }
 
-        protected override void Process_93_ValidFinancialVariation()
+        protected override async Task Process_93_ValidFinancialVariation()
         {
-            base.Process_93_ValidFinancialVariation();
+            await base.Process_93_ValidFinancialVariation();
 
-            SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
+            await SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
 
             EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, activeState: "I");
         }

@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,8 +11,9 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<ProvinceData> GetProvinces()
+        public async Task<List<ProvinceData>> GetProvincesAsync()
         {
+            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

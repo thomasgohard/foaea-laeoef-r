@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -9,8 +8,8 @@ namespace FOAEA3.Model.Interfaces
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public ActiveSummonsCoreData GetActiveSummonsCore(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd);
-        public ActiveSummonsData GetActiveSummonsData(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false);
-        public DateTime GetLegalDate(string appl_CtrlCd, string appl_EnfSrv_Cd);
+        public Task<ActiveSummonsCoreData> GetActiveSummonsCoreAsync(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd);
+        public Task<ActiveSummonsData> GetActiveSummonsDataAsync(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false);
+        public Task<DateTime> GetLegalDateAsync(string appl_CtrlCd, string appl_EnfSrv_Cd);
     }
 }

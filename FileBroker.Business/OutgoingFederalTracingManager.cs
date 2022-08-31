@@ -44,7 +44,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             var eventIds = new List<int>();
             string fileContent = GenerateOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
 
-            File.WriteAllText(newFilePath, fileContent);
+            await File.WriteAllTextAsync(newFilePath, fileContent);
             fileCreated = true;
 
             await Repositories.OutboundAuditDB.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,

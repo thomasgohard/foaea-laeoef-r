@@ -6,17 +6,18 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBControlBatch : DBbase, IControlBatchRepository
     {
-        public DBControlBatch(IDBTools mainDB) : base(mainDB)
+        public DBControlBatch(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public DataList<ControlBatchData> GetFADAReadyBatch(string EnfSrv_Source_Cd = "", string DAFABatchID = "")
+        public async Task<DataList<ControlBatchData>> GetFADAReadyBatchAsync(string EnfSrv_Source_Cd = "", string DAFABatchID = "")
         {
             var parameters = new Dictionary<string, object>();
 
@@ -26,12 +27,12 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(DAFABatchID))
                 parameters.Add("DAFABatchID", DAFABatchID);
 
-            var data = MainDB.GetDataFromStoredProc<ControlBatchData>("CtrlBatchGetDAFAReadyBatches", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<ControlBatchData>("CtrlBatchGetDAFAReadyBatches", parameters, FillDataFromReader);
 
             return new DataList<ControlBatchData>(data, MainDB.LastError);
         }
 
-        public void CreateXFControlBatch(ControlBatchData values, out string returnCode, out string batchID, out string reasonCode, out string reasonText)
+        public async Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values)
         {
             var parameters = new Dictionary<string, object>() {
                 { "chrEnfSrv_Src_Cd", "FO01" },
@@ -60,12 +61,14 @@ namespace FOAEA3.Data.DB
                 {"vchReasonText", "S"}
             };
 
-            var data = MainDB.GetDataFromStoredProcViaReturnParameters("fp_XFCtrlBatch", parameters, outputParameters);
+            var data = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("fp_XFCtrlBatch", parameters, outputParameters);
 
-            returnCode = data["intReturnCode"].ToString();
-            batchID = data["chrBatchId"].ToString();
-            reasonCode = data["intReasonCode"].ToString();
-            reasonText = data["vchReasonText"].ToString();
+            string returnCode = data["intReturnCode"].ToString();
+            string batchID = data["chrBatchId"].ToString();
+            string reasonCode = data["intReasonCode"].ToString();
+            string reasonText = data["vchReasonText"].ToString();
+
+            return (returnCode, batchID, reasonCode, reasonText);
         }
         
         private void FillDataFromReader(IDBHelperReader rdr, ControlBatchData data)
