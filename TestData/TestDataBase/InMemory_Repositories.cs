@@ -55,7 +55,7 @@ namespace TestData.TestDataBase
 
         public IInterceptionRepository InterceptionTable => throw new System.NotImplementedException();
 
-        public INotificationRepository NotificationTable => throw new System.NotImplementedException();
+        public INotificationRepository NotificationService => throw new System.NotImplementedException();
 
         public IApplicationEventDetailRepository ApplicationEventDetailTable => throw new System.NotImplementedException();
 

@@ -451,7 +451,7 @@ namespace FOAEA3.Business.Areas.Application
 
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
-            await repositories.NotificationTable.SendEmailAsync(subject, recipients, message);
+            await repositories.NotificationService.SendEmailAsync(subject, recipients, message);
         }
 
     }

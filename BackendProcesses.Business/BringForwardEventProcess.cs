@@ -21,7 +21,7 @@ namespace BackendProcesses.Business
             var prodAudit = DB.ProductionAuditTable;
             var dbApplicationEvent = DB.ApplicationEventTable;
             var dbApplication = DB.ApplicationTable; // use ApplicationManager() instead?
-            var dbNotification = DB.NotificationTable;
+            var dbNotification = DB.NotificationService;
 
             await prodAudit.InsertAsync("BF Events Process", "BF Events Process Started", "O");
 
