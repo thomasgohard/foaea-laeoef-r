@@ -10,9 +10,8 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public async Task<AffidavitData> GetAffidavitDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<AffidavitData> GetAffidavitDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

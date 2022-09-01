@@ -12,173 +12,143 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public async Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
+        public Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task CreateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
+        public Task CreateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task DeleteHoldbackConditionAsync(HoldbackConditionData holdbackCondition)
+        public Task DeleteHoldbackConditionAsync(HoldbackConditionData holdbackCondition)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task DeleteHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
+        public Task DeleteHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task DeleteInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
+        public Task DeleteInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN)
+        public Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, string confirmedSIN, string creditorFirstName, string creditorSurname)
+        public Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, string confirmedSIN, string creditorFirstName, string creditorSurname)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<HoldbackConditionData>> GetAllHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<List<HoldbackConditionData>> GetAllHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<InterceptionFinancialHoldbackData>> GetAllInterceptionFinancialTermsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<List<InterceptionFinancialHoldbackData>> GetAllInterceptionFinancialTermsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<string> GetApplicationJusticeNumberAsync(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<string> GetApplicationJusticeNumberAsync(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<string> GetDebtorIDAsync(string first3Char)
+        public Task<string> GetDebtorIDAsync(string first3Char)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
+        public Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ExGratiaListData>> GetExGratiasAsync()
+        public Task<List<ExGratiaListData>> GetExGratiasAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<DateTime> GetGarnisheeSummonsReceiptDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD)
+        public Task<DateTime> GetGarnisheeSummonsReceiptDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<HoldbackConditionData>> GetHoldbackConditionsAsync(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A")
+        public Task<List<HoldbackConditionData>> GetHoldbackConditionsAsync(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A")
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<HoldbackTypeData>> GetHoldbackTypesAsync()
+        public Task<List<HoldbackTypeData>> GetHoldbackTypesAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTermsAsync(string enfService, string controlCode, string activeState = "A")
+        public Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTermsAsync(string enfService, string controlCode, string activeState = "A")
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync()
+        public Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<InterceptionApplicationData>> GetSameCreditorForI01Async(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN, string activeState)
+        public Task<List<InterceptionApplicationData>> GetSameCreditorForI01Async(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN, string activeState)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode)
+        public Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount, BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null)
+        public Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount, BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null)
+        public Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber)
+        public Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> IsFeeCumulativeForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<bool> IsFeeCumulativeForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            return await Task.Run(() =>
-            {
-                return false;
-            });
+            return Task.FromResult(false);
         }
 
-        public async Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false)
+        public Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
+        public Task UpdateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
+        public Task UpdateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

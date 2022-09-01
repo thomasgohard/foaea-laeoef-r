@@ -137,7 +137,11 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(data.Messages);
 
             foreach (var item in data.FoaEvents)
-                FoaEvents.FoaEvents.Add(item.Key, item.Value);
+            {
+                FoaEvents.FoaEvents.TryAdd(item.Key, item.Value);
+                //FoaEvents.FoaEvents.Add(item.Key, item.Value);
+            }
+            
         }
 
         public async Task LoadApplicationCategoriesAsync(IApplicationCategoryRepository applicationCategoryRepository)

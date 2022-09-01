@@ -22,40 +22,35 @@ namespace FileBroker.Business.Tests.InMemory
             NextCycle = 1;
         }
 
-        public async Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
+        public Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
         {
-            return await Task.Run(() =>
+            var result = new FileTableData();
+
+            switch (fileNameNoExt)
             {
-                var result = new FileTableData();
+                case "RC3STSIT": // NETP
+                    result.PrcId = 2;
+                    result.Cycle = 1;
+                    result.Address = "dsarrazi@justice.gc.ca";
+                    break;
+                case "HR3STSIT": // EI 
+                    result.PrcId = 3;
+                    result.Cycle = 1;
+                    result.Address = "dsarrazi@justice.gc.ca";
+                    break;
+                case "EI3STSIT": // CRA 
+                    result.PrcId = 23;
+                    result.Cycle = 1;
+                    result.Address = "dsarrazi@justice.gc.ca";
+                    break;
+            }
 
-                switch (fileNameNoExt)
-                {
-                    case "RC3STSIT": // NETP
-                        result.PrcId = 2;
-                        result.Cycle = 1;
-                        result.Address = "dsarrazi@justice.gc.ca";
-                        break;
-                    case "HR3STSIT": // EI 
-                        result.PrcId = 3;
-                        result.Cycle = 1;
-                        result.Address = "dsarrazi@justice.gc.ca";
-                        break;
-                    case "EI3STSIT": // CRA 
-                        result.PrcId = 23;
-                        result.Cycle = 1;
-                        result.Address = "dsarrazi@justice.gc.ca";
-                        break;
-                }
-
-                return result;
-            });
+            return Task.FromResult(result);
         }
 
-        public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
+        public Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
-            return await Task.Run(() =>
-            {
-                return new List<FileTableData>
+            return Task.FromResult(new List<FileTableData>
                 {
                     new FileTableData
                     {
@@ -83,44 +78,37 @@ namespace FileBroker.Business.Tests.InMemory
                         Path = "C:\\Work",
                         Address = "dsarrazi@justice.gc.ca"
                     }
-                };
-            });
+                });
         }
 
-        public async Task<List<FileTableData>> GetAllActiveAsync()
+        public Task<List<FileTableData>> GetAllActiveAsync()
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
+        public Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
         {
-            await Task.Run(() =>
+            if (fileData.PrcId.In(2, 3, 23))
             {
-                if (fileData.PrcId.In(2, 3, 23))
-                {
-                    NextCycle++;
-                    if (NextCycle.ToString().Trim().Length > length)
-                        NextCycle = 1;
-                }
-            });
+                NextCycle++;
+                if (NextCycle.ToString().Trim().Length > length)
+                    NextCycle = 1;
+            }
+
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> IsFileLoadingAsync(int processId)
+        public Task<bool> IsFileLoadingAsync(int processId)
         {
-            return await Task.Run(() =>
-            {
-                return FileLoading;
-            });
+            return Task.FromResult(FileLoading);
         }
 
-        public async Task SetIsFileLoadingValueAsync(int processId, bool newValue)
+        public Task SetIsFileLoadingValueAsync(int processId, bool newValue)
         {
-            await Task.Run(() =>
-            {
-                if (processId.In(2, 3, 23))
-                    FileLoading = newValue;
-            });
+            if (processId.In(2, 3, 23))
+                FileLoading = newValue;
+
+            return Task.CompletedTask;
         }
     }
 }

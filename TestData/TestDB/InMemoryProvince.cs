@@ -11,9 +11,8 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public async Task<List<ProvinceData>> GetProvincesAsync()
+        public Task<List<ProvinceData>> GetProvincesAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

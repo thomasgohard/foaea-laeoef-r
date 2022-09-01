@@ -83,20 +83,17 @@ namespace FOAEA3.Business.Areas.Application
             await SetNewStateTo(expectedNextState);
         }
 
-        protected override async Task Process_09_ApplicationRejected()
+        protected override Task Process_09_ApplicationRejected()
         {
-            await Task.Run(() =>
-            {
                 InterceptionApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
                 InterceptionApplication.ActvSt_Cd = "J";
-            });
             
             if (!AcceptedWithin30Days.HasValue)
                 AcceptedWithin30Days = true;
 
             if (!AcceptedWithin30Days.Value)
             {
-                return;
+                return Task.CompletedTask;
             }
             else if (InterceptionApplication.AppLiSt_Cd == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
             {
@@ -111,6 +108,7 @@ namespace FOAEA3.Business.Areas.Application
             else
                 EventManager.AddEvent(EventCode.C50591_REJECTED_APPLICATION);
 
+            return Task.CompletedTask;
         }
 
         protected override async Task Process_10_ApplicationAccepted()

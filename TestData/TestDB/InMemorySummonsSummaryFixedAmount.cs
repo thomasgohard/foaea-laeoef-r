@@ -12,27 +12,23 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public async Task CreateSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime fixedAmountRecalcDate)
+        public  Task CreateSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime fixedAmountRecalcDate)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task DeleteSummSmryFixedAmountRecalcDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public  Task DeleteSummSmryFixedAmountRecalcDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<SummonsSummaryFixedAmountData> GetSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public  Task<SummonsSummaryFixedAmountData> GetSummonsSummaryFixedAmountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateSummonsSummaryFixedAmountAsync(SummonsSummaryFixedAmountData summSmryFixedAmount)
+        public  Task UpdateSummonsSummaryFixedAmountAsync(SummonsSummaryFixedAmountData summSmryFixedAmount)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

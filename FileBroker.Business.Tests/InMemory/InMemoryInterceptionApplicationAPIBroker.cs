@@ -11,62 +11,53 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
 
-        public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
+        public Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
+        public Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
         {
-            return await Task.Run(() => { return application; });
+            return Task.FromResult(application);
         }
 
-        public async Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        public Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }
