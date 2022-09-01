@@ -12,93 +12,78 @@ namespace TestData.TestDB
     {
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
-        public async Task<bool> ApplicationExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<bool> ApplicationExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CreateApplicationAsync(ApplicationData application)
+        public Task<bool> CreateApplicationAsync(ApplicationData application)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<string> GenerateApplicationControlCodeAsync(string appl_EnfSrv_Cd)
+        public Task<string> GenerateApplicationControlCodeAsync(string appl_EnfSrv_Cd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<ApplicationData> GetApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ApplicationData>> GetApplicationsForAutomationAsync(string appl_EnfSrv_Cd, string medium_Cd, ApplicationState appLiSt_Cd, string appCtgy_Cd, string actvSt_Cd)
+        public Task<List<ApplicationData>> GetApplicationsForAutomationAsync(string appl_EnfSrv_Cd, string medium_Cd, ApplicationState appLiSt_Cd, string appCtgy_Cd, string actvSt_Cd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetApplLocalConfirmedSINExistsAsync(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "")
+        public Task<bool> GetApplLocalConfirmedSINExistsAsync(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "")
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<(string errorSameEnfOFf, string errorDiffEnfOff)> GetConfirmedSINRecordsAsync(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public Task<(string errorSameEnfOFf, string errorDiffEnfOff)> GetConfirmedSINRecordsAsync(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetConfirmedSINSameEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN, string categoryCode)
+        public Task<bool> GetConfirmedSINSameEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN, string categoryCode)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ApplicationData>> GetDailyApplCountBySINAsync(string appl_Dbtr_Entrd_SIN, string appl_EnfSrv_Cd, string appl_CtrlCd, string appCtgy_Cd, string appl_Source_RfrNr)
+        public Task<List<ApplicationData>> GetDailyApplCountBySINAsync(string appl_Dbtr_Entrd_SIN, string appl_EnfSrv_Cd, string appl_CtrlCd, string appCtgy_Cd, string appl_Source_RfrNr)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<DataList<ApplicationData>> GetRequestedSINApplDataForFileAsync(string enfSrv_Cd, string fileName)
+        public Task<DataList<ApplicationData>> GetRequestedSINApplDataForFileAsync(string enfSrv_Cd, string fileName)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<ApplicationData>> GetSameCreditorForAppCtgyAsync(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
+        public Task<List<ApplicationData>> GetSameCreditorForAppCtgyAsync(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<StatsOutgoingProvincialData>> GetStatsProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        public Task<List<StatsOutgoingProvincialData>> GetStatsProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateApplicationAsync(ApplicationData application)
+        public Task UpdateApplicationAsync(ApplicationData application)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateSubmitterDefaultControlCodeAsync(string subm_SubmCd, string appl_CtrlCd)
+        public Task UpdateSubmitterDefaultControlCodeAsync(string subm_SubmCd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

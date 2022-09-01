@@ -17,33 +17,28 @@ namespace TestData.TestDB
 
         }
 
-        public async Task<bool> IsLoginExpiredAsync(string subjectName)
+        public  Task<bool> IsLoginExpiredAsync(string subjectName)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword)
+        public  Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetAllowedAccessAsync(string username)
+        public  Task<bool> GetAllowedAccessAsync(string username)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task AcceptNewTermsOfReferernceAsync(string username)
+        public  Task AcceptNewTermsOfReferernceAsync(string username)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
+        public  Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

@@ -73,14 +73,16 @@ namespace FOAEA3.Business.Areas.Application
             await SetNewStateTo(newState);
         }
 
-        protected virtual async Task Process_01_InvalidApplication()
+        protected virtual Task Process_01_InvalidApplication()
         {
             Application.AppLiSt_Cd = ApplicationState.INVALID_APPLICATION_1;
 
             Application.Appl_Dbtr_Cnfrmd_SIN = null;
             Application.Appl_SIN_Cnfrmd_Ind = 0;
 
-            await Task.Run(() => { EventManager.AddEvent(EventCode.C50600_INVALID_APPLICATION); });
+            EventManager.AddEvent(EventCode.C50600_INVALID_APPLICATION);
+
+            return Task.CompletedTask;
         }
 
         protected virtual async Task Process_02_AwaitingValidation()
@@ -104,24 +106,21 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        protected virtual async Task Process_03_SinConfirmationPending()
+        protected virtual Task Process_03_SinConfirmationPending()
         {
             Application.AppLiSt_Cd = ApplicationState.SIN_CONFIRMATION_PENDING_3;
 
-            await Task.Run(() =>
-            {
-                EventManager.AddEvent(EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION);
-                EventManager.AddSINEvent(EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION);
-            });
+            EventManager.AddEvent(EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION);
+            EventManager.AddSINEvent(EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION);
 
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_04_SinConfirmed()
+        protected virtual Task Process_04_SinConfirmed()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.SIN_CONFIRMED_4;
-            });
+            Application.AppLiSt_Cd = ApplicationState.SIN_CONFIRMED_4;
+
+            return Task.CompletedTask;
         }
 
         protected virtual async Task Process_05_SinNotConfirmed()
@@ -131,136 +130,121 @@ namespace FOAEA3.Business.Areas.Application
                                   eventReasonText: await GetSINResultsEventTextAsync());
         }
 
-        protected virtual async Task Process_06_PendingAcceptanceSwearing()
+        protected virtual Task Process_06_PendingAcceptanceSwearing()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
-            });
+            Application.AppLiSt_Cd = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_07_ValidAffidavitNotReceived()
+        protected virtual Task Process_07_ValidAffidavitNotReceived()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7;
-            });
+            Application.AppLiSt_Cd = ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_09_ApplicationRejected()
+        protected virtual Task Process_09_ApplicationRejected()
         {
             ApplicationState previousState = Application.AppLiSt_Cd;
 
-            await Task.Run(() =>
-            {
-                Application.ActvSt_Cd = "J";
-                Application.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
+            Application.ActvSt_Cd = "J";
+            Application.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
 
-                if (previousState == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
-                    EventManager.AddEvent(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
-                else
-                    EventManager.AddEvent(EventCode.C50760_APPLICATION_REJECTED_AS_CONDITIONS_NOT_MET_IN_TIMEFRAME);
-            });
+            if (previousState == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
+                EventManager.AddEvent(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
+            else
+                EventManager.AddEvent(EventCode.C50760_APPLICATION_REJECTED_AS_CONDITIONS_NOT_MET_IN_TIMEFRAME);
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_10_ApplicationAccepted()
+        protected virtual Task Process_10_ApplicationAccepted()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.APPLICATION_ACCEPTED_10;
-            });
+            Application.AppLiSt_Cd = ApplicationState.APPLICATION_ACCEPTED_10;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_11_ApplicationReinstated()
+        protected virtual Task Process_11_ApplicationReinstated()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.APPLICATION_REINSTATED_11;
-            });
+            Application.AppLiSt_Cd = ApplicationState.APPLICATION_REINSTATED_11;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_12_PartiallyServiced()
+        protected virtual Task Process_12_PartiallyServiced()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
-            });
+            Application.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_13_FullyServiced()
+        protected virtual Task Process_13_FullyServiced()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.FULLY_SERVICED_13;
-            });
+            Application.AppLiSt_Cd = ApplicationState.FULLY_SERVICED_13;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_14_ManuallyTerminated()
+        protected virtual Task Process_14_ManuallyTerminated()
         {
-            await Task.Run(() =>
-            {
-                Application.ActvSt_Cd = "X";
-                Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
-                EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
-            });
+            Application.ActvSt_Cd = "X";
+            Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
+            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_15_Expired()
+        protected virtual Task Process_15_Expired()
         {
-            await Task.Run(() =>
-            {
-                Application.ActvSt_Cd = "C";
-                Application.AppLiSt_Cd = ApplicationState.EXPIRED_15;
-                EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED);
-            });
+            Application.ActvSt_Cd = "C";
+            Application.AppLiSt_Cd = ApplicationState.EXPIRED_15;
+            EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED);
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_17_FinancialTermsVaried()
+        protected virtual Task Process_17_FinancialTermsVaried()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.FINANCIAL_TERMS_VARIED_17;
-            });
+            Application.AppLiSt_Cd = ApplicationState.FINANCIAL_TERMS_VARIED_17;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_19_AwaitingDocumentsForVariation()
+        protected virtual Task Process_19_AwaitingDocumentsForVariation()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19;
-            });
+            Application.AppLiSt_Cd = ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_35_ApplicationSuspended()
+        protected virtual Task Process_35_ApplicationSuspended()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.APPLICATION_SUSPENDED_35;
-            });
+            Application.AppLiSt_Cd = ApplicationState.APPLICATION_SUSPENDED_35;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_91_InvalidVariationSource()
+        protected virtual Task Process_91_InvalidVariationSource()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.INVALID_VARIATION_SOURCE_91;
-            });
+            Application.AppLiSt_Cd = ApplicationState.INVALID_VARIATION_SOURCE_91;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_92_InvalidVariationFinTerms()
+        protected virtual Task Process_92_InvalidVariationFinTerms()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.INVALID_VARIATION_FINTERMS_92;
-            });
+            Application.AppLiSt_Cd = ApplicationState.INVALID_VARIATION_FINTERMS_92;
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task Process_93_ValidFinancialVariation()
+        protected virtual Task Process_93_ValidFinancialVariation()
         {
-            await Task.Run(() =>
-            {
-                Application.AppLiSt_Cd = ApplicationState.VALID_FINANCIAL_VARIATION_93;
-            });
+            Application.AppLiSt_Cd = ApplicationState.VALID_FINANCIAL_VARIATION_93;
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -22,34 +22,32 @@ namespace TestData.TestDB
 
         public MessageDataList Messages { get; set; }
 
-        public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
+        public Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
         {
-            return await Task.Run(() =>
+            var result = new FoaEventDataDictionary();
+
+            foreach (var eventData in FoaMessages)
             {
-                var result = new FoaEventDataDictionary();
-
-                foreach (var eventData in FoaMessages)
+                EventCode eventCode = (EventCode)eventData.Error;
+                if (!result.ContainsKey(eventCode))
                 {
-                    EventCode eventCode = (EventCode)eventData.Error;
-                    if (!result.ContainsKey(eventCode))
+                    var newEventData = new FoaEventData
                     {
-                        var newEventData = new FoaEventData
-                        {
-                            Error = eventData.Error,
-                            Dlevel = eventData.Dlevel,
-                            Severity = eventData.Severity,
-                        };
+                        Error = eventData.Error,
+                        Dlevel = eventData.Dlevel,
+                        Severity = eventData.Severity,
+                    };
 
-                        result.FoaEvents.Add(eventData.Error.ToString(), newEventData);
-                    }
-
-                    if (eventData.MsgLangId == 1033)
-                        result[eventCode].Description_e = eventData.Description;
-                    else
-                        result[eventCode].Description_f = eventData.Description;
+                    result.FoaEvents.TryAdd(eventData.Error.ToString(), newEventData);
                 }
-                return result;
-            });
+
+                if (eventData.MsgLangId == 1033)
+                    result[eventCode].Description_e = eventData.Description;
+                else
+                    result[eventCode].Description_f = eventData.Description;
+            }
+
+            return Task.FromResult(result);
 
         }
 

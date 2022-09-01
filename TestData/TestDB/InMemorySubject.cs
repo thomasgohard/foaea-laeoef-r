@@ -11,21 +11,18 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public async Task<SubjectData> GetSubjectAsync(string subjectName)
+        public Task<SubjectData> GetSubjectAsync(string subjectName)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
+        public Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
+        public Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

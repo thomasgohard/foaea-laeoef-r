@@ -13,57 +13,48 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public async Task CreateTracingDataAsync(TracingApplicationData data)
+        public Task CreateTracingDataAsync(TracingApplicationData data)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
+        public Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords, string activeState, ApplicationState lifeState, string enfServiceCode)
+        public Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords, string activeState, ApplicationState lifeState, string enfServiceCode)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        public Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
+        public Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
+        public Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
 
-        public async Task UpdateTracingDataAsync(TracingApplicationData data)
+        public Task UpdateTracingDataAsync(TracingApplicationData data)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException();
         }
     }

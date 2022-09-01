@@ -15,7 +15,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
         [Fact]
         public async Task TestProcessFinancialTermsVaried_17GenerateEvent50933()
         {
-            if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
+            //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
                 await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
             var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());
@@ -42,7 +42,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
         [Fact]
         public async Task TestProcessFinancialTermsVaried_17StateNotChanged()
         {
-            if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
+            //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
                 await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
             var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());

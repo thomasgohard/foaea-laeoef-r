@@ -1,12 +1,11 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
+using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Exceptions;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
 using System;
-using System.Collections.Generic;
 using System.Threading;
-using FOAEA3.Model.Enums;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -55,7 +54,7 @@ namespace FOAEA3.Data.DB
 
                         var thisCode = (EventCode)eventData.Error;
 
-                        result.FoaEvents.Add(((int) thisCode).ToString(), newEventData);
+                        result.FoaEvents.TryAdd(((int)thisCode).ToString(), newEventData);
                     }
 
                     if (eventData.MsgLangId == 1033)

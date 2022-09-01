@@ -314,9 +314,8 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
-        public virtual async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
+        public virtual Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
-            await Task.Run(() => { });
             throw new NotImplementedException("ProcessBringForwards has not been implemented!");
         }
 

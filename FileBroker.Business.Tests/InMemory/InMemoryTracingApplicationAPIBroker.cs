@@ -10,68 +10,58 @@ namespace FileBroker.Business.Tests.InMemory
         public int Count { get; set; }
         public MessageDataList LastMessages { get; set; }
 
-        public async Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData)
+        public Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData)
         {
-            return await Task.Run(() => { return tracingData; });
+            return Task.FromResult(tracingData);
         }
 
-        public async Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode)
+        public Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
+        public Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle)
+        public Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
+        public Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
 
-        public async Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
-            await Task.Run(() => { });
             throw new System.NotImplementedException();
         }
     }
