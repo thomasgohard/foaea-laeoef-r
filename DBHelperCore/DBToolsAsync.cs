@@ -1,8 +1,10 @@
 ﻿using FOAEA3.Resources.Helpers;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DBHelper
@@ -93,7 +95,7 @@ namespace DBHelper
 
             ValidateConfiguration();
 
-            var result = new List<Tdata>();
+            var result = new ConcurrentBag<Tdata>();
 
             using (var con = new SqlConnection(ConnectionString))
             {
@@ -142,7 +144,7 @@ namespace DBHelper
 
             }
 
-            return result;
+            return result.ToList();
         }
 
         public async Task<List<Tdata>> GetDataFromSqlAsync<Tdata>(string sql, Dictionary<string, object> parameters,
@@ -152,7 +154,7 @@ namespace DBHelper
 
             ValidateConfiguration();
 
-            var result = new List<Tdata>();
+            var result = new ConcurrentBag<Tdata>();
 
             using (var con = new SqlConnection(ConnectionString))
             {
@@ -193,7 +195,7 @@ namespace DBHelper
 
             }
 
-            return result;
+            return result.ToList();
         }
 
         public async Task<List<Tdata>> GetRecordsFromStoredProcAsync<Tdata>(string procName, Dictionary<string, object> parameters,
@@ -202,7 +204,7 @@ namespace DBHelper
 
             ValidateConfiguration();
 
-            var result = new List<Tdata>();
+            var result = new ConcurrentBag<Tdata>();
 
             using (var con = new SqlConnection(ConnectionString))
             {
@@ -245,7 +247,7 @@ namespace DBHelper
 
             }
 
-            return result;
+            return result.ToList();
         }
 
         public async Task<Tdata> GetDataFromStoredProcAsync<Tdata>(string procName, Dictionary<string, object> parameters)
@@ -298,7 +300,7 @@ namespace DBHelper
         {
             ValidateConfiguration();
 
-            var result = new List<Tdata>();
+            var result = new ConcurrentBag<Tdata>();
 
             using (var con = new SqlConnection(ConnectionString))
             {
@@ -338,7 +340,7 @@ namespace DBHelper
                 }
             }
 
-            return result;
+            return result.ToList();
         }
 
         public async Task<Tdata> GetDataFromProcSingleValueAsync<Tdata>(string procName, Dictionary<string, object> parameters)
@@ -608,7 +610,7 @@ namespace DBHelper
         {
             ValidateConfiguration();
 
-            var result = new List<Tdata>();
+            var result = new ConcurrentBag<Tdata>();
 
             using (var con = new SqlConnection(ConnectionString))
             {
@@ -645,7 +647,7 @@ namespace DBHelper
                 }
             }
 
-            return result;
+            return result.ToList();
         }
 
         public async Task<Tdata> GetDataForKeyAsync<Tdata, Tkey>(string tableName, Tkey key, string keyColumnName,
