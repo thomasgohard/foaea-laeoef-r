@@ -1,8 +1,8 @@
-﻿using FOAEA3.Model;
+﻿using DBHelper;
+using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources;
-using FOAEA3.Resources.Helpers;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;

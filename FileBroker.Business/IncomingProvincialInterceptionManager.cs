@@ -1,6 +1,6 @@
-﻿using FOAEA3.Resources;
+﻿using DBHelper;
+using FOAEA3.Resources;
 using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FileBroker.Business
 {
@@ -123,7 +123,7 @@ namespace FileBroker.Business
                             bool isValidData = true;
                             InterceptionApplicationData thisApplication;
                             (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequestAsync(
-                                                                                        data, interceptionData, 
+                                                                                        data, interceptionData,
                                                                                         financialData, sourceSpecificData,
                                                                                         fileAuditData);
                             var interceptionMessage = new MessageData<InterceptionApplicationData>

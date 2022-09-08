@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace FOAEA3.Resources.Helpers
+namespace DBHelper
 {
     public static class SqlStyleExtensions
     {

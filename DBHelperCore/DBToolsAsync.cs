@@ -1,5 +1,4 @@
-﻿using FOAEA3.Resources.Helpers;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -25,7 +24,6 @@ namespace DBHelper
         {
             set
             {
-
                 // try to log the error to the database
                 if (value != null)
                     try
@@ -122,7 +120,7 @@ namespace DBHelper
                     {
 
                         var data = new Tdata();
-                        //Tdata data = (Tdata)Activator.CreateInstance(typeof(Tdata));
+                        
                         var dataReader = new DBHelperReader(rdr);
 
                         fillDataFromReader(dataReader, data);
@@ -628,7 +626,7 @@ namespace DBHelper
                     {
 
                         var data = new Tdata();
-                        //Tdata data = (Tdata)Activator.CreateInstance(typeof(Tdata));
+                        
                         var dataReader = new DBHelperReader(rdr);
                         fillDataFromReader(dataReader, data);
 
@@ -656,8 +654,7 @@ namespace DBHelper
             ValidateConfiguration();
 
             var data = new Tdata();
-            //Tdata data = (Tdata)Activator.CreateInstance(typeof(Tdata));
-
+            
             using (var con = new SqlConnection(ConnectionString))
             {
                 using SqlCommand cmd = CreateCommand(tableName + "_Select", con);

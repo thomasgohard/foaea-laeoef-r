@@ -1,4 +1,5 @@
-﻿namespace FileBroker.Business;
+﻿using DBHelper;
+namespace FileBroker.Business;
 
 public class IncomingFederalTracingManager
 {

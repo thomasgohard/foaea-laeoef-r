@@ -1,8 +1,8 @@
 ﻿using BackendProcesses.Business;
+using DBHelper;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -438,7 +438,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await EventManager.SaveEventsAsync();
 
-            if (InterceptionApplication.Medium_Cd != "FTP") 
+            if (InterceptionApplication.Medium_Cd != "FTP")
                 InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
@@ -575,7 +575,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await EventManager.SaveEventsAsync();
 
-            if (InterceptionApplication.Medium_Cd != "FTP") 
+            if (InterceptionApplication.Medium_Cd != "FTP")
                 InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;

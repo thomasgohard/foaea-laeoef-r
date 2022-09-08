@@ -1,11 +1,12 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using DBHelper;
+using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
-using FOAEA3.Business.Security;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -33,7 +34,7 @@ namespace FOAEA3.Business.Areas.Application
                                             });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
-//            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
         }
@@ -197,7 +198,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await EventManager.SaveEventsAsync();
 
-                if (TracingApplication.Medium_Cd != "FTP") 
+                if (TracingApplication.Medium_Cd != "FTP")
                     TracingApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
             }
             else
