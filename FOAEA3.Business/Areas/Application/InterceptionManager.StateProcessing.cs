@@ -1,5 +1,5 @@
-﻿using FOAEA3.Model.Enums;
-using FOAEA3.Resources.Helpers;
+﻿using DBHelper;
+using FOAEA3.Model.Enums;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

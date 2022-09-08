@@ -1,6 +1,6 @@
-﻿using FOAEA3.Business.Security;
+﻿using DBHelper;
+using FOAEA3.Business.Security;
 using FOAEA3.Model;
-using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
@@ -130,7 +130,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await EventManager.SaveEventsAsync();
 
-            return true;            
+            return true;
         }
 
         public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
@@ -138,7 +138,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             return await EventManager.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
-        
+
         public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetailsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {

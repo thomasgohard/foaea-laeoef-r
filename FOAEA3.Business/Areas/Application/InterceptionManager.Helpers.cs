@@ -1,4 +1,5 @@
 ﻿using BackendProcesses.Business;
+using DBHelper;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
@@ -17,7 +18,7 @@ namespace FOAEA3.Business.Areas.Application
                                                  EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR, "A");
 
             if (events.Count == 0)
-                EventManager.AddBFEvent(EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR, 
+                EventManager.AddBFEvent(EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR,
                     effectiveTimestamp: DateTime.Now, appState: ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
         }
@@ -187,7 +188,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     if (InterceptionApplication.Appl_RecvAffdvt_Dte is null)
                     {
-                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients, 
+                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
                                        $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot recalculate fixed amount recalc date after variation!");
                         return fixedAmountRecalcDate;
                     }
@@ -495,9 +496,10 @@ namespace FOAEA3.Business.Areas.Application
 
             summSmryCount--;
 
-            if (summSmryCount <= 0) {
+            if (summSmryCount <= 0)
+            {
                 var effective10daysFromNow = DateTime.Now.AddDays(10);
-                EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN, 
+                EventManager.AddEvent(EventCode.C56003_CANCELLED_OR_COMPLETED_BFN, queue: EventQueue.EventBFN,
                                       effectiveDateTime: effective10daysFromNow);
             }
 

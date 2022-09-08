@@ -10,8 +10,4 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
-	</ItemGroup>
-
 </Project>

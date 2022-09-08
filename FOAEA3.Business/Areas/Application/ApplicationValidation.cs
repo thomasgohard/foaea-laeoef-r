@@ -1,4 +1,5 @@
-﻿using FOAEA3.Data.Base;
+﻿using DBHelper;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Exceptions;
