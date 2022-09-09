@@ -26,14 +26,12 @@ public class LicenceDenialTerminationsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}")]
-    public async Task<ActionResult<LicenceDenialApplicationData>> GetApplication([FromRoute] string key,
+    public async Task<ActionResult<LicenceDenialApplicationData>> GetApplication([FromRoute] ApplKey key,
                                                                      [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(key);
-
         var manager = new LicenceDenialTerminationManager(repositories, config);
 
-        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplicationAsync(key.EnfSrv, key.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialTerminationApplication.AppCtgy_Cd == "L03")
@@ -75,15 +73,14 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpPut("{key}/ProcessLicenceDenialTerminationResponse")]
-    public async Task<ActionResult<LicenceDenialApplicationData>> ProcessLicenceDenialTerminationResponse([FromRoute] string key,
-                                                                                              [FromServices] IRepositories repositories)
+    public async Task<ActionResult<LicenceDenialApplicationData>> ProcessLicenceDenialTerminationResponse(
+                                                                        [FromRoute] ApplKey key,
+                                                                        [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(key);
-
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config);
-        if (await appManager.ProcessLicenceDenialTerminationResponseAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await appManager.ProcessLicenceDenialTerminationResponseAsync(key.EnfSrv, key.CtrlCd))
             return Ok(application);
         else
             return UnprocessableEntity(application);

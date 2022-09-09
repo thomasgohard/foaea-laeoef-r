@@ -4,7 +4,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -30,25 +29,23 @@ public class ApplicationsController : ControllerBase
     [HttpGet("{id}")]
     [HttpGet("{id}/friendly")]
     [ApplicationDataFriendlyResultFilter]
-    public async Task<ActionResult<ApplicationData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationData>> GetApplication(
+                                [FromRoute] ApplKey id,
+                                [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(id);
-
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
 
-        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
         else
             return NotFound();
     }
 
     [HttpPut("{id}/ValidateCoreValues")]
-    public async Task<ActionResult<ApplicationData>> ValidateCoreValues([FromRoute] string id,
+    public async Task<ActionResult<ApplicationData>> ValidateCoreValues([FromRoute] ApplKey id,
                                                             [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(id);
-
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
         var applicationValidation = new ApplicationValidation(appl, repositories, config);
 
@@ -61,48 +58,44 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet("{id}/SINresults")]
-    public async Task<ActionResult<DataList<SINResultData>>> GetSINResults([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<DataList<SINResultData>>> GetSINResults([FromRoute] ApplKey id,
+                                                                    [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(id);
-
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsAsync());
         else
             return NotFound();
     }
 
     [HttpGet("{id}/SINresultsWithHistory")]
-    public async Task<ActionResult<DataList<SINResultWithHistoryData>>> GetSINResultsWithHistory([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<DataList<SINResultWithHistoryData>>> GetSINResultsWithHistory([FromRoute] ApplKey id,
+                                                                                [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(id);
-
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsWithHistoryAsync());
         else
             return NotFound();
     }
 
     [HttpPut("{id}/SinConfirmation")]
-    public async Task<ActionResult<ApplicationData>> SINconfirmation([FromRoute] string id,
+    public async Task<ActionResult<ApplicationData>> SINconfirmation([FromRoute] ApplKey id,
                                                          [FromServices] IRepositories repositories,
                                                          [FromServices] IRepositories_Finance repositoriesFinance)
     {
-        var applKey = new ApplKey(id);
-
         var sinConfirmationData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINConfirmationData>(Request);
 
         var application = new ApplicationData();
 
         var appManager = new ApplicationManager(application, repositories, config);
-        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
 
         ApplicationSINManager sinManager;
 
@@ -110,17 +103,17 @@ public class ApplicationsController : ControllerBase
         {
             case "T01":
                 var tracingManager = new TracingManager(repositories, config);
-                await tracingManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+                await tracingManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(tracingManager.TracingApplication, tracingManager);
                 break;
             case "I01":
                 var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-                await interceptionManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+                await interceptionManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
             case "L01":
                 var licenceDenialManager = new LicenceDenialManager(repositories, config);
-                await licenceDenialManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+                await licenceDenialManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(licenceDenialManager.LicenceDenialApplication, licenceDenialManager);
                 break;
             default:

@@ -3,7 +3,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -27,13 +26,13 @@ public class TracingEventDetailsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
         return await GetEventsForQueueAsync(id, repositories, EventQueue.EventSIN_dtl);
     }
 
     [HttpGet("{id}/Trace")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
         return await GetEventsForQueueAsync(id, repositories, EventQueue.EventTrace_dtl);
     }
@@ -72,13 +71,12 @@ public class TracingEventDetailsController : ControllerBase
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(ApplKey id,
+                                                                IRepositories repositories, EventQueue queue)
     {
-        var applKey = new ApplKey(id);
-
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
 
-        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));
         else
             return NotFound();

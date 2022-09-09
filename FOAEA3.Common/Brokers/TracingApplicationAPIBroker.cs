@@ -1,8 +1,8 @@
-﻿using FOAEA3.Model;
-using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Collections.Generic;
 using FOAEA3.Model.Interfaces.Broker;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers

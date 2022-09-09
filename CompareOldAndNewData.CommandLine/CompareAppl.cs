@@ -1,5 +1,5 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model.Interfaces;
 
 namespace CompareOldAndNewData.CommandLine
 {
@@ -20,7 +20,7 @@ namespace CompareOldAndNewData.CommandLine
 
             if (appl2 is null)
             {
-                diffs.Add(new DiffData(tableName, key: key, colName: "", 
+                diffs.Add(new DiffData(tableName, key: key, colName: "",
                                        goodValue: "", badValue: "Not found in FOAEA 3!"));
                 return diffs;
             }
@@ -44,7 +44,7 @@ namespace CompareOldAndNewData.CommandLine
                 if (appl2.Appl_EnfSrv_Cd.Trim().ToUpper() != "BC01")
                     diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CommSubm_Text", goodValue: appl2.Appl_CommSubm_Text, badValue: appl3.Appl_CommSubm_Text));
             }
-            
+
             if (appl2.Appl_Rcptfrm_Dte.Date != appl3.Appl_Rcptfrm_Dte.Date) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Rcptfrm_Dte", goodValue: appl2.Appl_Rcptfrm_Dte, badValue: appl3.Appl_Rcptfrm_Dte));
             if (appl2.Appl_Group_Batch_Cd != appl3.Appl_Group_Batch_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Group_Batch_Cd", goodValue: appl2.Appl_Group_Batch_Cd, badValue: appl3.Appl_Group_Batch_Cd));
             if (appl2.Appl_Source_RfrNr != appl3.Appl_Source_RfrNr) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Source_RfrNr", goodValue: appl2.Appl_Source_RfrNr, badValue: appl3.Appl_Source_RfrNr));

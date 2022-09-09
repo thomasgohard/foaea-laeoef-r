@@ -1,8 +1,8 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -36,7 +36,7 @@ public class TracingEventsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] string id,
+    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] ApplKey id,
                                                               [FromQuery] int? queue,
                                                               [FromServices] IRepositories repositories)
     {
@@ -79,13 +79,11 @@ public class TracingEventsController : ControllerBase
         return Ok(result);
     }
 
-    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(ApplKey id, IRepositories repositories, EventQueue queue)
     {
-        var applKey = new ApplKey(id);
-
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
 
-        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(manager.EventManager.GetApplicationEventsForQueueAsync(queue));
         else
             return NotFound();

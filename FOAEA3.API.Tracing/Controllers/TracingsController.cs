@@ -4,7 +4,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -28,8 +27,9 @@ public class TracingsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}", Name = "GetTracing")]
-    public async Task<ActionResult<TracingApplicationData>> GetApplication([FromRoute] string key,
-                                                               [FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> GetApplication(
+                                    [FromRoute] string key,
+                                    [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 

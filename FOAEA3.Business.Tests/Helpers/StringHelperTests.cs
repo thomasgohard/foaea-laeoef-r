@@ -1,4 +1,4 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Common.Helpers;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
