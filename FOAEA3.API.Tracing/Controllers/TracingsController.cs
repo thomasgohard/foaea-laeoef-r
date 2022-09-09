@@ -27,7 +27,7 @@ public class TracingsController : ControllerBase
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
-    [HttpGet("{key}")]
+    [HttpGet("{key}", Name = "GetTracing")]
     public async Task<ActionResult<TracingApplicationData>> GetApplication([FromRoute] string key,
                                                                [FromServices] IRepositories repositories)
     {
@@ -63,10 +63,8 @@ public class TracingsController : ControllerBase
         if (isCreated)
         {
             var appKey = $"{appl.Appl_EnfSrv_Cd}-{appl.Appl_CtrlCd}";
-            var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-            return Created(getURI, appl);
+            return CreatedAtRoute("GetTracing", new { key = appKey }, appl);
         }
         else
         {
