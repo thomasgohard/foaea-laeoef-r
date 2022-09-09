@@ -33,19 +33,23 @@ namespace BackendProcesses.CommandLine
             var repositoriesFinance = new DbRepositories_Finance(mainDB);
 
             // preload reference data
+            var loadRefFoaEvents = ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(repositories.MainDB));
+            var loadRefActiveStatus = ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(repositories.MainDB));
+            var loadRefGenders = ReferenceData.Instance().LoadGendersAsync(new DBGender(repositories.MainDB));
+            var loadRefProvinces = ReferenceData.Instance().LoadProvincesAsync(new DBProvince(repositories.MainDB));
+            var loadRefMediums = ReferenceData.Instance().LoadMediumsAsync(new DBMedium(repositories.MainDB));
+            var loadRefLanguages = ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(repositories.MainDB));
+            var loadRefDocTypes = ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(repositories.MainDB));
+            var loadRefCountries = ReferenceData.Instance().LoadCountriesAsync(new DBCountry(repositories.MainDB));
+            var loadRefAppReasons = ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(repositories.MainDB));
+            var loadRefAppCategories = ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(repositories.MainDB));
+            var loadRefAppLifeStates = ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(repositories.MainDB));
+            var loadRefAppComments = ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(repositories.MainDB));
 
-            await ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(mainDB));
-            await ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(mainDB));
-            await ReferenceData.Instance().LoadGendersAsync(new DBGender(mainDB));
-            await ReferenceData.Instance().LoadProvincesAsync(new DBProvince(mainDB));
-            await ReferenceData.Instance().LoadMediumsAsync(new DBMedium(mainDB));
-            await ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(mainDB));
-            await ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(mainDB));
-            await ReferenceData.Instance().LoadCountriesAsync(new DBCountry(mainDB));
-            await ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(mainDB));
-            await ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(mainDB));
-            await ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(mainDB));
-            await ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(mainDB));
+            await Task.WhenAll(loadRefFoaEvents, loadRefActiveStatus, loadRefGenders,
+                               loadRefProvinces, loadRefMediums, loadRefLanguages,
+                               loadRefDocTypes, loadRefCountries, loadRefAppReasons,
+                               loadRefAppCategories, loadRefAppLifeStates, loadRefAppComments);
 
             ReferenceData.Instance().Configuration.Add("emailRecipients", configuration.GetSection("emailRecipients").Value);
 
