@@ -1,6 +1,6 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 
 namespace CompareOldAndNewData.CommandLine
 {
@@ -17,7 +17,7 @@ namespace CompareOldAndNewData.CommandLine
             foreach (var intFinH2item in allIntFinHdata2)
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH2item.ActvSt_Cd}]/[{intFinH2item.IntFinH_Dte.Date}]";
-                var intFinH3item = allIntFinHdata3.Where(m => (m.IntFinH_Dte.Date == intFinH2item.IntFinH_Dte.Date) || 
+                var intFinH3item = allIntFinHdata3.Where(m => (m.IntFinH_Dte.Date == intFinH2item.IntFinH_Dte.Date) ||
                                                               ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == intFinH2item.ActvSt_Cd)) ||
                                                               ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == intFinH2item.ActvSt_Cd))).FirstOrDefault();
                 if (intFinH3item is null)
@@ -29,7 +29,7 @@ namespace CompareOldAndNewData.CommandLine
             foreach (var intFinH3item in allIntFinHdata3)
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH3item.ActvSt_Cd}]/[{intFinH3item.IntFinH_Dte.Date}]";
-                var intFinH2item = allIntFinHdata2.Where(m => (m.IntFinH_Dte.Date == intFinH3item.IntFinH_Dte.Date) || 
+                var intFinH2item = allIntFinHdata2.Where(m => (m.IntFinH_Dte.Date == intFinH3item.IntFinH_Dte.Date) ||
                                                               ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == intFinH3item.ActvSt_Cd)) ||
                                                               ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == intFinH3item.ActvSt_Cd))).FirstOrDefault();
                 if (intFinH2item is null)

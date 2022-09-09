@@ -1,7 +1,7 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -43,7 +43,7 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutDataAsync<ApplicationData, SINConfirmationData>(apiCall, confirmationData);
         }
 
-        public async Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, 
+        public async Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords,
                                                                                     string activeState, string recipientCode)
         {
             string baseCall = "api/v1/Applications";

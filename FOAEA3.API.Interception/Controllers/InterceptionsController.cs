@@ -3,7 +3,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +25,7 @@ public class InterceptionsController : ControllerBase
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
-    [HttpGet("{key}")]
+    [HttpGet("{key}", Name = "GetInterception")]
     public async Task<ActionResult<InterceptionApplicationData>> GetApplication([FromRoute] string key,
                                                                     [FromServices] IRepositories repositories,
                                                                     [FromServices] IRepositories_Finance repositoriesFinance)
@@ -75,10 +74,8 @@ public class InterceptionsController : ControllerBase
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
-            var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
 
-            return Created(getURI, application);
+            return CreatedAtRoute("GetInterception", new { key = appKey }, application);
         }
         else
         {

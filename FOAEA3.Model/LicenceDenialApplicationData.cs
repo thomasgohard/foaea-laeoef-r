@@ -18,10 +18,10 @@ namespace FOAEA3.Model
         //}
 
         [Display(Name = "SUPPORTORDER_DTE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.YYYY_MM_DD)]
+        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime LicSusp_SupportOrder_Dte { get; set; }
         [Display(Name = "NOTICESENTTODEBTOR_DTE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.YYYY_MM_DD)]
+        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime LicSusp_NoticeSentToDbtr_Dte { get; set; }
         [Display(Name = "COURT_NAME", ResourceType = typeof(LanguageResource))]
         public string LicSusp_CourtNme { get; set; }
@@ -57,7 +57,7 @@ namespace FOAEA3.Model
         [Display(Name = "DEBTOR_BIRTH_COUNTRY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_Brth_CtryCd { get; set; }
         [Display(Name = "TERM_REQ_DATE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.YYYY_MM_DD)]
+        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime? LicSusp_TermRequestDte { get; set; }
         public byte LicSusp_Still_InEffect_Ind { get; set; }
         public byte LicSusp_AnyLicRvkd_Ind { get; set; }

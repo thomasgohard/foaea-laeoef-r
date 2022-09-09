@@ -1,6 +1,6 @@
 using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Common.Helpers;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,7 +14,7 @@ namespace FOAEA3.Web.Pages.Applications
     {
         private readonly ApiConfig ApiRoots;
 
-        public List<ApplicationLifeStateData> ApplLifeStates { get; }
+        private List<ApplicationLifeStateData> ApplLifeStates { get; set; }
 
         [BindProperty]
         public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -26,13 +26,6 @@ namespace FOAEA3.Web.Pages.Applications
         {
             ApiRoots = apiConfig.Value;
 
-            string currentSubmitter = "ON2D68";  // need to put something here, for testing/prototype
-            string currentUser = "system_support";       // need to put something here, for testing/prototype
-            var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
-            var apiBroker = new ApplicationLifeStatesAPIBroker(apiHelper);
-
-            ApplLifeStates = (apiBroker.GetApplicationLifeStatesAsync().Result).Items;
-
             SearchCriteria = new ApplicationSearchCriteriaData
             {
                 Category = "I01"
@@ -41,7 +34,7 @@ namespace FOAEA3.Web.Pages.Applications
 
         public void OnGet()
         {
-            ViewData["ApplLifeStates"] = ApplLifeStates;
+            ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
         }
 
         public async Task<IActionResult> OnPostAdvancedSearch()
@@ -49,8 +42,8 @@ namespace FOAEA3.Web.Pages.Applications
             if (!ModelState.IsValid)
             {
                 // call API to do search and display result
-                string currentSubmitter = "ON2D68";
-                string currentUser = "system_support";
+                string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
+                string currentUser = "system_support"; // TODO: fix when log in is done
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
                 var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
 
@@ -69,7 +62,7 @@ namespace FOAEA3.Web.Pages.Applications
                 };
 
                 ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
-                ViewData["ApplLifeStates"] = ApplLifeStates;
+                ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
 
                 return Page();
             }
@@ -82,8 +75,8 @@ namespace FOAEA3.Web.Pages.Applications
             if (!ModelState.IsValid)
             {
                 // call API to do search and display result
-                string currentSubmitter = "ON2D68";
-                string currentUser = "system_support";
+                string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
+                string currentUser = "system_support"; // TODO: fix when log in is done
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
                 var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
 
@@ -96,13 +89,13 @@ namespace FOAEA3.Web.Pages.Applications
                     Status = MySearchCriteria.Status,
                     Category = MySearchCriteria.Category,
                     ControlCode = MySearchCriteria.ControlCode,
-                    EnforcementService = "ON01",
+                    EnforcementService = "ON01", // TODO: fix when log in is done
                     ReferenceNumber = MySearchCriteria.EnfSourceRefNumber,
                     JusticeNumber = MySearchCriteria.JusticeNumber
                 };
 
                 ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
-                ViewData["ApplLifeStates"] = ApplLifeStates;
+                ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
 
                 return Page();
             }

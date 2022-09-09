@@ -10,7 +10,7 @@ namespace FOAEA3.Resources.Helpers
         public const string GRID_DATETIMEFORMATSTRING = "{0:yyyy/MM/dd HH:mm:ss}";
         public const string SQL_DATE = "MM/dd/yyyy";
         public const string SQL_DATETIME = "MM/dd/yyyy HH:mm:ss";
-        public const string YYYY_MM_DD = "yyyy/MM/dd";
+        public const string FOAEA_DATE_FORMAT = "yyyy/MM/dd";
 
         public static string AsJulianString(this DateTime value)
         {

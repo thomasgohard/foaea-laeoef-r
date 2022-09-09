@@ -3,6 +3,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Security
@@ -10,25 +11,12 @@ namespace FOAEA3.Business.Security
     public class AccessAuditManager
     {
         private readonly IRepositories DB;
-        private readonly Dictionary<AccessAuditElement, AccessAuditElementTypeData> AccessAuditElements;
         public readonly List<string> Errors;
 
         public AccessAuditManager(IRepositories repositories)
         {
             DB = repositories;
             Errors = new List<string>();
-
-            // load all values from database
-            AccessAuditElements = new Dictionary<AccessAuditElement, AccessAuditElementTypeData>();
-
-            var allElementTypes = DB.AccessAuditTable.GetAllElementAccessTypeAsync().Result;
-            foreach (var elementType in allElementTypes)
-            {
-                if (Enum.IsDefined(typeof(AccessAuditElement), elementType.AccessAuditDataElementValueType_ID))
-                    AccessAuditElements.Add((AccessAuditElement)elementType.AccessAuditDataElementValueType_ID, elementType);
-                else
-                    Errors.Add($"Undefined access audit element type: {elementType.AccessAuditDataElementValueType_ID} [{elementType.ElementName}]");
-            }
         }
 
         public async Task<int> AddAuditHeaderAsync(AccessAuditPage page)
@@ -40,7 +28,18 @@ namespace FOAEA3.Business.Security
 
         public async Task AddAuditElementAsync(int headerId, AccessAuditElement elementType, string elementValue)
         {
-            string elementName = AccessAuditElements[elementType].ElementName;
+            var accessAuditElements = new Dictionary<AccessAuditElement, AccessAuditElementTypeData>();
+            var allElementTypes = await DB.AccessAuditTable.GetAllElementAccessTypeAsync();
+
+            foreach (var thisElementType in allElementTypes)
+            {
+                if (Enum.IsDefined(typeof(AccessAuditElement), thisElementType.AccessAuditDataElementValueType_ID))
+                    accessAuditElements.Add((AccessAuditElement)thisElementType.AccessAuditDataElementValueType_ID, thisElementType);
+                else
+                    Errors.Add($"Undefined access audit element type: {thisElementType.AccessAuditDataElementValueType_ID} [{thisElementType.ElementName}]");
+            }
+
+            string elementName = accessAuditElements[elementType].ElementName;
             await DB.AccessAuditTable.SaveDataValueAsync(headerId, elementName, elementValue);
         }
 

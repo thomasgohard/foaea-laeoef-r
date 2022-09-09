@@ -1,6 +1,6 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 
 namespace CompareOldAndNewData.CommandLine
 {
@@ -17,7 +17,7 @@ namespace CompareOldAndNewData.CommandLine
             foreach (var holdbackItem2 in holdback2)
             {
                 string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte.Date}]/[{holdbackItem2.EnfSrv_Cd}]";
-                var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte.Date == holdbackItem2.IntFinH_Dte.Date) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) || 
+                var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte.Date == holdbackItem2.IntFinH_Dte.Date) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd))).FirstOrDefault();
                 if (holdbackItem3 is null)

@@ -3,7 +3,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -27,14 +26,12 @@ public class TraceResponsesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<DataList<TraceResponseData>>> GetTraceResults([FromRoute] string id,
+    public async Task<ActionResult<DataList<TraceResponseData>>> GetTraceResults([FromRoute] ApplKey id,
                                                                      [FromServices] IRepositories repositories)
     {
-        var applKey = new ApplKey(id);
-
         var manager = new TracingManager(repositories, config);
 
-        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await manager.GetTraceResultsAsync());
         else
             return NotFound();

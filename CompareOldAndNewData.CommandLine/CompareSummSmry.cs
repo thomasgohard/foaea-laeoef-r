@@ -1,5 +1,5 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model.Interfaces;
 
 namespace CompareOldAndNewData.CommandLine
 {
