@@ -55,12 +55,12 @@ namespace FOAEA3.Business.Areas.Application
             if (!string.IsNullOrEmpty(searchCriteria.Status)) items.Add(AccessAuditElement.Status, searchCriteria.Status);
             if (!string.IsNullOrEmpty(searchCriteria.Submitter)) items.Add(AccessAuditElement.Subm_SubmCd, searchCriteria.Submitter);
             if (searchCriteria.State != ApplicationState.UNDEFINED) items.Add(AccessAuditElement.State, ((int)searchCriteria.State).ToString());
-            if (searchCriteria.DebtorDateOfBirth_Start.HasValue) items.Add(AccessAuditElement.DOBFrom, searchCriteria.DebtorDateOfBirth_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
-            if (searchCriteria.DebtorDateOfBirth_End.HasValue) items.Add(AccessAuditElement.DOBTo, searchCriteria.DebtorDateOfBirth_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
-            if (searchCriteria.CreatedDate_Start.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateFrom, searchCriteria.CreatedDate_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
-            if (searchCriteria.CreatedDate_End.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateTo, searchCriteria.CreatedDate_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
-            if (searchCriteria.ActualEndDate_Start.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateFrom, searchCriteria.ActualEndDate_Start.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
-            if (searchCriteria.ActualEndDate_End.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateTo, searchCriteria.ActualEndDate_End.Value.ToString(DateTimeExtensions.YYYY_MM_DD));
+            if (searchCriteria.DebtorDateOfBirth_Start.HasValue) items.Add(AccessAuditElement.DOBFrom, searchCriteria.DebtorDateOfBirth_Start.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
+            if (searchCriteria.DebtorDateOfBirth_End.HasValue) items.Add(AccessAuditElement.DOBTo, searchCriteria.DebtorDateOfBirth_End.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
+            if (searchCriteria.CreatedDate_Start.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateFrom, searchCriteria.CreatedDate_Start.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
+            if (searchCriteria.CreatedDate_End.HasValue) items.Add(AccessAuditElement.ApplicationReceiptDateTo, searchCriteria.CreatedDate_End.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
+            if (searchCriteria.ActualEndDate_Start.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateFrom, searchCriteria.ActualEndDate_Start.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
+            if (searchCriteria.ActualEndDate_End.HasValue) items.Add(AccessAuditElement.ApplicationExpiryDateTo, searchCriteria.ActualEndDate_End.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT));
             if (searchCriteria.ViewAllJurisdiction) items.Add(AccessAuditElement.ViewAllJurisdictions, searchCriteria.ViewAllJurisdiction.ToString());
             if (searchCriteria.SearchOnlySinConfirmed) items.Add(AccessAuditElement.SINConfirmed, searchCriteria.SearchOnlySinConfirmed.ToString());
 

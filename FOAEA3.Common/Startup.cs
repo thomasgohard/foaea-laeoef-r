@@ -26,6 +26,9 @@ namespace FOAEA3.Common
                                                                                                            //TokenOptions tokenOptions, SigningConfigurations signingConfigurations)
         {
             AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
             services.AddControllers(options =>
@@ -129,9 +132,9 @@ namespace FOAEA3.Common
             var loadRefAppLifeStates = ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(repositories.MainDB));
             var loadRefAppComments = ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(repositories.MainDB));
 
-            await Task.WhenAll(loadRefFoaEvents, loadRefActiveStatus, loadRefGenders, 
-                               loadRefProvinces, loadRefMediums, loadRefLanguages, 
-                               loadRefDocTypes, loadRefCountries, loadRefAppReasons, 
+            await Task.WhenAll(loadRefFoaEvents, loadRefActiveStatus, loadRefGenders,
+                               loadRefProvinces, loadRefMediums, loadRefLanguages,
+                               loadRefDocTypes, loadRefCountries, loadRefAppReasons,
                                loadRefAppCategories, loadRefAppLifeStates, loadRefAppComments);
 
             if (ReferenceData.Instance().Messages.Count == 0)
