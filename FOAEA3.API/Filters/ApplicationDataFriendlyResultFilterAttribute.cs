@@ -18,9 +18,11 @@ namespace FOAEA3.API.Filters
                 return;
             }
 
-            var mapper = context.HttpContext.RequestServices.GetRequiredService<IMapper>();
-
-            resultFromAction.Value = mapper.Map<ApplicationDataFriendly>(resultFromAction.Value);
+            var actionPath = context.HttpContext.Request.Path;
+            if (actionPath.HasValue && actionPath.Value.Contains("/friendly")) {
+                var mapper = context.HttpContext.RequestServices.GetRequiredService<IMapper>();
+                resultFromAction.Value = mapper.Map<ApplicationDataFriendly>(resultFromAction.Value);
+            }
 
             await next();
         }

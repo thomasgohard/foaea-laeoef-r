@@ -28,22 +28,9 @@ public class ApplicationsController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApplicationData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
-    {
-        var applKey = new ApplKey(id);
-
-        var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
-
-        if (await applManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(appl);
-        else
-            return NotFound();
-    }
-
     [HttpGet("{id}/friendly")]
     [ApplicationDataFriendlyResultFilter]
-    public async Task<ActionResult<ApplicationData>> GetApplicationFriendly([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationData>> GetApplication([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(id);
 
