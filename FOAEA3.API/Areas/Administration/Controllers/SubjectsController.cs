@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FOAEA3.API.Areas.Administration.Controllers;
@@ -11,6 +12,10 @@ public class SubjectsController : ControllerBase
 {
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Subjects API Version 1.0");
+
+    [HttpGet("DB")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
     public async Task<ActionResult<List<SubjectData>>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)

@@ -5,9 +5,12 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,8 +25,7 @@ namespace FOAEA3.Common
 {
     public static class Startup
     {
-        public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration) //,
-                                                                                                           //TokenOptions tokenOptions, SigningConfigurations signingConfigurations)
+        public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
         {
             AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
@@ -31,29 +33,33 @@ namespace FOAEA3.Common
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
-            services.AddControllers(options =>
-            {
-                options.ReturnHttpNotAcceptable = true;
-                options.RespectBrowserAcceptHeader = true;
-                options.Filters.Add(new ActionAutoLoggerFilter());
-                options.Filters.Add(new ActionProcessHeadersFilter());
-            }).AddXmlSerializerFormatters();
 
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.TokenValidationParameters =
-            //            new TokenValidationParameters()
-            //            {
-            //                ValidateAudience = true,
-            //                ValidateLifetime = true,
-            //                ValidateIssuerSigningKey = true,
-            //                ValidIssuer = tokenOptions.Issuer,
-            //                ValidAudience = tokenOptions.Audience,
-            //                IssuerSigningKey = signingConfigurations.SecurityKey,
-            //                ClockSkew = TimeSpan.Zero
-            //            };
-            //    });
+            services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
+                    .SetApplicationName("SharedCookieApp");
+
+            services.AddAuthentication("Identity.Application")
+                    .AddCookie("Identity.Application", options =>
+                        {
+                            options.Cookie.Name = ".AspNet.SharedCookie";
+                        });
+
+            // TODO: replace with JWT authentication or something similar
+            //services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //        .AddCookie(); 
+
+            services.AddControllers(options =>
+                        {
+                            options.ReturnHttpNotAcceptable = true;
+                            options.RespectBrowserAcceptHeader = true;
+                            options.Filters.Add(new AuthorizeFilter());
+                            options.Filters.Add(new ActionAutoLoggerFilter());
+                            options.Filters.Add(new ActionProcessHeadersFilter());
+                        })
+                    .AddXmlSerializerFormatters()
+                    .AddNewtonsoftJson(options =>
+                            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                        );
         }
 
         public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -105,6 +111,7 @@ namespace FOAEA3.Common
             }
 
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
