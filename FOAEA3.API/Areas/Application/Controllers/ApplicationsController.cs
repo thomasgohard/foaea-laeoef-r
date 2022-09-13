@@ -22,6 +22,7 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 
     [HttpGet("DB")]

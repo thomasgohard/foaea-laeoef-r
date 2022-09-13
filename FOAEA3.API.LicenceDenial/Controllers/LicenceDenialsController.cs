@@ -3,6 +3,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -20,6 +21,7 @@ public class LicenceDenialsController : ControllerBase
     }
 
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("LicenceDenialsFiles API Version 1.0");
 
     [HttpGet("DB")]
