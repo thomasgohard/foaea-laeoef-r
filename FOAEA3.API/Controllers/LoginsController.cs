@@ -28,7 +28,7 @@ namespace FOAEA3.API.Controllers
                                                         [FromServices] IRepositories db)
         {
             // WARNING: not for production use!
-            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Submitter, db);
+            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
                 await HttpContext.SignInAsync("Identity.Application", principal);
