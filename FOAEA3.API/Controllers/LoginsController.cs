@@ -1,9 +1,13 @@
-﻿using FOAEA3.Business.Security;
+﻿using FOAEA3.API.Security;
+using FOAEA3.Business.Security;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FOAEA3.API.Controllers
 {
@@ -15,7 +19,70 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
 
         [HttpGet("DB")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
+        [AllowAnonymous]
+        [HttpGet("TestLogin")]
+        public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
+                                                        [FromServices] IRepositories db)
+        {
+            // WARNING: not for production use!
+            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Submitter, db);
+            if (principal is not null && principal.Identity is not null)
+            {
+                await HttpContext.SignInAsync("Identity.Application", principal);
+                return Ok(principal);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("TestLogout")]
+        public async Task<ActionResult> TestLogout()
+        {
+            // WARNING: not for production use!
+            await HttpContext.SignOutAsync("Identity.Application"); // CookieAuthenticationDefaults.AuthenticationScheme,
+
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("TestVerify")]
+        public ActionResult TestVerify()
+        {
+            // WARNING: not for production use!
+            var user = User.Identity;
+            if (user is not null && user.IsAuthenticated)
+            {
+                var claims = User.Claims;
+                var userName = string.Empty;
+                var userRole = string.Empty;
+                var submitter = string.Empty;
+                foreach (var claim in claims)
+                {
+                    switch (claim.Type)
+                    {
+                        case ClaimTypes.Name:
+                            userName = claim.Value;
+                            break;
+                        case ClaimTypes.Role:
+                            userRole = claim.Value;
+                            break;
+                        case "Submitter":
+                            submitter = claim.Value;
+                            break;
+                    }
+                }
+                return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
+            }
+            else
+            {
+                return Ok("No user logged in. Please login.");
+            }
+        }
 
         [HttpGet("CheckPreviousPasswords")]
         public async Task<ActionResult<string>> CheckPreviousPasswordsAsync([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)

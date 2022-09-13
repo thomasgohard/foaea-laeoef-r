@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FOAEA3.API.Areas.Administration.Controllers;
@@ -12,6 +13,10 @@ public class SubmitterProfilesController : ControllerBase
 
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("SubmitterProfiles API Version 1.0");
+
+    [HttpGet("DB")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{submCd}")]
     public async Task<ActionResult<SubmitterProfileData>> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)

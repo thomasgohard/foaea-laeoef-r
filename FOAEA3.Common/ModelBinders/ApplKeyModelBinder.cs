@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Common.Helpers;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Threading.Tasks;
 
@@ -23,7 +22,7 @@ namespace FOAEA3.Common.ModelBinders
             }
 
             var value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName).FirstValue;
-            if (!string.IsNullOrEmpty(value) )
+            if (!string.IsNullOrEmpty(value))
             {
                 var model = new ApplKey(value);
                 bindingContext.Result = ModelBindingResult.Success(model);
