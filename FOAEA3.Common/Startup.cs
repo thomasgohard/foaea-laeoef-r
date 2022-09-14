@@ -32,7 +32,6 @@ namespace FOAEA3.Common
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
-
             services.AddDataProtection()
                     .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
                     .SetApplicationName("SharedCookieApp");
