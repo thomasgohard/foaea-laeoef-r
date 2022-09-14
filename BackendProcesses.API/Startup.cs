@@ -45,7 +45,7 @@ namespace BackendProcesses.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackendProcesses.API", Version = "v1" });
             });
 
-            var mainDB = new DBTools(Config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            var mainDB = new DBToolsAsync(Config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
             services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB)); // to access database procs
             services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
