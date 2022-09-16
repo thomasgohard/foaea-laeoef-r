@@ -5,6 +5,7 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +33,10 @@ namespace FOAEA3.Common
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
+            // WARNING: replace with JWT authentication or something similar
+            //services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //        .AddCookie(); 
+
             services.AddDataProtection()
                     .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
                     .SetApplicationName("SharedCookieApp");
@@ -42,9 +47,13 @@ namespace FOAEA3.Common
                             options.Cookie.Name = ".AspNet.SharedCookie";
                         });
 
-            // TODO: replace with JWT authentication or something similar
-            //services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            //        .AddCookie(); 
+            //services.AddAuthentication(
+            //    JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.Authority = "https://localhost:7273";
+            //        options.Audience = "foaea3_api";
+            //    });
 
             services.AddControllers(options =>
                         {

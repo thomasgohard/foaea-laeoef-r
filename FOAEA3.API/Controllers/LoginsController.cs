@@ -23,7 +23,7 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [AllowAnonymous]
-        [HttpGet("TestLogin")]
+        [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
                                                         [FromServices] IRepositories db)
         {
@@ -40,7 +40,7 @@ namespace FOAEA3.API.Controllers
             }
         }
 
-        [HttpGet("TestLogout")]
+        [HttpPost("TestLogout")]
         public async Task<ActionResult> TestLogout()
         {
             // WARNING: not for production use!
@@ -50,7 +50,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("TestVerify")]
+        [HttpPost("TestVerify")]
         public ActionResult TestVerify()
         {
             // WARNING: not for production use!
