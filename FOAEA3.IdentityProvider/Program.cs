@@ -10,28 +10,26 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("FOAEA3IdentityManagerContextConnection").ReplaceVariablesWithEnvironmentValues()
                             ?? throw new InvalidOperationException("Connection string 'FOAEA3IdentityManagerContextConnection' not found.");
 
-builder.Services.AddDbContext<FOAEA3IdentityManagerContext>(options => options.UseSqlServer(connectionString));
-
-builder.Services.AddTransient<IEmailSender, EmailSender>();
-
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
                     {
+                        options.User.RequireUniqueEmail = false;
                         options.SignIn.RequireConfirmedAccount = false;
+                        options.Password.RequireNonAlphanumeric = true;
+                        options.Password.RequireDigit = true;
                     })
                 .AddEntityFrameworkStores<FOAEA3IdentityManagerContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddAuthentication()
+                .AddCookie()
+                .AddJwtBearer();
 
-// WARNING: this is only used for local testing -- dev/uat/production would use a cloud-based provider (or a department one at the minimum)
-//builder.Services.AddIdentityServer()
-//                .AddInMemoryIdentityResources(builder.Configuration.GetSection("IdentityServer:IdentityResources"))
-//                .AddInMemoryApiResources(builder.Configuration.GetSection("IdentityServer:ApiResources"))
-//                .AddInMemoryClients(builder.Configuration.GetSection("IdentityServer:Clients"))
-//                .AddDeveloperSigningCredential()
-//                .AddAspNetIdentity<ApplicationUser>();
+builder.Services.AddDbContext<FOAEA3IdentityManagerContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
