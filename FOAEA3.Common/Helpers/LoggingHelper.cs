@@ -10,6 +10,8 @@ namespace FOAEA3.Common.Helpers
 {
     public static class LoggingHelper
     {
+        public const string COOKIE_ID = "Identity.Application";
+
         public static void SetupLogging(IConfiguration config, string sourceNameForEvents,
                                         string connName = "FOAEAMain", string apiTableName = "Logs-API")
         {

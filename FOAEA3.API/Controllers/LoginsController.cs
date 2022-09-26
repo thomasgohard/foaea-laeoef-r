@@ -4,19 +4,16 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace FOAEA3.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LoginsController : ControllerBase
     {
         [HttpGet("Version")]
@@ -32,11 +29,10 @@ namespace FOAEA3.API.Controllers
                                                         [FromServices] IRepositories db)
         {
             // WARNING: not for production use!
-            (var principal, var token) = await TestLogin.AutoLogin(loginData.UserName, loginData.Password,
-                                                                   loginData.Submitter, db, "");
+            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
-                await HttpContext.SignInAsync("Identity.Application", principal);
+                await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);
                 return Ok(principal);
             }
             else
@@ -45,44 +41,15 @@ namespace FOAEA3.API.Controllers
             }
         }
 
-        [AllowAnonymous]
-        [HttpPost("TestTokens")]
-        public async Task<ActionResult> CreateToken([FromBody] LoginData2 loginData,
-                                                    [FromServices] IRepositories db,
-                                                    [FromServices] IConfiguration config)
-        {
-            // WARNING: not for production use!
-            string tokenKey = config["Tokens:Key"];
-            (var principal, var token) = await TestLogin.AutoLogin(loginData.UserName, loginData.Password,
-                                                                   loginData.Submitter, db,
-                                                                   tokenKey.ReplaceVariablesWithEnvironmentValues());
-            if (principal is not null && principal.Identity is not null)
-            {
-                await HttpContext.SignInAsync("Identity.Application", principal);
-
-                return Created("", new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
-            }
-            else
-            {
-                return BadRequest();
-            }
-        }
-
-
         [HttpPost("TestLogout")]
         public async Task<ActionResult> TestLogout()
         {
             // WARNING: not for production use!
-            await HttpContext.SignOutAsync("Identity.Application"); // CookieAuthenticationDefaults.AuthenticationScheme,
+            await HttpContext.SignOutAsync(LoggingHelper.COOKIE_ID); // CookieAuthenticationDefaults.AuthenticationScheme,
 
             return Ok();
         }
 
-        [AllowAnonymous]
         [HttpPost("TestVerify")]
         public ActionResult TestVerify()
         {

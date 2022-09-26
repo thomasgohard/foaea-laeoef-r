@@ -13,7 +13,6 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
 public class ApplicationsController : ControllerBase
 {
     private readonly CustomConfig config;
