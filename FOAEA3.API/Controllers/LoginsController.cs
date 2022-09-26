@@ -13,7 +13,6 @@ namespace FOAEA3.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    //    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LoginsController : ControllerBase
     {
         [HttpGet("Version")]
@@ -105,6 +104,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPost("SendEmail")]
+        [Authorize(Roles = "System")]
         public async Task<ActionResult<string>> SendEmail([FromServices] IRepositories repositories)
         {
             var emailData = await APIBrokerHelper.GetDataFromRequestBodyAsync<EmailData>(Request);
@@ -117,6 +117,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("PostConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -127,6 +128,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetEmailByConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -135,6 +137,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbSubject = new DBSubject(repositories.MainDB);
@@ -143,6 +146,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("PostPassword")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
