@@ -21,6 +21,7 @@ namespace FileBroker.Common
             services.AddScoped<IErrorTrackingRepository>(m => ActivatorUtilities.CreateInstance<DBErrorTracking>(m, fileBrokerDB));
             services.AddScoped<IMailServiceRepository>(m => ActivatorUtilities.CreateInstance<DBMailService>(m, fileBrokerDB));
             services.AddScoped<ILoadInboundAuditRepository>(m => ActivatorUtilities.CreateInstance<DBLoadInboundAudit>(m, fileBrokerDB));
+            services.AddScoped<IUserRepository>(m => ActivatorUtilities.CreateInstance<DBUser>(m, fileBrokerDB));
 
             return fileBrokerDB.ConnectionString;
         }

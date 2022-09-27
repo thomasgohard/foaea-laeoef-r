@@ -5,6 +5,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
@@ -17,6 +18,7 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "FederalLicenceDenial")]
 public class FederalLicenceDenialFilesController : ControllerBase
 {
     [HttpGet("Version")]

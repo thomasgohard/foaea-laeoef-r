@@ -5,6 +5,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.IO;
@@ -15,6 +16,7 @@ namespace FileBroker.API.Fed.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "FederalTracing")]
 public class FederalTracingFilesController : ControllerBase
 {
     [HttpGet("Version")]

@@ -38,7 +38,7 @@ public class ApplicationFederalSinsController : ControllerBase
 
         await sinManager.CreateResultDataAsync(responseData);
 
-        var rootPath = "http://" + HttpContext.Request.Host.ToString();
+        var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
         return Created(rootPath, new SINResultData());
     }

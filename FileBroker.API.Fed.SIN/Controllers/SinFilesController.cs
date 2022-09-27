@@ -5,6 +5,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.IO;
@@ -16,10 +17,18 @@ namespace FileBroker.API.Fed.SIN.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "SinRegistry")]
 public class SinFilesController : ControllerBase
 {
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("SinFiles API Version 1.0");
+
+    [HttpGet("Identity")]
+    public ActionResult GetIdentityInfo()
+    {
+        var user = User.Identity;
+        return Ok(user?.Name);
+    }
 
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);

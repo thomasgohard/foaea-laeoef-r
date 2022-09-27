@@ -3,7 +3,7 @@
     "IIS Express": {
       "commandName": "Project",
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:13012"
+      "applicationUrl": "https://localhost:13012"
     }
   }
 }

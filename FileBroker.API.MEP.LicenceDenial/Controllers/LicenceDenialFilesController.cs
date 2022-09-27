@@ -1,10 +1,12 @@
 ﻿using FileBroker.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileBroker.API.MEP.LicenceDenial.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "MEPlicenceDenial")]
 public class LicenceDenialFilesController : ControllerBase
 {
     [HttpGet("Version")]

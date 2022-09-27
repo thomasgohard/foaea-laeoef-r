@@ -63,7 +63,7 @@ public class LicenceDenialTerminationsController : ControllerBase
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
             var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
+            var getURI = new Uri("https://" + HttpContext.Request.Host.ToString() + actionPath);
 
             return Created(getURI, application);
         }

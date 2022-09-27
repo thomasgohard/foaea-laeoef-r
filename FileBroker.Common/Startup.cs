@@ -3,16 +3,20 @@ using FileBroker.Model;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FileBroker.Common
@@ -32,20 +36,21 @@ namespace FileBroker.Common
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.RespectBrowserAcceptHeader = true;
+                options.Filters.Add(new AuthorizeFilter());
                 options.Filters.Add(new ActionAutoLoggerFilter());
             }).AddXmlSerializerFormatters();
 
-            //services.AddAuthentication(LoggingHelper.COOKIE_ID)
-            //        .AddJwtBearer(options =>
-            //        {
-            //            options.TokenValidationParameters = new TokenValidationParameters()
-            //            {
-            //                ValidIssuer = "Justice",
-            //                ValidAudience = "Justice",
-            //                IssuerSigningKey = new SymmetricSecurityKey(
-            //                    Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
-            //            };
-            //        });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters()
+                        {
+                            ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+                            ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
+                        };
+                    });
 
             services.AddEndpointsApiExplorer();
             services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
@@ -112,55 +117,6 @@ namespace FileBroker.Common
             app.UseAuthorization();
             app.MapControllers();
         }
-
-        /*
-         
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, userRole),
-                new Claim("Submitter", submitter),
-                //new Claim(JwtRegisteredClaimNames.Sub, subject.EMailAddress),
-                //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                //new Claim(JwtRegisteredClaimNames.UniqueName, userName)
-            };
-
-            var identity = new ClaimsIdentity(claims, LoggingHelper.COOKIE_ID);
-            var principal = new ClaimsPrincipal(identity);
-          
-            var encodedApiKey = Encoding.UTF8.GetBytes(apiKey);
-            var securityKey = new SymmetricSecurityKey(encodedApiKey);
-            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken("Justice", "Justice", claims, signingCredentials: creds,
-                                 expires: DateTime.UtcNow.AddMinutes(20));    
-        
-            //[AllowAnonymous]
-            //[HttpPost("TestTokens")]
-            //public async Task<ActionResult> CreateToken([FromBody] LoginData2 loginData,
-            //                                            [FromServices] IRepositories db,
-            //                                            [FromServices] IConfiguration config)
-            //{
-            //    // WARNING: not for production use!
-            //    string tokenKey = config["Tokens:Key"];
-            //    (var principal, var token) = await TestLogin.AutoLogin(loginData.UserName, loginData.Password,
-            //                                                           loginData.Submitter, db,
-            //                                                           tokenKey.ReplaceVariablesWithEnvironmentValues());
-            //    if (principal is not null && principal.Identity is not null)
-            //    {
-            //        await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);
-
-            //        return Created("", new
-            //        {
-            //            token = new JwtSecurityTokenHandler().WriteToken(token),
-            //            expiration = token.ValidTo
-            //        });
-            //    }
-            //    else
-            //    {
-            //        return BadRequest();
-            //    }
-            //}
-         */
+                
     }
 }
