@@ -23,16 +23,16 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [AllowAnonymous]
-        [HttpGet("TestLogin")]
+        [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
                                                         [FromServices] IRepositories db)
         {
             // WARNING: not for production use!
-            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Submitter, db);
+            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
-                await HttpContext.SignInAsync("Identity.Application", principal);
-                return Ok(principal);
+                await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);
+                return Ok(principal.Claims);
             }
             else
             {
@@ -40,17 +40,16 @@ namespace FOAEA3.API.Controllers
             }
         }
 
-        [HttpGet("TestLogout")]
+        [HttpPost("TestLogout")]
         public async Task<ActionResult> TestLogout()
         {
             // WARNING: not for production use!
-            await HttpContext.SignOutAsync("Identity.Application"); // CookieAuthenticationDefaults.AuthenticationScheme,
+            await HttpContext.SignOutAsync(LoggingHelper.COOKIE_ID); // CookieAuthenticationDefaults.AuthenticationScheme,
 
             return Ok();
         }
 
-        [AllowAnonymous]
-        [HttpGet("TestVerify")]
+        [HttpPost("TestVerify")]
         public ActionResult TestVerify()
         {
             // WARNING: not for production use!
@@ -105,6 +104,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPost("SendEmail")]
+        [Authorize(Roles = "System")]
         public async Task<ActionResult<string>> SendEmail([FromServices] IRepositories repositories)
         {
             var emailData = await APIBrokerHelper.GetDataFromRequestBodyAsync<EmailData>(Request);
@@ -117,6 +117,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("PostConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -127,6 +128,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetEmailByConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -135,6 +137,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbSubject = new DBSubject(repositories.MainDB);
@@ -143,6 +146,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("PostPassword")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);

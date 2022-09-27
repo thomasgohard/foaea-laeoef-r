@@ -4,6 +4,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -22,6 +23,7 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 
     [HttpGet("DB")]

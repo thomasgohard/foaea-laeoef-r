@@ -3,16 +3,20 @@ using FileBroker.Model;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FileBroker.Common
@@ -32,8 +36,21 @@ namespace FileBroker.Common
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.RespectBrowserAcceptHeader = true;
+                options.Filters.Add(new AuthorizeFilter());
                 options.Filters.Add(new ActionAutoLoggerFilter());
             }).AddXmlSerializerFormatters();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters()
+                        {
+                            ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+                            ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
+                        };
+                    });
 
             services.AddEndpointsApiExplorer();
             services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
@@ -100,5 +117,6 @@ namespace FileBroker.Common
             app.UseAuthorization();
             app.MapControllers();
         }
+                
     }
 }

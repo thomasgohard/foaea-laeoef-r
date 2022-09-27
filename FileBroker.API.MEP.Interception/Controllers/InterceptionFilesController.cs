@@ -7,6 +7,7 @@ using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
@@ -20,6 +21,7 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "MEPinterception")]
 public class InterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]

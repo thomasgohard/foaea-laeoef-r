@@ -3,7 +3,7 @@ The following processes uses the same files currently being exchanged with the S
 ## Incoming Federal SIN Files
 1.	External partner calls our API to send us their file: 
 
-    `POST http://{server}:14015/api/v1/SinFiles?fileName=HR3SVSIS.{nnn}`
+    `POST https://{server}:14015/api/v1/SinFiles?fileName=HR3SVSIS.{nnn}`
 
     * **Important:** The **body** of the API must contain the flatfile in the same format that we currently receive.
     * `{server}` will be our server name available to external users
@@ -34,7 +34,7 @@ The `ProcessSINFile()` method of the `SinFilesController` class found in the `Fi
     5.  call an API to update the outbound SIN events in the FOAEA system
 1.	External partners will call our API to get the latest file:
 
-    `GET http://{server}:14015/api/v1/SinFiles`
+    `GET https://{server}:14015/api/v1/SinFiles`
 
      *An alternative would be for the SIN Registry to have an API available that we can call to send them the newly generated file.*
 

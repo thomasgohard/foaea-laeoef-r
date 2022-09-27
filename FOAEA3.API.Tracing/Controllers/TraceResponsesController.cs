@@ -46,7 +46,7 @@ public class TraceResponsesController : ControllerBase
 
         await tracingManager.CreateResponseDataAsync(responseData);
 
-        var rootPath = "http://" + HttpContext.Request.Host.ToString();
+        var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
         return Created(rootPath, new TraceResponseData());
 

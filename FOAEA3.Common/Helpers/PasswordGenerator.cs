@@ -94,11 +94,14 @@ namespace FOAEA3.Common.Helpers
 
             // Use a 4-byte array to fill it with random bytes and convert it then
             // to an integer value.
-            var randomBytes = new byte[4];
+            // var randomBytes = new byte[4];
 
             // Generate 4 random bytes.
-            var rng = new RNGCryptoServiceProvider();
-            rng.GetBytes(randomBytes);
+            // var rng = new RNGCryptoServiceProvider();
+            // rng.GetBytes(randomBytes);
+
+            var randomBytes = RandomNumberGenerator.GetBytes(4);
+            // string secureRandomString = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
             // Convert 4 bytes into a 32-bit integer value.
             int seed = (randomBytes[0] & 0x7F) << 24 | randomBytes[1] << 16 | randomBytes[2] << 8 | randomBytes[3];

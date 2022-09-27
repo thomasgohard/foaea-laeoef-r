@@ -3,6 +3,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -20,6 +21,7 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("LicenceDenialTerminations API Version 1.0");
 
     [HttpGet("DB")]
@@ -61,7 +63,7 @@ public class LicenceDenialTerminationsController : ControllerBase
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
             var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + appKey;
-            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
+            var getURI = new Uri("https://" + HttpContext.Request.Host.ToString() + actionPath);
 
             return Created(getURI, application);
         }

@@ -4,7 +4,7 @@
     "IIS Express": {
       "commandName": "Project",
       "launchUrl": "weatherforecast",
-      "applicationUrl": "http://localhost:12014"
+      "applicationUrl": "https://localhost:12014"
     }
   }
 }

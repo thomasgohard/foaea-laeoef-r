@@ -88,7 +88,7 @@ public class SubmittersController : ControllerBase
         if (!submitterData.Messages.ContainsMessagesOfType(MessageType.Error))
         {
             var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + submitterData.Subm_SubmCd;
-            var getURI = new Uri("http://" + HttpContext.Request.Host.ToString() + actionPath);
+            var getURI = new Uri("https://" + HttpContext.Request.Host.ToString() + actionPath);
 
             return Created(getURI, submitterData);
         }

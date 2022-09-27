@@ -1,15 +1,25 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Helpers;
+using FOAEA3.Model.Interfaces;
 using System.Security.Claims;
 
 namespace FOAEA3.API.Security
 {
     public class TestLogin
     {
-        public static async Task<ClaimsPrincipal> AutoLogin(string user, string submitter, IRepositories db)
+        public static async Task<ClaimsPrincipal> AutoLogin(string user, string password,
+                                                                                string submitter,
+                                                                                IRepositories db)
         {
             var subject = await db.SubjectTable.GetSubjectAsync(user);
 
             if (subject is null || subject.IsAccountLocked is true)
+                return new ClaimsPrincipal();
+
+            string encryptedPassword = subject.Password;
+            string salt = subject.PasswordSalt;
+
+            if (!PasswordHelper.IsValidPassword(password, salt, encryptedPassword))
                 return new ClaimsPrincipal();
 
             string userName = subject.SubjectName;
@@ -32,7 +42,7 @@ namespace FOAEA3.API.Security
                 new Claim("Submitter", submitter)
             };
 
-            var identity = new ClaimsIdentity(claims, "Identity.Application");
+            var identity = new ClaimsIdentity(claims, LoggingHelper.COOKIE_ID);
             var principal = new ClaimsPrincipal(identity);
 
             return principal;

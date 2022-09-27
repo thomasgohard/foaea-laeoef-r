@@ -1,4 +1,5 @@
 ﻿using FileBroker.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -6,6 +7,7 @@ namespace FileBroker.API.Fed.Interception.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "FederalInterception")]
 public class FederalInterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]
