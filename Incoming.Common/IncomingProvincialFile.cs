@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common;
+using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -56,7 +57,8 @@ namespace Incoming.Common
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors)
+        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors, 
+                                                    string userName, string userPassword)
         {
             bool fileProcessedSuccessfully = false;
 
@@ -74,7 +76,8 @@ namespace Incoming.Common
 
                 if (fileNameNoCycle == InterceptionBaseName)
                 {
-                    fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, jsonText);
+                    fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, jsonText, 
+                                                                                              userName, userPassword);
                 }
                 else if (fileNameNoCycle == LicencingBaseName)
                 {
@@ -141,10 +144,30 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public async Task<bool> ProcessMEPincomingInterceptionFileAsync(List<string> errors, string fileNameWithCycle, string jsonText)
+        public async Task<bool> ProcessMEPincomingInterceptionFileAsync(List<string> errors, 
+                                                                        string fileNameWithCycle, 
+                                                                        string jsonText, 
+                                                                        string userName, string userPassword)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIHelper.PostJsonFileAsync($"api/v1/InterceptionFiles?fileName={fileNameWithCycle}", jsonText, ApiFilesConfig.FileBrokerMEPInterceptionRootAPI);
+
+            // TODO: need to get bearer token before calling API
+            var loginData = new FileBroker.Model.LoginData
+            {
+                UserName = userName,
+                Password = userPassword
+            };
+
+            string api = "api/v1/Tokens";
+            var loginResponse = await APIHelper.PostDataAsync<TokenData, FileBroker.Model.LoginData>(api, 
+                                                              loginData, ApiFilesConfig.FileBrokerAccountRootAPI);
+
+            string apiCall = $"api/v1/InterceptionFiles?fileName={fileNameWithCycle}";
+            string token = loginResponse.Token;
+            string rootPath = ApiFilesConfig.FileBrokerMEPInterceptionRootAPI;
+
+            var response = await APIHelper.PostJsonFileWithTokenAsync(apiCall, jsonText, token, rootPath);
+
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string jsonData = String.Empty;

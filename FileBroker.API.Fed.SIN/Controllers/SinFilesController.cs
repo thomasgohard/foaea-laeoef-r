@@ -17,7 +17,7 @@ namespace FileBroker.API.Fed.SIN.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "SinRegistry")]
+[Authorize(Roles = "SinRegistry,System")]
 public class SinFilesController : ControllerBase
 {
     [HttpGet("Version")]

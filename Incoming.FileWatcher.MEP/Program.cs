@@ -118,7 +118,9 @@ internal class Program
                         ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
 
                         var errors = new List<string>();
-                        await provincialFileManager.ProcessNewFileAsync(newFile, errors);
+                        string userName = configuration["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
+                        string userPassword = configuration["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
+                        await provincialFileManager.ProcessNewFileAsync(newFile, errors, userName, userPassword);
                         if (errors.Any())
                         {
                             foreach (var error in errors)

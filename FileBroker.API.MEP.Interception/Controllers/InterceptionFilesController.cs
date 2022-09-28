@@ -9,6 +9,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "MEPinterception")]
+[Authorize(Roles = "MEPinterception,System")]
 public class InterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]
@@ -88,6 +89,7 @@ public class InterceptionFilesController : ControllerBase
                                                         [FromServices] ILoadInboundAuditRepository loadInboundAuditData,
                                                         [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                         [FromServices] IOptions<ApiConfig> apiConfig,
+                                                        [FromServices] IConfiguration config,
                                                         [FromHeader] string currentSubmitter,
                                                         [FromHeader] string currentSubject)
     {
@@ -112,6 +114,7 @@ public class InterceptionFilesController : ControllerBase
         var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
         var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper);
         var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper);
+        var loginAPIs = new LoginsAPIBroker(apiApplHelper);
 
         var apiInterceptionApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaInterceptionRootAPI, currentSubmitter, currentSubject);
         var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionApplHelper);
@@ -120,7 +123,8 @@ public class InterceptionFilesController : ControllerBase
         {
             Applications = applicationApplicationAPIs,
             InterceptionApplications = interceptionApplicationAPIs,
-            ProductionAudits = productionAuditAPIs
+            ProductionAudits = productionAuditAPIs,
+            Accounts = loginAPIs
         };
 
         var repositories = new RepositoryList
@@ -133,7 +137,7 @@ public class InterceptionFilesController : ControllerBase
             LoadInboundAuditTable = loadInboundAuditData
         };
 
-        var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value);
+        var interceptionManager = new IncomingProvincialInterceptionManager(fileName, apis, repositories, auditConfig.Value, config);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);

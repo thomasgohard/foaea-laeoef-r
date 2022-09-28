@@ -19,8 +19,8 @@ namespace FileBroker.API.Account.Controllers
         [AllowAnonymous]
         [HttpPost("")]
         public async Task<ActionResult> CreateToken([FromBody] LoginData loginData, 
-                                        [FromServices] IConfiguration config,
-                                        [FromServices] IUserRepository userDB)
+                                                    [FromServices] IConfiguration config,
+                                                    [FromServices] IUserRepository userDB)
         {
             var thisUser = await userDB.GetUserByNameAsync(loginData.UserName);
 
@@ -45,16 +45,19 @@ namespace FileBroker.API.Account.Controllers
             var securityKey = new SymmetricSecurityKey(encodedApiKey);
             var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
-                                            config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
-                                            claims, signingCredentials: creds,
-                                            expires: DateTime.UtcNow.AddMinutes(20));
+            if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
+                expireMinutes = 20; 
 
-            return Ok(new
-                        {
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo
-                        });
+            var token = new JwtSecurityToken(config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+                                             config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+                                             claims, signingCredentials: creds,
+                                             expires: DateTime.UtcNow.AddMinutes(expireMinutes));
+
+            return Created("", new TokenData
+                                {
+                                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                                    Expiration = token.ValidTo
+                                });
         }
 
         private static bool IsValidLogin(LoginData loginData, UserData thisUser)

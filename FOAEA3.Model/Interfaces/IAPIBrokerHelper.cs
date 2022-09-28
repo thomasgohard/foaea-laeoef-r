@@ -16,6 +16,7 @@ namespace FOAEA3.Model.Interfaces
         Task<string> GetStringAsync(string api, string root = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS);
         Task<T> PostDataAsync<T, P>(string api, P data, string root = "") where T : class, new() where P : class;
         Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, string rootAPI = null);
+        Task<HttpResponseMessage> PostJsonFileWithTokenAsync(string api, string jsonData, string token, string rootAPI = null);
         Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData, string rootAPI = null);
         Task<T> PutDataAsync<T, P>(string api, P data, string root = "") where T : class, new() where P : class;
         Task SendCommandAsync(string api, string root = "");

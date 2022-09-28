@@ -32,7 +32,7 @@ namespace FOAEA3.API.Controllers
             if (principal is not null && principal.Identity is not null)
             {
                 await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);
-                return Ok(principal.Claims);
+                return Ok(principal.Claims.ToList());
             }
             else
             {

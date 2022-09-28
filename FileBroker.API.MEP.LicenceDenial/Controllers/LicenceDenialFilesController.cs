@@ -6,7 +6,7 @@ namespace FileBroker.API.MEP.LicenceDenial.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "MEPlicenceDenial")]
+[Authorize(Roles = "MEPlicenceDenial,System")]
 public class LicenceDenialFilesController : ControllerBase
 {
     [HttpGet("Version")]

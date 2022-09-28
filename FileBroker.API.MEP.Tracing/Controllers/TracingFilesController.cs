@@ -20,7 +20,7 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "MEPtracing")]
+[Authorize(Roles = "MEPtracing,System")]
 public class TracingFilesController : ControllerBase
 {
     [HttpGet("Version")]

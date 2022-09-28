@@ -16,7 +16,7 @@ namespace FileBroker.API.Fed.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "FederalTracing")]
+[Authorize(Roles = "FederalTracing,System")]
 public class FederalTracingFilesController : ControllerBase
 {
     [HttpGet("Version")]

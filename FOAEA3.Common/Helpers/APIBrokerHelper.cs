@@ -281,6 +281,22 @@ namespace FOAEA3.Common.Helpers
             return await httpClient.PostAsync(root + api, content);
         }
 
+        public async Task<HttpResponseMessage> PostJsonFileWithTokenAsync(string api, string jsonData, string token, string rootAPI = null)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.Timeout = DEFAULT_TIMEOUT;
+            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
+            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            httpClient.DefaultRequestHeaders.Add("Authentication", "Bearer " + token);
+            if (!string.IsNullOrEmpty(CurrentLanguage))
+                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
+
+            using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            string root = rootAPI ?? APIroot;
+            return await httpClient.PostAsync(root + api, content);
+        }
+
         public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData, string rootAPI = null)
         {
             using var httpClient = new HttpClient();

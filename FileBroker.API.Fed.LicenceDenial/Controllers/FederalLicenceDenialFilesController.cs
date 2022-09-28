@@ -18,7 +18,7 @@ namespace FileBroker.API.Fed.LicenceDenial.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "FederalLicenceDenial")]
+[Authorize(Roles = "FederalLicenceDenial,System")]
 public class FederalLicenceDenialFilesController : ControllerBase
 {
     [HttpGet("Version")]
