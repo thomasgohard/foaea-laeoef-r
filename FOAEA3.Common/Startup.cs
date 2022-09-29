@@ -1,16 +1,13 @@
 ﻿using DBHelper;
 using FOAEA3.Common.Filters;
-using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,23 +30,8 @@ namespace FOAEA3.Common
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
-            //services.AddDataProtection()
-            //        .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
-            //        .SetApplicationName("SharedCookieApp");
-
-            //services.AddAuthentication(LoggingHelper.COOKIE_ID)
-            //        .AddCookie(
-            //            LoggingHelper.COOKIE_ID, options =>
-            //            {
-            //                options.Cookie.Name = ".AspNet.SharedCookie";
-            //            }
-            //            );
-
             services.AddControllers(options =>
                         {
-                            //options.ReturnHttpNotAcceptable = true;
-                            //options.RespectBrowserAcceptHeader = true;
-                            //options.Filters.Add(new AuthorizeFilter());
                             options.Filters.Add(new ActionAutoLoggerFilter());
                             options.Filters.Add(new ActionProcessHeadersFilter());
                         })
@@ -109,7 +91,6 @@ namespace FOAEA3.Common
 
             app.UseRouting();
 
-            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -150,7 +131,6 @@ namespace FOAEA3.Common
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 
-            // var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
             var api_url = configuration["Urls"];
 
             ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");
