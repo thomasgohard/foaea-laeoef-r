@@ -49,7 +49,7 @@ namespace FOAEA3.Common.Helpers
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
         }
 
-        public async Task<string> GetStringAsync(string api, string root = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
+        public async Task<string> GetStringAsync(string api, string root = "", string bearer = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
         {
 
             string result = string.Empty;
@@ -69,6 +69,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (!string.IsNullOrEmpty(bearer))
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + bearer);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
                         httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -98,7 +100,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> GetDataAsync<T>(string api, string root = "")
+        public async Task<T> GetDataAsync<T>(string api, string root = "", string bearer = "")
             where T : class, new()
         {
 
@@ -118,8 +120,12 @@ namespace FOAEA3.Common.Helpers
                     {
 
                         httpClient.Timeout = DEFAULT_TIMEOUT;
+                        httpClient.DefaultRequestHeaders.Accept.Clear();
                         httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                         httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                        if (!string.IsNullOrEmpty(bearer))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + bearer);
+
                         if (!string.IsNullOrEmpty(CurrentLanguage))
                             httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -174,6 +180,16 @@ namespace FOAEA3.Common.Helpers
             return await SendDataAsync<T, P>(api, data, "PUT", root);
         }
 
+        public async Task<string> PostDataGetStringAsync<P>(string api, P data, string root = "") where P : class
+        {
+            return await SendDataGetStringAsync<P>(api, data, "POST", root);
+        }
+
+        public async Task<string> PutDataGetStringAsync<P>(string api, P data, string root = "") where P : class
+        {
+            return await SendDataGetStringAsync<P>(api, data, "PUT", root);
+        }
+
         public async Task SendCommandAsync(string api, string root = "")
         {
             await SendCommandAsync(api, "PUT", root);
@@ -196,9 +212,11 @@ namespace FOAEA3.Common.Helpers
             {
                 try
                 {
+                    
                     using var httpClient = new HttpClient();
 
                     httpClient.Timeout = DEFAULT_TIMEOUT;
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
@@ -239,6 +257,66 @@ namespace FOAEA3.Common.Helpers
 
             if (result is null)
                 result = new T();
+
+            return result;
+
+        }
+
+        private async Task<string> SendDataGetStringAsync<P>(string api, P data, string method, string root = "")
+                                            where P : class
+        {
+            string result = string.Empty;
+
+            if (root == "")
+                root = APIroot;
+
+            int attemptCount = 0;
+            bool completed = false;
+
+            while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
+            {
+                try
+                {
+                    using var httpClient = new HttpClient();
+
+                    httpClient.Timeout = DEFAULT_TIMEOUT;
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
+                    httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (!string.IsNullOrEmpty(CurrentLanguage))
+                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
+
+                    string keyData = JsonConvert.SerializeObject(data);
+
+                    HttpResponseMessage callResult;
+                    using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
+                        callResult = method switch
+                        {
+                            "POST" => await httpClient.PostAsync(root + api, content),
+                            "PUT" => await httpClient.PutAsync(root + api, content),
+                            _ => null,
+                        };
+                    
+                    if (callResult != null) // && (callResult.IsSuccessStatusCode))
+                    {
+                        result = await callResult.Content.ReadAsStringAsync();
+                    }
+
+                    completed = true;
+                }
+                catch (Exception e)
+                {
+                    attemptCount++;
+                    Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                    {
+                        // log error
+                        Messages = new MessageDataList();
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                        Messages.Add(errorMessageData);
+                    }
+                }
+            }
 
             return result;
 
@@ -287,7 +365,7 @@ namespace FOAEA3.Common.Helpers
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            httpClient.DefaultRequestHeaders.Add("Authentication", "Bearer " + token);
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 

@@ -28,12 +28,20 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
         }
 
-        public async Task<List<Claim>> LoginAsync(LoginData2 loginData)
+        public async Task<string> LoginAsync(LoginData2 loginData)
         {
             string apiCall = "api/v1/logins/testLogin";
-            var data = await ApiHelper.PostDataAsync<List<Claim>, LoginData2>(apiCall, loginData);
+            var data = await ApiHelper.PostDataGetStringAsync<LoginData2>(apiCall, loginData);
             return data;
         }
+
+        public async Task<string> LoginVerificationAsync(LoginData2 loginData)
+        {
+            string apiCall = "api/v1/logins/testVerify";
+            var data = await ApiHelper.PostDataGetStringAsync<LoginData2>(apiCall, loginData);
+            return data;
+        }
+
 
         public async Task<string> LogoutAsync(LoginData2 loginData)
         {

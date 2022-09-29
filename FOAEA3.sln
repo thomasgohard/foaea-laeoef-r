@@ -138,7 +138,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAsync", "TestAsync\Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.IdentityManager", "FOAEA3.IdentityProvider\FOAEA3.IdentityManager.csproj", "{FAB2F2A1-2722-44C8-ADEC-A6E5066622CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBroker.API.Account", "FileBroker.API.Account\FileBroker.API.Account.csproj", "{690070AF-8D52-42AF-B4BD-C0A0AC903333}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.Account", "FileBroker.API.Account\FileBroker.API.Account.csproj", "{690070AF-8D52-42AF-B4BD-C0A0AC903333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAPIautoAuthentication", "TestAPIautoAuthentication\TestAPIautoAuthentication.csproj", "{16C77BCD-AFDB-4DE8-B626-18028836101C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -901,6 +903,20 @@ Global
 		{690070AF-8D52-42AF-B4BD-C0A0AC903333}.Release|Any CPU.Build.0 = Release|Any CPU
 		{690070AF-8D52-42AF-B4BD-C0A0AC903333}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{690070AF-8D52-42AF-B4BD-C0A0AC903333}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C77BCD-AFDB-4DE8-B626-18028836101C}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -941,6 +957,7 @@ Global
 		{72EDD86C-8E3A-4FB9-A9D3-DDC8B059F714} = {33A95810-1DF1-4EB3-B27B-AE98395364B6}
 		{FB8D9EE7-1D0D-418A-8EEC-E1CB314E9BC9} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 		{690070AF-8D52-42AF-B4BD-C0A0AC903333} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{16C77BCD-AFDB-4DE8-B626-18028836101C} = {171732AE-52EC-46F8-90CD-6BDB7B8B670E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}

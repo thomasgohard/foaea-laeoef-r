@@ -38,8 +38,8 @@ namespace FileBroker.API.Account.Controllers
                 new Claim(JwtRegisteredClaimNames.UniqueName, loginData.UserName)
             };
 
-            var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
+            //var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+            //var principal = new ClaimsPrincipal(identity);
 
             var encodedApiKey = Encoding.UTF8.GetBytes(apiKey);
             var securityKey = new SymmetricSecurityKey(encodedApiKey);

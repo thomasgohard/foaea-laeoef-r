@@ -6,6 +6,7 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -33,24 +34,24 @@ namespace FOAEA3.Common
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
 
-            services.AddAuthentication(LoggingHelper.COOKIE_ID)
-                    .AddCookie();
+            //services.AddDataProtection()
+            //        .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
+            //        .SetApplicationName("SharedCookieApp");
 
-            services.AddDataProtection()
-                    .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
-                    .SetApplicationName("SharedCookieApp");
-
-            services.AddAuthentication(LoggingHelper.COOKIE_ID)
-                    .AddCookie(LoggingHelper.COOKIE_ID, options =>
-                        {
-                            options.Cookie.Name = ".AspNet.SharedCookie";
-                        });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)  //LoggingHelper.COOKIE_ID)
+                    .AddCookie(
+                        //LoggingHelper.COOKIE_ID, options =>
+                        //{
+                        //    options.Cookie.Name = ".AspNet.SharedCookie";
+                        //    options.SlidingExpiration = true;
+                        //}
+                        );
 
             services.AddControllers(options =>
                         {
-                            options.ReturnHttpNotAcceptable = true;
-                            options.RespectBrowserAcceptHeader = true;
-                            options.Filters.Add(new AuthorizeFilter());
+                            //options.ReturnHttpNotAcceptable = true;
+                            //options.RespectBrowserAcceptHeader = true;
+                            //options.Filters.Add(new AuthorizeFilter());
                             options.Filters.Add(new ActionAutoLoggerFilter());
                             options.Filters.Add(new ActionProcessHeadersFilter());
                         })

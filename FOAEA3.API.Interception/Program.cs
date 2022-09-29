@@ -19,6 +19,6 @@ Startup.ConfigureAPIServices(builder.Services, config);
 
 var app = builder.Build();
 
-Startup.ConfigureAPI(app, env, config, apiName);
+await Startup.ConfigureAPI(app, env, config, apiName);
 
 app.Run();

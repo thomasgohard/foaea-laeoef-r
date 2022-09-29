@@ -114,7 +114,7 @@ namespace FileBroker.Business
                         Submitter = FOAEA_submitter
                     };
 
-                    await APIs.Accounts.LoginAsync(loginData);
+                    var claims = await APIs.Accounts.LoginAsync(loginData);
 
                     try
                     {
@@ -172,7 +172,7 @@ namespace FileBroker.Business
 
                                         await loadInboundDB.AddNewAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
-                                        var messages = await SendDataToFOAEA(interceptionMessage);
+                                        var messages = await SendDataToFoaeaAsync(interceptionMessage);
 
                                         if (messages.ContainsMessagesOfType(MessageType.Error))
                                         {
@@ -280,7 +280,7 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
 
-        public async Task<MessageDataList> SendDataToFOAEA(MessageData<InterceptionApplicationData> interceptionMessageData)
+        public async Task<MessageDataList> SendDataToFoaeaAsync(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
             var existingMessages = interceptionMessageData.Application.Messages;
@@ -636,7 +636,7 @@ namespace FileBroker.Business
             {
                 Appl_CtrlCd = interceptionApplication.Appl_CtrlCd,
                 Appl_EnfSrv_Cd = interceptionApplication.Appl_EnfSrv_Cd,
-                IntFinH_Dte = now,
+                IntFinH_Dte = interceptionApplication.IntFinH.IntFinH_Dte,
                 EnfSrv_Cd = sourceSpecific.dat_EnfSrv_Cd,
                 HldbCnd_MxmPerChq_Money = sourceSpecific.dat_HldbCnd_MxmPerChq_Money.Convert<decimal?>(),
                 HldbCnd_SrcHldbAmn_Money = sourceSpecific.dat_HldbCnd_Hldb_Amn_Money.Convert<decimal?>(),

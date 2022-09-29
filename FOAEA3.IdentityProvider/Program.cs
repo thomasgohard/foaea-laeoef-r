@@ -22,8 +22,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
                 .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication()
-                .AddCookie()
-                .AddJwtBearer();
+                .AddCookie();
 
 builder.Services.AddDbContext<FOAEA3IdentityManagerContext>(options => options.UseSqlServer(connectionString));
 
