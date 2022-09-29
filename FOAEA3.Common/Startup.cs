@@ -6,7 +6,6 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -38,14 +37,13 @@ namespace FOAEA3.Common
             //        .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
             //        .SetApplicationName("SharedCookieApp");
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)  //LoggingHelper.COOKIE_ID)
-                    .AddCookie(
-                        //LoggingHelper.COOKIE_ID, options =>
-                        //{
-                        //    options.Cookie.Name = ".AspNet.SharedCookie";
-                        //    options.SlidingExpiration = true;
-                        //}
-                        );
+            //services.AddAuthentication(LoggingHelper.COOKIE_ID)
+            //        .AddCookie(
+            //            LoggingHelper.COOKIE_ID, options =>
+            //            {
+            //                options.Cookie.Name = ".AspNet.SharedCookie";
+            //            }
+            //            );
 
             services.AddControllers(options =>
                         {
@@ -111,7 +109,7 @@ namespace FOAEA3.Common
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

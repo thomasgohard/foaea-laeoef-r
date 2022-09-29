@@ -10,15 +10,7 @@ namespace FileBroker.Web.Pages.Tools
 
         public async Task OnPostLogin()
         {
-            var cookies = new CookieContainer();
-            var handler = new HttpClientHandler
-            {
-                CookieContainer = cookies
-            };
-            foreach(var cookie in Request.Cookies)
-                handler.CookieContainer.Add(new Cookie(cookie.Key, cookie.Value));
-
-            var client = new HttpClient(handler);
+            var client = new HttpClient();
 
             var userLoginInfo = new LoginData2
             {
@@ -36,15 +28,8 @@ namespace FileBroker.Web.Pages.Tools
 
         public async Task OnPostLogout()
         {
-            var cookies = new CookieContainer();
-            var handler = new HttpClientHandler
-            {
-                CookieContainer = cookies
-            };
-            foreach (var cookie in Request.Cookies)
-                handler.CookieContainer.Add(new Cookie(cookie.Key, cookie.Value));
-
-            var client = new HttpClient(handler);            
+            
+            var client = new HttpClient();
 
             var userLoginInfo = new LoginData2();
 
@@ -56,16 +41,8 @@ namespace FileBroker.Web.Pages.Tools
         }
 
         public async Task OnPostValidate()
-        {
-            var cookies = new CookieContainer();
-            var handler = new HttpClientHandler
-            {
-                CookieContainer = cookies
-            };
-            foreach (var cookie in Request.Cookies)
-                handler.CookieContainer.Add(new Cookie(cookie.Key, cookie.Value));
-
-            var client = new HttpClient(handler);
+        {            
+            var client = new HttpClient();
 
             var userLoginInfo = new LoginData2();
 

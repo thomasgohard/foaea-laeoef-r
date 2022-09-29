@@ -5,7 +5,6 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -33,7 +32,7 @@ namespace FOAEA3.API.Controllers
             var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);// LoggingHelper.COOKIE_ID, principal);
+                await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);// CookieAuthenticationDefaults.AuthenticationScheme
                 return Ok("Successfully logged in.");
             }
             else
@@ -49,28 +48,26 @@ namespace FOAEA3.API.Controllers
             var user = User.Identity;
             if (user is not null && user.IsAuthenticated)
             {
-                //var claims = User.Claims;
-                //var userName = string.Empty;
-                //var userRole = string.Empty;
-                //var submitter = string.Empty;
-                //foreach (var claim in claims)
-                //{
-                //    switch (claim.Type)
-                //    {
-                //        case ClaimTypes.Name:
-                //            userName = claim.Value;
-                //            break;
-                //        case ClaimTypes.Role:
-                //            userRole = claim.Value;
-                //            break;
-                //        case "Submitter":
-                //            submitter = claim.Value;
-                //            break;
-                //    }
-                //}
-                // return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
-
-                return Ok($"Logged in user: " + user.Name);
+                var claims = User.Claims;
+                var userName = string.Empty;
+                var userRole = string.Empty;
+                var submitter = string.Empty;
+                foreach (var claim in claims)
+                {
+                    switch (claim.Type)
+                    {
+                        case ClaimTypes.Name:
+                            userName = claim.Value;
+                            break;
+                        case ClaimTypes.Role:
+                            userRole = claim.Value;
+                            break;
+                        case "Submitter":
+                            submitter = claim.Value;
+                            break;
+                    }
+                }
+                return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
             }
             else
             {
@@ -82,7 +79,7 @@ namespace FOAEA3.API.Controllers
         public async Task<ActionResult> TestLogout()
         {
             // WARNING: not for production use!
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(LoggingHelper.COOKIE_ID);
 
             return Ok();
         }
