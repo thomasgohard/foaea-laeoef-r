@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Services.AppAuthentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -43,11 +44,11 @@ namespace FOAEA3.API.Controllers
                 string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
                 if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
                     expireMinutes = 20;
-                
-                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey, 
+
+                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey,
                                                                            claims: principal.Claims.ToList());
                 string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
-                
+
                 var tokenData = new TokenData
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -95,6 +96,38 @@ namespace FOAEA3.API.Controllers
             {
                 return Ok("No user logged in. Please login.");
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("TestRefreshToken")]
+        public ActionResult TestRefreshToken([FromBody] TokenRefreshData refreshData,
+                                             [FromServices] IConfiguration config,
+                                             [FromServices] IRepositories db)
+        {
+            // WARNING: not for production use!
+            //if (user is not null && user.IsAuthenticated)
+            //{
+            //    string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
+            //    string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
+            //    string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
+            //    if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
+            //        expireMinutes = 20;
+
+            //    JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey,
+            //                                                               claims: User.Claims.ToList());
+            //    string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+            //    var tokenData = new TokenData
+            //    {
+            //        Token = new JwtSecurityTokenHandler().WriteToken(token),
+            //        RefreshToken = refreshToken,
+            //        Expiration = token.ValidTo
+            //    };
+
+            //    return Ok(tokenData);
+            //}
+            //else
+                return BadRequest();
         }
 
         [HttpPost("TestLogout")]
