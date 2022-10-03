@@ -1,12 +1,17 @@
-﻿using FOAEA3.API.Security;
+﻿using Azure.Identity;
+using FileBroker.Model;
+using FOAEA3.API.Security;
 using FOAEA3.Business.Security;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace FOAEA3.API.Controllers
@@ -26,14 +31,31 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
+                                                        [FromServices] IConfiguration config,
                                                         [FromServices] IRepositories db)
         {
             // WARNING: not for production use!
             var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
-                await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);// CookieAuthenticationDefaults.AuthenticationScheme
-                return Ok("Successfully logged in.");
+                string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
+                string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
+                string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
+                if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
+                    expireMinutes = 20;
+                
+                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey, 
+                                                                           claims: principal.Claims.ToList());
+                string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+                
+                var tokenData = new TokenData
+                {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    RefreshToken = refreshToken,
+                    Expiration = token.ValidTo
+                };
+
+                return Ok(tokenData);
             }
             else
             {
@@ -76,10 +98,26 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPost("TestLogout")]
-        public async Task<ActionResult> TestLogout()
+        public async Task<ActionResult> TestLogout([FromServices] IRepositories db)
         {
             // WARNING: not for production use!
-            await HttpContext.SignOutAsync(LoggingHelper.COOKIE_ID);
+            var user = User.Identity;
+            if (user is not null && user.IsAuthenticated)
+            {
+                var claims = User.Claims;
+                var userName = string.Empty;
+                foreach (var claim in claims)
+                {
+                    switch (claim.Type)
+                    {
+                        case ClaimTypes.Name:
+                            userName = claim.Value;
+                            break;
+                    }
+                }
+
+                await db.SubjectTable.ClearRefreshToken(userName);
+            }
 
             return Ok();
         }

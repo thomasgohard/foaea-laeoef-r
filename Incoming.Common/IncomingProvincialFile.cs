@@ -105,7 +105,7 @@ namespace Incoming.Common
         public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIHelper.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPTracingRootAPI);
+            var response = await APIHelper.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPTracingRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 if (response.Content is not null)
@@ -126,7 +126,7 @@ namespace Incoming.Common
         public async Task<bool> ProcessMEPincomingLicencingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIHelper.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
+            var response = await APIHelper.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 if (response.Content is not null)
@@ -159,14 +159,13 @@ namespace Incoming.Common
             };
 
             string api = "api/v1/Tokens";
-            var loginResponse = await APIHelper.PostDataAsync<TokenData, FileBroker.Model.LoginData>(api, 
+            var tokenData = await APIHelper.PostDataAsync<TokenData, FileBroker.Model.LoginData>(api, 
                                                               loginData, ApiFilesConfig.FileBrokerAccountRootAPI);
 
             string apiCall = $"api/v1/InterceptionFiles?fileName={fileNameWithCycle}";
-            string token = loginResponse.Token;
             string rootPath = ApiFilesConfig.FileBrokerMEPInterceptionRootAPI;
 
-            var response = await APIHelper.PostJsonFileWithTokenAsync(apiCall, jsonText, token, rootPath);
+            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, tokenData, rootPath);
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {

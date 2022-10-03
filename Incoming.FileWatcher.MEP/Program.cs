@@ -68,7 +68,7 @@ internal class Program
         var provinces = (from data in provinceFilesData
                          select data.Name[..2]).Distinct().ToList();
 
-        var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+        var apiBroker = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
         var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
         string tracingName = null;
@@ -93,7 +93,7 @@ internal class Program
             }
 
             var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(fileTable, apiRootData, apiAction,
+            var provincialFileManager = new IncomingProvincialFile(fileTable, apiRootData, apiBroker,
                                                                    interceptionBaseName: interceptionName,
                                                                    tracingBaseName: tracingName,
                                                                    licencingBaseName: licenceName);

@@ -5,17 +5,21 @@ using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Common
@@ -32,6 +36,7 @@ namespace FOAEA3.Common
 
             services.AddControllers(options =>
                         {
+                            options.Filters.Add(new AuthorizeFilter());
                             options.Filters.Add(new ActionAutoLoggerFilter());
                             options.Filters.Add(new ActionProcessHeadersFilter());
                         })
@@ -39,6 +44,18 @@ namespace FOAEA3.Common
                     .AddNewtonsoftJson(options =>
                             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                         );
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                        {
+                            options.TokenValidationParameters = new TokenValidationParameters()
+                            {
+                                ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+                                ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+                                IssuerSigningKey = new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
+                            };
+                        });
         }
 
         public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -91,6 +108,7 @@ namespace FOAEA3.Common
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

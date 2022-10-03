@@ -11,6 +11,11 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
+        public Task ClearRefreshToken(string subjectName)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<SubjectData> GetSubjectAsync(string subjectName)
         {
             throw new NotImplementedException();
@@ -22,6 +27,11 @@ namespace TestData.TestDB
         }
 
         public Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateRefreshToken(string subjectName, byte[] refreshToken, DateTime refreshTokenExpiration)
         {
             throw new NotImplementedException();
         }

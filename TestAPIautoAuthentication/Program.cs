@@ -38,19 +38,19 @@ if (runFileBrokerTest)
 
     string api = "api/v1/Tokens";
     string fileBrokerRootAPI = apiFilesConfig["FileBrokerAccountRootAPI"].ReplaceVariablesWithEnvironmentValues();
-    var loginResponse = await apiBrokerHelper.PostDataAsync<TokenData, FileBroker.Model.LoginData>(api,
+    var tokenData = await apiBrokerHelper.PostDataAsync<TokenData, FileBroker.Model.LoginData>(api,
                                                             loginData, root: fileBrokerRootAPI);
 
-    if (loginResponse is null)
+    if (tokenData is null)
         return;
 
-    ColourConsole.WriteEmbeddedColorLine($"\n[yellow]Bearer:[/yellow] {loginResponse.Token}");
+    ColourConsole.WriteEmbeddedColorLine($"\n[yellow]Bearer:[/yellow] {tokenData.Token}");
 
     string fileBrokerMEPInterceptionRootAPI = apiFilesConfig["FileBrokerMEPInterceptionRootAPI"].ReplaceVariablesWithEnvironmentValues();
 
     string versionAPI = "api/v1/interceptionFiles/Version";
     var response = await apiBrokerHelper.GetStringAsync(versionAPI, root: fileBrokerMEPInterceptionRootAPI,
-                                                        bearer: loginResponse.Token);
+                                                        token: tokenData);
 
     ColourConsole.WriteEmbeddedColorLine($"\n[yellow]Version:[/yellow] {response}");
 }

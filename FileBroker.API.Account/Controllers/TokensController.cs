@@ -1,14 +1,14 @@
 ﻿using FileBroker.Model;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using FileBrokerModel = FileBroker.Model;
 
 namespace FileBroker.API.Account.Controllers
 {
@@ -18,7 +18,7 @@ namespace FileBroker.API.Account.Controllers
     {
         [AllowAnonymous]
         [HttpPost("")]
-        public async Task<ActionResult> CreateToken([FromBody] LoginData loginData, 
+        public async Task<ActionResult> CreateToken([FromBody] FileBrokerModel.LoginData loginData,
                                                     [FromServices] IConfiguration config,
                                                     [FromServices] IUserRepository userDB)
         {
@@ -27,41 +27,48 @@ namespace FileBroker.API.Account.Controllers
             if (!IsValidLogin(loginData, thisUser))
                 return BadRequest();
 
-            var apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, loginData.UserName),
-                new Claim(ClaimTypes.Role, thisUser.SecurityRole),
-                new Claim(JwtRegisteredClaimNames.Sub, thisUser.EmailAddress),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, loginData.UserName)
-            };
-
-            //var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-            //var principal = new ClaimsPrincipal(identity);
-
-            var encodedApiKey = Encoding.UTF8.GetBytes(apiKey);
-            var securityKey = new SymmetricSecurityKey(encodedApiKey);
-            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+            string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
+            string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
+            string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
             if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
-                expireMinutes = 20; 
+                expireMinutes = 20;
 
-            var token = new JwtSecurityToken(config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
-                                             config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
-                                             claims, signingCredentials: creds,
-                                             expires: DateTime.UtcNow.AddMinutes(expireMinutes));
-
-            return Created("", new TokenData
-                                {
-                                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                                    Expiration = token.ValidTo
-                                });
+            return Created("", CreateNewToken(apiKey, issuer, audience, expireMinutes, thisUser));
         }
 
-        private static bool IsValidLogin(LoginData loginData, UserData thisUser)
-        {            
+        [HttpPost("Refresh")]
+        public async Task<ActionResult> RefreshToken([FromBody] TokenRefreshData refreshData,
+                                                     [FromServices] IConfiguration config,
+                                                     [FromServices] IUserRepository userDB)
+        {
+            var thisUser = await userDB.GetUserByNameAsync(refreshData.UserName);
+
+            if (thisUser is not null && AreSameBytes(thisUser.RefreshToken, refreshData.RefreshToken) && thisUser.RefreshTokenExpiration > DateTime.Now)
+            {
+                string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
+                string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
+                string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
+                if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
+                    expireMinutes = 20;
+
+                return Created("", CreateNewToken(apiKey, issuer, audience, expireMinutes, thisUser));
+            }
+            else
+                return BadRequest();
+        }
+
+        private static bool AreSameBytes(byte?[] bytes1, byte[] bytes2)
+        {
+            if (bytes1 is null)
+                return false;
+
+            var bytes1real = Array.ConvertAll(bytes1, x => x ?? 0);
+
+            return bytes2.SequenceEqual(bytes1real);
+        }
+
+        private static bool IsValidLogin(FileBrokerModel.LoginData loginData, FileBrokerModel.UserData thisUser)
+        {
             if (thisUser == null)
                 return false;
 
@@ -70,6 +77,28 @@ namespace FileBroker.API.Account.Controllers
 
             return true;
         }
-                
+
+        private static TokenData CreateNewToken(string apiKey, string issuer, string audience, int expireMinutes, UserData userData)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userData.UserName),
+                new Claim(ClaimTypes.Role, userData.SecurityRole),
+                new Claim(JwtRegisteredClaimNames.Sub, userData.EmailAddress),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, userData.UserName)
+            };
+
+            JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey, claims);
+            string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+            return new TokenData
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = refreshToken,
+                Expiration = token.ValidTo
+            };
+        }
+
     }
 }

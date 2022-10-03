@@ -22,6 +22,7 @@ namespace FOAEA3.Common.Helpers
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
+        private Func<TokenData> GetRefreshedToken { get; }
 
         public MessageDataList Messages { get; set; }
 
@@ -31,11 +32,12 @@ namespace FOAEA3.Common.Helpers
             set => _APIroot = value + (value.EndsWith("/", StringComparison.Ordinal) ? "" : "/");
         }
 
-        public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "")
+        public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "", Func<TokenData> getRefreshedToken = null)
         {
             APIroot = apiRoot;
             CurrentSubmitter = currentSubmitter;
             CurrentUser = currentUser;
+            GetRefreshedToken = getRefreshedToken;
         }
 
         public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
@@ -49,7 +51,7 @@ namespace FOAEA3.Common.Helpers
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
         }
 
-        public async Task<string> GetStringAsync(string api, string root = "", string bearer = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
+        public async Task<string> GetStringAsync(string api, string root = "", TokenData token = null, int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
         {
 
             string result = string.Empty;
@@ -69,8 +71,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                    if (!string.IsNullOrEmpty(bearer))
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + bearer);
+                    if (token is not null && !string.IsNullOrEmpty(token.Token))
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
                         httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -79,8 +81,13 @@ namespace FOAEA3.Common.Helpers
                     if (callResult.IsSuccessStatusCode)
                     {
                         result = await callResult.Content.ReadAsStringAsync();
+                        completed = true;
                     }
-                    completed = true;
+                    else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        token = GetRefreshedToken();
+                        attemptCount++;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -100,7 +107,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> GetDataAsync<T>(string api, string root = "", string bearer = "")
+        public async Task<T> GetDataAsync<T>(string api, string root = "", TokenData token = null)
             where T : class, new()
         {
 
@@ -123,8 +130,8 @@ namespace FOAEA3.Common.Helpers
                         httpClient.DefaultRequestHeaders.Accept.Clear();
                         httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                         httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                        if (!string.IsNullOrEmpty(bearer))
-                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + bearer);
+                        if (token is not null && !string.IsNullOrEmpty(token.Token))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
 
                         if (!string.IsNullOrEmpty(CurrentLanguage))
                             httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
@@ -344,28 +351,14 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, string rootAPI = null)
+        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, TokenData token = null, string rootAPI = null)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            if (!string.IsNullOrEmpty(CurrentLanguage))
-                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
-            using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-            string root = rootAPI ?? APIroot;
-            return await httpClient.PostAsync(root + api, content);
-        }
-
-        public async Task<HttpResponseMessage> PostJsonFileWithTokenAsync(string api, string jsonData, string token, string rootAPI = null)
-        {
-            using var httpClient = new HttpClient();
-            httpClient.Timeout = DEFAULT_TIMEOUT;
-            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            if (token is not null && !string.IsNullOrEmpty(token.Token))
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces
@@ -11,6 +12,7 @@ namespace FOAEA3.Model.Interfaces
         Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd);
         Task<SubjectData> GetSubjectAsync(string subjectName);
         Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode);
-
+        Task ClearRefreshToken(string subjectName);
+        Task UpdateRefreshToken(string subjectName, byte[] refreshToken, DateTime refreshTokenExpiration);
     }
 }
