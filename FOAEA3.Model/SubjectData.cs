@@ -22,8 +22,6 @@ namespace FOAEA3.Model
         public int? PasswordFormat { get; set; }
         public string PasswordSalt { get; set; }
         public DateTime? PasswordExpiryDate { get; set; }
-        public byte?[] RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiration { get; set; }
         public bool? IsAccountLocked { get; set; }
         public int? UnsuccessfulLoginAttempts { get; set; }
         public string ConfirmationCode { get; set; }

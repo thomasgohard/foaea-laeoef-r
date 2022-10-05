@@ -19,7 +19,7 @@ namespace FOAEA3.Common.Helpers
             var token = new JwtSecurityToken(issuer,
                                              audience,
                                              claims, signingCredentials: creds,
-                                             expires: DateTime.UtcNow.AddMinutes(expireMinutes));
+                                             expires: DateTime.Now.AddMinutes(expireMinutes));
             return token;
         }
 

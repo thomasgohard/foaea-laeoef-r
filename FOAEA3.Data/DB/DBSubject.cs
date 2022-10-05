@@ -38,29 +38,7 @@ namespace FOAEA3.Data.DB
 
             return await MainDB.GetDataFromStoredProcAsync<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
         }
-
-        public async Task ClearRefreshToken(string subjectName)
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                    {"SubjectName", subjectName}
-            };
-
-            await MainDB.ExecProcAsync("Subject_ClearRefreshToken", parameters);
-        }
-
-        public async Task UpdateRefreshToken(string subjectName, byte[] refreshToken, DateTime refreshTokenExpiration)
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                    {"SubjectName", subjectName},
-                    {"RefreshToken", refreshToken},
-                    {"RefreshTokenExpiration", refreshTokenExpiration}
-            };
-
-            await MainDB.ExecProcAsync("Subject_UpdateRefreshToken", parameters);
-        }
-
+        
         public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
@@ -100,8 +78,6 @@ namespace FOAEA3.Data.DB
             data.PasswordFormat = (int?)(rdr["PasswordFormat"]);
             data.PasswordSalt = (string)(rdr["PasswordSalt"]);
             data.PasswordExpiryDate = (DateTime?)(rdr["PasswordExpiryDate"]);
-            data.RefreshToken = (byte?[])rdr["RefreshToken"]; // can be null 
-            data.RefreshTokenExpiration = (DateTime?)rdr["RefreshTokenExpiration"]; // can be null 
             data.IsAccountLocked = (bool?)(rdr["IsAccountLocked"]);
             data.UnsuccessfulLoginAttempts = (int)(rdr["UnsuccessfulLoginAttempts"]);
             data.ConfirmationCode = (string)(rdr["ConfirmationCode"]);

@@ -43,7 +43,7 @@ namespace FileBroker.API.Account.Controllers
         {
             var thisUser = await userDB.GetUserByNameAsync(refreshData.UserName);
 
-            if (thisUser is not null && AreSameBytes(thisUser.RefreshToken, refreshData.RefreshToken) && thisUser.RefreshTokenExpiration > DateTime.Now)
+            if (thisUser is not null && String.Equals(thisUser.RefreshToken, refreshData.RefreshToken) && thisUser.RefreshTokenExpiration > DateTime.Now)
             {
                 string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
                 string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
@@ -55,16 +55,6 @@ namespace FileBroker.API.Account.Controllers
             }
             else
                 return BadRequest();
-        }
-
-        private static bool AreSameBytes(byte?[] bytes1, byte[] bytes2)
-        {
-            if (bytes1 is null)
-                return false;
-
-            var bytes1real = Array.ConvertAll(bytes1, x => x ?? 0);
-
-            return bytes2.SequenceEqual(bytes1real);
         }
 
         private static bool IsValidLogin(FileBrokerModel.LoginData loginData, FileBrokerModel.UserData thisUser)
@@ -96,7 +86,7 @@ namespace FileBroker.API.Account.Controllers
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 RefreshToken = refreshToken,
-                Expiration = token.ValidTo
+                TokenExpiration = token.ValidTo
             };
         }
 

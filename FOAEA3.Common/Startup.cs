@@ -33,6 +33,7 @@ namespace FOAEA3.Common
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
+            services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
 
             services.AddControllers(options =>
                         {

@@ -3,6 +3,6 @@
     public class TokenRefreshData
     {
         public string UserName { get; set; }
-        public byte[] RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
     }
 }

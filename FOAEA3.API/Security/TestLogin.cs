@@ -1,6 +1,7 @@
-﻿using FOAEA3.Common.Helpers;
-using FOAEA3.Helpers;
+﻿using FOAEA3.Helpers;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace FOAEA3.API.Security
@@ -29,20 +30,17 @@ namespace FOAEA3.API.Security
             if (submitterData is null || submitterData.ActvSt_Cd != "A")
                 return new ClaimsPrincipal();
 
-            string userRole = submitterData.Subm_Class switch
-            {
-                "AM" => "Admin",
-                _ => "User",
-            };
+            string userRole = submitterData.Subm_Class;
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),
                 new Claim(ClaimTypes.Role, userRole),
-                new Claim("Submitter", submitter)
+                new Claim("Submitter", submitter),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var identity = new ClaimsIdentity(claims, LoggingHelper.COOKIE_ID);
+            var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             return principal;
