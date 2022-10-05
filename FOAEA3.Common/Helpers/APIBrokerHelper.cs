@@ -22,7 +22,8 @@ namespace FOAEA3.Common.Helpers
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
-        private Func<TokenData> GetRefreshedToken { get; }
+        private Func<Task<string>> GetRefreshedToken { get; }
+
 
         public MessageDataList Messages { get; set; }
 
@@ -32,7 +33,8 @@ namespace FOAEA3.Common.Helpers
             set => _APIroot = value + (value.EndsWith("/", StringComparison.Ordinal) ? "" : "/");
         }
 
-        public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "", Func<TokenData> getRefreshedToken = null)
+        public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "",
+                               Func<Task<string>> getRefreshedToken = null)
         {
             APIroot = apiRoot;
             CurrentSubmitter = currentSubmitter;
@@ -51,7 +53,9 @@ namespace FOAEA3.Common.Helpers
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
         }
 
-        public async Task<string> GetStringAsync(string api, string root = "", TokenData token = null, int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS)
+        public async Task<string> GetStringAsync(string api, string root = "",
+                                                 int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS,
+                                                 string token = null)
         {
 
             string result = string.Empty;
@@ -71,8 +75,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                    if (token is not null && !string.IsNullOrEmpty(token.Token))
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
+                    if (token is not null && !string.IsNullOrEmpty(token))
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
                         httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -85,8 +89,16 @@ namespace FOAEA3.Common.Helpers
                     }
                     else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
                     {
-                        token = GetRefreshedToken();
-                        attemptCount++;
+                        if (GetRefreshedToken is null)
+                            completed = true;
+                        else
+                        {
+                            token = await GetRefreshedToken();
+                            if (string.IsNullOrEmpty(token))
+                                completed = true; // API failed and refreshed token expired
+                            else
+                                attemptCount++;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -107,7 +119,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> GetDataAsync<T>(string api, string root = "", TokenData token = null)
+        public async Task<T> GetDataAsync<T>(string api, string root = "", string token = null)
             where T : class, new()
         {
 
@@ -130,9 +142,8 @@ namespace FOAEA3.Common.Helpers
                         httpClient.DefaultRequestHeaders.Accept.Clear();
                         httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                         httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                        if (token is not null && !string.IsNullOrEmpty(token.Token))
-                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
-
+                        if (token is not null && !string.IsNullOrEmpty(token))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                         if (!string.IsNullOrEmpty(CurrentLanguage))
                             httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -147,6 +158,19 @@ namespace FOAEA3.Common.Helpers
                         {
                             string content = await callResult.Content.ReadAsStringAsync();
                             Messages = JsonConvert.DeserializeObject<MessageDataList>(content);
+                        }
+                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            if (GetRefreshedToken is null)
+                                completed = true;
+                            else
+                            {
+                                token = await GetRefreshedToken();
+                                if (string.IsNullOrEmpty(token))
+                                    completed = true; // API failed and refreshed token expired
+                                else
+                                    attemptCount++;
+                            }
                         }
                         completed = true;
                     }
@@ -173,36 +197,37 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> PostDataAsync<T, P>(string api, P data, string root = "")
+        public async Task<T> PostDataAsync<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()
             where P : class
         {
-            return await SendDataAsync<T, P>(api, data, "POST", root);
+            return await SendDataAsync<T, P>(api, data, "POST", root, token);
         }
 
-        public async Task<T> PutDataAsync<T, P>(string api, P data, string root = "")
+        public async Task<T> PutDataAsync<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()
             where P : class
         {
-            return await SendDataAsync<T, P>(api, data, "PUT", root);
+            return await SendDataAsync<T, P>(api, data, "PUT", root, token);
         }
 
-        public async Task<string> PostDataGetStringAsync<P>(string api, P data, string root = "") where P : class
+        public async Task<string> PostDataGetStringAsync<P>(string api, P data, string root = "", string token = null) where P : class
         {
-            return await SendDataGetStringAsync<P>(api, data, "POST", root);
+            return await SendDataGetStringAsync<P>(api, data, "POST", root, token);
         }
 
-        public async Task<string> PutDataGetStringAsync<P>(string api, P data, string root = "") where P : class
+        public async Task<string> PutDataGetStringAsync<P>(string api, P data, string root = "", string token = null) where P : class
         {
-            return await SendDataGetStringAsync<P>(api, data, "PUT", root);
+            return await SendDataGetStringAsync<P>(api, data, "PUT", root, token);
         }
 
-        public async Task SendCommandAsync(string api, string root = "")
+        public async Task SendCommandAsync(string api, string root = "", string token = null)
         {
-            await SendCommandAsync(api, "PUT", root);
+            await SendCommandAsync(api, "PUT", root, token);
         }
 
-        private async Task<T> SendDataAsync<T, P>(string api, P data, string method, string root = "")
+        private async Task<T> SendDataAsync<T, P>(string api, P data, string method, string root = "",
+                                                  string token = null)
             where T : class, new()
             where P : class
         {
@@ -219,13 +244,15 @@ namespace FOAEA3.Common.Helpers
             {
                 try
                 {
-                    
+
                     using var httpClient = new HttpClient();
 
                     httpClient.Timeout = DEFAULT_TIMEOUT;
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (token is not null && !string.IsNullOrEmpty(token))
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
                         httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -240,13 +267,30 @@ namespace FOAEA3.Common.Helpers
                             _ => null,
                         };
 
-                    if (callResult != null) // && (callResult.IsSuccessStatusCode))
+                    if (callResult != null)
                     {
-                        string content = await callResult.Content.ReadAsStringAsync();
-                        result = JsonConvert.DeserializeObject<T>(content);
+                        if (callResult.IsSuccessStatusCode)
+                        {
+                            string content = await callResult.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<T>(content);
+                            completed = true;
+                        }
+                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            if (GetRefreshedToken is null)
+                                completed = true;
+                            else
+                            {
+                                token = await GetRefreshedToken();
+                                if (string.IsNullOrEmpty(token))
+                                    completed = true; // API failed and refreshed token expired
+                                else
+                                    attemptCount++;
+                            }
+                        }
                     }
-
-                    completed = true;
+                    else 
+                        completed = true;
                 }
                 catch (Exception e)
                 {
@@ -269,7 +313,8 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        private async Task<string> SendDataGetStringAsync<P>(string api, P data, string method, string root = "")
+        private async Task<string> SendDataGetStringAsync<P>(string api, P data, string method,
+                                                             string root = "", string token = null)
                                             where P : class
         {
             string result = string.Empty;
@@ -290,6 +335,8 @@ namespace FOAEA3.Common.Helpers
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
                     httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                    if (token is not null && !string.IsNullOrEmpty(token))
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                     if (!string.IsNullOrEmpty(CurrentLanguage))
                         httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -303,13 +350,31 @@ namespace FOAEA3.Common.Helpers
                             "PUT" => await httpClient.PutAsync(root + api, content),
                             _ => null,
                         };
-                    
-                    if (callResult != null) // && (callResult.IsSuccessStatusCode))
-                    {
-                        result = await callResult.Content.ReadAsStringAsync();
-                    }
 
-                    completed = true;
+                    if (callResult != null)
+                    {
+                        if (callResult.IsSuccessStatusCode)
+                        {
+                            result = await callResult.Content.ReadAsStringAsync();
+                            completed = true;
+                        }
+                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            if (GetRefreshedToken is null)
+                                completed = true;
+                            else
+                            {
+                                token = await GetRefreshedToken();
+                                if (string.IsNullOrEmpty(token))
+                                    completed = true;
+                                else
+                                    attemptCount++;
+                            }
+                        }
+                    }
+                    else
+                        completed = true;
+
                 }
                 catch (Exception e)
                 {
@@ -329,7 +394,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        private async Task SendCommandAsync(string api, string method, string root = "")
+        private async Task SendCommandAsync(string api, string method, string root = "", string token = null)
         {
             if (root == "")
                 root = APIroot;
@@ -338,6 +403,8 @@ namespace FOAEA3.Common.Helpers
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            if (token is not null && !string.IsNullOrEmpty(token))
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -351,14 +418,15 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, TokenData token = null, string rootAPI = null)
+        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData,
+                                                                 string rootAPI = null, string token = null)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            if (token is not null && !string.IsNullOrEmpty(token.Token))
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Token);
+            if (token is not null && !string.IsNullOrEmpty(token))
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
@@ -368,12 +436,15 @@ namespace FOAEA3.Common.Helpers
             return await httpClient.PostAsync(root + api, content);
         }
 
-        public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData, string rootAPI = null)
+        public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData,
+                                                                 string rootAPI = null, string token = null)
         {
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+            if (token is not null && !string.IsNullOrEmpty(token))
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 

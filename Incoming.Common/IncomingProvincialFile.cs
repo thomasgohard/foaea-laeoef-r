@@ -165,7 +165,8 @@ namespace Incoming.Common
             string apiCall = $"api/v1/InterceptionFiles?fileName={fileNameWithCycle}";
             string rootPath = ApiFilesConfig.FileBrokerMEPInterceptionRootAPI;
 
-            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, tokenData, rootPath);
+            // TODO: fix token
+            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, rootAPI: rootPath, token: "");
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {

@@ -41,19 +41,20 @@ namespace FileBroker.API.Account.Controllers
                                                      [FromServices] IConfiguration config,
                                                      [FromServices] IUserRepository userDB)
         {
-            var thisUser = await userDB.GetUserByNameAsync(refreshData.UserName);
+            // TODO: fix this
+            //var thisUser = await userDB.GetUserByNameAsync(refreshData.UserName);
 
-            if (thisUser is not null && String.Equals(thisUser.RefreshToken, refreshData.RefreshToken) && thisUser.RefreshTokenExpiration > DateTime.Now)
-            {
-                string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
-                string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
-                string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
-                if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
-                    expireMinutes = 20;
+            //if (thisUser is not null && String.Equals(thisUser.RefreshToken, refreshData.RefreshToken) && thisUser.RefreshTokenExpiration > DateTime.Now)
+            //{
+            //    string apiKey = config["Tokens:Key"].ReplaceVariablesWithEnvironmentValues();
+            //    string issuer = config["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues();
+            //    string audience = config["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues();
+            //    if (!int.TryParse(config["Tokens:ExpireMinutes"], out int expireMinutes))
+            //        expireMinutes = 20;
 
-                return Created("", CreateNewToken(apiKey, issuer, audience, expireMinutes, thisUser));
-            }
-            else
+            //    return Created("", CreateNewToken(apiKey, issuer, audience, expireMinutes, thisUser));
+            //}
+            //else
                 return BadRequest();
         }
 

@@ -70,7 +70,8 @@ namespace FileBroker.Business
             var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
             int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode);
+            // TODO: fix token
+            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode, "");
             return data;
         }
 

@@ -5,12 +5,12 @@ namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface IApplicationAPIBroker
     {
-        Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd);
-        Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData);
+        Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd, string token);
+        Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData, string token);
 
         Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, string activeState,
-                                                                          string recipientCode);
+                                                                          string recipientCode, string token);
 
-        Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application);
+        Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application, string token);
     }
 }

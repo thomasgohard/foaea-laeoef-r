@@ -20,12 +20,6 @@ public class ActiveStatusesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<DataList<ActiveStatusData>>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
     {
-        if (Request.Headers.ContainsKey("CurrentSubmitter"))
-            activeStatusRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
-
-        if (Request.Headers.ContainsKey("CurrentSubject"))
-            activeStatusRepository.UserId = Request.Headers["CurrentSubject"];
-
         var data = await activeStatusRepository.GetActiveStatusAsync();
 
         return Ok(data);

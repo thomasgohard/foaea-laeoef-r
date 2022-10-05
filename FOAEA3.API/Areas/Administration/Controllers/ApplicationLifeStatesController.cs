@@ -21,12 +21,6 @@ public class ApplicationLifeStatesController : ControllerBase
     public async Task<ActionResult<DataList<ApplicationLifeStateData>>> GetApplicationLifeStates(
                             [FromServices] IApplicationLifeStateRepository applicationLifeStateRepository)
     {
-        if (Request.Headers.ContainsKey("CurrentSubmitter"))
-            applicationLifeStateRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
-
-        if (Request.Headers.ContainsKey("CurrentSubject"))
-            applicationLifeStateRepository.UserId = Request.Headers["CurrentSubject"];
-
         return Ok(await applicationLifeStateRepository.GetApplicationLifeStatesAsync());
     }
 }

@@ -58,10 +58,12 @@ namespace FileBroker.Web.Pages.Tools
 
         private async Task AddVersionFor(string apiName, IAPIBrokerHelper helper, IVersionSupport broker)
         {
-            bool isError = !GetVersionDescription(await broker.GetVersionAsync(), out string versionDescription);
+
+            // TODO: fix token
+            bool isError = !GetVersionDescription(await broker.GetVersionAsync(""), out string versionDescription);
             string connectionString = string.Empty;
             if (!isError)
-                connectionString = await broker.GetConnectionAsync();
+                connectionString = await broker.GetConnectionAsync("");
 
             var apiInfo = new ApiInfo
             {

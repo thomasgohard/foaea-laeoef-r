@@ -7,19 +7,19 @@ namespace FOAEA3.Model.Interfaces.Broker
     {
         IAPIBrokerHelper ApiHelper { get; }
 
-        Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
-        Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
-        Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
-        Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
-        Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
-        Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
+        Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd, string token);
+        Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token);
+        Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token);
+        Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token);
+        Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token);
+        Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token);
         Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication,
                                                                  string newRecipientSubmitter,
-                                                                 string newIssuingSubmitter);
+                                                                 string newIssuingSubmitter, string token);
 
-        Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application);
+        Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application, string token);
 
-        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
-        Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
+        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService, string token);
+        Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication, string token);
     }
 }

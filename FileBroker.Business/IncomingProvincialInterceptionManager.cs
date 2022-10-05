@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Resources;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -229,7 +230,8 @@ namespace FileBroker.Business
                     }
                     finally
                     {
-                        await APIs.Accounts.LogoutAsync(loginData);
+                        // TODO: fix token
+                        await APIs.Accounts.LogoutAsync(loginData, "");
                     }
 
                 }
@@ -272,10 +274,12 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
-            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
+            // TODO: fix token
+            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService, "");
 
+            // TODO: fix token
             foreach (var appl in applAutomation)
-                await APIs.InterceptionApplications.AcceptVariationAsync(appl);
+                await APIs.InterceptionApplications.AcceptVariationAsync(appl, "");
 
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
@@ -289,7 +293,8 @@ namespace FileBroker.Business
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
-                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application);
+                // TODO: fix token
+                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application, "");
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
             {
@@ -297,25 +302,30 @@ namespace FileBroker.Business
                 {
                     case "00": // change
                     case "0":
-                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application);
+                        // TODO: fix token
+                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application, "");
                         break;
 
                     case "14": // cancellation
-                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application);
+                        // TODO: fix token
+                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application, "");
                         break;
 
                     case "17": // variation
-                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application);
+                        // TODO: fix token
+                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application, "");
                         break;
 
                     case "29": // transfer
+                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interceptionMessageData.Application,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
-                                                                                                     interceptionMessageData.NewIssuingSubmitter);
+                                                                                                     interceptionMessageData.NewIssuingSubmitter, "");
                         break;
 
                     case "35": // suspend
-                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application);
+                        // TODO: fix token
+                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application, "");
                         break;
 
                     default:
@@ -448,7 +458,7 @@ namespace FileBroker.Business
                         bool isSourceSpecificDataValid;
                         HoldbackConditionData newSourceSpecificData;
                         (newSourceSpecificData, isSourceSpecificDataValid) = await ExtractAndValidateSourceSpecificDataAsync(sourceSpecific, fileAuditData,
-                                                                                                                        now, interceptionApplication);
+                                                                                                                             interceptionApplication);
                         if (!isSourceSpecificDataValid)
                             isValidData = false;
                         interceptionApplication.HldbCnd.Add(newSourceSpecificData);
@@ -484,7 +494,8 @@ namespace FileBroker.Business
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
 
-            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication);
+            // TODO: fix token
+            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication, "");
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
@@ -518,7 +529,8 @@ namespace FileBroker.Business
 
         private async Task<bool> IsValidFinancialInformationAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
-            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication);
+            // TODO: fix token
+            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication, "");
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
             interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 
@@ -628,7 +640,6 @@ namespace FileBroker.Business
 
         private async Task<(HoldbackConditionData, bool)> ExtractAndValidateSourceSpecificDataAsync(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
-                                                                                           DateTime now,
                                                                                            InterceptionApplicationData interceptionApplication)
         {
             bool isValidData = true;

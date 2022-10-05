@@ -15,11 +15,24 @@ namespace FOAEA3.Common.Helpers
             var encodedApiKey = Encoding.UTF8.GetBytes(apiKey);
             var securityKey = new SymmetricSecurityKey(encodedApiKey);
             var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            DateTime expirationDateTime = DateTime.Now.AddMinutes(expireMinutes);
+
+            // adjust time due to possible bug in JwtSecurityToken?
+            TimeSpan delta = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+            double offset = delta.TotalHours;
+            var expirationDateTimeAdjusted = expirationDateTime.AddHours(offset);
 
             var token = new JwtSecurityToken(issuer,
                                              audience,
                                              claims, signingCredentials: creds,
-                                             expires: DateTime.Now.AddMinutes(expireMinutes));
+                                             expires: expirationDateTimeAdjusted);
+
+            if (token.ValidTo < DateTime.Now) // do this in case the bug gets fixed
+                token = new JwtSecurityToken(issuer,
+                                             audience,
+                                             claims, signingCredentials: creds,
+                                             expires: expirationDateTime);
+
             return token;
         }
 
