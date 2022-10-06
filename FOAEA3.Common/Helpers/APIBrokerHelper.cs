@@ -16,7 +16,7 @@ namespace FOAEA3.Common.Helpers
 {
     public class APIBrokerHelper : IAPIBrokerHelper
     {
-        private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 20, 0);
+        private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 0, 30);
 
         private string _APIroot;
         public string CurrentSubmitter { get; set; }
@@ -100,12 +100,14 @@ namespace FOAEA3.Common.Helpers
                                 attemptCount++;
                         }
                     }
+                    else
+                        completed = true;
                 }
                 catch (Exception e)
                 {
                     attemptCount++;
                     Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                    if (attemptCount == maxAttempts)
                     {
                         // log error
                         Messages = new MessageDataList();

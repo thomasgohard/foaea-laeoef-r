@@ -4,8 +4,11 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using FileBrokerModel = FileBroker.Model;
 
 namespace FileBroker.Web.Pages.Tools
 {
@@ -21,12 +24,14 @@ namespace FileBroker.Web.Pages.Tools
             ApiData = new Dictionary<string, ApiInfo>();
         }
 
-        public async Task OnGet()
+        public async Task OnGet([FromServices] IConfiguration config)
         {
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+
+            var fb_accountApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerAccountRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
             var fb_interceptionApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var fb_licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -39,24 +44,61 @@ namespace FileBroker.Web.Pages.Tools
 
             var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
-            // TODO: fix token
-            string token = "";
+            string foaeaToken = await GetFoaeaApiTokenAsync(applicationApiHelper, config);
 
-            await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper, token));
-            await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper, token));
-            await AddVersionFor("FOAEA3.API.LicenceDenial", licenceDenialApiHelper, new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token));
-            await AddVersionFor("FOAEA3.API.Tracing", tracingApiHelper, new TracingApplicationAPIBroker(tracingApiHelper, token));
-            
-            await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper, ""));
-            
-            await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper, token));
-            await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper, token));
-            await AddVersionFor("FileBroker.API.MEP.Tracing", fb_tracingApiHelper, new MEPTracingAPIBroker(fb_tracingApiHelper, token));
-            
-            await AddVersionFor("FileBroker.API.FED.Interception", fb_FederalInterceptionApiHelper, new FEDInterceptionAPIBroker(fb_FederalInterceptionApiHelper, token));
-            await AddVersionFor("FileBroker.API.FED.LicenceDenial", fb_FederalLicenceDenialApiHelper, new FEDLicenceDenialAPIBroker(fb_FederalLicenceDenialApiHelper, token));
-            await AddVersionFor("FileBroker.API.FED.Tracing", fb_FederalTracingApiHelper, new FEDTracingAPIBroker(fb_FederalTracingApiHelper, token));
-            await AddVersionFor("FileBroker.API.FED.SIN", fb_FederalSINApiHelper, new FEDSINAPIBroker(fb_FederalSINApiHelper, token));
+            await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper, foaeaToken));
+            await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper, foaeaToken));
+            await AddVersionFor("FOAEA3.API.LicenceDenial", licenceDenialApiHelper, new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, foaeaToken));
+            await AddVersionFor("FOAEA3.API.Tracing", tracingApiHelper, new TracingApplicationAPIBroker(tracingApiHelper, foaeaToken));
+
+            await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper, foaeaToken));
+
+            string fileBrokerToken = await GetFileBrokerApiTokenAsync(fb_accountApiHelper, config);
+
+            await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper, fileBrokerToken));
+            await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper, fileBrokerToken));
+            await AddVersionFor("FileBroker.API.MEP.Tracing", fb_tracingApiHelper, new MEPTracingAPIBroker(fb_tracingApiHelper, fileBrokerToken));
+
+            await AddVersionFor("FileBroker.API.FED.Interception", fb_FederalInterceptionApiHelper, new FEDInterceptionAPIBroker(fb_FederalInterceptionApiHelper, fileBrokerToken));
+            await AddVersionFor("FileBroker.API.FED.LicenceDenial", fb_FederalLicenceDenialApiHelper, new FEDLicenceDenialAPIBroker(fb_FederalLicenceDenialApiHelper, fileBrokerToken));
+            await AddVersionFor("FileBroker.API.FED.Tracing", fb_FederalTracingApiHelper, new FEDTracingAPIBroker(fb_FederalTracingApiHelper, fileBrokerToken));
+            await AddVersionFor("FileBroker.API.FED.SIN", fb_FederalSINApiHelper, new FEDSINAPIBroker(fb_FederalSINApiHelper, fileBrokerToken));
+        }
+
+        private static async Task<string> GetFoaeaApiTokenAsync(APIBrokerHelper applicationApiHelper, IConfiguration config)
+        {
+            string token = string.Empty;
+            var loginAPIs = new LoginsAPIBroker(applicationApiHelper, token);
+
+            var loginData = new LoginData2
+            {
+                UserName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                Password = config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+                Submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
+            };
+
+            var result = await loginAPIs.LoginAsync(loginData);
+
+            return result.Token;
+        }
+
+        private static async Task<string> GetFileBrokerApiTokenAsync(APIBrokerHelper fb_accountApiHelper, IConfiguration config)
+        {
+            string token = string.Empty;
+            var loginAPIs = new AccountAPIBroker(fb_accountApiHelper, token);
+
+            string userName = config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
+            string userPassword = config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
+
+            var loginData = new FileBrokerModel.LoginData
+            {
+                UserName = userName,
+                Password = userPassword
+            };
+
+            var tokenData = await loginAPIs.CreateToken(loginData);
+
+            return tokenData.Token;
         }
 
         private async Task AddVersionFor(string apiName, IAPIBrokerHelper helper, IVersionSupport broker)
