@@ -231,7 +231,7 @@ namespace FileBroker.Business
                     finally
                     {
                         // TODO: fix token
-                        await APIs.Accounts.LogoutAsync(loginData, "");
+                        await APIs.Accounts.LogoutAsync(loginData);
                     }
 
                 }
@@ -275,11 +275,11 @@ namespace FileBroker.Business
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
             // TODO: fix token
-            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService, "");
+            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
 
             // TODO: fix token
             foreach (var appl in applAutomation)
-                await APIs.InterceptionApplications.AcceptVariationAsync(appl, "");
+                await APIs.InterceptionApplications.AcceptVariationAsync(appl);
 
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
@@ -294,7 +294,7 @@ namespace FileBroker.Business
             if (interceptionMessageData.MaintenanceAction == "A")
             {
                 // TODO: fix token
-                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application, "");
+                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application);
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
             {
@@ -303,29 +303,29 @@ namespace FileBroker.Business
                     case "00": // change
                     case "0":
                         // TODO: fix token
-                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application, "");
+                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "14": // cancellation
                         // TODO: fix token
-                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application, "");
+                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "17": // variation
                         // TODO: fix token
-                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application, "");
+                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "29": // transfer
                         // TODO: fix token
                         interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interceptionMessageData.Application,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
-                                                                                                     interceptionMessageData.NewIssuingSubmitter, "");
+                                                                                                     interceptionMessageData.NewIssuingSubmitter);
                         break;
 
                     case "35": // suspend
                         // TODO: fix token
-                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application, "");
+                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     default:
@@ -495,7 +495,7 @@ namespace FileBroker.Business
             };
 
             // TODO: fix token
-            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication, "");
+            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication);
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
@@ -530,7 +530,7 @@ namespace FileBroker.Business
         private async Task<bool> IsValidFinancialInformationAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
             // TODO: fix token
-            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication, "");
+            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
             interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 

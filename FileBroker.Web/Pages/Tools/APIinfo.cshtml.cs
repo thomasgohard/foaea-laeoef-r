@@ -39,31 +39,34 @@ namespace FileBroker.Web.Pages.Tools
 
             var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
-            await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper));
-            await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper));
-            await AddVersionFor("FOAEA3.API.LicenceDenial", licenceDenialApiHelper, new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper));
-            await AddVersionFor("FOAEA3.API.Tracing", tracingApiHelper, new TracingApplicationAPIBroker(tracingApiHelper));
+            // TODO: fix token
+            string token = "";
+
+            await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper, token));
+            await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper, token));
+            await AddVersionFor("FOAEA3.API.LicenceDenial", licenceDenialApiHelper, new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token));
+            await AddVersionFor("FOAEA3.API.Tracing", tracingApiHelper, new TracingApplicationAPIBroker(tracingApiHelper, token));
             
-            await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper));
+            await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper, ""));
             
-            await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper));
-            await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper));
-            await AddVersionFor("FileBroker.API.MEP.Tracing", fb_tracingApiHelper, new MEPTracingAPIBroker(fb_tracingApiHelper));
+            await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper, token));
+            await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper, token));
+            await AddVersionFor("FileBroker.API.MEP.Tracing", fb_tracingApiHelper, new MEPTracingAPIBroker(fb_tracingApiHelper, token));
             
-            await AddVersionFor("FileBroker.API.FED.Interception", fb_FederalInterceptionApiHelper, new FEDInterceptionAPIBroker(fb_FederalInterceptionApiHelper));
-            await AddVersionFor("FileBroker.API.FED.LicenceDenial", fb_FederalLicenceDenialApiHelper, new FEDLicenceDenialAPIBroker(fb_FederalLicenceDenialApiHelper));
-            await AddVersionFor("FileBroker.API.FED.Tracing", fb_FederalTracingApiHelper, new FEDTracingAPIBroker(fb_FederalTracingApiHelper));
-            await AddVersionFor("FileBroker.API.FED.SIN", fb_FederalSINApiHelper, new FEDSINAPIBroker(fb_FederalSINApiHelper));
+            await AddVersionFor("FileBroker.API.FED.Interception", fb_FederalInterceptionApiHelper, new FEDInterceptionAPIBroker(fb_FederalInterceptionApiHelper, token));
+            await AddVersionFor("FileBroker.API.FED.LicenceDenial", fb_FederalLicenceDenialApiHelper, new FEDLicenceDenialAPIBroker(fb_FederalLicenceDenialApiHelper, token));
+            await AddVersionFor("FileBroker.API.FED.Tracing", fb_FederalTracingApiHelper, new FEDTracingAPIBroker(fb_FederalTracingApiHelper, token));
+            await AddVersionFor("FileBroker.API.FED.SIN", fb_FederalSINApiHelper, new FEDSINAPIBroker(fb_FederalSINApiHelper, token));
         }
 
         private async Task AddVersionFor(string apiName, IAPIBrokerHelper helper, IVersionSupport broker)
         {
 
             // TODO: fix token
-            bool isError = !GetVersionDescription(await broker.GetVersionAsync(""), out string versionDescription);
+            bool isError = !GetVersionDescription(await broker.GetVersionAsync(), out string versionDescription);
             string connectionString = string.Empty;
             if (!isError)
-                connectionString = await broker.GetConnectionAsync("");
+                connectionString = await broker.GetConnectionAsync();
 
             var apiInfo = new ApiInfo
             {

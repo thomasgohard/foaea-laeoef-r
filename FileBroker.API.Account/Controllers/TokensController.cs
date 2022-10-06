@@ -37,9 +37,9 @@ namespace FileBroker.API.Account.Controllers
         }
 
         [HttpPost("Refresh")]
-        public async Task<ActionResult> RefreshToken([FromBody] TokenRefreshData refreshData,
-                                                     [FromServices] IConfiguration config,
-                                                     [FromServices] IUserRepository userDB)
+        public async Task<ActionResult> RefreshTokenAsync([FromBody] TokenRefreshData refreshData,
+                                                          [FromServices] IConfiguration config,
+                                                          [FromServices] IUserRepository userDB)
         {
             // TODO: fix this
             //var thisUser = await userDB.GetUserByNameAsync(refreshData.UserName);

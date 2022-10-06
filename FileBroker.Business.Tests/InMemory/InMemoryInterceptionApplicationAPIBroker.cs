@@ -11,52 +11,52 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
 
-        public Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd, string token)
+        public Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService, string token)
+        public Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter, string token)
+        public Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> UpdateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
-        public Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application, string token)
+        public Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application)
         {
             return Task.FromResult(application);
         }
 
-        public Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication, string token)
+        public Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }

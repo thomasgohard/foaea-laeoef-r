@@ -100,14 +100,16 @@ public class FederalLicenceDenialFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
+        // TODO: fix token
+        var token = "";
         var apiLicenceDenialHelper = new APIBrokerHelper(apiConfig.Value.FoaeaLicenceDenialRootAPI, currentSubmitter, currentSubject);
-        var licenceDenialApplicationAPIs = new LicenceDenialApplicationAPIBroker(apiLicenceDenialHelper);
-        var licenceDenialTerminationApplicationAPIs = new LicenceDenialTerminationApplicationAPIBroker(apiLicenceDenialHelper);
-        var licenceDenialEventAPIs = new LicenceDenialEventAPIBroker(apiLicenceDenialHelper);
-        var licenceDenialResponsesAPIs = new LicenceDenialResponseAPIBroker(apiLicenceDenialHelper);
+        var licenceDenialApplicationAPIs = new LicenceDenialApplicationAPIBroker(apiLicenceDenialHelper, token);
+        var licenceDenialTerminationApplicationAPIs = new LicenceDenialTerminationApplicationAPIBroker(apiLicenceDenialHelper, token);
+        var licenceDenialEventAPIs = new LicenceDenialEventAPIBroker(apiLicenceDenialHelper, token);
+        var licenceDenialResponsesAPIs = new LicenceDenialResponseAPIBroker(apiLicenceDenialHelper, token);
 
         var apiApplicationHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
-        var applicationEventsAPIs = new ApplicationEventAPIBroker(apiApplicationHelper);
+        var applicationEventsAPIs = new ApplicationEventAPIBroker(apiApplicationHelper, token);
 
         var apis = new APIBrokerList
         {

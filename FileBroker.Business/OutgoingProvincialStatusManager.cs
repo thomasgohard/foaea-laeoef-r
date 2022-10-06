@@ -71,7 +71,7 @@ namespace FileBroker.Business
             int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
             // TODO: fix token
-            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode, "");
+            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode);
             return data;
         }
 

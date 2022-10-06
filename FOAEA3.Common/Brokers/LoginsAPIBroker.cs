@@ -9,22 +9,24 @@ namespace FOAEA3.Common.Brokers
     public class LoginsAPIBroker : ILoginsAPIBroker, IVersionSupport
     {
         private IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public LoginsAPIBroker(IAPIBrokerHelper apiHelper)
+        public LoginsAPIBroker(IAPIBrokerHelper apiHelper, string currentToken)
         {
             ApiHelper = apiHelper;
+            Token = currentToken;
         }
 
-        public async Task<string> GetVersionAsync(string token)
+        public async Task<string> GetVersionAsync()
         {
             string apiCall = $"api/v1/logins/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: token);
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync(string token)
+        public async Task<string> GetConnectionAsync()
         {
             string apiCall = $"api/v1/logins/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: token);
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
         public async Task<TokenData> LoginAsync(LoginData2 loginData)
@@ -34,18 +36,18 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
-        public async Task<string> LoginVerificationAsync(LoginData2 loginData, string token)
+        public async Task<string> LoginVerificationAsync(LoginData2 loginData)
         {
             string apiCall = "api/v1/logins/testVerify";
-            var data = await ApiHelper.PostDataGetStringAsync<LoginData2>(apiCall, loginData, token: token);
+            var data = await ApiHelper.PostDataGetStringAsync<LoginData2>(apiCall, loginData, token: Token);
             return data;
         }
 
 
-        public async Task<string> LogoutAsync(LoginData2 loginData, string token)
+        public async Task<string> LogoutAsync(LoginData2 loginData)
         {
             string apiCall = "api/v1/logins/testLogout";
-            _ = await ApiHelper.PostDataAsync<List<string>, LoginData2>(apiCall, loginData, token: token);
+            _ = await ApiHelper.PostDataAsync<List<string>, LoginData2>(apiCall, loginData, token: Token);
 
             return string.Empty;
         }

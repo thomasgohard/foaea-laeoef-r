@@ -112,7 +112,7 @@ public class IncomingFederalSinManager
         bool sourceModifiedSin = false;
 
         // TODO: fix token
-        var appl = await APIs.Applications.GetApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd, "");
+        var appl = await APIs.Applications.GetApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
         if (appl.ActvSt_Cd != "A")
         {
@@ -165,7 +165,7 @@ public class IncomingFederalSinManager
             };
 
             // TODO: fix token
-            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData, "");
+            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -176,7 +176,7 @@ public class IncomingFederalSinManager
             };
 
             // TODO: fix token
-            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData, "");
+            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,

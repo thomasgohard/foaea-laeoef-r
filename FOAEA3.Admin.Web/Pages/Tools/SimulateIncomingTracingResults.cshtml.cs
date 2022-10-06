@@ -98,9 +98,10 @@ namespace FOAEA3.Admin.Web.Pages.Tools
                     string flatFileNameNoPath = $"RC3STSIT.{data.Cycle}";
 
                     // call Incoming Fed Tracing FileBroker API
-
+                    // TODO: fix token
+                    string token = "";
                     var apiHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-                    var broker = new IncomingFedTracingAPIbroker(apiHelper, ApiFilesConfig);
+                    var broker = new IncomingFedTracingAPIbroker(apiHelper, ApiFilesConfig, token);
                     var result = await broker.ProcessFlatFileAsync(flatFileNameNoPath, flatFile.ToString());
                     if (result.IsSuccessStatusCode)
                         ViewData["Message"] = $"Successfully processed simulated trace results for {data.EnfService}-{data.ControlCode}";

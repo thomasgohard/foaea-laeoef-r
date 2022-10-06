@@ -8,22 +8,22 @@ namespace FileBroker.Business.Tests.InMemory
 {
     internal class InMemoryApplicationAPIBroker : IApplicationAPIBroker
     {
-        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd, string token)
+        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, string activeState, string recipientCode, string token)
+        public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, string activeState, string recipientCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData, string token)
+        public Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application, string token)
+        public Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application)
         {
             return Task.FromResult(application);
         }

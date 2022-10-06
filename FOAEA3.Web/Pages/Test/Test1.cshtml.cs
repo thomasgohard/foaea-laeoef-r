@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
@@ -18,11 +19,11 @@ namespace FOAEA3.Web.Pages.Test
         [BindProperty]
         public LoginData2 LoginData { get; set; }
 
-        private IConfiguration Config { get; set; }
+        private ApiConfig ApiConfig { get; set; }
 
-        public Test1Model([FromServices] IConfiguration config)
+        public Test1Model([FromServices] IOptions<ApiConfig> apiConfigOption)
         {
-            Config = config;
+            ApiConfig = apiConfigOption.Value;
         }
 
         public void OnGet()
@@ -31,9 +32,9 @@ namespace FOAEA3.Web.Pages.Test
 
         public async Task OnPostLogin()
         {
-            string apiRoot = Config["APIroot:FoaeaApplicationRootAPI"].ReplaceVariablesWithEnvironmentValues();
-            var apiHelper = new APIBrokerHelper(apiRoot: apiRoot);
-            var loginAPIs = new LoginsAPIBroker(apiHelper);
+            string token = string.Empty;
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var loginAPIs = new LoginsAPIBroker(apiHelper, token);
 
             var result = await loginAPIs.LoginAsync(LoginData);
 
@@ -43,36 +44,15 @@ namespace FOAEA3.Web.Pages.Test
             Message = "Token: " + result.Token;
         }
 
-        private async Task<string> RefreshTokenAsync()
-        {
-            string oldToken = HttpContext.Session.GetString("Token");
-            string oldRefreshToken = HttpContext.Session.GetString("RefreshToken");
-
-            if (string.IsNullOrEmpty(oldToken))
-                return string.Empty;
-
-            string apiRoot = Config["APIroot:FoaeaApplicationRootAPI"].ReplaceVariablesWithEnvironmentValues();
-            var apiHelper = new APIBrokerHelper(apiRoot: apiRoot);
-            var loginAPIs = new LoginsAPIBroker(apiHelper); 
-            
-            var result = await loginAPIs.RefreshTokenAsync(oldToken, oldRefreshToken);
-
-            HttpContext.Session.SetString("Token", result.Token);
-            HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
-
-            return result.Token;
-        }
-
         public async Task OnPostLogout()
         {
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken"); 
             
-            string apiRoot = Config["APIroot:FoaeaApplicationRootAPI"].ReplaceVariablesWithEnvironmentValues();
-            var apiHelper = new APIBrokerHelper(apiRoot: apiRoot);
-            var loginAPIs = new LoginsAPIBroker(apiHelper);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
-            var result = await loginAPIs.LogoutAsync(LoginData, currentToken);
+            await loginAPIs.LogoutAsync(LoginData);
 
             HttpContext.Session.SetString("Token", "");
             HttpContext.Session.SetString("RefreshToken", "");
@@ -88,11 +68,11 @@ namespace FOAEA3.Web.Pages.Test
             if (string.IsNullOrEmpty(currentToken))
                 Message = "No logged in user.";
             else {
-                string apiRoot = Config["APIroot:FoaeaApplicationRootAPI"].ReplaceVariablesWithEnvironmentValues();
-                var apiHelper = new APIBrokerHelper(apiRoot: apiRoot, getRefreshedToken: RefreshTokenAsync);
-                var loginAPIs = new LoginsAPIBroker(apiHelper);
+                var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI, 
+                                                    getRefreshedToken: OnRefreshTokenAsync);
+                var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
-                Message = await loginAPIs.LoginVerificationAsync(new LoginData2 { }, currentToken);
+                Message = await loginAPIs.LoginVerificationAsync(new LoginData2 { });
             }
 
         }
@@ -102,11 +82,11 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            string apiRoot = Config["APIroot:FoaeaApplicationRootAPI"].ReplaceVariablesWithEnvironmentValues();
-            var apiHelper = new APIBrokerHelper(apiRoot: apiRoot, getRefreshedToken: RefreshTokenAsync);
-            var appAPIs = new ApplicationAPIBroker(apiHelper);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI, 
+                                                getRefreshedToken: OnRefreshTokenAsync);
+            var appAPIs = new ApplicationAPIBroker(apiHelper, currentToken);
 
-            var result = await appAPIs.GetVersionAsync(currentToken);
+            var result = await appAPIs.GetVersionAsync();
 
             Message = result;
         }
@@ -116,13 +96,32 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            string apiRoot = Config["APIroot:FoaeaInterceptionRootAPI"].ReplaceVariablesWithEnvironmentValues();
-            var apiHelper = new APIBrokerHelper(apiRoot: apiRoot, getRefreshedToken: RefreshTokenAsync);
-            var interceptionAPIs = new InterceptionApplicationAPIBroker(apiHelper);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaInterceptionRootAPI, 
+                                                getRefreshedToken: OnRefreshTokenAsync);
+            var interceptionAPIs = new InterceptionApplicationAPIBroker(apiHelper, currentToken);
 
-            var result = await interceptionAPIs.GetVersionAsync(currentToken);
+            var result = await interceptionAPIs.GetVersionAsync();
 
             Message = result;
+        }
+
+        private async Task<string> OnRefreshTokenAsync()
+        {
+            string oldToken = HttpContext.Session.GetString("Token");
+            string oldRefreshToken = HttpContext.Session.GetString("RefreshToken");
+
+            if (string.IsNullOrEmpty(oldToken))
+                return string.Empty;
+
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var loginAPIs = new LoginsAPIBroker(apiHelper, oldToken);
+
+            var result = await loginAPIs.RefreshTokenAsync(oldToken, oldRefreshToken);
+
+            HttpContext.Session.SetString("Token", result.Token);
+            HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
+
+            return result.Token;
         }
 
     }

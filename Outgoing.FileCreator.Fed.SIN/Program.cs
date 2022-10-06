@@ -44,10 +44,12 @@ internal class Program
     {
         var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
+        // TODO: fix token
+        string token = "";
         var apiBrokers = new APIBrokerList
         {
-            ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
-            Sins = new SinAPIBroker(applicationApiHelper)
+            ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
+            Sins = new SinAPIBroker(applicationApiHelper, token)
         };
 
         var repositories = new RepositoryList

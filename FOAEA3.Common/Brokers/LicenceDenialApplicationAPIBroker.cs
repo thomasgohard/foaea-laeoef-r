@@ -10,29 +10,31 @@ namespace FOAEA3.Common.Brokers
     public class LicenceDenialApplicationAPIBroker : ILicenceDenialApplicationAPIBroker, IVersionSupport
     {
         private IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public LicenceDenialApplicationAPIBroker(IAPIBrokerHelper apiHelper)
+        public LicenceDenialApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
-        public async Task<string> GetVersionAsync(string token)
+        public async Task<string> GetVersionAsync()
         {
             string apiCall = $"api/v1/licencedenials/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync(string token)
+        public async Task<string> GetConnectionAsync()
         {
             string apiCall = $"api/v1/licencedenials/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1);
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
         public async Task<LicenceDenialApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(dat_Appl_EnfSrvCd, dat_Appl_CtrlCd);
             string apiCall = $"api/v1/licencedenials/{key}";
-            return await ApiHelper.GetDataAsync<LicenceDenialApplicationData>(apiCall);
+            return await ApiHelper.GetDataAsync<LicenceDenialApplicationData>(apiCall, token: Token);
         }
 
         public async Task<List<LicenceDenialOutgoingFederalData>> GetOutgoingFederalLicenceDenialRequestsAsync(int maxRecords,
@@ -43,13 +45,13 @@ namespace FOAEA3.Common.Brokers
             string baseCall = "api/v1/OutgoingFederalLicenceDenialRequests";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&lifeState={lifeState}&enfServiceCode={enfServiceCode}";
-            return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingFederalData>>(apiCall);
+            return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingFederalData>>(apiCall, token: Token);
         }
 
         public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string fedSource)
         {
             string apiCall = $"api/v1/licenceDenials/LicenceDenialToApplication?federalSource={fedSource}";
-            return await ApiHelper.GetDataAsync<List<LicenceDenialToApplData>>(apiCall);
+            return await ApiHelper.GetDataAsync<List<LicenceDenialToApplData>>(apiCall, token: Token);
         }
 
         public async Task<LicenceDenialApplicationData> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
@@ -62,7 +64,7 @@ namespace FOAEA3.Common.Brokers
             };
             string key = ApplKey.MakeKey(appl_EnfSrv_Cd, appl_CtrlCd);
             string apiCall = $"api/v1/licenceDenials/{key}/ProcessLicenceDenialResponse";
-            return await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData);
+            return await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData, token: Token);
         }
 
         public async Task<List<LicenceDenialOutgoingProvincialData>> GetOutgoingProvincialLicenceDenialDataAsync(int maxRecords, string activeState,
@@ -71,7 +73,7 @@ namespace FOAEA3.Common.Brokers
             string baseCall = "api/v1/OutgoingProvincialLicenceDenialResults";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&recipientCode={recipientCode}&isXML=true";
-            return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingProvincialData>>(apiCall);
+            return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingProvincialData>>(apiCall, token: Token);
         }
 
     }

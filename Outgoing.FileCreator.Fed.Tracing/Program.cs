@@ -46,13 +46,15 @@ namespace Outgoing.FileCreator.Fed.Tracing
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
+            // TODO: fix token
+            string token = "";
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
-                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper),
-                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper),
-                TracingEvents = new TracingEventAPIBroker(tracingApiHelper),
-                Sins = new SinAPIBroker(applicationApiHelper)
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
+                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper, token),
+                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper, token),
+                TracingEvents = new TracingEventAPIBroker(tracingApiHelper, token),
+                Sins = new SinAPIBroker(applicationApiHelper, token)
             };
 
             var repositories = new RepositoryList

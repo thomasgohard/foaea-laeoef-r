@@ -9,16 +9,18 @@ namespace FOAEA3.Common.Brokers.Administration
     public class ApplicationLifeStatesAPIBroker : IApplicationLifeStatesAPIBroker
     {
         private IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public ApplicationLifeStatesAPIBroker(IAPIBrokerHelper apiHelper)
+        public ApplicationLifeStatesAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
         public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
         {
             string apiCall = $"api/v1/ApplicationLifeStates";
-            return await ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall);
+            return await ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall, token: Token);
         }
 
     }
