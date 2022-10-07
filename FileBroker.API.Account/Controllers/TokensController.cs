@@ -140,12 +140,12 @@ namespace FileBroker.API.Account.Controllers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, userData.UserName),
-                new Claim(ClaimTypes.Role, userData.SecurityRole),
+                new Claim(ClaimTypes.Name, userData.UserName),                
                 new Claim(JwtRegisteredClaimNames.Sub, userData.EmailAddress),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, userData.UserName)
             };
+            SetupRoleClaims(claims, userData.SecurityRole);
 
             JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey, claims);
             string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
@@ -156,6 +156,13 @@ namespace FileBroker.API.Account.Controllers
                 RefreshToken = refreshToken,
                 TokenExpiration = token.ValidTo
             };
+        }
+
+        private static void SetupRoleClaims(List<Claim> claims, string securityRole)
+        {
+            string[] roles = securityRole.Split(",");
+            foreach (string role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
     }
