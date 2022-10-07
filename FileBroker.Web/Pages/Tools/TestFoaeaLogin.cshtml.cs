@@ -12,7 +12,7 @@ namespace FileBroker.Web.Pages.Tools
         {
             var client = new HttpClient();
 
-            var userLoginInfo = new LoginData2
+            var userLoginInfo = new FoaeaLoginData
             {
                 UserName = "system_support",
                 Password = "shared",
@@ -31,7 +31,7 @@ namespace FileBroker.Web.Pages.Tools
             
             var client = new HttpClient();
 
-            var userLoginInfo = new LoginData2();
+            var userLoginInfo = new FoaeaLoginData();
 
             string api = "https://localhost:12011/api/v1/logins/TestLogout";
             var response = await client.PostAsJsonAsync(api, userLoginInfo);
@@ -44,7 +44,7 @@ namespace FileBroker.Web.Pages.Tools
         {            
             var client = new HttpClient();
 
-            var userLoginInfo = new LoginData2();
+            var userLoginInfo = new FoaeaLoginData();
 
             string api = "https://localhost:12011/api/v1/logins/TestVerify";
             var response = await client.PostAsJsonAsync(api, userLoginInfo);

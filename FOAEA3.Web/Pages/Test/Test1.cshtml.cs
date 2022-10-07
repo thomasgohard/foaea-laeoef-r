@@ -17,7 +17,7 @@ namespace FOAEA3.Web.Pages.Test
         public string Message { get; set; }
 
         [BindProperty]
-        public LoginData2 LoginData { get; set; }
+        public FoaeaLoginData LoginData { get; set; }
 
         private ApiConfig ApiConfig { get; set; }
 
@@ -72,7 +72,7 @@ namespace FOAEA3.Web.Pages.Test
                                                     getRefreshedToken: OnRefreshTokenAsync);
                 var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
-                Message = await loginAPIs.LoginVerificationAsync(new LoginData2 { });
+                Message = await loginAPIs.LoginVerificationAsync(new FoaeaLoginData { });
             }
 
         }

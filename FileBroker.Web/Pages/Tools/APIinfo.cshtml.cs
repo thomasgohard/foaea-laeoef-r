@@ -1,14 +1,13 @@
 using FileBroker.Common.Brokers;
+using FileBroker.Common;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using FileBrokerModel = FileBroker.Model;
 
 namespace FileBroker.Web.Pages.Tools
 {
@@ -44,7 +43,7 @@ namespace FileBroker.Web.Pages.Tools
 
             var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
-            string foaeaToken = await GetFoaeaApiTokenAsync(applicationApiHelper, config);
+            string foaeaToken = await TokenHelper.GetFoaeaApiTokenAsync(applicationApiHelper, config);
 
             await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper, foaeaToken));
             await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper, foaeaToken));
@@ -53,7 +52,7 @@ namespace FileBroker.Web.Pages.Tools
 
             await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper, foaeaToken));
 
-            string fileBrokerToken = await GetFileBrokerApiTokenAsync(fb_accountApiHelper, config);
+            string fileBrokerToken = await TokenHelper.GetFileBrokerApiTokenAsync(fb_accountApiHelper, config);
 
             await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper, fileBrokerToken));
             await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper, fileBrokerToken));
@@ -63,42 +62,6 @@ namespace FileBroker.Web.Pages.Tools
             await AddVersionFor("FileBroker.API.FED.LicenceDenial", fb_FederalLicenceDenialApiHelper, new FEDLicenceDenialAPIBroker(fb_FederalLicenceDenialApiHelper, fileBrokerToken));
             await AddVersionFor("FileBroker.API.FED.Tracing", fb_FederalTracingApiHelper, new FEDTracingAPIBroker(fb_FederalTracingApiHelper, fileBrokerToken));
             await AddVersionFor("FileBroker.API.FED.SIN", fb_FederalSINApiHelper, new FEDSINAPIBroker(fb_FederalSINApiHelper, fileBrokerToken));
-        }
-
-        private static async Task<string> GetFoaeaApiTokenAsync(APIBrokerHelper applicationApiHelper, IConfiguration config)
-        {
-            string token = string.Empty;
-            var loginAPIs = new LoginsAPIBroker(applicationApiHelper, token);
-
-            var loginData = new LoginData2
-            {
-                UserName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                Password = config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                Submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-            };
-
-            var result = await loginAPIs.LoginAsync(loginData);
-
-            return result.Token;
-        }
-
-        private static async Task<string> GetFileBrokerApiTokenAsync(APIBrokerHelper fb_accountApiHelper, IConfiguration config)
-        {
-            string token = string.Empty;
-            var loginAPIs = new AccountAPIBroker(fb_accountApiHelper, token);
-
-            string userName = config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
-            string userPassword = config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
-
-            var loginData = new FileBrokerModel.LoginData
-            {
-                UserName = userName,
-                Password = userPassword
-            };
-
-            var tokenData = await loginAPIs.CreateToken(loginData);
-
-            return tokenData.Token;
         }
 
         private async Task AddVersionFor(string apiName, IAPIBrokerHelper helper, IVersionSupport broker)

@@ -30,10 +30,10 @@ namespace FileBroker.Common.Brokers
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<TokenData> CreateToken(FileBrokerModel.LoginData loginData)
+        public async Task<TokenData> CreateTokenAsync(FileBrokerModel.FileBrokerLoginData loginData)
         {
             string apiCall = $"api/v1/Tokens";
-            return await ApiHelper.PostDataAsync<TokenData, FileBrokerModel.LoginData>(apiCall, loginData, token: Token);
+            return await ApiHelper.PostDataAsync<TokenData, FileBrokerModel.FileBrokerLoginData>(apiCall, loginData, token: Token);
         }
     }
 }

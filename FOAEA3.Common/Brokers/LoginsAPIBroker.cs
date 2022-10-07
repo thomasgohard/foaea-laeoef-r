@@ -29,25 +29,25 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<TokenData> LoginAsync(LoginData2 loginData)
+        public async Task<TokenData> LoginAsync(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testLogin";
-            var data = await ApiHelper.PostDataAsync<TokenData, LoginData2>(apiCall, loginData);
+            var data = await ApiHelper.PostDataAsync<TokenData, FoaeaLoginData>(apiCall, loginData);
             return data;
         }
 
-        public async Task<string> LoginVerificationAsync(LoginData2 loginData)
+        public async Task<string> LoginVerificationAsync(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testVerify";
-            var data = await ApiHelper.PostDataGetStringAsync<LoginData2>(apiCall, loginData, token: Token);
+            var data = await ApiHelper.PostDataGetStringAsync<FoaeaLoginData>(apiCall, loginData, token: Token);
             return data;
         }
 
 
-        public async Task<string> LogoutAsync(LoginData2 loginData)
+        public async Task<string> LogoutAsync(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testLogout";
-            _ = await ApiHelper.PostDataAsync<List<string>, LoginData2>(apiCall, loginData, token: Token);
+            _ = await ApiHelper.PostDataAsync<List<string>, FoaeaLoginData>(apiCall, loginData, token: Token);
 
             return string.Empty;
         }

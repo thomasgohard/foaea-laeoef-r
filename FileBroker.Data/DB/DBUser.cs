@@ -45,8 +45,6 @@ namespace FileBroker.Data.DB
             data.UserName = rdr["UserName"] as string;
             data.EncryptedPassword = rdr["EncryptedPassword"] as string;
             data.PasswordSalt = rdr["PasswordSalt"] as string;
-            data.RefreshToken =  rdr["RefreshToken"] as string; // can be null 
-            data.RefreshTokenExpiration = (DateTime?)rdr["RefreshTokenExpiration"]; // can be null 
             data.SecurityRole = rdr["SecurityRole"] as string;
             data.EmailAddress = rdr["EmailAddress"] as string;
             data.IsActive = (bool)rdr["IsActive"];

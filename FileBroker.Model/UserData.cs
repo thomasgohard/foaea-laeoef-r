@@ -8,8 +8,6 @@ namespace FileBroker.Model
         public string UserName { get; set; }
         public string EncryptedPassword { get; set; }
         public string PasswordSalt { get; set; }
-        public string RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiration { get; set; }
         public string SecurityRole { get; set; }
         public string EmailAddress { get; set; }
         public bool IsActive { get; set; }

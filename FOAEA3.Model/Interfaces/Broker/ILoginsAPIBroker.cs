@@ -4,8 +4,8 @@ namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface ILoginsAPIBroker
     {
-        Task<TokenData> LoginAsync(LoginData2 loginData);
-        Task<string> LoginVerificationAsync(LoginData2 loginData);
-        Task<string> LogoutAsync(LoginData2 loginData);
+        Task<TokenData> LoginAsync(FoaeaLoginData loginData);
+        Task<string> LoginVerificationAsync(FoaeaLoginData loginData);
+        Task<string> LogoutAsync(FoaeaLoginData loginData);
     }
 }

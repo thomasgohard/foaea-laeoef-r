@@ -108,7 +108,7 @@ namespace FileBroker.Business
                     int warningCount = 0;
                     int successCount = 0;
 
-                    var loginData = new LoginData2
+                    var loginData = new FoaeaLoginData
                     {
                         UserName = FOAEA_userName,
                         Password = FOAEA_userPassword,

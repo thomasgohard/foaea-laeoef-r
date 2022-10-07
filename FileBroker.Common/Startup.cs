@@ -26,6 +26,8 @@ namespace FileBroker.Common
         public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration, string apiName)
         {
             LoggingHelper.SetupLogging(configuration, "FILEBROKER-API", "FileBroker", "Logs-API-FileBroker");
+            
+            services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
 
             services.AddSwaggerGen(options =>
             {

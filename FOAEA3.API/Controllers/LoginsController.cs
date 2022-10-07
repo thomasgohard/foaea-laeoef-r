@@ -1,18 +1,16 @@
-﻿using FileBroker.Model;
-using FOAEA3.API.Security;
+﻿using FOAEA3.API.Security;
 using FOAEA3.Business.Security;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using SecurityTokenData = FOAEA3.Model.SecurityTokenData;
 
 namespace FOAEA3.API.Controllers
 {
@@ -30,7 +28,7 @@ namespace FOAEA3.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("TestLogin")]
-        public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
+        public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
                                                         [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                         [FromServices] IRepositories db)
         {
@@ -136,7 +134,7 @@ namespace FOAEA3.API.Controllers
                 new Claim("Submitter", lastSecurityToken.Subm_SubmCd),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            
+
             string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
             string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
             string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
@@ -261,8 +259,6 @@ namespace FOAEA3.API.Controllers
 
             return Ok(passwordData);
         }
-
-
 
     }
 }

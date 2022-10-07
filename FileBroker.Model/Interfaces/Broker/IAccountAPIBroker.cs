@@ -5,6 +5,6 @@ namespace FileBroker.Model.Interfaces.Broker
 {
     public interface IAccountAPIBroker
     {
-        Task<TokenData> CreateToken(LoginData loginData);
+        Task<TokenData> CreateTokenAsync(FileBrokerLoginData loginData);
     }
 }

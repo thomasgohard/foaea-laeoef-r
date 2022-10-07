@@ -1,6 +1,6 @@
 ﻿namespace FOAEA3.Model
 {
-    public class LoginData2
+    public class FoaeaLoginData
     {
         public string UserName { get; set; }
         public string Password { get; set; }
