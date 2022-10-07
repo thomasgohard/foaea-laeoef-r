@@ -8,7 +8,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class LicenceDenialEventAPIBroker : ILicenceDenialEventAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public LicenceDenialEventAPIBroker(IAPIBrokerHelper apiHelper, string token)

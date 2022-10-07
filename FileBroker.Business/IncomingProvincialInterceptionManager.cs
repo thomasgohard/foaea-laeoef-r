@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FOAEA3.Resources;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -19,6 +18,9 @@ namespace FileBroker.Business
         private string FOAEA_userName { get; }
         private string FOAEA_userPassword { get; }
         private string FOAEA_submitter { get; }
+
+        private string CurrentToken { get; set; }
+        private string CurrentRefreshToken { get; set; }
 
         public IncomingProvincialInterceptionManager(string fileName,
                                                      APIBrokerList apis,
@@ -115,7 +117,17 @@ namespace FileBroker.Business
                         Submitter = FOAEA_submitter
                     };
 
-                    var claims = await APIs.Accounts.LoginAsync(loginData);
+                    var tokenData = await APIs.Accounts.LoginAsync(loginData);
+
+                    CurrentToken = tokenData.Token;
+                    CurrentRefreshToken = tokenData.RefreshToken;
+
+                    SetTokenForAPIs();
+
+                    APIs.Applications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.ProductionAudits.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.Accounts.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
 
                     try
                     {
@@ -230,7 +242,6 @@ namespace FileBroker.Business
                     }
                     finally
                     {
-                        // TODO: fix token
                         await APIs.Accounts.LogoutAsync(loginData);
                     }
 
@@ -274,10 +285,9 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
-            // TODO: fix token
+
             var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
 
-            // TODO: fix token
             foreach (var appl in applAutomation)
                 await APIs.InterceptionApplications.AcceptVariationAsync(appl);
 
@@ -293,7 +303,6 @@ namespace FileBroker.Business
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
-                // TODO: fix token
                 interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application);
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
@@ -302,29 +311,24 @@ namespace FileBroker.Business
                 {
                     case "00": // change
                     case "0":
-                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "14": // cancellation
-                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "17": // variation
-                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
                     case "29": // transfer
-                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interceptionMessageData.Application,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
                                                                                                      interceptionMessageData.NewIssuingSubmitter);
                         break;
 
                     case "35": // suspend
-                        // TODO: fix token
                         interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application);
                         break;
 
@@ -494,7 +498,6 @@ namespace FileBroker.Business
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
 
-            // TODO: fix token
             var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication);
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
@@ -529,7 +532,6 @@ namespace FileBroker.Business
 
         private async Task<bool> IsValidFinancialInformationAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
-            // TODO: fix token
             var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
             interceptionApplication.Messages.AddRange(validatedApplication.Messages);
@@ -689,6 +691,26 @@ namespace FileBroker.Business
             }
 
             return (newHoldback, isValidData);
+        }
+
+        private async Task<string> OnRefreshTokenAsync()
+        {
+            var result = await APIs.Accounts.RefreshTokenAsync(CurrentToken, CurrentRefreshToken);
+
+            CurrentToken = result.Token;
+            CurrentRefreshToken = result.RefreshToken;
+
+            SetTokenForAPIs();
+
+            return result.Token;
+        }
+
+        private void SetTokenForAPIs()
+        {
+            APIs.Applications.Token = CurrentToken;
+            APIs.InterceptionApplications.Token = CurrentToken;
+            APIs.ProductionAudits.Token = CurrentToken;
+            APIs.Accounts.Token = CurrentToken;
         }
 
     }

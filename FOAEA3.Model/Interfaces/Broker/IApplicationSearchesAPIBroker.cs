@@ -5,6 +5,9 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface IApplicationSearchesAPIBroker
     {
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
         Task<List<ApplicationSearchResultData>> SearchAsync(QuickSearchData searchCriteria);
     }
 }

@@ -10,7 +10,7 @@ namespace FOAEA3.Common.Brokers
 
     public class TracingApplicationAPIBroker : ITracingApplicationAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public TracingApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)

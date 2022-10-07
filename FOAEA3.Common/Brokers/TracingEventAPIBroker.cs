@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class TracingEventAPIBroker : ITracingEventAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public TracingEventAPIBroker(IAPIBrokerHelper apiHelper, string token)

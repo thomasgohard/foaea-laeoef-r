@@ -8,7 +8,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class ApplicationEventAPIBroker : IApplicationEventAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public ApplicationEventAPIBroker(IAPIBrokerHelper apiHelper, string token)

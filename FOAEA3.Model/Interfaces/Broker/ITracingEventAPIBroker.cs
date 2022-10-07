@@ -5,6 +5,9 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface ITracingEventAPIBroker
     {
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
         Task CloseNETPTraceEventsAsync();
         Task<List<ApplicationEventData>> GetRequestedTRCINEventsAsync(string enfSrvCd, string fileCycle);
         Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrvCd, string fileCycle);

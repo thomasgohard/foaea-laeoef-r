@@ -8,7 +8,7 @@ namespace FOAEA3.Common.Brokers.Administration
 
     public class ApplicationLifeStatesAPIBroker : IApplicationLifeStatesAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public ApplicationLifeStatesAPIBroker(IAPIBrokerHelper apiHelper, string token)

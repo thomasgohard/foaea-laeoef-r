@@ -22,7 +22,7 @@ namespace FOAEA3.Common.Helpers
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
-        private Func<Task<string>> GetRefreshedToken { get; }
+        public Func<Task<string>> GetRefreshedToken { get; set; }
 
 
         public MessageDataList Messages { get; set; }

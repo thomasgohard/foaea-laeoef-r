@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class SinAPIBroker : ISinAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public SinAPIBroker(IAPIBrokerHelper apiHelper, string token)

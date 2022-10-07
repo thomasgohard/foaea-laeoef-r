@@ -9,7 +9,7 @@ namespace FileBroker.Common.Brokers
 {
     public class AccountAPIBroker : IAccountAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public AccountAPIBroker(IAPIBrokerHelper apiHelper, string token)

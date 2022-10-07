@@ -5,6 +5,9 @@ namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface IApplicationAPIBroker
     {
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
         Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd);
         Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData);
 

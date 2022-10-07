@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class BackendProcessesAPIBroker : IBackendProcessesAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public BackendProcessesAPIBroker(IAPIBrokerHelper apiHelper, string token)

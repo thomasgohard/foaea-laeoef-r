@@ -7,7 +7,7 @@ namespace FileBroker.Common.Brokers
 {
     public class FEDSINAPIBroker : IFEDSINAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public FEDSINAPIBroker(IAPIBrokerHelper apiHelper, string token)

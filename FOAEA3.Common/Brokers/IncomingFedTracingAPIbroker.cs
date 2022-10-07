@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class IncomingFedTracingAPIbroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         private ApiConfig ApiFilesConfig { get; }
         public string Token { get; set; }
 

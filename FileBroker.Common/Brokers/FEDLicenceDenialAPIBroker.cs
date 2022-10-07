@@ -7,7 +7,7 @@ namespace FileBroker.Common.Brokers
 {
     public class FEDLicenceDenialAPIBroker : IFEDLicenceDenialAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public FEDLicenceDenialAPIBroker(IAPIBrokerHelper apiHelper, string token)

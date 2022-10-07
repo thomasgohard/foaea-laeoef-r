@@ -10,6 +10,10 @@ namespace FileBroker.Business.Tests.InMemory
         public int Count { get; set; }
         public MessageDataList LastMessages { get; set; }
 
+        public IAPIBrokerHelper ApiHelper => throw new System.NotImplementedException();
+
+        public string Token { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
         public Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();

@@ -7,7 +7,7 @@ namespace FileBroker.Common.Brokers
 {
     public class MEPInterceptionAPIBroker : IMEPInterceptionAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public MEPInterceptionAPIBroker(IAPIBrokerHelper apiHelper, string token)

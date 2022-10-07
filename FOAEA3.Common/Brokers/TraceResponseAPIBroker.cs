@@ -7,7 +7,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class TraceResponseAPIBroker : ITraceResponseAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public TraceResponseAPIBroker(IAPIBrokerHelper apiHelper, string token)

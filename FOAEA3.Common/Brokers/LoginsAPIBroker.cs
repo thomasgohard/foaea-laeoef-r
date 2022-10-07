@@ -8,7 +8,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class LoginsAPIBroker : ILoginsAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public LoginsAPIBroker(IAPIBrokerHelper apiHelper, string currentToken)

@@ -8,7 +8,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class ProductionAuditAPIBroker : IProductionAuditAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public ProductionAuditAPIBroker(IAPIBrokerHelper apiHelper, string token)

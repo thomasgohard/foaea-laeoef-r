@@ -7,7 +7,7 @@ namespace FileBroker.Common.Brokers
 {
     public class FEDInterceptionAPIBroker : IFEDInterceptionAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public FEDInterceptionAPIBroker(IAPIBrokerHelper apiHelper, string token)

@@ -7,7 +7,7 @@ namespace FileBroker.Common.Brokers
 {
     public class MEPTracingAPIBroker : IMEPTracingAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public MEPTracingAPIBroker(IAPIBrokerHelper apiHelper, string token)

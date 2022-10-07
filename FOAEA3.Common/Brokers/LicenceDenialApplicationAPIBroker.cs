@@ -9,7 +9,7 @@ namespace FOAEA3.Common.Brokers
 {
     public class LicenceDenialApplicationAPIBroker : ILicenceDenialApplicationAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
         public LicenceDenialApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)

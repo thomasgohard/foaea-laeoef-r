@@ -5,6 +5,9 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface IApplicationEventAPIBroker
     {
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
         Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName);
         Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName);
         Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync();
