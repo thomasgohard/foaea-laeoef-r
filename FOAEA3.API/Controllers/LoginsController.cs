@@ -127,13 +127,21 @@ namespace FOAEA3.API.Controllers
 
             await db.SecurityTokenTable.MarkTokenAsExpired(oldToken);
 
+            string userRole = lastSecurityToken.Subm_Class;
+
+            if (string.Equals(lastSecurityToken.SubjectName, "system_support", StringComparison.InvariantCultureIgnoreCase))
+                userRole += ", Admin";
+
+            if (lastSecurityToken.Subm_SubmCd.IsInternalUser())
+                userRole += ", FO";
+            
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, lastSecurityToken.SubjectName),
-                new Claim(ClaimTypes.Role, lastSecurityToken.Subm_Class),
                 new Claim("Submitter", lastSecurityToken.Subm_SubmCd),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+            SetupRoleClaims(claims, userRole);
 
             string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
             string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
@@ -169,6 +177,13 @@ namespace FOAEA3.API.Controllers
             await db.SecurityTokenTable.CreateAsync(securityToken);
 
             return Ok(tokenData);
+        }
+
+        private static void SetupRoleClaims(List<Claim> claims, string securityRole)
+        {
+            string[] roles = securityRole.Split(",");
+            foreach (string role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
         }
 
         [HttpPost("TestLogout")]

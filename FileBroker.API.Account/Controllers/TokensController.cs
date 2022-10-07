@@ -162,7 +162,7 @@ namespace FileBroker.API.Account.Controllers
         {
             string[] roles = securityRole.Split(",");
             foreach (string role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
         }
 
     }
