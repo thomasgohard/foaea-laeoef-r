@@ -68,10 +68,12 @@ namespace FileBroker.Business.Tests
                 FrenchAuditProvinceCodes = null
             };
 
+            // TODO: fix test to get a "fake" IConfiguration object
             var interceptionManager = new IncomingProvincialInterceptionManager(fileName,
                                                                                 apis,
                                                                                 repositories,
-                                                                                auditConfig);
+                                                                                auditConfig, 
+                                                                                null);
 
             // Act
             InterceptionApplicationData applicationData;

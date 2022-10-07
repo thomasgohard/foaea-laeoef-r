@@ -20,7 +20,7 @@ namespace FileBroker.API.MEP.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "MEPtracing")]
+[Authorize(Roles = "MEPtracing,System")]
 public class TracingFilesController : ControllerBase
 {
     [HttpGet("Version")]
@@ -107,8 +107,10 @@ public class TracingFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
+        // TODO: fix token
+        string token = "";
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
-        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper);
+        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);
 
         var apis = new APIBrokerList
         {

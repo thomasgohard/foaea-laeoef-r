@@ -2,8 +2,6 @@
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +19,6 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpGet("Version")]
-    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("LicenceDenialTerminations API Version 1.0");
 
     [HttpGet("DB")]

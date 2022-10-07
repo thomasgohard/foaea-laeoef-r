@@ -7,7 +7,7 @@ namespace FileBroker.API.Fed.Interception.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "FederalInterception")]
+[Authorize(Roles = "FederalInterception,System")]
 public class FederalInterceptionFilesController : ControllerBase
 {
     [HttpGet("Version")]

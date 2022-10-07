@@ -8,6 +8,7 @@ using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace FileBroker.API.Fed.SIN.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "SinRegistry")]
+[Authorize(Roles = "SinRegistry,System")]
 public class SinFilesController : ControllerBase
 {
     [HttpGet("Version")]
@@ -104,11 +105,13 @@ public class SinFilesController : ControllerBase
 
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
 
+        string token = "";
         var apis = new APIBrokerList
         {
-            Sins = new SinAPIBroker(apiHelper),
-            ApplicationEvents = new ApplicationEventAPIBroker(apiHelper),
-            Applications = new ApplicationAPIBroker(apiHelper)
+            // TODO: fix token
+            Sins = new SinAPIBroker(apiHelper, token),
+            ApplicationEvents = new ApplicationEventAPIBroker(apiHelper, token),
+            Applications = new ApplicationAPIBroker(apiHelper, token)
         };
 
         var repositories = new RepositoryList

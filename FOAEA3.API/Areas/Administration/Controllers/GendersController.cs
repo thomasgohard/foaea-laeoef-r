@@ -20,12 +20,6 @@ public class GendersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<DataList<GenderData>>> GetGenders([FromServices] IGenderRepository genderRepository)
     {
-        if (Request.Headers.ContainsKey("CurrentSubmitter"))
-            genderRepository.CurrentSubmitter = Request.Headers["CurrentSubmitter"];
-
-        if (Request.Headers.ContainsKey("CurrentSubject"))
-            genderRepository.UserId = Request.Headers["CurrentSubject"];
-
         var data = await genderRepository.GetGendersAsync();
 
         return Ok(data);

@@ -6,6 +6,8 @@ namespace FOAEA3.Model.Interfaces.Broker
     public interface IInterceptionApplicationAPIBroker
     {
         IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
 
         Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
         Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
@@ -14,8 +16,8 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
         Task<InterceptionApplicationData> VaryInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication);
         Task<InterceptionApplicationData> TransferInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication,
-                                                                 string newRecipientSubmitter,
-                                                                 string newIssuingSubmitter);
+                                                                             string newRecipientSubmitter,
+                                                                             string newIssuingSubmitter);
 
         Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application);
 

@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Resources;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business
@@ -14,16 +15,28 @@ namespace FileBroker.Business
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
 
+        private string FOAEA_userName { get; }
+        private string FOAEA_userPassword { get; }
+        private string FOAEA_submitter { get; }
+
+        private string CurrentToken { get; set; }
+        private string CurrentRefreshToken { get; set; }
+
         public IncomingProvincialInterceptionManager(string fileName,
                                                      APIBrokerList apis,
                                                      RepositoryList repositories,
-                                                     ProvincialAuditFileConfig auditConfig)
+                                                     ProvincialAuditFileConfig auditConfig,
+                                                     IConfiguration config)
         {
             FileName = fileName;
             APIs = apis;
             DB = repositories;
             AuditConfiguration = auditConfig;
             Translations = new Dictionary<string, string>();
+
+            FOAEA_userName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues();
+            FOAEA_userPassword = config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues();
+            FOAEA_submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues();
 
             // load translations
 
@@ -97,113 +110,140 @@ namespace FileBroker.Business
                     int warningCount = 0;
                     int successCount = 0;
 
-                    foreach (var data in interceptionFile.INTAPPIN10)
+                    var loginData = new FoaeaLoginData
                     {
-                        bool isValidRequest = true;
+                        UserName = FOAEA_userName,
+                        Password = FOAEA_userPassword,
+                        Submitter = FOAEA_submitter
+                    };
 
-                        var fileAuditData = new FileAuditData
+                    var tokenData = await APIs.Accounts.LoginAsync(loginData);
+
+                    CurrentToken = tokenData.Token;
+                    CurrentRefreshToken = tokenData.RefreshToken;
+
+                    SetTokenForAPIs();
+
+                    APIs.Applications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.ProductionAudits.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    APIs.Accounts.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+
+                    try
+                    {
+                        foreach (var data in interceptionFile.INTAPPIN10)
                         {
-                            Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-                            Appl_CtrlCd = data.dat_Appl_CtrlCd,
-                            Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
-                            InboundFilename = FileName + ".XML"
-                        };
+                            bool isValidRequest = true;
 
-                        var requestError = new MessageDataList();
-
-                        ValidateActionCode(data, ref requestError, ref isValidRequest);
-
-                        if (isValidRequest)
-                        {
-                            var interceptionData = interceptionFile.INTAPPIN11.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var financialData = interceptionFile.INTAPPIN12.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var sourceSpecificData = interceptionFile.INTAPPIN13.Where(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd).ToList();
-
-                            int thisErrorCount = 0;
-                            bool isValidData = true;
-                            InterceptionApplicationData thisApplication;
-                            (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequestAsync(
-                                                                                        data, interceptionData,
-                                                                                        financialData, sourceSpecificData,
-                                                                                        fileAuditData);
-                            var interceptionMessage = new MessageData<InterceptionApplicationData>
+                            var fileAuditData = new FileAuditData
                             {
-                                Application = thisApplication,
-                                MaintenanceAction = data.Maintenance_ActionCd,
-                                MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
-                                NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                                NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
-                                NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
+                                Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
+                                Appl_CtrlCd = data.dat_Appl_CtrlCd,
+                                Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
+                                InboundFilename = FileName + ".XML"
                             };
-                            errorCount += thisErrorCount;
 
-                            await AddRequestToAuditAsync(interceptionMessage);
+                            var requestError = new MessageDataList();
 
-                            if (isValidData)
+                            ValidateActionCode(data, ref requestError, ref isValidRequest);
+
+                            if (isValidRequest)
                             {
-                                var loadInboundDB = DB.LoadInboundAuditTable;
-                                var appl = interceptionMessage.Application;
-                                var fileName = FileName + ".XML";
+                                var interceptionData = interceptionFile.INTAPPIN11.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                                var financialData = interceptionFile.INTAPPIN12.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                                var sourceSpecificData = interceptionFile.INTAPPIN13.Where(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd).ToList();
 
-                                if (!await loadInboundDB.AlreadyExistsAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
-                                                                            fileName))
+                                int thisErrorCount = 0;
+                                bool isValidData = true;
+                                InterceptionApplicationData thisApplication;
+                                (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequestAsync(
+                                                                                            data, interceptionData,
+                                                                                            financialData, sourceSpecificData,
+                                                                                            fileAuditData);
+                                var interceptionMessage = new MessageData<InterceptionApplicationData>
                                 {
+                                    Application = thisApplication,
+                                    MaintenanceAction = data.Maintenance_ActionCd,
+                                    MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
+                                    NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
+                                    NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
+                                    NewUpdateSubmitter = data.dat_Update_SubmCd ?? data.dat_Subm_SubmCd
+                                };
+                                errorCount += thisErrorCount;
 
-                                    await loadInboundDB.AddNewAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+                                await AddRequestToAuditAsync(interceptionMessage);
 
-                                    var messages = await ProcessApplicationRequestAsync(interceptionMessage);
+                                if (isValidData)
+                                {
+                                    var loadInboundDB = DB.LoadInboundAuditTable;
+                                    var appl = interceptionMessage.Application;
+                                    var fileName = FileName + ".XML";
 
-                                    if (messages.ContainsMessagesOfType(MessageType.Error))
+                                    if (!await loadInboundDB.AlreadyExistsAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
+                                                                                fileName))
                                     {
-                                        var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
-                                        errorCount++;
-                                    }
-                                    else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                    {
-                                        var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
-                                        warningCount++;
-                                    }
-                                    else
-                                    {
-                                        if (includeInfoInMessages)
+
+                                        await loadInboundDB.AddNewAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
+                                        var messages = await SendDataToFoaeaAsync(interceptionMessage);
+
+                                        if (messages.ContainsMessagesOfType(MessageType.Error))
                                         {
-                                            var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-                                            if (infos.Any())
+                                            var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
+                                            errorCount++;
+                                        }
+                                        else if (messages.ContainsMessagesOfType(MessageType.Warning))
+                                        {
+                                            var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
+                                            warningCount++;
+                                        }
+                                        else
+                                        {
+                                            if (includeInfoInMessages)
                                             {
-                                                fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
-                                                result.AddRange(infos);
+                                                var infos = messages.FindAll(m => m.Severity == MessageType.Information);
+                                                if (infos.Any())
+                                                {
+                                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
+                                                    result.AddRange(infos);
+                                                }
                                             }
+
+                                            if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
+                                                fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
+                                            successCount++;
                                         }
 
-                                        if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                            fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
-                                        successCount++;
+                                        await loadInboundDB.MarkAsCompletedAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+
                                     }
-
-                                    await loadInboundDB.MarkAsCompletedAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
-
                                 }
+
+                            }
+                            else
+                            {
+                                fileAuditData.ApplicationMessage = requestError[0].Description;
+                                errorCount++;
                             }
 
-                        }
-                        else
-                        {
-                            fileAuditData.ApplicationMessage = requestError[0].Description;
-                            errorCount++;
+                            await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+
                         }
 
-                        await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                        await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
+                        await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
+                                                                           errorCount, warningCount, successCount, unknownTags.Count);
+
+                        if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                            await AutoAcceptVariationsAsync(EnfSrv_Cd);
 
                     }
-
-                    await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
-                                                                       errorCount, warningCount, successCount, unknownTags.Count);
-
-                    if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
-                        await AutoAcceptVariationsAsync(EnfSrv_Cd);
+                    finally
+                    {
+                        await APIs.Accounts.LogoutAsync(loginData);
+                    }
 
                 }
 
@@ -245,6 +285,7 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
+
             var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
 
             foreach (var appl in applAutomation)
@@ -253,7 +294,7 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
 
-        public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<InterceptionApplicationData> interceptionMessageData)
+        public async Task<MessageDataList> SendDataToFoaeaAsync(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
             InterceptionApplicationData interception;
             var existingMessages = interceptionMessageData.Application.Messages;
@@ -421,7 +462,7 @@ namespace FileBroker.Business
                         bool isSourceSpecificDataValid;
                         HoldbackConditionData newSourceSpecificData;
                         (newSourceSpecificData, isSourceSpecificDataValid) = await ExtractAndValidateSourceSpecificDataAsync(sourceSpecific, fileAuditData,
-                                                                                                                        now, interceptionApplication);
+                                                                                                                             interceptionApplication);
                         if (!isSourceSpecificDataValid)
                             isValidData = false;
                         interceptionApplication.HldbCnd.Add(newSourceSpecificData);
@@ -601,7 +642,6 @@ namespace FileBroker.Business
 
         private async Task<(HoldbackConditionData, bool)> ExtractAndValidateSourceSpecificDataAsync(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
-                                                                                           DateTime now,
                                                                                            InterceptionApplicationData interceptionApplication)
         {
             bool isValidData = true;
@@ -609,7 +649,7 @@ namespace FileBroker.Business
             {
                 Appl_CtrlCd = interceptionApplication.Appl_CtrlCd,
                 Appl_EnfSrv_Cd = interceptionApplication.Appl_EnfSrv_Cd,
-                IntFinH_Dte = now,
+                IntFinH_Dte = interceptionApplication.IntFinH.IntFinH_Dte,
                 EnfSrv_Cd = sourceSpecific.dat_EnfSrv_Cd,
                 HldbCnd_MxmPerChq_Money = sourceSpecific.dat_HldbCnd_MxmPerChq_Money.Convert<decimal?>(),
                 HldbCnd_SrcHldbAmn_Money = sourceSpecific.dat_HldbCnd_Hldb_Amn_Money.Convert<decimal?>(),
@@ -651,6 +691,26 @@ namespace FileBroker.Business
             }
 
             return (newHoldback, isValidData);
+        }
+
+        private async Task<string> OnRefreshTokenAsync()
+        {
+            var result = await APIs.Accounts.RefreshTokenAsync(CurrentToken, CurrentRefreshToken);
+
+            CurrentToken = result.Token;
+            CurrentRefreshToken = result.RefreshToken;
+
+            SetTokenForAPIs();
+
+            return result.Token;
+        }
+
+        private void SetTokenForAPIs()
+        {
+            APIs.Applications.Token = CurrentToken;
+            APIs.InterceptionApplications.Token = CurrentToken;
+            APIs.ProductionAudits.Token = CurrentToken;
+            APIs.Accounts.Token = CurrentToken;
         }
 
     }

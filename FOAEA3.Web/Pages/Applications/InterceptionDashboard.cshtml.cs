@@ -41,11 +41,13 @@ namespace FOAEA3.Web.Pages.Applications
         {
             if (!ModelState.IsValid)
             {
+                // TODO: fix token
+                string token = "";
                 // call API to do search and display result
                 string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
                 string currentUser = "system_support"; // TODO: fix when log in is done
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
-                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
+                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, token);
 
                 var quickSearch = new QuickSearchData
                 {
@@ -74,11 +76,13 @@ namespace FOAEA3.Web.Pages.Applications
         {
             if (!ModelState.IsValid)
             {
+                // TODO: fix token
+                string token = "";
                 // call API to do search and display result
                 string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
                 string currentUser = "system_support"; // TODO: fix when log in is done
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaApplicationRootAPI, currentSubmitter, currentUser);
-                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper);
+                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, token);
 
                 var quickSearch = new QuickSearchData
                 {

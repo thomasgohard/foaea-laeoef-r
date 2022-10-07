@@ -16,7 +16,7 @@ namespace FileBroker.API.Fed.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "FederalTracing")]
+[Authorize(Roles = "FederalTracing,System")]
 public class FederalTracingFilesController : ControllerBase
 {
     [HttpGet("Version")]
@@ -94,8 +94,10 @@ public class FederalTracingFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
+        // TODO: fix token
+        string token = "";
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
-        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper);
+        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);
 
         var apis = new APIBrokerList
         {

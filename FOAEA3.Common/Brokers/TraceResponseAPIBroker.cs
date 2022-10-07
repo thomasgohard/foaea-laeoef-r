@@ -7,22 +7,24 @@ namespace FOAEA3.Common.Brokers
 {
     public class TraceResponseAPIBroker : ITraceResponseAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public TraceResponseAPIBroker(IAPIBrokerHelper apiHelper)
+        public TraceResponseAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
         public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
             _ = await ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
-                                                                                    responseData);
+                                                                                    responseData, token: Token);
         }
 
         public async Task MarkTraceResultsAsViewedAsync(string enfService)
         {
-            await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService);
+            await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
         }
     }
 }

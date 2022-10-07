@@ -6,6 +6,7 @@ using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace FOAEA3.Common.Filters;
 
@@ -20,27 +21,23 @@ public class ActionProcessHeadersFilter : IActionFilter
     {
         var repositories = context.HttpContext.RequestServices.GetService<IRepositories>();
 
-        ProcessRequestHeaders(context.HttpContext.Request.Headers, repositories);
+        var user = context.HttpContext.User;
+
+        ProcessRequestHeaders(context.HttpContext.Request.Headers, user.Claims, repositories);
         ProcessResponseHeaders(context.HttpContext.Response.Headers);
     }
 
-    private static void ProcessRequestHeaders(IDictionary<string, StringValues> headers, IRepositories repositories)
+    private static void ProcessRequestHeaders(IDictionary<string, StringValues> headers,
+                                              IEnumerable<Claim> claims,
+                                              IRepositories repositories)
     {
-        const string CURRENT_SUBMITTER = "CurrentSubmitter";
-        const string CURRENT_SUBJECT = "CurrentSubject";
         const string ACCEPT_LANGUAGE = "Accept-Language";
 
-        if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBMITTER))
-        {
-            string key = headers.Keys.First(m => m.Contains(CURRENT_SUBMITTER, StringComparison.InvariantCultureIgnoreCase));
-            repositories.CurrentSubmitter = headers[key];
-        }
+        var userName = claims?.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
+        var submitter = claims?.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 
-        if (headers.Keys.ContainsCaseInsensitive(CURRENT_SUBJECT))
-        {
-            string key = headers.Keys.First(m => m.Contains(CURRENT_SUBJECT, StringComparison.InvariantCultureIgnoreCase));
-            repositories.CurrentUser = headers[key];
-        }
+        repositories.CurrentUser = userName;
+        repositories.CurrentSubmitter = submitter;
 
         if (headers.Keys.ContainsCaseInsensitive(ACCEPT_LANGUAGE))
         {

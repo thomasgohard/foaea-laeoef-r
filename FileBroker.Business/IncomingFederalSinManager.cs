@@ -111,6 +111,7 @@ public class IncomingFederalSinManager
 
         bool sourceModifiedSin = false;
 
+        // TODO: fix token
         var appl = await APIs.Applications.GetApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
 
         if (appl.ActvSt_Cd != "A")
@@ -163,6 +164,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = updatedSinDataSummary.SVR_SIN
             };
 
+            // TODO: fix token
             await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
@@ -173,6 +175,7 @@ public class IncomingFederalSinManager
                 ConfirmedSIN = String.Empty
             };
 
+            // TODO: fix token
             await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)

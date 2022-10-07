@@ -1,24 +1,25 @@
 ﻿using DBHelper;
 using FOAEA3.Common.Filters;
-using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Common
@@ -32,32 +33,39 @@ namespace FOAEA3.Common
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
-
-            services.AddAuthentication(LoggingHelper.COOKIE_ID)
-                    .AddCookie();
-
-            services.AddDataProtection()
-                    .PersistKeysToFileSystem(new DirectoryInfo(@"c:\FOAEA"))
-                    .SetApplicationName("SharedCookieApp");
-
-            services.AddAuthentication(LoggingHelper.COOKIE_ID)
-                    .AddCookie(LoggingHelper.COOKIE_ID, options =>
-                        {
-                            options.Cookie.Name = ".AspNet.SharedCookie";
-                        });
+            services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
 
             services.AddControllers(options =>
                         {
-                            options.ReturnHttpNotAcceptable = true;
-                            options.RespectBrowserAcceptHeader = true;
                             options.Filters.Add(new AuthorizeFilter());
                             options.Filters.Add(new ActionAutoLoggerFilter());
                             options.Filters.Add(new ActionProcessHeadersFilter());
                         })
-                    .AddXmlSerializerFormatters()
                     .AddNewtonsoftJson(options =>
                             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                         );
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                        {
+                            options.TokenValidationParameters = new TokenValidationParameters()
+                            {
+                                ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+                                ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+                                IssuerSigningKey = new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues())),
+                                ValidateIssuer = true,
+                                ValidateAudience = true,
+                                ValidateLifetime = true,
+                                LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
+                                {
+                                    var clonedParameters = validationParameters.Clone();
+                                    clonedParameters.LifetimeValidator = null;
+                                    bool valid = expires >= DateTime.Now;
+                                    return valid;
+                                }
+                            };
+                        });
         }
 
         public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -151,7 +159,6 @@ namespace FOAEA3.Common
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 
-            // var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
             var api_url = configuration["Urls"];
 
             ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");

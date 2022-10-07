@@ -1,0 +1,14 @@
+﻿@page
+@model FileBroker.Web.Pages.Tools.TestFoaeaLoginModel
+@{
+}
+
+<h2>Test Login</h2>
+
+<form method="post">
+    <input asp-page-handler="Login" class="btn btn-action" type="submit" value="Test Login" />
+    <input asp-page-handler="Logout" class="btn btn-action" type="submit" value="Test Logout" />
+    <input asp-page-handler="Validate" class="btn btn-action" type="submit" value="Test Validate" />
+</form>
+
+<h3 class="clearfix">@Model.Message</h3>

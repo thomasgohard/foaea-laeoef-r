@@ -4,6 +4,7 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using Incoming.Common;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -16,16 +17,18 @@ namespace FileBroker.Web.Pages.Tasks
         private IFileTableRepository FileTable { get; }
         private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
+        private IConfiguration Config { get; }
 
         public IFormFile FormFile { get; set; }
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
-        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig)
+        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig, IConfiguration config)
         {
             FileTable = fileTable;
             ApiConfig = apiConfig.Value;
             APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            Config = config;
         }
 
         public async Task OnPostUpload()
@@ -74,7 +77,11 @@ namespace FileBroker.Web.Pages.Tasks
                     switch (incomingFileInfo.Category)
                     {
                         case "INTAPPIN":
-                            await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson);
+
+                            string userName = Config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
+                            string userPassword = Config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
+                            await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, 
+                                                            fileName, fileContentAsJson, userName, userPassword);
                             if (errors.Any())
                             {
                                 ErrorMessage = String.Empty;

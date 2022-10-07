@@ -46,14 +46,16 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
+            // TODO: fix token
+            string token = "";
             var apiBrokers = new APIBrokerList
             {
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper),
-                Sins = new SinAPIBroker(applicationApiHelper)
+                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
+                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token),
+                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper, token),
+                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper, token),
+                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper, token),
+                Sins = new SinAPIBroker(applicationApiHelper, token)
             };
 
             var repositories = new RepositoryList

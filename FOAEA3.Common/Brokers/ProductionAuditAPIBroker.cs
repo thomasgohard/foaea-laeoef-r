@@ -8,11 +8,13 @@ namespace FOAEA3.Common.Brokers
 {
     public class ProductionAuditAPIBroker : IProductionAuditAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public ProductionAuditAPIBroker(IAPIBrokerHelper apiHelper)
+        public ProductionAuditAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
         public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
@@ -26,13 +28,13 @@ namespace FOAEA3.Common.Brokers
             };
 
             _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
-                                                                                  productionAuditData);
+                                                                             productionAuditData, token: Token);
         }
 
         public async Task InsertAsync(ProductionAuditData productionAuditData)
         {
             _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
-                                                                                  productionAuditData);
+                                                                              productionAuditData, token: Token);
         }
     }
 }

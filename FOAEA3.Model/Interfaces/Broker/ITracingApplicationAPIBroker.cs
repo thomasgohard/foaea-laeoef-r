@@ -5,6 +5,9 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface ITracingApplicationAPIBroker
     {
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
         Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication);
         Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData);
         Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd);

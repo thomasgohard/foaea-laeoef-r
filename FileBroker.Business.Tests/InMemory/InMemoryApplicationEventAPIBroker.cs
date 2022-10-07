@@ -8,6 +8,10 @@ namespace FileBroker.Business.Tests.InMemory
 {
     public class InMemoryApplicationEventAPIBroker : IApplicationEventAPIBroker
     {
+        public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
+
+        public string Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
         {
             throw new NotImplementedException();

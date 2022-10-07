@@ -4,15 +4,19 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Authentication;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using SecurityTokenData = FOAEA3.Model.SecurityTokenData;
 
 namespace FOAEA3.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
+    [Authorize()]
     public class LoginsController : ControllerBase
     {
         [HttpGet("Version")]
@@ -24,29 +28,56 @@ namespace FOAEA3.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("TestLogin")]
-        public async Task<ActionResult> TestLoginAction([FromBody] LoginData2 loginData,
+        public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
+                                                        [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                         [FromServices] IRepositories db)
         {
             // WARNING: not for production use!
+            var tokenConfig = tokenConfigOptions.Value;
+            if (tokenConfig == null)
+                return StatusCode(500);
+
             var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
-                await HttpContext.SignInAsync(LoggingHelper.COOKIE_ID, principal);
-                return Ok(principal.Claims);
+                string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
+                string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
+                string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
+                int expireMinutes = tokenConfig.ExpireMinutes;
+                int refreshExpireMinutes = tokenConfig.RefreshTokenExpireMinutes;
+
+                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey,
+                                                                           claims: principal.Claims.ToList());
+                string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+                DateTime refreshTokenExpiration = DateTime.Now.AddMinutes(refreshExpireMinutes);
+
+                var tokenData = new TokenData
+                {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    TokenExpiration = token.ValidTo,
+                    RefreshToken = refreshToken,
+                    RefreshTokenExpiration = refreshTokenExpiration
+                };
+
+                var securityToken = new SecurityTokenData
+                {
+                    Token = tokenData.Token,
+                    TokenExpiration = tokenData.TokenExpiration,
+                    RefreshToken = tokenData.RefreshToken,
+                    RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
+                    SubjectName = loginData.UserName,
+                    Subm_SubmCd = loginData.Submitter,
+                    Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
+                };
+                await db.SecurityTokenTable.CreateAsync(securityToken);
+
+                return Ok(tokenData);
             }
             else
             {
-                return BadRequest();
+                return BadRequest("Login failed.");
             }
-        }
-
-        [HttpPost("TestLogout")]
-        public async Task<ActionResult> TestLogout()
-        {
-            // WARNING: not for production use!
-            await HttpContext.SignOutAsync(LoggingHelper.COOKIE_ID); // CookieAuthenticationDefaults.AuthenticationScheme,
-
-            return Ok();
         }
 
         [HttpPost("TestVerify")]
@@ -57,30 +88,117 @@ namespace FOAEA3.API.Controllers
             if (user is not null && user.IsAuthenticated)
             {
                 var claims = User.Claims;
-                var userName = string.Empty;
-                var userRole = string.Empty;
-                var submitter = string.Empty;
-                foreach (var claim in claims)
-                {
-                    switch (claim.Type)
-                    {
-                        case ClaimTypes.Name:
-                            userName = claim.Value;
-                            break;
-                        case ClaimTypes.Role:
-                            userRole = claim.Value;
-                            break;
-                        case "Submitter":
-                            submitter = claim.Value;
-                            break;
-                    }
-                }
+                var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
+                var userRole = claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value;
+                var submitter = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
+
                 return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
             }
             else
             {
                 return Ok("No user logged in. Please login.");
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("TestRefreshToken")]
+        public async Task<ActionResult> TestRefreshToken([FromBody] TokenRefreshData refreshData,
+                                                         [FromServices] IOptions<TokenConfig> tokenConfigOptions,
+                                                         [FromServices] IRepositories db)
+        {
+            var tokenConfig = tokenConfigOptions.Value;
+            if (tokenConfig == null)
+                return StatusCode(500);
+
+            string oldToken = Request.Headers["Authorization"];
+            if (string.IsNullOrEmpty(oldToken) || oldToken.Length < 8)
+                return BadRequest();
+
+            oldToken = oldToken[7..]; // get rid of the word Bearer that is at the beginning
+
+            var lastSecurityToken = await db.SecurityTokenTable.GetTokenDataAsync(oldToken);
+
+            if (lastSecurityToken is null ||
+                !string.Equals(lastSecurityToken.RefreshToken, refreshData.RefreshToken) ||
+                lastSecurityToken.RefreshTokenExpiration < DateTime.Now)
+            {
+                return BadRequest();
+            }
+
+            await db.SecurityTokenTable.MarkTokenAsExpired(oldToken);
+
+            string userRole = lastSecurityToken.Subm_Class;
+
+            if (string.Equals(lastSecurityToken.SubjectName, "system_support", StringComparison.InvariantCultureIgnoreCase))
+                userRole += ", Admin";
+
+            if (lastSecurityToken.Subm_SubmCd.IsInternalUser())
+                userRole += ", FO";
+            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, lastSecurityToken.SubjectName),
+                new Claim("Submitter", lastSecurityToken.Subm_SubmCd),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            SetupRoleClaims(claims, userRole);
+
+            string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
+            string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
+            string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
+            int expireMinutes = tokenConfig.ExpireMinutes;
+            int refreshExpireMinutes = tokenConfig.RefreshTokenExpireMinutes;
+
+            JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes,
+                                                                       apiKey, claims: claims.ToList());
+            string newRefreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+            DateTime refreshTokenExpiration = DateTime.Now.AddMinutes(refreshExpireMinutes);
+
+            var tokenData = new TokenData
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                TokenExpiration = token.ValidTo,
+                RefreshToken = newRefreshToken,
+                RefreshTokenExpiration = refreshTokenExpiration
+            };
+
+            var securityToken = new SecurityTokenData
+            {
+                Token = tokenData.Token,
+                TokenExpiration = tokenData.TokenExpiration,
+                RefreshToken = tokenData.RefreshToken,
+                RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
+                SubjectName = lastSecurityToken.SubjectName,
+                Subm_SubmCd = lastSecurityToken.Subm_SubmCd,
+                Subm_Class = lastSecurityToken.Subm_Class,
+                FromRefreshToken = lastSecurityToken.RefreshToken
+            };
+            await db.SecurityTokenTable.CreateAsync(securityToken);
+
+            return Ok(tokenData);
+        }
+
+        private static void SetupRoleClaims(List<Claim> claims, string securityRole)
+        {
+            string[] roles = securityRole.Split(",");
+            foreach (string role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
+        }
+
+        [HttpPost("TestLogout")]
+        public async Task<ActionResult> TestLogout([FromServices] IRepositories db)
+        {
+            // WARNING: not for production use!
+            string oldToken = Request.Headers["Authorization"];
+            if (string.IsNullOrEmpty(oldToken) || oldToken.Length < 8)
+                return BadRequest();
+
+            oldToken = oldToken[7..]; // get rid of the word Bearer that is at the beginning
+
+            await db.SecurityTokenTable.MarkTokenAsExpired(oldToken);
+
+            return Ok();
         }
 
         [HttpGet("CheckPreviousPasswords")]
@@ -156,8 +274,6 @@ namespace FOAEA3.API.Controllers
 
             return Ok(passwordData);
         }
-
-
 
     }
 }

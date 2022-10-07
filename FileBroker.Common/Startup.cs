@@ -26,6 +26,8 @@ namespace FileBroker.Common
         public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration, string apiName)
         {
             LoggingHelper.SetupLogging(configuration, "FILEBROKER-API", "FileBroker", "Logs-API-FileBroker");
+            
+            services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
 
             services.AddSwaggerGen(options =>
             {
@@ -48,9 +50,29 @@ namespace FileBroker.Common
                             ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
                             ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
                             IssuerSigningKey = new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
+                                Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues())),
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
+                            {
+                                var clonedParameters = validationParameters.Clone();
+                                clonedParameters.LifetimeValidator = null;
+                                bool valid = expires >= DateTime.Now;
+                                return valid;
+                            }
                         };
                     });
+            //.AddJwtBearer(options =>
+            //{
+            //    options.TokenValidationParameters = new TokenValidationParameters()
+            //    {
+            //        ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+            //        ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+            //        IssuerSigningKey = new SymmetricSecurityKey(
+            //            Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues()))
+            //    };
+            //});
 
             services.AddEndpointsApiExplorer();
             services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));

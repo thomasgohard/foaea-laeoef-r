@@ -11,6 +11,8 @@ namespace FileBroker.Business.Tests.InMemory
     {
         public IAPIBrokerHelper ApiHelper => throw new NotImplementedException();
 
+        public string Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();

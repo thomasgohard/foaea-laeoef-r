@@ -5,6 +5,7 @@ namespace FOAEA3.Common.Brokers
 {
     public struct APIBrokerList
     {
+        public ILoginsAPIBroker Accounts { get; set; }
         public ITracingEventAPIBroker TracingEvents { get; set; }
         public ITracingApplicationAPIBroker TracingApplications { get; set; }
         public ITraceResponseAPIBroker TracingResponses { get; set; }

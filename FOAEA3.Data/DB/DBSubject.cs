@@ -38,7 +38,7 @@ namespace FOAEA3.Data.DB
 
             return await MainDB.GetDataFromStoredProcAsync<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
         }
-
+        
         public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>

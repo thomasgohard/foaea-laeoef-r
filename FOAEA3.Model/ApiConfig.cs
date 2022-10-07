@@ -16,6 +16,7 @@ namespace FOAEA3.Model
         private string fileBrokerFederalTracingRootAPI;
         private string fileBrokerFederalSINRootAPI;
         private string backendProcessesRootAPI;
+        private string fileBrokerAccountRootAPI;
 
         public string FoaeaApplicationRootAPI
         {
@@ -77,6 +78,12 @@ namespace FOAEA3.Model
         {
             get => backendProcessesRootAPI;
             set => backendProcessesRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+        }
+
+        public string FileBrokerAccountRootAPI
+        {
+            get => fileBrokerAccountRootAPI;
+            set => fileBrokerAccountRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
 
     }

@@ -36,6 +36,7 @@ namespace FOAEA3.Data.Base
         private IAccessAuditRepository accessAuditDB;
         private IFailedSubmitAuditRepository failedSubmitAuditDB;
         private IPostalCodeRepository postalCodeDB;
+        private ISecurityTokenRepository securityTokenDB;
 
         public IDBToolsAsync MainDB { get; }
 
@@ -317,5 +318,15 @@ namespace FOAEA3.Data.Base
                 return postalCodeDB;
             }
         }
+
+        public ISecurityTokenRepository SecurityTokenTable
+        {
+            get
+            {
+                securityTokenDB ??= new DBSecurityToken(MainDB);
+                return securityTokenDB;
+            }
+        }
+
     }
 }

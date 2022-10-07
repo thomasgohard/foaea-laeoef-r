@@ -2,6 +2,7 @@
 using TestData.TestDB;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Data.DB;
 
 namespace TestData.TestDataBase
 {
@@ -68,6 +69,8 @@ namespace TestData.TestDataBase
         public IPostalCodeRepository PostalCodeTable => throw new System.NotImplementedException();
 
         public ILicenceDenialResponseRepository LicenceDenialResponseTable => throw new System.NotImplementedException();
+
+        public ISecurityTokenRepository SecurityTokenTable => throw new System.NotImplementedException();
 
         public InMemory_Repositories()
         {
