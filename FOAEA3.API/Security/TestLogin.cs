@@ -1,6 +1,5 @@
 ﻿using FOAEA3.Helpers;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -35,9 +34,6 @@ namespace FOAEA3.API.Security
 
             if (string.Equals(userName, "system_support", StringComparison.InvariantCultureIgnoreCase))
                 userRole += ", Admin";
-
-            if (submitterData.Subm_SubmCd.IsInternalUser())
-                userRole += ", FO";
 
             var claims = new List<Claim>
             {

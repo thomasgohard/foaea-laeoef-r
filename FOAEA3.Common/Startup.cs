@@ -66,6 +66,17 @@ namespace FOAEA3.Common
                                 }
                             };
                         });
+
+
+            /*
+                services.AddOpenIdConnect("oidc", options => 
+                    {
+                        // existing config
+
+                        // Enable PKCE (authorization code flow only)
+                        options.UsePkce = true;             
+                    }
+             */
         }
 
         public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)

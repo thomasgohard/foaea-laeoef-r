@@ -68,6 +68,7 @@ namespace FOAEA3.API.Controllers
                     RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
                     SubjectName = loginData.UserName,
                     Subm_SubmCd = loginData.Submitter,
+                    // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
                 await db.SecurityTokenTable.CreateAsync(securityToken);
@@ -89,6 +90,7 @@ namespace FOAEA3.API.Controllers
             {
                 var claims = User.Claims;
                 var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
+                // TODO: fix this to handle multiple roles
                 var userRole = claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value;
                 var submitter = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 
@@ -132,9 +134,6 @@ namespace FOAEA3.API.Controllers
             if (string.Equals(lastSecurityToken.SubjectName, "system_support", StringComparison.InvariantCultureIgnoreCase))
                 userRole += ", Admin";
 
-            if (lastSecurityToken.Subm_SubmCd.IsInternalUser())
-                userRole += ", FO";
-            
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, lastSecurityToken.SubjectName),
