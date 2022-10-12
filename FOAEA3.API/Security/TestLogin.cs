@@ -48,8 +48,6 @@ namespace FOAEA3.API.Security
             if (submitterData.Subm_Audit_File_Ind)
                 userRole += ", Audit";
 
-            userRole += ", Part1, Part2, Part3, Swear, Fin, Audit";
-
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),
