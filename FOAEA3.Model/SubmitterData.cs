@@ -118,6 +118,8 @@ namespace FOAEA3.Model
 
         public string Subm_Create_Usr { get; set; }
 
+        public bool Subm_Audit_File_Ind { get; set; }
+
         [NonSerialized]
         private MessageDataList messages;
 

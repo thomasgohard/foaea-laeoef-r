@@ -91,10 +91,19 @@ namespace FOAEA3.API.Controllers
                 var claims = User.Claims;
                 var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
                 // TODO: fix this to handle multiple roles
-                var userRole = claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value;
+                var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
                 var submitter = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 
-                return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
+                string roles = string.Empty;
+                if (userRoles != null)
+                    foreach (var userRole in userRoles)
+                    {
+                        roles += userRole.Value;
+                        if (userRole != userRoles.Last())
+                            roles += ",";
+                    }
+
+                return Ok($"Logged in user: {userName} [{submitter} ({roles})]");
             }
             else
             {
@@ -129,10 +138,18 @@ namespace FOAEA3.API.Controllers
 
             await db.SecurityTokenTable.MarkTokenAsExpired(oldToken);
 
-            string userRole = lastSecurityToken.Subm_Class;
-
-            if (string.Equals(lastSecurityToken.SubjectName, "system_support", StringComparison.InvariantCultureIgnoreCase))
-                userRole += ", Admin";
+            List<Claim> roleClaims;
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var securityToken2 = (JwtSecurityToken)tokenHandler.ReadToken(oldToken);
+                roleClaims = securityToken2.Claims.Where(c => c.Type == ClaimTypes.Role)?.ToList();
+            }
+            catch (Exception)
+            {
+                //TODO: Log Error
+                return null;
+            }
 
             var claims = new List<Claim>
             {
@@ -140,7 +157,8 @@ namespace FOAEA3.API.Controllers
                 new Claim("Submitter", lastSecurityToken.Subm_SubmCd),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            SetupRoleClaims(claims, userRole);
+            if (roleClaims is not null)
+                claims.AddRange(roleClaims);
 
             string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
             string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
@@ -176,13 +194,6 @@ namespace FOAEA3.API.Controllers
             await db.SecurityTokenTable.CreateAsync(securityToken);
 
             return Ok(tokenData);
-        }
-
-        private static void SetupRoleClaims(List<Claim> claims, string securityRole)
-        {
-            string[] roles = securityRole.Split(",");
-            foreach (string role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
         }
 
         [HttpPost("TestLogout")]

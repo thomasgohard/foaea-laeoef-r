@@ -214,7 +214,8 @@ namespace FOAEA3.Data.DB
                 { "CourtUserIndicator", data.Subm_CourtUsr_Ind ? 1 : 0 },
                 { "Status", data.ActvSt_Cd },
                 { "SubmitterClass", data.Subm_Class },
-                { "SubmittedBy", data.Subm_Create_Usr }
+                { "SubmittedBy", data.Subm_Create_Usr },
+                { "ReceiveAuditIndicatior", data.Subm_Audit_File_Ind }
             };
 
             return parameters;
@@ -249,6 +250,7 @@ namespace FOAEA3.Data.DB
             data.Subm_LglSgnAuth_Ind = rdr["Subm_LglSgnAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_LglSgnAuth_Ind"]);
             data.Subm_EnfSrvAuth_Ind = rdr["Subm_EnfSrvAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfSrvAuth_Ind"]);
             data.Subm_EnfOffAuth_Ind = rdr["Subm_EnfOffAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfOffAuth_Ind"]);
+            data.Subm_Audit_File_Ind = rdr["Subm_Audit_File_Ind"] != null && ByteToBool((byte)rdr["Subm_Audit_File_Ind"]);
             data.Subm_SysMgr_Ind = rdr["Subm_SysMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_SysMgr_Ind"]);
             data.Subm_AppMgr_Ind = rdr["Subm_AppMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_AppMgr_Ind"]);
             data.Subm_Fin_Ind = rdr["Subm_Fin_Ind"] != null && ByteToBool((byte)rdr["Subm_Fin_Ind"]);
@@ -275,6 +277,7 @@ namespace FOAEA3.Data.DB
             data.ActvSt_Cd = data.ActvSt_Cd?.Trim();
             data.Subm_Class = data.Subm_Class?.Trim(); // can be null
             data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr?.Trim();
+            
 
         }
 

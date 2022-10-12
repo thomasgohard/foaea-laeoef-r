@@ -35,6 +35,21 @@ namespace FOAEA3.API.Security
             if (string.Equals(userName, "system_support", StringComparison.InvariantCultureIgnoreCase))
                 userRole += ", Admin";
 
+            if (submitterData.Subm_Trcn_AccsPrvCd)
+                userRole += ", Part1";
+            if (submitterData.Subm_Intrc_AccsPrvCd)
+                userRole += ", Part2";
+            if (submitterData.Subm_Lic_AccsPrvCd)
+                userRole += ", Part3";
+            if (submitterData.Subm_Fin_Ind)
+                userRole += ", Fin";
+            if (submitterData.Subm_LglSgnAuth_Ind)
+                userRole += ", Swear";
+            if (submitterData.Subm_Audit_File_Ind)
+                userRole += ", Audit";
+
+            userRole += ", Part1, Part2, Part3, Swear, Fin, Audit";
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),
