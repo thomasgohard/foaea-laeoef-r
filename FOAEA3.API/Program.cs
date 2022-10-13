@@ -22,3 +22,5 @@ var app = builder.Build();
 await Startup.ConfigureAPI(app, env, config, apiName);
 
 app.Run();
+
+public partial class Program { }

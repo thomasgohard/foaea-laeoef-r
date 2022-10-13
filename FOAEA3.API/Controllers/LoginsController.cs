@@ -23,7 +23,7 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
 
         [HttpGet("DB")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [AllowAnonymous]
@@ -245,7 +245,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("PostConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -256,7 +256,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetEmailByConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -265,7 +265,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbSubject = new DBSubject(repositories.MainDB);
@@ -274,7 +274,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("PostPassword")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);

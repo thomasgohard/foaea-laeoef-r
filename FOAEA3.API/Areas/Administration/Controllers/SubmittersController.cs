@@ -18,7 +18,7 @@ public class SubmittersController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Submitters API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]

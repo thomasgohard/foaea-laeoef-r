@@ -1,4 +1,5 @@
-﻿using FOAEA3.Data.Base;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ public class FoaEventsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("FoaEvents API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]

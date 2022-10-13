@@ -23,7 +23,7 @@ public class ApplicationFederalSinsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("ApplicationFederalSins API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpPost("bulk")]

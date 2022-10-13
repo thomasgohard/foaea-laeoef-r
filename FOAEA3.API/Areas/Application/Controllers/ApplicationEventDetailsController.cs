@@ -25,7 +25,7 @@ public class ApplicationEventDetailsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("ApplicationEventDetails API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]

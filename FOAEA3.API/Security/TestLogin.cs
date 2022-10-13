@@ -1,6 +1,8 @@
-﻿using FOAEA3.Helpers;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Helpers;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -30,23 +32,23 @@ namespace FOAEA3.API.Security
             if (submitterData is null || submitterData.ActvSt_Cd != "A")
                 return new ClaimsPrincipal();
 
-            string userRole = submitterData.Subm_Class;
+            string userRole = submitterData.Subm_Class.ToUpper().Trim();
 
             if (string.Equals(userName, "system_support", StringComparison.InvariantCultureIgnoreCase))
-                userRole += ", Admin";
+                userRole += ", " + Roles.Admin;
 
             if (submitterData.Subm_Trcn_AccsPrvCd)
-                userRole += ", Part1";
+                userRole += ", " + Duties.Tracing;
             if (submitterData.Subm_Intrc_AccsPrvCd)
-                userRole += ", Part2";
+                userRole += ", " + Duties.Interception;
             if (submitterData.Subm_Lic_AccsPrvCd)
-                userRole += ", Part3";
+                userRole += ", " + Duties.LicenceDenial;
             if (submitterData.Subm_Fin_Ind)
-                userRole += ", Fin";
+                userRole += ", " + Duties.Finance;
             if (submitterData.Subm_LglSgnAuth_Ind)
-                userRole += ", Swear";
+                userRole += ", " + Duties.Swear_Affidavit;
             if (submitterData.Subm_Audit_File_Ind)
-                userRole += ", Audit";
+                userRole += ", " + Duties.ReceiveAuditFiles;
 
             var claims = new List<Claim>
             {

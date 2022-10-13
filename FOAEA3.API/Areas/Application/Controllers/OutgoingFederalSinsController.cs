@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -23,7 +24,7 @@ public class OutgoingFederalSinsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("OutgoingFederalSins API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("")]
