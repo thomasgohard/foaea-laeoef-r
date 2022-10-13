@@ -11,7 +11,7 @@ namespace FOAEA3.API.Interception.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-//[Authorize(Roles = Duties.Interception + "," + Roles.FlasUser + "," + Roles.Admin)]
+[Authorize(Roles = Duties.Interception + "," + Roles.FlasUser + "," + Roles.Admin)]
 public class InterceptionsController : ControllerBase
 {
     private readonly CustomConfig config;
@@ -28,7 +28,7 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpGet("DB")]
-    //[Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}", Name = "GetInterception")]
@@ -66,7 +66,7 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPost]
-    //[Authorize(Roles = Roles.EnforcementOffice + "," + Roles.EnforcementService + "," + Roles.CourtUser + "," + Roles.Admin)]
+    [Authorize(Roles = Roles.EnforcementOffice + "," + Roles.EnforcementService + "," + Roles.CourtUser + "," + Roles.Admin)]
     public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories repositories,
                                                                                    [FromServices] IRepositories_Finance repositoriesFinance)
     {

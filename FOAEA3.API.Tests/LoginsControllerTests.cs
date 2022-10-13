@@ -33,8 +33,18 @@ namespace FOAEA3.API.Tests
             var content = new StringContent(keyData, Encoding.UTF8, "application/json");
 
             var response = await _client.PostAsync("/api/v1/logins/TestLogin", content);
-            var responseContent = response.Content;
-            response.StatusCode.Should().Be(HttpStatusCode.OK);            
+            var responseContent = await response.Content.ReadAsStringAsync();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var tokenData = JsonConvert.DeserializeObject<TokenData>(responseContent);
+            if (tokenData is not null)
+            {
+                Assert.True(tokenData.TokenExpiration > DateTime.Now);
+                Assert.True(tokenData.RefreshTokenExpiration > DateTime.Now);
+            }
+            else
+                Assert.Fail("Missing tokendata expirations or invalid expiration dates");
+
         }
 
         [Fact]

@@ -250,7 +250,7 @@ namespace FOAEA3.Data.DB
             data.Subm_LglSgnAuth_Ind = rdr["Subm_LglSgnAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_LglSgnAuth_Ind"]);
             data.Subm_EnfSrvAuth_Ind = rdr["Subm_EnfSrvAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfSrvAuth_Ind"]);
             data.Subm_EnfOffAuth_Ind = rdr["Subm_EnfOffAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfOffAuth_Ind"]);
-            data.Subm_Audit_File_Ind = rdr["Subm_Audit_File_Ind"] != null && ByteToBool((byte)rdr["Subm_Audit_File_Ind"]);
+            data.Subm_Audit_File_Ind = (bool)rdr["Subm_Audit_File_Ind"];
             data.Subm_SysMgr_Ind = rdr["Subm_SysMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_SysMgr_Ind"]);
             data.Subm_AppMgr_Ind = rdr["Subm_AppMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_AppMgr_Ind"]);
             data.Subm_Fin_Ind = rdr["Subm_Fin_Ind"] != null && ByteToBool((byte)rdr["Subm_Fin_Ind"]);
