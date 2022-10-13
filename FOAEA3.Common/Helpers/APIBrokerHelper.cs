@@ -16,7 +16,7 @@ namespace FOAEA3.Common.Helpers
 {
     public class APIBrokerHelper : IAPIBrokerHelper
     {
-        private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 0, 30);
+        private static readonly TimeSpan DEFAULT_TIMEOUT = new(0, 20, 30);
 
         private string _APIroot;
         public string CurrentSubmitter { get; set; }
