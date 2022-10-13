@@ -37,7 +37,7 @@ namespace FOAEA3.Common
 
             services.AddControllers(options =>
                         {
-                            options.Filters.Add(new AuthorizeFilter());
+                            // options.Filters.Add(new AuthorizeFilter());
                             options.Filters.Add(new ActionAutoLoggerFilter());
                             options.Filters.Add(new ActionProcessHeadersFilter());
                         })
@@ -45,27 +45,27 @@ namespace FOAEA3.Common
                             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                         );
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options =>
-                        {
-                            options.TokenValidationParameters = new TokenValidationParameters()
-                            {
-                                ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
-                                ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
-                                IssuerSigningKey = new SymmetricSecurityKey(
-                                    Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues())),
-                                ValidateIssuer = true,
-                                ValidateAudience = true,
-                                ValidateLifetime = true,
-                                LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
-                                {
-                                    var clonedParameters = validationParameters.Clone();
-                                    clonedParameters.LifetimeValidator = null;
-                                    bool valid = expires >= DateTime.Now;
-                                    return valid;
-                                }
-                            };
-                        });
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //        .AddJwtBearer(options =>
+            //            {
+            //                options.TokenValidationParameters = new TokenValidationParameters()
+            //                {
+            //                    ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
+            //                    ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
+            //                    IssuerSigningKey = new SymmetricSecurityKey(
+            //                        Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues())),
+            //                    ValidateIssuer = true,
+            //                    ValidateAudience = true,
+            //                    ValidateLifetime = true,
+            //                    LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
+            //                    {
+            //                        var clonedParameters = validationParameters.Clone();
+            //                        clonedParameters.LifetimeValidator = null;
+            //                        bool valid = expires >= DateTime.Now;
+            //                        return valid;
+            //                    }
+            //                };
+            //            });
         }
 
         public static async Task ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
@@ -118,7 +118,7 @@ namespace FOAEA3.Common
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
