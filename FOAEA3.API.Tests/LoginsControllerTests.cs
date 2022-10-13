@@ -31,7 +31,7 @@ namespace FOAEA3.API.Tests
             }
             catch (Exception e)
             {
-                Assert.Contains("401 (Unauthorized)", e.Message);
+                Assert.Contains("401 (Unauthorized)", e.Message, StringComparison.InvariantCultureIgnoreCase);
             }
 
         }
@@ -48,7 +48,7 @@ namespace FOAEA3.API.Tests
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetStringAsync("/api/v1/logins/Version");
 
-            Assert.StartsWith("Logins API Version", response);
+            Assert.StartsWith("Logins API Version", response, StringComparison.InvariantCultureIgnoreCase);
         }
 
         [Fact]
@@ -60,14 +60,66 @@ namespace FOAEA3.API.Tests
 
             var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
 
-            if (tokenData is not null)
+            Assert.NotNull(tokenData);
+            Assert.True(tokenData.TokenExpiration > DateTime.Now);
+            Assert.True(tokenData.RefreshTokenExpiration > DateTime.Now);
+        }
+
+        [Fact]
+        public async Task TestVerify()
+        {
+            var client = _app.CreateClient();
+
+            var userLoginInfo = GetDefaultSystemUser();
+
+            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
+
+            var response = await client.PostAsync("/api/v1/logins/TestVerify", null);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Assert.StartsWith($"Logged in user: {userLoginInfo.UserName}", responseContent, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public async Task TestRefreshToken()
+        {
+            var client = _app.CreateClient();
+
+            var userLoginInfo = GetDefaultSystemUser();
+
+            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
+
+            var refreshData = new TokenRefreshData
             {
-                Assert.True(tokenData.TokenExpiration > DateTime.Now);
-                Assert.True(tokenData.RefreshTokenExpiration > DateTime.Now);
+                Token = tokenData.Token,
+                RefreshToken = tokenData.RefreshToken
+            };
+
+            string keyData = JsonConvert.SerializeObject(refreshData);
+            var content = new StringContent(keyData, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/api/v1/logins/TestRefreshToken", content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                var refreshedTokenData = JsonConvert.DeserializeObject<TokenData>(responseContent);
+                Assert.NotNull(refreshedTokenData);
+                Assert.NotEqual(tokenData.Token, refreshedTokenData.Token);
+
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + refreshedTokenData.Token);
+
+                var responseVerify = await client.PostAsync("/api/v1/logins/TestVerify", null);
+                var responseVerifyContent = await responseVerify.Content.ReadAsStringAsync();
+
+                Assert.StartsWith($"Logged in user: {userLoginInfo.UserName}", responseVerifyContent, StringComparison.InvariantCultureIgnoreCase);
             }
             else
-                Assert.Fail("Missing tokendata expirations or invalid expiration dates");
-
+                Assert.Fail($"Status code return was not 200 OK ({response.StatusCode})");
         }
 
         public static IConfiguration InitConfiguration()
