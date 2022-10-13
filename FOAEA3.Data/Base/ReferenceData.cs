@@ -11,19 +11,19 @@ namespace FOAEA3.Data.Base
     public sealed class ReferenceData : IReferenceData, IMessageList
     {
         public ConcurrentDictionary<string, ActiveStatusData> ActiveStatuses { get; }
-        public Dictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
-        public Dictionary<string, GenderData> Genders { get; }
-        public Dictionary<string, ProvinceData> Provinces { get; }
-        public Dictionary<string, MediumData> Mediums { get; }
-        public Dictionary<string, LanguageData> Languages { get; }
-        public Dictionary<string, ApplicationCategoryData> ApplicationCategories { get; }
-        public Dictionary<string, ApplicationReasonData> ApplicationReasons { get; }
-        public Dictionary<string, CountryData> Countries { get; }
-        public Dictionary<string, DocumentTypeData> DocumentTypes { get; }
+        public ConcurrentDictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
+        public ConcurrentDictionary<string, GenderData> Genders { get; }
+        public ConcurrentDictionary<string, ProvinceData> Provinces { get; }
+        public ConcurrentDictionary<string, MediumData> Mediums { get; }
+        public ConcurrentDictionary<string, LanguageData> Languages { get; }
+        public ConcurrentDictionary<string, ApplicationCategoryData> ApplicationCategories { get; }
+        public ConcurrentDictionary<string, ApplicationReasonData> ApplicationReasons { get; }
+        public ConcurrentDictionary<string, CountryData> Countries { get; }
+        public ConcurrentDictionary<string, DocumentTypeData> DocumentTypes { get; }
         public List<ApplicationCommentsData> ApplicationComments { get; }
         public FoaEventDataDictionary FoaEvents { get; }
 
-        public Dictionary<string, string> Configuration { get; }
+        public ConcurrentDictionary<string, string> Configuration { get; }
 
         private static ReferenceData instance = null;
 
@@ -33,16 +33,16 @@ namespace FOAEA3.Data.Base
         {
             Messages = new MessageDataList();
             ActiveStatuses = new ConcurrentDictionary<string, ActiveStatusData>();
-            ApplicationLifeStates = new Dictionary<ApplicationState, ApplicationLifeStateData>();
-            Genders = new Dictionary<string, GenderData>();
-            Provinces = new Dictionary<string, ProvinceData>();
-            Mediums = new Dictionary<string, MediumData>();
-            Languages = new Dictionary<string, LanguageData>();
-            ApplicationCategories = new Dictionary<string, ApplicationCategoryData>();
-            ApplicationReasons = new Dictionary<string, ApplicationReasonData>();
-            Countries = new Dictionary<string, CountryData>();
-            DocumentTypes = new Dictionary<string, DocumentTypeData>();
-            Configuration = new Dictionary<string, string>();
+            ApplicationLifeStates = new ConcurrentDictionary<ApplicationState, ApplicationLifeStateData>();
+            Genders = new ConcurrentDictionary<string, GenderData>();
+            Provinces = new ConcurrentDictionary<string, ProvinceData>();
+            Mediums = new ConcurrentDictionary<string, MediumData>();
+            Languages = new ConcurrentDictionary<string, LanguageData>();
+            ApplicationCategories = new ConcurrentDictionary<string, ApplicationCategoryData>();
+            ApplicationReasons = new ConcurrentDictionary<string, ApplicationReasonData>();
+            Countries = new ConcurrentDictionary<string, CountryData>();
+            DocumentTypes = new ConcurrentDictionary<string, DocumentTypeData>();
+            Configuration = new ConcurrentDictionary<string, string>();
             ApplicationComments = new List<ApplicationCommentsData>();
             FoaEvents = new FoaEventDataDictionary();
         }
@@ -86,7 +86,7 @@ namespace FOAEA3.Data.Base
             var data = await applicationLifeStateRepository.GetApplicationLifeStatesAsync();
 
             foreach (var applicationLifeState in data.Items)
-                ApplicationLifeStates.Add(applicationLifeState.AppLiSt_Cd, applicationLifeState);
+                ApplicationLifeStates.TryAdd(applicationLifeState.AppLiSt_Cd, applicationLifeState);
         }
 
         public async Task LoadGendersAsync(IGenderRepository genderRepository)
@@ -97,7 +97,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(genderRepository.Messages);
 
             foreach (var gender in data.Items)
-                Genders.Add(gender.Gender_Cd, gender);
+                Genders.TryAdd(gender.Gender_Cd, gender);
         }
 
         public async Task LoadProvincesAsync(IProvinceRepository provinceRepository)
@@ -105,7 +105,7 @@ namespace FOAEA3.Data.Base
             var data = await provinceRepository.GetProvincesAsync();
 
             foreach (var province in data)
-                Provinces.Add(province.PrvCd, province);
+                Provinces.TryAdd(province.PrvCd, province);
         }
 
         public async Task LoadMediumsAsync(IMediumRepository mediumRepository)
@@ -116,7 +116,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(mediumRepository.Messages);
 
             foreach (var medium in data.Items)
-                Mediums.Add(medium.Medium_Cd, medium);
+                Mediums.TryAdd(medium.Medium_Cd, medium);
         }
 
         public async Task LoadLanguagesAsync(ILanguageRepository languageRepository)
@@ -127,7 +127,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(languageRepository.Messages);
 
             foreach (var language in data.Items)
-                Languages.Add(language.Lng_Cd, language);
+                Languages.TryAdd(language.Lng_Cd, language);
         }
 
         public async Task LoadFoaEventsAsync(IFoaEventsRepository foaMessageRepository)
@@ -153,7 +153,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(applicationCategoryRepository.Messages);
 
             foreach (var applicationCategory in data.Items)
-                ApplicationCategories.Add(applicationCategory.AppCtgy_Cd, applicationCategory);
+                ApplicationCategories.TryAdd(applicationCategory.AppCtgy_Cd, applicationCategory);
 
         }
 
@@ -165,7 +165,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(applicationReasonRepository.Messages);
 
             foreach (var applicationReason in data.Items)
-                ApplicationReasons.Add(applicationReason.AppReas_Cd.Trim(), applicationReason);
+                ApplicationReasons.TryAdd(applicationReason.AppReas_Cd.Trim(), applicationReason);
         }
 
         public async Task LoadCountriesAsync(ICountryRepository countryRepository)
@@ -176,7 +176,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(countryRepository.Messages);
 
             foreach (var country in data.Items)
-                Countries.Add(country.Ctry_Cd, country);
+                Countries.TryAdd(country.Ctry_Cd, country);
         }
 
         public async Task LoadDocumentTypesAsync(IDocumentTypeRepository documentTypeRepository)
@@ -187,7 +187,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(documentTypeRepository.Messages);
 
             foreach (var docType in data.Items)
-                DocumentTypes.Add(docType.DocTyp_Cd, docType);
+                DocumentTypes.TryAdd(docType.DocTyp_Cd, docType);
         }
     }
 }
