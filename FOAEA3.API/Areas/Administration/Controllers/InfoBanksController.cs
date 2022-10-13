@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ public class InfoBanksController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("InfoBanks API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]

@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -24,6 +25,7 @@ public class TracingsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.0");
 
     [HttpGet("DB")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}", Name = "GetTracing")]

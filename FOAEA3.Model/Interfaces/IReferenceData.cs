@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface IReferenceData
     {
-        public Dictionary<string, ActiveStatusData> ActiveStatuses { get; }
+        public ConcurrentDictionary<string, ActiveStatusData> ActiveStatuses { get; }
         public Dictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
         public FoaEventDataDictionary FoaEvents { get; }
         public Dictionary<string, GenderData> Genders { get; }

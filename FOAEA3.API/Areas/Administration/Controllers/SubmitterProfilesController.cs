@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Security;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +16,7 @@ public class SubmitterProfilesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("SubmitterProfiles API Version 1.0");
 
     [HttpGet("DB")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{submCd}")]

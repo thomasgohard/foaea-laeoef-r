@@ -1,4 +1,5 @@
 using FOAEA3.Model;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net;
 
@@ -8,15 +9,15 @@ namespace FileBroker.Web.Pages.Tools
     {
         public string Message { get; set; }
 
-        public async Task OnPostLogin()
+        public async Task OnPostLogin(IConfiguration config)
         {
             var client = new HttpClient();
 
             var userLoginInfo = new FoaeaLoginData
             {
-                UserName = "system_support",
-                Password = "shared",
-                Submitter = "MSGBRO"
+                UserName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                Password = config["FOAEA:password"].ReplaceVariablesWithEnvironmentValues(),
+                Submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
             };
 
             string api = "https://localhost:12011/api/v1/logins/TestLogin";

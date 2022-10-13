@@ -1,10 +1,20 @@
 {
+  "profiles": {
+    "BackendProcesses.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:13728;http://localhost:13729"
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "https://localhost:38348"
     }
-  },
-  "$schema": "http://json.schemastore.org/launchsettings.json"
+  }
 }

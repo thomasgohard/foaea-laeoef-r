@@ -2,6 +2,7 @@
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace FOAEA3.Data.Base
 {
     public sealed class ReferenceData : IReferenceData, IMessageList
     {
-        public Dictionary<string, ActiveStatusData> ActiveStatuses { get; }
+        public ConcurrentDictionary<string, ActiveStatusData> ActiveStatuses { get; }
         public Dictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
         public Dictionary<string, GenderData> Genders { get; }
         public Dictionary<string, ProvinceData> Provinces { get; }
@@ -31,7 +32,7 @@ namespace FOAEA3.Data.Base
         private ReferenceData()
         {
             Messages = new MessageDataList();
-            ActiveStatuses = new Dictionary<string, ActiveStatusData>();
+            ActiveStatuses = new ConcurrentDictionary<string, ActiveStatusData>();
             ApplicationLifeStates = new Dictionary<ApplicationState, ApplicationLifeStateData>();
             Genders = new Dictionary<string, GenderData>();
             Provinces = new Dictionary<string, ProvinceData>();
@@ -77,7 +78,7 @@ namespace FOAEA3.Data.Base
                 Messages.AddRange(data.Messages);
 
             foreach (var activeStatus in data.Items)
-                ActiveStatuses.Add(activeStatus.ActvSt_Cd, activeStatus);
+                ActiveStatuses.TryAdd(activeStatus.ActvSt_Cd, activeStatus);
         }
 
         public async Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository)

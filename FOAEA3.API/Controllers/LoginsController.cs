@@ -23,7 +23,7 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
 
         [HttpGet("DB")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [AllowAnonymous]
@@ -68,6 +68,7 @@ namespace FOAEA3.API.Controllers
                     RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
                     SubjectName = loginData.UserName,
                     Subm_SubmCd = loginData.Submitter,
+                    // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
                 await db.SecurityTokenTable.CreateAsync(securityToken);
@@ -89,10 +90,20 @@ namespace FOAEA3.API.Controllers
             {
                 var claims = User.Claims;
                 var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
-                var userRole = claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value;
+                // TODO: fix this to handle multiple roles
+                var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
                 var submitter = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 
-                return Ok($"Logged in user: {userName} [{submitter} ({userRole})]");
+                string roles = string.Empty;
+                if (userRoles != null)
+                    foreach (var userRole in userRoles)
+                    {
+                        roles += userRole.Value;
+                        if (userRole != userRoles.Last())
+                            roles += ",";
+                    }
+
+                return Ok($"Logged in user: {userName} [{submitter} ({roles})]");
             }
             else
             {
@@ -127,21 +138,27 @@ namespace FOAEA3.API.Controllers
 
             await db.SecurityTokenTable.MarkTokenAsExpired(oldToken);
 
-            string userRole = lastSecurityToken.Subm_Class;
+            List<Claim> roleClaims;
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var securityToken2 = (JwtSecurityToken)tokenHandler.ReadToken(oldToken);
+                roleClaims = securityToken2.Claims.Where(c => c.Type == ClaimTypes.Role)?.ToList();
+            }
+            catch (Exception)
+            {
+                //TODO: Log Error
+                return null;
+            }
 
-            if (string.Equals(lastSecurityToken.SubjectName, "system_support", StringComparison.InvariantCultureIgnoreCase))
-                userRole += ", Admin";
-
-            if (lastSecurityToken.Subm_SubmCd.IsInternalUser())
-                userRole += ", FO";
-            
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, lastSecurityToken.SubjectName),
                 new Claim("Submitter", lastSecurityToken.Subm_SubmCd),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            SetupRoleClaims(claims, userRole);
+            if (roleClaims is not null)
+                claims.AddRange(roleClaims);
 
             string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
             string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
@@ -177,13 +194,6 @@ namespace FOAEA3.API.Controllers
             await db.SecurityTokenTable.CreateAsync(securityToken);
 
             return Ok(tokenData);
-        }
-
-        private static void SetupRoleClaims(List<Claim> claims, string securityRole)
-        {
-            string[] roles = securityRole.Split(",");
-            foreach (string role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
         }
 
         [HttpPost("TestLogout")]
@@ -235,7 +245,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("PostConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -246,7 +256,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetEmailByConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbLogin = new DBLogin(repositories.MainDB);
@@ -255,7 +265,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var dbSubject = new DBSubject(repositories.MainDB);
@@ -264,7 +274,7 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpPut("PostPassword")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
