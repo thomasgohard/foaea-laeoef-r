@@ -9,19 +9,19 @@ namespace FOAEA3.Model.Interfaces
     public interface IReferenceData
     {
         public ConcurrentDictionary<string, ActiveStatusData> ActiveStatuses { get; }
-        public Dictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
+        public ConcurrentDictionary<ApplicationState, ApplicationLifeStateData> ApplicationLifeStates { get; }
         public FoaEventDataDictionary FoaEvents { get; }
-        public Dictionary<string, GenderData> Genders { get; }
-        public Dictionary<string, ProvinceData> Provinces { get; }
-        public Dictionary<string, MediumData> Mediums { get; }
-        public Dictionary<string, LanguageData> Languages { get; }
-        public Dictionary<string, ApplicationCategoryData> ApplicationCategories { get; }
-        public Dictionary<string, ApplicationReasonData> ApplicationReasons { get; }
-        public Dictionary<string, CountryData> Countries { get; }
-        public Dictionary<string, DocumentTypeData> DocumentTypes { get; }
+        public ConcurrentDictionary<string, GenderData> Genders { get; }
+        public ConcurrentDictionary<string, ProvinceData> Provinces { get; }
+        public ConcurrentDictionary<string, MediumData> Mediums { get; }
+        public ConcurrentDictionary<string, LanguageData> Languages { get; }
+        public ConcurrentDictionary<string, ApplicationCategoryData> ApplicationCategories { get; }
+        public ConcurrentDictionary<string, ApplicationReasonData> ApplicationReasons { get; }
+        public ConcurrentDictionary<string, CountryData> Countries { get; }
+        public ConcurrentDictionary<string, DocumentTypeData> DocumentTypes { get; }
         public List<ApplicationCommentsData> ApplicationComments { get; }
 
-        public Dictionary<string, string> Configuration { get; }
+        public ConcurrentDictionary<string, string> Configuration { get; }
 
         public Task LoadActiveStatusesAsync(IActiveStatusRepository activeStatusRepository);
         public Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository);

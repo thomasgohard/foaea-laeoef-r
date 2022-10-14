@@ -1,13 +1,16 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Helpers;
+using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources;
 using System;
-using System.Text;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -28,6 +31,29 @@ namespace FOAEA3.Business.Areas.Application
         protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd?.Trim();
 
         protected string Appl_CtrlCd => Application.Appl_CtrlCd?.Trim();
+
+        public FoaeaUser CurrentUser { get; set; }
+
+        public async Task SetCurrentUser(ClaimsPrincipal user)
+        {
+            var claims = user.Claims;
+            var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
+            var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
+            var submitterCode = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
+            var submitterData = (await DB.SubmitterTable.GetSubmitterAsync(submCode: submitterCode)).FirstOrDefault();
+            var enfOffData = (await DB.EnfOffTable.GetEnfOffAsync(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+
+            CurrentUser = new FoaeaUser
+            {
+                SubjectName = userName,
+                Submitter = submitterData,
+                OfficeCode = enfOffData?.EnfOff_AbbrCd
+            };
+
+            if (userRoles != null)
+                foreach (var userRole in userRoles)
+                    CurrentUser.UserRoles.Add(userRole.Value);
+        }
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
                                   ApplicationValidation applicationValidation = null)
@@ -99,17 +125,19 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
-            bool isSuccess = false;
-
             var data = await DB.ApplicationTable.GetApplicationAsync(enfService, controlCode);
 
-            if (data != null)
+            if ((data != null) && (CurrentUser is not null))
             {
-                isSuccess = true;
-                Application.Merge(data);
+
+                if (CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
+                {
+                    Application.Merge(data);
+                    return true;
+                }
             }
 
-            return isSuccess;
+            return false;
         }
 
         public async Task<bool> ApplicationExistsAsync()
@@ -124,6 +152,13 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual async Task<bool> CreateApplicationAsync()
         {
+            if ((CurrentUser is null) ||
+                (!CurrentUserHasFullAccess(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd)))
+            {
+                Application.Messages.AddError(ErrorResource.CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED);
+                return false;
+            }
+
             if (await ApplicationExistsAsync())
             {
                 Application.Messages.AddError(ErrorResource.CANT_CREATE_APPLICATION_ALREADY_EXISTS);
@@ -242,7 +277,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 Validation.ValidateAndRevertNonUpdateFields(current.Application);
 
-                // update reaason text with message
+                // update reason text with message
 
                 string reasonText = BuildApplicationReasonText(BuildReferenceNumberChangeReasonText(Application, current.Application),
                                                                BuildAddressChangeReasonText(Application, current.Application),
@@ -451,6 +486,54 @@ namespace FOAEA3.Business.Areas.Application
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
             await repositories.NotificationService.SendEmailAsync(subject, recipients, message);
+        }
+
+        private bool CurrentUserHasReadAccess(string enfService, string subm_SubmCd)
+        {
+            bool canAccess = true;
+
+            if ((CurrentUser.HasRole(Roles.EnforcementService) ||
+                 CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||
+                 CurrentUser.HasRole(Roles.FileTransfer)) &&
+                !CurrentUser.IsSameEnfService(enfService))
+                canAccess = false;
+
+            if ((CurrentUser.HasRole(Roles.EnforcementOffice) ||
+                 CurrentUser.HasRole(Roles.EnforcementOfficeReadOnly)) &&
+                (!CurrentUser.IsSameEnfService(enfService) ||
+                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                canAccess = false;
+
+            if (CurrentUser.HasRole(Roles.CourtUser) &&
+                !CurrentUser.IsSameEnfService(enfService))
+                canAccess = false;
+
+            return canAccess;
+        }
+
+        private bool CurrentUserHasFullAccess(string enfService, string subm_SubmCd)
+        {
+            bool canAccess = true;
+
+            if ((CurrentUser.HasRole(Roles.EnforcementService) ||
+                 CurrentUser.HasRole(Roles.FileTransfer)) &&
+                !CurrentUser.IsSameEnfService(enfService))
+                canAccess = false;
+
+            if (CurrentUser.HasRole(Roles.EnforcementOffice) &&
+                (!CurrentUser.IsSameEnfService(enfService) ||
+                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                canAccess = false;
+
+            if (CurrentUser.HasRole(Roles.CourtUser) &&
+                !CurrentUser.IsSameEnfService(enfService))
+                canAccess = false;
+
+            if (CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||
+                CurrentUser.HasRole(Roles.EnforcementOfficeReadOnly))
+                canAccess = false;
+
+            return canAccess;
         }
 
     }

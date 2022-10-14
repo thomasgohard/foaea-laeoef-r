@@ -79,6 +79,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unauthorized.
+        /// </summary>
+        public static string CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED {
+            get {
+                return ResourceManager.GetString("CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t set once a value has already been set..
         /// </summary>
         public static string CANT_SET_VALUE_ONCE_SET {

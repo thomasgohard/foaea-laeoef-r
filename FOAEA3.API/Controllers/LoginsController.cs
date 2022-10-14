@@ -90,7 +90,6 @@ namespace FOAEA3.API.Controllers
             {
                 var claims = User.Claims;
                 var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
-                // TODO: fix this to handle multiple roles
                 var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
                 var submitter = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 

@@ -2,7 +2,6 @@
 using FOAEA3.Helpers;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 

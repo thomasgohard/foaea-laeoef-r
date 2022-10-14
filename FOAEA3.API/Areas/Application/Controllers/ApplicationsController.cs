@@ -25,7 +25,7 @@ public class ApplicationsController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 
     [HttpGet("DB")]
-    //[Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}")]
@@ -37,6 +37,8 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
+        
+        applManager.SetCurrentUser(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
