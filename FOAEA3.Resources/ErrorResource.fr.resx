@@ -123,6 +123,9 @@
   <data name="CANT_CREATE_APPLICATION_ALREADY_EXISTS" xml:space="preserve">
     <value>Application existe déjà! Ne peux créer.</value>
   </data>
+  <data name="CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED" xml:space="preserve">
+    <value>Non-autorisé</value>
+  </data>
   <data name="CANT_SET_VALUE_ONCE_SET" xml:space="preserve">
     <value>Ne peux ré-assigner une valeur une fois assignée.</value>
   </data>

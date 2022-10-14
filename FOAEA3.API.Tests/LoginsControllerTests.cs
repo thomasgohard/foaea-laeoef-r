@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Net;
 using System.Text;
+using static FOAEA3.API.Tests.TestHelper;
 
 namespace FOAEA3.API.Tests
 {
@@ -15,7 +16,7 @@ namespace FOAEA3.API.Tests
         public LoginsControllerTests()
         {
             _app = new FoaeaApi();
-            _config = InitConfiguration();
+            _config = TestHelper.InitConfiguration();
         }
 
         [Fact]
@@ -41,9 +42,9 @@ namespace FOAEA3.API.Tests
         {
             var client = _app.CreateClient();
 
-            FoaeaLoginData userLoginInfo = GetDefaultSystemUser();
+            FoaeaLoginData userLoginInfo = TestHelper.GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetStringAsync("/api/v1/logins/Version");
@@ -51,14 +52,46 @@ namespace FOAEA3.API.Tests
             Assert.StartsWith("Logins API Version", response, StringComparison.InvariantCultureIgnoreCase);
         }
 
+
         [Fact]
-        public async Task TestLogin()
+        public async Task TestDB()
         {
             var client = _app.CreateClient();
 
-            var userLoginInfo = GetDefaultSystemUser();
+            FoaeaLoginData userLoginInfo = TestHelper.GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
+            var response = await client.GetStringAsync("/api/v1/logins/DB");
+
+            string connectionString = "Server=%FOAEA_DB_SERVER%;Database=FOAEA_DEV;Integrated Security=SSPI;Trust Server Certificate=true;";
+            connectionString = connectionString.ReplaceVariablesWithEnvironmentValues();
+            Assert.StartsWith(connectionString, response, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public async Task TestSystemLogin()
+        {
+            var client = _app.CreateClient();
+
+            var userLoginInfo = TestHelper.GetSystemUser(_config);
+
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
+
+            Assert.NotNull(tokenData);
+            Assert.True(tokenData.TokenExpiration > DateTime.Now);
+            Assert.True(tokenData.RefreshTokenExpiration > DateTime.Now);
+        }
+
+        [Fact]
+        public async Task TestUser1Login()
+        {
+            var client = _app.CreateClient();
+
+            var userLoginInfo = TestHelper.GetTestUser(_config, TEST_USER.Ontario);
+
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
 
             Assert.NotNull(tokenData);
             Assert.True(tokenData.TokenExpiration > DateTime.Now);
@@ -70,9 +103,9 @@ namespace FOAEA3.API.Tests
         {
             var client = _app.CreateClient();
 
-            var userLoginInfo = GetDefaultSystemUser();
+            var userLoginInfo = TestHelper.GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
 
             var response = await client.PostAsync("/api/v1/logins/TestVerify", null);
@@ -86,9 +119,9 @@ namespace FOAEA3.API.Tests
         {
             var client = _app.CreateClient();
 
-            var userLoginInfo = GetDefaultSystemUser();
+            var userLoginInfo = TestHelper.GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await TestHelper.LoginToFoaeaAsync(userLoginInfo, client);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
 
             var refreshData = new TokenRefreshData
@@ -120,44 +153,6 @@ namespace FOAEA3.API.Tests
             }
             else
                 Assert.Fail($"Status code return was not 200 OK ({response.StatusCode})");
-        }
-
-        public static IConfiguration InitConfiguration()
-        {
-            var config = new ConfigurationBuilder()
-                            .AddJsonFile("appsettings.test.json")
-                            .AddEnvironmentVariables()
-                            .Build();
-            return config;
-        }
-
-        private FoaeaLoginData GetDefaultSystemUser()
-        {
-            return new FoaeaLoginData
-            {
-                UserName = _config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                Password = _config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                Submitter = _config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-            };
-        }
-
-        private static async Task<TokenData> LoginToFoaeaAsync(FoaeaLoginData userLoginInfo, HttpClient client)
-        {
-            string keyData = JsonConvert.SerializeObject(userLoginInfo);
-            var content = new StringContent(keyData, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("/api/v1/logins/TestLogin", content);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var tokenData = JsonConvert.DeserializeObject<TokenData>(responseContent);
-                return tokenData;
-            }
-            else
-                return null;
         }
 
     }

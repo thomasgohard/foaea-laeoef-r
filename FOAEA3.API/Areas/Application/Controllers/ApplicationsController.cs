@@ -37,6 +37,8 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
+        
+        applManager.SetCurrentUser(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
