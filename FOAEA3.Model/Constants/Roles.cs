@@ -1,4 +1,4 @@
-﻿namespace FOAEA3.Common.Helpers
+﻿namespace FOAEA3.Model.Constants
 {
     public static class Roles
     {
@@ -8,7 +8,6 @@
         public const string EnforcementServiceReadOnly = "R1";
         public const string EnforcementOffice = "EO";
         public const string EnforcementOfficeReadOnly = "RO";
-        public const string SystemManager = "SM";
         public const string CourtUser = "CU";
         public const string FlasUser = "FC";
         public const string FoaeaSystem = "FO"; // FO2SSS

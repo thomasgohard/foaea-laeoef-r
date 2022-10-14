@@ -3,6 +3,7 @@ using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,7 @@ public class ApplicationsController : ControllerBase
 
     [HttpGet("{id}")]
     [HttpGet("{id}/friendly")]
+    [Authorize(Policy = Policies.ApplicationReadAccess)]
     [ApplicationDataFriendlyResultFilter]
     public async Task<ActionResult<ApplicationData>> GetApplication(
                                 [FromRoute] ApplKey id,
@@ -37,8 +39,8 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
-        
-        applManager.SetCurrentUser(User);
+
+        await applManager.SetCurrentUser(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);

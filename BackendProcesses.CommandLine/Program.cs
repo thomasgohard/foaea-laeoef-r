@@ -51,7 +51,7 @@ namespace BackendProcesses.CommandLine
                                loadRefDocTypes, loadRefCountries, loadRefAppReasons,
                                loadRefAppCategories, loadRefAppLifeStates, loadRefAppComments);
 
-            ReferenceData.Instance().Configuration.Add("emailRecipients", configuration.GetSection("emailRecipients").Value);
+            ReferenceData.Instance().Configuration.TryAdd("emailRecipients", configuration.GetSection("emailRecipients").Value);
 
             // for testing
             //UserData.Instance().SubmitterCode = "ON2D68";

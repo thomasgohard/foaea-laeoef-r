@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,7 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpGet("GetApplicationsForVariationAutoAccept")]
+    [Authorize(Policy = Policies.ApplicationReadAccess)]
     public async Task<ActionResult<List<InterceptionApplicationData>>> GetApplicationsForVariationAutoAccept(
                                                                         [FromServices] IRepositories repositories,
                                                                         [FromServices] IRepositories_Finance repositoriesFinance,
@@ -66,7 +68,7 @@ public class InterceptionsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = Roles.EnforcementOffice + "," + Roles.EnforcementService + "," + Roles.CourtUser + "," + Roles.Admin)]
+    [Authorize(Policy = Policies.ApplicationModifyAccess)]
     public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories repositories,
                                                                                    [FromServices] IRepositories_Finance repositoriesFinance)
     {

@@ -3,6 +3,7 @@ using FOAEA3.Common.Filters;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +67,31 @@ namespace FOAEA3.Common
                                     return valid;
                                 }
                             };
+                        });
+
+            services.AddAuthorization(options =>
+                        {
+                            options.AddPolicy(Policies.AdminOnlyAccess,
+                                        policy => policy.RequireClaim(ClaimTypes.Role,
+                                                                        Roles.Admin));
+
+                            options.AddPolicy(Policies.ApplicationReadAccess,
+                                        policy => policy.RequireClaim(ClaimTypes.Role,
+                                                                        Roles.Admin,
+                                                                        Roles.FlasUser,
+                                                                        Roles.EnforcementOffice,
+                                                                        Roles.EnforcementOfficeReadOnly,
+                                                                        Roles.EnforcementService,
+                                                                        Roles.EnforcementServiceReadOnly,
+                                                                        Roles.CourtUser));
+
+                            options.AddPolicy(Policies.ApplicationModifyAccess,
+                                        policy => policy.RequireClaim(ClaimTypes.Role,
+                                                                        Roles.Admin,
+                                                                        Roles.FlasUser,
+                                                                        Roles.EnforcementOffice,
+                                                                        Roles.EnforcementService,
+                                                                        Roles.CourtUser));
                         });
         }
 

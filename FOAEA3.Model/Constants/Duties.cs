@@ -1,4 +1,4 @@
-﻿namespace FOAEA3.Common.Helpers
+﻿namespace FOAEA3.Model.Constants
 {
     public static class Duties
     {
