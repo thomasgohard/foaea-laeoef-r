@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FOAEA3.API\FOAEA3.API.csproj" />
+    <ProjectReference Include="..\TestData\TestData.csproj" />
   </ItemGroup>
 
   <ItemGroup>

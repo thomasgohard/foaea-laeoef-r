@@ -1,5 +1,5 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace TestData.TestDB
             newSubmitter.Subm_Create_Usr = "Test";
             newSubmitter.Subm_CourtUsr_Ind = true;
 
-            return Task.CompletedTask;   
+            return Task.CompletedTask;
         }
 
         public Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
@@ -50,7 +50,32 @@ namespace TestData.TestDB
                                                 string submFName = null, string submMName = null,
                                                 string prov = null)
         {
-            throw new NotImplementedException();
+            string submClass = "EO";
+
+            if ((submCode == "MSGBRO") || (submCode.ToUpper().StartsWith("FO")))
+                submClass = "FC";
+            else if (submCode[2] == '1')
+                submClass = "ES";
+
+            var submitter = new SubmitterData
+            {
+                Subm_SubmCd = submCode,
+                ActvSt_Cd = "A",
+                Subm_Class = submClass,
+                Subm_Trcn_AccsPrvCd = true,
+                Subm_Intrc_AccsPrvCd = true,
+                Subm_Lic_AccsPrvCd = true,
+                Subm_Fin_Ind = true,
+                Subm_LglSgnAuth_Ind = true,
+                Subm_Audit_File_Ind = true
+            };
+
+            var result = new List<SubmitterData>
+            {
+                submitter
+            };
+
+            return Task.FromResult(result);
         }
 
         public Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)

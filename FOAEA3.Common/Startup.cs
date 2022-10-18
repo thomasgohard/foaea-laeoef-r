@@ -28,10 +28,13 @@ namespace FOAEA3.Common
 {
     public static class Startup
     {
+        public static bool UseInMemoryData(WebApplicationBuilder builder)
+        {
+            return builder.Configuration["UseInMemoryData"] == "Yes";
+        }
+
         public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
         {
-            AddDBServices(services, configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
-
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
@@ -153,6 +156,27 @@ namespace FOAEA3.Common
                 endpoints.MapControllers();
             });
 
+        }
+
+        public static void AddDBServices(IServiceCollection services, string connectionString)
+        {
+            var mainDB = new DBToolsAsync(connectionString);
+
+            services.AddScoped<IDBToolsAsync>(m => ActivatorUtilities.CreateInstance<DBToolsAsync>(m, mainDB)); // used to display the database name at top of page
+            services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB));
+            services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
+            services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<DBFoaMessage>(m, mainDB));
+            services.AddScoped<IActiveStatusRepository>(m => ActivatorUtilities.CreateInstance<DBActiveStatus>(m, mainDB));
+            services.AddScoped<IGenderRepository>(m => ActivatorUtilities.CreateInstance<DBGender>(m, mainDB));
+            services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
+            services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
+
+            Log.Information("Using MainDB = {MainDB}", mainDB.ConnectionString);
+            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");
+        }
+
+        public static async Task AddReferenceDataFromDB(WebApplication app)
+        {
             Console.WriteLine("Loading Reference Data");
 
             using IServiceScope serviceScope = app.Services.CreateScope();
@@ -186,27 +210,6 @@ namespace FOAEA3.Common
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 
-            var api_url = configuration["Urls"];
-
-            ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");
-
-        }
-
-        private static void AddDBServices(IServiceCollection services, string connectionString)
-        {
-            var mainDB = new DBToolsAsync(connectionString);
-
-            services.AddScoped<IDBToolsAsync>(m => ActivatorUtilities.CreateInstance<DBToolsAsync>(m, mainDB)); // used to display the database name at top of page
-            services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB));
-            services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
-            services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<DBFoaMessage>(m, mainDB));
-            services.AddScoped<IActiveStatusRepository>(m => ActivatorUtilities.CreateInstance<DBActiveStatus>(m, mainDB));
-            services.AddScoped<IGenderRepository>(m => ActivatorUtilities.CreateInstance<DBGender>(m, mainDB));
-            services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
-            services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
-
-            Log.Information("Using MainDB = {MainDB}", mainDB.ConnectionString);
-            ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using DBHelper;
-using TestData.TestDB;
+using FOAEA3.Data.DB;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
-using FOAEA3.Data.DB;
+using TestData.TestDB;
 
 namespace TestData.TestDataBase
 {
@@ -70,13 +70,11 @@ namespace TestData.TestDataBase
 
         public ILicenceDenialResponseRepository LicenceDenialResponseTable => throw new System.NotImplementedException();
 
-        public ISecurityTokenRepository SecurityTokenTable => throw new System.NotImplementedException();
+        public ISecurityTokenRepository SecurityTokenTable { get; }
 
         public InMemory_Repositories()
         {
             MainDB = new InMemory_MainDB();
-
-            CurrentSubmitter = "ON2D68";
 
             ApplicationTable = new InMemoryApplication();
             InterceptionTable = new InMemoryInterception();
@@ -95,6 +93,7 @@ namespace TestData.TestDataBase
             SubmitterProfileTable = new InMemorySubmitterProfile();
             SubjectRoleTable = new InMemorySubjectRole();
             ProductionAuditTable = new InMemoryProductionAudit();
+            SecurityTokenTable = new InMemorySecurityToken();
         }
     }
 }
