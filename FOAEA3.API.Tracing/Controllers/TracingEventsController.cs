@@ -85,6 +85,7 @@ public class TracingEventsController : ControllerBase
     private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(ApplKey id, IRepositories repositories, EventQueue queue)
     {
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
+        await manager.SetCurrentUser(User);
 
         if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(manager.EventManager.GetApplicationEventsForQueueAsync(queue));

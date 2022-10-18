@@ -290,6 +290,8 @@ namespace FOAEA3.Common.Helpers
                                     attemptCount++;
                             }
                         }
+                        else
+                            completed = true;
                     }
                     else 
                         completed = true;
@@ -373,6 +375,8 @@ namespace FOAEA3.Common.Helpers
                                     attemptCount++;
                             }
                         }
+                        else
+                            completed = true;
                     }
                     else
                         completed = true;

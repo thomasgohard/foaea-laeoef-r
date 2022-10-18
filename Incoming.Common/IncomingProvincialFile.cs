@@ -151,22 +151,20 @@ namespace Incoming.Common
         {
             bool fileProcessedSuccessfully;
 
-            // TODO: need to get bearer token before calling API
-            var loginData = new FileBroker.Model.FileBrokerLoginData
+            var loginData = new FileBrokerLoginData
             {
                 UserName = userName,
                 Password = userPassword
             };
 
             string api = "api/v1/Tokens";
-            var tokenData = await APIHelper.PostDataAsync<TokenData, FileBroker.Model.FileBrokerLoginData>(api, 
+            var tokenData = await APIHelper.PostDataAsync<TokenData, FileBrokerLoginData>(api, 
                                                               loginData, ApiFilesConfig.FileBrokerAccountRootAPI);
 
             string apiCall = $"api/v1/InterceptionFiles?fileName={fileNameWithCycle}";
             string rootPath = ApiFilesConfig.FileBrokerMEPInterceptionRootAPI;
 
-            // TODO: fix token
-            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, rootAPI: rootPath, token: "");
+            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, rootAPI: rootPath, token: tokenData.Token);
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {

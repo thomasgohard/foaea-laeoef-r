@@ -31,8 +31,6 @@ namespace FOAEA3.API.Tests
                 {
                     services.AddSingleton<IRepositories>(m => ActivatorUtilities.CreateInstance<InMemory_Repositories>(m));
                     services.AddSingleton<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<InMemory_RepositoriesFinance>(m)); // to access database procs for finance tables
-//                    services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<InMemory_Repositories>(m));
-//                    services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<InMemory_RepositoriesFinance>(m)); // to access database procs for finance tables
 
                     services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<InMemoryFoaEvents>(m));
                     services.AddScoped<IActiveStatusRepository>(m => ActivatorUtilities.CreateInstance<InMemoryActiveStatus>(m));

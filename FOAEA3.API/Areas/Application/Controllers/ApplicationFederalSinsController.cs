@@ -36,6 +36,7 @@ public class ApplicationFederalSinsController : ControllerBase
 
         var applManager = new ApplicationManager(application, repositories, config);
         var sinManager = new ApplicationSINManager(application, applManager);
+        await applManager.SetCurrentUser(User);
 
         await sinManager.CreateResultDataAsync(responseData);
 

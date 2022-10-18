@@ -63,6 +63,8 @@ namespace FOAEA3.Business.Areas.Application
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
                 var existingApp = new ApplicationManager(new ApplicationData(), DB, config);
+                // TODO: await existingApp.SetCurrentUser(User);
+
                 if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
                     // update

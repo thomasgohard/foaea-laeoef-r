@@ -254,6 +254,8 @@ namespace FOAEA3.Business.Areas.Application
 
             // load old data from database
             var current = new ApplicationManager(new ApplicationData(), DB, config);
+           // TODO: await current.SetCurrentUser(User);
+
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";

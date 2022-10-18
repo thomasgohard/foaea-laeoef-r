@@ -120,7 +120,9 @@ internal class Program
                         var errors = new List<string>();
                         string userName = configuration["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
                         string userPassword = configuration["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
+                        
                         await provincialFileManager.ProcessNewFileAsync(newFile, errors, userName, userPassword);
+                        
                         if (errors.Any())
                         {
                             foreach (var error in errors)

@@ -172,6 +172,7 @@ namespace FOAEA3.Business.Areas.Application
         public override async Task UpdateApplicationAsync()
         {
             var current = new InterceptionManager(DB, DBfinance, config);
+            // TODO: await current.SetCurrentUser(User);
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
@@ -294,6 +295,7 @@ namespace FOAEA3.Business.Areas.Application
 
 
             var currentInterceptionManager = new InterceptionManager(DB, DBfinance, config);
+            // TODO: await currentInterceptionManager.SetCurrentUser(User);
             await currentInterceptionManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
 
@@ -373,6 +375,7 @@ namespace FOAEA3.Business.Areas.Application
         public async Task FullyServiceApplicationAsync()
         {
             var applicationManagerCopy = new InterceptionManager(DB, DBfinance, config);
+            // TODO: await applicationManagerCopy.SetCurrentUser(User);
 
             if (!await applicationManagerCopy.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {

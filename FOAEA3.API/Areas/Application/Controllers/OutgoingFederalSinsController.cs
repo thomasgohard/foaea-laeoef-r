@@ -38,6 +38,7 @@ public class OutgoingFederalSinsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var manager = new ApplicationSINManager(appl, applManager);
+        await applManager.SetCurrentUser(User);
 
         var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState, enfServiceCode);
 

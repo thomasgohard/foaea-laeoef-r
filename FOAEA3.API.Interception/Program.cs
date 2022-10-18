@@ -23,7 +23,7 @@ Startup.ConfigureAPIServices(builder.Services, config);
 
 var app = builder.Build();
 
-await Startup.ConfigureAPI(app, env, config, apiName);
+Startup.ConfigureAPI(app, env, config, apiName);
 
 if (!Startup.UseInMemoryData(builder))
     await Startup.AddReferenceDataFromDB(app);

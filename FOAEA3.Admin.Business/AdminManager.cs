@@ -35,6 +35,8 @@ namespace FOAEA3.Admin.Business
                 var applicationData = new ApplicationData();
 
                 var applManager = new ApplicationManager(applicationData, DB, config);
+                // TODO: await applManager.SetCurrentUser(User);
+
                 if (!await applManager.LoadApplicationAsync(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
 

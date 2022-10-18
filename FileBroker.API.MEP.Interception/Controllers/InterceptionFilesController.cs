@@ -55,8 +55,8 @@ public class InterceptionFilesController : ControllerBase
                                                           m.Active.HasValue && m.Active.Value);
 
         string lastFileName;
-        
-        if(fileTableData is null)
+
+        if (fileTableData is null)
         {
             lastFileName = "";
             return ($"Error: fileTableData is empty for category INTAPPOUT.", lastFileName);
@@ -99,11 +99,16 @@ public class InterceptionFilesController : ControllerBase
             sourceInterceptionJsonData = await reader.ReadToEndAsync();
         }
 
-
         var errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
 
         if (errors.Any())
-            return UnprocessableEntity(errors);
+        {
+            errors = JsonHelper.Validate<MEPInterceptionFileDataSingleSource>(sourceInterceptionJsonData, out unknownTags);
+            if (errors.Any())
+            {
+                return UnprocessableEntity(errors);
+            }
+        }
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
@@ -111,7 +116,6 @@ public class InterceptionFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        // TODO: fix token
         string token = "";
         var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
         var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
