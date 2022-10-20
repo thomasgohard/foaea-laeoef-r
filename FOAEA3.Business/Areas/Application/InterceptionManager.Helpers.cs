@@ -96,8 +96,10 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var thisApplicationManager = new InterceptionManager(DB, DBfinance, config);
-            // TODO: await thisApplicationManager.SetCurrentUser(User);
+            var thisApplicationManager = new InterceptionManager(DB, DBfinance, config)
+            {
+                CurrentUser = this.CurrentUser
+            };            
 
             var thisApplication = thisApplicationManager.InterceptionApplication;
             var applEventManager = new ApplicationEventManager(thisApplication, DB);

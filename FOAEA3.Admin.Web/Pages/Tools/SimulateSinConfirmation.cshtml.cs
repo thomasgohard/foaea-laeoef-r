@@ -37,8 +37,9 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
                 try
                 {
-                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService, SimulateSinConfirmation.ControlCode,
-                                                                  SimulateSinConfirmation.Sin);
+                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService, 
+                                                                            SimulateSinConfirmation.ControlCode,
+                                                                            SimulateSinConfirmation.Sin, User);
 
                     if (success)
                         ViewData["Message"] = $"{SimulateSinConfirmation.EnfService}-{SimulateSinConfirmation.ControlCode}: SIN has been confirmed.";

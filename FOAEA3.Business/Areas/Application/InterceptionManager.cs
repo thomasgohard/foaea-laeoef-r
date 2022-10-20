@@ -1,5 +1,6 @@
 ﻿using BackendProcesses.Business;
 using DBHelper;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -34,7 +35,8 @@ namespace FOAEA3.Business.Areas.Application
 
         public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
                                    IRepositories_Finance repositoriesFinance, CustomConfig config) :
-                                  base(interception, repositories, config, new InterceptionValidation(interception, repositories, config))
+                                  base(interception, repositories, config,
+                                      new InterceptionValidation(interception, repositories, config, null))
         {
             InterceptionApplication = interception;
             InterceptionValidation = Validation as InterceptionValidation;
@@ -171,8 +173,10 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new InterceptionManager(DB, DBfinance, config);
-            // TODO: await current.SetCurrentUser(User);
+            var current = new InterceptionManager(DB, DBfinance, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
@@ -294,8 +298,10 @@ namespace FOAEA3.Business.Areas.Application
             }
 
 
-            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, config);
-            // TODO: await currentInterceptionManager.SetCurrentUser(User);
+            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
             await currentInterceptionManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
 
@@ -374,8 +380,10 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task FullyServiceApplicationAsync()
         {
-            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, config);
-            // TODO: await applicationManagerCopy.SetCurrentUser(User);
+            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
 
             if (!await applicationManagerCopy.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {

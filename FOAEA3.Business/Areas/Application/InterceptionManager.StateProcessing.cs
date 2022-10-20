@@ -267,8 +267,11 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_17_FinancialTermsVaried();
 
-            var currentApplicationManager = new InterceptionManager(DB, DBfinance, config);
-            // TODO: await currentApplicationManager.SetCurrentUser(User);
+            var currentApplicationManager = new InterceptionManager(DB, DBfinance, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
+            
             await currentApplicationManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             var currentApplInfo = currentApplicationManager.InterceptionApplication;

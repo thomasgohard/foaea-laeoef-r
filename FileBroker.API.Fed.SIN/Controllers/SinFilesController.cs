@@ -8,7 +8,6 @@ using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -39,7 +38,7 @@ public class SinFilesController : ControllerBase
     {
         string fileContent;
         string lastFileName;
-        
+
         (fileContent, lastFileName) = await LoadLatestFederalSinFileAsync(fileTable);
 
         if (fileContent == null)

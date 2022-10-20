@@ -19,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
         private int BFEvent_Id { get; set; }
 
         public TracingManager(TracingApplicationData tracing, IRepositories repositories, CustomConfig config) :
-            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config))
+            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
         {
 
             TracingApplication = tracing;

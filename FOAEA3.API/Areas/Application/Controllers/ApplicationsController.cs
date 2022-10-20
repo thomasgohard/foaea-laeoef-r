@@ -52,7 +52,8 @@ public class ApplicationsController : ControllerBase
                                                             [FromServices] IRepositories repositories)
     {
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
-        var applicationValidation = new ApplicationValidation(appl, repositories, config);
+        var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
+        var applicationValidation = new ApplicationValidation(appl, repositories, config, currentUser);
 
         bool isValid = await applicationValidation.ValidateCodeValues();
 

@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -16,13 +17,15 @@ namespace FOAEA3.Business.Areas.Application
 
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, ApplicationEventManager eventManager,
-                                      IRepositories repositories, CustomConfig config) : base(interceptionApplication, eventManager, repositories, config)
+                                      IRepositories repositories, CustomConfig config, FoaeaUser user) : 
+                                        base(interceptionApplication, eventManager, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, IRepositories repositories,
-                                      CustomConfig config) : base(interceptionApplication, repositories, config)
+                                      CustomConfig config, FoaeaUser user) : 
+                                        base(interceptionApplication, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }

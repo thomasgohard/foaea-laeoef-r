@@ -49,12 +49,12 @@ public class IncomingFederalTracingResponse
     {
         var responseDataTemp = new List<TraceResponseData>();
 
-        var data = from d in tracingIN02
-                   join emp in tracingResidential
+        var data = from d in tracingIN02.AsParallel()
+                   join emp in tracingResidential.AsParallel()
                             on new { d.dat_Appl_EnfSrvCd, d.dat_Appl_CtrlCd } equals new { emp.dat_Appl_EnfSrvCd, emp.dat_Appl_CtrlCd }
                    into empResponse
                    where string.IsNullOrEmpty(d.dat_TrcSt_Cd?.Trim())
-                   from r in empResponse
+                   from r in empResponse.AsParallel()
                    select new
                    {
                        r.dat_Appl_CtrlCd,
@@ -97,10 +97,9 @@ public class IncomingFederalTracingResponse
             responseDataTemp.Add(newResponse03);
         }
 
-        var c = responseDataTemp.Where(m => m.Appl_CtrlCd == "035971");
-
         // remove duplicates
         var responseDataTempNoDuplicates = responseDataTemp
+            .AsParallel()
             .OrderByDescending(m => m.TrcRsp_Addr_LstUpdte)
             .GroupBy(m => new
             {
@@ -120,10 +119,7 @@ public class IncomingFederalTracingResponse
             })
             .Select(g => g.First());
 
-        var e = responseDataTemp.Where(m => m.Appl_CtrlCd == "035971");
-
         responseData.AddRange(responseDataTempNoDuplicates);
-
 
         max += responseDataTempNoDuplicates.Count();
 
@@ -134,12 +130,12 @@ public class IncomingFederalTracingResponse
     {
         var responseDataTemp = new List<TraceResponseData>();
 
-        var data = from d in tracingIN02
-                   join emp in tracingIN04
+        var data = from d in tracingIN02.AsParallel()
+                   join emp in tracingIN04.AsParallel()
                            on new { d.dat_Appl_EnfSrvCd, d.dat_Appl_CtrlCd } equals new { emp.dat_Appl_EnfSrvCd, emp.dat_Appl_CtrlCd }
                    into empResponse
                    where string.IsNullOrEmpty(d.dat_TrcSt_Cd?.Trim())
-                   from r in empResponse
+                   from r in empResponse.AsParallel()
                    select new
                    {
                        r.dat_Appl_CtrlCd,
@@ -188,6 +184,7 @@ public class IncomingFederalTracingResponse
 
         // remove duplicates
         var responseDataTemp2 = responseDataTemp
+            .AsParallel()
             .OrderByDescending(m => m.TrcRsp_Addr_LstUpdte)
             .GroupBy(m => new
             {
@@ -216,7 +213,7 @@ public class IncomingFederalTracingResponse
                                      string enfSrvCd, int maxRsp, string traceState,
                                      string englishMessage, string frenchMessage)
     {
-        var dataLocked = from d in tracingIN02
+        var dataLocked = from d in tracingIN02.AsParallel()
                          where d.dat_TrcSt_Cd == traceState
                          select new
                          {

@@ -173,7 +173,8 @@ public class InterceptionsController : ControllerBase
     public async Task<ActionResult<ApplicationData>> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
     {
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
-        var interceptionValidation = new InterceptionValidation(appl, repositories, config);
+        var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
+        var interceptionValidation = new InterceptionValidation(appl, repositories, config, currentUser);
 
         bool isValid = interceptionValidation.ValidateFinancialCoreValues();
 

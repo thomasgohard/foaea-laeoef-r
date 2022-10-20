@@ -21,21 +21,21 @@ namespace FileBroker.Data.DB
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
+            return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
         }
 
         public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Category == category).ToList();
+            return fileTableData.AsParallel().Where(f => f.Category == category).ToList();
         }
 
         public async Task<List<FileTableData>> GetAllActiveAsync()
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Active is true).ToList();
+            return fileTableData.AsParallel().Where(f => f.Active is true).ToList();
         }
 
         public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)

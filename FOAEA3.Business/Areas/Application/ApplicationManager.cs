@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
@@ -36,23 +37,9 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task SetCurrentUser(ClaimsPrincipal user)
         {
-            var claims = user.Claims;
-            var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
-            var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
-            var submitterCode = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
-            var submitterData = (await DB.SubmitterTable.GetSubmitterAsync(submCode: submitterCode)).FirstOrDefault();
-            var enfOffData = (await DB.EnfOffTable.GetEnfOffAsync(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
-
-            CurrentUser = new FoaeaUser
-            {
-                SubjectName = userName,
-                Submitter = submitterData,
-                OfficeCode = enfOffData?.EnfOff_AbbrCd
-            };
-
-            if (userRoles != null)
-                foreach (var userRole in userRoles)
-                    CurrentUser.UserRoles.Add(userRole.Value);
+            CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
+            if (Validation is not null)
+                Validation.CurrentUser = this.CurrentUser;
         }
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
@@ -64,7 +51,7 @@ namespace FOAEA3.Business.Areas.Application
             EventDetailManager = new ApplicationEventDetailManager(Application, repositories);
             DB = repositories;
             if (applicationValidation is null)
-                Validation = new ApplicationValidation(Application, EventManager, DB, config);
+                Validation = new ApplicationValidation(Application, EventManager, DB, config, CurrentUser);
             else
             {
                 Validation = applicationValidation;
@@ -253,8 +240,10 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
             // load old data from database
-            var current = new ApplicationManager(new ApplicationData(), DB, config);
-           // TODO: await current.SetCurrentUser(User);
+            var current = new ApplicationManager(new ApplicationData(), DB, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
 
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 

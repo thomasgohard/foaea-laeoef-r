@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -26,20 +27,25 @@ namespace FOAEA3.Business.Areas.Application
 
         public bool IsSystemGeneratedControlCode { get; set; }
 
+        public FoaeaUser CurrentUser { get; set; }
+
         public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
-                                     IRepositories repositories, CustomConfig config)
+                                     IRepositories repositories, CustomConfig config, FoaeaUser currentUser)
         {
             this.config = config;
             Application = application;
             DB = repositories;
             EventManager = eventManager;
+            CurrentUser = currentUser;
         }
 
-        public ApplicationValidation(ApplicationData application, IRepositories repositories, CustomConfig config)
+        public ApplicationValidation(ApplicationData application, IRepositories repositories, 
+                                     CustomConfig config, FoaeaUser currentUser)
         {
             this.config = config;
             Application = application;
             DB = repositories;
+            CurrentUser = currentUser;
         }
 
         public virtual void VerifyPresets()
@@ -62,8 +68,10 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                var existingApp = new ApplicationManager(new ApplicationData(), DB, config);
-                // TODO: await existingApp.SetCurrentUser(User);
+                var existingApp = new ApplicationManager(new ApplicationData(), DB, config)
+                {
+                    CurrentUser = this.CurrentUser
+                };
 
                 if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
