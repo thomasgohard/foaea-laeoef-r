@@ -1,10 +1,12 @@
 ﻿using DBHelper;
 using FOAEA3.Common.Filters;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
@@ -170,6 +173,7 @@ namespace FOAEA3.Common
             services.AddScoped<IGenderRepository>(m => ActivatorUtilities.CreateInstance<DBGender>(m, mainDB));
             services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
             services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
+            services.AddScoped<IIVRRepository>(m => ActivatorUtilities.CreateInstance<DBIVR>(m, mainDB));
 
             Log.Information("Using MainDB = {MainDB}", mainDB.ConnectionString);
             ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");
@@ -210,6 +214,40 @@ namespace FOAEA3.Common
                     ColourConsole.WriteLine($"  {message.Description}", ConsoleColor.Red);
             }
 
+        }
+
+        public static async Task SetupAndRun(string[] args, string sourceNameForEvents)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+
+            var config = builder.Configuration;
+            var env = builder.Environment;
+            var apiName = env.ApplicationName;
+
+            LoggingHelper.SetupLogging(config, sourceNameForEvents);
+
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = apiName, Version = "v1" });
+            });
+
+            if (!Startup.UseInMemoryData(builder))
+                Startup.AddDBServices(builder.Services, config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            Startup.ConfigureAPIServices(builder.Services, config);
+
+            var app = builder.Build();
+
+            Startup.ConfigureAPI(app, env, config, apiName);
+
+            if (!Startup.UseInMemoryData(builder))
+                await Startup.AddReferenceDataFromDB(app);
+
+            var api_url = config["Urls"];
+
+            ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");
+
+            app.Run();
         }
     }
 }
