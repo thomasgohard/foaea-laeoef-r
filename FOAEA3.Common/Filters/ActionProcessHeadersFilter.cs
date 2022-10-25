@@ -36,8 +36,11 @@ public class ActionProcessHeadersFilter : IActionFilter
         var userName = claims?.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
         var submitter = claims?.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
 
-        repositories.CurrentUser = userName;
-        repositories.CurrentSubmitter = submitter;
+        if (repositories is not null)
+        {
+            repositories.CurrentUser = userName;
+            repositories.CurrentSubmitter = submitter;
+        }
 
         if (headers.Keys.ContainsCaseInsensitive(ACCEPT_LANGUAGE))
         {

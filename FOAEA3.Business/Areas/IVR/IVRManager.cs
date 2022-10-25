@@ -16,7 +16,7 @@ namespace FOAEA3.Business.Areas.IVR
 
         public async Task<CheckSinReturnData> GetSinCount(CheckSinGetData data)
         {
-            return await DB.GetSinCount(data);
+            return await DB.CheckSinCount(data);
         }
 
         public async Task<CheckCreditorIdReturnData> CheckCreditorId(CheckCreditorIdGetData data)

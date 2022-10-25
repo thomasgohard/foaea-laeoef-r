@@ -13,7 +13,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<CheckControlCodeReturnData> CheckControlCode(CheckControlCodeGetData data);
         Task<CheckDebtorIdReturnData> CheckDebtorId(CheckDebtorIdGetData data);
         Task<CheckDebtorLetterReturnData> CheckDebtorLetter(CheckDebtorLetterGetData data);
-        Task<CheckSinReturnData> GetSinCount(CheckSinGetData data);
+        Task<CheckSinReturnData> CheckSinCount(CheckSinGetData data);
         Task<GetAgencyReturnData> GetAgency(GetAgencyGetData data);
         Task<GetAgencyDebReturnData> GetAgencyDeb(GetAgencyDebGetData data);
         Task<GetApplControlCodeReturnData> GetApplControlCode(GetApplControlCodeGetData data);

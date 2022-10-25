@@ -32,35 +32,3 @@
         public string HldbDefaultValue { get; set; }
     }
 }
-
-/*
-Appl_EnfSrv_Cd
-Appl_ctrlcd
-src_dept
-EnfSrv_Nme
-DebtorId
-Appl_Dbtr_Cnfrmd_SIN
-Dbtr
-Crdtr
-Appl_Source_RfrNr
-Status
-GarnIssue
-EnfOff_OrgCd
-CourtCd
-GarnEffective
-Arrears
-PayPer
-Periodic
-Variation
-Cancel
-Suspend
-Expired
-Satisfied
-lmpOwed
-FeeOwed
-PerOwed
-LastCalc
-HldbCtg_Cd
-Hldb_DefaultValue
- 
- */

@@ -17,18 +17,3 @@
     }
 }
 
-/*
-SrcDept
-FA_Amount
-FA_Date
-Divert_Req
-Fee_Inc
-MEP_Summons
-Court_Summons
-Divert_Date
-Divert_Amt
-Fee_Amount
-CR_Date
-CR_Amount
- 
- */

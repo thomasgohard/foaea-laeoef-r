@@ -216,7 +216,7 @@ namespace FOAEA3.Common
 
         }
 
-        public static async Task SetupAndRun(string[] args, string sourceNameForEvents)
+        public static async Task SetupAndRun(string[] args, string sourceNameForEvents, Action<IServiceCollection> SetupDataOverride = null)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Logging.ClearProviders();
@@ -234,6 +234,9 @@ namespace FOAEA3.Common
 
             if (!Startup.UseInMemoryData(builder))
                 Startup.AddDBServices(builder.Services, config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            else if (SetupDataOverride is not null)
+                SetupDataOverride(builder.Services);
+
             Startup.ConfigureAPIServices(builder.Services, config);
 
             var app = builder.Build();

@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<CheckSinReturnData> GetSinCount(CheckSinGetData data)
+        public async Task<CheckSinReturnData> CheckSinCount(CheckSinGetData data)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -217,7 +217,7 @@ namespace FOAEA3.Data.DB
 
         private void FillDataFromReaderGetHoldbackCondition(IDBHelperReader rdr, GetHoldbackConditionReturnData data)
         {
-            data.EnforcementCode = rdr["EnfSrc_Cd"] as string;
+            data.EnfSrcCd = rdr["EnfSrc_Cd"] as string;
             data.HldbCtgCd = rdr["HldbCtg_Cd"] as string;
             data.HldbSrcHldValue = rdr["Hldb_SrcHldValue"] as string;
             data.HldbMxmPerChq = rdr["Hldb_MxmPerChq"] as string;

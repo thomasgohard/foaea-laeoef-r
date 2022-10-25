@@ -1,5 +1,14 @@
 using FOAEA3.Common;
+using FOAEA3.Model.Interfaces.Repository;
+using IVR.API.Data;
 
-await Startup.SetupAndRun(args, "IVR-API");
+// WARNING: FOR testing only -- will use fake data instead of db data
+var argsList = args.ToList();
+argsList.Add("--UseInMemoryData=Yes"); 
 
-public partial class Program { }
+await Startup.SetupAndRun(argsList.ToArray(), "IVR-API", AddFakeDataService);
+
+static void AddFakeDataService(IServiceCollection services)
+{
+    services.AddScoped<IIVRRepository>(m => ActivatorUtilities.CreateInstance<FakeDataIVR>(m));
+}
