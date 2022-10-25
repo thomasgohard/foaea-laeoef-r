@@ -31,8 +31,6 @@ namespace FOAEA3.Common.Helpers
         {
             var logConfig = new LoggerConfiguration()
                             .MinimumLevel.Information()
-                            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                            .MinimumLevel.Override("System", LogEventLevel.Warning)
                             .Enrich.FromLogContext()
                             .Enrich.WithMachineName()
                             .Enrich.WithEnvironmentUserName();
@@ -63,12 +61,6 @@ namespace FOAEA3.Common.Helpers
                            sinkOptions: sqlSinkOpts,
                            columnOptions: sqlColumnOpts);
 
-            // also log to the Windows Event Viewer
-
-            logConfig = logConfig.WriteTo.EventLog(source: sourceName,
-                                  logName: "Application",
-                                  manageEventSource: true,
-                                  restrictedToMinimumLevel: LogEventLevel.Information);
             return logConfig;
         }
     }
