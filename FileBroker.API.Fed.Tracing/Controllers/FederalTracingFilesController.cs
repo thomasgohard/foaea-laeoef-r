@@ -7,6 +7,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.IO;
 using System.Text;
@@ -79,6 +80,7 @@ public class FederalTracingFilesController : ControllerBase
                                            [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                            [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                            [FromServices] IOptions<ApiConfig> apiConfig,
+                                           [FromServices] IConfiguration config,
                                            [FromHeader] string currentSubmitter,
                                            [FromHeader] string currentSubject)
     {
@@ -112,7 +114,7 @@ public class FederalTracingFilesController : ControllerBase
             MailService = mailService
         };
 
-        var tracingManager = new IncomingFederalTracingManager(apis, repositories);
+        var tracingManager = new IncomingFederalTracingManager(apis, repositories, config);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);

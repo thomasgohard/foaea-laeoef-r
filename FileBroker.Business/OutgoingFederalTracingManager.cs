@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace FileBroker.Business;
 
@@ -6,11 +7,16 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+    private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingFederalTracingManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    public OutgoingFederalTracingManager(APIBrokerList apis, RepositoryList repositories, IConfiguration config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+
+        FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                                                  config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+                                                  config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
     }
 
     public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -37,24 +43,32 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 errors.Add("** Error: File Already Exists");
                 return "";
             }
+            await FoaeaAccess.SystemLoginAsync();
 
-            var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                     processCodes.EnfSrv_Cd);
+            try
+            {
+                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                         processCodes.EnfSrv_Cd);
 
-            var eventIds = new List<int>();
-            string fileContent = GenerateOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
+                var eventIds = new List<int>();
+                string fileContent = GenerateOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
 
-            await File.WriteAllTextAsync(newFilePath, fileContent);
-            fileCreated = true;
+                await File.WriteAllTextAsync(newFilePath, fileContent);
+                fileCreated = true;
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                 "Outbound File created successfully.");
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                         "Outbound File created successfully.");
 
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
-            await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                                     processCodes.EnfSrv_Cd,
-                                                                     "OK: Written to " + newFilePath, eventIds);
+                await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                                                            processCodes.EnfSrv_Cd,
+                                                                            "OK: Written to " + newFilePath, eventIds);
+            }
+            finally
+            {
+                await FoaeaAccess.SystemLogoutAsync();
+            }
 
             return newFilePath;
 

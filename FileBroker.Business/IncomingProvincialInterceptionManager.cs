@@ -15,12 +15,7 @@ namespace FileBroker.Business
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
 
-        private string FOAEA_userName { get; }
-        private string FOAEA_userPassword { get; }
-        private string FOAEA_submitter { get; }
-
-        private string CurrentToken { get; set; }
-        private string CurrentRefreshToken { get; set; }
+        private FoaeaSystemAccess FoaeaAccess { get; }
 
         public IncomingProvincialInterceptionManager(string fileName,
                                                      APIBrokerList apis,
@@ -34,9 +29,9 @@ namespace FileBroker.Business
             AuditConfiguration = auditConfig;
             Translations = new Dictionary<string, string>();
 
-            FOAEA_userName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues();
-            FOAEA_userPassword = config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues();
-            FOAEA_submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues();
+            FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                                                      config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+                                                      config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
 
             // load translations
 
@@ -110,24 +105,7 @@ namespace FileBroker.Business
                     int warningCount = 0;
                     int successCount = 0;
 
-                    var loginData = new FoaeaLoginData
-                    {
-                        UserName = FOAEA_userName,
-                        Password = FOAEA_userPassword,
-                        Submitter = FOAEA_submitter
-                    };
-
-                    var tokenData = await APIs.Accounts.LoginAsync(loginData);
-
-                    CurrentToken = tokenData.Token;
-                    CurrentRefreshToken = tokenData.RefreshToken;
-
-                    SetTokenForAPIs();
-
-                    APIs.Applications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.ProductionAudits.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.Accounts.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    await FoaeaAccess.SystemLoginAsync();
 
                     try
                     {
@@ -242,7 +220,7 @@ namespace FileBroker.Business
                     }
                     finally
                     {
-                        await APIs.Accounts.LogoutAsync(loginData);
+                        await FoaeaAccess.SystemLogoutAsync();
                     }
 
                 }
@@ -691,26 +669,6 @@ namespace FileBroker.Business
             }
 
             return (newHoldback, isValidData);
-        }
-
-        private async Task<string> OnRefreshTokenAsync()
-        {
-            var result = await APIs.Accounts.RefreshTokenAsync(CurrentToken, CurrentRefreshToken);
-
-            CurrentToken = result.Token;
-            CurrentRefreshToken = result.RefreshToken;
-
-            SetTokenForAPIs();
-
-            return result.Token;
-        }
-
-        private void SetTokenForAPIs()
-        {
-            APIs.Applications.Token = CurrentToken;
-            APIs.InterceptionApplications.Token = CurrentToken;
-            APIs.ProductionAudits.Token = CurrentToken;
-            APIs.Accounts.Token = CurrentToken;
         }
 
     }

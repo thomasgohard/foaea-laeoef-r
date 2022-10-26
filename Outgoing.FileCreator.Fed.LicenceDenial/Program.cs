@@ -35,13 +35,14 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, apiRootForFiles);
+            await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, apiRootForFiles, configuration);
 
             ColourConsole.Write("Completed.");
 
         }
 
-        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles)
+        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+                                                                               IConfiguration config)
         {
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -68,7 +69,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                 MailService = new DBMailService(fileBrokerDB)
             };
 
-            var federalFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
+            var federalFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories, config);
 
             var federalLicenceDenialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("LICOUT"))
                                                                   .Where(s => s.Active == true);

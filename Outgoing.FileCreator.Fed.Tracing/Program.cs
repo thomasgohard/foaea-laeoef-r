@@ -35,13 +35,14 @@ namespace Outgoing.FileCreator.Fed.Tracing
             var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            await CreateOutgoingFederalTracingFiles(fileBrokerDB, apiRootForFiles);
+            await CreateOutgoingFederalTracingFiles(fileBrokerDB, apiRootForFiles, configuration);
 
             ColourConsole.Write("Completed.");
 
         }
 
-        private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles)
+        private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+                                                                    IConfiguration config)
         {
             var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
@@ -67,7 +68,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 MailService = new DBMailService(fileBrokerDB)
             };
 
-            var federalFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories);
+            var federalFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories, config);
 
             var federalTraceOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("TRCOUT"))
                                                 .Where(s => s.Active == true);

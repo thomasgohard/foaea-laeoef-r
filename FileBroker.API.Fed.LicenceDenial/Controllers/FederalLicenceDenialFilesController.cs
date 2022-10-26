@@ -7,6 +7,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
 using System.IO;
@@ -80,6 +81,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
                                                  [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                                  [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                  [FromServices] IOptions<ApiConfig> apiConfig,
+                                                 [FromServices] IConfiguration config,
                                                  [FromHeader] string currentSubmitter,
                                                  [FromHeader] string currentSubject)
     {
@@ -129,7 +131,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
             ProcessParameterTable = processParameterDB
         };
 
-        var licenceDenialManager = new IncomingFederalLicenceDenialManager(apis, repositories);
+        var licenceDenialManager = new IncomingFederalLicenceDenialManager(apis, repositories, config);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);

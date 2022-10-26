@@ -20,6 +20,7 @@ namespace FileBroker.Web.Pages.Tasks
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
         private ApiConfig ApiConfig { get; }
+        private IConfiguration Config { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
@@ -32,7 +33,8 @@ namespace FileBroker.Web.Pages.Tasks
                                    IErrorTrackingRepository errorTrackingDB,
                                    IProcessParameterRepository processParameterTable,
                                    IMailServiceRepository mailServiceDB,
-                                   IOptions<ApiConfig> apiConfig)
+                                   IOptions<ApiConfig> apiConfig,
+                                   IConfiguration config)
         {
             FileTable = fileTable;
             FlatFileSpecs = flatFileSpecs;
@@ -41,6 +43,7 @@ namespace FileBroker.Web.Pages.Tasks
             ProcessParameterTable = processParameterTable;
             MailServiceDB = mailServiceDB;
             ApiConfig = apiConfig.Value;
+            Config = config;
         }
 
         public async Task OnGet()
@@ -105,22 +108,22 @@ namespace FileBroker.Web.Pages.Tasks
                     switch (thisProcess.Category)
                     {
                         case "LICAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories, Config);
                             break;
                         case "TRCAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories, Config);
                             break;
                         case "STATAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialStatusManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialStatusManager(apiBrokers, repositories, Config);
                             break;
                         case "TRCOUT":
-                            outgoingFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories, Config);
                             break;
                         case "SINOUT":
-                            outgoingFileManager = new OutgoingFederalSinManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalSinManager(apiBrokers, repositories, Config);
                             break;
                         case "LICOUT":
-                            outgoingFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories, Config);
                             break;
                     }
 

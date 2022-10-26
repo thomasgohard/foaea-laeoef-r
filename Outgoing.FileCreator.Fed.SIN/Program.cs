@@ -35,12 +35,13 @@ internal class Program
         var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
         var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-        await CreateOutgoingFederalSinFileAsync(fileBrokerDB, apiRootForFiles);
+        await CreateOutgoingFederalSinFileAsync(fileBrokerDB, apiRootForFiles, configuration);
 
         ColourConsole.Write("Completed.\n");
     }
 
-    private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles)
+    private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+                                                                IConfiguration config)
     {
         var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
@@ -61,7 +62,7 @@ internal class Program
             ProcessParameterTable = new DBProcessParameter(fileBrokerDB) 
         };
 
-        var federalFileManager = new OutgoingFederalSinManager(apiBrokers, repositories);
+        var federalFileManager = new OutgoingFederalSinManager(apiBrokers, repositories, config);
 
         var federalSinOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("SINOUT"))
                                           .Where(s => s.Active == true);

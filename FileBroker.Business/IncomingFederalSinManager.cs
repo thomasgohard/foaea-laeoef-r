@@ -1,14 +1,22 @@
-﻿namespace FileBroker.Business;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace FileBroker.Business;
 
 public class IncomingFederalSinManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+    private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public IncomingFederalSinManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
+                                     IConfiguration config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+
+        FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                                                  config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+                                                  config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
@@ -77,17 +85,25 @@ public class IncomingFederalSinManager
 
     private async Task SendSinResultsToFOAEAAsync(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
-        var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
-        var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
+        await FoaeaAccess.SystemLoginAsync();
+        try
+        {
+            var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
+            var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
 
-        foreach (var sinResult in sinResults)
-            UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
+            foreach (var sinResult in sinResults)
+                UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
 
-        UpdateSinResultTable(sinResults);
+            UpdateSinResultTable(sinResults);
 
-        var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
-        foreach (var updatedSinDataSummary in latestUpdatedSinData)
-            await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
+            var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
+            foreach (var updatedSinDataSummary in latestUpdatedSinData)
+                await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
+        }
+        finally
+        {
+            await FoaeaAccess.SystemLogoutAsync();
+        }
 
     }
 
@@ -136,7 +152,7 @@ public class IncomingFederalSinManager
         if (!updatedSinDataSummary.ValStat_Cd.HasValue)
         {
             // this hasn't occurred since 1997 -- probably not needed anymore???
-           await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50483_NO_MATCHING_ACTIVE_DETAIL_EVENTS_WERE_FOUND_FOR_INBOUND_RECORD);
             return;
         }

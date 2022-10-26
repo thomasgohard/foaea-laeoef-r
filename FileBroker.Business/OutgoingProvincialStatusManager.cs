@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace FileBroker.Business
 {
@@ -6,11 +7,15 @@ namespace FileBroker.Business
     {
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
+        private FoaeaSystemAccess FoaeaAccess { get; }
 
-        public OutgoingProvincialStatusManager(APIBrokerList apiBrokers, RepositoryList repositories)
+        public OutgoingProvincialStatusManager(APIBrokerList apis, RepositoryList repositories, IConfiguration config)
         {
-            APIs = apiBrokers;
+            APIs = apis;
             DB = repositories;
+            FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+                                                      config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+                                                      config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
         }
 
         public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -34,17 +39,26 @@ namespace FileBroker.Business
                     return "";
                 }
 
-                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                await FoaeaAccess.SystemLoginAsync();
 
-                string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+                try
+                {
+                    var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent);
-                fileCreated = true;
+                    string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                     "Outbound File created successfully.");
+                    await File.WriteAllTextAsync(newFilePath, fileContent);
+                    fileCreated = true;
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                    await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                             "Outbound File created successfully.");
+
+                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                }
+                finally
+                {
+                    await FoaeaAccess.SystemLogoutAsync();
+                }
 
                 return newFilePath;
 

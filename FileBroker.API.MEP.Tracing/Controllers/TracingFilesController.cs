@@ -8,6 +8,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using NJsonSchema;
 using System.Collections.Generic;
@@ -83,6 +84,7 @@ public class TracingFilesController : ControllerBase
                                                    [FromServices] IMailServiceRepository mailService,
                                                    [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                    [FromServices] IOptions<ApiConfig> apiConfig,
+                                                   [FromServices] IConfiguration config,
                                                    [FromHeader] string currentSubmitter,
                                                    [FromHeader] string currentSubject)
     {
@@ -124,7 +126,7 @@ public class TracingFilesController : ControllerBase
             MailService = mailService
         };
 
-        var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value);
+        var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value, config);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);

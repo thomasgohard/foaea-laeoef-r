@@ -65,7 +65,6 @@ namespace Outgoing.FileCreator.MEP
             var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
             var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
 
-            // TODO: fix token
             string token = "";
             var apiBrokers = new APIBrokerList
             {
@@ -91,13 +90,13 @@ namespace Outgoing.FileCreator.MEP
             };
 
             if (generateTracingFiles)
-                await CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories, configuration));
 
             if (generateLicencingFiles)
-                await CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories, configuration));
 
             if (generateStatsFiles)
-                await CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories));
+                await CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories, configuration));
         }
 
         private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,

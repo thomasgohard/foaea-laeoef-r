@@ -7,6 +7,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.IO;
 using System.Linq;
@@ -87,6 +88,7 @@ public class SinFilesController : ControllerBase
                                        [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
                                        [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                        [FromServices] IOptions<ApiConfig> apiConfig,
+                                       [FromServices] IConfiguration config,
                                        [FromHeader] string currentSubmitter,
                                        [FromHeader] string currentSubject)
     {
@@ -122,7 +124,7 @@ public class SinFilesController : ControllerBase
             ProcessParameterTable = processParameterDB
         };
 
-        var sinManager = new IncomingFederalSinManager(apis, repositories);
+        var sinManager = new IncomingFederalSinManager(apis, repositories, config);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
         var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
