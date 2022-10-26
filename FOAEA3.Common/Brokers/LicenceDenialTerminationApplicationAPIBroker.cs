@@ -29,5 +29,25 @@ namespace FOAEA3.Common.Brokers
             string apiCall = $"api/v1/licenceDenials/{key}/ProcessLicenceDenialTerminationResponse";
             return await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData, token: Token);
         }
+
+        public async Task<LicenceDenialApplicationData> CreateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<LicenceDenialApplicationData> CancelLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

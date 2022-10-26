@@ -76,5 +76,19 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingProvincialData>>(apiCall, token: Token);
         }
 
+        public async Task<LicenceDenialApplicationData> CreateLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

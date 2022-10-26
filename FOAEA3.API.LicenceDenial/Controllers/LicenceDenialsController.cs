@@ -100,7 +100,7 @@ public class LicenceDenialsController : ControllerBase
 
     [HttpPut("{key}")]
     [Produces("application/json")]
-    public async Task<ActionResult<TracingApplicationData>> UpdateApplication(
+    public async Task<ActionResult<LicenceDenialApplicationData>> UpdateApplication(
                                                     [FromRoute] string key,
                                                     [FromQuery] string command,
                                                     [FromQuery] string enforcementServiceCode,
