@@ -99,8 +99,6 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
-
-
         public async Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords,
                                                                                   string activeState,
                                                                                   int lifeState,

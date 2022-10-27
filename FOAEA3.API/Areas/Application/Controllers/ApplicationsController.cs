@@ -39,7 +39,7 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
-        await applManager.SetCurrentUser(User);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
@@ -70,7 +70,7 @@ public class ApplicationsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
-        await applManager.SetCurrentUser(User);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsAsync());
@@ -85,7 +85,7 @@ public class ApplicationsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
-        await applManager.SetCurrentUser(User);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsWithHistoryAsync());
@@ -104,7 +104,7 @@ public class ApplicationsController : ControllerBase
 
         var appManager = new ApplicationManager(application, repositories, config);
         await appManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
-        await appManager.SetCurrentUser(User);
+        await appManager.SetCurrentUserAsync(User);
 
         ApplicationSINManager sinManager;
 
@@ -117,7 +117,7 @@ public class ApplicationsController : ControllerBase
                 break;
             case "I01":
                 var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-                await interceptionManager.SetCurrentUser(User);
+                await interceptionManager.SetCurrentUserAsync(User);
                 await interceptionManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
@@ -146,7 +146,7 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
-        await applManager.SetCurrentUser(User);
+        await applManager.SetCurrentUserAsync(User);
 
         return await applManager.GetProvincialStatsOutgoingDataAsync(maxRecords, activeState, recipientCode);
     }

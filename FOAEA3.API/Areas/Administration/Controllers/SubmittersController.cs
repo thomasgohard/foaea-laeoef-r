@@ -7,6 +7,7 @@ using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FOAEA3.API.Areas.Administration.Controllers;
 
@@ -35,7 +36,7 @@ public class SubmittersController : ControllerBase
             return Ok(await submitterManager.GetSubmittersForProvinceAndOfficeAsync(provCd, enfOffCode, enfSrvCode, onlyActive == "true"));
     }
 
-    [HttpGet("{submCd}")]
+    [HttpGet("{submCd}", Name = "GetSubmitter")]
     public async Task<ActionResult<SubmitterData>> GetSubmitter([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterManager = new SubmitterManager(repositories);
@@ -91,7 +92,7 @@ public class SubmittersController : ControllerBase
             var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + submitterData.Subm_SubmCd;
             var getURI = new Uri("https://" + HttpContext.Request.Host.ToString() + actionPath);
 
-            return Created(getURI, submitterData);
+            return CreatedAtRoute("GetSubmitter", new { submCd = submitterData.Subm_SubmCd }, submitterData);
         }
         else
         {

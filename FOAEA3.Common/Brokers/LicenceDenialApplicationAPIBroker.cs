@@ -76,19 +76,30 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetDataAsync<List<LicenceDenialOutgoingProvincialData>>(apiCall, token: Token);
         }
 
-        public async Task<LicenceDenialApplicationData> CreateLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        public async Task<LicenceDenialApplicationData> CreateLicenceDenialApplicationAsync(LicenceDenialApplicationData appData)
         {
-            throw new System.NotImplementedException();
+            string apiCall = $"api/v1/licenceDenials";
+            return await ApiHelper.PostDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData, token: Token);
         }
 
-        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialApplicationAsync(LicenceDenialApplicationData appData)
         {
-            throw new System.NotImplementedException();
+            string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenials/{key}";
+            var data = await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall,
+                                                                                               appData, token: Token);
+            return data;
         }
 
-        public async Task<LicenceDenialApplicationData> TransferLicenceDenialApplicationAsync(LicenceDenialApplicationData licenceDenialApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialApplicationAsync(LicenceDenialApplicationData appData, 
+                                                                string newRecipientSubmitter, string newIssuingSubmitter)
         {
-            throw new System.NotImplementedException();
+            string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenial/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
+                                                           $"&newIssuingSubmitter={newIssuingSubmitter}";
+            var data = await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall,
+                                                                                              appData, token: Token);
+            return data;
         }
     }
 }

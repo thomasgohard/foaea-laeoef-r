@@ -102,8 +102,6 @@ public class LicenceDenialsController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<LicenceDenialApplicationData>> UpdateApplication(
                                                     [FromRoute] string key,
-                                                    [FromQuery] string command,
-                                                    [FromQuery] string enforcementServiceCode,
                                                     [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
@@ -114,26 +112,34 @@ public class LicenceDenialsController : ControllerBase
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
-
-        if (string.IsNullOrEmpty(command))
-            command = "";
-
-        switch (command.ToLower())
-        {
-            case "":
-                await licenceDenialManager.UpdateApplicationAsync();
-                break;
-
-            default:
-                application.Messages.AddSystemError($"Unknown command: {command}");
-                return UnprocessableEntity(application);
-        }
+        await licenceDenialManager.SetCurrentUserAsync(User);
+        await licenceDenialManager.UpdateApplicationAsync();
 
         if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
         else
             return UnprocessableEntity(application);
 
+    }
+
+    [HttpPut("{key}/Transfer")]
+    public async Task<ActionResult<LicenceDenialApplicationData>> Transfer([FromRoute] string key,
+                                                     [FromServices] IRepositories repositories,
+                                                     [FromQuery] string newRecipientSubmitter,
+                                                     [FromQuery] string newIssuingSubmitter)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new LicenceDenialManager(application, repositories, config);
+
+        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
+
+        return Ok(application);
     }
 
     [HttpPut("{key}/SINbypass")]

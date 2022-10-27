@@ -187,6 +187,73 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public async Task<bool> CancelApplication()
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            string appl_CommSubm_Text = LicenceDenialTerminationApplication.Appl_CommSubm_Text;
+
+            // var newAppl_Source_RfrNr = LicenceDenialTerminationApplication.Appl_Source_RfrNr;
+            var newAppl_Dbtr_Addr_Ln = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_Ln;
+            var newAppl_Dbtr_Addr_Ln1 = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_Ln1;
+            var newAppl_Dbtr_Addr_CityNme = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_CityNme;
+            var newAppl_Dbtr_Addr_PrvCd = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_PrvCd;
+            var newAppl_Dbtr_Addr_CtryCd = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_CtryCd;
+            var newAppl_Dbtr_Addr_PCd = LicenceDenialTerminationApplication.Appl_Dbtr_Addr_PCd;
+
+            if (!await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
+            {
+                LicenceDenialTerminationApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            LicenceDenialTerminationApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+            LicenceDenialTerminationApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            LicenceDenialTerminationApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? LicenceDenialTerminationApplication.Appl_CommSubm_Text;
+
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            LicenceDenialTerminationApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+
+            if (LicenceDenialTerminationApplication.ActvSt_Cd != "A")
+            {
+                EventManager.AddEvent(EventCode.C50841_CAN_ONLY_CANCEL_AN_ACTIVE_APPLICATION, activeState: "C");
+                await EventManager.SaveEventsAsync();
+                return false;
+            }
+
+            await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+
+            await UpdateApplicationNoValidationAsync();
+
+            await EventManager.SaveEventsAsync();
+
+            if (LicenceDenialTerminationApplication.Medium_Cd != "FTP")
+                LicenceDenialTerminationApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;
+        }
+
+        public override async Task UpdateApplicationAsync()
+        {
+            var current = new LicenceDenialTerminationManager(DB, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
+            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            // keep these stored values
+            LicenceDenialTerminationApplication.Appl_Create_Dte = current.LicenceDenialTerminationApplication.Appl_Create_Dte;
+            LicenceDenialTerminationApplication.Appl_Create_Usr = current.LicenceDenialTerminationApplication.Appl_Create_Usr;
+
+            await base.UpdateApplicationAsync();
+        }
+
         private void SetL03ValuesBasedOnL01(LicenceDenialApplicationData originalL01, DateTime requestDate)
         {
             var newL03 = LicenceDenialTerminationApplication;

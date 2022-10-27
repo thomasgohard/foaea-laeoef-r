@@ -124,9 +124,9 @@ public class TracingsController : ControllerBase
 
     [HttpPut("{key}/Transfer")]
     public async Task<ActionResult<TracingApplicationData>> Transfer([FromRoute] string key,
-                                                         [FromServices] IRepositories repositories,
-                                                         [FromQuery] string newRecipientSubmitter,
-                                                         [FromQuery] string newIssuingSubmitter)
+                                                 [FromServices] IRepositories repositories,
+                                                 [FromQuery] string newRecipientSubmitter,
+                                                 [FromQuery] string newIssuingSubmitter)
     {
         var applKey = new ApplKey(key);
 

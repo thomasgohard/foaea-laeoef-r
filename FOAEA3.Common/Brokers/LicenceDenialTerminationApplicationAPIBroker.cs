@@ -2,6 +2,8 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
@@ -30,24 +32,41 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData, token: Token);
         }
 
-        public async Task<LicenceDenialApplicationData> CreateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        public async Task<LicenceDenialApplicationData> CreateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData,
+                                                                                            string controlCodeForL01)
         {
-            throw new System.NotImplementedException();
+            string apiCall = $"api/v1/licenceDenialTerminations?controlCodeForL01={controlCodeForL01}";
+            return await ApiHelper.PostDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall, appData, token: Token);
         }
 
-        public async Task<LicenceDenialApplicationData> CancelLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        public async Task<LicenceDenialApplicationData> CancelLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData)
         {
-            throw new System.NotImplementedException();
+            string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenialTerminations/{key}/cancel";
+            var data = await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall,
+                                                                                               appData, token: Token);
+            return data;
         }
 
-        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialData)
+        public async Task<LicenceDenialApplicationData> UpdateLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData)
         {
-            throw new System.NotImplementedException();
+            string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenialTerminations/{key}";
+            var data = await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall,
+                                                                                               appData, token: Token);
+            return data;
+
         }
 
-        public async Task<LicenceDenialApplicationData> TransferLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData licenceDenialApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData, 
+                                                                string newRecipientSubmitter, string newIssuingSubmitter)
         {
-            throw new System.NotImplementedException();
+            string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
+            string apiCall = $"api/v1/licenceDenialTerminations/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
+                                                           $"&newIssuingSubmitter={newIssuingSubmitter}";
+            var data = await ApiHelper.PutDataAsync<LicenceDenialApplicationData, LicenceDenialApplicationData>(apiCall,
+                                                                                              appData, token: Token);
+            return data;
         }
     }
 }

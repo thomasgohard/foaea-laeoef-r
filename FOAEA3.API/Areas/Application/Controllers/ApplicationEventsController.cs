@@ -70,7 +70,7 @@ public class ApplicationEventsController : ControllerBase
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
-        await manager.SetCurrentUser(User);
+        await manager.SetCurrentUserAsync(User);
 
         if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(await manager.EventManager.GetApplicationEventsForQueueAsync(queue));

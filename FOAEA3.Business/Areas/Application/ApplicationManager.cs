@@ -35,7 +35,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public FoaeaUser CurrentUser { get; set; }
 
-        public async Task SetCurrentUser(ClaimsPrincipal user)
+        public async Task SetCurrentUserAsync(ClaimsPrincipal user)
         {
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
             if (Validation is not null)

@@ -102,6 +102,21 @@ namespace FOAEA3.Business.Areas.Application
             await EventManager.SaveEventsAsync();
         }
 
+        public override async Task UpdateApplicationAsync()
+        {
+            var current = new LicenceDenialManager(DB, config)
+            {
+                CurrentUser = this.CurrentUser
+            };
+            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            // keep these stored values
+            LicenceDenialApplication.Appl_Create_Dte = current.LicenceDenialApplication.Appl_Create_Dte;
+            LicenceDenialApplication.Appl_Create_Usr = current.LicenceDenialApplication.Appl_Create_Usr;
+
+            await base.UpdateApplicationAsync();
+        }
+
         public async Task<bool> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             if (!await LoadApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd))

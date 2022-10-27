@@ -246,7 +246,8 @@ public class IncomingProvincialLicenceDenialManager
 
         if (licenceDenialMessageData.MaintenanceAction == "A")
         {
-            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application);
+            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application,
+                                                                                    licenceDenialMessageData.Application.LicSusp_Appl_CtrlCd);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
