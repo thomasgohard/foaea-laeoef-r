@@ -30,7 +30,6 @@ public class TracingFilesController : ControllerBase
     [HttpGet("DB")]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
-    //GET api/v1/TraceResults?partnerId=ON
     [HttpGet("")]
     public async Task<IActionResult> GetLatestProvincialFile([FromQuery] string partnerId, [FromServices] IFileTableRepository fileTable)
     {

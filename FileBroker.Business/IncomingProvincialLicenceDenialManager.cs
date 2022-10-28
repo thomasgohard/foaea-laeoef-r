@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FileBroker.Common.Helpers;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -76,15 +77,17 @@ public class IncomingProvincialLicenceDenialManager
                 await FoaeaAccess.SystemLoginAsync();
                 try
                 {
-                    foreach (var data in licenceDenialFile.LICAPPIN30)
-                        await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
-                                                              includeInfoInMessages, counts,
-                                                              isTermination: false);
+                    if (licenceDenialFile.LICAPPIN30 is not null)
+                        foreach (var data in licenceDenialFile.LICAPPIN30)
+                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                                                                  includeInfoInMessages, counts,
+                                                                  isTermination: false);
 
-                    foreach (var data in licenceDenialFile.LICAPPIN40)
-                        await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
-                                                              includeInfoInMessages, counts,
-                                                              isTermination: true);
+                    if (licenceDenialFile.LICAPPIN40 is not null)
+                        foreach (var data in licenceDenialFile.LICAPPIN40)
+                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                                                                  includeInfoInMessages, counts,
+                                                                  isTermination: true);
 
                     await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
                     await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
@@ -303,7 +306,12 @@ public class IncomingProvincialLicenceDenialManager
 
     private static void ValidateFooter(MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile, ref MessageDataList result, ref bool isValid)
     {
-        int totalCount = licenceDenialFile.LICAPPIN30.Count + licenceDenialFile.LICAPPIN40.Count;
+        int totalCount = 0;
+        if (licenceDenialFile.LICAPPIN30 is not null)
+            totalCount += licenceDenialFile.LICAPPIN30.Count;
+        if (licenceDenialFile.LICAPPIN40 is not null)
+            totalCount += licenceDenialFile.LICAPPIN40.Count;
+
         if (int.Parse(licenceDenialFile.LICAPPIN99.ResponseCnt) != totalCount)
         {
             isValid = false;
@@ -320,7 +328,7 @@ public class IncomingProvincialLicenceDenialManager
 
         if ((actionCode == "A") && actionState.NotIn("00", "0"))
             validActionLifeState = false;
-        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29"))) 
+        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
             validActionLifeState = false;
         else if (actionCode.NotIn("A", "C"))
             validActionLifeState = false;

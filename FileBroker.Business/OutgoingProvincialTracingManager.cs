@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using FileBroker.Common.Helpers;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -72,7 +73,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
             await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;

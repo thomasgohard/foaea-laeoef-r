@@ -1,6 +1,10 @@
-﻿namespace FileBroker.Business.Helpers
+﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Model;
+using System.Threading.Tasks;
+
+namespace FileBroker.Common.Helpers
 {
-    internal class FoaeaSystemAccess
+    public class FoaeaSystemAccess
     {
         public FoaeaLoginData LoginData { get; }
 

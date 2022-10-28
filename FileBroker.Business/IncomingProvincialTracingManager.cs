@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FileBroker.Common.Helpers;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -180,7 +181,7 @@ public class IncomingProvincialTracingManager
             switch (tracingMessageData.MaintenanceLifeState)
             {
                 case "00": // change
-                case "0": 
+                case "0":
                     tracing = await APIs.TracingApplications.UpdateTracingApplicationAsync(tracingMessageData.Application);
                     break;
 
@@ -265,7 +266,7 @@ public class IncomingProvincialTracingManager
             try
             {
                 var single = JsonConvert.DeserializeObject<MEPTracingFileDataSingle>(sourceTracingData);
-                if (single is null) 
+                if (single is null)
                     throw new NullReferenceException("json conversion failed for MEPTracingFileDataSingle");
 
                 result = new MEPTracingFileData();

@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common;
+using FileBroker.Common.Helpers;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
@@ -21,7 +22,7 @@ namespace Incoming.Common
         private string TracingBaseName { get; }
         private string LicencingBaseName { get; }
         private ApiConfig ApiFilesConfig { get; }
-        private IAPIBrokerHelper APIHelper { get; }
+        private IAPIBrokerHelper APIs { get; }
 
         public IncomingProvincialFile(IFileTableRepository fileTable,
                                       ApiConfig apiFilesConfig,
@@ -31,7 +32,7 @@ namespace Incoming.Common
                                       string licencingBaseName)
         {
             ApiFilesConfig = apiFilesConfig;
-            APIHelper = apiHelper;
+            APIs = apiHelper;
             FileTableDB = fileTable;
             InterceptionBaseName = interceptionBaseName;
             TracingBaseName = tracingBaseName;
@@ -57,7 +58,7 @@ namespace Incoming.Common
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors, 
+        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors,
                                                     string userName, string userPassword)
         {
             bool fileProcessedSuccessfully = false;
@@ -74,23 +75,38 @@ namespace Incoming.Common
                 if (errors.Any())
                     return false;
 
-                if (fileNameNoCycle == InterceptionBaseName)
-                {
-                    fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, jsonText, 
-                                                                                              userName, userPassword);
-                }
-                else if (fileNameNoCycle == LicencingBaseName)
-                {
-                    fileProcessedSuccessfully = await ProcessMEPincomingLicencingFileAsync(errors, fileNameNoExtension, jsonText);
-                }
-                else if (fileNameNoCycle == TracingBaseName)
-                {
-                    fileProcessedSuccessfully = await ProcessMEPincomingTracingFileAsync(errors, fileNameNoExtension, jsonText);
+                var fileBrokerAccess = new FileBrokerSystemAccess(APIs, ApiFilesConfig, userName, userPassword);
 
-                }
-                else
+                await fileBrokerAccess.SystemLoginAsync();
+
+                try
                 {
-                    errors.Add($"Error: Unrecognized file name '{fileNameNoCycle}'");
+                    if (fileNameNoCycle == InterceptionBaseName)
+                    {
+                        fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, 
+                                                                                                  jsonText,
+                                                                                                  fileBrokerAccess.CurrentToken);
+                    }
+                    else if (fileNameNoCycle == LicencingBaseName)
+                    {
+                        fileProcessedSuccessfully = await ProcessMEPincomingLicencingFileAsync(errors, fileNameNoExtension, 
+                                                                                               jsonText, 
+                                                                                               fileBrokerAccess.CurrentToken);
+                    }
+                    else if (fileNameNoCycle == TracingBaseName)
+                    {
+                        fileProcessedSuccessfully = await ProcessMEPincomingTracingFileAsync(errors, fileNameNoExtension, jsonText,
+                                                                                             fileBrokerAccess.CurrentToken);
+
+                    }
+                    else
+                    {
+                        errors.Add($"Error: Unrecognized file name '{fileNameNoCycle}'");
+                    }
+                }
+                finally
+                {
+                    await fileBrokerAccess.SystemLogoutAsync();
                 }
 
             }
@@ -102,10 +118,11 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
+        public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension, 
+                                                                   string jsonText, string token)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIHelper.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPTracingRootAPI);
+            var response = await APIs.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPTracingRootAPI, token: token);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 if (response.Content is not null)
@@ -123,10 +140,11 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public async Task<bool> ProcessMEPincomingLicencingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText)
+        public async Task<bool> ProcessMEPincomingLicencingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText, string token)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIHelper.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI);
+            var response = await APIs.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", 
+                                            jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI, token: token);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 if (response.Content is not null)
@@ -144,27 +162,17 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
-        public async Task<bool> ProcessMEPincomingInterceptionFileAsync(List<string> errors, 
-                                                                        string fileNameWithCycle, 
-                                                                        string jsonText, 
-                                                                        string userName, string userPassword)
+        public async Task<bool> ProcessMEPincomingInterceptionFileAsync(List<string> errors,
+                                                                        string fileNameWithCycle,
+                                                                        string jsonText,
+                                                                        string token)
         {
             bool fileProcessedSuccessfully;
-
-            var loginData = new FileBrokerLoginData
-            {
-                UserName = userName,
-                Password = userPassword
-            };
-
-            string api = "api/v1/Tokens";
-            var tokenData = await APIHelper.PostDataAsync<TokenData, FileBrokerLoginData>(api, 
-                                                              loginData, ApiFilesConfig.FileBrokerAccountRootAPI);
 
             string apiCall = $"api/v1/InterceptionFiles?fileName={fileNameWithCycle}";
             string rootPath = ApiFilesConfig.FileBrokerMEPInterceptionRootAPI;
 
-            var response = await APIHelper.PostJsonFileAsync(apiCall, jsonText, rootAPI: rootPath, token: tokenData.Token);
+            var response = await APIs.PostJsonFileAsync(apiCall, jsonText, rootAPI: rootPath, token: token);
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
