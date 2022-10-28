@@ -11,6 +11,8 @@ public class IncomingProvincialTracingManager
     private RepositoryList DB { get; }
     private ProvincialAuditFileConfig AuditConfiguration { get; }
 
+    private IncomingProvincialHelper IncomingFileHelper { get; }
+
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public IncomingProvincialTracingManager(string fileName,
@@ -28,6 +30,8 @@ public class IncomingProvincialTracingManager
                                                   config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
                                                   config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
 
+        string provCode = FileName[..2].ToUpper();
+        IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
@@ -54,7 +58,7 @@ public class IncomingProvincialTracingManager
         }
         else
         {
-            ValidateHeader(tracingFile, ref result, ref isValid);
+            ValidateHeader(tracingFile.TRCAPPIN01, ref result, ref isValid);
             ValidateFooter(tracingFile, ref result, ref isValid);
 
             if (isValid)
@@ -201,13 +205,18 @@ public class IncomingProvincialTracingManager
         return tracing.Messages;
     }
 
-    private void ValidateHeader(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
+    private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
     {
         int cycle = FileHelper.GetCycleFromFilename(FileName);
-        if (int.Parse(tracingFile.TRCAPPIN01.Cycle) != cycle)
+        if (int.Parse(headerData.Cycle) != cycle)
         {
             isValid = false;
-            result.AddSystemError($"Cycle in file [{tracingFile.TRCAPPIN01.Cycle}] does not match cycle of file [{cycle}]");
+            result.AddSystemError($"Cycle in file [{headerData.Cycle}] does not match cycle of file [{cycle}]");
+        }
+        if (!IncomingFileHelper.IsValidTermsAccepted(headerData.TermsAccepted))
+        {
+            isValid = false;
+            result.AddSystemError($"type 01 Terms Accepted invalid text: {headerData.TermsAccepted}");
         }
 
     }

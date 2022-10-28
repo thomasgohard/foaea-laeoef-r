@@ -15,6 +15,8 @@ namespace FileBroker.Business
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
 
+        private IncomingProvincialHelper IncomingFileHelper { get; }
+
         private FoaeaSystemAccess FoaeaAccess { get; }
 
         public IncomingProvincialInterceptionManager(string fileName,
@@ -48,6 +50,9 @@ namespace FileBroker.Business
             }
 
             EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
+
+            string provCode = FileName[..2].ToUpper();
+            IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
 
         }
 
@@ -96,7 +101,7 @@ namespace FileBroker.Business
             }
             else
             {
-                ValidateHeader(interceptionFile, ref result, ref isValid);
+                ValidateHeader(interceptionFile.INTAPPIN01, ref result, ref isValid);
                 ValidateFooter(interceptionFile, ref result, ref isValid);
 
                 if (isValid)
@@ -333,13 +338,19 @@ namespace FileBroker.Business
             return thisErrorDescription;
         }
 
-        private void ValidateHeader(MEPInterception_InterceptionDataSet interceptionFile, ref MessageDataList result, ref bool isValid)
+        private void ValidateHeader(MEPInterception_RecType01 interceptionFile, ref MessageDataList result, ref bool isValid)
         {
             int cycle = FileHelper.GetCycleFromFilename(FileName);
-            if (int.Parse(interceptionFile.INTAPPIN01.Cycle) != cycle)
+            if (int.Parse(interceptionFile.Cycle) != cycle)
             {
                 isValid = false;
-                result.AddSystemError($"Cycle in file [{interceptionFile.INTAPPIN01.Cycle}] does not match cycle of file [{cycle}]");
+                result.AddSystemError($"Cycle in file [{interceptionFile.Cycle}] does not match cycle of file [{cycle}]");
+            }
+
+            if (!IncomingFileHelper.IsValidTermsAccepted(interceptionFile.TermsAccepted))
+            {
+                isValid = false;
+                result.AddSystemError($"type 01 Terms Accepted invalid text: {interceptionFile.TermsAccepted}");
             }
 
         }

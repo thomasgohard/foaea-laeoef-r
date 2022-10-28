@@ -14,6 +14,8 @@ public class IncomingProvincialLicenceDenialManager
     private string DeclarationTextEnglish { get; }
     private string DeclarationTextFrench { get; }
 
+    private IncomingProvincialHelper IncomingFileHelper { get; }
+
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public IncomingProvincialLicenceDenialManager(string fileName,
@@ -33,6 +35,10 @@ public class IncomingProvincialLicenceDenialManager
 
         DeclarationTextEnglish = config["Declaration:LicenceDenial:English"];
         DeclarationTextFrench = config["Declaration:LicenceDenial:French"];
+
+        string provCode = FileName[..2].ToUpper();
+        IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
+
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceLicenceDenialData,
@@ -60,7 +66,7 @@ public class IncomingProvincialLicenceDenialManager
         }
         else
         {
-            ValidateHeader(licenceDenialFile, ref result, ref isValid);
+            ValidateHeader(licenceDenialFile.LICAPPIN01, ref result, ref isValid);
             ValidateFooter(licenceDenialFile, ref result, ref isValid);
 
             if (isValid)
@@ -123,7 +129,7 @@ public class IncomingProvincialLicenceDenialManager
 
         var requestError = new MessageDataList();
 
-        ValidateActionCode(data, ref requestError, ref isValidRequest);
+        ValidateActionCode(data, ref requestError, ref isValidRequest, isTermination);
 
         if (isValidRequest)
         {
@@ -280,13 +286,18 @@ public class IncomingProvincialLicenceDenialManager
 
     }
 
-    private void ValidateHeader(MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile, ref MessageDataList result, ref bool isValid)
+    private void ValidateHeader(MEPLicenceDenial_RecType01 licenceDenialFile, ref MessageDataList result, ref bool isValid)
     {
         int cycle = FileHelper.GetCycleFromFilename(FileName);
-        if (int.Parse(licenceDenialFile.LICAPPIN01.Cycle) != cycle)
+        if (int.Parse(licenceDenialFile.Cycle) != cycle)
         {
             isValid = false;
-            result.AddSystemError($"Cycle in file [{licenceDenialFile.LICAPPIN01.Cycle}] does not match cycle of file [{cycle}]");
+            result.AddSystemError($"Cycle in file [{licenceDenialFile.Cycle}] does not match cycle of file [{cycle}]");
+        }
+        if (!IncomingFileHelper.IsValidTermsAccepted(licenceDenialFile.TermsAccepted))
+        {
+            isValid = false;
+            result.AddSystemError($"type 01 Terms Accepted invalid text: {licenceDenialFile.TermsAccepted}");
         }
     }
 
@@ -300,7 +311,8 @@ public class IncomingProvincialLicenceDenialManager
         }
     }
 
-    private static void ValidateActionCode(MEPLicenceDenial_RecTypeBase data, ref MessageDataList result, ref bool isValid)
+    private static void ValidateActionCode(MEPLicenceDenial_RecTypeBase data, ref MessageDataList result, ref bool isValid,
+                                          bool isTermination)
     {
         bool validActionLifeState = true;
         string actionCode = data.Maintenance_ActionCd.Trim();
@@ -308,10 +320,13 @@ public class IncomingProvincialLicenceDenialManager
 
         if ((actionCode == "A") && actionState.NotIn("00", "0"))
             validActionLifeState = false;
-        else if ((actionCode == "C") && (actionState.NotIn("00", "0"))) // not allowed to cancel or transfer L01/L03
+        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29"))) 
             validActionLifeState = false;
         else if (actionCode.NotIn("A", "C"))
             validActionLifeState = false;
+
+        if (!isTermination && (actionCode == "C") && (actionState == "14"))
+            validActionLifeState = false; // licence denial applications cannot be cancelled!
 
         if (!validActionLifeState)
         {
