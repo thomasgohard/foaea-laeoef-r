@@ -1,5 +1,6 @@
 using DBHelper;
 using FileBroker.Common;
+using FileBroker.Common.Helpers;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
@@ -80,20 +81,30 @@ namespace FileBroker.Web.Pages.Tasks
 
                             string userName = Config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
                             string userPassword = Config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
-                            await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, 
-                                                            fileName, fileContentAsJson, userName, userPassword);
-                            if (errors.Any())
+
+                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, ApiConfig, userName, userPassword);
+
+                            await fileBrokerAccess.SystemLoginAsync();
+                            try
                             {
-                                ErrorMessage = String.Empty;
-                                string lastError = errors.Last();
-                                foreach (string error in errors)
+                                await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson, fileBrokerAccess.CurrentToken);
+                                if (errors.Any())
                                 {
-                                    ErrorMessage += error;
-                                    ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                                    ErrorMessage = String.Empty;
+                                    string lastError = errors.Last();
+                                    foreach (string error in errors)
+                                    {
+                                        ErrorMessage += error;
+                                        ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                                    }
                                 }
+                                else
+                                    InfoMessage = $"File {fileName} processed successfully.";
                             }
-                            else
-                                InfoMessage = $"File {fileName} processed successfully.";
+                            finally
+                            {
+                                await fileBrokerAccess.SystemLogoutAsync();
+                            }
                             break;
                         default:
                             ErrorMessage = "Not able to process files of category: " + incomingFileInfo.Category;
