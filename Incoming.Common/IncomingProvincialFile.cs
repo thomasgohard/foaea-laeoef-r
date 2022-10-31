@@ -1,6 +1,5 @@
 ﻿using FileBroker.Common;
 using FileBroker.Common.Helpers;
-using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -82,27 +81,19 @@ namespace Incoming.Common
                 try
                 {
                     if (fileNameNoCycle == InterceptionBaseName)
-                    {
-                        fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension, 
+                        fileProcessedSuccessfully = await ProcessMEPincomingInterceptionFileAsync(errors, fileNameNoExtension,
                                                                                                   jsonText,
                                                                                                   fileBrokerAccess.CurrentToken);
-                    }
                     else if (fileNameNoCycle == LicencingBaseName)
-                    {
-                        fileProcessedSuccessfully = await ProcessMEPincomingLicencingFileAsync(errors, fileNameNoExtension, 
-                                                                                               jsonText, 
+                        fileProcessedSuccessfully = await ProcessMEPincomingLicencingFileAsync(errors, fileNameNoExtension,
+                                                                                               jsonText,
                                                                                                fileBrokerAccess.CurrentToken);
-                    }
                     else if (fileNameNoCycle == TracingBaseName)
-                    {
                         fileProcessedSuccessfully = await ProcessMEPincomingTracingFileAsync(errors, fileNameNoExtension, jsonText,
                                                                                              fileBrokerAccess.CurrentToken);
 
-                    }
                     else
-                    {
                         errors.Add($"Error: Unrecognized file name '{fileNameNoCycle}'");
-                    }
                 }
                 finally
                 {
@@ -111,14 +102,12 @@ namespace Incoming.Common
 
             }
             else
-            {
                 errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoExtension?.ToUpper()[6]}'. Is this an incoming file?");
-            }
 
             return fileProcessedSuccessfully;
         }
 
-        public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension, 
+        public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension,
                                                                    string jsonText, string token)
         {
             bool fileProcessedSuccessfully;
@@ -133,9 +122,7 @@ namespace Incoming.Common
                 fileProcessedSuccessfully = false;
             }
             else
-            {
                 fileProcessedSuccessfully = true;
-            }
 
             return fileProcessedSuccessfully;
         }
@@ -143,7 +130,7 @@ namespace Incoming.Common
         public async Task<bool> ProcessMEPincomingLicencingFileAsync(List<string> errors, string fileNameNoExtension, string jsonText, string token)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIs.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}", 
+            var response = await APIs.PostJsonFileAsync($"api/v1/LicenceDenialFiles?fileName={fileNameNoExtension}",
                                             jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPLicenceDenialRootAPI, token: token);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -155,9 +142,7 @@ namespace Incoming.Common
                 fileProcessedSuccessfully = false;
             }
             else
-            {
                 fileProcessedSuccessfully = true;
-            }
 
             return fileProcessedSuccessfully;
         }
@@ -209,9 +194,7 @@ namespace Incoming.Common
                 fileProcessedSuccessfully = false;
             }
             else
-            {
                 fileProcessedSuccessfully = true;
-            }
 
             return fileProcessedSuccessfully;
         }

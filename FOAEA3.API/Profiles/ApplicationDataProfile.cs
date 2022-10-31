@@ -37,7 +37,6 @@ namespace FOAEA3.API.Profiles
                 .ForMember(dest => dest.DebtorConfirmedSIN, opt => opt.MapFrom(src => src.Appl_Dbtr_Cnfrmd_SIN ?? ""))
                 .ForMember(dest => dest.ApplicationCategory, opt => opt.MapFrom(src => src.AppCtgy_Cd))
                 .ForMember(dest => dest.ActiveState, opt => opt.MapFrom(src => src.ActvSt_Cd))
-                .ForMember(dest => dest.ActiveState, opt => opt.MapFrom(src => src.ActvSt_Cd))
                 .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Appl_Create_Dte.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT) + " [" + src.Appl_Create_Usr.Trim() + "]"))
                 .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => src.Appl_LastUpdate_Dte.HasValue ? src.Appl_LastUpdate_Dte.Value.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT) + " [" + src.Appl_LastUpdate_Usr.Trim() + "]" : ""))
                 ;
