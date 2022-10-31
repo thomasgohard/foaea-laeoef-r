@@ -419,8 +419,8 @@ public class IncomingProvincialLicenceDenialManager
             LicSusp_NoticeSentToDbtr_Dte = licenceDenialData.dat_LicSup_NoticeSntTDbtr_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date ?? default,
             LicSusp_CourtNme = licenceDenialData.dat_LicSup_CourtNme,
             PymPr_Cd = licenceDenialData.dat_LicSup_PymPr_Cd,
-            LicSusp_NrOfPymntsInDefault = short.Parse(licenceDenialData.dat_LicSup_NrOfPymntsInDefault),
-            LicSusp_AmntOfArrears = decimal.Parse(licenceDenialData.dat_LicSup_AmntOfArrears),
+            LicSusp_NrOfPymntsInDefault = ConvertToShortOrNull(licenceDenialData.dat_LicSup_NrOfPymntsInDefault),
+            LicSusp_AmntOfArrears = ConvertToDecimalOrNull(licenceDenialData.dat_LicSup_AmntOfArrears),
             LicSusp_Dbtr_EmplNme = licenceDenialData.dat_LicSup_Dbtr_EmplNme,
             LicSusp_Dbtr_EmplAddr_Ln = licenceDenialData.dat_LicSup_Dbtr_EmplAddr_Ln,
             LicSusp_Dbtr_EmplAddr_Ln1 = licenceDenialData.dat_LicSup_Dbtr_EmplAddr_Ln1,
@@ -430,7 +430,7 @@ public class IncomingProvincialLicenceDenialManager
             LicSusp_Dbtr_EmplAddr_PCd = licenceDenialData.dat_LicSup_Dbtr_EmplAddr_PCd,
             LicSusp_Dbtr_EyesColorCd = licenceDenialData.dat_LicSup_Dbtr_EyesColorCd,
             LicSusp_Dbtr_HeightUOMCd = licenceDenialData.dat_LicSup_Dbtr_HeightUOMCd,
-            LicSusp_Dbtr_HeightQty = int.Parse(licenceDenialData.dat_LicSup_Dbtr_HeightQty),
+            LicSusp_Dbtr_HeightQty = ConvertToIntOrNull(licenceDenialData.dat_LicSup_Dbtr_HeightQty),
             LicSusp_Dbtr_Brth_CityNme = licenceDenialData.dat_LicSup_Dbtr_Brth_CityNme,
             LicSusp_Dbtr_Brth_CtryCd = licenceDenialData.dat_LicSup_Dbtr_Brth_CtryCd,
             LicSusp_Dbtr_LastAddr_Ln = licenceDenialData.dat_Appl_Dbtr_Addr_Ln,
@@ -443,6 +443,31 @@ public class IncomingProvincialLicenceDenialManager
 
         return licenceDenialApplication;
     }
+
+    private static short? ConvertToShortOrNull(string value)
+    {
+        if (short.TryParse(value, out short result))
+            return result;
+        else
+            return null;
+    }
+
+    private static int? ConvertToIntOrNull(string value)
+    {
+        if (int.TryParse(value, out int result))
+            return result;
+        else
+            return null;
+    }
+
+    private static decimal? ConvertToDecimalOrNull(string value)
+    {
+        if (decimal.TryParse(value, out decimal result))
+            return result;
+        else
+            return null;
+    }
+
 
     private bool ValidDeclaration(string declaration)
     {
