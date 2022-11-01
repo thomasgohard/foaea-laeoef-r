@@ -91,26 +91,78 @@ namespace FOAEA3.Data.DB
                         {"PymPr_Cd", data.PymPr_Cd },
                         {"LicSusp_NrOfPymntsInDefault", data.LicSusp_NrOfPymntsInDefault ?? 0},
                         {"LicSusp_AmntOfArrears", data.LicSusp_AmntOfArrears ?? 0M },
-                        {"LicSusp_Dbtr_EmplNme", data.LicSusp_Dbtr_EmplNme },
-                        {"LicSusp_Dbtr_EmplAddr_Ln", data.LicSusp_Dbtr_EmplAddr_Ln },
-                        {"LicSusp_Dbtr_EmplAddr_Ln1", data.LicSusp_Dbtr_EmplAddr_Ln1 },
-                        {"LicSusp_Dbtr_EmplAddr_CityNme", data.LicSusp_Dbtr_EmplAddr_CityNme },
-                        {"LicSusp_Dbtr_EmplAddr_PrvCd", data.LicSusp_Dbtr_EmplAddr_PrvCd },
-                        {"LicSusp_Dbtr_EmplAddr_CtryCd", data.LicSusp_Dbtr_EmplAddr_CtryCd },
-                        {"LicSusp_Dbtr_EmplAddr_PCd", data.LicSusp_Dbtr_EmplAddr_PCd },
-                        {"LicSusp_Dbtr_EyesColorCd", data.LicSusp_Dbtr_EyesColorCd },
-                        {"LicSusp_Dbtr_HeightUOMCd", data.LicSusp_Dbtr_HeightUOMCd },
                         {"LicSusp_Dbtr_HeightQty", data.LicSusp_Dbtr_HeightQty ?? 0},
-                        {"LicSusp_Dbtr_PhoneNumber", data.LicSusp_Dbtr_PhoneNumber },
-                        {"LicSusp_Dbtr_EmailAddress", data.LicSusp_Dbtr_EmailAddress },
-                        {"LicSusp_Dbtr_Brth_CityNme", data.LicSusp_Dbtr_Brth_CityNme },
-                        {"LicSusp_Dbtr_Brth_CtryCd", data.LicSusp_Dbtr_Brth_CtryCd },
                         {"LicSusp_Still_InEffect_Ind", data.LicSusp_Still_InEffect_Ind },
                         {"LicSusp_AnyLicRvkd_Ind", data.LicSusp_AnyLicRvkd_Ind },
                         {"LicSusp_AnyLicReinst_Ind", data.LicSusp_AnyLicReinst_Ind },
                         {"LicSusp_LiStCd", data.LicSusp_LiStCd },
                         {"LicSusp_Appl_CtrlCd", data.LicSusp_Appl_CtrlCd }
                     };
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplNme))
+                parameters.Add("LicSusp_Dbtr_EmplNme", data.LicSusp_Dbtr_EmplNme);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplNme", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_Ln))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_Ln", data.LicSusp_Dbtr_EmplAddr_Ln);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_Ln", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_Ln1))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_Ln1", data.LicSusp_Dbtr_EmplAddr_Ln1);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_Ln1", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_CityNme))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_CityNme", data.LicSusp_Dbtr_EmplAddr_CityNme);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_CityNme", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_PrvCd))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_PrvCd", data.LicSusp_Dbtr_EmplAddr_PrvCd);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_PrvCd", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_CtryCd))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_CtryCd", data.LicSusp_Dbtr_EmplAddr_CtryCd);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_CtryCd", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplAddr_PCd))
+                parameters.Add("LicSusp_Dbtr_EmplAddr_PCd", data.LicSusp_Dbtr_EmplAddr_PCd);
+            else
+                parameters.Add("LicSusp_Dbtr_EmplAddr_PCd", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EyesColorCd))
+                parameters.Add("LicSusp_Dbtr_EyesColorCd", data.LicSusp_Dbtr_EyesColorCd);
+            else
+                parameters.Add("LicSusp_Dbtr_EyesColorCd", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_HeightUOMCd))
+                parameters.Add("LicSusp_Dbtr_HeightUOMCd", data.LicSusp_Dbtr_HeightUOMCd);
+            else
+                parameters.Add("LicSusp_Dbtr_HeightUOMCd", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_PhoneNumber))
+                parameters.Add("LicSusp_Dbtr_PhoneNumber", data.LicSusp_Dbtr_PhoneNumber);
+            else
+                parameters.Add("LicSusp_Dbtr_PhoneNumber", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmailAddress))
+                parameters.Add("LicSusp_Dbtr_EmailAddress", data.LicSusp_Dbtr_EmailAddress);
+            else
+                parameters.Add("LicSusp_Dbtr_EmailAddress", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_Brth_CityNme))
+                parameters.Add("LicSusp_Dbtr_Brth_CityNme", data.LicSusp_Dbtr_Brth_CityNme);
+            else
+                parameters.Add("LicSusp_Dbtr_Brth_CityNme", DBNull.Value);
+
+            if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_Brth_CtryCd))
+                parameters.Add("LicSusp_Dbtr_Brth_CtryCd", data.LicSusp_Dbtr_Brth_CtryCd);
+            else
+                parameters.Add("LicSusp_Dbtr_Brth_CtryCd", DBNull.Value);
 
             if (data.LicSusp_TermRequestDte.HasValue)
                 parameters.Add("LicSusp_TermRequestDte", data.LicSusp_TermRequestDte.Value);
@@ -137,6 +189,16 @@ namespace FOAEA3.Data.DB
 
             if (data.LicSusp_Declaration_Ind.HasValue)
                 parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
+
+            /*
+      ,@LicSusp_TermRequestDte datetime
+      ,@LicSusp_Dbtr_LastAddr_Ln char(30) = NULL
+      ,@LicSusp_Dbtr_LastAddr_Ln1 char(30) = NULL
+      ,@LicSusp_Dbtr_LastAddr_CityNme char(50) = NULL
+      ,@LicSusp_Dbtr_LastAddr_PrvCd char(2) = NULL
+      ,@LicSusp_Dbtr_LastAddr_CtryCd char(3) = NULL
+      ,@LicSusp_Dbtr_LastAddr_PCd char(10) = NULL
+      ,@LicSusp_Declaration_Ind BIT = NULL             */
 
             return parameters;
         }

@@ -196,7 +196,9 @@ namespace FOAEA3.Business.Areas.Application
             isSuccess = IsValidMandatory(isSuccess, Application.AppCtgy_Cd, Resources.ErrorResource.MISSING_CATEGORY_CODE);
             isSuccess = IsValidMandatory(isSuccess, Application.Appl_Dbtr_Brth_Dte, Resources.ErrorResource.MISSING_DEBTOR_DOB);
 
-            if ((!string.IsNullOrEmpty(Application.Medium_Cd)) && (Application.Medium_Cd.ToUpper() == "FTP"))
+            if ((!string.IsNullOrEmpty(Application.Medium_Cd)) &&
+                (Application.Medium_Cd.ToUpper() == "FTP") &&
+                (Application.AppCtgy_Cd != "L03"))
                 isSuccess = IsValidMandatory(isSuccess, Application.Appl_Group_Batch_Cd, Resources.ErrorResource.MISSING_GROUP_BATCH_CODE);
 
             return isSuccess;

@@ -33,6 +33,7 @@ public class LicenceDenialTerminationsController : ControllerBase
                                                                      [FromServices] IRepositories repositories)
     {
         var manager = new LicenceDenialTerminationManager(repositories, config);
+        await manager.SetCurrentUserAsync(User);
 
         bool success = await manager.LoadApplicationAsync(key.EnfSrv, key.CtrlCd);
         if (success)
@@ -58,6 +59,7 @@ public class LicenceDenialTerminationsController : ControllerBase
             return UnprocessableEntity(error);
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, repositories, config);
+        await licenceDenialTerminationManager.SetCurrentUserAsync(User);
 
         bool isCreated = await licenceDenialTerminationManager.CreateApplicationAsync(controlCodeForL01, requestDate);
         if (isCreated)
@@ -87,6 +89,7 @@ public class LicenceDenialTerminationsController : ControllerBase
 
         var licenceDenialManager = new LicenceDenialTerminationManager(application, repositories, config);
         await licenceDenialManager.SetCurrentUserAsync(User);
+
         await licenceDenialManager.UpdateApplicationAsync();
 
         if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -110,6 +113,7 @@ public class LicenceDenialTerminationsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config);
+        await appManager.SetCurrentUserAsync(User);
 
         await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
 
@@ -148,6 +152,8 @@ public class LicenceDenialTerminationsController : ControllerBase
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config);
+        await appManager.SetCurrentUserAsync(User);
+
         if (await appManager.ProcessLicenceDenialTerminationResponseAsync(key.EnfSrv, key.CtrlCd))
             return Ok(application);
         else
