@@ -77,15 +77,21 @@ public class LicenceDenialsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories repositories)
+    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories db)
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
+        var licenceDenialManager = new LicenceDenialManager(application, db, config);
         await licenceDenialManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+        {
+            licenceDenialManager.CurrentUser.Submitter = submitter;
+            db.CurrentSubmitter = submitter.Subm_SubmCd;
+        }
 
         bool isCreated = await licenceDenialManager.CreateApplicationAsync();
         if (isCreated)

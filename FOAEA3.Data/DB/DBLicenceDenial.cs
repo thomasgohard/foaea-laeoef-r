@@ -91,7 +91,6 @@ namespace FOAEA3.Data.DB
                         {"PymPr_Cd", data.PymPr_Cd },
                         {"LicSusp_NrOfPymntsInDefault", data.LicSusp_NrOfPymntsInDefault ?? 0},
                         {"LicSusp_AmntOfArrears", data.LicSusp_AmntOfArrears ?? 0M },
-                        {"LicSusp_Dbtr_HeightQty", data.LicSusp_Dbtr_HeightQty ?? 0},
                         {"LicSusp_Still_InEffect_Ind", data.LicSusp_Still_InEffect_Ind },
                         {"LicSusp_AnyLicRvkd_Ind", data.LicSusp_AnyLicRvkd_Ind },
                         {"LicSusp_AnyLicReinst_Ind", data.LicSusp_AnyLicReinst_Ind },
@@ -193,6 +192,11 @@ namespace FOAEA3.Data.DB
 
             if (data.LicSusp_Declaration_Ind.HasValue)
                 parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
+
+            if (data.LicSusp_Dbtr_HeightQty.HasValue)
+                parameters.Add("LicSusp_Dbtr_HeightQty", data.LicSusp_Dbtr_HeightQty.Value);
+            else
+                parameters.Add("LicSusp_Dbtr_HeightQty", DBNull.Value);
 
             return parameters;
         }
