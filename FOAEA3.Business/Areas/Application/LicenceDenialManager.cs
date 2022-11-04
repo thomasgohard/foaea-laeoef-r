@@ -96,10 +96,6 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplicationNoValidationAsync();
 
             await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialApplication);
-
-            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
-
-            await EventManager.SaveEventsAsync();
         }
 
         public override async Task UpdateApplicationAsync()

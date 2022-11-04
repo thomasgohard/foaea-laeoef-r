@@ -17,6 +17,8 @@ namespace FOAEA3.Business.Areas.Application
         public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, CustomConfig config) :
             base(licenceDenialTermination, repositories, config)
         {
+            StateEngine.ValidStateChange[ApplicationState.INITIAL_STATE_0].Add(ApplicationState.APPLICATION_ACCEPTED_10);
+
             LicenceDenialTerminationApplication = licenceDenialTermination;
         }
 
@@ -59,6 +61,11 @@ namespace FOAEA3.Business.Areas.Application
 
             bool success = await base.CreateApplicationAsync();
 
+            var originalLicenceDenialManager = new LicenceDenialManager(originalL01, DB, config)
+            {
+                CurrentUser = CurrentUser
+            };
+
             if (!success)
             {
                 var failedSubmitterManager = new FailedSubmitAuditManager(DB, LicenceDenialTerminationApplication);
@@ -66,9 +73,6 @@ namespace FOAEA3.Business.Areas.Application
             }
             else if (LicenceDenialTerminationApplication.AppLiSt_Cd != ApplicationState.INVALID_APPLICATION_1)
             {
-                LicenceDenialTerminationApplication.AppLiSt_Cd = ApplicationState.APPLICATION_ACCEPTED_10;
-                await UpdateApplicationNoValidationAsync();
-
                 originalL01.LicSusp_Dbtr_LastAddr_Ln = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_Ln;
                 originalL01.LicSusp_Dbtr_LastAddr_Ln1 = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_Ln1;
                 originalL01.LicSusp_Dbtr_LastAddr_CityNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CityNme;
@@ -81,10 +85,43 @@ namespace FOAEA3.Business.Areas.Application
                 originalL01.LicSusp_Appl_CtrlCd = LicenceDenialTerminationApplication.Appl_CtrlCd;
                 originalL01.LicSusp_LiStCd = 14;
 
-                var licenceDenialManager = new LicenceDenialManager(originalL01, DB, config);
-                licenceDenialManager.CurrentUser = CurrentUser;
-                await licenceDenialManager.CancelApplicationAsync();
+                await originalLicenceDenialManager.CancelApplicationAsync();
             }
+
+            string msg = string.Empty;
+
+            var activeL01s = await DB.LicenceDenialTable.GetActiveLO1ApplsForDebtor(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            foreach(var dr in activeL01s)
+                msg += dr.Value + " ";
+            
+            if (msg.Trim().Length < 0)
+                EventManager.AddEvent(EventCode.C50936_THERE_EXISTS_ONE_OR_MORE_ACTIVE_LICENCE_DENIAL_APPLICATIONS_FOR_THIS_DEBTOR_IN_YOUR_JURISDICTION, msg);
+
+            // WARNING: is this needed? can the L03 be at any state other than 10 or maybe 1 but never 15?
+            switch (LicenceDenialTerminationApplication.AppLiSt_Cd)
+            {
+                case ApplicationState.EXPIRED_15:
+                    EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED);
+                    break;
+                case ApplicationState.APPLICATION_ACCEPTED_10:
+                    originalLicenceDenialManager.EventManager.AddEvent(EventCode.C50781_L03_ACCEPTED, queue: EventQueue.EventLicence, activeState: "X");
+                    EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED);
+                    break;
+                case ApplicationState.INVALID_APPLICATION_1:
+                    LicenceDenialTerminationApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REJECTED_9;
+                    LicenceDenialTerminationApplication.ActvSt_Cd = "X";
+                    await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialTerminationApplication);
+                    EventManager.AddEvent(EventCode.C51020_APPLICATION_UPDATED);
+                    break;
+                default:
+                    // no event created
+                    break;
+            }
+
+            await originalLicenceDenialManager.EventManager.SaveEventsAsync();
+            await EventManager.SaveEventsAsync();
+
+            await DB.LicenceDenialTable.CloseSameDayLicenceEventAsync(originalL01.Appl_EnfSrv_Cd, originalL01.Appl_CtrlCd, Appl_CtrlCd);
 
             return success;
         }

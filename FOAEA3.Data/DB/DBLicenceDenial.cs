@@ -190,16 +190,6 @@ namespace FOAEA3.Data.DB
             if (data.LicSusp_Declaration_Ind.HasValue)
                 parameters.Add("LicSusp_Declaration_Ind", data.LicSusp_Declaration_Ind.Value);
 
-            /*
-      ,@LicSusp_TermRequestDte datetime
-      ,@LicSusp_Dbtr_LastAddr_Ln char(30) = NULL
-      ,@LicSusp_Dbtr_LastAddr_Ln1 char(30) = NULL
-      ,@LicSusp_Dbtr_LastAddr_CityNme char(50) = NULL
-      ,@LicSusp_Dbtr_LastAddr_PrvCd char(2) = NULL
-      ,@LicSusp_Dbtr_LastAddr_CtryCd char(3) = NULL
-      ,@LicSusp_Dbtr_LastAddr_PCd char(10) = NULL
-      ,@LicSusp_Declaration_Ind BIT = NULL             */
-
             return parameters;
         }
 
@@ -247,6 +237,24 @@ namespace FOAEA3.Data.DB
                                                                                  parameters, FillLicenceDenialOutgoingProvincialData);
             return data;
 
+        }
+
+        public async Task<List<SingleStringColumnData>> GetActiveLO1ApplsForDebtor(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                    {
+                        {"Appl_CtrlCd", appl_CtrlCd },
+                        {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd}
+                    };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<SingleStringColumnData>("ApplGetL01sForDebtor", parameters, FillActiveL01ApplsForDebtor);
+
+            return data;
+        }
+
+        private void FillActiveL01ApplsForDebtor(IDBHelperReader rdr, SingleStringColumnData data)
+        {
+            data.Value = rdr[0] as string;
         }
 
         private void FillLicenceDenialToApplDataFromReader(IDBHelperReader rdr, LicenceDenialToApplData data)
@@ -361,5 +369,6 @@ namespace FOAEA3.Data.DB
             data.RqstStat_Cd = (short)rdr["Val_8"];
             data.EnfSrv_Cd = rdr["Val_9"] as string;
         }
+
     }
 }

@@ -49,7 +49,7 @@ public class LicenceDenialTerminationsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories repositories,
+    public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories db,
                                                                         [FromQuery] string controlCodeForL01)
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
@@ -58,8 +58,11 @@ public class LicenceDenialTerminationsController : ControllerBase
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, repositories, config);
+        var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, db, config);
         await licenceDenialTerminationManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+            licenceDenialTerminationManager.CurrentUser.Submitter = submitter;
 
         bool isCreated = await licenceDenialTerminationManager.CreateApplicationAsync(controlCodeForL01, requestDate);
         if (isCreated)
@@ -68,9 +71,7 @@ public class LicenceDenialTerminationsController : ControllerBase
             return CreatedAtRoute("GetApplication", new { key = appKey }, application);
         }
         else
-        {
             return UnprocessableEntity(application);
-        }
 
     }
 

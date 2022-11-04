@@ -33,13 +33,29 @@ namespace FOAEA3.Business.Areas.Application
 
         protected string Appl_CtrlCd => Application.Appl_CtrlCd?.Trim();
 
-        public FoaeaUser CurrentUser { get; set; }
+        private FoaeaUser _currentUser;
+
+        public FoaeaUser CurrentUser
+        {
+            get
+            {
+                return _currentUser;
+            }
+            set
+            {
+                _currentUser = value;
+
+                if (Validation is not null)
+                    Validation.CurrentUser = this.CurrentUser;
+
+                if (DB is not null)
+                    DB.CurrentSubmitter = this.CurrentUser.Submitter.Subm_SubmCd;
+            }
+        }
 
         public async Task SetCurrentUserAsync(ClaimsPrincipal user)
         {
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
-            if (Validation is not null)
-                Validation.CurrentUser = this.CurrentUser;
         }
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,

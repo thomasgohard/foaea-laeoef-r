@@ -191,7 +191,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             Application.ActvSt_Cd = "X";
             Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
-            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
+            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED, activeState: "X");
 
             return Task.CompletedTask;
         }
