@@ -67,6 +67,11 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("L01"))
                 return false;
 
+            if (ValidateDeclaration())
+                LicenceDenialApplication.LicSusp_Declaration_Ind = true;
+            else
+                return false;
+
             bool success = await base.CreateApplicationAsync();
 
             if (!success)
@@ -75,9 +80,21 @@ namespace FOAEA3.Business.Areas.Application
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L01);
             }
 
+            LicenceDenialApplication.LicSusp_LiStCd = 2;
             await DB.LicenceDenialTable.CreateLicenceDenialDataAsync(LicenceDenialApplication);
 
             return success;
+        }
+
+        private bool ValidateDeclaration()
+        {
+            string declaration = LicenceDenialApplication.LicSusp_Declaration?.Trim();
+            if (declaration is not null &&
+                (declaration.Equals(config.DeclarationTextEnglish, StringComparison.InvariantCultureIgnoreCase) ||
+                 declaration.Equals(config.DeclarationTextFrench, StringComparison.InvariantCultureIgnoreCase)))
+                return true;
+            else
+                return false;
         }
 
         public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync()

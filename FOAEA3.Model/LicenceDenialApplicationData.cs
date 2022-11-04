@@ -10,12 +10,13 @@ namespace FOAEA3.Model
         public LicenceDenialApplicationData()
         {
             AppCtgy_Cd = "L01";
+            ActvSt_Cd = "A";
+            Appl_SIN_Cnfrmd_Ind = 0;
+            Appl_Create_Dte = DateTime.Now;
+            Appl_Rcptfrm_Dte = Appl_Create_Dte.Date; // only date, no time
+            Appl_Lgl_Dte = Appl_Create_Dte;
+            Appl_LastUpdate_Dte = Appl_Create_Dte;
         }
-
-        //public LicenceDenialData(IReferenceData referenceData): base(referenceData)
-        //{
-
-        //}
 
         [Display(Name = "SUPPORTORDER_DTE", ResourceType = typeof(LanguageResource))]
         [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
@@ -76,6 +77,7 @@ namespace FOAEA3.Model
         [Display(Name = "DEBTOR_LAST_POSTALCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_PCd { get; set; }
         public bool? LicSusp_Declaration_Ind { get; set; }
+        public string LicSusp_Declaration { get; set; }
 
         public void Merge(LicenceDenialApplicationData data)
         {

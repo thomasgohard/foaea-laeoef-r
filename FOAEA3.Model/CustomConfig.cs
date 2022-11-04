@@ -32,5 +32,8 @@ namespace FOAEA3.Model
         }
 
         public List<string> ESDsites { get; set; }
+
+        public string DeclarationTextEnglish { get; set; }
+        public string DeclarationTextFrench { get; set; }
     }
 }

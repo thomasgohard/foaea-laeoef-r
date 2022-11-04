@@ -454,6 +454,9 @@ public class IncomingProvincialLicenceDenialManager
 
     private static int? ConvertToIntOrNull(string value)
     {
+        if (string.IsNullOrEmpty(value))
+            return null;
+
         if (int.TryParse(value, out int result))
             return result;
         else

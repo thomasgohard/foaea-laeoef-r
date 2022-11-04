@@ -96,9 +96,8 @@ namespace FOAEA3.Data.DB
                         {"LicSusp_AnyLicRvkd_Ind", data.LicSusp_AnyLicRvkd_Ind },
                         {"LicSusp_AnyLicReinst_Ind", data.LicSusp_AnyLicReinst_Ind },
                         {"LicSusp_LiStCd", data.LicSusp_LiStCd },
-                        {"LicSusp_Appl_CtrlCd", data.LicSusp_Appl_CtrlCd }
                     };
-
+            
             if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EmplNme))
                 parameters.Add("LicSusp_Dbtr_EmplNme", data.LicSusp_Dbtr_EmplNme);
             else
@@ -162,7 +161,12 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_Brth_CtryCd))
                 parameters.Add("LicSusp_Dbtr_Brth_CtryCd", data.LicSusp_Dbtr_Brth_CtryCd);
             else
-                parameters.Add("LicSusp_Dbtr_Brth_CtryCd", DBNull.Value);
+                parameters.Add("LicSusp_Dbtr_Brth_CtryCd", "999");
+            
+            if (!string.IsNullOrEmpty(data.LicSusp_Appl_CtrlCd))
+                parameters.Add("LicSusp_Appl_CtrlCd", data.LicSusp_Appl_CtrlCd);
+            else
+                parameters.Add("LicSusp_Appl_CtrlCd", DBNull.Value);
 
             if (data.LicSusp_TermRequestDte.HasValue)
                 parameters.Add("LicSusp_TermRequestDte", data.LicSusp_TermRequestDte.Value);

@@ -177,6 +177,10 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
+            Application.Appl_Lgl_Dte = Application.Appl_Lgl_Dte.Date; // remove time
+
+            Application.Appl_Rcptfrm_Dte = DateTime.Now.Date;
+
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd))
             {
