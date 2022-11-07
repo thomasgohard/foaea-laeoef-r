@@ -137,9 +137,9 @@ namespace FOAEA3.Business.Areas.Application
 
             string cityName = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CityNme;
             string provinceCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PrvCd;
+            string postalCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd?.Replace(" ", "");
 
             string reasonText = string.Empty;
-            var eventCode = EventCode.C50772_INVALID_POSTAL_CODE;
 
             if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CtryCd))
             {
@@ -149,7 +149,6 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd))
                     {
-                        string postalCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd;
 
                         (validPostalCode, validProvCode, validFlags) = await DB.PostalCodeTable.ValidatePostalCodeAsync(postalCode, provinceCode, cityName);
 
@@ -200,7 +199,7 @@ namespace FOAEA3.Business.Areas.Application
                 if (!validPostalCode)
                 {
                     if (createEventForBadPostalCode)
-                        EventManager.AddEvent(eventCode, reasonText);
+                        EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
 
                     validPostalCode = true;
                 }

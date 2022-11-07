@@ -28,7 +28,6 @@ namespace FOAEA3.Business.Areas.Application
                             ApplicationState.MANUALLY_TERMINATED_14
                         });
 
-            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
@@ -94,7 +93,10 @@ namespace FOAEA3.Business.Areas.Application
                  declaration.Equals(config.DeclarationTextFrench, StringComparison.InvariantCultureIgnoreCase)))
                 return true;
             else
+            {
+                LicenceDenialApplication.Messages.AddError("Invalid or missing declaration.");
                 return false;
+            }
         }
 
         public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync()

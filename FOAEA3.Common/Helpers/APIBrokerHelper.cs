@@ -291,7 +291,18 @@ namespace FOAEA3.Common.Helpers
                             }
                         }
                         else
+                        {
+                            try
+                            {
+                                string content = await callResult.Content.ReadAsStringAsync();
+                                result = JsonConvert.DeserializeObject<T>(content);
+                            }
+                            catch
+                            {
+                                // no content or invalid content so ignore?
+                            }
                             completed = true;
+                        }
                     }
                     else 
                         completed = true;

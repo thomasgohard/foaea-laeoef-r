@@ -189,7 +189,8 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // add reminder
-            EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
+            if (Application.AppCtgy_Cd != "L03")
+                EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
 
             // validate data and decide on what state to bring the application to
             await Process_00_InitialState();

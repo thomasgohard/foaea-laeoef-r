@@ -12,9 +12,6 @@ public class IncomingProvincialLicenceDenialManager
     private RepositoryList DB { get; }
     private ProvincialAuditFileConfig AuditConfiguration { get; }
 
-    private string DeclarationTextEnglish { get; }
-    private string DeclarationTextFrench { get; }
-
     private IncomingProvincialHelper IncomingFileHelper { get; }
 
     private FoaeaSystemAccess FoaeaAccess { get; }
@@ -33,9 +30,6 @@ public class IncomingProvincialLicenceDenialManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
                                                   config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
                                                   config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
-
-        DeclarationTextEnglish = config["Declaration:LicenceDenial:English"];
-        DeclarationTextFrench = config["Declaration:LicenceDenial:French"];
 
         string provCode = FileName[..2].ToUpper();
         IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
@@ -153,13 +147,7 @@ public class IncomingProvincialLicenceDenialManager
                     NewUpdateSubmitter = data.dat_Update_SubmCd
                 };
 
-                if (!ValidDeclaration(licenceDenialData.dat_LicSup_Declaration))
-                {
-                    messages = new MessageDataList();
-                    messages.AddError("Type 31 dat_LicSup_Declaration invalid text: " + licenceDenialData.dat_LicSup_Declaration);
-                }
-                else
-                    messages = await ProcessApplicationRequestAsync(licenceDenialMessage);
+                messages = await ProcessApplicationRequestAsync(licenceDenialMessage);
             }
             else
             {
@@ -433,12 +421,14 @@ public class IncomingProvincialLicenceDenialManager
             LicSusp_Dbtr_HeightQty = ConvertToIntOrNull(licenceDenialData.dat_LicSup_Dbtr_HeightQty),
             LicSusp_Dbtr_Brth_CityNme = licenceDenialData.dat_LicSup_Dbtr_Brth_CityNme,
             LicSusp_Dbtr_Brth_CtryCd = licenceDenialData.dat_LicSup_Dbtr_Brth_CtryCd,
-            LicSusp_Dbtr_LastAddr_Ln = licenceDenialData.dat_Appl_Dbtr_Addr_Ln,
-            LicSusp_Dbtr_LastAddr_Ln1 = licenceDenialData.dat_Appl_Dbtr_Addr_Ln1,
-            LicSusp_Dbtr_LastAddr_CityNme = licenceDenialData.dat_Appl_Dbtr_Addr_CityNme,
-            LicSusp_Dbtr_LastAddr_PrvCd = licenceDenialData.dat_Appl_Dbtr_Addr_PrvCd,
-            LicSusp_Dbtr_LastAddr_CtryCd = licenceDenialData.dat_Appl_Dbtr_Addr_CtryCd,
-            LicSusp_Dbtr_LastAddr_PCd = licenceDenialData.dat_Appl_Dbtr_Addr_PCd
+            Appl_Dbtr_Addr_Ln = licenceDenialData.dat_Appl_Dbtr_Addr_Ln,
+            Appl_Dbtr_Addr_Ln1 = licenceDenialData.dat_Appl_Dbtr_Addr_Ln1,
+            Appl_Dbtr_Addr_CityNme = licenceDenialData.dat_Appl_Dbtr_Addr_CityNme,
+            Appl_Dbtr_Addr_PrvCd = licenceDenialData.dat_Appl_Dbtr_Addr_PrvCd,
+            Appl_Dbtr_Addr_CtryCd = licenceDenialData.dat_Appl_Dbtr_Addr_CtryCd,
+            Appl_Dbtr_Addr_PCd = licenceDenialData.dat_Appl_Dbtr_Addr_PCd,
+
+            LicSusp_Declaration = licenceDenialData.dat_LicSup_Declaration
         };
 
         return licenceDenialApplication;
@@ -466,16 +456,9 @@ public class IncomingProvincialLicenceDenialManager
     private static decimal? ConvertToDecimalOrNull(string value)
     {
         if (decimal.TryParse(value, out decimal result))
-            return result;
+            return result / 100M;
         else
             return null;
-    }
-
-
-    private bool ValidDeclaration(string declaration)
-    {
-        return declaration.Equals(DeclarationTextEnglish, StringComparison.InvariantCultureIgnoreCase) ||
-               declaration.Equals(DeclarationTextFrench, StringComparison.InvariantCultureIgnoreCase);
     }
 
     private static LicenceDenialApplicationData GetLicenceDenialTerminationApplicationDataFromRequest(MEPLicenceDenial_RecTypeBase baseData, MEPLicenceDenial_RecType41 licenceDenialData)
