@@ -20,15 +20,13 @@ namespace CompareOldAndNewData.CommandLine
 
             if (appl2 is null)
             {
-                diffs.Add(new DiffData(tableName, key: key, colName: "",
-                                       goodValue: "", badValue: "Not found in FOAEA 3!"));
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "", badValue: "Not found in FOAEA 2!"));
                 return diffs;
             }
 
             if (appl3 is null)
             {
-                diffs.Add(new DiffData(tableName, key: key, colName: "",
-                                       goodValue: "Not found in FOAEA 3!", badValue: ""));
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "Not found in FOAEA 3!", badValue: ""));
                 return diffs;
             }
 
