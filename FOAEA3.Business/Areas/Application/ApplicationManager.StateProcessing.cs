@@ -44,7 +44,12 @@ namespace FOAEA3.Business.Areas.Application
 
             bool isValid;
             string reasonText;
-            (isValid, reasonText) = await Validation.IsValidPostalCodeAsync();
+
+            string postalCode = Application.Appl_Dbtr_Addr_PCd;
+            string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
+            string cityName = Application.Appl_Dbtr_Addr_CityNme;
+
+            (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName);
             if (!isValid)
             {
                 EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);

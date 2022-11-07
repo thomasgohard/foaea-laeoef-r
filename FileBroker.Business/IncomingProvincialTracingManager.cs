@@ -102,6 +102,17 @@ public class IncomingProvincialTracingManager
                                 NewUpdateSubmitter = data.dat_Update_SubmCd
                             };
 
+                            var requestLogData = new RequestLogData
+                            {
+                                MaintenanceAction = tracingMessage.MaintenanceAction,
+                                MaintenanceLifeState = tracingMessage.MaintenanceLifeState,
+                                Appl_EnfSrv_Cd = tracingMessage.Application.Appl_EnfSrv_Cd,
+                                Appl_CtrlCd = tracingMessage.Application.Appl_CtrlCd,
+                                LoadedDateTime = DateTime.Now
+                            };
+
+                            _ = await DB.RequestLogTable.AddAsync(requestLogData);
+
                             var messages = await ProcessApplicationRequestAsync(tracingMessage);
 
                             if (messages.ContainsMessagesOfType(MessageType.Error))

@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Business.Security;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -80,7 +81,16 @@ namespace FOAEA3.Business.Areas.Application
                 originalL01.LicSusp_Dbtr_LastAddr_CtryCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CtryCd;
                 originalL01.LicSusp_Dbtr_LastAddr_PCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd;
 
-                await ValidatePostalCodeForL03Async();
+                bool isValid;
+                string reasonText;
+
+                string cityName = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CityNme;
+                string provinceCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PrvCd;
+                string postalCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd;
+
+                (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName);
+                if (!isValid)
+                    EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
 
                 originalL01.LicSusp_Appl_CtrlCd = LicenceDenialTerminationApplication.Appl_CtrlCd;
                 originalL01.LicSusp_LiStCd = 14;
@@ -91,9 +101,9 @@ namespace FOAEA3.Business.Areas.Application
             string msg = string.Empty;
 
             var activeL01s = await DB.LicenceDenialTable.GetActiveLO1ApplsForDebtor(Appl_EnfSrv_Cd, Appl_CtrlCd);
-            foreach(var dr in activeL01s)
+            foreach (var dr in activeL01s)
                 msg += dr.Value + " ";
-            
+
             if (msg.Trim().Length < 0)
                 EventManager.AddEvent(EventCode.C50936_THERE_EXISTS_ONE_OR_MORE_ACTIVE_LICENCE_DENIAL_APPLICATIONS_FOR_THIS_DEBTOR_IN_YOUR_JURISDICTION, msg);
 
@@ -124,88 +134,6 @@ namespace FOAEA3.Business.Areas.Application
             await DB.LicenceDenialTable.CloseSameDayLicenceEventAsync(originalL01.Appl_EnfSrv_Cd, originalL01.Appl_CtrlCd, Appl_CtrlCd);
 
             return success;
-        }
-
-        private async Task<bool> ValidatePostalCodeForL03Async()
-        {
-
-            bool validPostalCode = true;
-            PostalCodeFlag validFlags;
-            string validProvCode;
-
-            bool createEventForBadPostalCode = false;
-
-            string cityName = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CityNme;
-            string provinceCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PrvCd;
-            string postalCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd?.Replace(" ", "");
-
-            string reasonText = string.Empty;
-
-            if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CtryCd))
-            {
-                string countryCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CtryCd;
-
-                if (countryCode.In("CAN", "CA"))
-                {
-                    if (!string.IsNullOrEmpty(LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd))
-                    {
-
-                        (validPostalCode, validProvCode, validFlags) = await DB.PostalCodeTable.ValidatePostalCodeAsync(postalCode, provinceCode, cityName);
-
-                        if (!validPostalCode)
-                        {
-                            createEventForBadPostalCode = true;
-                            reasonText = "1";
-                        }
-                        else
-                        {
-                            if ((provinceCode == string.Empty) || (provinceCode.In("77", "88", "99")))
-                            {
-                                LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PrvCd = validProvCode;
-                                validFlags = new PostalCodeFlag
-                                {
-                                    IsCityNameValid = validFlags.IsCityNameValid,
-                                    IsProvinceValid = true,
-                                    IsPostalCodeValid = validFlags.IsPostalCodeValid
-                                };
- 
-                                if (validFlags.IsCityNameValid && !validFlags.IsProvinceValid && validFlags.IsPostalCodeValid)
-                                {
-                                    createEventForBadPostalCode = true;
-                                    reasonText = "2";
-                                    validPostalCode = false;
-                                }
-                                else if (!validFlags.IsCityNameValid && validFlags.IsProvinceValid && validFlags.IsPostalCodeValid)
-                                {
-                                    createEventForBadPostalCode = true;
-                                    reasonText = "3";
-                                    validPostalCode = false;
-                                }
-                                else if (!validFlags.IsCityNameValid && !validFlags.IsProvinceValid && validFlags.IsPostalCodeValid)
-                                {
-                                    createEventForBadPostalCode = true;
-                                    reasonText = "2,3";
-                                    validPostalCode = false;
-                                }
-                                else
-                                {
-                                    validPostalCode = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!validPostalCode)
-                {
-                    if (createEventForBadPostalCode)
-                        EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
-
-                    validPostalCode = true;
-                }
-            }
-
-            return validPostalCode;
         }
 
         private async Task<LicenceDenialApplicationData> GetOriginalLicenceDenialApplication(string controlCodeForL01, DateTime requestDate)

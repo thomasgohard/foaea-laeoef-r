@@ -226,7 +226,7 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual async Task<(bool, string)> IsValidPostalCodeAsync()
+        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName)
         {
             // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
             // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
@@ -234,9 +234,6 @@ namespace FOAEA3.Business.Areas.Application
             // 3-Postal code does not match City (if the City associated to the postal code is not the same in the application VS the two found in the Canada Post file)
             // More than one of these can occur for the same triggering of Event 50772 (really just 2 and 3).
 
-            string postalCode = Application.Appl_Dbtr_Addr_PCd;
-            string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
-            string cityName = Application.Appl_Dbtr_Addr_CityNme;
             string reasonText = string.Empty;
 
             if (postalCode == "-")

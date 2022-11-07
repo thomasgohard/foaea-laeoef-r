@@ -12,14 +12,26 @@ namespace CompareOldAndNewData.CommandLine
                                string action, string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate,
                                StringBuilder output)
         {
+            var appl = await repositories2.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
+            string category = appl.AppCtgy_Cd.ToUpper();
+
             var diffs = await CompareAppl.RunAsync("Appl", repositories2, repositories3, enfSrv, ctrlCd);
-            diffs.AddRange(await CompareSummSmry.RunAsync("SummSmry", repositories2Finance, repositories3Finance, enfSrv, ctrlCd));
-            diffs.AddRange(await CompareIntFinH.RunAsync("IntFinH", repositories2, repositories3, enfSrv, ctrlCd));
-            diffs.AddRange(await CompareHldbCnd.RunAsync("HldbCnd", repositories2, repositories3, enfSrv, ctrlCd));
+
+            if (category == "I01")
+            {
+                diffs.AddRange(await CompareSummSmry.RunAsync("SummSmry", repositories2Finance, repositories3Finance, enfSrv, ctrlCd));
+                diffs.AddRange(await CompareIntFinH.RunAsync("IntFinH", repositories2, repositories3, enfSrv, ctrlCd));
+                diffs.AddRange(await CompareHldbCnd.RunAsync("HldbCnd", repositories2, repositories3, enfSrv, ctrlCd));
+            }
+            
             diffs.AddRange(await CompareEvents.RunAsync("EvntSubm", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSubm));
-            diffs.AddRange(await CompareEvents.RunAsync("EvntBF", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBF));
-            diffs.AddRange(await CompareEvents.RunAsync("EvntBFN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBFN));
-            diffs.AddRange(await CompareEvents.RunAsync("EvntSIN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSIN));
+
+            if (category != "L03")
+            {
+                diffs.AddRange(await CompareEvents.RunAsync("EvntBF", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBF));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntBFN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventBFN));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntSIN", repositories2, repositories3, enfSrv, ctrlCd, EventQueue.EventSIN));
+            }
 
             diffs.RemoveAll(m => (m.GoodValue is DateTime goodValue) && (m.BadValue is DateTime badValue) &&
                                  (goodValue.Date == foaea2RunDate) && (badValue.Date == foaea3RunDate));

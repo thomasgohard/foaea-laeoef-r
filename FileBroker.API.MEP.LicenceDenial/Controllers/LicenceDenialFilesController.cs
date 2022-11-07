@@ -74,6 +74,8 @@ public class LicenceDenialFilesController : ControllerBase
     public async Task<ActionResult> ProcessIncomingLicenceDenialFileAsync([FromQuery] string fileName,
                                                    [FromServices] IFileAuditRepository fileAuditDB,
                                                    [FromServices] IFileTableRepository fileTableDB,
+                                                   [FromServices] ITranslationRepository translationDB,
+                                                   [FromServices] IRequestLogRepository requestLogDB,
                                                    [FromServices] IMailServiceRepository mailService,
                                                    [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                    [FromServices] IOptions<ApiConfig> apiConfig,
@@ -92,9 +94,6 @@ public class LicenceDenialFilesController : ControllerBase
         {
             return UnprocessableEntity(errors);
         }
-
-        //foreach (var error in errors)
-        //    Console.WriteLine(error.Path + ": " + error.Kind);
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
@@ -125,7 +124,9 @@ public class LicenceDenialFilesController : ControllerBase
         {
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailService = mailService
+            RequestLogTable = requestLogDB,
+            MailService = mailService,
+            TranslationTable = translationDB
         };
 
         var licenceDenialManager = new IncomingProvincialLicenceDenialManager(fileName, apis, repositories, auditConfig.Value, config);

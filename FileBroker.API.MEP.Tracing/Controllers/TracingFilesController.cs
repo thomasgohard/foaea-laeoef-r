@@ -80,7 +80,9 @@ public class TracingFilesController : ControllerBase
     public async Task<ActionResult> ProcessIncomingTracingFileAsync([FromQuery] string fileName,
                                                    [FromServices] IFileAuditRepository fileAuditDB,
                                                    [FromServices] IFileTableRepository fileTableDB,
-                                                   [FromServices] IMailServiceRepository mailService,
+                                                   [FromServices] IMailServiceRepository mailService, 
+                                                   [FromServices] ITranslationRepository translationDB,
+                                                   [FromServices] IRequestLogRepository requestLogDB,
                                                    [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
                                                    [FromServices] IOptions<ApiConfig> apiConfig,
                                                    [FromServices] IConfiguration config,
@@ -122,7 +124,9 @@ public class TracingFilesController : ControllerBase
         {
             FileAudit = fileAuditDB,
             FileTable = fileTableDB,
-            MailService = mailService
+            MailService = mailService,
+            TranslationTable = translationDB,
+            RequestLogTable = requestLogDB
         };
 
         var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value, config);

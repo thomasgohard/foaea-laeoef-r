@@ -11,6 +11,8 @@ public class IncomingProvincialLicenceDenialManager
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
     private ProvincialAuditFileConfig AuditConfiguration { get; }
+    private Dictionary<string, string> Translations { get; }
+    private bool IsFrench { get; }
 
     private IncomingProvincialHelper IncomingFileHelper { get; }
 
@@ -26,14 +28,39 @@ public class IncomingProvincialLicenceDenialManager
         APIs = apis;
         DB = repositories;
         AuditConfiguration = auditConfig;
+        Translations = new Dictionary<string, string>();
 
         FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
                                                   config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
                                                   config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
 
+        // load translations
+
+        string provinceCode = fileName[0..2].ToUpper();
+        IsFrench = auditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+
+        if (IsFrench)
+        {
+            var translations = repositories.TranslationTable.GetTranslationsAsync().Result;
+            foreach (var translation in translations)
+                Translations.Add(translation.EnglishText, translation.FrenchText);
+            APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
+            LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
+        }
+
         string provCode = FileName[..2].ToUpper();
         IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
 
+    }
+
+    private string Translate(string englishText)
+    {
+        if (IsFrench && Translations.ContainsKey(englishText))
+        {
+            return Translations[englishText];
+        }
+        else
+            return englishText;
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceLicenceDenialData,
@@ -147,6 +174,17 @@ public class IncomingProvincialLicenceDenialManager
                     NewUpdateSubmitter = data.dat_Update_SubmCd
                 };
 
+                var requestLogData = new RequestLogData
+                {
+                    MaintenanceAction = licenceDenialMessage.MaintenanceAction,
+                    MaintenanceLifeState = licenceDenialMessage.MaintenanceLifeState,
+                    Appl_EnfSrv_Cd = licenceDenialMessage.Application.Appl_EnfSrv_Cd,
+                    Appl_CtrlCd = licenceDenialMessage.Application.Appl_CtrlCd,
+                    LoadedDateTime = DateTime.Now
+                };
+
+                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+
                 messages = await ProcessApplicationRequestAsync(licenceDenialMessage);
             }
             else
@@ -163,6 +201,17 @@ public class IncomingProvincialLicenceDenialManager
                     NewUpdateSubmitter = data.dat_Update_SubmCd
                 };
 
+                var requestLogData = new RequestLogData
+                {
+                    MaintenanceAction = licenceDenialMessage.MaintenanceAction,
+                    MaintenanceLifeState = licenceDenialMessage.MaintenanceLifeState,
+                    Appl_EnfSrv_Cd = licenceDenialMessage.Application.Appl_EnfSrv_Cd,
+                    Appl_CtrlCd = licenceDenialMessage.Application.Appl_CtrlCd,
+                    LoadedDateTime = DateTime.Now
+                };
+
+                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+
                 messages = await ProcessTerminationApplicationRequestAsync(licenceDenialMessage);
             }
 
@@ -170,14 +219,14 @@ public class IncomingProvincialLicenceDenialManager
             {
                 var errors = messages.FindAll(m => m.Severity == MessageType.Error);
 
-                fileAuditData.ApplicationMessage = errors[0].Description;
+                fileAuditData.ApplicationMessage = Translate(errors[0].Description);
                 counts.ErrorCount++;
             }
             else if (messages.ContainsMessagesOfType(MessageType.Warning))
             {
                 var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
 
-                fileAuditData.ApplicationMessage = warnings[0].Description;
+                fileAuditData.ApplicationMessage = Translate(warnings[0].Description);
                 counts.WarningCount++;
             }
             else
@@ -189,7 +238,7 @@ public class IncomingProvincialLicenceDenialManager
                     result.AddRange(infos);
                 }
 
-                fileAuditData.ApplicationMessage = "Success";
+                fileAuditData.ApplicationMessage = Translate("Success");
                 counts.SuccessCount++;
             }
 
@@ -403,8 +452,8 @@ public class IncomingProvincialLicenceDenialManager
             LicSusp_Dbtr_PhoneNumber = licenceDenialData.dat_LicSup_Dbtr_PhoneNumber,
             LicSusp_Dbtr_EmailAddress = licenceDenialData.dat_LicSup_Dbtr_EmailAddress,
 
-            LicSusp_SupportOrder_Dte = licenceDenialData.dat_LicSup_SupportOrder_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date ?? default,
-            LicSusp_NoticeSentToDbtr_Dte = licenceDenialData.dat_LicSup_NoticeSntTDbtr_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date ?? default,
+            LicSusp_SupportOrder_Dte = licenceDenialData.dat_LicSup_SupportOrder_Dte.ConvertToDateTimeIgnoringTimeZone() ?? default,
+            LicSusp_NoticeSentToDbtr_Dte = licenceDenialData.dat_LicSup_NoticeSntTDbtr_Dte.ConvertToDateTimeIgnoringTimeZone() ?? default,
             LicSusp_CourtNme = licenceDenialData.dat_LicSup_CourtNme,
             PymPr_Cd = licenceDenialData.dat_LicSup_PymPr_Cd,
             LicSusp_NrOfPymntsInDefault = ConvertToShortOrNull(licenceDenialData.dat_LicSup_NrOfPymntsInDefault),

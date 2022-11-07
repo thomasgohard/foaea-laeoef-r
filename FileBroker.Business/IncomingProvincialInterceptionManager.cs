@@ -155,7 +155,16 @@ namespace FileBroker.Business
                                 };
                                 errorCount += thisErrorCount;
 
-                                await AddRequestToAuditAsync(interceptionMessage);
+                                var requestLogData = new RequestLogData
+                                {
+                                    MaintenanceAction = interceptionMessage.MaintenanceAction,
+                                    MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
+                                    Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
+                                    Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
+                                    LoadedDateTime = DateTime.Now
+                                };
+
+                                _ = await DB.RequestLogTable.AddAsync(requestLogData);
 
                                 if (isValidData)
                                 {
@@ -245,20 +254,6 @@ namespace FileBroker.Business
             await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
 
             return result;
-        }
-
-        private async Task AddRequestToAuditAsync(MessageData<InterceptionApplicationData> interceptionMessage)
-        {
-            var requestLogData = new RequestLogData
-            {
-                MaintenanceAction = interceptionMessage.MaintenanceAction,
-                MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
-                Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
-                Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
-                LoadedDateTime = DateTime.Now
-            };
-
-            _ = await DB.RequestLogTable.AddAsync(requestLogData);
         }
 
         public async Task AutoAcceptVariationsAsync(string enfService)
