@@ -169,7 +169,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // clean data
-            TrimTrailingSpaces();
+            TrimSpaces();
             MakeUpperCase();
 
             Application.Appl_Create_Dte = DateTime.Now;
@@ -189,7 +189,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // add reminder
-            if (Application.AppCtgy_Cd != "L03")
+            if (Application.AppCtgy_Cd.NotIn("L01", "L03"))
                 EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
 
             // validate data and decide on what state to bring the application to
@@ -280,7 +280,7 @@ namespace FOAEA3.Business.Areas.Application
             if (isReset) // reset
             {
                 // clean data
-                TrimTrailingSpaces();
+                TrimSpaces();
                 MakeUpperCase();
 
                 await Process_00_InitialState();
@@ -387,18 +387,39 @@ namespace FOAEA3.Business.Areas.Application
             await DB.ApplicationTable.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
         }
 
-        protected void TrimTrailingSpaces()
+        protected virtual void TrimSpaces()
         {
+            Application.Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd?.Trim();
+            Application.Appl_CtrlCd = Application.Appl_CtrlCd?.Trim();
+            Application.Subm_SubmCd = Application.Subm_SubmCd?.Trim();
+            Application.Subm_Recpt_SubmCd = Application.Subm_Recpt_SubmCd?.Trim();
+            Application.Appl_CommSubm_Text = Application.Appl_CommSubm_Text?.Trim();
+            Application.Appl_Group_Batch_Cd = Application.Appl_Group_Batch_Cd?.Trim();
             Application.Appl_Source_RfrNr = Application.Appl_Source_RfrNr?.Trim();
-            Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.Trim();
+            Application.Subm_Affdvt_SubmCd = Application.Subm_Affdvt_SubmCd?.Trim();
+            Application.Appl_Affdvt_DocTypCd = Application.Appl_Affdvt_DocTypCd?.Trim();
+            Application.Appl_Crdtr_FrstNme = Application.Appl_Crdtr_FrstNme?.Trim();
+            Application.Appl_Crdtr_MddleNme = Application.Appl_Crdtr_MddleNme?.Trim();
+            Application.Appl_Crdtr_SurNme = Application.Appl_Crdtr_SurNme?.Trim();
             Application.Appl_Dbtr_FrstNme = Application.Appl_Dbtr_FrstNme?.Trim();
             Application.Appl_Dbtr_MddleNme = Application.Appl_Dbtr_MddleNme?.Trim();
-            Application.Appl_Dbtr_Entrd_SIN = Application.Appl_Dbtr_Entrd_SIN?.Trim();
-            Application.Appl_Dbtr_Parent_SurNme = Application.Appl_Dbtr_Parent_SurNme?.Trim();
-            Application.Appl_CommSubm_Text = Application.Appl_CommSubm_Text?.Trim();
+            Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.Trim();
+            Application.Appl_Dbtr_Parent_SurNme_Birth = Application.Appl_Dbtr_Parent_SurNme_Birth?.Trim();
+            Application.Appl_Dbtr_LngCd = Application.Appl_Dbtr_LngCd?.Trim();
+            Application.Appl_Dbtr_Gendr_Cd = Application.Appl_Dbtr_Gendr_Cd?.Trim();
+            Application.Appl_Dbtr_Addr_Ln = Application.Appl_Dbtr_Addr_Ln?.Trim();
+            Application.Appl_Dbtr_Addr_Ln1 = Application.Appl_Dbtr_Addr_Ln1?.Trim();
+            Application.Appl_Dbtr_Addr_CityNme = Application.Appl_Dbtr_Addr_CityNme?.Trim();
+            Application.Appl_Dbtr_Addr_PrvCd = Application.Appl_Dbtr_Addr_PrvCd?.Trim();
+            Application.Appl_Dbtr_Addr_CtryCd = Application.Appl_Dbtr_Addr_CtryCd?.Trim();
+            Application.Appl_Dbtr_Addr_PCd = Application.Appl_Dbtr_Addr_PCd?.Trim();
+            Application.Medium_Cd = Application.Medium_Cd?.Trim();
+            Application.AppCtgy_Cd = Application.AppCtgy_Cd?.Trim();
+            Application.AppReas_Cd = Application.AppReas_Cd?.Trim();
+            Application.ActvSt_Cd = Application.ActvSt_Cd?.Trim();
         }
 
-        public void MakeUpperCase()
+        public virtual void MakeUpperCase()
         {
             Application.Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd?.ToUpper();
             Application.Appl_CtrlCd = Application.Appl_CtrlCd?.ToUpper();
@@ -415,7 +436,7 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_Dbtr_FrstNme = Application.Appl_Dbtr_FrstNme?.ToUpper();
             Application.Appl_Dbtr_MddleNme = Application.Appl_Dbtr_MddleNme?.ToUpper();
             Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.ToUpper();
-            Application.Appl_Dbtr_Parent_SurNme = Application.Appl_Dbtr_Parent_SurNme?.ToUpper();
+            Application.Appl_Dbtr_Parent_SurNme_Birth = Application.Appl_Dbtr_Parent_SurNme_Birth?.ToUpper();
             Application.Appl_Dbtr_LngCd = Application.Appl_Dbtr_LngCd?.ToUpper();
             Application.Appl_Dbtr_Gendr_Cd = Application.Appl_Dbtr_Gendr_Cd?.ToUpper();
             Application.Appl_Dbtr_Addr_Ln = Application.Appl_Dbtr_Addr_Ln?.ToUpper();

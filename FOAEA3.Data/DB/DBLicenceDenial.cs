@@ -135,7 +135,7 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_EyesColorCd))
                 parameters.Add("LicSusp_Dbtr_EyesColorCd", data.LicSusp_Dbtr_EyesColorCd);
             else
-                parameters.Add("LicSusp_Dbtr_EyesColorCd", DBNull.Value);
+                parameters.Add("LicSusp_Dbtr_EyesColorCd", "NUL");
 
             if (!string.IsNullOrEmpty(data.LicSusp_Dbtr_HeightUOMCd))
                 parameters.Add("LicSusp_Dbtr_HeightUOMCd", data.LicSusp_Dbtr_HeightUOMCd);

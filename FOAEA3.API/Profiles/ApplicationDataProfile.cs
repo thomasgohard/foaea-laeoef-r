@@ -30,7 +30,7 @@ namespace FOAEA3.API.Profiles
                 .ForMember(dest => dest.CreditorName, opt => opt.MapFrom(src => FormatName(src.Appl_Crdtr_FrstNme, src.Appl_Crdtr_MddleNme, src.Appl_Crdtr_SurNme)))
                 .ForMember(dest => dest.DebtorName, opt => opt.MapFrom(src => FormatName(src.Appl_Dbtr_FrstNme, src.Appl_Dbtr_MddleNme, src.Appl_Dbtr_SurNme)))
                 .ForMember(dest => dest.DebtorAddress, opt => opt.MapFrom(src => FormatAddress(src.Appl_Dbtr_Addr_Ln, src.Appl_Dbtr_Addr_Ln1, src.Appl_Dbtr_Addr_CityNme, src.Appl_Dbtr_Addr_PrvCd, src.Appl_Dbtr_Addr_CtryCd, src.Appl_Dbtr_Addr_PCd)))
-                .ForMember(dest => dest.DebtorParentSurname, opt => opt.MapFrom(src => src.Appl_Dbtr_Parent_SurNme ?? ""))
+                .ForMember(dest => dest.DebtorParentSurname, opt => opt.MapFrom(src => src.Appl_Dbtr_Parent_SurNme_Birth ?? ""))
                 .ForMember(dest => dest.DebtorLanguage, opt => opt.MapFrom(src => src.Appl_Dbtr_LngCd))
                 .ForMember(dest => dest.DebtorGender, opt => opt.MapFrom(src => src.Appl_Dbtr_Gendr_Cd))
                 .ForMember(dest => dest.DebtorEnteredSIN, opt => opt.MapFrom(src => src.Appl_Dbtr_Entrd_SIN ?? ""))

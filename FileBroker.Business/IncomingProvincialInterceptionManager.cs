@@ -555,7 +555,7 @@ namespace FileBroker.Business
                 Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date,
                 Appl_Dbtr_Gendr_Cd = baseData.dat_Appl_Dbtr_Gendr_Cd.Trim() == "" ? "M" : baseData.dat_Appl_Dbtr_Gendr_Cd.Trim(),
                 Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
-                Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
+                Appl_Dbtr_Parent_SurNme_Birth = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
                 Appl_CommSubm_Text = baseData.dat_Appl_CommSubm_Text,
                 Appl_Rcptfrm_Dte = now, // as per spec, ignore the baseData.dat_Appl_Rcptfrm_dte.Date value
                 AppCtgy_Cd = baseData.dat_Appl_AppCtgy_Cd,

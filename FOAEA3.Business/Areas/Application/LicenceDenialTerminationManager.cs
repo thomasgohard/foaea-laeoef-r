@@ -215,6 +215,44 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        protected override void TrimSpaces()
+        {
+            base.TrimSpaces();
+
+            LicenceDenialTerminationApplication.LicSusp_CourtNme = LicenceDenialTerminationApplication.LicSusp_CourtNme?.Trim();
+            LicenceDenialTerminationApplication.PymPr_Cd = LicenceDenialTerminationApplication.PymPr_Cd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplNme?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln1?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CityNme?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PCd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EyesColorCd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_HeightUOMCd?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CityNme?.Trim();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CtryCd?.Trim();
+        }
+
+        public override void MakeUpperCase()
+        {
+            base.MakeUpperCase();
+
+            LicenceDenialTerminationApplication.LicSusp_CourtNme = LicenceDenialTerminationApplication.LicSusp_CourtNme?.ToUpper();
+            LicenceDenialTerminationApplication.PymPr_Cd = LicenceDenialTerminationApplication.PymPr_Cd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplNme?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_Ln1?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CityNme?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EmplAddr_PCd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_EyesColorCd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_HeightUOMCd?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CityNme?.ToUpper();
+            LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CtryCd?.ToUpper();
+        }
+
         public async Task<bool> CancelApplication()
         {
             if (!IsValidCategory("I01"))

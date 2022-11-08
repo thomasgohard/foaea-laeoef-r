@@ -550,7 +550,7 @@ namespace FOAEA3.Business.Areas.Application
                 (Application.Appl_Dbtr_FrstNme != current.Appl_Dbtr_FrstNme) ||
                 (Application.Appl_Dbtr_MddleNme != current.Appl_Dbtr_MddleNme) ||
                 (Application.Appl_Dbtr_SurNme != current.Appl_Dbtr_SurNme) ||
-                (Application.Appl_Dbtr_Parent_SurNme != current.Appl_Dbtr_Parent_SurNme) ||
+                (Application.Appl_Dbtr_Parent_SurNme_Birth != current.Appl_Dbtr_Parent_SurNme_Birth) ||
                 (!Application.Appl_Dbtr_Brth_Dte.AreDatesEqual(current.Appl_Dbtr_Brth_Dte)) ||
                 (Application.Appl_Dbtr_LngCd != current.Appl_Dbtr_LngCd) ||
                 (Application.Appl_Dbtr_Gendr_Cd != current.Appl_Dbtr_Gendr_Cd) ||
@@ -586,7 +586,7 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_Dbtr_FrstNme = current.Appl_Dbtr_FrstNme;
                 Application.Appl_Dbtr_MddleNme = current.Appl_Dbtr_MddleNme;
                 Application.Appl_Dbtr_SurNme = current.Appl_Dbtr_SurNme;
-                Application.Appl_Dbtr_Parent_SurNme = current.Appl_Dbtr_Parent_SurNme;
+                Application.Appl_Dbtr_Parent_SurNme_Birth = current.Appl_Dbtr_Parent_SurNme_Birth;
                 Application.Appl_Dbtr_Brth_Dte = current.Appl_Dbtr_Brth_Dte;
                 Application.Appl_Dbtr_LngCd = current.Appl_Dbtr_LngCd;
                 Application.Appl_Dbtr_Gendr_Cd = current.Appl_Dbtr_Gendr_Cd;

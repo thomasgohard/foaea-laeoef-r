@@ -85,6 +85,44 @@ namespace FOAEA3.Business.Areas.Application
             return success;
         }
 
+        protected override void TrimSpaces()
+        {
+            base.TrimSpaces();
+
+            LicenceDenialApplication.LicSusp_CourtNme = LicenceDenialApplication.LicSusp_CourtNme?.Trim();
+            LicenceDenialApplication.PymPr_Cd = LicenceDenialApplication.PymPr_Cd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplNme = LicenceDenialApplication.LicSusp_Dbtr_EmplNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.Trim();
+        }
+
+        public override void MakeUpperCase()
+        {
+            base.MakeUpperCase();
+
+            LicenceDenialApplication.LicSusp_CourtNme = LicenceDenialApplication.LicSusp_CourtNme?.ToUpper();
+            LicenceDenialApplication.PymPr_Cd = LicenceDenialApplication.PymPr_Cd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplNme = LicenceDenialApplication.LicSusp_Dbtr_EmplNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.ToUpper();
+        }
+
         private bool ValidateDeclaration()
         {
             string declaration = LicenceDenialApplication.LicSusp_Declaration?.Trim();

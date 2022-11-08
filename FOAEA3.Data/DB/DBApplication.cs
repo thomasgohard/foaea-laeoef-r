@@ -96,7 +96,7 @@ namespace FOAEA3.Data.DB
                 { "Appl_Dbtr_FrstNme", application.Appl_Dbtr_FrstNme },
                 { "Appl_Dbtr_MddleNme", application.Appl_Dbtr_MddleNme },
                 { "Appl_Dbtr_SurNme", application.Appl_Dbtr_SurNme },
-                { "Appl_Dbtr_Parent_SurNme", application.Appl_Dbtr_Parent_SurNme },
+                { "Appl_Dbtr_Parent_SurNme", application.Appl_Dbtr_Parent_SurNme_Birth },
                 { "Appl_Dbtr_LngCd", application.Appl_Dbtr_LngCd },
                 { "Appl_Dbtr_Gendr_Cd", application.Appl_Dbtr_Gendr_Cd },
                 { "Appl_Dbtr_Entrd_SIN", application.Appl_Dbtr_Entrd_SIN },
@@ -136,7 +136,7 @@ namespace FOAEA3.Data.DB
             if (String.IsNullOrWhiteSpace(application.Appl_Crdtr_MddleNme)) parameters["Appl_Crdtr_MddleNme"] = DBNull.Value;
             if (String.IsNullOrWhiteSpace(application.Appl_Crdtr_SurNme)) parameters["Appl_Crdtr_SurNme"] = DBNull.Value;
             if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_MddleNme)) parameters["Appl_Dbtr_MddleNme"] = DBNull.Value;
-            if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_Parent_SurNme)) parameters["Appl_Dbtr_Parent_SurNme"] = DBNull.Value;
+            if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_Parent_SurNme_Birth)) parameters["Appl_Dbtr_Parent_SurNme"] = DBNull.Value;
             if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_LngCd)) parameters["Appl_Dbtr_LngCd"] = DBNull.Value;
             if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_Entrd_SIN)) parameters["Appl_Dbtr_Entrd_SIN"] = DBNull.Value;
             if (String.IsNullOrWhiteSpace(application.Appl_Dbtr_Cnfrmd_SIN)) parameters["Appl_Dbtr_Cnfrmd_SIN"] = DBNull.Value;
@@ -437,12 +437,8 @@ namespace FOAEA3.Data.DB
             data.Appl_Dbtr_MddleNme = rdr["Appl_Dbtr_MddleNme"] as string; // can be null 
             data.Appl_Dbtr_SurNme = rdr["Appl_Dbtr_SurNme"] as string;
 
-            // NOTE: procs don't consistently return the same field name for this field, 
-            //       so we have to check for both possible name.
-            //if (rdr.ColumnExists("Appl_Dbtr_Parent_SurNme"))
-            //    data.Appl_Dbtr_Parent_SurNme = rdr["Appl_Dbtr_Parent_SurNme"] as string; // can be null 
             if (rdr.ColumnExists("Appl_Dbtr_Parent_SurNme"))
-                data.Appl_Dbtr_Parent_SurNme = rdr["Appl_Dbtr_Parent_SurNme"] as string; // can be null 
+                data.Appl_Dbtr_Parent_SurNme_Birth = rdr["Appl_Dbtr_Parent_SurNme"] as string; // can be null 
 
             data.Appl_Dbtr_Brth_Dte = rdr["Appl_Dbtr_Brth_Dte"] as DateTime?; // can be null 
             data.Appl_Dbtr_LngCd = rdr["Appl_Dbtr_LngCd"] as string; // can be null 

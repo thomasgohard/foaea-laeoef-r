@@ -42,7 +42,7 @@ namespace FOAEA3.Model
         public string Appl_Dbtr_SurNme { get; set; }
 
         [Display(Name = "MOTHER_MAIDEN_NAME", ResourceType = typeof(LanguageResource))]
-        public string Appl_Dbtr_Parent_SurNme { get; set; }
+        public string Appl_Dbtr_Parent_SurNme_Birth { get; set; }
 
         [Display(Name = "DOB", ResourceType = typeof(LanguageResource))]
         [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
@@ -109,7 +109,7 @@ namespace FOAEA3.Model
             Appl_Dbtr_FrstNme = data.Appl_Dbtr_FrstNme;
             Appl_Dbtr_MddleNme = data.Appl_Dbtr_MddleNme;
             Appl_Dbtr_SurNme = data.Appl_Dbtr_SurNme;
-            Appl_Dbtr_Parent_SurNme = data.Appl_Dbtr_Parent_SurNme;
+            Appl_Dbtr_Parent_SurNme_Birth = data.Appl_Dbtr_Parent_SurNme_Birth;
             Appl_Dbtr_Brth_Dte = data.Appl_Dbtr_Brth_Dte;
             Appl_Dbtr_LngCd = data.Appl_Dbtr_LngCd;
             Appl_Dbtr_Gendr_Cd = data.Appl_Dbtr_Gendr_Cd;
