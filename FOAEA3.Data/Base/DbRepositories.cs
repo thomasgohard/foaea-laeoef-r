@@ -48,6 +48,12 @@ namespace FOAEA3.Data.Base
             set => MainDB.Submitter = value;
         }
 
+        public string UpdateSubmitter
+        {
+            get => MainDB.UpdateSubmitter;
+            set => MainDB.UpdateSubmitter = value;
+        }
+
         public string CurrentUser
         {
             get => MainDB.UserId;

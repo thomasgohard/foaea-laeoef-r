@@ -35,8 +35,8 @@ namespace FileBroker.Common.Helpers
             SetTokenForAPIs();
 
             if (APIs.Accounts is not null) APIs.Accounts.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.TracingEvents is not null) APIs.TracingEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
             if (APIs.TracingApplications is not null) APIs.TracingApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.TracingEvents is not null) APIs.TracingEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
             if (APIs.TracingResponses is not null) APIs.TracingResponses.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
 
             if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
@@ -62,8 +62,8 @@ namespace FileBroker.Common.Helpers
         private void SetTokenForAPIs()
         {
             if (APIs.Accounts is not null) APIs.Accounts.Token = CurrentToken;
-            if (APIs.TracingEvents is not null) APIs.TracingEvents.Token = CurrentToken;
             if (APIs.TracingApplications is not null) APIs.TracingApplications.Token = CurrentToken;
+            if (APIs.TracingEvents is not null) APIs.TracingEvents.Token = CurrentToken;
             if (APIs.TracingResponses is not null) APIs.TracingResponses.Token = CurrentToken;
 
             if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.Token = CurrentToken;

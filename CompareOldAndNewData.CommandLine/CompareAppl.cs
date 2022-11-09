@@ -6,11 +6,11 @@ namespace CompareOldAndNewData.CommandLine
     internal static class CompareAppl
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd)
+                                                          string enfSrv, string ctrlCd, string category)
         {
             var diffs = new List<DiffData>();
 
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
             var appl2 = await repositories2.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
             var appl3 = await repositories3.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);

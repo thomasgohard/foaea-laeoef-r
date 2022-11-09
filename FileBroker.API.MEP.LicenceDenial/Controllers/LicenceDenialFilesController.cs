@@ -92,7 +92,10 @@ public class LicenceDenialFilesController : ControllerBase
         var errors = JsonHelper.Validate<MEPLicenceDenialFileData>(sourceLicenceDenialJsonData, out List<UnknownTag> unknownTags);
         if (errors.Any())
         {
-            return UnprocessableEntity(errors);
+            errors = JsonHelper.Validate<MEPLicenceDenialFileDataSingle>(sourceLicenceDenialJsonData, out unknownTags);
+
+            if (errors.Any())
+                return UnprocessableEntity(errors);
         }
 
         if (string.IsNullOrEmpty(fileName))

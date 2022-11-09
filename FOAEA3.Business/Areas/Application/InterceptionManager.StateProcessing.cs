@@ -227,9 +227,11 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override async Task Process_13_FullyServiced()
         {
+            var previousState = InterceptionApplication.AppLiSt_Cd;
+            
             await base.Process_13_FullyServiced();
 
-            await StopBlockFundsAsync(ApplicationState.FULLY_SERVICED_13);
+            await StopBlockFundsAsync(ApplicationState.FULLY_SERVICED_13, previousState);
 
             InterceptionApplication.ActvSt_Cd = "C";
 
@@ -240,7 +242,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             var previousState = InterceptionApplication.AppLiSt_Cd;
 
-            await StopBlockFundsAsync(ApplicationState.MANUALLY_TERMINATED_14);
+            await StopBlockFundsAsync(ApplicationState.MANUALLY_TERMINATED_14, previousState);
 
             InterceptionApplication.ActvSt_Cd = "X";
             InterceptionApplication.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
@@ -254,11 +256,13 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override async Task Process_15_Expired()
         {
+            var previousState = InterceptionApplication.AppLiSt_Cd;
+            
             InterceptionApplication.AppLiSt_Cd = ApplicationState.EXPIRED_15;
 
             EventManager.AddEvent(EventCode.C50860_APPLICATION_COMPLETED, activeState: "I");
 
-            await StopBlockFundsAsync(ApplicationState.EXPIRED_15);
+            await StopBlockFundsAsync(ApplicationState.EXPIRED_15, previousState);
 
             InterceptionApplication.ActvSt_Cd = "C";
         }
@@ -341,7 +345,8 @@ namespace FOAEA3.Business.Areas.Application
 
             await SetNewStateTo(ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
 
-            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, activeState: "I");
+            EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, activeState: "I", 
+                                  updateSubm: DB.UpdateSubmitter);
         }
 
     }

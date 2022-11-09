@@ -96,7 +96,6 @@ public class FederalTracingFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        // TODO: fix token
         string token = "";
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
         var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);

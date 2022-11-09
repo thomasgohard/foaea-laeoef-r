@@ -7,7 +7,7 @@ namespace CompareOldAndNewData.CommandLine
     internal static class CompareHldbCnd
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd)
+                                         string enfSrv, string ctrlCd, string category, DateTime foaea2run, DateTime foaea3run)
         {
             var diffs = new List<DiffData>();
 
@@ -16,7 +16,7 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var holdbackItem2 in holdback2)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte.Date}]/[{holdbackItem2.EnfSrv_Cd}]";
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " " + $" [{holdbackItem2.ActvSt_Cd}]/[{holdbackItem2.IntFinH_Dte.Date}]/[{holdbackItem2.EnfSrv_Cd}]";
                 var holdbackItem3 = holdback3.Where(m => ((m.IntFinH_Dte.Date == holdbackItem2.IntFinH_Dte.Date) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd)) ||
                                                           ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == holdbackItem2.ActvSt_Cd) && (m.EnfSrv_Cd == holdbackItem2.EnfSrv_Cd))).FirstOrDefault();
@@ -39,7 +39,8 @@ namespace CompareOldAndNewData.CommandLine
             return diffs;
         }
 
-        private static void CompareData(string tableName, HoldbackConditionData holdback2, HoldbackConditionData holdback3, ref List<DiffData> diffs, string key)
+        private static void CompareData(string tableName, HoldbackConditionData holdback2, HoldbackConditionData holdback3, ref List<DiffData> diffs, 
+                                    string key)
         {
             if (holdback2.Appl_EnfSrv_Cd != holdback3.Appl_EnfSrv_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_EnfSrv_Cd", goodValue: holdback2.Appl_EnfSrv_Cd, badValue: holdback3.Appl_EnfSrv_Cd));
             if (holdback2.Appl_CtrlCd != holdback3.Appl_CtrlCd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_CtrlCd", goodValue: holdback2.Appl_CtrlCd, badValue: holdback3.Appl_CtrlCd));

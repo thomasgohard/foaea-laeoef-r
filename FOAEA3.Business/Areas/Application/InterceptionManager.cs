@@ -272,6 +272,8 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.Medium_Cd == "FTP")
             {
+                InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
+
                 InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
                 InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
                 InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
@@ -307,7 +309,6 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!StateEngine.IsValidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17))
             {
-
                 InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
                 await EventManager.SaveEventsAsync();
 
@@ -421,7 +422,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
@@ -629,7 +630,10 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+            if (InterceptionApplication.Medium_Cd == "FTP")
+                InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
+            else
+                InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);

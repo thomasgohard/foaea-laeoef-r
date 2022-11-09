@@ -30,7 +30,7 @@ namespace FOAEA3.Business.Areas.Application
         public void AddEvent(EventCode eventCode, string eventReasonText = null, EventQueue queue = EventQueue.EventSubm,
                              ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
                              string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
-                             string activeState = "A")
+                             string activeState = "A", string updateSubm = null)
         {
             if (appState == ApplicationState.UNDEFINED)
                 appState = Application.AppLiSt_Cd;
@@ -64,7 +64,7 @@ namespace FOAEA3.Business.Areas.Application
                 Event_Effctv_Dte = eventEffectiveDateTime,
                 ActvSt_Cd = activeState,
                 Subm_SubmCd = string.IsNullOrEmpty(submCd) ? Application.Subm_SubmCd : submCd,
-                Subm_Update_SubmCd = Application.Appl_LastUpdate_Usr
+                Subm_Update_SubmCd = updateSubm ?? Application.Appl_LastUpdate_Usr
             });
         }
 

@@ -61,7 +61,9 @@ internal class Program
             return;
         }
 
+        DateTime start = DateTime.Now;
         ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
+        ColourConsole.WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
 
         var provinceFilesData = fileTableData.Where(f => (f.Name[..2].ToUpper() == provinceCode) || (provinceCode == "ALL"))
                                              .ToList();
@@ -142,6 +144,12 @@ internal class Program
         }
 
         ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+
+        DateTime end = DateTime.Now;
+        var duration = end - start;
+
+        ColourConsole.WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+
         Console.ReadKey();
 
     }

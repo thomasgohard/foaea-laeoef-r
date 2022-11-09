@@ -9,11 +9,11 @@ namespace CompareOldAndNewData.CommandLine
     internal static class CompareEvents
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd, EventQueue queue)
+                                         string enfSrv, string ctrlCd, string category, EventQueue queue)
         {
             var diffs = new List<DiffData>();
 
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
             var evnt2 = await repositories2.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
             var evnt3 = await repositories3.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);

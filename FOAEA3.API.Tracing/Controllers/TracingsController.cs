@@ -8,6 +8,7 @@ using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FOAEA3.API.Tracing.Controllers;
 
@@ -52,14 +53,22 @@ public class TracingsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories db)
     {
         var tracingData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var tracingManager = new TracingManager(tracingData, repositories, config);
+        var tracingManager = new TracingManager(tracingData, db, config);
+        await tracingManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(tracingData.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+        {
+            tracingManager.CurrentUser.Submitter = submitter;
+            db.CurrentSubmitter = submitter.Subm_SubmCd;
+        }
+
         var appl = tracingManager.TracingApplication;
 
         bool isCreated = await tracingManager.CreateApplicationAsync();

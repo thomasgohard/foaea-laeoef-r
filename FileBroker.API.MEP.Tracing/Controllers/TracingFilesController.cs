@@ -80,7 +80,7 @@ public class TracingFilesController : ControllerBase
     public async Task<ActionResult> ProcessIncomingTracingFileAsync([FromQuery] string fileName,
                                                    [FromServices] IFileAuditRepository fileAuditDB,
                                                    [FromServices] IFileTableRepository fileTableDB,
-                                                   [FromServices] IMailServiceRepository mailService, 
+                                                   [FromServices] IMailServiceRepository mailService,
                                                    [FromServices] ITranslationRepository translationDB,
                                                    [FromServices] IRequestLogRepository requestLogDB,
                                                    [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
@@ -98,11 +98,11 @@ public class TracingFilesController : ControllerBase
         var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
         if (errors.Any())
         {
-            return UnprocessableEntity(errors);
-        }
+            errors = JsonHelper.Validate<MEPTracingFileDataSingle>(sourceTracingJsonData, out unknownTags);
 
-        //foreach (var error in errors)
-        //    Console.WriteLine(error.Path + ": " + error.Kind);
+            if (errors.Any())
+                return UnprocessableEntity(errors);
+        }
 
         if (string.IsNullOrEmpty(fileName))
             return UnprocessableEntity("Missing fileName");
@@ -110,14 +110,20 @@ public class TracingFilesController : ControllerBase
         if (fileName.ToUpper().EndsWith(".XML"))
             fileName = fileName[0..^4]; // remove .XML extension
 
-        // TODO: fix token
         string token = "";
+        var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
+        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
         var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
         var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);
+        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
+        var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
 
         var apis = new APIBrokerList
         {
-            TracingApplications = tracingApplicationAPIs
+            Applications = applicationApplicationAPIs,
+            TracingApplications = tracingApplicationAPIs,
+            ProductionAudits = productionAuditAPIs,
+            Accounts = loginAPIs
         };
 
         var repositories = new RepositoryList

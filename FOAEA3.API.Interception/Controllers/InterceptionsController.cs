@@ -71,16 +71,22 @@ public class InterceptionsController : ControllerBase
 
     [HttpPost]
     [Authorize(Policy = Policies.ApplicationModifyAccess)]
-    public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories repositories,
-                                                                                   [FromServices] IRepositories_Finance repositoriesFinance)
+    public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories db,
+                                                                                   [FromServices] IRepositories_Finance dbFinance)
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        var interceptionManager = new InterceptionManager(application, db, dbFinance, config);
         await interceptionManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+        {
+            interceptionManager.CurrentUser.Submitter = submitter;
+            db.CurrentSubmitter = submitter.Subm_SubmCd;
+        }
 
         bool isCreated = await interceptionManager.CreateApplicationAsync();
         if (isCreated)
@@ -241,6 +247,7 @@ public class InterceptionsController : ControllerBase
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
         await appManager.SetCurrentUserAsync(User);
+
         if (await appManager.VaryApplicationAsync())
             return Ok(application);
         else

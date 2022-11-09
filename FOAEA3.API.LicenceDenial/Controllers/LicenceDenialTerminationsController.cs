@@ -60,9 +60,9 @@ public class LicenceDenialTerminationsController : ControllerBase
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, db, config);
         await licenceDenialTerminationManager.SetCurrentUserAsync(User);
-        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
-        if (submitter is not null)
-            licenceDenialTerminationManager.CurrentUser.Submitter = submitter;
+        //var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        //if (submitter is not null)
+        //    licenceDenialTerminationManager.CurrentUser.Submitter = submitter;
 
         bool isCreated = await licenceDenialTerminationManager.CreateApplicationAsync(controlCodeForL01, requestDate);
         if (isCreated)

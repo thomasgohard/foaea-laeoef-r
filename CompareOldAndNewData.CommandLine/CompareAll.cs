@@ -14,39 +14,44 @@ namespace CompareOldAndNewData.CommandLine
                                StringBuilder output)
         {
             var appl = await foaea2db.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
+            if (appl is null)
+                return;
+
             string category = appl.AppCtgy_Cd.ToUpper();
 
-            var diffs = await CompareAppl.RunAsync("Appl", foaea2db, foaea3db, enfSrv, ctrlCd);
+            var diffs = await CompareAppl.RunAsync("Appl", foaea2db, foaea3db, enfSrv, ctrlCd, category);
 
             if (category == "I01")
             {
-                diffs.AddRange(await CompareSummSmry.RunAsync("SummSmry", foaea2financeDb, foaea3financeDb, enfSrv, ctrlCd));
-                diffs.AddRange(await CompareIntFinH.RunAsync("IntFinH", foaea2db, foaea3db, enfSrv, ctrlCd));
-                diffs.AddRange(await CompareHldbCnd.RunAsync("HldbCnd", foaea2db, foaea3db, enfSrv, ctrlCd));
-                diffs.AddRange(await CompareHldbCnd.RunAsync("EvntDbtr", foaea2db, foaea3db, enfSrv, ctrlCd));
+                diffs.AddRange(await CompareSummSmry.RunAsync("SummSmry", foaea2financeDb, foaea3financeDb, enfSrv, ctrlCd, category));
+                diffs.AddRange(await CompareIntFinH.RunAsync("IntFinH", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
+                diffs.AddRange(await CompareHldbCnd.RunAsync("HldbCnd", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntDbtr", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventDbtr));
             }
 
-            diffs.AddRange(await CompareEvents.RunAsync("EvntSubm", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventSubm));
+            diffs.AddRange(await CompareEvents.RunAsync("EvntSubm", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSubm));
 
             if (category != "L03")
             {
-                diffs.AddRange(await CompareEvents.RunAsync("EvntBF", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventBF));
-                diffs.AddRange(await CompareEvents.RunAsync("EvntBFN", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventBFN));
-                diffs.AddRange(await CompareEvents.RunAsync("EvntSIN", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventSIN));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntBF", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBF));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntBFN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBFN));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntSIN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSIN));
             }
 
             if (category.In("L01", "L03"))
             {
-                diffs.AddRange(await CompareEvents.RunAsync("EvntLicence", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventLicence));
+                diffs.AddRange(await CompareEvents.RunAsync("EvntLicence", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventLicence));
                 diffs.AddRange(await CompareLicSusp.RunAsync("LicSusp", foaea2db, foaea3db, enfSrv, ctrlCd, category));
             }
 
             if (category == "T01")
-                diffs.AddRange(await CompareEvents.RunAsync("EvntTrace", foaea2db, foaea3db, enfSrv, ctrlCd, EventQueue.EventTrace));
+            {
+                diffs.AddRange(await CompareEvents.RunAsync("EvntTrace", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventTrace));
+            }
 
             CleanupData(foaea2RunDate, foaea3RunDate, diffs);
 
-            OutputResults(action, enfSrv, ctrlCd, output, diffs);
+            OutputResults(action, enfSrv, ctrlCd, output, diffs, category);
         }
 
         private static void CleanupData(DateTime foaea2RunDate, DateTime foaea3RunDate, List<DiffData> diffs)
@@ -56,7 +61,7 @@ namespace CompareOldAndNewData.CommandLine
             diffs.RemoveAll(m => m.ColName.ToLower() == "event_id");
         }
 
-        private static void OutputResults(string action, string enfSrv, string ctrlCd, StringBuilder output, List<DiffData> diffs)
+        private static void OutputResults(string action, string enfSrv, string ctrlCd, StringBuilder output, List<DiffData> diffs, string category)
         {
             if (diffs.Any())
             {
@@ -64,13 +69,13 @@ namespace CompareOldAndNewData.CommandLine
             }
             else
             {
-                OutputNoDifferences(action, enfSrv, ctrlCd, output);
+                OutputNoDifferences(action, enfSrv, ctrlCd, output, category);
             }
         }
 
-        private static void OutputNoDifferences(string action, string enfSrv, string ctrlCd, StringBuilder output)
+        private static void OutputNoDifferences(string action, string enfSrv, string ctrlCd, StringBuilder output, string category)
         {
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
             output.AppendLine($"{action}\t{key}: No differences found.");
         }
 

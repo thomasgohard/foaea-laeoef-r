@@ -28,6 +28,9 @@ int n = 1;
 
 var output = new StringBuilder();
 
+DateTime start = DateTime.Now;
+ColourConsole.WriteEmbeddedColorLine($"Starting time [yellow]{start}[/yellow]");
+
 foreach (var request in requests)
 {
     var action = request.MaintenanceAction + request.MaintenanceLifeState;
@@ -35,7 +38,7 @@ foreach (var request in requests)
     var ctrlCd = request.Appl_CtrlCd.Trim();
 
     var foaea2RunDate = new DateTime(2022, 11, 7).Date;
-    var foaea3RunDate = DateTime.Now.Date;
+    var foaea3RunDate = new DateTime(2022, 11, 9).Date;
 
     ColourConsole.WriteEmbeddedColor($"Comparing [cyan]{enfSrv}-{ctrlCd}[/cyan]... ([green]{n}[/green] of [green]{requests.Count}[/green])\r");
     await CompareAll.RunAsync(repositories2, repositories2Finance, repositories3, repositories3Finance,
@@ -46,4 +49,8 @@ foreach (var request in requests)
 File.WriteAllText(@"C:\work\Compare1.txt", output.ToString());
 
 Console.WriteLine("\nFinished");
+
+DateTime end = DateTime.Now;
+var difference = end - start;
+ColourConsole.WriteEmbeddedColorLine($"Completed time [yellow]{end}[/yellow] (Duration [yellow]{difference.Minutes}[/yellow] minutes)");
 

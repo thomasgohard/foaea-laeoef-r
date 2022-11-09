@@ -25,7 +25,10 @@ namespace FOAEA3.Business.Areas.Application
 
         private static string GetDebtorID(string justiceID)
         {
-            return justiceID.Trim()[..7];
+            if (!string.IsNullOrEmpty(justiceID))
+                return justiceID.Trim()[..7];
+            else
+                return null;
         }
 
         private static string DebtorPrefix(string name)
@@ -99,7 +102,7 @@ namespace FOAEA3.Business.Areas.Application
             var thisApplicationManager = new InterceptionManager(DB, DBfinance, config)
             {
                 CurrentUser = this.CurrentUser
-            };            
+            };
 
             var thisApplication = thisApplicationManager.InterceptionApplication;
             var applEventManager = new ApplicationEventManager(thisApplication, DB);
@@ -485,7 +488,7 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        private async Task StopBlockFundsAsync(ApplicationState fromState)
+        private async Task StopBlockFundsAsync(ApplicationState requestedState, ApplicationState previousState)
         {
             string debtorID = GetDebtorID(InterceptionApplication.Appl_JusticeNr);
             int summSmryCount = 0;
@@ -509,27 +512,31 @@ namespace FOAEA3.Business.Areas.Application
 
             var summSmryForCurrentAppl = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                                             .FirstOrDefault();
-            if (summSmryForCurrentAppl is null)
+            if ((summSmryForCurrentAppl is null) && (previousState >= ApplicationState.APPLICATION_ACCEPTED_10))
             {
                 await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
                                $"Could not find summSmry record for {Appl_EnfSrv_Cd}-{Appl_CtrlCd} in StopBlockFunds!");
                 return;
             }
-            switch (fromState)
-            {
-                case ApplicationState.FULLY_SERVICED_13:
-                case ApplicationState.MANUALLY_TERMINATED_14:
-                    summSmryForCurrentAppl.ActualEnd_Dte = DateTime.Now;
-                    break;
-                case ApplicationState.EXPIRED_15:
-                    summSmryForCurrentAppl.ActualEnd_Dte = summSmryForCurrentAppl.End_Dte;
-                    break;
-                default:
-                    // Throw New Exception("Invalid State for the current application.")
-                    break;
-            }
 
-            await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
+            if (summSmryForCurrentAppl is not null)
+            {
+                switch (requestedState)
+                {
+                    case ApplicationState.FULLY_SERVICED_13:
+                    case ApplicationState.MANUALLY_TERMINATED_14:
+                        summSmryForCurrentAppl.ActualEnd_Dte = DateTime.Now;
+                        break;
+                    case ApplicationState.EXPIRED_15:
+                        summSmryForCurrentAppl.ActualEnd_Dte = summSmryForCurrentAppl.End_Dte;
+                        break;
+                    default:
+                        // Throw New Exception("Invalid State for the current application.")
+                        break;
+                }
+
+                await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
+            }
 
             await DB.InterceptionTable.EISOHistoryDeleteBySINAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
 

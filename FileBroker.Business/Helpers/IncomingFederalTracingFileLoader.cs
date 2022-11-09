@@ -13,7 +13,7 @@ public class IncomingFederalTracingFileLoader
 
     public async Task FillTracingFileDataFromFlatFileAsync(FedTracingFileBase fileData, string flatFile, List<string> errors)
     {
-        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync (ProcessId);
+        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync(ProcessId);
 
         // extract data into object
         var flatFileLines = flatFile.Split("\n");
@@ -23,7 +23,7 @@ public class IncomingFederalTracingFileLoader
 
             if (flatFileLine.Trim().Length > 2)
             {
-                string recType = flatFileLine.Substring(0, 2);
+                string recType = flatFileLine[..2];
                 switch (recType)
                 {
                     case "01":

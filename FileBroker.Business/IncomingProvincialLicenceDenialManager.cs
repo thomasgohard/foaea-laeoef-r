@@ -344,11 +344,11 @@ public class IncomingProvincialLicenceDenialManager
     private static void ValidateFooter(MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile, ref MessageDataList result, ref bool isValid)
     {
         int totalCount = 0;
-        if (licenceDenialFile.LICAPPIN30 is not null)
+        if (licenceDenialFile.LICAPPIN30 is not null && licenceDenialFile.LICAPPIN30.Any() && !EmptyAction(licenceDenialFile.LICAPPIN30))
             totalCount += licenceDenialFile.LICAPPIN30.Count;
-        if (licenceDenialFile.LICAPPIN40 is not null)
+        if (licenceDenialFile.LICAPPIN40 is not null && licenceDenialFile.LICAPPIN40.Any() && !EmptyAction(licenceDenialFile.LICAPPIN40))
             totalCount += licenceDenialFile.LICAPPIN40.Count;
-
+        
         if (int.Parse(licenceDenialFile.LICAPPIN99.ResponseCnt) != totalCount)
         {
             isValid = false;
@@ -356,22 +356,43 @@ public class IncomingProvincialLicenceDenialManager
         }
     }
 
+    private static bool EmptyAction(List<MEPLicenceDenial_RecTypeBase> baseData)
+    {
+        bool result = true;
+
+        foreach(var item in baseData)
+        {
+            if (!string.IsNullOrEmpty(item.Maintenance_ActionCd))
+            {
+                result = false;
+                break;
+            }
+        }
+
+        return result;
+    }
+
     private static void ValidateActionCode(MEPLicenceDenial_RecTypeBase data, ref MessageDataList result, ref bool isValid,
                                           bool isTermination)
     {
         bool validActionLifeState = true;
-        string actionCode = data.Maintenance_ActionCd.Trim();
-        string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-        if ((actionCode == "A") && actionState.NotIn("00", "0"))
-            validActionLifeState = false;
-        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
-            validActionLifeState = false;
-        else if (actionCode.NotIn("A", "C"))
-            validActionLifeState = false;
+        string actionCode = data.Maintenance_ActionCd?.Trim();
+        string actionState = data.dat_Appl_LiSt_Cd?.Trim();
 
-        if (!isTermination && (actionCode == "C") && (actionState == "14"))
-            validActionLifeState = false; // licence denial applications cannot be cancelled!
+        if (!string.IsNullOrEmpty(actionCode) && !string.IsNullOrEmpty(actionState))
+        {
+            if ((actionCode == "A") && actionState.NotIn("00", "0"))
+                validActionLifeState = false;
+            else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
+                validActionLifeState = false;
+            else if (actionCode.NotIn("A", "C"))
+                validActionLifeState = false;
+
+            if (!isTermination && (actionCode == "C") && (actionState == "14"))
+                validActionLifeState = false; // licence denial applications cannot be cancelled!
+        }
+        else validActionLifeState = false;
 
         if (!validActionLifeState)
         {

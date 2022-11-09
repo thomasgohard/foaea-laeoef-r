@@ -19,6 +19,8 @@ namespace DBHelper
         public string UserId { get; set; }
 
         public string Submitter { get; set; }
+        
+        public string UpdateSubmitter { get; set; }
 
         private Exception LastException
         {

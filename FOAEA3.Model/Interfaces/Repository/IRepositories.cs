@@ -9,6 +9,7 @@ namespace FOAEA3.Model.Interfaces
         IDBToolsAsync MainDB { get; }
 
         string CurrentSubmitter { get; set; }
+        string UpdateSubmitter { get; set; }
         string CurrentUser { get; set; }
 
         IApplicationRepository ApplicationTable { get; }
