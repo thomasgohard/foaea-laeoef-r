@@ -9,6 +9,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -190,7 +191,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // add reminder
-            if (Application.AppCtgy_Cd.NotIn("L01", "L03"))
+            if (Application.AppCtgy_Cd.NotIn("L03"))
                 EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
 
             // validate data and decide on what state to bring the application to
@@ -258,9 +259,6 @@ namespace FOAEA3.Business.Areas.Application
                 return;
             }
 
-            //Application.Appl_LastUpdate_Dte = DateTime.Now;
-            //Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
-
             // load old data from database
             var current = new ApplicationManager(new ApplicationData(), DB, config)
             {
@@ -288,6 +286,9 @@ namespace FOAEA3.Business.Areas.Application
             }
             else // regular update
             {
+                Application.AppLiSt_Cd = current.Application.AppLiSt_Cd;
+                Application.ActvSt_Cd = current.Application.ActvSt_Cd;
+
                 Validation.ValidateAndRevertNonUpdateFields(current.Application);
 
                 // update reason text with message
@@ -502,7 +503,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private static string BuildReferenceNumberChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)
         {
-            if (currentAppl.Appl_Source_RfrNr != newAppl.Appl_Source_RfrNr)
+            if (currentAppl.Appl_Source_RfrNr?.Trim() != newAppl.Appl_Source_RfrNr?.Trim())
             {
                 if (currentAppl.Appl_EnfSrv_Cd.Trim() == "QC01")
                     return "Numéro référence de l'autorité provinciale";

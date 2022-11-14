@@ -14,6 +14,7 @@ namespace TestData.TestDataBase
         public string Submitter { get; set; }
         public string UserId { get; set; }
         public int LastReturnValue { get; set; }
+        public string UpdateSubmitter { get; set; }
 
         public Task BulkUpdateAsync<T>(List<T> data, string tableName)
         {

@@ -400,7 +400,8 @@ namespace FOAEA3.Business.Areas.Application
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
-                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED, errorDiffEnfOff);
+                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED, 
+                                          errorDiffEnfOff);
 
                     string errorMessage = Application.Appl_EnfSrv_Cd.Trim() + "-" + Application.Subm_SubmCd.Trim() + "-" + Application.Appl_CtrlCd.Trim();
                     foreach (ApplicationConfirmedSINData confirmedAppl in applsInOtherJurisdictions)
@@ -486,16 +487,15 @@ namespace FOAEA3.Business.Areas.Application
                     break;
 
                 case ApplicationState.SIN_CONFIRMATION_PENDING_3:
-                case ApplicationState.APPLICATION_REJECTED_9:
 
                     // nothing can be changed
-
                     if(Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
 
                     break;
 
                 case ApplicationState.PENDING_ACCEPTANCE_SWEARING_6:
                 case ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7:
+                case ApplicationState.APPLICATION_REJECTED_9:
                 case ApplicationState.APPLICATION_ACCEPTED_10:
                 case ApplicationState.PARTIALLY_SERVICED_12:
 

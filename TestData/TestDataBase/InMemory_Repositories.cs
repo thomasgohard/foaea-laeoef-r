@@ -10,9 +10,11 @@ namespace TestData.TestDataBase
     {
         public IDBToolsAsync MainDB { get; }
 
+        public string CurrentUser { get; set; }
+
         public string CurrentSubmitter { get; set; }
 
-        public string CurrentUser { get; set; }
+        public string UpdateSubmitter { get; set; }
 
         public IApplicationRepository ApplicationTable { get; }
 

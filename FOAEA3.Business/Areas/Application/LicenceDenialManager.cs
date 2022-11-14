@@ -71,6 +71,9 @@ namespace FOAEA3.Business.Areas.Application
             else
                 return false;
 
+            if (string.IsNullOrEmpty(LicenceDenialApplication.Appl_Dbtr_LngCd))
+                LicenceDenialApplication.Appl_Dbtr_LngCd = "E";
+
             bool success = await base.CreateApplicationAsync();
 
             if (!success)

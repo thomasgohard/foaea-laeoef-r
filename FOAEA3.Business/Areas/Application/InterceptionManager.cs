@@ -173,48 +173,37 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new InterceptionManager(DB, DBfinance, config)
-            {
-                CurrentUser = this.CurrentUser
-            };
-            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            //var newAppl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+            //var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            //var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
+            //var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
+            //var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
+            //var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
+            //var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
+            //var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
 
-            bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
-            bool isReset = current.InterceptionApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
+            //if (!await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            //{
+            //    InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+            //    return;
+            //}
 
-            // keep these stored values
-            InterceptionApplication.Appl_Create_Dte = current.InterceptionApplication.Appl_Create_Dte;
-            InterceptionApplication.Appl_Create_Usr = current.InterceptionApplication.Appl_Create_Usr;
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            //InterceptionApplication.Appl_CommSubm_Text = newAppl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+            //InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            //InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            //InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            //InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            //InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            //InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            //InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
 
             await base.UpdateApplicationAsync();
-
-            if (isReset && !isCancelled) // reset
-            {
-                // delete any existing intfinh and hldbcnd records for this application and then recreate them with the new data
-
-                // IMPORTANT: must delete holdbacks first since they have a dependancy on IntFinH
-                var allHoldbacks = await DB.InterceptionTable.GetAllHoldbackConditionsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-                foreach (var holdback in allHoldbacks)
-                    await DB.InterceptionTable.DeleteHoldbackConditionAsync(holdback);
-
-                var allIntFinH = await DB.InterceptionTable.GetAllInterceptionFinancialTermsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-                foreach (var intFinH in allIntFinH)
-                    await DB.InterceptionTable.DeleteInterceptionFinancialTermsAsync(intFinH);
-
-                InterceptionApplication.IntFinH.ActvSt_Cd = "P";
-                await DB.InterceptionTable.CreateInterceptionFinancialTermsAsync(InterceptionApplication.IntFinH);
-
-                foreach (var holdback in InterceptionApplication.HldbCnd)
-                    holdback.ActvSt_Cd = "P";
-                await DB.InterceptionTable.CreateHoldbackConditionsAsync(InterceptionApplication.HldbCnd);
-            }
-            else
-            {
-                await DB.InterceptionTable.UpdateInterceptionFinancialTermsAsync(InterceptionApplication.IntFinH);
-                await DB.InterceptionTable.UpdateHoldbackConditionsAsync(InterceptionApplication.HldbCnd);
-            }
-
+            
         }
+        
 
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {

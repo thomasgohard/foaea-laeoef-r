@@ -38,7 +38,7 @@ foreach (var request in requests)
     var ctrlCd = request.Appl_CtrlCd.Trim();
 
     var foaea2RunDate = new DateTime(2022, 11, 7).Date;
-    var foaea3RunDate = new DateTime(2022, 11, 9).Date;
+    var foaea3RunDate = new DateTime(2022, 11, 10).Date;
 
     ColourConsole.WriteEmbeddedColor($"Comparing [cyan]{enfSrv}-{ctrlCd}[/cyan]... ([green]{n}[/green] of [green]{requests.Count}[/green])\r");
     await CompareAll.RunAsync(repositories2, repositories2Finance, repositories3, repositories3Finance,
