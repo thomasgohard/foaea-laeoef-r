@@ -426,6 +426,26 @@ namespace FOAEA3.Data.DB
 
         }
 
+        public async Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"FileName", fileName }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentZipData>("ESDZIPs_FindByFileName", parameters, FillElectronicSummonsDocumentZipDataFromReader);
+
+            return data.SingleOrDefault();
+        }
+
+        private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)
+        {
+            data.ZipID = (int)rdr["ZipID"];
+            data.PrcID = (int)rdr["PrcID"];
+            data.ZipName = rdr["ZipName"] as string;
+            data.DateReceived = (DateTime)rdr["DateReceived"];
+        }
+
         public async Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
                                           BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null)
         {

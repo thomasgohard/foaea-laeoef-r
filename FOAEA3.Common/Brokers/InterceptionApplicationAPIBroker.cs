@@ -111,5 +111,14 @@ namespace FOAEA3.Common.Brokers
                                                                                            interceptionApplication, token: Token);
             return data;
         }
+
+        public async Task<bool> ESD_CheckIfAlreadyLoaded(string fileName)
+        {
+            string apiCall = $"api/v1/ESDs/{fileName}";
+            var data = await ApiHelper.GetDataAsync<ElectronicSummonsDocumentZipData>(apiCall, token: Token);
+
+            return data.ZipName != null;
+        }
+
     }
 }

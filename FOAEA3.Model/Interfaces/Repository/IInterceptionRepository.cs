@@ -40,8 +40,11 @@ namespace FOAEA3.Model.Interfaces
         Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode);
         Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN);
         Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN);
+        
         Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
         Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
+        Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName);
+
         Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
                                    BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null);
 

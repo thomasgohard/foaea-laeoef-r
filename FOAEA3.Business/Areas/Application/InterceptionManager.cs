@@ -1,6 +1,5 @@
 ﻿using BackendProcesses.Business;
 using DBHelper;
-using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -173,37 +172,12 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            //var newAppl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
-            //var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
-            //var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
-            //var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
-            //var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
-            //var newAppl_Dbtr_Addr_PrvCd = InterceptionApplication.Appl_Dbtr_Addr_PrvCd;
-            //var newAppl_Dbtr_Addr_CtryCd = InterceptionApplication.Appl_Dbtr_Addr_CtryCd;
-            //var newAppl_Dbtr_Addr_PCd = InterceptionApplication.Appl_Dbtr_Addr_PCd;
-
-            //if (!await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
-            //{
-            //    InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
-            //    return;
-            //}
-
             InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            //InterceptionApplication.Appl_CommSubm_Text = newAppl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
-            //InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
-            //InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
-            //InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
-            //InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
-            //InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
-            //InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
-            //InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
-
             await base.UpdateApplicationAsync();
-            
         }
-        
+
 
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {

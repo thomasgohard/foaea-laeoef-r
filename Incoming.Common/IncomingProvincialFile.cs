@@ -1,9 +1,11 @@
 ﻿using FileBroker.Common;
 using FileBroker.Common.Helpers;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Common.Brokers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -18,27 +20,30 @@ namespace Incoming.Common
     {
         private IFileTableRepository FileTableDB { get; }
         private string InterceptionBaseName { get; }
+        private string ESDbaseName { get; }
         private string TracingBaseName { get; }
         private string LicencingBaseName { get; }
         private ApiConfig ApiFilesConfig { get; }
         private IAPIBrokerHelper APIs { get; }
+        private APIBrokerList FoaeaApis { get; }
 
         public IncomingProvincialFile(IFileTableRepository fileTable,
                                       ApiConfig apiFilesConfig,
                                       IAPIBrokerHelper apiHelper,
-                                      string interceptionBaseName,
-                                      string tracingBaseName,
-                                      string licencingBaseName)
+                                      FileBaseName fileBaseName,
+                                      APIBrokerList foaeaApis)
         {
             ApiFilesConfig = apiFilesConfig;
             APIs = apiHelper;
             FileTableDB = fileTable;
-            InterceptionBaseName = interceptionBaseName;
-            TracingBaseName = tracingBaseName;
-            LicencingBaseName = licencingBaseName;
+            InterceptionBaseName = fileBaseName.Interception;
+            TracingBaseName = fileBaseName.Tracing;
+            LicencingBaseName = fileBaseName.Licencing;
+            ESDbaseName = fileBaseName.ESD;
+            FoaeaApis = foaeaApis;
         }
 
-        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
+        public async Task AddNewXmlFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = await Task.Run(() => { return directory.GetFiles("*.xml"); });
@@ -57,8 +62,74 @@ namespace Incoming.Common
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors,
+        public async Task AddNewESDfilesAsync(string rootPath, List<string> newFiles, FoaeaLoginData foaeaLoginData)
+        {
+            var directory = new DirectoryInfo(rootPath);
+
+            if (directory.Exists)
+            {
+                var allFiles = await Task.Run(() => { return directory.GetFiles("*.zip"); });
+                var last31days = DateTime.Now.AddDays(-31);
+                var files = allFiles.Where(f => f.LastWriteTime > last31days).OrderByDescending(f => f.LastWriteTime);
+
+                if (files.Any())
+                {
+                    var foaeaAccess = new FoaeaSystemAccess(FoaeaApis, foaeaLoginData);
+
+                    await foaeaAccess.SystemLoginAsync();
+                    try
+                    {
+                        foreach (var fileInfo in files)
+                        {
+                            var fileName = Path.GetFileName(fileInfo.FullName);
+
+                            bool wasAlreadyLoaded = await FoaeaApis.InterceptionApplications.ESD_CheckIfAlreadyLoaded(fileName);
+
+                            if (!wasAlreadyLoaded)
+                                newFiles.Add(fileInfo.FullName);
+                        }
+                    }
+                    finally
+                    {
+                        await foaeaAccess.SystemLogoutAsync();
+                    }
+                }
+            }
+        }
+
+        public async Task<List<string>> GetWaitingFiles(List<string> searchPaths, FoaeaLoginData foaeaLoginData)
+        {
+            var allNewFiles = new List<string>();
+
+            foreach (string searchPath in searchPaths)
+                if (!searchPath.Contains("ESD"))
+                    await AddNewXmlFilesAsync(searchPath, allNewFiles);
+                else
+                    await AddNewESDfilesAsync(searchPath, allNewFiles, foaeaLoginData);
+
+            return allNewFiles;
+        }
+
+        public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors,
                                                     string userName, string userPassword)
+        {
+            bool fileProcessedSuccessfully = false;
+
+            if (!fullPath.Contains("ESD"))
+            {
+                fileProcessedSuccessfully = await ProcessIncomingXmlFile(fullPath, errors, userName, userPassword);
+            }
+            else
+            {
+                // TODO: process ESD
+                // fileProcessedSuccessfully = await ProcessIncomingESDfile(fullPath, errors, userName, userPassword);
+            }
+
+            return fileProcessedSuccessfully;
+        }
+
+        private async Task<bool> ProcessIncomingXmlFile(string fullPath, List<string> errors,
+                                                        string userName, string userPassword)
         {
             bool fileProcessedSuccessfully = false;
 
@@ -66,8 +137,7 @@ namespace Incoming.Common
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
 
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
-            {                                             //                                                    ↑
-
+            {
                 string xmlData = File.ReadAllText(fullPath);
                 string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
@@ -107,11 +177,21 @@ namespace Incoming.Common
             return fileProcessedSuccessfully;
         }
 
+        //private async Task<bool> ProcessIncomingESDfile(string fullPath, List<string> errors,
+        //                                                string userName, string userPassword)
+        //{
+        //    bool fileProcessedSuccessfully = false;
+
+        //    // TODO: process ESD
+
+        //    return fileProcessedSuccessfully;
+        //}
+
         public async Task<bool> ProcessMEPincomingTracingFileAsync(List<string> errors, string fileNameNoExtension,
-                                                                   string jsonText, string token)
+                                                               string jsonText, string token)
         {
             bool fileProcessedSuccessfully;
-            var response = await APIs.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}", 
+            var response = await APIs.PostJsonFileAsync($"api/v1/TracingFiles?fileName={fileNameNoExtension}",
                                             jsonText, rootAPI: ApiFilesConfig.FileBrokerMEPTracingRootAPI, token: token);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {

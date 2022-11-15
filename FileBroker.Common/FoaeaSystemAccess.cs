@@ -24,6 +24,13 @@ namespace FileBroker.Common.Helpers
                 Submitter = submitter
             };
         }
+        
+        public FoaeaSystemAccess(APIBrokerList apis, FoaeaLoginData foaeaLoginData)
+        {
+            APIs = apis;
+
+            LoginData = foaeaLoginData;
+        }
 
         public async Task SystemLoginAsync()
         {

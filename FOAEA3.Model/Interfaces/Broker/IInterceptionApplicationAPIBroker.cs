@@ -23,5 +23,7 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
         Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
+
+        Task<bool> ESD_CheckIfAlreadyLoaded(string fileName);
     }
 }

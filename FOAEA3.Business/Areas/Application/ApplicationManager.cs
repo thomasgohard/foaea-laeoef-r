@@ -9,12 +9,10 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -241,9 +239,6 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual async Task UpdateApplicationNoValidationAsync()
         {
-            //Application.Appl_LastUpdate_Dte = DateTime.Now;
-            //Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
-
             await DB.ApplicationTable.UpdateApplicationAsync(Application);
             await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
 
