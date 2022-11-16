@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
@@ -25,5 +26,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
 
         Task<bool> ESD_CheckIfAlreadyLoaded(string fileName);
+        Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived);
     }
 }

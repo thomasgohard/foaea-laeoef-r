@@ -100,7 +100,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
                     // call Incoming Fed Tracing FileBroker API
                     // TODO: fix token
                     string token = "";
-                    var apiHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+                    var apiHelper = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
                     var broker = new IncomingFedTracingAPIbroker(apiHelper, ApiFilesConfig, token);
                     var result = await broker.ProcessFlatFileAsync(flatFileNameNoPath, flatFile.ToString());
                     if (result.IsSuccessStatusCode)

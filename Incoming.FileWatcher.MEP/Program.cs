@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FileBroker.Business.Helpers;
 using FileBroker.Data.DB;
 using FileBroker.Model;
 using FOAEA3.Common.Brokers;
@@ -6,7 +7,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
-using Incoming.Common;
+using static FOAEA3.Resources.Helpers.ColourConsole;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using System;
@@ -14,6 +15,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Configuration;
+using FileBroker.Data;
+using FileBroker.Model.Interfaces;
+using Microsoft.AspNetCore.Http.Extensions;
+using FileBroker.Common;
 
 namespace Incoming.FileWatcher.MEP;
 
@@ -32,18 +38,28 @@ internal class Program
         IConfiguration configuration = builder.Build();
 
         var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+        var db = new RepositoryList
+        {
+            FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
+            FileTable = new DBFileTable(fileBrokerDB),
+            FileAudit = new DBFileAudit(fileBrokerDB),
+            ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
+            OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+            ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
+            MailService = new DBMailService(fileBrokerDB),
+            TranslationTable = new DBTranslation(fileBrokerDB),
+            RequestLogTable = new DBRequestLog(fileBrokerDB),
+            LoadInboundAuditTable = new DBLoadInboundAudit(fileBrokerDB)
+        };
 
-        var requestLogDB = new DBRequestLog(fileBrokerDB);
-        await requestLogDB.DeleteAllAsync();
+        await db.RequestLogTable.DeleteAllAsync();
 
         string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
         var filesToProcess = await GetFileTableDataForArgsOrAllAsync(args, new DBFileTable(fileBrokerDB));
 
-        var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
-
         if (!filesToProcess.Any())
         {
-            await GenerateError(errorTrackingDB, "No items found in FileTable?");
+            await GenerateError(db.ErrorTrackingTable, "No items found in FileTable?");
             return;
         }
 
@@ -51,92 +67,69 @@ internal class Program
 
         if ((string.IsNullOrEmpty(provinceCode) || !provinces.Contains(provinceCode)) && (provinceCode != "ALL"))
         {
-            await GenerateError(errorTrackingDB, $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
-                                                 string.Join(", ", provinces + " or ALL"));
+            await GenerateError(db.ErrorTrackingTable, $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
+                                                       string.Join(", ", provinces + " or ALL"));
             return;
         }
 
         DateTime start = DateTime.Now;
-        ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
-        ColourConsole.WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
+        WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
+        WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
 
-        var apiBroker = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "System_Support");
-        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
+        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();        
 
-        string token = "";
-        var apiApplHelper = new APIBrokerHelper(apiRootData.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "System_Support");
-        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
-        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
-        var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
-
-        var apiInterceptionApplHelper = new APIBrokerHelper(apiRootData.FoaeaInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "System_Support");
-        var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionApplHelper, token);
-
-        var foaeaApis = new APIBrokerList
-        {
-            Applications = applicationApplicationAPIs,
-            InterceptionApplications = interceptionApplicationAPIs,
-            ProductionAudits = productionAuditAPIs,
-            Accounts = loginAPIs
-        };
+        APIBrokerList foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 
         int totalFilesFound = 0;
         foreach (var itemProvince in provinces)
         {
             string provCode = itemProvince.ToUpper();
-            var searchPaths = GetSearchPaths(filesToProcess, out FileBaseName fileBaseName, provCode);
+            var searchPaths = GetFileSearchPaths(filesToProcess, out FileBaseName fileBaseName, provCode);
 
             var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(fileTable, apiRootData, apiBroker, fileBaseName, foaeaApis);
+            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, configuration);
 
             bool foundZero = true;
 
             var processedFiles = new List<string>();
+            bool AlreadyProcessed(string f) => processedFiles.Contains(f);
 
             bool finishedForProvince = false;
             while (!finishedForProvince)
             {
-                var foaeaLoginData = new FoaeaLoginData
-                {
-                    UserName = configuration["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                    Password = configuration["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                    Submitter = configuration["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-                };
-
-                var allNewFiles = await provincialFileManager.GetWaitingFiles(searchPaths, foaeaLoginData);
+                var allNewFiles = await provincialFileManager.GetWaitingFiles(searchPaths);
 
                 if (allNewFiles.Any())
                 {
                     foundZero = false;
                     string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
 
-                    if (!processedFiles.Contains(allNewFiles.First()))
+                    if (!AlreadyProcessed(allNewFiles.First()))
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+                        WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
                         totalFilesFound += allNewFiles.Count;
                     }
 
                     foreach (var newFile in allNewFiles)
                     {
-                        if (processedFiles.Contains(newFile))
+                        if (AlreadyProcessed(newFile))
                         {
                             finishedForProvince = true;
                             break;
                         }
+
                         processedFiles.Add(newFile);
 
-                        ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                        WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
 
                         var errors = new List<string>();
-                        string fileBrokerUserName = configuration["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
-                        string fileBrokerUserPassword = configuration["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
 
-                        await provincialFileManager.ProcessWaitingFile(newFile, errors, fileBrokerUserName, fileBrokerUserPassword);
+                        await provincialFileManager.ProcessWaitingFile(newFile, errors);
 
                         if (errors.Any())
                         {
                             foreach (var error in errors)
-                                await errorTrackingDB.MessageBrokerErrorAsync($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
                             finishedForProvince = true;
                         }
                     }
@@ -145,32 +138,31 @@ internal class Program
                 {
                     finishedForProvince = true;
                     if (foundZero)
-                        ColourConsole.WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
+                        WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
                 }
             }
 
         }
 
-        ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+        WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
 
         DateTime end = DateTime.Now;
         var duration = end - start;
 
-        ColourConsole.WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+        WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
 
         Console.ReadKey();
 
     }
 
-
-    private static async Task GenerateError(DBErrorTracking errorTrackingDB, string error)
+    private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)
     {
-        ColourConsole.WriteEmbeddedColorLine(error);
+        WriteEmbeddedColorLine(error);
         await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
                                                       new Exception(error), displayExceptionError: true);
     }
 
-    private static List<string> GetSearchPaths(List<FileTableData> filesToProcess, out FileBaseName fileBaseName, string provinceCode)
+    private static List<string> GetFileSearchPaths(List<FileTableData> filesToProcess, out FileBaseName fileBaseName, string provinceCode)
     {
         var searchPaths = new List<string>();
         fileBaseName = new FileBaseName();

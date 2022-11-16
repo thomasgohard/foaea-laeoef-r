@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -118,6 +119,21 @@ namespace FOAEA3.Common.Brokers
             var data = await ApiHelper.GetDataAsync<ElectronicSummonsDocumentZipData>(apiCall, token: Token);
 
             return data.ZipName != null;
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived)
+        {
+            var newFile = new ElectronicSummonsDocumentZipData
+            {
+                PrcID = processId,
+                ZipName = fileName,
+                DateReceived = dateReceived
+            };
+
+            string apiCall = $"api/v1/ESDs";
+            var data = await ApiHelper.PostDataAsync<ElectronicSummonsDocumentZipData, ElectronicSummonsDocumentZipData>(apiCall, newFile, token: Token);
+
+            return data;
         }
 
     }

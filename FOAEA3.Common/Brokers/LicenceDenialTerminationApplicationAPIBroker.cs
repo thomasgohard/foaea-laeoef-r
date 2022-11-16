@@ -25,7 +25,7 @@ namespace FOAEA3.Common.Brokers
             {
                 Appl_EnfSrv_Cd = appl_EnfSrv_Cd,
                 Appl_CtrlCd = appl_CtrlCd,
-                Subm_SubmCd = "MSGBRO"
+                Subm_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER
             };
             string key = ApplKey.MakeKey(appl_EnfSrv_Cd, appl_CtrlCd);
             string apiCall = $"api/v1/licenceDenials/{key}/ProcessLicenceDenialTerminationResponse";

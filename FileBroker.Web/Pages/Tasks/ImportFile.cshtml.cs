@@ -1,12 +1,16 @@
 using DBHelper;
+using FileBroker.Business.Helpers;
 using FileBroker.Common;
 using FileBroker.Common.Helpers;
+using FileBroker.Data.DB;
+using FileBroker.Data;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
-using Incoming.Common;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -28,11 +32,11 @@ namespace FileBroker.Web.Pages.Tasks
         {
             FileTable = fileTable;
             ApiConfig = apiConfig.Value;
-            APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            APIHelper = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             Config = config;
         }
 
-        public async Task OnPostUpload()
+        public async Task OnPostUpload(IConfiguration configuration)
         {
             var file = FormFile;
             if (file is not null)
@@ -53,10 +57,31 @@ namespace FileBroker.Web.Pages.Tasks
 
                 InfoMessage = $"Loading and processing {fileName} [category: {incomingFileInfo.Category}, size: {fileSize} KB]...";
 
-                var provincialFileManager = new IncomingProvincialFile(FileTable, ApiConfig, APIHelper,
-                                                                       interceptionBaseName: string.Empty,
-                                                                       tracingBaseName: string.Empty,
-                                                                       licencingBaseName: string.Empty);
+                var fileBaseName = new FileBaseName
+                {
+                    Interception = string.Empty,
+                    Tracing = string.Empty,
+                    Licencing = string.Empty
+                };
+
+                var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+                var db = new RepositoryList
+                {
+                    FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
+                    FileTable = new DBFileTable(fileBrokerDB),
+                    FileAudit = new DBFileAudit(fileBrokerDB),
+                    ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
+                    OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+                    ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
+                    MailService = new DBMailService(fileBrokerDB),
+                    TranslationTable = new DBTranslation(fileBrokerDB),
+                    RequestLogTable = new DBRequestLog(fileBrokerDB),
+                    LoadInboundAuditTable = new DBLoadInboundAudit(fileBrokerDB)
+                };
+
+                var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
+                var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, configuration);
 
                 var errors = new List<string>();
 
@@ -87,7 +112,8 @@ namespace FileBroker.Web.Pages.Tasks
                             await fileBrokerAccess.SystemLoginAsync();
                             try
                             {
-                                await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson, fileBrokerAccess.CurrentToken);
+                                // TODO: fix this
+//                                await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson, fileBrokerAccess.CurrentToken);
                                 if (errors.Any())
                                 {
                                     ErrorMessage = String.Empty;

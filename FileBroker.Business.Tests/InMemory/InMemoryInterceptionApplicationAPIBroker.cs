@@ -28,6 +28,16 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<bool> ESD_CheckIfAlreadyLoaded(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             throw new NotImplementedException();

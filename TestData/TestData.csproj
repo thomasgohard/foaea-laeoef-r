@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
   </ItemGroup>

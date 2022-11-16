@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.IO.Compression;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -40,6 +41,26 @@ namespace FOAEA3.Business.Areas.Application
         public async Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
         {
             return await DB.InterceptionTable.GetESDasync(fileName);
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> CreateESD(ElectronicSummonsDocumentZipData newData)
+        {
+            var newESDzip = await DB.InterceptionTable.CreateESDasync(newData.PrcID, newData.ZipName, newData.DateReceived);
+
+            using (ZipArchive archive = ZipFile.OpenRead(newESDzip.ZipName))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    string pdfName = entry.FullName;
+
+                    // TODO: Add PDF info the ZIPPDFs table
+
+                }
+            }
+
+            // TODO: update ESDRequired table
+
+            return newESDzip;
         }
     }
 }

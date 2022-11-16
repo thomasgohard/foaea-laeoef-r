@@ -10,36 +10,80 @@ public class IncomingProvincialTracingManager
     private string FileName { get; }
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
-    private ProvincialAuditFileConfig AuditConfiguration { get; }
+    private IConfiguration Config { get; }
+    private ProvincialAuditFileConfig AuditConfig { get; }
+    private Dictionary<string, string> Translations { get; }
+    private bool IsFrench { get; }
+    private string EnfSrv_Cd { get; }
 
     private IncomingProvincialHelper IncomingFileHelper { get; }
 
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public IncomingProvincialTracingManager(string fileName,
-                                            APIBrokerList apis,
-                                            RepositoryList repositories,
-                                            ProvincialAuditFileConfig auditConfig,
+    public IncomingProvincialTracingManager(RepositoryList db,
+                                            APIBrokerList foaeaApis,
+                                            string fileName,
                                             IConfiguration config)
     {
         FileName = fileName;
-        APIs = apis;
-        DB = repositories;
-        AuditConfiguration = auditConfig;
+        APIs = foaeaApis;
+        DB = db;
+        Config = config;
 
-        FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
+        AuditConfig = Config.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
+
+        string provinceCode = fileName[0..2].ToUpper();
+        IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+
+        Translations = LoadTranslations();
+
+        EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
 
         string provCode = FileName[..2].ToUpper();
         IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
+
+        var foaeaLoginData = new FoaeaLoginData
+        {
+            UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
+            Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
+            Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
+        };
+
+        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, foaeaLoginData);
+    }
+
+    private Dictionary<string, string> LoadTranslations()
+    {
+        var translations = new Dictionary<string, string>();
+
+        if (IsFrench)
+        {
+            var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
+            foreach (var translation in Translations)
+                translations.Add(translation.EnglishText, translation.FrenchText);
+
+            APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
+            LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
+        }
+
+        return translations;
+    }
+
+    private string Translate(string englishText)
+    {
+        if (IsFrench && Translations.ContainsKey(englishText))
+        {
+            return Translations[englishText];
+        }
+        else
+            return englishText;
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfiguration, DB.MailService);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfig, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -154,7 +198,7 @@ public class IncomingProvincialTracingManager
                     }
 
                     await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
+                    await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfig.AuditRecipients,
                                                             errorCount, warningCount, successCount, unknownTags.Count);
                 }
                 finally
@@ -169,7 +213,7 @@ public class IncomingProvincialTracingManager
         {
             result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfig.AuditRecipients, result);
         }
 
         await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);

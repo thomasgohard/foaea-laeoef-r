@@ -1,14 +1,6 @@
-﻿using FileBroker.Business.Helpers;
-using FileBroker.Business;
-using FileBroker.Data;
-using FileBroker.Model;
-using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+﻿using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace FileBroker.API.MEP.LicenceDenial.Controllers;
@@ -67,82 +59,6 @@ public class LicenceDenialFilesController : ControllerBase
             return (System.IO.File.ReadAllText(fullFilePath), lastFileName);
         else
             return (null, null);
-
-    }
-
-    [HttpPost]
-    public async Task<ActionResult> ProcessIncomingLicenceDenialFileAsync([FromQuery] string fileName,
-                                                   [FromServices] IFileAuditRepository fileAuditDB,
-                                                   [FromServices] IFileTableRepository fileTableDB,
-                                                   [FromServices] ITranslationRepository translationDB,
-                                                   [FromServices] IRequestLogRepository requestLogDB,
-                                                   [FromServices] IMailServiceRepository mailService,
-                                                   [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                                   [FromServices] IOptions<ApiConfig> apiConfig,
-                                                   [FromServices] IConfiguration config,
-                                                   [FromHeader] string currentSubmitter,
-                                                   [FromHeader] string currentSubject)
-    {
-        string sourceLicenceDenialJsonData;
-        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-        {
-            sourceLicenceDenialJsonData = await reader.ReadToEndAsync();
-        }
-
-        var errors = JsonHelper.Validate<MEPLicenceDenialFileData>(sourceLicenceDenialJsonData, out List<UnknownTag> unknownTags);
-        if (errors.Any())
-        {
-            errors = JsonHelper.Validate<MEPLicenceDenialFileDataSingle>(sourceLicenceDenialJsonData, out unknownTags);
-
-            if (errors.Any())
-                return UnprocessableEntity(errors);
-        }
-
-        if (string.IsNullOrEmpty(fileName))
-            return UnprocessableEntity("Missing fileName");
-
-        if (fileName.ToUpper().EndsWith(".XML"))
-            fileName = fileName[0..^4]; // remove .XML extension
-
-        string token = "";
-        var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
-        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
-        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
-        var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
-
-        var apiLicenceDenialApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaLicenceDenialRootAPI, currentSubmitter, currentSubject);
-        var licenceDenialApplicationAPIs = new LicenceDenialApplicationAPIBroker(apiLicenceDenialApplHelper, token);
-        var licenceDenialTerminationApplicationAPIs = new LicenceDenialTerminationApplicationAPIBroker(apiLicenceDenialApplHelper, token);
-
-        var apis = new APIBrokerList
-        {
-            Applications = applicationApplicationAPIs,
-            LicenceDenialApplications = licenceDenialApplicationAPIs,
-            LicenceDenialTerminationApplications = licenceDenialTerminationApplicationAPIs,
-            ProductionAudits = productionAuditAPIs,
-            Accounts = loginAPIs
-        };
-
-        var repositories = new RepositoryList
-        {
-            FileAudit = fileAuditDB,
-            FileTable = fileTableDB,
-            RequestLogTable = requestLogDB,
-            MailService = mailService,
-            TranslationTable = translationDB
-        };
-
-        var licenceDenialManager = new IncomingProvincialLicenceDenialManager(fileName, apis, repositories, auditConfig.Value, config);
-
-        var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-        if (!fileTableData.IsLoading)
-        {
-            await licenceDenialManager.ExtractAndProcessRequestsInFileAsync(sourceLicenceDenialJsonData, unknownTags);
-            return Ok("File processed.");
-        }
-        else
-            return UnprocessableEntity("File was already loading?");
 
     }
 }

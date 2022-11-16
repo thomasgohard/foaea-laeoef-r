@@ -1,18 +1,7 @@
-﻿using FileBroker.Business;
-using FileBroker.Business.Helpers;
-using FileBroker.Data;
-using FileBroker.Model;
-using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+﻿using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using NJsonSchema;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,78 +64,5 @@ public class TracingFilesController : ControllerBase
             return (null, null);
 
     }
-
-    [HttpPost]
-    public async Task<ActionResult> ProcessIncomingTracingFileAsync([FromQuery] string fileName,
-                                                   [FromServices] IFileAuditRepository fileAuditDB,
-                                                   [FromServices] IFileTableRepository fileTableDB,
-                                                   [FromServices] IMailServiceRepository mailService,
-                                                   [FromServices] ITranslationRepository translationDB,
-                                                   [FromServices] IRequestLogRepository requestLogDB,
-                                                   [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                                   [FromServices] IOptions<ApiConfig> apiConfig,
-                                                   [FromServices] IConfiguration config,
-                                                   [FromHeader] string currentSubmitter,
-                                                   [FromHeader] string currentSubject)
-    {
-        string sourceTracingJsonData;
-        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-        {
-            sourceTracingJsonData = await reader.ReadToEndAsync();
-        }
-
-        var errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
-        if (errors.Any())
-        {
-            errors = JsonHelper.Validate<MEPTracingFileDataSingle>(sourceTracingJsonData, out unknownTags);
-
-            if (errors.Any())
-                return UnprocessableEntity(errors);
-        }
-
-        if (string.IsNullOrEmpty(fileName))
-            return UnprocessableEntity("Missing fileName");
-
-        if (fileName.ToUpper().EndsWith(".XML"))
-            fileName = fileName[0..^4]; // remove .XML extension
-
-        string token = "";
-        var apiApplHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
-        var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
-        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);
-        var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
-        var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
-
-        var apis = new APIBrokerList
-        {
-            Applications = applicationApplicationAPIs,
-            TracingApplications = tracingApplicationAPIs,
-            ProductionAudits = productionAuditAPIs,
-            Accounts = loginAPIs
-        };
-
-        var repositories = new RepositoryList
-        {
-            FileAudit = fileAuditDB,
-            FileTable = fileTableDB,
-            MailService = mailService,
-            TranslationTable = translationDB,
-            RequestLogTable = requestLogDB
-        };
-
-        var tracingManager = new IncomingProvincialTracingManager(fileName, apis, repositories, auditConfig.Value, config);
-
-        var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-        if (!fileTableData.IsLoading)
-        {
-            await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingJsonData, unknownTags);
-            return Ok("File processed.");
-        }
-        else
-            return UnprocessableEntity("File was already loading?");
-
-    }
-
+    
 }

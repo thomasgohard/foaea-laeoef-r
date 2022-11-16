@@ -12,6 +12,11 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
             throw new NotImplementedException();
@@ -68,6 +73,11 @@ namespace TestData.TestDB
         }
 
         public Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
         {
             throw new NotImplementedException();
         }

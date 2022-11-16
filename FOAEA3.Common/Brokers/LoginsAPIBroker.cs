@@ -11,6 +11,9 @@ namespace FOAEA3.Common.Brokers
         public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
+        public const string SYSTEM_SUBJECT = "System_Support";
+        public const string SYSTEM_SUBMITTER = "MSGBRO";
+
         public LoginsAPIBroker(IAPIBrokerHelper apiHelper, string currentToken)
         {
             ApiHelper = apiHelper;

@@ -1,5 +1,7 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Broker;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -52,7 +54,7 @@ namespace TestData.TestDB
         {
             string submClass = "EO";
 
-            if ((submCode == "MSGBRO") || (submCode.ToUpper().StartsWith("FO")))
+            if ((submCode == LoginsAPIBroker.SYSTEM_SUBMITTER) || (submCode.ToUpper().StartsWith("FO")))
                 submClass = "FC";
             else if (submCode[2] == '1')
                 submClass = "ES";

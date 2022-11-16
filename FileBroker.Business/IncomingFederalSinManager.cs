@@ -171,7 +171,7 @@ public class IncomingFederalSinManager
         }
 
         appl.Appl_LastUpdate_Dte = DateTime.Now;
-        appl.Appl_LastUpdate_Usr = "MSGBRO";
+        appl.Appl_LastUpdate_Usr = LoginsAPIBroker.SYSTEM_SUBMITTER;
 
         if (IsSinConfirmed(updatedSinDataSummary))
         {
@@ -211,8 +211,8 @@ public class IncomingFederalSinManager
             Appl_CtrlCd = appl_CtrlCd,
             Queue = EventQueue.EventSYS,
             Event_Reas_Cd = eventCode,
-            Subm_SubmCd = "MSGBRO",
-            Subm_Recpt_SubmCd = "MSGBRO",
+            Subm_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
+            Subm_Recpt_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
             Event_TimeStamp = DateTime.Now,
             Event_RecptSubm_ActvStCd = "A",
             Event_Effctv_Dte = DateTime.Now,
@@ -231,8 +231,8 @@ public class IncomingFederalSinManager
             Queue = EventQueue.EventAM,
             Event_Reas_Cd = eventCode,
             Event_Reas_Text = reasonText,
-            Subm_SubmCd = "MSGBRO",
-            Subm_Recpt_SubmCd = "MSGBRO",
+            Subm_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
+            Subm_Recpt_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
             Event_TimeStamp = DateTime.Now,
             Event_RecptSubm_ActvStCd = "A",
             Event_Effctv_Dte = DateTime.Now,

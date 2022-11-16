@@ -18,7 +18,6 @@
 		<ProjectReference Include="..\FOAEA3.EmailTools\FOAEA3.EmailTools.csproj" />
 		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
 		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
-		<ProjectReference Include="..\Incoming.Common\Incoming.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

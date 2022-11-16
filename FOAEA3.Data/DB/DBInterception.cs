@@ -438,6 +438,26 @@ namespace FOAEA3.Data.DB
             return data.SingleOrDefault();
         }
 
+        public async Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"PrcID", processId },
+                {"ZipName", fileName },
+                {"DateReceived", dateReceived }
+            };
+
+            int zipId = await MainDB.GetDataFromProcSingleValueAsync<int>("ESDZipsInsert", parameters);
+
+            return new ElectronicSummonsDocumentZipData
+            {
+                ZipID = zipId,
+                PrcID = processId,
+                ZipName= fileName,
+                DateReceived= dateReceived
+            };
+        }
+
         private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)
         {
             data.ZipID = (int)rdr["ZipID"];

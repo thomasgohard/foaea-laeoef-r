@@ -1,10 +1,10 @@
 ﻿using DBHelper;
+using FileBroker.Business.Helpers;
 using FileBroker.Data.DB;
-using FileBroker.Model;
+using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Incoming.Common;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
             var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
             var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
             var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
-            var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var apiAction = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
             FederalFileManager = new(fileBrokerDB, apiRootForFiles, apiAction);
 
@@ -61,6 +61,6 @@ namespace Incoming.FileWatcher.Fed.Tracing
             else
                 ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
         }
-   
+
     }
 }

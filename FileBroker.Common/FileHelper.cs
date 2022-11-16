@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace FileBroker.Common
 {
@@ -46,11 +47,14 @@ namespace FileBroker.Common
         {
             try
             {
-                xmlData = FileHelper.RemoveXMLartifacts(xmlData);
-                var doc = new XmlDocument();
-                doc.LoadXml(xmlData);
+                // xmlData = FileHelper.RemoveXMLartifacts(xmlData);
+                //var doc = new XmlDocument();
+                //doc.LoadXml(xmlData);
+                //return JsonConvert.SerializeXmlNode(doc);
 
-                return JsonConvert.SerializeXmlNode(doc);
+                var doc = XDocument.Parse(xmlData);
+                var json = JsonConvert.SerializeXNode(doc, Newtonsoft.Json.Formatting.None, omitRootObject: true);
+                return json;
             }
             catch (Exception ex)
             {

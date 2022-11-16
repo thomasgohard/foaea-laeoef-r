@@ -25,7 +25,6 @@
 		<ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
 		<ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
 		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
-		<ProjectReference Include="..\Incoming.Common\Incoming.Common.csproj" />
 	</ItemGroup>
 
 </Project>
