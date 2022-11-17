@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Business;
+using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FOAEA3.Common.Brokers;
@@ -41,36 +42,16 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
         }
 
-        private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+        private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                                     IConfiguration config)
         {
-            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            // TODO: fix token
-            string token = "";
-            var apiBrokers = new APIBrokerList
-            {
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
-                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper, token),
-                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper, token),
-                TracingEvents = new TracingEventAPIBroker(tracingApiHelper, token),
-                Sins = new SinAPIBroker(applicationApiHelper, token)
-            };
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            var repositories = new RepositoryList
-            {
-                FileTable = new DBFileTable(fileBrokerDB),
-                FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
-                ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailService = new DBMailService(fileBrokerDB)
-            };
+            var federalFileManager = new OutgoingFederalTracingManager(foaeaApis, db, config);
 
-            var federalFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories, config);
-
-            var federalTraceOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("TRCOUT"))
+            var federalTraceOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("TRCOUT"))
                                                 .Where(s => s.Active == true);
 
             foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
@@ -83,7 +64,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name, 
+                        await db.ErrorTrackingTable.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name, 
                                                                                    new Exception(error), displayExceptionError: true);
                     }
             }

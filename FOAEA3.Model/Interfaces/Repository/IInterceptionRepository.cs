@@ -50,6 +50,7 @@ namespace FOAEA3.Model.Interfaces
                                    BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null);
 
         Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync();
-        Task<List<HoldbackTypeData>> GetHoldbackTypesAsync();        
+        Task<List<HoldbackTypeData>> GetHoldbackTypesAsync();
+        Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry);
     }
 }

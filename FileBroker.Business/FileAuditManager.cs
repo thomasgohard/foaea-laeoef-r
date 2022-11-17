@@ -48,7 +48,7 @@ public class FileAuditManager
                                                 $"{auditError.Appl_Source_RfrNr,-30}\t{auditError.ApplicationMessage}");
             }
 
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
             {
                 auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"Codes XML invalides: {fileName}");
@@ -61,7 +61,7 @@ public class FileAuditManager
             auditFileContent.AppendLine($"Nombre total de records: {errorCount + warningCount + successCount}");
             auditFileContent.AppendLine($"Nombre total avec succès: {successCount + warningCount}");
             auditFileContent.AppendLine($"Nombre total sans succès: {errorCount}");
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
                 auditFileContent.AppendLine($"Nombre total avec avertissements de validation XML: {unknownTags.Count}");
 
         }
@@ -84,7 +84,7 @@ public class FileAuditManager
                                                 $"{auditError.Appl_Source_RfrNr,-23}\t{auditError.ApplicationMessage}");
             }
 
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
             {
                 auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"XML validation warnings: {fileName}");
@@ -97,7 +97,7 @@ public class FileAuditManager
             auditFileContent.AppendLine($"Total records: {errorCount + warningCount + successCount}");
             auditFileContent.AppendLine($"Total success: {successCount + warningCount}");
             auditFileContent.AppendLine($"Total failed: {errorCount}");
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
                 auditFileContent.AppendLine($"Total XML validation warnings: {unknownTags.Count}");
         }
 

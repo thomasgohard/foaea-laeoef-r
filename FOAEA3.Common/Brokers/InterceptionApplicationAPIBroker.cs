@@ -136,5 +136,13 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public async Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf)
+        {
+            string apiCall = $"api/v1/ESDPDFs";
+            var data = await ApiHelper.PostDataAsync<ElectronicSummonsDocumentPdfData, ElectronicSummonsDocumentPdfData>(apiCall, newPdf, token: Token);
+
+            return data;
+        }
+
     }
 }

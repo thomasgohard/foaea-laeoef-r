@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Business;
+using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FOAEA3.Common.Brokers;
@@ -40,31 +41,16 @@ internal class Program
         ColourConsole.Write("Completed.\n");
     }
 
-    private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+    private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                                 IConfiguration config)
     {
-        var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 
-        // TODO: fix token
-        string token = "";
-        var apiBrokers = new APIBrokerList
-        {
-            ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
-            Sins = new SinAPIBroker(applicationApiHelper, token)
-        };
+        var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-        var repositories = new RepositoryList
-        {
-            FileTable = new DBFileTable(fileBrokerDB),
-            FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-            OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
-            ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
-            ProcessParameterTable = new DBProcessParameter(fileBrokerDB) 
-        };
+        var federalFileManager = new OutgoingFederalSinManager(foaeaApis, db, config);
 
-        var federalFileManager = new OutgoingFederalSinManager(apiBrokers, repositories, config);
-
-        var federalSinOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("SINOUT"))
+        var federalSinOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("SINOUT"))
                                           .Where(s => s.Active == true);
 
         foreach (var federalSinOutgoingSource in federalSinOutgoingSources)
@@ -78,7 +64,7 @@ internal class Program
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("SINOUT", federalSinOutgoingSource.Name, 
+                    await db.ErrorTrackingTable.MessageBrokerErrorAsync("SINOUT", federalSinOutgoingSource.Name, 
                                                                                new Exception(error), displayExceptionError: true);
                 }
         }

@@ -28,6 +28,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> ESD_CheckIfAlreadyLoaded(string fileName)
         {
             throw new NotImplementedException();

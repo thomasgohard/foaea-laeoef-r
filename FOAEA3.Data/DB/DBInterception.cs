@@ -5,6 +5,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -447,15 +448,32 @@ namespace FOAEA3.Data.DB
                 {"DateReceived", dateReceived }
             };
 
-            int zipId = await MainDB.GetDataFromProcSingleValueAsync<int>("ESDZipsInsert", parameters);
+            await MainDB.ExecProcAsync("ESDZipsInsert", parameters);
 
             return new ElectronicSummonsDocumentZipData
             {
-                ZipID = zipId,
+                ZipID = MainDB.LastReturnValue,
                 PrcID = processId,
                 ZipName= fileName,
                 DateReceived= dateReceived
             };
+        }
+
+        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ZipID", newPDFentry.ZipID },
+                {"PDFName", newPDFentry.PDFName },
+                {"EnfSrv", newPDFentry.EnfSrv[..2] },
+                {"Ctrl", newPDFentry.Ctrl }
+            };
+
+            await MainDB.ExecProcAsync("ESDPDFsInsert", parameters);
+
+            newPDFentry.PDFid= MainDB.LastReturnValue;
+
+            return newPDFentry;
         }
 
         private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)

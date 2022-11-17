@@ -17,6 +17,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
             throw new NotImplementedException();

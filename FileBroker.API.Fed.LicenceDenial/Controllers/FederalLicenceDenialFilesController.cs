@@ -1,17 +1,6 @@
-﻿using FileBroker.Business;
-using FileBroker.Data;
-using FileBroker.Model;
-using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+﻿using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using NJsonSchema;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -72,75 +61,4 @@ public class FederalLicenceDenialFilesController : ControllerBase
 
     }
 
-    [HttpPost]
-    public async Task<ActionResult> ProcessLicenceDenialFileAsync([FromQuery] string fileName,
-                                                 [FromServices] IFileAuditRepository fileAuditDB,
-                                                 [FromServices] IFileTableRepository fileTableDB,
-                                                 [FromServices] IMailServiceRepository mailService,
-                                                 [FromServices] IProcessParameterRepository processParameterDB,
-                                                 [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
-                                                 [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                                 [FromServices] IOptions<ApiConfig> apiConfig,
-                                                 [FromServices] IConfiguration config,
-                                                 [FromHeader] string currentSubmitter,
-                                                 [FromHeader] string currentSubject)
-    {
-        string sourceLicenceDenialJsonData;
-        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-        {
-            sourceLicenceDenialJsonData = await reader.ReadToEndAsync();
-        }
-
-        var schema = JsonSchema.FromType<FedLicenceDenialFileData>();
-        var errors = schema.Validate(sourceLicenceDenialJsonData);
-        if (errors.Any())
-            return UnprocessableEntity(errors);
-
-        if (string.IsNullOrEmpty(fileName))
-            return UnprocessableEntity("Missing fileName");
-
-        if (fileName.ToUpper().EndsWith(".XML"))
-            fileName = fileName[0..^4]; // remove .XML extension
-
-        // TODO: fix token
-        var token = "";
-        var apiLicenceDenialHelper = new APIBrokerHelper(apiConfig.Value.FoaeaLicenceDenialRootAPI, currentSubmitter, currentSubject);
-        var licenceDenialApplicationAPIs = new LicenceDenialApplicationAPIBroker(apiLicenceDenialHelper, token);
-        var licenceDenialTerminationApplicationAPIs = new LicenceDenialTerminationApplicationAPIBroker(apiLicenceDenialHelper, token);
-        var licenceDenialEventAPIs = new LicenceDenialEventAPIBroker(apiLicenceDenialHelper, token);
-        var licenceDenialResponsesAPIs = new LicenceDenialResponseAPIBroker(apiLicenceDenialHelper, token);
-
-        var apiApplicationHelper = new APIBrokerHelper(apiConfig.Value.FoaeaApplicationRootAPI, currentSubmitter, currentSubject);
-        var applicationEventsAPIs = new ApplicationEventAPIBroker(apiApplicationHelper, token);
-
-        var apis = new APIBrokerList
-        {
-            LicenceDenialApplications = licenceDenialApplicationAPIs,
-            LicenceDenialTerminationApplications = licenceDenialTerminationApplicationAPIs,
-            LicenceDenialEvents = licenceDenialEventAPIs,
-            LicenceDenialResponses = licenceDenialResponsesAPIs,
-            ApplicationEvents = applicationEventsAPIs
-        };
-
-        var repositories = new RepositoryList
-        {
-            FlatFileSpecs = flatFileSpecs,
-            FileAudit = fileAuditDB,
-            FileTable = fileTableDB,
-            MailService = mailService,
-            ProcessParameterTable = processParameterDB
-        };
-
-        var licenceDenialManager = new IncomingFederalLicenceDenialManager(apis, repositories, config);
-
-        var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-        if (!fileTableData.IsLoading)
-        {
-            await licenceDenialManager.ProcessJsonFileAsync(sourceLicenceDenialJsonData, fileName);
-            return Ok("File processed.");
-        }
-        else
-            return UnprocessableEntity("File was already loading?");
-    }
 }

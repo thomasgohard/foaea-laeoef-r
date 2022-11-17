@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System.Text;
 
 namespace FileBroker.Business.Helpers
 {
-    public class IncomingFederalTracingFile
+    public class IncomingFederalSinFile
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
@@ -11,9 +10,9 @@ namespace FileBroker.Business.Helpers
 
         public List<string> Errors { get; }
 
-        public IncomingFederalTracingFile(RepositoryList db,
-                                          APIBrokerList foaeaApis,
-                                          IConfiguration config)
+        public IncomingFederalSinFile(RepositoryList db,
+                                      APIBrokerList foaeaApis,
+                                      IConfiguration config)
         {
             DB = db;
             FoaeaApis = foaeaApis;
@@ -24,14 +23,15 @@ namespace FileBroker.Business.Helpers
         public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
-            var allFiles = directory.GetFiles("*IT.*");
+            var allFiles = directory.GetFiles("*IL.*");
             var last31days = DateTime.Now.AddDays(-31);
             var files = allFiles.Where(f => f.LastWriteTime > last31days).OrderByDescending(f => f.LastWriteTime);
 
             foreach (var fileInfo in files)
             {
                 int cycle = FileHelper.GetCycleFromFilename(fileInfo.Name);
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove cycle
+                var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
+                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
@@ -43,22 +43,20 @@ namespace FileBroker.Business.Helpers
         {
             string fileNameNoPath = Path.GetFileName(fullPath);
 
-            if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. EI3STSIT.000022)
+            if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. HR3SVSIS.176)
             {                                        //                                                    ↑ 
+                string flatFileContent = File.ReadAllText(fullPath);
 
-                string flatFile;
-                using (var streamReader = new StreamReader(fullPath, Encoding.UTF8))
-                {
-                    flatFile = streamReader.ReadToEnd();
-                }
+                if (Errors.Any())
+                    return false;
 
-                var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
+                var sinManager = new IncomingFederalSinManager(FoaeaApis, DB, Config);
 
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fullPath);
+                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoPath);
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
-                    await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
+                    await sinManager.ProcessFlatFileAsync(flatFileContent, fullPath);
                     return true;
                 }
                 else
@@ -73,6 +71,5 @@ namespace FileBroker.Business.Helpers
 
             return false;
         }
-
     }
 }

@@ -1,8 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Business.Helpers;
-using FileBroker.Data.DB;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
+using FileBroker.Common;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +14,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
 {
     class Program
     {
-        private static IncomingFederalLicenceDenialFile FederalFileManager;
+        // private static IncomingFederalLicenceDenialFile FederalFileManager;
 
         static async Task Main(string[] args)
         {
@@ -33,17 +31,19 @@ namespace Incoming.FileWatcher.Fed.Tracing
             IConfiguration configuration = builder.Build();
 
             var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-            var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
-            var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
-            var apiAction = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            FederalFileManager = new(fileBrokerDB, apiRootForFiles, apiAction);
+            var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
+
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+
+            var federalFileManager = new IncomingFederalLicenceDenialFile(db, foaeaApis, configuration);
 
             string ftpRoot = configuration["FTProot"];
 
             var allNewFiles = new List<string>();
-            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
-            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
+            await federalFileManager.AddNewFilesAsync(ftpRoot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
+            await federalFileManager.AddNewFilesAsync(ftpRoot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {
@@ -52,10 +52,10 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    await FederalFileManager.ProcessNewFileAsync(newFile);
-                    if (FederalFileManager.Errors.Any())
+                    await federalFileManager.ProcessNewFileAsync(newFile);
+                    if (federalFileManager.Errors.Any())
                         foreach (var error in errors)
-                            await errorTrackingDB.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
+                            await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
                 }
             }
             else

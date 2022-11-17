@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Business;
+using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FOAEA3.Common.Brokers;
@@ -9,6 +10,7 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,37 +43,15 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
 
         }
 
-        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootForFiles,
+        private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                                                IConfiguration config)
         {
-            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            // TODO: fix token
-            string token = "";
-            var apiBrokers = new APIBrokerList
-            {
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper, token),
-                Sins = new SinAPIBroker(applicationApiHelper, token)
-            };
+            var federalFileManager = new OutgoingFederalLicenceDenialManager(foaeaApis, db, config);
 
-            var repositories = new RepositoryList
-            {
-                FileTable = new DBFileTable(fileBrokerDB),
-                FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
-                ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailService = new DBMailService(fileBrokerDB)
-            };
-
-            var federalFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories, config);
-
-            var federalLicenceDenialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync("LICOUT"))
+            var federalLicenceDenialOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("LICOUT"))
                                                                   .Where(s => s.Active == true);
 
             foreach (var federalLicenceDenialOutgoingSource in federalLicenceDenialOutgoingSources)
@@ -85,7 +65,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
+                        await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
                                                                                    new Exception(error), displayExceptionError: true);
                     }
             }

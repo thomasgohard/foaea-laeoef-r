@@ -32,10 +32,10 @@ namespace FileBroker.Business.Helpers
 
         public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors)
         {
-            if (!fullPath.Contains("ESD"))
+            if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
                 await ProcessIncomingXmlFile(fullPath, errors);
 
-            else if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
+            else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
                 await ProcessIncomingESDfile(fullPath, errors);
 
             else
@@ -110,7 +110,7 @@ namespace FileBroker.Business.Helpers
             if (!fileTableData.IsLoading)
             {
                 var info = await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingJsonData, unknownTags);
-                
+
                 if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                     foreach (var error in info.GetMessagesForType(MessageType.Error))
                         errors.Add(error.Description);
@@ -166,7 +166,7 @@ namespace FileBroker.Business.Helpers
             if (!fileTableData.IsLoading)
             {
                 var info = await licenceDenialManager.ExtractAndProcessRequestsInFileAsync(sourceLicenceDenialJsonData, unknownTags);
-                
+
                 if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                     foreach (var error in info.GetMessagesForType(MessageType.Error))
                         errors.Add(error.Description);
@@ -177,12 +177,13 @@ namespace FileBroker.Business.Helpers
 
         private async Task ProcessIncomingESDfile(string fullPath, List<string> errors)
         {
-            var baseFileName = Path.GetFileName(fullPath);
-            if (baseFileName.Length > 5)
-                baseFileName = baseFileName[0..5];
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(baseFileName);
-            var fileInfo = new FileInfo(fullPath);
-            _ = await FoaeaApis.InterceptionApplications.ESD_Create(fileTableData.PrcId, fullPath, fileInfo.CreationTime);
+            var electronicSummonsManager = new IncomingProvincialElectronicSummonsManager(DB, FoaeaApis, fullPath, Config);
+
+            var info = await electronicSummonsManager.ExtractAndProcessRequestsInFileAsync(fullPath);
+
+            if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
+                foreach (var error in info.GetMessagesForType(MessageType.Error))
+                    errors.Add(error.Description);
         }
 
         public async Task AddNewXmlFilesAsync(string rootPath, List<string> newFiles)

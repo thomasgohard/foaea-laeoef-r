@@ -1,10 +1,10 @@
 ﻿using FOAEA3.Common.Helpers;
 using FOAEA3.Common.Models;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.IO.Compression;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -45,22 +45,32 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task<ElectronicSummonsDocumentZipData> CreateESD(ElectronicSummonsDocumentZipData newData)
         {
-            var newESDzip = await DB.InterceptionTable.CreateESDasync(newData.PrcID, newData.ZipName, newData.DateReceived);
+            return await DB.InterceptionTable.CreateESDasync(newData.PrcID, newData.ZipName, newData.DateReceived);
+        }
 
-            using (ZipArchive archive = ZipFile.OpenRead(newESDzip.ZipName))
+        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDF(ElectronicSummonsDocumentPdfData pdfData)
+        {
+            var isAmendment = pdfData.PDFName.EndsWith("A.PDF");
+
+            var newPdf = await DB.InterceptionTable.CreateESDPDFasync(pdfData);
+
+            if (isAmendment)
             {
-                foreach (ZipArchiveEntry entry in archive.Entries)
+                var application = await DB.ApplicationTable.GetApplicationAsync(pdfData.EnfSrv, pdfData.Ctrl);
+                if (application != null)
                 {
-                    string pdfName = entry.FullName;
-
-                    // TODO: Add PDF info the ZIPPDFs table
-
+                    if ((int)application.AppLiSt_Cd < 7)
+                        await DB.InterceptionTable.InsertESDrequiredAsync(pdfData.EnfSrv, pdfData.Ctrl, ESDrequired.NoESDrequired);
+                }
+                else
+                {
+                    newPdf.Messages.AddWarning("Warning: Appl Record does not exist");
                 }
             }
 
-            // TODO: update ESDRequired table
+            return newPdf;
 
-            return newESDzip;
         }
+
     }
 }

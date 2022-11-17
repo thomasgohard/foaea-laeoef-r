@@ -42,7 +42,7 @@ namespace FOAEA3.Resources.Helpers
             return result;
         }
 
-        public static string AppendPath(this string basePath, string additionalPath)
+        public static string AppendToPath(this string basePath, string additionalPath, bool isFileName = false)
         {
             string result = basePath;
 
@@ -54,7 +54,7 @@ namespace FOAEA3.Resources.Helpers
                     result += @"\";
 
                 result += additionalPath;
-                if (!result.EndsWith(@"\"))
+                if (!result.EndsWith(@"\") && !isFileName)
                     result += @"\";
             }
 

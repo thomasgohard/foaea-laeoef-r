@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Business;
+using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FileBroker.Model.Interfaces;
@@ -33,7 +34,7 @@ namespace Outgoing.FileCreator.MEP
             IConfiguration configuration = builder.Build();
 
             var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-            var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
+            var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
             bool generateTracingFiles = true;
             bool generateLicencingFiles = true;
@@ -60,43 +61,19 @@ namespace Outgoing.FileCreator.MEP
                         break;
                 }
             }
+            
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 
-            var applicationApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var tracingApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var licenceDenialApiHelper = new APIBrokerHelper(apiRootForFiles.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-
-            string token = "";
-            var apiBrokers = new APIBrokerList
-            {
-                Applications = new ApplicationAPIBroker(applicationApiHelper, token),
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
-                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper, token),
-                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper, token),
-                TracingEvents = new TracingEventAPIBroker(tracingApiHelper, token),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper, token),
-            };
-
-            var repositories = new RepositoryList
-            {
-                FileTable = new DBFileTable(fileBrokerDB),
-                FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
-                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
-                ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-                MailService = new DBMailService(fileBrokerDB)
-            };
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
             if (generateTracingFiles)
-                await CreateOutgoingProvincialFiles(repositories, "TRCAPPOUT", new OutgoingProvincialTracingManager(apiBrokers, repositories, configuration));
+                await CreateOutgoingProvincialFiles(db, "TRCAPPOUT", new OutgoingProvincialTracingManager(foaeaApis, db, configuration));
 
             if (generateLicencingFiles)
-                await CreateOutgoingProvincialFiles(repositories, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories, configuration));
+                await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, configuration));
 
             if (generateStatsFiles)
-                await CreateOutgoingProvincialFiles(repositories, "STATAPPOUT", new OutgoingProvincialStatusManager(apiBrokers, repositories, configuration));
+                await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, configuration));
         }
 
         private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,

@@ -1,25 +1,19 @@
 ﻿using DBHelper;
 using FileBroker.Business.Helpers;
+using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
-using static FOAEA3.Resources.Helpers.ColourConsole;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Configuration;
-using FileBroker.Data;
-using FileBroker.Model.Interfaces;
-using Microsoft.AspNetCore.Http.Extensions;
-using FileBroker.Common;
+using static FOAEA3.Resources.Helpers.ColourConsole;
 
 namespace Incoming.FileWatcher.MEP;
 
@@ -38,19 +32,7 @@ internal class Program
         IConfiguration configuration = builder.Build();
 
         var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-        var db = new RepositoryList
-        {
-            FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
-            FileTable = new DBFileTable(fileBrokerDB),
-            FileAudit = new DBFileAudit(fileBrokerDB),
-            ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
-            OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
-            ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
-            MailService = new DBMailService(fileBrokerDB),
-            TranslationTable = new DBTranslation(fileBrokerDB),
-            RequestLogTable = new DBRequestLog(fileBrokerDB),
-            LoadInboundAuditTable = new DBLoadInboundAudit(fileBrokerDB)
-        };
+        var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
         await db.RequestLogTable.DeleteAllAsync();
 
@@ -76,9 +58,9 @@ internal class Program
         WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
         WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
 
-        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();        
+        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-        APIBrokerList foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 
         int totalFilesFound = 0;
         foreach (var itemProvince in provinces)
@@ -129,7 +111,7 @@ internal class Program
                         if (errors.Any())
                         {
                             foreach (var error in errors)
-                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", newFile, new Exception(error), displayExceptionError: true);
                             finishedForProvince = true;
                         }
                     }
@@ -199,7 +181,7 @@ internal class Program
         }
 
         if (!string.IsNullOrEmpty(interceptionPath))
-            searchPaths.Add(interceptionPath.AppendPath("ESD"));
+            searchPaths.Add(interceptionPath.AppendToPath("ESD"));
 
         return searchPaths;
     }

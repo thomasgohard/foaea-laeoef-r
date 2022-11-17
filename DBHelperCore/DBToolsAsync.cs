@@ -597,8 +597,7 @@ namespace DBHelper
             }
             catch (Exception e)
             {
-                if (tran is not null)
-                    tran.Rollback();
+                tran?.Rollback();
                 LastException = new Exception(procName, e);
             }
 
