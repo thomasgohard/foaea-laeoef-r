@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -10,11 +9,10 @@ public class IncomingProvincialTracingManager
     private string FileName { get; }
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
-    private IConfiguration Config { get; }
+    private ConfigurationHelper Config { get; }
     private ProvincialAuditFileConfig AuditConfig { get; }
     private Dictionary<string, string> Translations { get; }
     private bool IsFrench { get; }
-    private string EnfSrv_Cd { get; }
 
     private IncomingProvincialHelper IncomingFileHelper { get; }
 
@@ -23,33 +21,22 @@ public class IncomingProvincialTracingManager
     public IncomingProvincialTracingManager(RepositoryList db,
                                             APIBrokerList foaeaApis,
                                             string fileName,
-                                            IConfiguration config)
+                                            ConfigurationHelper config)
     {
         FileName = fileName;
         APIs = foaeaApis;
         DB = db;
         Config = config;
 
-        AuditConfig = Config.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
-
         string provinceCode = fileName[0..2].ToUpper();
         IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
         Translations = LoadTranslations();
 
-        EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
-
         string provCode = FileName[..2].ToUpper();
-        IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
+        IncomingFileHelper = new IncomingProvincialHelper(Config, provCode);
 
-        var foaeaLoginData = new FoaeaLoginData
-        {
-            UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-            Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-            Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-        };
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, foaeaLoginData);
+        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
     private Dictionary<string, string> LoadTranslations()

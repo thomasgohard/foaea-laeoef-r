@@ -1,22 +1,20 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace FileBroker.Business.Helpers
+﻿namespace FileBroker.Business.Helpers
 {
     public class IncomingFederalLicenceDenialFile
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
-        private IConfiguration Config { get; }
+        private ConfigurationHelper Config { get; }
 
         public List<string> Errors { get; }
 
         public IncomingFederalLicenceDenialFile(RepositoryList db,
                                                 APIBrokerList foaeaApis,
-                                                IConfiguration config)
+                                                ConfigurationHelper config)
         {
             DB = db;
             FoaeaApis = foaeaApis;
-            Config = config;           
+            Config = config;
             Errors = new List<string>();
         }
 

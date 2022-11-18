@@ -6,7 +6,7 @@ using IVR.API.Data;
 var argsList = args.ToList();
 argsList.Add("--UseInMemoryData=Yes"); 
 
-await Startup.SetupAndRun(argsList.ToArray(), "IVR-API", AddFakeDataService);
+await Startup.SetupAndRun(argsList.ToArray(), AddFakeDataService);
 
 static void AddFakeDataService(IServiceCollection services)
 {

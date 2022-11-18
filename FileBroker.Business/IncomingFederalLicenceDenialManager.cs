@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business
@@ -16,17 +15,14 @@ namespace FileBroker.Business
         private List<ApplicationEventDetailData> ValidEventDetails { get; set; }
 
         public IncomingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories,
-                                                   IConfiguration config)
+                                                   ConfigurationHelper config)
         {
             APIs = apis;
             DB = repositories;
             ValidEvents = new List<ApplicationEventData>();
             ValidEventDetails = new List<ApplicationEventDetailData>();
 
-            FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                                                      config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                                                      config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
-
+            FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
 
         public async Task<List<string>> ProcessJsonFileAsync(string jsonFileContent, string fileName)
@@ -237,7 +233,7 @@ namespace FileBroker.Business
         }
 
         public async Task SendLicenceDenialResponsesToFOAEAAsync(List<LicenceDenialResponseData> licenceDenialResponseData,
-                                                      string fedSource, string fileName, 
+                                                      string fedSource, string fileName,
                                                       List<string> errors)
         {
             try
@@ -279,7 +275,7 @@ namespace FileBroker.Business
             if ((responseType == "L01") && (item.ActvSt_Cd == "A"))
             {
                 var applLicenceDenial = await APIs.LicenceDenialApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-                
+
                 if (applLicenceDenial.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
                     foreach (var error in applLicenceDenial.Messages.GetMessagesForType(MessageType.Error))
@@ -297,7 +293,7 @@ namespace FileBroker.Business
             else if (responseType == "L03")
             {
                 var applLicenceDenialTermination = await APIs.LicenceDenialTerminationApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-                
+
                 if (applLicenceDenialTermination.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
                     foreach (var error in applLicenceDenialTermination.Messages.GetMessagesForType(MessageType.Error))
@@ -306,7 +302,7 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            await  DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                            await DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                                         new Exception(errorMsg), displayExceptionError: true);
                         }
                     }

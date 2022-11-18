@@ -47,14 +47,14 @@ namespace FileBroker.Common
         {
             try
             {
-                // xmlData = FileHelper.RemoveXMLartifacts(xmlData);
-                //var doc = new XmlDocument();
-                //doc.LoadXml(xmlData);
-                //return JsonConvert.SerializeXmlNode(doc);
+                xmlData = FileHelper.RemoveXMLartifacts(xmlData);
+                var doc = new XmlDocument();
+                doc.LoadXml(xmlData);
+                return JsonConvert.SerializeXmlNode(doc);
 
-                var doc = XDocument.Parse(xmlData);
-                var json = JsonConvert.SerializeXNode(doc, Newtonsoft.Json.Formatting.None, omitRootObject: true);
-                return json;
+                //var doc = XDocument.Parse(xmlData);
+                //var json = JsonConvert.SerializeXNode(doc, Newtonsoft.Json.Formatting.Indented, omitRootObject: true);
+                //return json;
             }
             catch (Exception ex)
             {

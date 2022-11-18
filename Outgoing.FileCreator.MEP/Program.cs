@@ -2,16 +2,10 @@
 using FileBroker.Business;
 using FileBroker.Common;
 using FileBroker.Data;
-using FileBroker.Data.DB;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,18 +17,9 @@ namespace Outgoing.FileCreator.MEP
         {
             ColourConsole.WriteEmbeddedColorLine("Starting MEP Outgoing File Creator");
 
-            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var config = new ConfigurationHelper(args);
 
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args);
-
-            IConfiguration configuration = builder.Build();
-
-            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-            var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
             bool generateTracingFiles = true;
             bool generateLicencingFiles = true;
@@ -61,19 +46,19 @@ namespace Outgoing.FileCreator.MEP
                         break;
                 }
             }
-            
-            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
 
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
             if (generateTracingFiles)
-                await CreateOutgoingProvincialFiles(db, "TRCAPPOUT", new OutgoingProvincialTracingManager(foaeaApis, db, configuration));
+                await CreateOutgoingProvincialFiles(db, "TRCAPPOUT", new OutgoingProvincialTracingManager(foaeaApis, db, config));
 
             if (generateLicencingFiles)
-                await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, configuration));
+                await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, config));
 
             if (generateStatsFiles)
-                await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, configuration));
+                await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, config));
         }
 
         private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
@@ -92,7 +77,7 @@ namespace Outgoing.FileCreator.MEP
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name, 
+                        await repositories.ErrorTrackingTable.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name,
                                                                         new Exception(error), displayExceptionError: true);
                     }
             }

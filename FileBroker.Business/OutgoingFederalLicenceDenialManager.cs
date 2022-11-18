@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -11,15 +10,12 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, IConfiguration config)
+    public OutgoingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;
 
-        FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
-
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -81,7 +77,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
             await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;

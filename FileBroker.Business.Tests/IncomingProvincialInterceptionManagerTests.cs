@@ -1,12 +1,6 @@
-﻿using FileBroker.Business.Tests.InMemory;
-using FileBroker.Data;
-using FileBroker.Model;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Model;
+﻿using FileBroker.Model;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace FileBroker.Business.Tests
 {

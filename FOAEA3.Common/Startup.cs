@@ -216,7 +216,7 @@ namespace FOAEA3.Common
 
         }
 
-        public static async Task SetupAndRun(string[] args, string sourceNameForEvents, Action<IServiceCollection> SetupDataOverride = null)
+        public static async Task SetupAndRun(string[] args, Action<IServiceCollection> SetupDataOverride = null)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Logging.ClearProviders();
@@ -225,7 +225,7 @@ namespace FOAEA3.Common
             var env = builder.Environment;
             var apiName = env.ApplicationName;
 
-            LoggingHelper.SetupLogging(config, sourceNameForEvents);
+            LoggingHelper.SetupLogging(config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
 
             builder.Services.AddSwaggerGen(options =>
             {

@@ -23,7 +23,7 @@ namespace FileBroker.Web.Pages.Tools
             ApiData = new Dictionary<string, ApiInfo>();
         }
 
-        public async Task OnGet([FromServices] IConfiguration config)
+        public async Task OnGet([FromServices] ConfigurationHelper config)
         {
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);

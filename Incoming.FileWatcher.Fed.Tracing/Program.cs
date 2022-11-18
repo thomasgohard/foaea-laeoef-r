@@ -1,12 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Business.Helpers;
 using FileBroker.Common;
-using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,30 +15,19 @@ namespace Incoming.FileWatcher.Fed.Tracing
         {
             ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
 
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var config = new ConfigurationHelper(args);
 
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args);
-
-            IConfiguration configuration = builder.Build();
-
-            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
-            var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
 
-            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
 
-            var federalFileManager = new IncomingFederalTracingFile(db, foaeaApis, configuration);
-
-            string ftpRoot = configuration["FTProot"];
+            var federalFileManager = new IncomingFederalTracingFile(db, foaeaApis, config);
 
             var allNewFiles = new List<string>();
-            await federalFileManager.AddNewFilesAsync(ftpRoot + @"\EI3STS", allNewFiles); // NETP
-            await federalFileManager.AddNewFilesAsync(ftpRoot + @"\HR3STS", allNewFiles); // EI Tracing
-            await federalFileManager.AddNewFilesAsync(ftpRoot + @"\RC3STS", allNewFiles); // CRA Tracing
+            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\EI3STS", allNewFiles); // NETP
+            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\HR3STS", allNewFiles); // EI Tracing
+            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\RC3STS", allNewFiles); // CRA Tracing
 
             if (allNewFiles.Count > 0)
             {

@@ -1,6 +1,5 @@
 ﻿using FileBroker.Common.Helpers;
 using FOAEA3.Model.Structs;
-using Microsoft.Extensions.Configuration;
 
 namespace FileBroker.Business.Helpers
 {
@@ -9,25 +8,17 @@ namespace FileBroker.Business.Helpers
         private RepositoryList DB { get; }
         private FileBaseName FileBaseName { get; }
         private APIBrokerList FoaeaApis { get; }
-        private IConfiguration Config { get; }
-        private FoaeaLoginData FoaeaLoginData { get; }
+        private ConfigurationHelper Config { get; }
 
         public IncomingProvincialFile(RepositoryList db,
                                       APIBrokerList foaeaApis,
                                       FileBaseName fileBaseName,
-                                      IConfiguration config)
+                                      ConfigurationHelper config)
         {
             DB = db;
             FileBaseName = fileBaseName;
             FoaeaApis = foaeaApis;
             Config = config;
-
-            FoaeaLoginData = new FoaeaLoginData
-            {
-                UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-            };
         }
 
         public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors)
@@ -217,7 +208,7 @@ namespace FileBroker.Business.Helpers
 
                 if (files.Any())
                 {
-                    var foaeaAccess = new FoaeaSystemAccess(FoaeaApis, FoaeaLoginData);
+                    var foaeaAccess = new FoaeaSystemAccess(FoaeaApis, Config.FoaeaLogin);
 
                     await foaeaAccess.SystemLoginAsync();
                     try

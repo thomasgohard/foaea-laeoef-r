@@ -1,6 +1,4 @@
-﻿using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
-using Serilog;
+﻿using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Collections.ObjectModel;
@@ -12,22 +10,14 @@ namespace FOAEA3.Common.Helpers
     {
         public const string COOKIE_ID = "Identity.Application";
 
-        public static void SetupLogging(IConfiguration config, string sourceNameForEvents,
-                                        string connName = "FOAEAMain", string apiTableName = "Logs-API")
+        public static void SetupLogging(string logConnectionString, string apiTableName = "Logs-API")
         {
-            string logPath = config["FileLogPath"];
-            LoggerConfiguration logConfig = SetupLogConfiguration(config, sourceNameForEvents, connName, apiTableName);
-
-            if (!string.IsNullOrEmpty(logPath))
-                logConfig = logConfig.WriteTo.File(logPath,
-                                                   rollingInterval: RollingInterval.Day,
-                                                   outputTemplate: "API: {Timestamp} {Message}{NewLine:1}{Exception:1}");
+            LoggerConfiguration logConfig = SetupLogConfiguration(logConnectionString, apiTableName);
 
             Log.Logger = logConfig.CreateLogger();
         }
 
-        private static LoggerConfiguration SetupLogConfiguration(IConfiguration config, string sourceName,
-                                                                 string connName, string apiTableName)
+        private static LoggerConfiguration SetupLogConfiguration(string logConnectionString, string apiTableName)
         {
             var logConfig = new LoggerConfiguration()
                             .MinimumLevel.Information()
@@ -56,7 +46,7 @@ namespace FOAEA3.Common.Helpers
             // log to SQL Server table
 
             logConfig = logConfig.WriteTo.MSSqlServer(
-                           connectionString: config[$"ConnectionStrings:{connName}"].ReplaceVariablesWithEnvironmentValues(),
+                           connectionString: logConnectionString,
                            restrictedToMinimumLevel: LogEventLevel.Information,
                            sinkOptions: sqlSinkOpts,
                            columnOptions: sqlColumnOpts);

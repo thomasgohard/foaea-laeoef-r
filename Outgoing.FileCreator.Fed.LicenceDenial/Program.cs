@@ -23,28 +23,18 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Licence Denial Files Creator");
 
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var config = new ConfigurationHelper(args);
 
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args);
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            IConfiguration configuration = builder.Build();
-
-            string fileBrokerConnectionString = configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
-            var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
-            var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
-
-            await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, apiRootForFiles, configuration);
+            await CreateOutgoingFederalLicenceDenialFilesAsync(fileBrokerDB, config.ApiRootData, config);
 
             ColourConsole.Write("Completed.");
 
         }
 
         private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                               IConfiguration config)
+                                                                               ConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);

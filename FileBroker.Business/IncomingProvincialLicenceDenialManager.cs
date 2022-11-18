@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -10,11 +9,9 @@ public class IncomingProvincialLicenceDenialManager
     private string FileName { get; }
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
-    private IConfiguration Config { get; }
-    private ProvincialAuditFileConfig AuditConfig { get; }
+    private ConfigurationHelper Config { get; }
     private Dictionary<string, string> Translations { get; }
     private bool IsFrench { get; }
-    private string EnfSrv_Cd { get; }
 
     private IncomingProvincialHelper IncomingFileHelper { get; }
 
@@ -23,33 +20,22 @@ public class IncomingProvincialLicenceDenialManager
     public IncomingProvincialLicenceDenialManager(RepositoryList db,
                                                   APIBrokerList foaeaApis,
                                                   string fileName,
-                                                  IConfiguration config)
+                                                  ConfigurationHelper config)
     {
         FileName = fileName;
         APIs = foaeaApis;
         DB = db;
         Config = config;
 
-        AuditConfig = Config.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
-
         string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+        IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
         Translations = LoadTranslations();
-
-        EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
 
         string provCode = FileName[..2].ToUpper();
         IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
 
-        var foaeaLoginData = new FoaeaLoginData
-        {
-            UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-            Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-            Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-        };
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, foaeaLoginData);
+        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
     private Dictionary<string, string> LoadTranslations()
@@ -84,7 +70,7 @@ public class IncomingProvincialLicenceDenialManager
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfig, DB.MailService);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -127,7 +113,7 @@ public class IncomingProvincialLicenceDenialManager
                                                                   isTermination: true);
 
                     await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", AuditConfig.AuditRecipients,
+                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                             counts.ErrorCount, counts.WarningCount, counts.SuccessCount, unknownTags.Count);
                 }
                 finally
@@ -142,7 +128,7 @@ public class IncomingProvincialLicenceDenialManager
         {
             result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfig.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
         }
 
         await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
@@ -364,7 +350,7 @@ public class IncomingProvincialLicenceDenialManager
             totalCount += licenceDenialFile.LICAPPIN30.Count;
         if (licenceDenialFile.LICAPPIN40 is not null && licenceDenialFile.LICAPPIN40.Any() && !EmptyAction(licenceDenialFile.LICAPPIN40))
             totalCount += licenceDenialFile.LICAPPIN40.Count;
-        
+
         if (int.Parse(licenceDenialFile.LICAPPIN99.ResponseCnt) != totalCount)
         {
             isValid = false;
@@ -376,7 +362,7 @@ public class IncomingProvincialLicenceDenialManager
     {
         bool result = true;
 
-        foreach(var item in baseData)
+        foreach (var item in baseData)
         {
             if (!string.IsNullOrEmpty(item.Maintenance_ActionCd))
             {

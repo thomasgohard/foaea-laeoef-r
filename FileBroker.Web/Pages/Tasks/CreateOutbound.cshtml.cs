@@ -4,8 +4,6 @@ using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -21,7 +19,7 @@ namespace FileBroker.Web.Pages.Tasks
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
         private ApiConfig ApiRootData { get; }
-        private IConfiguration Config { get; }
+        private ConfigurationHelper Config { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
@@ -35,7 +33,7 @@ namespace FileBroker.Web.Pages.Tasks
                                    IProcessParameterRepository processParameterTable,
                                    IMailServiceRepository mailServiceDB,
                                    IOptions<ApiConfig> apiConfig,
-                                   IConfiguration config)
+                                   ConfigurationHelper config)
         {
             FileTable = fileTable;
             FlatFileSpecs = flatFileSpecs;

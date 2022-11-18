@@ -1,7 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
 using FOAEA3.Resources;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business
@@ -11,8 +10,7 @@ namespace FileBroker.Business
         private string FileName { get; }
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
-        private IConfiguration Config { get; }
-        private ProvincialAuditFileConfig AuditConfig { get; }
+        private ConfigurationHelper Config { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
@@ -24,17 +22,15 @@ namespace FileBroker.Business
         public IncomingProvincialInterceptionManager(RepositoryList db,
                                                      APIBrokerList foaeaApis,
                                                      string fileName,
-                                                     IConfiguration config)
+                                                     ConfigurationHelper config)
         {
             FileName = fileName;
             APIs = foaeaApis;
             DB = db;
             Config = config;
 
-            AuditConfig = Config.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
-
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+            IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
             Translations = LoadTranslations();
 
@@ -43,14 +39,7 @@ namespace FileBroker.Business
             string provCode = FileName[..2].ToUpper();
             IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
 
-            var foaeaLoginData = new FoaeaLoginData
-            {
-                UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-            };
-
-            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, foaeaLoginData);
+            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
         }
 
         private Dictionary<string, string> LoadTranslations()
@@ -80,12 +69,12 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags, 
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags,
                                                                                 bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfig, DB.MailService);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
             var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -240,10 +229,10 @@ namespace FileBroker.Business
                         }
 
                         await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", AuditConfig.AuditRecipients,
+                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                                            errorCount, warningCount, successCount, unknownTags.Count);
 
-                        if (AuditConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                        if (Config.AuditConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
                             await AutoAcceptVariationsAsync(EnfSrv_Cd);
 
                     }
@@ -260,7 +249,7 @@ namespace FileBroker.Business
             {
                 result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfig.AuditRecipients, result);
+                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
             }
 
             await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);

@@ -2,15 +2,12 @@ using DBHelper;
 using FileBroker.Business.Helpers;
 using FileBroker.Common;
 using FileBroker.Common.Helpers;
-using FileBroker.Data.DB;
-using FileBroker.Data;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Structs;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -22,13 +19,13 @@ namespace FileBroker.Web.Pages.Tasks
         private IFileTableRepository FileTable { get; }
         private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
-        private IConfiguration Config { get; }
+        private ConfigurationHelper Config { get; }
 
         public IFormFile FormFile { get; set; }
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
-        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig, IConfiguration config)
+        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig, ConfigurationHelper config)
         {
             FileTable = fileTable;
             ApiConfig = apiConfig.Value;
@@ -64,12 +61,11 @@ namespace FileBroker.Web.Pages.Tasks
                     Licencing = string.Empty
                 };
 
-                var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+                var fileBrokerDB = new DBToolsAsync(Config.FileBrokerConnection);
                 var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-                var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
-                var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
-                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, configuration);
+                var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
+                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
 
                 var errors = new List<string>();
 
@@ -92,10 +88,8 @@ namespace FileBroker.Web.Pages.Tasks
                     {
                         case "INTAPPIN":
 
-                            string userName = Config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
-                            string userPassword = Config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
-
-                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, ApiConfig, userName, userPassword);
+                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, ApiConfig, Config.FileBrokerLogin.UserName,
+                                                                                                    Config.FileBrokerLogin.Password);
 
                             await fileBrokerAccess.SystemLoginAsync();
                             try

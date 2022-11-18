@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 
 namespace FileBroker.Business;
 
@@ -10,14 +9,12 @@ public class IncomingFederalSinManager
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
-                                     IConfiguration config)
+                                     ConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;
 
-        FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                                                  config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)

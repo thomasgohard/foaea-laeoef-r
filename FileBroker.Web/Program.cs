@@ -1,9 +1,6 @@
 using DBHelper;
 using FileBroker.Common;
-using FileBroker.Model;
 using FileBroker.Web.Filter;
-using FOAEA3.Model;
-using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,20 +14,15 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy;
 });
 
-var configuration = builder.Configuration;
+var config = new ConfigurationHelper(args);
 
-builder.Services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
-builder.Services.Configure<ApiConfig>(configuration.GetSection("APIroot"));
-
-string fileBrokerCON = configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues();
-
-string actualConnection = DataHelper.ConfigureDBServices(builder.Services, fileBrokerCON);
+string actualConnection = DataHelper.ConfigureDBServices(builder.Services, config.FileBrokerConnection);
 var mainDB = new DBTools(actualConnection);
 
 builder.Services.AddRazorPages()
         .AddMvcOptions(options =>
         {
-            options.Filters.Add(new RazorPageActionFilter(configuration, mainDB));
+            options.Filters.Add(new RazorPageActionFilter(mainDB));
         });
 
 var app = builder.Build();

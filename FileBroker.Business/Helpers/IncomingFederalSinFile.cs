@@ -1,18 +1,16 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace FileBroker.Business.Helpers
+﻿namespace FileBroker.Business.Helpers
 {
     public class IncomingFederalSinFile
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
-        private IConfiguration Config { get; }
+        private ConfigurationHelper Config { get; }
 
         public List<string> Errors { get; }
 
         public IncomingFederalSinFile(RepositoryList db,
                                       APIBrokerList foaeaApis,
-                                      IConfiguration config)
+                                      ConfigurationHelper config)
         {
             DB = db;
             FoaeaApis = foaeaApis;

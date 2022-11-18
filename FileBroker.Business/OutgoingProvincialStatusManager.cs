@@ -10,13 +10,11 @@ namespace FileBroker.Business
         private RepositoryList DB { get; }
         private FoaeaSystemAccess FoaeaAccess { get; }
 
-        public OutgoingProvincialStatusManager(APIBrokerList apis, RepositoryList repositories, IConfiguration config)
+        public OutgoingProvincialStatusManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
         {
             APIs = apis;
             DB = repositories;
-            FoaeaAccess = new FoaeaSystemAccess(apis, config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                                                      config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                                                      config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues());
+            FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
 
         public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)

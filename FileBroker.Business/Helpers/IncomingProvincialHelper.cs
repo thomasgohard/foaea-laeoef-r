@@ -1,18 +1,16 @@
 ﻿using DBHelper;
-using Microsoft.Extensions.Configuration;
 
 namespace FileBroker.Business.Helpers
 {
     internal class IncomingProvincialHelper
     {
-        private string TermsAcceptedTextEnglish { get; }
-        private string TermsAcceptedTextFrench { get; }
+        private ConfigurationHelper Config { get; }
+
         private string ProvCode { get; }
 
-        public IncomingProvincialHelper(IConfiguration config, string provCode)
+        public IncomingProvincialHelper(ConfigurationHelper config, string provCode)
         {
-            TermsAcceptedTextEnglish = config["Declaration:TermsAccepted:English"];
-            TermsAcceptedTextFrench = config["Declaration:TermsAccepted:French"];
+            Config = config;
             ProvCode = provCode;
         }
 
@@ -22,14 +20,14 @@ namespace FileBroker.Business.Helpers
 
             if (ProvCode.ToUpper().In("NF", "NL"))
             {
-                result = string.Equals(TermsAcceptedTextEnglish.Replace("{prv}", "NF"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
-                         string.Equals(TermsAcceptedTextEnglish.Replace("{prv}", "NL"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
-                         string.Equals(TermsAcceptedTextFrench.Replace("{prv}", "NF"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
-                         string.Equals(TermsAcceptedTextFrench.Replace("{prv}", "NL"), termsAccepted, StringComparison.InvariantCultureIgnoreCase);
+                result = string.Equals(Config.TermsAcceptedTextEnglish.Replace("{prv}", "NF"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
+                         string.Equals(Config.TermsAcceptedTextEnglish.Replace("{prv}", "NL"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
+                         string.Equals(Config.TermsAcceptedTextFrench.Replace("{prv}", "NF"), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
+                         string.Equals(Config.TermsAcceptedTextFrench.Replace("{prv}", "NL"), termsAccepted, StringComparison.InvariantCultureIgnoreCase);
             }
             else
-                result = string.Equals(TermsAcceptedTextEnglish.Replace("{prv}", ProvCode), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
-                         string.Equals(TermsAcceptedTextFrench.Replace("{prv}", ProvCode), termsAccepted, StringComparison.InvariantCultureIgnoreCase);
+                result = string.Equals(Config.TermsAcceptedTextEnglish.Replace("{prv}", ProvCode), termsAccepted, StringComparison.InvariantCultureIgnoreCase) ||
+                         string.Equals(Config.TermsAcceptedTextFrench.Replace("{prv}", ProvCode), termsAccepted, StringComparison.InvariantCultureIgnoreCase);
 
             return result;
         }

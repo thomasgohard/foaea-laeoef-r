@@ -1,8 +1,6 @@
 ﻿using FileBroker.Common.Helpers;
 using FOAEA3.Resources;
-using Microsoft.Extensions.Configuration;
 using System.IO.Compression;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
 namespace FileBroker.Business
@@ -12,8 +10,7 @@ namespace FileBroker.Business
         private string FileName { get; }
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
-        private IConfiguration Config { get; }
-        private ProvincialAuditFileConfig AuditConfig { get; }
+        private ConfigurationHelper Config { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
@@ -25,17 +22,15 @@ namespace FileBroker.Business
         public IncomingProvincialElectronicSummonsManager(RepositoryList db,
                                                           APIBrokerList foaeaApis,
                                                           string fileName,
-                                                          IConfiguration config)
+                                                          ConfigurationHelper config)
         {
             FileName = fileName;
             APIs = foaeaApis;
             DB = db;
             Config = config;
 
-            AuditConfig = Config.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
-
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+            IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
             Translations = LoadTranslations();
 
@@ -44,14 +39,7 @@ namespace FileBroker.Business
             string provCode = FileName[..2].ToUpper();
             IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
 
-            var foaeaLoginData = new FoaeaLoginData
-            {
-                UserName = Config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues(),
-                Password = Config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues(),
-                Submitter = Config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
-            };
-
-            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, foaeaLoginData);
+            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
         }
 
         private Dictionary<string, string> LoadTranslations()
@@ -85,7 +73,7 @@ namespace FileBroker.Business
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfig, DB.MailService);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
 
             int errorCount = 0;
             int warningCount = 0;
@@ -160,11 +148,11 @@ namespace FileBroker.Business
                         string pdfNameNoExtension = Path.GetFileNameWithoutExtension(pdfName);
 
                         enfServiceCode = pdfNameNoExtension[..2] + "01";
-                        controlCode = pdfNameNoExtension[5..(pdfNameNoExtension.Length-1)];
+                        controlCode = pdfNameNoExtension[5..(pdfNameNoExtension.Length - 1)];
 
                         var appl = await APIs.Applications.GetApplicationAsync(enfServiceCode, controlCode);
 
-                        if ((appl == null) || (appl.Appl_CtrlCd != controlCode)) 
+                        if ((appl == null) || (appl.Appl_CtrlCd != controlCode))
                             warning = Translate("Warning: Appl Record does not exist");
                         else
                             sourceRef = appl.Appl_Source_RfrNr?.Trim();
@@ -216,7 +204,7 @@ namespace FileBroker.Business
                 }
 
                 await fileAuditManager.GenerateAuditFileAsync(fileName, null, errorCount, warningCount, successCount);
-                await fileAuditManager.SendStandardAuditEmailAsync(fileName, AuditConfig.AuditRecipients,
+                await fileAuditManager.SendStandardAuditEmailAsync(fileName, Config.AuditConfig.AuditRecipients,
                                                                    errorCount, warningCount, successCount, 0);
 
             }

@@ -21,17 +21,9 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        var config = new ConfigurationHelper(args);
 
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-            .AddCommandLine(args);
-
-        IConfiguration configuration = builder.Build();
-
-        var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
+        var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
         var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
         await db.RequestLogTable.DeleteAllAsync();
@@ -58,9 +50,7 @@ internal class Program
         WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
         WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
 
-        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
-
-        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
+        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
 
         int totalFilesFound = 0;
         foreach (var itemProvince in provinces)
@@ -69,7 +59,7 @@ internal class Program
             var searchPaths = GetFileSearchPaths(filesToProcess, out FileBaseName fileBaseName, provCode);
 
             var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, configuration);
+            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, config);
 
             bool foundZero = true;
 

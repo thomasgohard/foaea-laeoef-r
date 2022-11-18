@@ -6,12 +6,10 @@ namespace FileBroker.Web.Filter
 {
     public class RazorPageActionFilter : IAsyncPageFilter
     {
-        private readonly IConfiguration _config;
         private readonly IDBTools _mainDB;
 
-        public RazorPageActionFilter(IConfiguration config, IDBTools mainDB)
+        public RazorPageActionFilter(IDBTools mainDB)
         {
-            _config = config;
             _mainDB = mainDB;
         }
 
