@@ -102,7 +102,7 @@ public class FileAuditManager
         }
 
         // save file to proper location
-        string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
+        string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
         await File.WriteAllTextAsync(fullFileName, auditFileContent.ToString());
     }
 
@@ -134,9 +134,9 @@ public class FileAuditManager
                 bodyContent += $"Total XML validation warnings: {xmlWarningCount}";
         }
 
-        string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
+        string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
 
-        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent, auditFileLocation);
+        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent, auditFileLocation);
 
     }
 
@@ -165,7 +165,7 @@ public class FileAuditManager
             bodyContent += @"<br />For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
         }
 
-        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent);
+        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent);
 
     }
 }

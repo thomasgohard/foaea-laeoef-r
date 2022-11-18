@@ -164,10 +164,10 @@ namespace FileBroker.Business
 
                         var appl = await APIs.Applications.GetApplicationAsync(enfServiceCode, controlCode);
 
-                        if (appl == null)
+                        if ((appl == null) || (appl.Appl_CtrlCd != controlCode)) 
                             warning = Translate("Warning: Appl Record does not exist");
                         else
-                            sourceRef = appl.Appl_Source_RfrNr.Trim();
+                            sourceRef = appl.Appl_Source_RfrNr?.Trim();
 
                         var newPDF = new ElectronicSummonsDocumentPdfData
                         {
@@ -204,7 +204,7 @@ namespace FileBroker.Business
                     {
                         Appl_EnfSrv_Cd = enfServiceCode,
                         Appl_CtrlCd = controlCode,
-                        Appl_Source_RfrNr = sourceRef,
+                        Appl_Source_RfrNr = sourceRef ?? string.Empty,
                         ApplicationMessage = message,
                         InboundFilename = fileName,
                         Timestamp = DateTime.Now,
