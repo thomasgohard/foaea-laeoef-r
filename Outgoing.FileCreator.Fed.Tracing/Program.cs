@@ -16,7 +16,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
 
-            var config = new ConfigurationHelper(args);
+            var config = new FileBrokerConfigurationHelper(args);
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
@@ -27,7 +27,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
         }
 
         private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                    ConfigurationHelper config)
+                                                                    FileBrokerConfigurationHelper config)
         {
 
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);

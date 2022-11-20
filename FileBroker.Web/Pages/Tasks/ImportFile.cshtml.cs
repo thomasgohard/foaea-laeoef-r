@@ -17,18 +17,16 @@ namespace FileBroker.Web.Pages.Tasks
     public class ImportFileModel : PageModel
     {
         private IFileTableRepository FileTable { get; }
-        private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
-        private ConfigurationHelper Config { get; }
+        private FileBrokerConfigurationHelper Config { get; }
 
         public IFormFile FormFile { get; set; }
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
-        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig, ConfigurationHelper config)
+        public ImportFileModel(IFileTableRepository fileTable, FileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
-            ApiConfig = apiConfig.Value;
             APIHelper = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             Config = config;
         }
@@ -88,8 +86,8 @@ namespace FileBroker.Web.Pages.Tasks
                     {
                         case "INTAPPIN":
 
-                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, ApiConfig, Config.FileBrokerLogin.UserName,
-                                                                                                    Config.FileBrokerLogin.Password);
+                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, Config.ApiRootData, Config.FileBrokerLogin.UserName,
+                                                                              Config.FileBrokerLogin.Password);
 
                             await fileBrokerAccess.SystemLoginAsync();
                             try

@@ -1,4 +1,5 @@
-﻿using FileBroker.Model;
+﻿using FileBroker.Common;
+using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Helpers;
@@ -20,11 +21,11 @@ namespace FileBroker.API.Account.Controllers
         [AllowAnonymous]
         [HttpPost("")]
         public async Task<ActionResult> CreateToken([FromBody] FileBrokerLoginData loginData,
-                                                    [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                     [FromServices] IUserRepository userTable,
                                                     [FromServices] ISecurityTokenRepository securityTokenTable)
         {
-            var tokenConfig = tokenConfigOptions.Value;
+            var configHelper = new FileBrokerConfigurationHelper();
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 
@@ -59,11 +60,11 @@ namespace FileBroker.API.Account.Controllers
         [AllowAnonymous]
         [HttpPost("Refresh")]
         public async Task<ActionResult> RefreshTokenAsync([FromBody] TokenRefreshData refreshData,
-                                                          [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                           [FromServices] IUserRepository userTable,
                                                           [FromServices] ISecurityTokenRepository securityTokenTable)
         {
-            var tokenConfig = tokenConfigOptions.Value;
+            var configHelper = new FileBrokerConfigurationHelper();
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 

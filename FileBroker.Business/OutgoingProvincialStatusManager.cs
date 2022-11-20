@@ -10,7 +10,7 @@ namespace FileBroker.Business
         private RepositoryList DB { get; }
         private FoaeaSystemAccess FoaeaAccess { get; }
 
-        public OutgoingProvincialStatusManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
+        public OutgoingProvincialStatusManager(APIBrokerList apis, RepositoryList repositories, FileBrokerConfigurationHelper config)
         {
             APIs = apis;
             DB = repositories;

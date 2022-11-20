@@ -6,13 +6,13 @@ namespace FileBroker.Business.Helpers
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
-        private ConfigurationHelper Config { get; }
+        private FileBrokerConfigurationHelper Config { get; }
 
         public List<string> Errors { get; }
 
         public IncomingFederalTracingFile(RepositoryList db,
                                           APIBrokerList foaeaApis,
-                                          ConfigurationHelper config)
+                                          FileBrokerConfigurationHelper config)
         {
             DB = db;
             FoaeaApis = foaeaApis;

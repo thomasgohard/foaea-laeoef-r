@@ -14,11 +14,12 @@ namespace FOAEA3.API.Tracing.Controllers;
 [ApiController]
 public class TracingEventsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public TracingEventsController(IOptions<CustomConfig> config)
+    public TracingEventsController(g)
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

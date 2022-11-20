@@ -18,7 +18,7 @@ namespace FOAEA3.Business.Areas.Application
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
 
-        public TracingManager(TracingApplicationData tracing, IRepositories repositories, CustomConfig config) :
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, RecipientsConfig config) :
             base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
         {
 
@@ -39,7 +39,7 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public TracingManager(IRepositories repositories, CustomConfig config) :
+        public TracingManager(IRepositories repositories, RecipientsConfig config) :
             this(new TracingApplicationData(), repositories, config)
         {
         }

@@ -17,14 +17,14 @@ namespace FOAEA3.Business.Areas.Application
 
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, ApplicationEventManager eventManager,
-                                      IRepositories repositories, CustomConfig config, FoaeaUser user) : 
+                                      IRepositories repositories, RecipientsConfig config, FoaeaUser user) : 
                                         base(interceptionApplication, eventManager, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, IRepositories repositories,
-                                      CustomConfig config, FoaeaUser user) : 
+                                      RecipientsConfig config, FoaeaUser user) : 
                                         base(interceptionApplication, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;

@@ -10,7 +10,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
 
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingFederalSinManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
+    public OutgoingFederalSinManager(APIBrokerList apis, RepositoryList repositories, FileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;

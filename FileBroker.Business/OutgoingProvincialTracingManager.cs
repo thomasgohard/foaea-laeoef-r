@@ -10,7 +10,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
     private RepositoryList DB { get; }
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingProvincialTracingManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
+    public OutgoingProvincialTracingManager(APIBrokerList apis, RepositoryList repositories, FileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;

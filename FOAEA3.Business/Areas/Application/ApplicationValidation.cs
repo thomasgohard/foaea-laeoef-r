@@ -21,7 +21,7 @@ namespace FOAEA3.Business.Areas.Application
         protected IRepositories DB { get; }
         private ApplicationData Application { get; }
 
-        protected readonly CustomConfig config;
+        protected readonly RecipientsConfig config;
 
         public ApplicationEventManager EventManager { get; set; }
 
@@ -30,7 +30,7 @@ namespace FOAEA3.Business.Areas.Application
         public FoaeaUser CurrentUser { get; set; }
 
         public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
-                                     IRepositories repositories, CustomConfig config, FoaeaUser currentUser)
+                                     IRepositories repositories, RecipientsConfig config, FoaeaUser currentUser)
         {
             this.config = config;
             Application = application;
@@ -40,7 +40,7 @@ namespace FOAEA3.Business.Areas.Application
         }
 
         public ApplicationValidation(ApplicationData application, IRepositories repositories, 
-                                     CustomConfig config, FoaeaUser currentUser)
+                                     RecipientsConfig config, FoaeaUser currentUser)
         {
             this.config = config;
             Application = application;

@@ -18,8 +18,7 @@ namespace FileBroker.Web.Pages.Tasks
         private IErrorTrackingRepository ErrorTrackingDB { get; }
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
-        private ApiConfig ApiRootData { get; }
-        private ConfigurationHelper Config { get; }
+        private FileBrokerConfigurationHelper Config { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
@@ -32,8 +31,7 @@ namespace FileBroker.Web.Pages.Tasks
                                    IErrorTrackingRepository errorTrackingDB,
                                    IProcessParameterRepository processParameterTable,
                                    IMailServiceRepository mailServiceDB,
-                                   IOptions<ApiConfig> apiConfig,
-                                   ConfigurationHelper config)
+                                   FileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
             FlatFileSpecs = flatFileSpecs;
@@ -41,7 +39,6 @@ namespace FileBroker.Web.Pages.Tasks
             ErrorTrackingDB = errorTrackingDB;
             ProcessParameterTable = processParameterTable;
             MailServiceDB = mailServiceDB;
-            ApiRootData = apiConfig.Value;
             Config = config;
         }
 
@@ -52,7 +49,7 @@ namespace FileBroker.Web.Pages.Tasks
 
         public async Task OnPostCreateFiles(int[] selectedProcesses)
         {
-            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(ApiRootData);
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
 
             var repositories = new RepositoryList
             {

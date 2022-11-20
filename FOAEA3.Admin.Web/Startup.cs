@@ -1,5 +1,6 @@
 using DBHelper;
 using FOAEA3.Admin.Web.Filter;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
@@ -16,22 +17,24 @@ namespace FOAEA3.Admin.Web
 {
     public class Startup
     {
+        public IConfiguration LocalConfiguration { get; }
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            LocalConfiguration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var mainDB = new DBTools(Configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            var config = new FoaeaConfigurationHelper();
+            var mainDB = new DBTools(config.FoaeaConnection);
 
             services.AddRazorPages()
                     .AddMvcOptions(options =>
                     {
-                        options.Filters.Add(new RazorPageActionFilter(Configuration, mainDB));
+                        options.Filters.Add(new RazorPageActionFilter(mainDB));
                     });
 
             services.AddScoped<IDBToolsAsync>(m => ActivatorUtilities.CreateInstance<DBToolsAsync>(m, mainDB)); // used to display the database name at top of page
@@ -43,7 +46,7 @@ namespace FOAEA3.Admin.Web
             services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
             services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
 
-            services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));
+            services.Configure<ApiConfig>(LocalConfiguration.GetSection("APIroot"));
 
         }
 

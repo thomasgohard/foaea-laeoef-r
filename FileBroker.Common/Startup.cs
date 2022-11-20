@@ -19,12 +19,9 @@ namespace FileBroker.Common
 {
     public static class Startup
     {
-        public static void ConfigureAPIServices(IServiceCollection services, ConfigurationHelper config, string apiName)
+        public static void ConfigureAPIServices(IServiceCollection services, FileBrokerConfigurationHelper config, string apiName)
         {
             LoggingHelper.SetupLogging(config.FileBrokerConnection, "Logs-API-FileBroker");
-
-            // TODO: services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
-            // this might do the same (is it actually needed though): services.AddSingleton(config.Tokens);
 
             services.AddSwaggerGen(options =>
             {
@@ -63,16 +60,10 @@ namespace FileBroker.Common
 
             services.AddEndpointsApiExplorer();
 
-            // TODO: services.Configure<ProvincialAuditFileConfig>(configuration.GetSection("AuditConfig"));
-            // this might do the same (is it actually needed though): services.AddSingleton(config.AuditConfig);
-
-            // TODO: services.Configure<ApiConfig>(configuration.GetSection("APIroot"));            
-            // this might do the same (is it actually needed though): services.AddSingleton(config.ApiRootData);
-
             DataHelper.ConfigureDBServices(services, config.FileBrokerConnection);
         }
 
-        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, ConfigurationHelper config, string apiName, string url)
+        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, FileBrokerConfigurationHelper config, string apiName, string url)
         {
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");

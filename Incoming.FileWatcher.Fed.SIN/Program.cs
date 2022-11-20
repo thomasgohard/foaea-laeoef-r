@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
 
-var config = new ConfigurationHelper(args);
+var config = new FileBrokerConfigurationHelper(args);
 
 var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);

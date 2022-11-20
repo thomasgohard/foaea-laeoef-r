@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
@@ -13,11 +14,12 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 [Route("api/v1/[controller]")]
 public class OutgoingFederalSinsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public OutgoingFederalSinsController(IOptions<CustomConfig> config)
+    public OutgoingFederalSinsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

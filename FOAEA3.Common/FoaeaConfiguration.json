@@ -1,21 +1,11 @@
 {
-  "AllowedHosts": "*",
   "ConnectionStrings": {
     "FOAEAMain": "Server=%FOAEA_DB_SERVER%;Database=FoaeaDBStg2Prod;Integrated Security=SSPI;Trust Server Certificate=true;"
   },
   "CustomConfig": {
-    "EmailRecipients": "Flas-it-SO@justice.gc.ca",
-    "ExGratiaRecipients": "Flas-it-SO@justice.gc.ca",
+    "EmailRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
     "SystemErrorRecipients": "Flas-it-SO@justice.gc.ca",
-    "ESDsites": [
-      "AB01",
-      "MB01",
-      "NF01",
-      "ON01",
-      "QC01",
-      "NU01",
-      "NS01"
-    ]
   },
   "Tokens": {
     "Key": "%FILEBROKER_TOKEN_KEY%",
@@ -24,6 +14,5 @@
     "ExpireMinutes": 2,
     "RefreshTokenExpireMinutes": 20
   },
-  "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ],
-  "Urls": "https://localhost:51053"
+  "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ]
 }

@@ -15,7 +15,7 @@ namespace FOAEA3.Business.Areas.Application
         public LicenceDenialApplicationData LicenceDenialApplication { get; }
         private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
-        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, RecipientsConfig config) : base(licenceDenial, repositories, config)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -38,7 +38,7 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
-        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
+        public LicenceDenialManager(IRepositories repositories, RecipientsConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
 
         }

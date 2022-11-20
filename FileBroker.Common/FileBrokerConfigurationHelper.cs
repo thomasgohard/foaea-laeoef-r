@@ -8,7 +8,7 @@ using System.IO;
 
 namespace FileBroker.Common
 {
-    public class ConfigurationHelper
+    public class FileBrokerConfigurationHelper
     {
         public string FileBrokerConnection { get; }
         public string TermsAcceptedTextEnglish { get; }
@@ -24,15 +24,17 @@ namespace FileBroker.Common
 
         public List<string> ProductionServers { get; }
 
-        public ConfigurationHelper(string[] args)
+        public FileBrokerConfigurationHelper(string[] args = null)
         {
             string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("configuration.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"configuration.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args);
+                .AddJsonFile("FileBrokerConfiguration.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"FileBrokerConfiguration.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true);
+
+            if (args is not null)
+                builder = builder.AddCommandLine(args);
 
             IConfiguration configuration = builder.Build();
 

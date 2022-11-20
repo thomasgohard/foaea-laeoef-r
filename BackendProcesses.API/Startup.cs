@@ -50,7 +50,7 @@ namespace BackendProcesses.API
             services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB)); // to access database procs
             services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
 
-            services.Configure<CustomConfig>(Config.GetSection("CustomConfig"));
+            services.Configure<RecipientsConfig>(Config.GetSection("CustomConfig"));
 
             Log.Information("Using MainDB = {MainDB}", mainDB.ConnectionString);
             ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");

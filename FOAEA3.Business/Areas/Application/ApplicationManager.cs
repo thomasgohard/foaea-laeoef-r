@@ -25,7 +25,7 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventDetailManager EventDetailManager { get; }
 
         protected ApplicationValidation Validation { get; }
-        protected readonly CustomConfig config;
+        protected readonly RecipientsConfig config;
 
         protected ApplicationStateEngine StateEngine { get; }
 
@@ -58,7 +58,7 @@ namespace FOAEA3.Business.Areas.Application
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
         }
 
-        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
+        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, RecipientsConfig config,
                                   ApplicationValidation applicationValidation = null)
         {
             this.config = config;

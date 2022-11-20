@@ -13,11 +13,12 @@ namespace FOAEA3.API.LicenceDenial.Controllers;
 [ApiController]
 public class LicenceDenialResponsesController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public LicenceDenialResponsesController(IOptions<CustomConfig> config)
+    public LicenceDenialResponsesController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

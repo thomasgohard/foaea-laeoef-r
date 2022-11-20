@@ -14,11 +14,12 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 [Route("api/v1/[controller]")]
 public class ApplicationEventsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public ApplicationEventsController(IOptions<CustomConfig> config)
+    public ApplicationEventsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

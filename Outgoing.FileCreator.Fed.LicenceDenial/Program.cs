@@ -23,7 +23,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Licence Denial Files Creator");
 
-            var config = new ConfigurationHelper(args);
+            var config = new FileBrokerConfigurationHelper(args);
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
@@ -34,7 +34,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
         }
 
         private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                               ConfigurationHelper config)
+                                                                               FileBrokerConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);

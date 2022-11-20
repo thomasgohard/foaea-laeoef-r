@@ -7,10 +7,10 @@ namespace BackendProcesses.Business
 {
     public class BringForwardEventProcess
     {
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig config;
         private readonly IRepositories DB;
 
-        public BringForwardEventProcess(IRepositories repositories, CustomConfig config)
+        public BringForwardEventProcess(IRepositories repositories, RecipientsConfig config)
         {
             this.config = config;
             DB = repositories;

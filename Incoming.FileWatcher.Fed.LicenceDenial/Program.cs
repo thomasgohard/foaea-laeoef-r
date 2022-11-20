@@ -17,7 +17,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Licence Denial File Monitor");
 
-            var config = new ConfigurationHelper(args);
+            var config = new FileBrokerConfigurationHelper(args);
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);

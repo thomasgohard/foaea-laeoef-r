@@ -13,11 +13,12 @@ namespace FOAEA3.API.Interception.Controllers
     [Route("api/v1/[controller]")]
     public class ESDsController : ControllerBase
     {
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig config;
 
-        public ESDsController(IOptions<CustomConfig> config)
+        public ESDsController()
         {
-            this.config = config.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+            config = configHelper.RecipientsConfig;
         }
 
         [HttpGet("Version")]

@@ -14,7 +14,7 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy;
 });
 
-var config = new ConfigurationHelper(args);
+var config = new FileBrokerConfigurationHelper(args);
 
 string actualConnection = DataHelper.ConfigureDBServices(builder.Services, config.FileBrokerConnection);
 var mainDB = new DBTools(actualConnection);

@@ -14,11 +14,12 @@ namespace FOAEA3.API.LicenceDenial.Controllers;
 [Route("api/v1/[controller]")]
 public class LicenceDenialsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public LicenceDenialsController(IOptions<CustomConfig> config)
+    public LicenceDenialsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

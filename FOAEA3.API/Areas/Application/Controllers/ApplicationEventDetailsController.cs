@@ -6,7 +6,6 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
@@ -14,11 +13,12 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 [Route("api/v1/[controller]")]
 public class ApplicationEventDetailsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public ApplicationEventDetailsController(IOptions<CustomConfig> config)
+    public ApplicationEventDetailsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

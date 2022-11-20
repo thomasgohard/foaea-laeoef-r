@@ -12,17 +12,17 @@ namespace FOAEA3.Web
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            LocalConfiguration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration LocalConfiguration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
 
-            services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));
+            services.Configure<ApiConfig>(LocalConfiguration.GetSection("APIroot"));
 
             services.AddDistributedMemoryCache();
 

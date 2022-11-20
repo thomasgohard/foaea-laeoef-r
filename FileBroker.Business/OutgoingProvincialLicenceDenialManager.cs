@@ -10,7 +10,7 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
     private RepositoryList DB { get; }
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingProvincialLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
+    public OutgoingProvincialLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, FileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;

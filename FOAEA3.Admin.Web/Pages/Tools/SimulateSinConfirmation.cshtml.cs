@@ -1,10 +1,10 @@
 using FOAEA3.Admin.Business;
 using FOAEA3.Admin.Web.Models;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
@@ -16,11 +16,12 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
 
         private readonly IRepositories DB;
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig recipients;
 
-        public SimulateSinConfirmationModel(IRepositories repositories, IOptions<CustomConfig> config)
+        public SimulateSinConfirmationModel(IRepositories repositories)
         {
-            this.config = config.Value;
+            var config = new FoaeaConfigurationHelper();
+            recipients = config.RecipientsConfig;
             DB = repositories;
         }
 
@@ -33,11 +34,11 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
             if (ModelState.IsValid)
             {
-                var adminManager = new AdminManager(DB, config);
+                var adminManager = new AdminManager(DB, recipients);
 
                 try
                 {
-                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService, 
+                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService,
                                                                             SimulateSinConfirmation.ControlCode,
                                                                             SimulateSinConfirmation.Sin, User);
 

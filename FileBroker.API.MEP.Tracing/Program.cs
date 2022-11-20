@@ -7,7 +7,7 @@ builder.Logging.ClearProviders();
 
 var localConfig = builder.Configuration;
 
-var configuration = new ConfigurationHelper(args);
+var configuration = new FileBrokerConfigurationHelper(args);
 var env = builder.Environment;
 var apiName = env.ApplicationName;
 

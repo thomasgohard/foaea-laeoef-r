@@ -1,4 +1,5 @@
 ﻿using BackendProcesses.Business;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,12 @@ namespace BackendProcesses.API.Controllers
     [ApiController]
     public class BringForwardEventsController : Controller
     {
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig config;
 
-        public BringForwardEventsController(IOptions<CustomConfig> config)
+        public BringForwardEventsController()
         {
-            this.config = config.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+            config = configHelper.RecipientsConfig;
         }
 
         [HttpGet]

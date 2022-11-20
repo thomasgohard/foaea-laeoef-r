@@ -9,7 +9,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
     private RepositoryList DB { get; }
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingFederalTracingManager(APIBrokerList apis, RepositoryList repositories, ConfigurationHelper config)
+    public OutgoingFederalTracingManager(APIBrokerList apis, RepositoryList repositories, FileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;

@@ -30,11 +30,12 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
-                                                        [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                         [FromServices] IRepositories db)
         {
+            var configHelper = new FoaeaConfigurationHelper();
+
             // WARNING: not for production use!
-            var tokenConfig = tokenConfigOptions.Value;
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 
@@ -114,10 +115,12 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("TestRefreshToken")]
         public async Task<ActionResult> TestRefreshToken([FromBody] TokenRefreshData refreshData,
-                                                         [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                          [FromServices] IRepositories db)
         {
-            var tokenConfig = tokenConfigOptions.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+
+            // WARNING: not for production use!
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 

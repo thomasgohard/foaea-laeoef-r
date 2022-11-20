@@ -15,11 +15,12 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 [Route("api/v1/[controller]")]
 public class ApplicationsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public ApplicationsController(IOptions<CustomConfig> config)
+    public ApplicationsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

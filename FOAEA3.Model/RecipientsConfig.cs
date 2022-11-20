@@ -1,20 +1,13 @@
 ﻿using FOAEA3.Resources.Helpers;
-using System.Collections.Generic;
 
 namespace FOAEA3.Model
 {
-    public class CustomConfig
+    public class RecipientsConfig
     {
-        private string auditRecipients;
         private string emailRecipients;
         private string exGratiaRecipients;
         private string systemErrorRecipients;
 
-        public string AuditRecipients
-        {
-            get => auditRecipients;
-            set => auditRecipients = value.ReplaceVariablesWithEnvironmentValues();
-        }
         public string EmailRecipients
         {
             get => emailRecipients;
@@ -30,10 +23,5 @@ namespace FOAEA3.Model
             get => systemErrorRecipients;
             set => systemErrorRecipients = value.ReplaceVariablesWithEnvironmentValues();
         }
-
-        public List<string> ESDsites { get; set; }
-
-        public string DeclarationTextEnglish { get; set; }
-        public string DeclarationTextFrench { get; set; }
     }
 }

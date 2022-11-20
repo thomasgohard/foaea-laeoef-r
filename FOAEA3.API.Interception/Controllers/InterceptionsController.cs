@@ -15,11 +15,12 @@ namespace FOAEA3.API.Interception.Controllers;
 [Authorize(Roles = Duties.Interception + "," + Roles.FlasUser + "," + Roles.Admin)]
 public class InterceptionsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public InterceptionsController(IOptions<CustomConfig> config)
+    public InterceptionsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

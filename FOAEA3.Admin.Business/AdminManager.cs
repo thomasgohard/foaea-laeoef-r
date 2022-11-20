@@ -3,7 +3,6 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -14,10 +13,10 @@ namespace FOAEA3.Admin.Business
     internal class AdminManager
     {
         private readonly IRepositories DB;
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig config;
         public string LastError { get; set; }
 
-        public AdminManager(IRepositories repositories, CustomConfig config)
+        public AdminManager(IRepositories repositories, RecipientsConfig config)
         {
             this.config = config;
             DB = repositories;

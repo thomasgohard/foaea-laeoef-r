@@ -17,7 +17,7 @@ namespace Outgoing.FileCreator.MEP
         {
             ColourConsole.WriteEmbeddedColorLine("Starting MEP Outgoing File Creator");
 
-            var config = new ConfigurationHelper(args);
+            var config = new FileBrokerConfigurationHelper(args);
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 

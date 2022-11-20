@@ -17,13 +17,14 @@ namespace FileBroker.Web.Pages.Tools
 
         public Dictionary<string, ApiInfo> ApiData { get; }
 
-        public APIinfoModel(IOptions<ApiConfig> apiConfig)
+        public APIinfoModel()
         {
-            ApiConfig = apiConfig.Value;
+            var config = new FileBrokerConfigurationHelper();
+            ApiConfig = config.ApiRootData;
             ApiData = new Dictionary<string, ApiInfo>();
         }
 
-        public async Task OnGet([FromServices] ConfigurationHelper config)
+        public async Task OnGet([FromServices] FileBrokerConfigurationHelper config)
         {
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);

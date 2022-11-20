@@ -23,13 +23,14 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
         private ApiConfig ApiFilesConfig { get; }
         private IRepositories DB { get; }
-        private readonly CustomConfig config;
+        private RecipientsConfig Recipients { get; }
 
-        public SimulateIncomingTracingResultsModel(IOptions<ApiConfig> apiConfig, IRepositories repositories, IOptions<CustomConfig> config)
+        public SimulateIncomingTracingResultsModel(IOptions<ApiConfig> apiConfig, IRepositories repositories)
         {
+            var config = new FoaeaConfigurationHelper();
             ApiFilesConfig = apiConfig.Value;
             DB = repositories;
-            this.config = config.Value;
+            Recipients = config.RecipientsConfig;
         }
 
         public void OnGet()
@@ -44,7 +45,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
                 var data = SimulateIncomingTracingResults;
 
                 // TODO: check if application exists and is in proper state
-                var appManager = new TracingManager(DB, config);
+                var appManager = new TracingManager(DB, Recipients);
                 if (await appManager.LoadApplicationAsync(data.EnfService, data.ControlCode))
                 {
                     if (appManager.TracingApplication.AppCtgy_Cd != "T01")

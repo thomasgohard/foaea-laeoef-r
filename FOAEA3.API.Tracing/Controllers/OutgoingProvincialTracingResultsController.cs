@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
@@ -12,11 +13,12 @@ namespace FOAEA3.API.Tracing.Controllers;
 [Route("api/v1/[controller]")]
 public class OutgoingProvincialTracingResultsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public OutgoingProvincialTracingResultsController(IOptions<CustomConfig> config)
+    public OutgoingProvincialTracingResultsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig;
     }
 
     [HttpGet("Version")]

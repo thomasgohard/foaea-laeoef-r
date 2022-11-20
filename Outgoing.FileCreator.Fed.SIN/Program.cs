@@ -16,7 +16,7 @@ internal class Program
     {
         ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing SIN File Creator");
 
-        var config = new ConfigurationHelper(args);
+        var config = new FileBrokerConfigurationHelper(args);
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
@@ -26,7 +26,7 @@ internal class Program
     }
 
     private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                ConfigurationHelper config)
+                                                                FileBrokerConfigurationHelper config)
     {
         var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 

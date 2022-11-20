@@ -3,7 +3,6 @@ using FOAEA3.Common.Filters;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
-using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
@@ -13,14 +12,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -36,12 +33,9 @@ namespace FOAEA3.Common
             return builder.Configuration["UseInMemoryData"] == "Yes";
         }
 
-        public static void ConfigureAPIServices(IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureAPIServices(IServiceCollection services, FoaeaConfigurationHelper configuration)
         {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            services.Configure<CustomConfig>(configuration.GetSection("CustomConfig"));
-            services.Configure<TokenConfig>(configuration.GetSection("Tokens"));
 
             services.AddControllers(options =>
                         {
@@ -58,10 +52,9 @@ namespace FOAEA3.Common
                         {
                             options.TokenValidationParameters = new TokenValidationParameters()
                             {
-                                ValidIssuer = configuration["Tokens:Issuer"].ReplaceVariablesWithEnvironmentValues(),
-                                ValidAudience = configuration["Tokens:Audience"].ReplaceVariablesWithEnvironmentValues(),
-                                IssuerSigningKey = new SymmetricSecurityKey(
-                                    Encoding.UTF8.GetBytes(configuration["Tokens:Key"].ReplaceVariablesWithEnvironmentValues())),
+                                ValidIssuer = configuration.Tokens.Issuer,
+                                ValidAudience = configuration.Tokens.Audience,
+                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Tokens.Key)),
                                 ValidateIssuer = true,
                                 ValidateAudience = true,
                                 ValidateLifetime = true,
@@ -101,7 +94,7 @@ namespace FOAEA3.Common
                         });
         }
 
-        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IConfiguration configuration, string apiName)
+        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, FoaeaConfigurationHelper configuration, string apiName)
         {
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");
@@ -111,10 +104,6 @@ namespace FOAEA3.Common
             Log.Information("Machine Name = {MachineName}", Environment.MachineName);
 
             string currentServer = Environment.MachineName;
-            var prodServersSection = configuration.GetSection("ProductionServers");
-            var prodServers = prodServersSection.Get<List<string>>();
-            for (int i = 0; i < prodServers.Count; i++)
-                prodServers[i] = prodServers[i].ReplaceVariablesWithEnvironmentValues();
 
             if (!env.IsEnvironment("Production"))
             {
@@ -126,7 +115,7 @@ namespace FOAEA3.Common
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
                 });
             }
-            else if (prodServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
+            else if (configuration.ProductionServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {
                 app.UseExceptionHandler(appBuilder =>
                 {
@@ -221,11 +210,13 @@ namespace FOAEA3.Common
             var builder = WebApplication.CreateBuilder(args);
             builder.Logging.ClearProviders();
 
-            var config = builder.Configuration;
+            var localConfig = builder.Configuration;
             var env = builder.Environment;
             var apiName = env.ApplicationName;
 
-            LoggingHelper.SetupLogging(config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            var config = new FoaeaConfigurationHelper(args);
+
+            LoggingHelper.SetupLogging(config.FoaeaConnection);
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -233,7 +224,7 @@ namespace FOAEA3.Common
             });
 
             if (!Startup.UseInMemoryData(builder))
-                Startup.AddDBServices(builder.Services, config.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+                Startup.AddDBServices(builder.Services, config.FoaeaConnection);
             else if (SetupDataOverride is not null)
                 SetupDataOverride(builder.Services);
 
@@ -246,7 +237,7 @@ namespace FOAEA3.Common
             if (!Startup.UseInMemoryData(builder))
                 await Startup.AddReferenceDataFromDB(app);
 
-            var api_url = config["Urls"];
+            var api_url = localConfig["Urls"];
 
             ColourConsole.WriteEmbeddedColorLine($"[green]Waiting for API calls...[/green] [yellow]{api_url}[/yellow]\n");
 

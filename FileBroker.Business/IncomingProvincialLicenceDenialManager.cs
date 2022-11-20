@@ -9,7 +9,7 @@ public class IncomingProvincialLicenceDenialManager
     private string FileName { get; }
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
-    private ConfigurationHelper Config { get; }
+    private FileBrokerConfigurationHelper Config { get; }
     private Dictionary<string, string> Translations { get; }
     private bool IsFrench { get; }
 
@@ -20,7 +20,7 @@ public class IncomingProvincialLicenceDenialManager
     public IncomingProvincialLicenceDenialManager(RepositoryList db,
                                                   APIBrokerList foaeaApis,
                                                   string fileName,
-                                                  ConfigurationHelper config)
+                                                  FileBrokerConfigurationHelper config)
     {
         FileName = fileName;
         APIs = foaeaApis;

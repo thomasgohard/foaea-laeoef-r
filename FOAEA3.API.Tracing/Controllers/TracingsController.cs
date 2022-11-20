@@ -16,11 +16,12 @@ namespace FOAEA3.API.Tracing.Controllers;
 [Route("api/v1/[controller]")]
 public class TracingsController : ControllerBase
 {
-    private readonly CustomConfig config;
+    private readonly RecipientsConfig config;
 
-    public TracingsController(IOptions<CustomConfig> config)
+    public TracingsController()
     {
-        this.config = config.Value;
+        var configHelper = new FoaeaConfigurationHelper();
+        config = configHelper.RecipientsConfig; ;
     }
 
     [HttpGet("Version")]

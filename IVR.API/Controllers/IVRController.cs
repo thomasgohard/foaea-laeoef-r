@@ -1,10 +1,10 @@
 ﻿using FOAEA3.Business.Areas.IVR;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Model.IVR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace IVR.API.Controllers
 {
@@ -12,11 +12,12 @@ namespace IVR.API.Controllers
     [ApiController]
     public class IVRController : ControllerBase
     {
-        private readonly CustomConfig config;
+        private readonly RecipientsConfig config;
 
-        public IVRController(IOptions<CustomConfig> config)
+        public IVRController()
         {
-            this.config = config.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+            config = configHelper.RecipientsConfig;
         }
 
         [HttpGet("fpIVR_Check_Creditor_Id")]
@@ -146,7 +147,7 @@ namespace IVR.API.Controllers
             else
                 return NotFound();
         }
-        
+
         [HttpGet("fpIVR_Get_Appl_Enfsrv_Cd")]
         [AllowAnonymous]
         public async Task<ActionResult<GetApplEnforcementCodeReturnData>> IVRGetApplEnforcementCode(

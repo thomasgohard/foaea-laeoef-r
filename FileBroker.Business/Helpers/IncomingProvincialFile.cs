@@ -8,12 +8,12 @@ namespace FileBroker.Business.Helpers
         private RepositoryList DB { get; }
         private FileBaseName FileBaseName { get; }
         private APIBrokerList FoaeaApis { get; }
-        private ConfigurationHelper Config { get; }
+        private FileBrokerConfigurationHelper Config { get; }
 
         public IncomingProvincialFile(RepositoryList db,
                                       APIBrokerList foaeaApis,
                                       FileBaseName fileBaseName,
-                                      ConfigurationHelper config)
+                                      FileBrokerConfigurationHelper config)
         {
             DB = db;
             FileBaseName = fileBaseName;

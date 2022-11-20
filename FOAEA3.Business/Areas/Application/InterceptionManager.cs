@@ -33,7 +33,7 @@ namespace FOAEA3.Business.Areas.Application
         private VariationDocumentAction VariationAction { get; set; }
 
         public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
-                                   IRepositories_Finance repositoriesFinance, CustomConfig config) :
+                                   IRepositories_Finance repositoriesFinance, RecipientsConfig config) :
                                   base(interception, repositories, config,
                                       new InterceptionValidation(interception, repositories, config, null))
         {
@@ -82,7 +82,7 @@ namespace FOAEA3.Business.Areas.Application
                         });
         }
 
-        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, CustomConfig config) :
+        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, RecipientsConfig config) :
             this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
         {
 

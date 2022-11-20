@@ -18,7 +18,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
                 await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
-            var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());
+            var tracingManager = new TracingManager(new InMemory_Repositories(), new RecipientsConfig());
 
             await tracingManager.SetNewStateTo(ApplicationState.FINANCIAL_TERMS_VARIED_17);
 
@@ -45,7 +45,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
                 await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
-            var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());
+            var tracingManager = new TracingManager(new InMemory_Repositories(), new RecipientsConfig());
 
             ApplicationState oldState = tracingManager.TracingApplication.AppLiSt_Cd;
             await tracingManager.SetNewStateTo(ApplicationState.FINANCIAL_TERMS_VARIED_17);

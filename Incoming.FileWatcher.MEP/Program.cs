@@ -21,7 +21,7 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        var config = new ConfigurationHelper(args);
+        var config = new FileBrokerConfigurationHelper(args);
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
         var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
