@@ -16,7 +16,7 @@ public class TracingEventsController : ControllerBase
 {
     private readonly RecipientsConfig config;
 
-    public TracingEventsController(g)
+    public TracingEventsController()
     {
         var configHelper = new FoaeaConfigurationHelper();
         config = configHelper.RecipientsConfig;
