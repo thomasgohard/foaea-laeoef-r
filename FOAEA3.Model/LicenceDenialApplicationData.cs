@@ -1,7 +1,4 @@
-﻿using FOAEA3.Resources;
-using FOAEA3.Resources.Helpers;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 
 namespace FOAEA3.Model
 {
@@ -18,63 +15,37 @@ namespace FOAEA3.Model
             Appl_LastUpdate_Dte = Appl_Create_Dte;
         }
 
-        [Display(Name = "SUPPORTORDER_DTE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime LicSusp_SupportOrder_Dte { get; set; }
-        [Display(Name = "NOTICESENTTODEBTOR_DTE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime LicSusp_NoticeSentToDbtr_Dte { get; set; }
-        [Display(Name = "COURT_NAME", ResourceType = typeof(LanguageResource))]
         public string LicSusp_CourtNme { get; set; }
-        [Display(Name = "PAYMENT_PERIOD_CODE", ResourceType = typeof(LanguageResource))]
         public string PymPr_Cd { get; set; }
-        [Display(Name = "NUMBER_PAYMENTS_IN_DEFAULT", ResourceType = typeof(LanguageResource))]
         public short? LicSusp_NrOfPymntsInDefault { get; set; }
-        [Display(Name = "AMOUNT_OF_ARREARS", ResourceType = typeof(LanguageResource))]
         public decimal? LicSusp_AmntOfArrears { get; set; }
-        [Display(Name = "EMPLOYER_NAME", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplNme { get; set; }
-        [Display(Name = "EMPLOYER_ADDRESS1", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_Ln { get; set; }
-        [Display(Name = "IF_KNOWN", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_Ln1 { get; set; }
-        [Display(Name = "EMPLOYER_ADDRESS_CITY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_CityNme { get; set; }
-        [Display(Name = "EMPLOYER_ADDRESS_PROVCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_PrvCd { get; set; }
-        [Display(Name = "EMPLOYER_ADDRESS_COUNTRYCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_CtryCd { get; set; }
-        [Display(Name = "EMPLOYER_ADDRESS_POSTALCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EmplAddr_PCd { get; set; }
-        [Display(Name = "EYE_COLOUR", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_EyesColorCd { get; set; }
         public string LicSusp_Dbtr_HeightUOMCd { get; set; }
-        [Display(Name = "DEBTOR_HEIGHT", ResourceType = typeof(LanguageResource))]
         public int? LicSusp_Dbtr_HeightQty { get; set; }
         public string LicSusp_Dbtr_PhoneNumber { get; set; }
         public string LicSusp_Dbtr_EmailAddress { get; set; }
-        [Display(Name = "DEBTOR_BIRTH_CITY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_Brth_CityNme { get; set; }
-        [Display(Name = "DEBTOR_BIRTH_COUNTRY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_Brth_CtryCd { get; set; }
-        [Display(Name = "TERM_REQ_DATE", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
         public DateTime? LicSusp_TermRequestDte { get; set; }
         public byte LicSusp_Still_InEffect_Ind { get; set; }
         public byte LicSusp_AnyLicRvkd_Ind { get; set; }
         public byte LicSusp_AnyLicReinst_Ind { get; set; }
         public short LicSusp_LiStCd { get; set; }
         public string LicSusp_Appl_CtrlCd { get; set; }
-        [Display(Name = "DEBTOR_LAST_ADDRESS", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_Ln { get; set; }
         public string LicSusp_Dbtr_LastAddr_Ln1 { get; set; }
-        [Display(Name = "DEBTOR_LAST_CITY", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_CityNme { get; set; }
-        [Display(Name = "DEBTOR_LAST_PROVCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_PrvCd { get; set; }
-        [Display(Name = "DEBTOR_LAST_COUNTRYCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_CtryCd { get; set; }
-        [Display(Name = "DEBTOR_LAST_POSTALCODE", ResourceType = typeof(LanguageResource))]
         public string LicSusp_Dbtr_LastAddr_PCd { get; set; }
         public bool? LicSusp_Declaration_Ind { get; set; }
         public string LicSusp_Declaration { get; set; }

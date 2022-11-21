@@ -6,6 +6,7 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -77,16 +78,21 @@ namespace FOAEA3.Business.Areas.Application
             if (string.IsNullOrEmpty(LicenceDenialApplication.Appl_Dbtr_LngCd))
                 LicenceDenialApplication.Appl_Dbtr_LngCd = "E";
 
-            bool success = await base.CreateApplicationAsync();
+            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+
+            if (success)
+                success = await base.CreateApplicationAsync();
+            else
+                success = false;
 
             if (!success)
             {
                 var failedSubmitterManager = new FailedSubmitAuditManager(DB, LicenceDenialApplication);
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L01);
-            }
 
-            LicenceDenialApplication.LicSusp_LiStCd = 2;
-            await DB.LicenceDenialTable.CreateLicenceDenialDataAsync(LicenceDenialApplication);
+                LicenceDenialApplication.LicSusp_LiStCd = 2;
+                await DB.LicenceDenialTable.CreateLicenceDenialDataAsync(LicenceDenialApplication);
+            }
 
             return success;
         }
@@ -127,6 +133,34 @@ namespace FOAEA3.Business.Areas.Application
             LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd?.ToUpper();
             LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme?.ToUpper();
             LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.ToUpper();
+        }
+
+        private async Task<bool> ValidateOrderOrProvisionInDefaultAsync()
+        {
+            bool result = true;
+
+            var app = LicenceDenialApplication;
+
+            if (!await IsValidPaymentPeriodAsync(app.PymPr_Cd))
+            {
+                app.Messages.AddError($"Invalid PymPr_Cd: {app.PymPr_Cd}");
+                result = false;
+            }
+
+            if ((app.LicSusp_NrOfPymntsInDefault is null || app.LicSusp_NrOfPymntsInDefault < 3) && 
+                (app.LicSusp_AmntOfArrears is null || app.LicSusp_AmntOfArrears < 3000M))
+            {
+                app.Messages.AddError("Number of payments less than 3 and amount of arrears < 3000.00");
+                result = false;
+            }
+
+            return result;
+        }
+
+        private async Task<bool> IsValidPaymentPeriodAsync(string paymentPeriodCode)
+        {
+            var paymentPeriods = await DB.InterceptionTable.GetPaymentPeriodsAsync();
+            return paymentPeriods.Any(m => (m.PymPr_Cd == paymentPeriodCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 
         private bool ValidateDeclaration()
@@ -173,7 +207,11 @@ namespace FOAEA3.Business.Areas.Application
             LicenceDenialApplication.Appl_Create_Dte = current.LicenceDenialApplication.Appl_Create_Dte;
             LicenceDenialApplication.Appl_Create_Usr = current.LicenceDenialApplication.Appl_Create_Usr;
 
-            await base.UpdateApplicationAsync();
+            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+
+            if (success)
+                await base.UpdateApplicationAsync();
+
         }
 
         public async Task<bool> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)

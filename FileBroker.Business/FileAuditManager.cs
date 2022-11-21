@@ -133,11 +133,6 @@ public class FileAuditManager
                           @"Pour toutes questions concernant le contenu de ce courriel, SVP envoyez un courriel à <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
             if (xmlWarningCount > 0)
                 bodyContent += $"Nombre total avec avertissements de validation XML: {xmlWarningCount}";
-            /*            auditFileContent.AppendLine("");
-                        auditFileContent.AppendLine($"Nombre d'enregistrements: {errorCount + warningCount + successCount}");
-                        auditFileContent.AppendLine($"Enregistrements chargés: {successCount + warningCount}");
-                        auditFileContent.AppendLine($"Enregistrements non chargés: {errorCount}");
-                        auditFileContent.AppendLine($"Erreurs décelées: {errorCount}");*/
         }
         else
         {
