@@ -184,9 +184,9 @@ public class IncomingProvincialTracingManager
 
                     }
 
-                    await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                    int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
                     await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", AuditConfig.AuditRecipients,
-                                                            errorCount, warningCount, successCount, unknownTags.Count);
+                                                            errorCount, warningCount, successCount, unknownTags.Count, totalFilesCount);
                 }
                 finally
                 {

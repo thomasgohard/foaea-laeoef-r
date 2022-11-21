@@ -112,9 +112,10 @@ public class IncomingProvincialLicenceDenialManager
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: true);
 
-                    await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
+                    int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
                     await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
-                                                            counts.ErrorCount, counts.WarningCount, counts.SuccessCount, unknownTags.Count);
+                                                            counts.ErrorCount, counts.WarningCount, counts.SuccessCount, 
+                                                            unknownTags.Count, totalFilesCount);
                 }
                 finally
                 {

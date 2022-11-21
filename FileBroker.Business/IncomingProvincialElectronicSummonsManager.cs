@@ -203,9 +203,9 @@ namespace FileBroker.Business
 
                 }
 
-                await fileAuditManager.GenerateAuditFileAsync(fileName, null, errorCount, warningCount, successCount);
+                int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(fileName, null, errorCount, warningCount, successCount);
                 await fileAuditManager.SendStandardAuditEmailAsync(fileName, Config.AuditConfig.AuditRecipients,
-                                                                   errorCount, warningCount, successCount, 0);
+                                                                   errorCount, warningCount, successCount, 0, totalFilesCount);
 
             }
             finally
