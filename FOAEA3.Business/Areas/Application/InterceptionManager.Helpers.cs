@@ -83,9 +83,9 @@ namespace FOAEA3.Business.Areas.Application
                 return JUSTICE_ID_SUFFIX.Substring(position + 1, 1);
         }
 
-        private bool IsESD_MEP(string enforcementServiceCode)
+        private static bool IsESD_MEP(string enforcementServiceCode)
         {
-            return config.ESDsites.Contains(enforcementServiceCode);
+            return ESDsites.Contains(enforcementServiceCode);
         }
 
         private async Task ProcessSummSmryBFNAsync(string debtorId, EventCode eventBFNreasonCode)

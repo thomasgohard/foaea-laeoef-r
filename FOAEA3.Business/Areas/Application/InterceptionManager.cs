@@ -6,6 +6,7 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -23,6 +24,8 @@ namespace FOAEA3.Business.Areas.Application
         private DateTime? GarnisheeSummonsReceiptDate { get; set; }
 
         private int nextJusticeID_callCount = 0;
+
+        public static List<string> ESDsites { get; set; }
 
         private enum VariationDocumentAction
         {
@@ -160,7 +163,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await IncrementGarnSmryAsync(isNewApplication: true);
 
-                if (config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
+                if (ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
                     await DB.InterceptionTable.InsertESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, ESDrequired.OriginalESDrequired);
 
                 await EventManager.SaveEventsAsync();
@@ -505,7 +508,7 @@ namespace FOAEA3.Business.Areas.Application
 
             bool result = await AcceptGarnisheeAsync(supportingDocsDate, isAutoAccept: false);
 
-            if (config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
+            if (ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
                 await DB.InterceptionTable.UpdateESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, supportingDocsDate);
 
             await EventManager.SaveEventsAsync();

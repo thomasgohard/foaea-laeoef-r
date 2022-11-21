@@ -31,4 +31,13 @@
 		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="FoaeaConfiguration.Denis.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="FoaeaConfiguration.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

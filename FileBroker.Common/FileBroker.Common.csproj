@@ -32,6 +32,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="FileBrokerConfiguration.Denis.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="FileBrokerConfiguration.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

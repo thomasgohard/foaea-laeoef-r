@@ -30,7 +30,7 @@ namespace FileBroker.Common
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("FileBrokerConfiguration.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("FileBrokerConfiguration.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"FileBrokerConfiguration.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true);
 
             if (args is not null)

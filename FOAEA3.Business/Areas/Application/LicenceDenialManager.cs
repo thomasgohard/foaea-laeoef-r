@@ -13,6 +13,9 @@ namespace FOAEA3.Business.Areas.Application
     internal partial class LicenceDenialManager : ApplicationManager
     {
         public LicenceDenialApplicationData LicenceDenialApplication { get; }
+
+        public static DeclarationData Declaration { get; set; }
+
         private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
         public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, RecipientsConfig config) : base(licenceDenial, repositories, config)
@@ -130,8 +133,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             string declaration = LicenceDenialApplication.LicSusp_Declaration?.Trim();
             if (declaration is not null &&
-                (declaration.Equals(config.DeclarationTextEnglish, StringComparison.InvariantCultureIgnoreCase) ||
-                 declaration.Equals(config.DeclarationTextFrench, StringComparison.InvariantCultureIgnoreCase)))
+                (declaration.Equals(Declaration.English, StringComparison.InvariantCultureIgnoreCase) ||
+                 declaration.Equals(Declaration.French, StringComparison.InvariantCultureIgnoreCase)))
                 return true;
             else
             {
