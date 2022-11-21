@@ -40,7 +40,10 @@ public class ActionProcessHeadersFilter : IActionFilter
         {
             repositories.CurrentUser = userName;
             repositories.CurrentSubmitter = submitter;
-            repositories.UpdateSubmitter = headers["CurrentSubmitter"];
+            if (headers.ContainsKey("CurrentSubmitter"))
+                repositories.UpdateSubmitter = headers["CurrentSubmitter"];
+            else
+                repositories.UpdateSubmitter = submitter;
         }
 
         if (headers.Keys.ContainsCaseInsensitive(ACCEPT_LANGUAGE))

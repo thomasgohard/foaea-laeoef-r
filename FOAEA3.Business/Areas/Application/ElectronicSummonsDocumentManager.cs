@@ -3,6 +3,7 @@ using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -43,12 +44,19 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.InterceptionTable.GetESDasync(fileName);
         }
 
+        public async Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            if (appl_EnfSrv_Cd.Length > 2)
+                appl_EnfSrv_Cd = appl_EnfSrv_Cd[0..2];
+            return await DB.InterceptionTable.FindDocumentsForApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+
         public async Task<ElectronicSummonsDocumentZipData> CreateESD(ElectronicSummonsDocumentZipData newData)
         {
             return await DB.InterceptionTable.CreateESDasync(newData.PrcID, newData.ZipName, newData.DateReceived);
         }
 
-        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDF(ElectronicSummonsDocumentPdfData pdfData)
+        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData pdfData)
         {
             var isAmendment = pdfData.PDFName.EndsWith("A.PDF");
 

@@ -52,5 +52,6 @@ namespace FOAEA3.Model.Interfaces
         Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync();
         Task<List<HoldbackTypeData>> GetHoldbackTypesAsync();
         Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry);
+        Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }
 }

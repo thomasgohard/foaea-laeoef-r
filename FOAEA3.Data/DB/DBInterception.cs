@@ -476,6 +476,23 @@ namespace FOAEA3.Data.DB
             return newPDFentry;
         }
 
+        public async Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"EnfSrv", appl_EnfSrv_Cd },
+                {"Ctrl", appl_CtrlCd }
+            };
+
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentData>("ESDFindDocuments", parameters, FillElectronicSummonsDocumentDataFromReader);
+        }
+
+        private void FillElectronicSummonsDocumentDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentData data)
+        {
+            data.ZipName = rdr["ZipName"] as string;
+            data.PdfName = rdr["PDFName"] as string;
+        }
+
         private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)
         {
             data.ZipID = (int)rdr["ZipID"];
