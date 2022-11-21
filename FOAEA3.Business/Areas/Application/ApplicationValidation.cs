@@ -39,7 +39,7 @@ namespace FOAEA3.Business.Areas.Application
             CurrentUser = currentUser;
         }
 
-        public ApplicationValidation(ApplicationData application, IRepositories repositories, 
+        public ApplicationValidation(ApplicationData application, IRepositories repositories,
                                      RecipientsConfig config, FoaeaUser currentUser)
         {
             this.config = config;
@@ -226,7 +226,8 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName)
+        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName,
+                                                                         string countryCode)
         {
             // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
             // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
@@ -238,8 +239,12 @@ namespace FOAEA3.Business.Areas.Application
 
             if (postalCode == "-")
             {
-                if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Single Dash Postal Code");
-                return (false, reasonText);
+                var thisCountry = ReferenceData.Instance().Countries[countryCode];
+                if (thisCountry is { Ctry_PCd_Ind: true })
+                {
+                    Application.Messages.AddError("Invalid Single Dash Postal Code");
+                    return (false, reasonText);
+                }
             }
 
             if (Application.Appl_Dbtr_Addr_CtryCd == "CAN")
@@ -400,7 +405,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
-                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED, 
+                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
                                           errorDiffEnfOff);
 
                     string errorMessage = Application.Appl_EnfSrv_Cd.Trim() + "-" + Application.Subm_SubmCd.Trim() + "-" + Application.Appl_CtrlCd.Trim();
@@ -489,7 +494,7 @@ namespace FOAEA3.Business.Areas.Application
                 case ApplicationState.SIN_CONFIRMATION_PENDING_3:
 
                     // nothing can be changed
-                    if(Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
 
                     break;
 

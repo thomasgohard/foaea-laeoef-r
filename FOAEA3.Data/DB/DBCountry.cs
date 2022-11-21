@@ -28,7 +28,8 @@ namespace FOAEA3.Data.DB
             data.Ctry_Cd = rdr["Ctry_Cd"] as string;
             data.Ctry_Txt_E = rdr["Ctry_Txt_E"] as string;
             data.Ctry_Txt_F = rdr["Ctry_Txt_F"] as string;
-            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string; 
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Ctry_PCd_Ind = (bool)rdr["Ctry_PCd_Ind"];
         }
     }
 }

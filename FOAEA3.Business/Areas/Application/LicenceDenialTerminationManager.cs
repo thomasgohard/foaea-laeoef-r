@@ -85,8 +85,9 @@ namespace FOAEA3.Business.Areas.Application
                 string cityName = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_CityNme;
                 string provinceCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PrvCd;
                 string postalCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_LastAddr_PCd;
+                string countryCode = LicenceDenialTerminationApplication.LicSusp_Dbtr_Brth_CtryCd;
 
-                (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName);
+                (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
                 if (!isValid)
                     EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
 
