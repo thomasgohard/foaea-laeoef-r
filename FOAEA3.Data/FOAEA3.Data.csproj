@@ -17,19 +17,4 @@
 		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>BackendProcesses.Business</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>FOAEA3.Business</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>FOAEA3.Business.Tests</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>FileBroker.Business.Tests</_Parameter1>
-		</AssemblyAttribute>
-	</ItemGroup>
-
 </Project>

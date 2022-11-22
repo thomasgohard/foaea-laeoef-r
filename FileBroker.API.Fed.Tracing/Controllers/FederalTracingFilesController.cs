@@ -1,15 +1,6 @@
-﻿using FileBroker.Business;
-using FileBroker.Data;
-using FileBroker.Model;
-using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+﻿using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 

@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Model", "FOAEA3.Mode
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.API", "FOAEA3.API\FOAEA3.API.csproj", "{C5C75653-D95A-4251-B8DA-301F70166B96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBHelperCore", "DBHelperCore\DBHelperCore.csproj", "{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendProcesses.CommandLine", "BackendProcesses.CommandLine\BackendProcesses.CommandLine.csproj", "{E9025BB2-D81C-495D-8359-21AF87A494BB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendProcesses.API", "BackendProcesses.API\BackendProcesses.API.csproj", "{47B42CCB-0586-480A-A3DB-141B34571734}"
@@ -138,6 +136,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IVR.API", "IVR.API\IVR.API.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Incoming.FileWatcher.Fed.SIN", "Incoming.FileWatcher.Fed.SIN\Incoming.FileWatcher.Fed.SIN.csproj", "{D8D0F7CD-9924-4DE5-A4E0-FDBA4D979D13}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBHelperCore", "DBHelperCore\DBHelperCore.csproj", "{17981143-2584-4E58-95C9-1B4165675ACB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BackendProcesses Debug|Any CPU = BackendProcesses Debug|Any CPU
@@ -240,20 +240,6 @@ Global
 		{C5C75653-D95A-4251-B8DA-301F70166B96}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C5C75653-D95A-4251-B8DA-301F70166B96}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
 		{C5C75653-D95A-4251-B8DA-301F70166B96}.Tests|Any CPU.Build.0 = Tests|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.BackendProcesses Debug|Any CPU.ActiveCfg = BackendProcesses Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.BackendProcesses Debug|Any CPU.Build.0 = BackendProcesses Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.FileBroker Debug|Any CPU.ActiveCfg = FileBroker Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.FileBroker Debug|Any CPU.Build.0 = FileBroker Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.FOAEA Debug|Any CPU.ActiveCfg = FOAEA Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.FOAEA Debug|Any CPU.Build.0 = FOAEA Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Ops Debug|Any CPU.ActiveCfg = Ops Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Ops Debug|Any CPU.Build.0 = Ops Debug|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
-		{AC0094D6-3F2D-4A68-AE0D-D321C3D6328B}.Tests|Any CPU.Build.0 = Tests|Any CPU
 		{E9025BB2-D81C-495D-8359-21AF87A494BB}.BackendProcesses Debug|Any CPU.ActiveCfg = BackendProcesses Debug|Any CPU
 		{E9025BB2-D81C-495D-8359-21AF87A494BB}.BackendProcesses Debug|Any CPU.Build.0 = BackendProcesses Debug|Any CPU
 		{E9025BB2-D81C-495D-8359-21AF87A494BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -888,6 +874,20 @@ Global
 		{D8D0F7CD-9924-4DE5-A4E0-FDBA4D979D13}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D8D0F7CD-9924-4DE5-A4E0-FDBA4D979D13}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{D8D0F7CD-9924-4DE5-A4E0-FDBA4D979D13}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{17981143-2584-4E58-95C9-1B4165675ACB}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

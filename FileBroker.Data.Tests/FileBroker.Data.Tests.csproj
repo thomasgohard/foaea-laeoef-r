@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
     <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />

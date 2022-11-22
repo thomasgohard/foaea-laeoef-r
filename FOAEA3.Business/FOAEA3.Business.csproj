@@ -15,8 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
-    <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
-    <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
     <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
     <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
@@ -40,9 +39,6 @@
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>BackendProcesses.API</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>BackendProcesses.Business</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>FOAEA3.API</_Parameter1>

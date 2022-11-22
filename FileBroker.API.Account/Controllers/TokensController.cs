@@ -7,7 +7,6 @@ using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using FileBrokerModel = FileBroker.Model;
@@ -141,7 +140,7 @@ namespace FileBroker.API.Account.Controllers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, userData.UserName),                
+                new Claim(ClaimTypes.Name, userData.UserName),
                 new Claim(JwtRegisteredClaimNames.Sub, userData.EmailAddress),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, userData.UserName)
