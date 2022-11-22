@@ -92,10 +92,10 @@ namespace FOAEA3.Business.Areas.Application
         public async Task CheckCreditorSurnameAsync()
         {
             var applications = await DB.InterceptionTable.GetSameCreditorForI01Async(InterceptionApplication.Appl_CtrlCd,
-                                                                                         InterceptionApplication.Subm_SubmCd,
-                                                                                         InterceptionApplication.Appl_Dbtr_Entrd_SIN,
-                                                                                         InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
-                                                                                         InterceptionApplication.ActvSt_Cd);
+                                                                                     InterceptionApplication.Subm_SubmCd,
+                                                                                     InterceptionApplication.Appl_Dbtr_Entrd_SIN,
+                                                                                     InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
+                                                                                     InterceptionApplication.ActvSt_Cd);
 
             if (applications.Count > 0)
             {

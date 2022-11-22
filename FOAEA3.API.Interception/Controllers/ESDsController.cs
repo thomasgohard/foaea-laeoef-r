@@ -5,7 +5,6 @@ using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Interception.Controllers
 {

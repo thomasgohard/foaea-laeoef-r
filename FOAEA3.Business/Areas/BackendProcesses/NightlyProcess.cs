@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model.Interfaces;
 using System.Threading.Tasks;
 
-namespace BackendProcesses.Business
+namespace FOAEA3.Business.BackendProcesses
 {
     public class NightlyProcess
     {

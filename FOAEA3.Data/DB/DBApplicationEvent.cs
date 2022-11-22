@@ -27,8 +27,26 @@ namespace FOAEA3.Data.DB
 
             List<ApplicationEventData> data = null;
 
+
             switch (queue)
             {
+                case EventQueue.EventAM:
+                case EventQueue.EventDbtr:
+                case EventQueue.EventLicence:
+                case EventQueue.EventSYS:
+                case EventQueue.EventTrace_ESDC:
+                case EventQueue.EventCR_PADR:
+                    // TODO: add other events associated to application?
+                    break;
+
+                case EventQueue.EventBF:
+                    data = await MainDB.GetDataFromStoredProcAsync<ApplicationEventData>("EvntBF_SelectForApplication",
+                                                                              parameters, FillEventDataFromReader);
+                    foreach (var item in data)
+                        item.Queue = EventQueue.EventSubm;
+
+                    break;
+
                 case EventQueue.EventBFN:
                     if (string.IsNullOrEmpty(activeState))
                         parameters.Add("ActvSt_Cd", "A");
@@ -58,14 +76,6 @@ namespace FOAEA3.Data.DB
 
                     break;
 
-                case EventQueue.EventBF:
-                    data = await MainDB.GetDataFromStoredProcAsync<ApplicationEventData>("EvntBF_SelectForApplication",
-                                                                              parameters, FillEventDataFromReader);
-                    foreach (var item in data)
-                        item.Queue = EventQueue.EventSubm;
-
-                    break;
-
                 case EventQueue.EventTrace:
                     data = await MainDB.GetDataFromStoredProcAsync<ApplicationEventData>("EvntTrace_SelectForApplication",
                                                                               parameters, FillEventDataFromReader);
@@ -73,9 +83,8 @@ namespace FOAEA3.Data.DB
                         item.Queue = EventQueue.EventTrace;
 
                     break;
-            }
 
-            // TODO: add other events associated to application?
+            }
 
             if (string.IsNullOrEmpty(activeState))
                 return data;
@@ -187,6 +196,15 @@ namespace FOAEA3.Data.DB
 
             switch (eventData.Queue)
             {
+                case EventQueue.EventAM:
+                case EventQueue.EventDbtr:
+                case EventQueue.EventLicence:
+                case EventQueue.EventSYS:
+                case EventQueue.EventTrace_ESDC:
+                case EventQueue.EventCR_PADR:
+                    // TODO: other types of events
+                    break;
+
                 case EventQueue.EventBF:
                     parameters.Add("Event_Id", eventData.Event_Id);
                     parameters.Add("AppLiSt_Cd", applicationState);
@@ -235,7 +253,7 @@ namespace FOAEA3.Data.DB
                     parameters.Add("Appl_CtrlCd", eventData.Appl_CtrlCd);
                     parameters.Add("Event_TimeStamp", eventData.Event_TimeStamp);
                     parameters.Add("Subm_Recpt_SubmCd", eventData.Subm_Recpt_SubmCd);
-                    parameters.Add("Event_Reas_Cd", (int) (eventData.Event_Reas_Cd ?? 0));
+                    parameters.Add("Event_Reas_Cd", (int)(eventData.Event_Reas_Cd ?? 0));
                     parameters.Add("Event_Priority_Ind", eventData.Event_Priority_Ind);
                     parameters.Add("Event_Effctv_Dte", eventData.Event_Effctv_Dte);
                     parameters.Add("ActvSt_Cd", eventData.ActvSt_Cd);
@@ -249,8 +267,6 @@ namespace FOAEA3.Data.DB
                     await MainDB.ExecProcAsync("MessageBrokerEventSINUpdate", parameters);
                     break;
             }
-
-            // TODO: other types of events
 
             if (string.IsNullOrEmpty(MainDB.LastError))
                 return true;
@@ -295,7 +311,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd, 
+        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
@@ -303,7 +319,7 @@ namespace FOAEA3.Data.DB
                 {"EnfSrv_Cd", enfSrv_Cd},
                 {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd},
                 {"Appl_CtrlCd", appl_CtrlCd}
-            }; 
+            };
 
             var result = await MainDB.GetDataFromStoredProcAsync<ApplicationEventData>("MessageBrokerRequestedLICINEventData", parameters,
                                                                             FillEventDataFromReader);
@@ -311,7 +327,7 @@ namespace FOAEA3.Data.DB
                 item.Queue = EventQueue.EventLicence;
             return result;
         }
-        
+
         public async Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>

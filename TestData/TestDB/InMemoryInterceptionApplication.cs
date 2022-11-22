@@ -52,6 +52,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, string confirmedSIN, string creditorFirstName, string creditorSurname)
         {
             throw new NotImplementedException();

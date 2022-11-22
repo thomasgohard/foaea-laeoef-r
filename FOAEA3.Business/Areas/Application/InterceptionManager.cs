@@ -1,12 +1,12 @@
-﻿using BackendProcesses.Business;
-using DBHelper;
+﻿using DBHelper;
+using FOAEA3.Business.BackendProcesses;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -336,8 +336,6 @@ namespace FOAEA3.Business.Areas.Application
                         break;
                 }
 
-                // don't update the application in the database, but only save the events
-
                 await EventManager.SaveEventsAsync();
 
                 return false;
@@ -354,7 +352,8 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!await applicationManagerCopy.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
-                // TODO: generate error that application does not exists
+                string key = ApplKey.MakeKey(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                InterceptionApplication.Messages.AddError($"Application {key} does not exists");
                 return;
             }
 
@@ -573,7 +572,7 @@ namespace FOAEA3.Business.Areas.Application
             return interceptions;
         }
 
-        public async Task<bool> AcceptVariationAsync(DateTime supportingDocsDate, bool isAutoAccept = false)
+        public async Task<bool> AcceptVariationAsync()
         {
             if (!IsValidCategory("I01"))
                 return false;

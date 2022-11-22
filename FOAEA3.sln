@@ -25,8 +25,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendProcesses.CommandLin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendProcesses.API", "BackendProcesses.API\BackendProcesses.API.csproj", "{47B42CCB-0586-480A-A3DB-141B34571734}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackendProcesses.Business", "BackendProcesses.Business\BackendProcesses.Business.csproj", "{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Finance", "FOAEA3.Finance\FOAEA3.Finance.csproj", "{1FB5AA72-B9F2-4643-8862-D272B111E998}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.Maintenance.Tables", "FOAEA3.Maintenance.Tables\FOAEA3.Maintenance.Tables.csproj", "{2CE189D4-E7C9-4E0F-8AA5-20108282AEE4}"
@@ -278,17 +276,6 @@ Global
 		{47B42CCB-0586-480A-A3DB-141B34571734}.Release|Any CPU.Build.0 = Release|Any CPU
 		{47B42CCB-0586-480A-A3DB-141B34571734}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
 		{47B42CCB-0586-480A-A3DB-141B34571734}.Tests|Any CPU.Build.0 = Tests|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.BackendProcesses Debug|Any CPU.ActiveCfg = BackendProcesses Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.BackendProcesses Debug|Any CPU.Build.0 = BackendProcesses Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.FileBroker Debug|Any CPU.ActiveCfg = FileBroker Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.FOAEA Debug|Any CPU.ActiveCfg = FOAEA Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Ops Debug|Any CPU.ActiveCfg = Ops Debug|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Tests|Any CPU.ActiveCfg = Tests|Any CPU
-		{8900D3DB-604F-4A2F-B6ED-A961B5E15C48}.Tests|Any CPU.Build.0 = Tests|Any CPU
 		{1FB5AA72-B9F2-4643-8862-D272B111E998}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1FB5AA72-B9F2-4643-8862-D272B111E998}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FB5AA72-B9F2-4643-8862-D272B111E998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

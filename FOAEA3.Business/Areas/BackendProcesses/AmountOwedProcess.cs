@@ -1,5 +1,5 @@
-﻿using BackendProcesses.Business.Enums;
-using BackendProcesses.Business.Structs;
+﻿using FOAEA3.Business.BackendProcesses.Enums;
+using FOAEA3.Business.BackendProcesses.Structs;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BackendProcesses.Business
+namespace FOAEA3.Business.BackendProcesses
 {
     public class AmountOwedProcess
     {
@@ -49,7 +49,7 @@ namespace BackendProcesses.Business
             var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
             var summSmryData = await dbSummonsSummary.GetSummonsSummaryAsync(enfSrv, applCtrl);
-            (SummonsSummaryData summSmryNewData, 
+            (SummonsSummaryData summSmryNewData,
              SummonsSummaryFixedAmountData summSmryFixedAmountNewData) = await CalculateAndUpdateAmountOwedAsync(summSmryData, isVariation: true);
 
             return (summSmryNewData, summSmryFixedAmountNewData);
@@ -88,7 +88,7 @@ namespace BackendProcesses.Business
 
                 if (newAmountOwedAndDiverted.NewRecalcDate != null)
                 {
-                    (summSmryNewData, summSmryFixedAmountNewData) = await SaveDataAsync(row, 
+                    (summSmryNewData, summSmryFixedAmountNewData) = await SaveDataAsync(row,
                                                                             newAmountOwedAndDiverted.OwedData,
                                                                             newAmountOwedAndDiverted.NewRecalcDate,
                                                                             newAmountOwedAndDiverted.NewFixedAmountRecalcDate,

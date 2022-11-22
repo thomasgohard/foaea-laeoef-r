@@ -4,7 +4,7 @@ using FOAEA3.Model.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace BackendProcesses.Business
+namespace FOAEA3.Business.BackendProcesses
 {
     public class DivertFundsProcess
     {

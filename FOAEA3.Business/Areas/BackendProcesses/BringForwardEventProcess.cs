@@ -2,8 +2,9 @@
 using FOAEA3.Model.Interfaces;
 using System;
 using System.Threading.Tasks;
+using FOAEA3.Business.Areas.Application;
 
-namespace BackendProcesses.Business
+namespace FOAEA3.Business.BackendProcesses
 {
     public class BringForwardEventProcess
     {
@@ -20,7 +21,6 @@ namespace BackendProcesses.Business
         {
             var prodAudit = DB.ProductionAuditTable;
             var dbApplicationEvent = DB.ApplicationEventTable;
-            var dbApplication = DB.ApplicationTable; // use ApplicationManager() instead?
             var dbNotification = DB.NotificationService;
 
             await prodAudit.InsertAsync("BF Events Process", "BF Events Process Started", "O");
@@ -30,27 +30,24 @@ namespace BackendProcesses.Business
             {
                 try
                 {
-                    var application = await dbApplication.GetApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                    var applicationManager = new ApplicationManager(null, DB, config);
+                    await applicationManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
 
-                    switch (application.AppCtgy_Cd)
+                    switch (applicationManager.GetCategory())
                     {
                         case "I01":
                             break;
 
                         case "T01":
-                            var tracingData = new TracingApplicationData();
-                            tracingData.Merge(application);
-                            // TODO: call API instead?
-                            //var tracingManager = new TracingManager(tracingData, DB, config);
-                            //tracingManager.ProcessBringForwards(bfEvent);
+                            var tracingManager = new TracingManager(null, DB, config);
+                            await tracingManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await tracingManager.ProcessBringForwardsAsync(bfEvent);
                             break;
 
                         case "L01":
-                            var licencingData = new LicenceDenialApplicationData();
-                            licencingData.Merge(application);
-                            // TODO: call API instead?
-                            //var licencingManager = new LicenceDenialManager(licencingData, DB, config);
-                            //licencingManager.ProcessBringForwards(bfEvent);
+                            var licencingManager = new LicenceDenialManager(null, DB, config);
+                            await licencingManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await licencingManager.ProcessBringForwardsAsync(bfEvent);
                             break;
 
                         default:
@@ -60,9 +57,7 @@ namespace BackendProcesses.Business
                 }
                 catch (Exception e)
                 {
-                    await dbNotification.SendEmailAsync("BF Error",
-                        "", // System.Configuration.ConfigurationManager.AppSettings("EmailRecipients")
-                        e.Message + Environment.NewLine + Environment.NewLine + e.StackTrace);
+                    await dbNotification.SendEmailAsync("BF Error", config.EmailRecipients, e.Message + "\n\n" + e.StackTrace);
                 }
             }
 

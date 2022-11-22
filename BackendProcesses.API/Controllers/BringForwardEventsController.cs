@@ -1,9 +1,8 @@
-﻿using BackendProcesses.Business;
+﻿using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -29,8 +28,8 @@ namespace BackendProcesses.API.Controllers
         }
 
         [HttpGet("Version")]
-        public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4"); 
-        
+        public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4");
+
         [HttpPut("")]
         public async Task<ActionResult<string>> RunBringForward([FromServices] IRepositories repositories)
         {

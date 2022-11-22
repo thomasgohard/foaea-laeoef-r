@@ -33,6 +33,13 @@ namespace FOAEA3.Data.DB
 
             switch (queue)
             {
+                case EventQueue.EventLicence_dtl:
+                case EventQueue.EventSYS_dtl:
+                case EventQueue.EventCR_PADR_dtl:
+                case EventQueue.EventTrace_ESDC_dtl:
+                    // TODO: add other events associated to application?
+                    break;
+
                 case EventQueue.EventBFN_dtl:
                     if (string.IsNullOrEmpty(activeState))
                         parameters.Add("ActvSt_Cd", "A");
@@ -42,7 +49,7 @@ namespace FOAEA3.Data.DB
                     data = await MainDB.GetDataFromStoredProcAsync<ApplicationEventDetailData>("GetEventBFNDTLforI01",
                                                                                     parameters, FillEventDetailDataFromReader);
                     foreach (var item in data)
-                        item.Queue = EventQueue.EventSIN_dtl;
+                        item.Queue = EventQueue.EventBFN_dtl;
 
                     break;
                 case EventQueue.EventSIN_dtl:
@@ -61,8 +68,6 @@ namespace FOAEA3.Data.DB
 
                     break;
             }
-
-            // TODO: add other events associated to application?
 
             if (string.IsNullOrEmpty(activeState))
                 return data;
@@ -152,6 +157,12 @@ namespace FOAEA3.Data.DB
 
             switch (eventDetailData.Queue)
             {
+                case EventQueue.EventSYS_dtl:
+                case EventQueue.EventCR_PADR_dtl:
+                case EventQueue.EventTrace_ESDC_dtl:
+                    // TODO: other event details types
+                    break;
+
                 case EventQueue.EventBFN_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
                         success = await CreateEventDetailAsync(eventDetailData, "EvntBFN");
@@ -164,8 +175,8 @@ namespace FOAEA3.Data.DB
                         success = await CreateEventDetailAsync(eventDetailData, "EvntTrace");
                     else
                         success = await UpdateEventDetailAsync(eventDetailData, "MessageBrokerEventTraceDetailUpdate");
-                    break;                
-                
+                    break;
+
                 case EventQueue.EventLicence_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
                         success = await CreateEventDetailAsync(eventDetailData, "EvntLicence");
@@ -181,8 +192,6 @@ namespace FOAEA3.Data.DB
                     break;
 
             }
-
-            // TODO: other event details types
 
             return success;
         }
@@ -229,7 +238,7 @@ namespace FOAEA3.Data.DB
 
             return success;
         }
-                
+
         private async Task<bool> UpdateBFNEventDetaiAsync(ApplicationEventDetailData eventDetailData)
         {
             bool success = false;
@@ -309,9 +318,9 @@ namespace FOAEA3.Data.DB
 
         private static string ConvertEventIdsListToXml(List<int> eventIds)
         {
-            var x = new XElement("NewDataSet", eventIds.Select(eventId => new XElement("FTPEvents", 
+            var x = new XElement("NewDataSet", eventIds.Select(eventId => new XElement("FTPEvents",
                                                                                        new XElement("Event_dtl_Id", eventId))));
-           
+
             return x.ToString();
         }
 

@@ -1,5 +1,5 @@
-﻿using BackendProcesses.Business;
-using DBHelper;
+﻿using DBHelper;
+using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
@@ -36,7 +36,7 @@ namespace FOAEA3.Business.Areas.Application
             name = name.Trim();
             name = name.Replace("'", "");
             if (name.Length >= 3)
-                return name.Substring(0, 3);
+                return name[..3];
             else
                 return name.PadRight(3, '-');
         }
@@ -49,7 +49,7 @@ namespace FOAEA3.Business.Areas.Application
         private async Task<string> NextJusticeIDAsync(string justiceID)
         {
             string justiceSuffix = justiceID.Substring(justiceID.Length - 1, 1);
-            string debtorID = justiceID.Substring(0, 7);
+            string debtorID = justiceID[..7];
             if (string.IsNullOrEmpty(justiceID))
                 justiceSuffix = "A";
             else
@@ -99,18 +99,20 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var thisApplicationManager = new InterceptionManager(DB, DBfinance, config)
+            var bfApplicationManager = new InterceptionManager(DB, DBfinance, config)
             {
                 CurrentUser = this.CurrentUser
             };
 
-            var thisApplication = thisApplicationManager.InterceptionApplication;
-            var applEventManager = new ApplicationEventManager(thisApplication, DB);
-            var applEventDetailManager = new ApplicationEventDetailManager(thisApplication, DB);
+            await bfApplicationManager.LoadApplicationAsync(applEnfSrvCode, applControlCode);
+            var bfApplication = bfApplicationManager.InterceptionApplication;
+            var bfEventManager = new ApplicationEventManager(bfApplication, DB);
+            var bfEventDetailManager = new ApplicationEventDetailManager(bfApplication, DB);
 
-            var eventBFNs = (await applEventManager.GetApplicationEventsForQueueAsync(EventQueue.EventBFN))
+            var eventBFNs = (await bfEventManager.GetApplicationEventsForQueueAsync(EventQueue.EventBFN))
                                 .Where(m => m.ActvSt_Cd == "A");
-            var eventBFNDetails = (await applEventDetailManager.GetApplicationEventDetailsForQueueAsync(EventQueue.EventBFN_dtl))
+
+            var eventBFNDetails = (await bfEventDetailManager.GetApplicationEventDetailsForQueueAsync(EventQueue.EventBFN_dtl))
                                     .Where(m => m.ActvSt_Cd == "A");
 
             foreach (var thisEventBFN in eventBFNs)
@@ -149,12 +151,12 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     thisEventBFNdetail.ActvSt_Cd = "C";
                     thisEventBFNdetail.Event_Compl_Dte = DateTime.Now;
-                    thisEventBFNdetail.Event_Reas_Text = $"Application {thisApplication.Appl_EnfSrv_Cd}-{thisApplication.Appl_CtrlCd} became active, STOP BLOCK not sent";
+                    thisEventBFNdetail.Event_Reas_Text = $"Application {bfApplication.Appl_EnfSrv_Cd}-{bfApplication.Appl_CtrlCd} became active, STOP BLOCK not sent";
                 }
             }
 
-            await applEventManager.SaveEventsAsync();
-            await applEventDetailManager.SaveEventDetailsAsync();
+            await bfEventManager.SaveEventsAsync();
+            await bfEventDetailManager.SaveEventDetailsAsync();
         }
 
         private async Task<DateTime> RecalculateFixedAmountRecalcDateAfterVariationAsync(InterceptionFinancialHoldbackData newFinTerms, DateTime variationCalcDate)

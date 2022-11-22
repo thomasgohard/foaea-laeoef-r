@@ -160,12 +160,11 @@ namespace FOAEA3.Business.Areas.Application
 
                 if (fixedAmountData is null)
                 {
-                    // create fixed amount data
                     await fixedAmountDB.CreateSummonsSummaryFixedAmountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, startDate);
                 }
                 else
                 {
-                    // TODO when would this already exists?
+                    // QUESTION when would this already exists?
                     fixedAmountData.SummSmry_LastFixedAmountCalc_Dte = DateTime.Now;
                     fixedAmountData.SummSmry_FixedAmount_Recalc_Dte = startDate;
 

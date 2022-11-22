@@ -280,9 +280,7 @@ public class InterceptionsController : ControllerBase
     [HttpPut("{key}/AcceptVariation")]
     public async Task<ActionResult<InterceptionApplicationData>> AcceptVariation([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories,
-                                                                     [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                     [FromQuery] DateTime supportingDocsReceiptDate,
-                                                                     [FromQuery] bool autoAccept)
+                                                                     [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
@@ -294,7 +292,7 @@ public class InterceptionsController : ControllerBase
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
         await appManager.SetCurrentUserAsync(User);
 
-        if (await appManager.AcceptVariationAsync(supportingDocsReceiptDate, autoAccept))
+        if (await appManager.AcceptVariationAsync())
             return Ok(application);
         else
             return UnprocessableEntity(application);
