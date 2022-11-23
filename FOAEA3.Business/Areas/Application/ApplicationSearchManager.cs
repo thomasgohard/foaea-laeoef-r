@@ -1,9 +1,9 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using System.Collections.Generic;
-using FOAEA3.Business.Security;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -17,11 +17,11 @@ namespace FOAEA3.Business.Areas.Application
 
         public ApplicationSearchManager(IRepositories repositories)
         {
-            DB = repositories; 
+            DB = repositories;
             AuditManager = new AccessAuditManager(DB);
         }
 
-        public async Task<(List<ApplicationSearchResultData>, int)> SearchAsync(QuickSearchData searchCriteria, 
+        public async Task<(List<ApplicationSearchResultData>, int)> SearchAsync(QuickSearchData searchCriteria,
                                                                            int page, int perPage, string orderBy)
         {
             int accessAuditId = await AuditManager.AddAuditHeaderAsync(AccessAuditPage.ApplicationSearch);

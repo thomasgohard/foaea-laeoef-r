@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model.Enums;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IFailedSubmitAuditRepository
     {

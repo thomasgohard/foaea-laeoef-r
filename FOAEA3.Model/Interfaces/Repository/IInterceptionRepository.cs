@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IInterceptionRepository
     {

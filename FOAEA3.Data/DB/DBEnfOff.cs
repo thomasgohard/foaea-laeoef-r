@@ -1,7 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null, 
+        public async Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null,
             string province = null, string enfServCode = null)
         {
             var parameters = new Dictionary<string, object>();

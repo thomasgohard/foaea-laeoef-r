@@ -1,8 +1,7 @@
 ﻿using DBHelper;
-
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -277,7 +276,7 @@ namespace FOAEA3.Data.DB
             data.ActvSt_Cd = data.ActvSt_Cd?.Trim();
             data.Subm_Class = data.Subm_Class?.Trim(); // can be null
             data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr?.Trim();
-            
+
 
         }
 

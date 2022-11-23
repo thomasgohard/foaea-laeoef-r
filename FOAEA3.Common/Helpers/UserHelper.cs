@@ -1,8 +1,6 @@
 ﻿using FOAEA3.Common.Models;
-using FOAEA3.Model.Interfaces;
-using System.Linq;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Helpers
 {

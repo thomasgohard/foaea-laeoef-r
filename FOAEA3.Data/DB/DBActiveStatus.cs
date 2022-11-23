@@ -1,10 +1,8 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System.Collections.Generic;
-using System;
 using FOAEA3.Model.Base;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -12,7 +10,7 @@ namespace FOAEA3.Data.DB
     public class DBActiveStatus : DBbase, IActiveStatusRepository
     {
 
-        public MessageDataList Messages { get; set;  }
+        public MessageDataList Messages { get; set; }
 
         public DBActiveStatus(IDBToolsAsync mainDB) : base(mainDB)
         {

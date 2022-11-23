@@ -1,9 +1,9 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,7 +38,7 @@ namespace FOAEA3.Data.DB
 
             return await MainDB.GetDataFromStoredProcAsync<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
         }
-        
+
         public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>

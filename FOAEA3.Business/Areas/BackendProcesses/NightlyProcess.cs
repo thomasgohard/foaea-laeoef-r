@@ -1,4 +1,4 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Model.Interfaces.Repository;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.BackendProcesses

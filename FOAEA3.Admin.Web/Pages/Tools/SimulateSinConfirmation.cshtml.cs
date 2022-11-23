@@ -2,7 +2,7 @@ using FOAEA3.Admin.Business;
 using FOAEA3.Admin.Web.Models;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;

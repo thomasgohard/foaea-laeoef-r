@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

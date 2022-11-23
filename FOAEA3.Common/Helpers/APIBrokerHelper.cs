@@ -4,13 +4,8 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Helpers
 {
@@ -304,7 +299,7 @@ namespace FOAEA3.Common.Helpers
                             completed = true;
                         }
                     }
-                    else 
+                    else
                         completed = true;
                 }
                 catch (Exception e)

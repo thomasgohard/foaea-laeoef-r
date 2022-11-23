@@ -4,11 +4,9 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FOAEA3.API.Tracing.Controllers;
 

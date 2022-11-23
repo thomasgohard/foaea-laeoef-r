@@ -1,8 +1,7 @@
 ﻿using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace CompareOldAndNewData.CommandLine
 {

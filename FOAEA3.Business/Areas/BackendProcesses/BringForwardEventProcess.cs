@@ -1,8 +1,8 @@
-﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Threading.Tasks;
-using FOAEA3.Business.Areas.Application;
 
 namespace FOAEA3.Business.BackendProcesses
 {

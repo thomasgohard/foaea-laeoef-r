@@ -2,10 +2,9 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -53,7 +52,7 @@ namespace FOAEA3.Data.DB
             if (values.DoJTtlAmt_Money.HasValue) parameters.Add("curDoJTtlAmt_Money", values.DoJTtlAmt_Money.Value);
             if (values.Batch_Reas_Cd.HasValue) parameters.Add("intBatch_Reas_Cd", values.Batch_Reas_Cd.Value);
             if (values.PendTtlAmt_Money.HasValue) parameters.Add("curPendTtlAmt_Money", values.PendTtlAmt_Money.Value);
-            
+
             var outputParameters = new Dictionary<string, string> {
                 {"intReturnCode", "I"},
                 {"chrBatchId", "C"},
@@ -70,7 +69,7 @@ namespace FOAEA3.Data.DB
 
             return (returnCode, batchID, reasonCode, reasonText);
         }
-        
+
         private void FillDataFromReader(IDBHelperReader rdr, ControlBatchData data)
         {
             data.Batch_Id = rdr["Batch_Id"] as string;

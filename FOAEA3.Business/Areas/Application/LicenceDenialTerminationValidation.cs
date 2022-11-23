@@ -1,11 +1,6 @@
 ﻿using FOAEA3.Common.Models;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Business.Areas.Application
 {

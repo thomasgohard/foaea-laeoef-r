@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model.Base;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IGenderRepository : IMessageList
     {

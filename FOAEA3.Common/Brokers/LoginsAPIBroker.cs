@@ -1,8 +1,6 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -60,11 +58,11 @@ namespace FOAEA3.Common.Brokers
             var refreshData = new TokenRefreshData
             {
                 Token = oldToken,
-                RefreshToken = oldRefreshToken              
+                RefreshToken = oldRefreshToken
             };
 
             string apiCall = "api/v1/logins/TestRefreshToken";
-            var data = await ApiHelper.PostDataAsync<TokenData, TokenRefreshData>(apiCall, refreshData, 
+            var data = await ApiHelper.PostDataAsync<TokenData, TokenRefreshData>(apiCall, refreshData,
                                                                                   token: oldToken);
 
             return data;

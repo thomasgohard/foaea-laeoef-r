@@ -1,9 +1,7 @@
 ﻿using DBHelper;
-using TestData.TestDB;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using TestData.TestDB;
 
 namespace TestData.TestDataBase
 {

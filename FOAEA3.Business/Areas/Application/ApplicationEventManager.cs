@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -48,14 +48,14 @@ namespace FOAEA3.Business.Areas.Application
                         eventEffectiveDateTime = DateTime.Now.AddDays(10);
                 }
             }
-                        
+
             Events.Add(new ApplicationEventData
             {
                 Queue = queue,
                 Event_Reas_Cd = eventCode,
                 Event_Reas_Text = eventReasonText,
                 Appl_CtrlCd = string.IsNullOrEmpty(controlCode) ? Application.Appl_CtrlCd : controlCode,
-                Appl_EnfSrv_Cd = string.IsNullOrEmpty(enfSrv) ? Application.Appl_EnfSrv_Cd :  enfSrv,
+                Appl_EnfSrv_Cd = string.IsNullOrEmpty(enfSrv) ? Application.Appl_EnfSrv_Cd : enfSrv,
                 AppLiSt_Cd = appState == ApplicationState.UNDEFINED ? ApplicationState.INITIAL_STATE_0 : appState,
                 Subm_Recpt_SubmCd = recipientSubm ?? Application.Subm_Recpt_SubmCd,
                 Event_TimeStamp = DateTime.Now,
@@ -148,7 +148,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             return await EventDB.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
-        
+
         public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
         {
             return await EventDB.GetLatestSinEventDataSummaryAsync();

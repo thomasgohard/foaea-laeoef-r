@@ -2,7 +2,7 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace FOAEA3.Data.DB
         }
 
         public async Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData,
-                                                             int page = 1, int perPage = 1000, 
+                                                             int page = 1, int perPage = 1000,
                                                              string orderBy = "EnforcementService, ControlCode")
         {
             int totalCount = 0;
@@ -168,7 +168,7 @@ namespace FOAEA3.Data.DB
 
             string sqlSort = @" ORDER BY " + orderBy +
                              @" OFFSET ((@Page-1) * @PerPage) ROWS 
-                                FETCH NEXT @PerPage ROWS ONLY"; 
+                                FETCH NEXT @PerPage ROWS ONLY";
 
             parameters.Add("Page", page);
             parameters.Add("PerPage", perPage);

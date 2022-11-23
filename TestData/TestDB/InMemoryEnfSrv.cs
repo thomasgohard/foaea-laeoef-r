@@ -1,4 +1,4 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Model;
 using System;
 using System.Collections.Generic;

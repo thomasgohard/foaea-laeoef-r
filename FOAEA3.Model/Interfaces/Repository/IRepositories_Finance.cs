@@ -1,6 +1,6 @@
 ﻿using DBHelper;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IRepositories_Finance
     {

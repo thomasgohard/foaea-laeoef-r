@@ -1,11 +1,8 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 
 namespace FOAEA3.Common.Filters;

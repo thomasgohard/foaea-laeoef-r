@@ -2,9 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using System;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -58,7 +55,7 @@ namespace FOAEA3.Common.Brokers
 
         }
 
-        public async Task<LicenceDenialApplicationData> TransferLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData, 
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialTerminationApplicationAsync(LicenceDenialApplicationData appData,
                                                                 string newRecipientSubmitter, string newIssuingSubmitter)
         {
             string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);

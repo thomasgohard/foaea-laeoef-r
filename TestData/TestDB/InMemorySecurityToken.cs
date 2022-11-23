@@ -1,5 +1,5 @@
-﻿using FOAEA3.Data.DB;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;

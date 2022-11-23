@@ -3,7 +3,7 @@ using FOAEA3.Business.BackendProcesses.Structs;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;

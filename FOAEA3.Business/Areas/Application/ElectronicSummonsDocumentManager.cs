@@ -2,7 +2,7 @@
 using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;

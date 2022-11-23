@@ -5,7 +5,7 @@ using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

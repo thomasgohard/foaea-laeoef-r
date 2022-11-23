@@ -2,11 +2,9 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -25,7 +23,7 @@ namespace FOAEA3.Data.DB
             };
 
             var data = await MainDB.GetDataFromStoredProcAsync<SummFAFR_DE_Data>("GetSummFaFrDEForDivertFunds", parameters, FillDataFromReader);
-            
+
             return new DataList<SummFAFR_DE_Data>(data, MainDB.LastError);
 
         }
@@ -45,7 +43,7 @@ namespace FOAEA3.Data.DB
 
         private void FillDataFromReader(IDBHelperReader rdr, SummFAFR_DE_Data data)
         {
-            data.SummFAFR_Id = (int)rdr["SummFAFR_Id"]; 
+            data.SummFAFR_Id = (int)rdr["SummFAFR_Id"];
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string; // can be null 
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string; // can be null 
             data.Batch_Id = rdr["Batch_Id"] as string; // can be null
@@ -73,7 +71,7 @@ namespace FOAEA3.Data.DB
                 else
                     data.SummFAFR_OrigFA_Ind = 0;
             }
-         }
+        }
 
     }
 }

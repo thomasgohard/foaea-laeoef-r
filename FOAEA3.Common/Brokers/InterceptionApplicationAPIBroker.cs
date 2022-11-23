@@ -2,9 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {

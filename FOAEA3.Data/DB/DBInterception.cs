@@ -2,10 +2,9 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -454,8 +453,8 @@ namespace FOAEA3.Data.DB
             {
                 ZipID = MainDB.LastReturnValue,
                 PrcID = processId,
-                ZipName= fileName,
-                DateReceived= dateReceived
+                ZipName = fileName,
+                DateReceived = dateReceived
             };
         }
 
@@ -471,7 +470,7 @@ namespace FOAEA3.Data.DB
 
             await MainDB.ExecProcAsync("ESDPDFsInsert", parameters);
 
-            newPDFentry.PDFid= MainDB.LastReturnValue;
+            newPDFentry.PDFid = MainDB.LastReturnValue;
 
             return newPDFentry;
         }

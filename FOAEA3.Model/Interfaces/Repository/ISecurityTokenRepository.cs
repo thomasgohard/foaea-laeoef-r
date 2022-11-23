@@ -1,7 +1,6 @@
-﻿using FOAEA3.Model;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace FOAEA3.Data.DB
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ISecurityTokenRepository
     {

@@ -1,8 +1,6 @@
 ﻿using DBHelper;
-using FOAEA3.Data.DB;
-using FOAEA3.Model.Interfaces.Repository;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IRepositories
     {

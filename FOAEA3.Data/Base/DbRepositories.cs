@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FOAEA3.Data.DB;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Data.Base

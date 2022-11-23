@@ -1,15 +1,13 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    internal class DBSubjectRole: DBbase, ISubjectRoleRepository
+    internal class DBSubjectRole : DBbase, ISubjectRoleRepository
     {
         public DBSubjectRole(IDBToolsAsync mainDB) : base(mainDB)
         {
@@ -40,7 +38,7 @@ namespace FOAEA3.Data.DB
             };
 
             return await MainDB.GetDataFromStoredProcAsync<SubjectRoleData>("UserGetRoleNames", parameters, FillSubjectRoleData);
-            
+
         }
         private void FillSubjectRoleData(IDBHelperReader rdr, SubjectRoleData data)
         {

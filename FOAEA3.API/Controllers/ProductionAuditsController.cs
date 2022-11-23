@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Business.Utilities;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FOAEA3.API.Controllers

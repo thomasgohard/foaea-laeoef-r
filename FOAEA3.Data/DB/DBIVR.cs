@@ -23,7 +23,7 @@ namespace FOAEA3.Data.DB
                 { "Debtor_SIN",  data.DebtorSin}
             };
 
-            var result = await MainDB.GetDataFromStoredProcAsync<CheckSinReturnData>("fpIVR_Check_Sin", 
+            var result = await MainDB.GetDataFromStoredProcAsync<CheckSinReturnData>("fpIVR_Check_Sin",
                                                                         parameters,
                                                                         FillDataFromReaderGetSinCount);
             return result.FirstOrDefault();
@@ -52,7 +52,7 @@ namespace FOAEA3.Data.DB
             data.CreditorCount = (int)(rdr["CREDITOR_COUNT"]);
         }
 
-         public async Task<CheckControlCodeReturnData> CheckControlCode(CheckControlCodeGetData data)
+        public async Task<CheckControlCodeReturnData> CheckControlCode(CheckControlCodeGetData data)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -71,7 +71,7 @@ namespace FOAEA3.Data.DB
             data.ControlCodeCount = (int)(rdr["CTRL_CDCOUNT"]);
         }
 
-         public async Task<CheckDebtorIdReturnData> CheckDebtorId(CheckDebtorIdGetData data)
+        public async Task<CheckDebtorIdReturnData> CheckDebtorId(CheckDebtorIdGetData data)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -90,7 +90,7 @@ namespace FOAEA3.Data.DB
             data.DebtorIdCount = (int)(rdr["DEBTOR_IDCOUNT"]);
         }
 
-         public async Task<CheckDebtorLetterReturnData> CheckDebtorLetter(CheckDebtorLetterGetData data)
+        public async Task<CheckDebtorLetterReturnData> CheckDebtorLetter(CheckDebtorLetterGetData data)
         {
             var parameters = new Dictionary<string, object>
             {

@@ -4,7 +4,6 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model.Constants;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,12 +16,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using System;
-using System.IO;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common
 {

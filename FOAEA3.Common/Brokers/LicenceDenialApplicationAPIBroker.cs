@@ -2,8 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -91,7 +89,7 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
-        public async Task<LicenceDenialApplicationData> TransferLicenceDenialApplicationAsync(LicenceDenialApplicationData appData, 
+        public async Task<LicenceDenialApplicationData> TransferLicenceDenialApplicationAsync(LicenceDenialApplicationData appData,
                                                                 string newRecipientSubmitter, string newIssuingSubmitter)
         {
             string key = ApplKey.MakeKey(appData.Appl_EnfSrv_Cd, appData.Appl_CtrlCd);
