@@ -1,8 +1,17 @@
-﻿using FileBroker.Model.Interfaces;
+﻿using FileBroker.Common;
+using FileBroker.Model;
+using FileBroker.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace FileBroker.API.Fed.LicenceDenial.Controllers;
 
@@ -35,6 +44,12 @@ public class FederalLicenceDenialFilesController : ControllerBase
         byte[] result = Encoding.UTF8.GetBytes(fileContent);
 
         return File(result, "text/xml", fileName + "." + lastFileCycleString + ".XML");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
+    {
+        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);        
     }
 
     private static async Task<(string, string)> LoadLatestFederalLicenceDenialFileAsync(string fileName, IFileTableRepository fileTable,

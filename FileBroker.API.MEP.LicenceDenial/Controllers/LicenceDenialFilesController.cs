@@ -1,4 +1,5 @@
-﻿using FileBroker.Model.Interfaces;
+﻿using FileBroker.Common;
+using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
@@ -29,6 +30,12 @@ public class LicenceDenialFilesController : ControllerBase
         byte[] result = Encoding.UTF8.GetBytes(fileContent);
 
         return File(result, "text/xml", lastFileName);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
+    {
+        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);
     }
 
     private static async Task<(string, string)> LoadLatestProvincialLicenceDenialFileAsync(string partnerId, IFileTableRepository fileTable)

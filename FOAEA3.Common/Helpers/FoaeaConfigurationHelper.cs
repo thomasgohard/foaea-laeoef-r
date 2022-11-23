@@ -18,7 +18,7 @@ namespace FOAEA3.Common.Helpers
             string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
-                .SetBasePath(System.AppContext.BaseDirectory)
+                .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("FoaeaConfiguration.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"FoaeaConfiguration.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true);
 

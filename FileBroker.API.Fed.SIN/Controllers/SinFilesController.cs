@@ -1,4 +1,5 @@
-﻿using FileBroker.Model.Interfaces;
+﻿using FileBroker.Common;
+using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -39,6 +40,12 @@ public class SinFilesController : ControllerBase
         byte[] result = Encoding.UTF8.GetBytes(fileContent);
 
         return File(result, "text/plain", lastFileName);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
+    {
+        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);
     }
 
     private static async Task<(string, string)> LoadLatestFederalSinFileAsync(IFileTableRepository fileTable)

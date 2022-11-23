@@ -29,7 +29,7 @@ namespace FileBroker.Common
             string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("FileBrokerConfiguration.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"FileBrokerConfiguration.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true);
 
