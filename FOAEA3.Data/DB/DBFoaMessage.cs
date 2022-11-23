@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBFoaMessage : DBbase, IFoaEventsRepository
+    internal class DBFoaMessage : DBbase, IFoaEventsRepository
     {
         public MessageDataList Messages { get; set; }
 

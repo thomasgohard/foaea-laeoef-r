@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBApplicationComments : DBbase, IApplicationCommentsRepository
+    internal class DBApplicationComments : DBbase, IApplicationCommentsRepository
     {
         public DBApplicationComments(IDBToolsAsync mainDB) : base(mainDB)
         {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBFailedSubmitAudit : DBbase, IFailedSubmitAuditRepository
+    internal class DBFailedSubmitAudit : DBbase, IFailedSubmitAuditRepository
     {
         public DBFailedSubmitAudit(IDBToolsAsync mainDB) : base(mainDB)
         {

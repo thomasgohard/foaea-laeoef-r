@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBNotification : DBbase, INotificationRepository
+    internal class DBNotification : DBbase, INotificationRepository
     {
         public DBNotification(IDBToolsAsync mainDB) : base(mainDB)
         {

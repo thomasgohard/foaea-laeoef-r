@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBLogin : DBbase, ILoginRepository
+    internal class DBLogin : DBbase, ILoginRepository
     {
         private const int PREVIOUS_PASSWORDS_HISTORY = 5;
         public DBLogin(IDBToolsAsync mainDB) : base(mainDB)

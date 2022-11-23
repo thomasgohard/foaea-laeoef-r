@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBIVR : DBbase, IIVRRepository
+    internal class DBIVR : DBbase, IIVRRepository
     {
 
         public DBIVR(IDBToolsAsync mainDB) : base(mainDB)

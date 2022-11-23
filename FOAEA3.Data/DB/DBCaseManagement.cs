@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBCaseManagement : DBbase, ICaseManagementRepository
+    internal class DBCaseManagement : DBbase, ICaseManagementRepository
     {
         public DBCaseManagement(IDBToolsAsync mainDB) : base(mainDB)
         {

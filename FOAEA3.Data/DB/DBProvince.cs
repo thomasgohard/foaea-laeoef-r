@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBProvince : DBbase, IProvinceRepository
+    internal class DBProvince : DBbase, IProvinceRepository
     {
         public DBProvince(IDBToolsAsync mainDB) : base(mainDB)
         {

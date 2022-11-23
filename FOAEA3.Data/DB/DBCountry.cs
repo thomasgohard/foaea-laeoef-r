@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBCountry : DBbase, ICountryRepository
+    internal class DBCountry : DBbase, ICountryRepository
     {
         public MessageDataList Messages { get; set; }
 

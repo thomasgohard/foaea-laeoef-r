@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBAccessAudit : DBbase, IAccessAuditRepository
+    internal class DBAccessAudit : DBbase, IAccessAuditRepository
     {
         public DBAccessAudit(IDBToolsAsync mainDB) : base(mainDB)
         {

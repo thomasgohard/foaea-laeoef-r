@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBSubject : DBbase, ISubjectRepository
+    internal class DBSubject : DBbase, ISubjectRepository
     {
         public DBSubject(IDBToolsAsync mainDB) : base(mainDB)
         {
