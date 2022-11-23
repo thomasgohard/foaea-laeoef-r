@@ -1,4 +1,5 @@
 ﻿using FOAEA3.API.Security;
+using FOAEA3.Business.Areas.Administration;
 using FOAEA3.Business.Security;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.DB;
@@ -246,46 +247,45 @@ namespace FOAEA3.API.Controllers
 
         }
 
-        //[HttpGet("PostConfirmationCode")]
-        //[Authorize(Roles = Roles.Admin)]
-        //public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
-        //{
-        //    var dbLogin = new DBLogin(repositories.MainDB);
+        [HttpGet("PostConfirmationCode")]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        {
+            var loginManager = new LoginManager(repositories);
+            await loginManager.PostConfirmationCodeAsync(subjectId, confirmationCode);
 
-        //    await dbLogin.PostConfirmationCodeAsync(subjectId, confirmationCode);
+            return Ok(string.Empty);
+        }
 
-        //    return Ok(string.Empty);
-        //}
+        [HttpGet("GetEmailByConfirmationCode")]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        {
+            var loginManager = new LoginManager(repositories);
 
-        //[HttpGet("GetEmailByConfirmationCode")]
-        //[Authorize(Roles = Roles.Admin)]
-        //public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
-        //{
-        //    var dbLogin = new DBLogin(repositories.MainDB);
+            return Ok(await loginManager.GetEmailByConfirmationCodeAsync(confirmationCode));
+        }
 
-        //    return Ok(await dbLogin.GetEmailByConfirmationCodeAsync(confirmationCode));
-        //}
+        [HttpGet("GetSubjectByConfirmationCode")]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
+        {
+            var subjectManager = new SubjectManager(repositories);
 
-        //[HttpGet("GetSubjectByConfirmationCode")]
-        //[Authorize(Roles = Roles.Admin)]
-        //public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
-        //{
-        //    var dbSubject = new DBSubject(repositories.MainDB);
+            return Ok(await subjectManager.GetSubjectByConfirmationCodeAsync(confirmationCode));
+        }
 
-        //    return Ok(await dbSubject.GetSubjectByConfirmationCodeAsync(confirmationCode));
-        //}
+        [HttpPut("PostPassword")]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
+        {
+            var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
 
-        //[HttpPut("PostPassword")]
-        //[Authorize(Roles = Roles.Admin)]
-        //public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
-        //{
-        //    var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
+            var loginManager = new LoginManager(repositories);
+            await loginManager.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
 
-        //    var dbLogin = new DBLogin(repositories.MainDB);
-        //    await dbLogin.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
-
-        //    return Ok(passwordData);
-        //}
+            return Ok(passwordData);
+        }
 
     }
 }

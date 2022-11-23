@@ -61,15 +61,27 @@ namespace FOAEA3.Business.Security
 
         public async Task<SubjectData> GetSubjectAsync(string subjectName)
         {
-            //int subjectID = GetSubjectLoginCredentials(subjectName).SubjectId;
-            return (await DB.SubjectTable.GetSubjectAsync(subjectName));
+            return await DB.SubjectTable.GetSubjectAsync(subjectName);
         }
 
         public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
         {
-            //int subjectID = GetSubjectLoginCredentials(subjectName).SubjectId;
-            return (await DB.SubjectTable.GetSubjectByConfirmationCodeAsync(confirmationCode));
+            return await DB.SubjectTable.GetSubjectByConfirmationCodeAsync(confirmationCode);
         }
 
+        public async Task PostConfirmationCodeAsync(int subjectId, string confirmationCode)
+        {
+            await DB.LoginTable.PostConfirmationCodeAsync(subjectId, confirmationCode);
+        }
+
+        public async Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode)
+        {
+            return await DB.LoginTable.GetEmailByConfirmationCodeAsync(confirmationCode);
+        }
+
+        public async Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial)
+        {
+            await DB.LoginTable.PostPasswordAsync(confirmationCode, password, salt, initial);
+        }
     }
 }

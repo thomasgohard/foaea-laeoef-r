@@ -38,5 +38,20 @@ namespace TestData.TestDB
         {
             throw new NotImplementedException();
         }
+
+        public Task PostConfirmationCodeAsync(int subjectId, string confirmationCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
