@@ -69,6 +69,9 @@ if (ValidationHelper.IsValidInteger(option))
         case "5":
             //CreateDebtorLetters();
             break;
+        default:
+            Console.WriteLine("Unknown option selected: " + option);
+            break;
     }
 
     return;

@@ -49,8 +49,6 @@ namespace BackendProcesses.CommandLine
             Console.WriteLine("Email Recipients: " + Config.Recipients.EmailRecipients);
             Console.WriteLine("");
             Console.WriteLine("OPTION 1 - Run FOAEA Job");
-            Console.WriteLine("OPTION 5 - Send PADR Summary Email");
-            Console.WriteLine("OPTION 6 - Create Debtor Letters");
             Console.WriteLine("OPTION X - Exit");
             Console.WriteLine("");
             Console.Write("Enter OPTION number: ");
@@ -78,11 +76,8 @@ namespace BackendProcesses.CommandLine
                         }
                         await RunFOAEAJob(processName);
                         break;
-                    case "5":
-                        //SendPADREmail();
-                        break;
-                    case "6":
-                        //CreateDebtorLetters();
+                    default:
+                        Console.WriteLine("Unknown option selected: " + option);
                         break;
                 }
 
