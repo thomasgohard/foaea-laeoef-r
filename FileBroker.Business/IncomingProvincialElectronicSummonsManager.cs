@@ -10,7 +10,7 @@ namespace FileBroker.Business
         private string FileName { get; }
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
-        private FileBrokerConfigurationHelper Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
@@ -22,7 +22,7 @@ namespace FileBroker.Business
         public IncomingProvincialElectronicSummonsManager(RepositoryList db,
                                                           APIBrokerList foaeaApis,
                                                           string fileName,
-                                                          FileBrokerConfigurationHelper config)
+                                                          IFileBrokerConfigurationHelper config)
         {
             FileName = fileName;
             APIs = foaeaApis;

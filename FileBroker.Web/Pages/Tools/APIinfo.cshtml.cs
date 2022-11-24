@@ -8,6 +8,7 @@ using FOAEA3.Model.Interfaces.Broker;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using FileBroker.Model.Interfaces;
 
 namespace FileBroker.Web.Pages.Tools
 {
@@ -24,7 +25,7 @@ namespace FileBroker.Web.Pages.Tools
             ApiData = new Dictionary<string, ApiInfo>();
         }
 
-        public async Task OnGet([FromServices] FileBrokerConfigurationHelper config)
+        public async Task OnGet([FromServices] IFileBrokerConfigurationHelper config)
         {
             var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);

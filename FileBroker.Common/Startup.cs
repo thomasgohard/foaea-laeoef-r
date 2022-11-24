@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common.Filters;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,7 +20,7 @@ namespace FileBroker.Common
 {
     public static class Startup
     {
-        public static void ConfigureAPIServices(IServiceCollection services, FileBrokerConfigurationHelper config, string apiName)
+        public static void ConfigureAPIServices(IServiceCollection services, IFileBrokerConfigurationHelper config, string apiName)
         {
             LoggingHelper.SetupLogging(config.FileBrokerConnection, "Logs-API-FileBroker");
 
@@ -63,7 +64,7 @@ namespace FileBroker.Common
             DataHelper.ConfigureDBServices(services, config.FileBrokerConnection);
         }
 
-        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, FileBrokerConfigurationHelper config, string apiName, string url)
+        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IFileBrokerConfigurationHelper config, string apiName, string url)
         {
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");

@@ -15,5 +15,8 @@ namespace FileBroker.Model.Interfaces
         Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6);
         Task<bool> IsFileLoadingAsync(int processId);
         Task SetIsFileLoadingValueAsync(int processId, bool newValue);
+
+        Task DisableFileProcess(int processId);
+        Task EnableFileProcess(int processId);
     }
 }

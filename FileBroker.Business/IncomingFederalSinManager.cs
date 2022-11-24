@@ -9,7 +9,7 @@ public class IncomingFederalSinManager
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
-                                     FileBrokerConfigurationHelper config)
+                                     IFileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;

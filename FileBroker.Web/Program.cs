@@ -1,5 +1,6 @@
 using DBHelper;
 using FileBroker.Common;
+using FileBroker.Model.Interfaces;
 using FileBroker.Web.Filter;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 
@@ -18,6 +19,8 @@ var config = new FileBrokerConfigurationHelper(args);
 
 string actualConnection = DataHelper.ConfigureDBServices(builder.Services, config.FileBrokerConnection);
 var mainDB = new DBTools(actualConnection);
+
+builder.Services.AddSingleton<IFileBrokerConfigurationHelper, FileBrokerConfigurationHelper>();
 
 builder.Services.AddRazorPages()
         .AddMvcOptions(options =>

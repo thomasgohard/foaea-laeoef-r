@@ -18,7 +18,7 @@ namespace FileBroker.Web.Pages.Tasks
         private IErrorTrackingRepository ErrorTrackingDB { get; }
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
-        private FileBrokerConfigurationHelper Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
@@ -31,7 +31,7 @@ namespace FileBroker.Web.Pages.Tasks
                                    IErrorTrackingRepository errorTrackingDB,
                                    IProcessParameterRepository processParameterTable,
                                    IMailServiceRepository mailServiceDB,
-                                   FileBrokerConfigurationHelper config)
+                                   IFileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
             FlatFileSpecs = flatFileSpecs;

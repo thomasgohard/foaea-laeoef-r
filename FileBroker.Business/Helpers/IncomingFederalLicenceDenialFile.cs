@@ -4,13 +4,13 @@
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
-        private FileBrokerConfigurationHelper Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         public List<string> Errors { get; }
 
         public IncomingFederalLicenceDenialFile(RepositoryList db,
                                                 APIBrokerList foaeaApis,
-                                                FileBrokerConfigurationHelper config)
+                                                IFileBrokerConfigurationHelper config)
         {
             DB = db;
             FoaeaApis = foaeaApis;

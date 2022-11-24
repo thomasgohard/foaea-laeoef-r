@@ -23,8 +23,8 @@ namespace BackendProcesses.CommandLine
             Config = new FoaeaConfigurationHelper(args);
 
             var mainDB = new DBToolsAsync(Config.FoaeaConnection);
-            var DB = new DbRepositories(mainDB);
-            var DBfinance = new DbRepositories_Finance(mainDB);
+            DB = new DbRepositories(mainDB);
+            DBfinance = new DbRepositories_Finance(mainDB);
 
             var loadRefFoaEvents = ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(mainDB));
             var loadRefActiveStatus = ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(mainDB));
@@ -43,16 +43,12 @@ namespace BackendProcesses.CommandLine
                                loadRefLanguages, loadRefDocTypes, loadRefCountries, loadRefAppReasons,
                                loadRefAppCategories, loadRefAppLifeStates, loadRefAppComments);
 
-            Console.WriteLine("Message Broker Command Line Tool");
+            Console.WriteLine("Backend Processes Command Line Tool");
             Console.WriteLine("");
-            Console.WriteLine("MessageBroker DB: ");
             Console.WriteLine("FOAEA DB: " + mainDB.ConnectionString);
             Console.WriteLine("Email Recipients: " + Config.Recipients.EmailRecipients);
             Console.WriteLine("");
             Console.WriteLine("OPTION 1 - Run FOAEA Job");
-            Console.WriteLine("OPTION 2 - Check for New Files");
-            Console.WriteLine("OPTION 3 - Disable File Process");
-            Console.WriteLine("OPTION 4 - Enable File Process");
             Console.WriteLine("OPTION 5 - Send PADR Summary Email");
             Console.WriteLine("OPTION 6 - Create Debtor Letters");
             Console.WriteLine("OPTION X - Exit");
@@ -81,15 +77,6 @@ namespace BackendProcesses.CommandLine
                             processName = Console.ReadLine();
                         }
                         await RunFOAEAJob(processName);
-                        break;
-                    case "2":
-                        //CheckForNewFiles();
-                        break;
-                    case "3":
-                        //DisableFileProcess(args[1]);
-                        break;
-                    case "4":
-                        //EnableFileProcess(args[1]);
                         break;
                     case "5":
                         //SendPADREmail();

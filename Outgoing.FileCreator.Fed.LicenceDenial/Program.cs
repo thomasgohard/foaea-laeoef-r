@@ -1,17 +1,11 @@
 ﻿using DBHelper;
 using FileBroker.Business;
 using FileBroker.Common;
-using FileBroker.Data;
-using FileBroker.Data.DB;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,7 +28,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
         }
 
         private static async Task CreateOutgoingFederalLicenceDenialFilesAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                               FileBrokerConfigurationHelper config)
+                                                                               IFileBrokerConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
@@ -55,7 +49,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
                     foreach (var error in errors)
                     {
                         ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalLicenceDenialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                        await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name, 
+                        await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICOUT", federalLicenceDenialOutgoingSource.Name,
                                                                                    new Exception(error), displayExceptionError: true);
                     }
             }

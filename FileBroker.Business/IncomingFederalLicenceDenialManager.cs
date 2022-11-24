@@ -15,7 +15,7 @@ namespace FileBroker.Business
         private List<ApplicationEventDetailData> ValidEventDetails { get; set; }
 
         public IncomingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories,
-                                                   FileBrokerConfigurationHelper config)
+                                                   IFileBrokerConfigurationHelper config)
         {
             APIs = apis;
             DB = repositories;

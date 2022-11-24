@@ -18,13 +18,13 @@ namespace FileBroker.Web.Pages.Tasks
     {
         private IFileTableRepository FileTable { get; }
         private IAPIBrokerHelper APIHelper { get; }
-        private FileBrokerConfigurationHelper Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         public IFormFile FormFile { get; set; }
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
-        public ImportFileModel(IFileTableRepository fileTable, FileBrokerConfigurationHelper config)
+        public ImportFileModel(IFileTableRepository fileTable, IFileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
             APIHelper = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);

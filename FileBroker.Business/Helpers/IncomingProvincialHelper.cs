@@ -4,11 +4,11 @@ namespace FileBroker.Business.Helpers
 {
     internal class IncomingProvincialHelper
     {
-        private FileBrokerConfigurationHelper Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         private string ProvCode { get; }
 
-        public IncomingProvincialHelper(FileBrokerConfigurationHelper config, string provCode)
+        public IncomingProvincialHelper(IFileBrokerConfigurationHelper config, string provCode)
         {
             Config = config;
             ProvCode = provCode;

@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FileBroker.Business;
 using FileBroker.Common;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -26,7 +27,7 @@ internal class Program
     }
 
     private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                                FileBrokerConfigurationHelper config)
+                                                                IFileBrokerConfigurationHelper config)
     {
         var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 

@@ -1,14 +1,14 @@
 ﻿using FileBroker.Model;
+using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace FileBroker.Common
 {
-    public class FileBrokerConfigurationHelper
+    public class FileBrokerConfigurationHelper : IFileBrokerConfigurationHelper
     {
         public string FileBrokerConnection { get; }
         public string TermsAcceptedTextEnglish { get; }

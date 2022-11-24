@@ -1,7 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -109,6 +108,16 @@ namespace FileBroker.Business.Tests.InMemory
                 FileLoading = newValue;
 
             return Task.CompletedTask;
+        }
+
+        public Task DisableFileProcess(int processId)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task EnableFileProcess(int processId)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

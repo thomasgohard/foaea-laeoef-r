@@ -9,7 +9,7 @@ public class IncomingProvincialTracingManager
     private string FileName { get; }
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
-    private FileBrokerConfigurationHelper Config { get; }
+    private IFileBrokerConfigurationHelper Config { get; }
     private ProvincialAuditFileConfig AuditConfig { get; }
     private Dictionary<string, string> Translations { get; }
     private bool IsFrench { get; }
@@ -21,7 +21,7 @@ public class IncomingProvincialTracingManager
     public IncomingProvincialTracingManager(RepositoryList db,
                                             APIBrokerList foaeaApis,
                                             string fileName,
-                                            FileBrokerConfigurationHelper config)
+                                            IFileBrokerConfigurationHelper config)
     {
         FileName = fileName;
         APIs = foaeaApis;

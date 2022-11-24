@@ -24,6 +24,28 @@ namespace FileBroker.Data.DB
             return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
         }
 
+        public async Task DisableFileProcess(int processId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "nProcessID", processId },
+                { "bActive", false }
+            };
+
+            await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
+        }
+
+        public async Task EnableFileProcess(int processId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "nProcessID", processId },
+                { "bActive", true }
+            };
+
+            await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
+        }
+
         public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);

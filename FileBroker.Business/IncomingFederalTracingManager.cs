@@ -19,7 +19,7 @@ public class IncomingFederalTracingManager
     }
 
     public IncomingFederalTracingManager(APIBrokerList apis, RepositoryList repositories,
-                                         FileBrokerConfigurationHelper config)
+                                         IFileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;
