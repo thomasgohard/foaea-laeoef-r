@@ -36,7 +36,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 body += $"\n\n{Appl_EnfSrv_Cd}-{Appl_CtrlCd}";
 
-                await dbNotification.SendEmailAsync(subject, config.ExGratiaRecipients, body);
+                await dbNotification.SendEmailAsync(subject, Config.Recipients.ExGratiaRecipients, body);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (GarnisheeSummonsReceiptDate is null)
             {
-                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.EmailRecipients,
                                $"GarnisheeSummonsReceiptDate is null. Cannot accept application {Appl_EnfSrv_Cd}-{Appl_CtrlCd}.");
                 return;
             }
@@ -270,7 +270,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_17_FinancialTermsVaried();
 
-            var currentApplicationManager = new InterceptionManager(DB, DBfinance, config)
+            var currentApplicationManager = new InterceptionManager(DB, DBfinance, Config)
             {
                 CurrentUser = this.CurrentUser
             };

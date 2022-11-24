@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
@@ -11,16 +12,8 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ApplicationEventsController : ControllerBase
+public class ApplicationEventsController : FoaeaControllerBase
 {
-    private readonly RecipientsConfig config;
-
-    public ApplicationEventsController()
-    {
-        var configHelper = new FoaeaConfigurationHelper();
-        config = configHelper.RecipientsConfig;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("ApplicationEvents API Version 1.0");
 

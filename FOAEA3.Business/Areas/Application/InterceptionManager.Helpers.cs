@@ -83,9 +83,9 @@ namespace FOAEA3.Business.Areas.Application
                 return JUSTICE_ID_SUFFIX.Substring(position + 1, 1);
         }
 
-        private static bool IsESD_MEP(string enforcementServiceCode)
+        private bool IsESD_MEP(string enforcementServiceCode)
         {
-            return ESDsites.Contains(enforcementServiceCode);
+            return Config.ESDsites.Contains(enforcementServiceCode);
         }
 
         private async Task ProcessSummSmryBFNAsync(string debtorId, EventCode eventBFNreasonCode)
@@ -99,7 +99,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var bfApplicationManager = new InterceptionManager(DB, DBfinance, config)
+            var bfApplicationManager = new InterceptionManager(DB, DBfinance, Config)
             {
                 CurrentUser = this.CurrentUser
             };
@@ -197,7 +197,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     if (InterceptionApplication.Appl_RecvAffdvt_Dte is null)
                     {
-                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
+                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.EmailRecipients,
                                        $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot recalculate fixed amount recalc date after variation!");
                         return fixedAmountRecalcDate;
                     }
@@ -516,7 +516,7 @@ namespace FOAEA3.Business.Areas.Application
                                             .FirstOrDefault();
             if ((summSmryForCurrentAppl is null) && (previousState >= ApplicationState.APPLICATION_ACCEPTED_10))
             {
-                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                $"Could not find summSmry record for {Appl_EnfSrv_Cd}-{Appl_CtrlCd} in StopBlockFunds!");
                 return;
             }

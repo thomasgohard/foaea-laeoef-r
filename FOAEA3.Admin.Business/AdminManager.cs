@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Business.Areas.Application;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -13,10 +14,10 @@ namespace FOAEA3.Admin.Business
     internal class AdminManager
     {
         private readonly IRepositories DB;
-        private readonly RecipientsConfig config;
+        private readonly IFoaeaConfigurationHelper config;
         public string LastError { get; set; }
 
-        public AdminManager(IRepositories repositories, RecipientsConfig config)
+        public AdminManager(IRepositories repositories, IFoaeaConfigurationHelper config)
         {
             this.config = config;
             DB = repositories;

@@ -391,6 +391,53 @@ namespace FOAEA3.Data.DB
             data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
         }
 
+        public async Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd },
+                { "AmendedESDRequired", originalESDrequired }
+            };
+            var returnParameters = new Dictionary<string, string>
+            {
+                { "NewESDexists", "B" },
+                { "ESDReceivedDate", "D" }
+            };
+            
+            var returnValues = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("IsNewESDReceived", parameters, returnParameters);
+
+            return ((bool)returnValues["NewESDexists"], (DateTime)returnValues["ESDReceivedDate"]);
+        }
+
+        public async Task<List<ApplicationData>> GetApplicationsForReject()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentRequiredData>("GetESDRequiredData", FillESDrequiredData);
+        }
+
+        private void FillESDrequiredData(IDBHelperReader rdr, ElectronicSummonsDocumentRequiredData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.ESDRequired = (ESDrequired)rdr["ESDRequired"];
+            data.ESDRequiredDate = (DateTime)rdr["ESDRequiredDate"];
+            if (rdr.ColumnExists("ESDReceivedDate"))
+                data.ESDReceivedDate = (DateTime?)rdr["ESDReceivedDate"];
+            if (rdr.ColumnExists("Subm_SubmCd"))
+                data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            if (rdr.ColumnExists("Subm_Recpt_SubmCd"))
+                data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
+            if (rdr.ColumnExists("AppLiSt_Cd"))
+                data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
+            if (rdr.ColumnExists("ActvSt_Cd"))
+                data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+        }
+
         public async Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,
                                       DateTime? esdReceivedDate = null)
         {

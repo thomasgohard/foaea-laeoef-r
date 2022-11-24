@@ -3,6 +3,7 @@ using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -18,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
 
-        public TracingManager(TracingApplicationData tracing, IRepositories repositories, RecipientsConfig config) :
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config) :
             base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
         {
 
@@ -39,7 +40,7 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public TracingManager(IRepositories repositories, RecipientsConfig config) :
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
             this(new TracingApplicationData(), repositories, config)
         {
         }

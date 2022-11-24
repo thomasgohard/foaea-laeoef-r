@@ -4,6 +4,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
 using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,7 +29,7 @@ namespace FOAEA3.Common
             return builder.Configuration["UseInMemoryData"] == "Yes";
         }
 
-        public static void ConfigureAPIServices(IServiceCollection services, FoaeaConfigurationHelper configuration)
+        public static void ConfigureAPIServices(IServiceCollection services, IFoaeaConfigurationHelper configuration)
         {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -89,7 +90,7 @@ namespace FOAEA3.Common
                         });
         }
 
-        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, FoaeaConfigurationHelper configuration, string apiName)
+        public static void ConfigureAPI(WebApplication app, IWebHostEnvironment env, IFoaeaConfigurationHelper configuration, string apiName)
         {
             ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{apiName}[/cyan]...");
             ColourConsole.WriteEmbeddedColorLine($"Using .Net Code Environment = [yellow]{env.EnvironmentName}[/yellow]");

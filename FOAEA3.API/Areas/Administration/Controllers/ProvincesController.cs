@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common;
+using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ namespace FOAEA3.API.Areas.Administration.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ProvincesController : ControllerBase
+public class ProvincesController : FoaeaControllerBase
 {
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Provinces API Version 1.0");

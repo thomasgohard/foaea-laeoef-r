@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Utilities;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
@@ -8,7 +9,7 @@ namespace FOAEA3.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ProductionAuditsController : ControllerBase
+    public class ProductionAuditsController : FoaeaControllerBase
     {
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("APIConfigurations API Version 1.0");

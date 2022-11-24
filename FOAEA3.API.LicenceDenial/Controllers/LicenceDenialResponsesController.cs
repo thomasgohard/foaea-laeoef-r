@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
@@ -10,16 +11,8 @@ namespace FOAEA3.API.LicenceDenial.Controllers;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class LicenceDenialResponsesController : ControllerBase
+public class LicenceDenialResponsesController : FoaeaControllerBase
 {
-    private readonly RecipientsConfig config;
-
-    public LicenceDenialResponsesController()
-    {
-        var configHelper = new FoaeaConfigurationHelper();
-        config = configHelper.RecipientsConfig;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("LicenceDenialResponses API Version 1.0");
 

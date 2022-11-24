@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Administration;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
@@ -7,15 +8,13 @@ using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace FOAEA3.API.Areas.Administration.Controllers;
+namespace FOAEA3.API.Areas.Administration;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class SubmittersController : ControllerBase
+public class SubmittersController : FoaeaControllerBase
 {
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Submitters API Version 1.0");
 

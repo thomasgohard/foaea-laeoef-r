@@ -23,8 +23,6 @@ namespace FOAEA3.Data.Base
         public List<ApplicationCommentsData> ApplicationComments { get; }
         public FoaEventDataDictionary FoaEvents { get; }
 
-        public ConcurrentDictionary<string, string> Configuration { get; }
-
         private static ReferenceData instance = null;
 
         private static readonly object syncLock = new();
@@ -42,7 +40,6 @@ namespace FOAEA3.Data.Base
             ApplicationReasons = new ConcurrentDictionary<string, ApplicationReasonData>();
             Countries = new ConcurrentDictionary<string, CountryData>();
             DocumentTypes = new ConcurrentDictionary<string, DocumentTypeData>();
-            Configuration = new ConcurrentDictionary<string, string>();
             ApplicationComments = new List<ApplicationCommentsData>();
             FoaEvents = new FoaEventDataDictionary();
         }

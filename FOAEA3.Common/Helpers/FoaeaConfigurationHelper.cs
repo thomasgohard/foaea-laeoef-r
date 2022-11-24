@@ -1,17 +1,19 @@
 ﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
 
 namespace FOAEA3.Common.Helpers
 {
-    public class FoaeaConfigurationHelper
+    public class FoaeaConfigurationHelper : IFoaeaConfigurationHelper
     {
         public string FoaeaConnection { get; }
 
-        public RecipientsConfig RecipientsConfig { get; }
+        public RecipientsConfig Recipients { get; }
         public TokenConfig Tokens { get; }
-
+        public DeclarationData LicenceDenialDeclaration { get; }
         public List<string> ProductionServers { get; }
+        public List<string> ESDsites { get; }
 
         public FoaeaConfigurationHelper(string[] args = null)
         {
@@ -29,9 +31,10 @@ namespace FOAEA3.Common.Helpers
 
             FoaeaConnection = configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues();
 
-            RecipientsConfig = configuration.GetSection("RecipientsConfig").Get<RecipientsConfig>();
+            Recipients = configuration.GetSection("RecipientsConfig").Get<RecipientsConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
-
+            LicenceDenialDeclaration = configuration.GetSection("Declaration:LicenceDenial").Get<DeclarationData>();
+            ESDsites = configuration.GetSection("ESDsites").Get<List<string>>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
         }
     }

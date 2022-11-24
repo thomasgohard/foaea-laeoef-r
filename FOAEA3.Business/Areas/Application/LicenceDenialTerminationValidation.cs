@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Common.Models;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Business.Areas.Application
@@ -10,14 +11,14 @@ namespace FOAEA3.Business.Areas.Application
 
 
         public LicenceDenialTerminationValidation(LicenceDenialApplicationData licenceDenialTerminationApplication, ApplicationEventManager eventManager,
-                                      IRepositories repositories, RecipientsConfig config, FoaeaUser user) :
+                                      IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
                                         base(licenceDenialTerminationApplication, eventManager, repositories, config, user)
         {
             LicenceDenialTerminationApplication = licenceDenialTerminationApplication;
         }
 
         public LicenceDenialTerminationValidation(LicenceDenialApplicationData licenceDenialTerminationApplication, IRepositories repositories,
-                                      RecipientsConfig config, FoaeaUser user) :
+                                      IFoaeaConfigurationHelper config, FoaeaUser user) :
                                         base(licenceDenialTerminationApplication, repositories, config, user)
         {
             LicenceDenialTerminationApplication = licenceDenialTerminationApplication;

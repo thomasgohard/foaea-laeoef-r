@@ -492,6 +492,8 @@ namespace DBHelper
                     {
                         'S' => SqlDbType.VarChar,
                         'C' => SqlDbType.Char,
+                        'D' => SqlDbType.DateTime,
+                        'B' => SqlDbType.Bit,
                         'I' => SqlDbType.Int,
                         _ => throw new Exception($"Unsupported DB type! ({returnedValue})"),
                     };

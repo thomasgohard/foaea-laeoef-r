@@ -1,5 +1,6 @@
 ﻿using FOAEA3.API.Filters;
 using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
@@ -12,16 +13,8 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ApplicationsController : ControllerBase
-{
-    private readonly RecipientsConfig config;
-
-    public ApplicationsController()
-    {
-        var configHelper = new FoaeaConfigurationHelper();
-        config = configHelper.RecipientsConfig;
-    }
-
+public class ApplicationsController : FoaeaControllerBase
+{    
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 

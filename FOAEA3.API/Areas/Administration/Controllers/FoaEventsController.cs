@@ -1,4 +1,5 @@
-﻿using FOAEA3.Data.Base;
+﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
@@ -9,7 +10,7 @@ namespace FOAEA3.API.Areas.Administration.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class FoaEventsController : ControllerBase
+public class FoaEventsController : FoaeaControllerBase
 {
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("FoaEvents API Version 1.0");

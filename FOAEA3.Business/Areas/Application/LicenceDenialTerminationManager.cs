@@ -2,6 +2,7 @@
 using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -13,7 +14,7 @@ namespace FOAEA3.Business.Areas.Application
     {
         public LicenceDenialApplicationData LicenceDenialTerminationApplication { get; }
 
-        public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, RecipientsConfig config) :
+        public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, IFoaeaConfigurationHelper config) :
             base(licenceDenialTermination, repositories, config)
         {
             StateEngine.ValidStateChange[ApplicationState.INITIAL_STATE_0].Add(ApplicationState.APPLICATION_ACCEPTED_10);
@@ -21,7 +22,7 @@ namespace FOAEA3.Business.Areas.Application
             LicenceDenialTerminationApplication = licenceDenialTermination;
         }
 
-        public LicenceDenialTerminationManager(IRepositories repositories, RecipientsConfig config) :
+        public LicenceDenialTerminationManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
             this(new LicenceDenialApplicationData(), repositories, config)
         {
 
@@ -60,7 +61,7 @@ namespace FOAEA3.Business.Areas.Application
 
             bool success = await base.CreateApplicationAsync();
 
-            var originalLicenceDenialManager = new LicenceDenialManager(originalL01, DB, config)
+            var originalLicenceDenialManager = new LicenceDenialManager(originalL01, DB, Config)
             {
                 CurrentUser = CurrentUser
             };
@@ -137,7 +138,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<LicenceDenialApplicationData> GetOriginalLicenceDenialApplication(string controlCodeForL01, DateTime requestDate)
         {
-            var licenceDenialManager = new LicenceDenialManager(DB, config);
+            var licenceDenialManager = new LicenceDenialManager(DB, Config);
             licenceDenialManager.CurrentUser = CurrentUser;
             if (!await licenceDenialManager.LoadApplicationAsync(LicenceDenialTerminationApplication.Appl_EnfSrv_Cd, controlCodeForL01))
             {
@@ -306,7 +307,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new LicenceDenialTerminationManager(DB, config)
+            var current = new LicenceDenialTerminationManager(DB, Config)
             {
                 CurrentUser = this.CurrentUser
             };

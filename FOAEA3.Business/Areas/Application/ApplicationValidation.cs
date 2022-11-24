@@ -1,9 +1,11 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Exceptions;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
@@ -21,7 +23,7 @@ namespace FOAEA3.Business.Areas.Application
         protected IRepositories DB { get; }
         private ApplicationData Application { get; }
 
-        protected readonly RecipientsConfig config;
+        protected IFoaeaConfigurationHelper Config { get; }
 
         public ApplicationEventManager EventManager { get; set; }
 
@@ -30,9 +32,9 @@ namespace FOAEA3.Business.Areas.Application
         public FoaeaUser CurrentUser { get; set; }
 
         public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
-                                     IRepositories repositories, RecipientsConfig config, FoaeaUser currentUser)
+                                     IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser currentUser)
         {
-            this.config = config;
+            Config = config;
             Application = application;
             DB = repositories;
             EventManager = eventManager;
@@ -40,9 +42,9 @@ namespace FOAEA3.Business.Areas.Application
         }
 
         public ApplicationValidation(ApplicationData application, IRepositories repositories,
-                                     RecipientsConfig config, FoaeaUser currentUser)
+                                     IFoaeaConfigurationHelper config, FoaeaUser currentUser)
         {
-            this.config = config;
+            Config = config;
             Application = application;
             DB = repositories;
             CurrentUser = currentUser;
@@ -68,7 +70,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                var existingApp = new ApplicationManager(new ApplicationData(), DB, config)
+                var existingApp = new ApplicationManager(new ApplicationData(), DB, Config)
                 {
                     CurrentUser = this.CurrentUser
                 };

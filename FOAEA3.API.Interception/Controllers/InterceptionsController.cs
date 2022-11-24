@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
@@ -12,16 +13,8 @@ namespace FOAEA3.API.Interception.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize(Roles = Duties.Interception + "," + Roles.FlasUser + "," + Roles.Admin)]
-public class InterceptionsController : ControllerBase
+public class InterceptionsController : FoaeaControllerBase
 {
-    private readonly RecipientsConfig config;
-
-    public InterceptionsController()
-    {
-        var configHelper = new FoaeaConfigurationHelper();
-        config = configHelper.RecipientsConfig;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> Version()
     {

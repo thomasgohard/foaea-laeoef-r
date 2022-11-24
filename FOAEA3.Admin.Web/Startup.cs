@@ -3,11 +3,9 @@ using FOAEA3.Admin.Web.Filter;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Data.DB;
-using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
@@ -16,14 +14,6 @@ namespace FOAEA3.Admin.Web
 {
     public class Startup
     {
-        public IConfiguration LocalConfiguration { get; }
-
-        public Startup(IConfiguration configuration)
-        {
-            LocalConfiguration = configuration;
-        }
-
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -44,9 +34,6 @@ namespace FOAEA3.Admin.Web
             services.AddScoped<IGenderRepository>(m => ActivatorUtilities.CreateInstance<DBGender>(m, mainDB));
             services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
             services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
-
-            services.Configure<ApiConfig>(LocalConfiguration.GetSection("APIroot"));
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

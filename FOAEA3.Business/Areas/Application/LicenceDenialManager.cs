@@ -2,6 +2,7 @@
 using FOAEA3.Business.Security;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -15,11 +16,10 @@ namespace FOAEA3.Business.Areas.Application
     {
         public LicenceDenialApplicationData LicenceDenialApplication { get; }
 
-        public static DeclarationData Declaration { get; set; }
-
         private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
-        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, RecipientsConfig config) : base(licenceDenial, repositories, config)
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config) :
+                                        base(licenceDenial, repositories, config)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -42,7 +42,7 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
-        public LicenceDenialManager(IRepositories repositories, RecipientsConfig config) : this(new LicenceDenialApplicationData(), repositories, config)
+        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config) : this(new LicenceDenialApplicationData(), repositories, config)
         {
 
         }
@@ -147,7 +147,7 @@ namespace FOAEA3.Business.Areas.Application
                 result = false;
             }
 
-            if ((app.LicSusp_NrOfPymntsInDefault is null || app.LicSusp_NrOfPymntsInDefault < 3) && 
+            if ((app.LicSusp_NrOfPymntsInDefault is null || app.LicSusp_NrOfPymntsInDefault < 3) &&
                 (app.LicSusp_AmntOfArrears is null || app.LicSusp_AmntOfArrears < 3000M))
             {
                 app.Messages.AddError("Number of payments less than 3 and amount of arrears < 3000.00");
@@ -167,8 +167,8 @@ namespace FOAEA3.Business.Areas.Application
         {
             string declaration = LicenceDenialApplication.LicSusp_Declaration?.Trim();
             if (declaration is not null &&
-                (declaration.Equals(Declaration.English, StringComparison.InvariantCultureIgnoreCase) ||
-                 declaration.Equals(Declaration.French, StringComparison.InvariantCultureIgnoreCase)))
+                (declaration.Equals(Config.LicenceDenialDeclaration.English, StringComparison.InvariantCultureIgnoreCase) ||
+                 declaration.Equals(Config.LicenceDenialDeclaration.French, StringComparison.InvariantCultureIgnoreCase)))
                 return true;
             else
             {
@@ -197,7 +197,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new LicenceDenialManager(DB, config)
+            var current = new LicenceDenialManager(DB, Config)
             {
                 CurrentUser = this.CurrentUser
             };

@@ -1,5 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
-using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Threading.Tasks;
@@ -8,13 +8,16 @@ namespace FOAEA3.Business.BackendProcesses
 {
     public class BringForwardEventProcess
     {
-        private readonly RecipientsConfig config;
+        private readonly IFoaeaConfigurationHelper config;
         private readonly IRepositories DB;
+        private readonly IRepositories_Finance DBfinance;
 
-        public BringForwardEventProcess(IRepositories repositories, RecipientsConfig config)
+        public BringForwardEventProcess(IRepositories repositories, IRepositories_Finance repositories_finance,
+                                        IFoaeaConfigurationHelper config)
         {
             this.config = config;
             DB = repositories;
+            DBfinance = repositories_finance;
         }
 
         public async Task RunAsync()
@@ -36,6 +39,9 @@ namespace FOAEA3.Business.BackendProcesses
                     switch (applicationManager.GetCategory())
                     {
                         case "I01":
+                            var interceptionManager = new InterceptionManager(null, DB, DBfinance, config);
+                            await interceptionManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await interceptionManager.ProcessBringForwardsAsync(bfEvent);
                             break;
 
                         case "T01":
@@ -57,7 +63,7 @@ namespace FOAEA3.Business.BackendProcesses
                 }
                 catch (Exception e)
                 {
-                    await dbNotification.SendEmailAsync("BF Error", config.EmailRecipients, e.Message + "\n\n" + e.StackTrace);
+                    await dbNotification.SendEmailAsync("BF Error", config.Recipients.EmailRecipients, e.Message + "\n\n" + e.StackTrace);
                 }
             }
 

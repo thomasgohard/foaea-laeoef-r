@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
@@ -10,16 +11,8 @@ namespace FOAEA3.API.Interception.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ESDsController : ControllerBase
-    {
-        private readonly RecipientsConfig config;
-
-        public ESDsController()
-        {
-            var configHelper = new FoaeaConfigurationHelper();
-            config = configHelper.RecipientsConfig;
-        }
-
+    public class ESDsController : FoaeaControllerBase
+    {     
         [HttpGet("Version")]
         public ActionResult<string> Version()
         {

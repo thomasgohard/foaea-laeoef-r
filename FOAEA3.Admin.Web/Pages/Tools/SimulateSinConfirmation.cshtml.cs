@@ -1,7 +1,7 @@
 using FOAEA3.Admin.Business;
 using FOAEA3.Admin.Web.Models;
 using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,12 +16,11 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
 
         private readonly IRepositories DB;
-        private readonly RecipientsConfig recipients;
+        private readonly IFoaeaConfigurationHelper Config;
 
         public SimulateSinConfirmationModel(IRepositories repositories)
         {
-            var config = new FoaeaConfigurationHelper();
-            recipients = config.RecipientsConfig;
+            Config = new FoaeaConfigurationHelper();
             DB = repositories;
         }
 
@@ -34,7 +33,7 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
             if (ModelState.IsValid)
             {
-                var adminManager = new AdminManager(DB, recipients);
+                var adminManager = new AdminManager(DB, Config);
 
                 try
                 {

@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
@@ -12,16 +13,8 @@ namespace FOAEA3.API.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class TracingsController : ControllerBase
+public class TracingsController : FoaeaControllerBase
 {
-    private readonly RecipientsConfig config;
-
-    public TracingsController()
-    {
-        var configHelper = new FoaeaConfigurationHelper();
-        config = configHelper.RecipientsConfig; ;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.0");
 

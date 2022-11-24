@@ -17,7 +17,7 @@ namespace IVR.API.Controllers
         public IVRController()
         {
             var configHelper = new FoaeaConfigurationHelper();
-            config = configHelper.RecipientsConfig;
+            config = configHelper.Recipients;
         }
 
         [HttpGet("fpIVR_Check_Creditor_Id")]

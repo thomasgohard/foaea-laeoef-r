@@ -117,13 +117,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.Fed.Intercep
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.API.MEP.LicenceDenial", "FileBroker.API.MEP.LicenceDenial\FileBroker.API.MEP.LicenceDenial.csproj", "{8827F98A-7DF2-4E2A-82E7-FA06988C30B8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utilities", "utilities", "{A2276EEF-D839-414A-882D-8C92B03C7A5E}"
-	ProjectSection(SolutionItems) = preProject
-		utilities\SetEnvironmentForFOAEA.cmd = utilities\SetEnvironmentForFOAEA.cmd
-		utilities\StartAPIs.cmd = utilities\StartAPIs.cmd
-		utilities\StopAPIs.cmd = utilities\StopAPIs.cmd
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIs", "APIs", "{33A95810-1DF1-4EB3-B27B-AE98395364B6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FOAEA3.API.Tests", "FOAEA3.API.Tests\FOAEA3.API.Tests.csproj", "{72EDD86C-8E3A-4FB9-A9D3-DDC8B059F714}"

@@ -5,6 +5,7 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
@@ -25,7 +26,7 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventDetailManager EventDetailManager { get; }
 
         protected ApplicationValidation Validation { get; }
-        protected readonly RecipientsConfig config;
+        protected IFoaeaConfigurationHelper Config { get; }
 
         protected ApplicationStateEngine StateEngine { get; }
 
@@ -58,16 +59,16 @@ namespace FOAEA3.Business.Areas.Application
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
         }
 
-        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, RecipientsConfig config,
+        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
                                   ApplicationValidation applicationValidation = null)
         {
-            this.config = config;
+            this.Config = config;
             Application = applicationData;
             EventManager = new ApplicationEventManager(Application, repositories);
             EventDetailManager = new ApplicationEventDetailManager(Application, repositories);
             DB = repositories;
             if (applicationValidation is null)
-                Validation = new ApplicationValidation(Application, EventManager, DB, config, CurrentUser);
+                Validation = new ApplicationValidation(Application, EventManager, DB, Config, CurrentUser);
             else
             {
                 Validation = applicationValidation;
@@ -255,7 +256,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // load old data from database
-            var current = new ApplicationManager(new ApplicationData(), DB, config)
+            var current = new ApplicationManager(new ApplicationData(), DB, Config)
             {
                 CurrentUser = this.CurrentUser
             };

@@ -2,6 +2,7 @@
 using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
@@ -17,14 +18,14 @@ namespace FOAEA3.Business.Areas.Application
 
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, ApplicationEventManager eventManager,
-                                      IRepositories repositories, RecipientsConfig config, FoaeaUser user) :
+                                      IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
                                         base(interceptionApplication, eventManager, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, IRepositories repositories,
-                                      RecipientsConfig config, FoaeaUser user) :
+                                      IFoaeaConfigurationHelper config, FoaeaUser user) :
                                         base(interceptionApplication, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
@@ -393,7 +394,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money is null)
             {
-                await ApplicationManager.AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await ApplicationManager.AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                                   $"CalculateMaxAmountPeriodicForPeriodCode for {InterceptionApplication.Appl_EnfSrv_Cd}-{InterceptionApplication.Appl_CtrlCd}" +
                                                   $" (with periodic code {paymentPeriodicCode}) was called even though IntFinH_PerPym_Money is null!");
                 return 0.0M;

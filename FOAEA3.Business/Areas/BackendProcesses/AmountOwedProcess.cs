@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Business.BackendProcesses.Enums;
 using FOAEA3.Business.BackendProcesses.Structs;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -195,9 +196,11 @@ namespace FOAEA3.Business.BackendProcesses
                     else
                     {
                         // send email notification about error in amount owed periodic calculations
+                        var config = new FoaeaConfigurationHelper();
+
                         var dbNotification = DB.NotificationService;
                         await dbNotification.SendEmailAsync(subject: "Amount Owed Periodic Calculation Error",
-                                                 recipient: ReferenceData.Instance().Configuration["emailRecipients"],
+                                                 recipient: config.Recipients.EmailRecipients,
                                                  body: $"{enfSrvCd}-{ctrlCd}: Invalid periodic amounts \n" +
                                                        $"  Fixed Amount Period: {fixedAmountPeriodCode}\n" +
                                                        $"  Ongoing Period: {paymentPeriodCode}\n" +

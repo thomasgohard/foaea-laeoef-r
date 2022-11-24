@@ -40,7 +40,10 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode);
         Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN);
         Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN);
-        
+
+        Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync();
+        Task<List<ApplicationData>> GetApplicationsForReject();
+        Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired);
         Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
         Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
         Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName);

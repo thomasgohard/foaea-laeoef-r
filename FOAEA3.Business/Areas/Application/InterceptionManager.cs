@@ -3,6 +3,7 @@ using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,11 @@ namespace FOAEA3.Business.Areas.Application
         public InterceptionApplicationData InterceptionApplication { get; }
         private IRepositories_Finance DBfinance { get; }
         private InterceptionValidation InterceptionValidation { get; }
-        private bool? AcceptedWithin30Days { get; set; } = null;
-        private bool ESDReceived { get; set; } = true;
-        private DateTime? GarnisheeSummonsReceiptDate { get; set; }
+        public bool? AcceptedWithin30Days { get; set; } = null;
+        public bool ESDReceived { get; set; } = true;
+        public DateTime? GarnisheeSummonsReceiptDate { get; set; }
 
         private int nextJusticeID_callCount = 0;
-
-        public static List<string> ESDsites { get; set; }
 
         private enum VariationDocumentAction
         {
@@ -36,7 +35,7 @@ namespace FOAEA3.Business.Areas.Application
         private VariationDocumentAction VariationAction { get; set; }
 
         public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
-                                   IRepositories_Finance repositoriesFinance, RecipientsConfig config) :
+                                   IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
                                   base(interception, repositories, config,
                                       new InterceptionValidation(interception, repositories, config, null))
         {
@@ -85,7 +84,7 @@ namespace FOAEA3.Business.Areas.Application
                         });
         }
 
-        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, RecipientsConfig config) :
+        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
             this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
         {
 
@@ -163,7 +162,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await IncrementGarnSmryAsync(isNewApplication: true);
 
-                if (ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
+                if (Config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
                     await DB.InterceptionTable.InsertESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, ESDrequired.OriginalESDrequired);
 
                 await EventManager.SaveEventsAsync();
@@ -252,7 +251,7 @@ namespace FOAEA3.Business.Areas.Application
             var summSmry = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd)).FirstOrDefault();
             if (summSmry is null)
             {
-                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.EmailRecipients,
                                $"No summsmry record was found for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot vary.");
                 return false;
             }
@@ -266,7 +265,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
 
-            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, config)
+            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config)
             {
                 CurrentUser = this.CurrentUser
             };
@@ -345,7 +344,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task FullyServiceApplicationAsync()
         {
-            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, config)
+            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, Config)
             {
                 CurrentUser = this.CurrentUser
             };
@@ -507,7 +506,7 @@ namespace FOAEA3.Business.Areas.Application
 
             bool result = await AcceptGarnisheeAsync(supportingDocsDate, isAutoAccept: false);
 
-            if (ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
+            if (Config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
                 await DB.InterceptionTable.UpdateESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, supportingDocsDate);
 
             await EventManager.SaveEventsAsync();
@@ -740,6 +739,10 @@ namespace FOAEA3.Business.Areas.Application
                     var dbNotification = DB.NotificationService;
                     switch (bfEvent.Event_Reas_Cd)
                     {
+                        case EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION:
+                            // do nothing for I01 -- this is now handled by the ESD event processing that every morning
+                            break;
+
                         case EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION:
                             if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
                             {
@@ -757,7 +760,6 @@ namespace FOAEA3.Business.Areas.Application
                                 }
                             }
                             break;
-
 
                         case EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR:
                             if (InterceptionApplication.Appl_Rcptfrm_Dte.AddDays(20) < DateTime.Now)

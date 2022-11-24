@@ -77,6 +77,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetApplicationsForReject()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> GetDebtorIDAsync(string first3Char)
         {
             throw new NotImplementedException();
@@ -88,6 +93,11 @@ namespace TestData.TestDB
         }
 
         public Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
         {
             throw new NotImplementedException();
         }
@@ -150,6 +160,11 @@ namespace TestData.TestDB
         public Task<bool> IsFeeCumulativeForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             return Task.FromResult(false);
+        }
+
+        public Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)

@@ -2,6 +2,21 @@
   "ConnectionStrings": {
     "FOAEAMain": "Server=%FOAEA_DB_SERVER%;Database=FoaeaDBStg2Prod;Integrated Security=SSPI;Trust Server Certificate=true;"
   },
+  "Declaration": {
+    "LicenceDenial": {
+      "English": "I declare that the information given in this application is true and is for the purpose of applying for licence denial in accordance with the Family Orders and Agreements Enforcement Assistance Act",
+      "French": "J’atteste que les renseignements donnés dans la présente demande sont vrais et sont fournis aux fins de la demande de refus d’autorisation en conformité avec la Loi d’aide à l’exécution des ordonnances et des ententes familiales"
+    }
+  },
+  "ESDsites": [
+    "AB01",
+    "MB01",
+    "NF01",
+    "ON01",
+    "QC01",
+    "NS01"
+  ],
+  "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ],
   "RecipientsConfig": {
     "EmailRecipients": "FLAS-IT_Testing@justice.gc.ca",
     "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
@@ -13,6 +28,5 @@
     "Audience": "%FILEBROKER_TOKEN_AUDIENCE%",
     "ExpireMinutes": 2,
     "RefreshTokenExpireMinutes": 20
-  },
-  "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ]
+  }
 }
