@@ -82,6 +82,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> GetDebtorIDAsync(string first3Char)
         {
             throw new NotImplementedException();
@@ -137,6 +142,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetTerminatedI01()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode)
         {
             throw new NotImplementedException();
@@ -163,6 +173,16 @@ namespace TestData.TestDB
         }
 
         public Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN)
         {
             throw new NotImplementedException();
         }

@@ -8,11 +8,12 @@ namespace FOAEA3.Common.Helpers
     public class FoaeaConfigurationHelper : IFoaeaConfigurationHelper
     {
         public string FoaeaConnection { get; }
-
         public RecipientsConfig Recipients { get; }
         public TokenConfig Tokens { get; }
         public DeclarationData LicenceDenialDeclaration { get; }
         public List<string> ProductionServers { get; }
+        public List<string> AutoSwear { get; }
+        public List<string> AutoAccept { get; }
         public List<string> ESDsites { get; }
 
         public FoaeaConfigurationHelper(string[] args = null)
@@ -34,6 +35,8 @@ namespace FOAEA3.Common.Helpers
             Recipients = configuration.GetSection("RecipientsConfig").Get<RecipientsConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
             LicenceDenialDeclaration = configuration.GetSection("Declaration:LicenceDenial").Get<DeclarationData>();
+            AutoSwear = configuration.GetSection("AutoSwear").Get<List<string>>();
+            AutoAccept = configuration.GetSection("AutoAccept").Get<List<string>>();
             ESDsites = configuration.GetSection("ESDsites").Get<List<string>>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
         }

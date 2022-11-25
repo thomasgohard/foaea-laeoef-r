@@ -43,6 +43,9 @@ namespace FOAEA3.Model.Interfaces.Repository
 
         Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync();
         Task<List<ApplicationData>> GetApplicationsForReject();
+        Task<List<ApplicationData>> GetTerminatedI01();
+        Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd);
+
         Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired);
         Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
         Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
@@ -56,5 +59,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<HoldbackTypeData>> GetHoldbackTypesAsync();
         Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry);
         Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN);
+        Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr);
     }
 }

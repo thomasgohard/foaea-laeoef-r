@@ -13,11 +13,12 @@ Console.WriteLine("");
 Console.WriteLine("FileBroker DB: " + mainDB.ConnectionString);
 Console.WriteLine("Email Recipient: " + Config.EmailRecipient);
 Console.WriteLine("");
-Console.WriteLine("OPTION 1 - Check for New Files");
-Console.WriteLine("OPTION 2 - Disable File Process");
-Console.WriteLine("OPTION 3 - Enable File Process");
-Console.WriteLine("OPTION 4 - Send PADR Summary Email");
-Console.WriteLine("OPTION 5 - Create Debtor Letters");
+Console.WriteLine("OPTION 1 - Run FileBroker Job");
+Console.WriteLine("OPTION 2 - Check for New Files");
+Console.WriteLine("OPTION 3 - Disable File Process");
+Console.WriteLine("OPTION 4 - Enable File Process");
+Console.WriteLine("OPTION 5 - Send PADR Summary Email");
+Console.WriteLine("OPTION 6 - Create Debtor Letters");
 Console.WriteLine("OPTION X - Exit");
 Console.WriteLine("");
 Console.Write("Enter OPTION number: ");
@@ -25,11 +26,11 @@ Console.WriteLine("");
 
 string option;
 if (args.Length == 0)
-    option = Console.ReadLine();
+    option = Console.ReadLine() ?? string.Empty;
 else
-    option = args[0];
+    option = args[0] ?? string.Empty;
 
-if (ValidationHelper.IsValidInteger(option))
+if ((option.ToUpper() != "X") && ValidationHelper.IsValidInteger(option))
 {
     string processName;
     string result;
@@ -37,9 +38,23 @@ if (ValidationHelper.IsValidInteger(option))
     switch (option)
     {
         case "1":
+            //run file broker job (e.g. daily outgoing files or weekly IFMS file)
+            if (args.Length > 1)
+                processName = args[1];
+            else
+            {
+                Console.WriteLine("");
+                Console.WriteLine("Run FileBroker job:");
+                processName = Console.ReadLine();
+            }
+            await RunFileBrokerJob(processName);
+            break;
+
+        case "2":
             //CheckForNewFiles();
             break;
-        case "2":
+
+        case "3":
             if (args.Length > 1)
                 processName = args[1];
             else
@@ -51,7 +66,8 @@ if (ValidationHelper.IsValidInteger(option))
             result = await DisableFileProcess(processName, mainDB);
             Console.WriteLine(result);
             break;
-        case "3":
+
+        case "4":
             if (args.Length > 1)
                 processName = args[1];
             else
@@ -63,12 +79,15 @@ if (ValidationHelper.IsValidInteger(option))
             result = await EnableFileProcess(processName, mainDB);
             Console.WriteLine(result);
             break;
-        case "4":
+
+        case "5":
             //SendPADREmail();
             break;
-        case "5":
+
+        case "6":
             //CreateDebtorLetters();
             break;
+
         default:
             Console.WriteLine("Unknown option selected: " + option);
             break;
@@ -109,4 +128,93 @@ static async Task<string> EnableFileProcess(string fileName, IDBToolsAsync mainD
     }
     else
         return "Invalid FOAEA File: " + fileName;
+}
+
+static async Task RunFileBrokerJob(string processName)
+{
+
+    if (processName.ToUpper().IndexOf("CRA") > -1)
+    {
+        // EISO_OUT();
+        return;
+    }
+    switch (processName)
+    {
+        case "daily":
+            //dailyJob()
+            break;
+
+        case "weekly":
+            //Weeklyjob();
+            break;
+
+        case "EISO_OUT":
+            //EISO_OUT();
+            break;
+
+        case "EIEISO_OUT":
+            //EIEISO_OUT();
+            break;
+
+        case "EIEISO_OUT_2":
+            //EIEISO_OUT_2();
+            break;
+
+        case "CPPEISO_OUT":
+            //CPPEISO_OUT();
+            break;
+
+        case "DF_OUT":
+            //DF_OUT();
+            break;
+
+        case "EISO_FT":
+            //ProcessEISOFTData();
+            break;
+
+        case "RestartFileMonitor":
+            //RestartFileMonitor();
+            break;
+
+        case "CPPEISOIN":
+            //CPPEISOIN();
+            break;
+
+        case "QC3M01IN":
+            //QC3M01IN();
+            break;
+
+        case "EISOIN":   //CR1208
+            //CRAEISOIN();
+            break;
+
+        case "PADRXML":
+            //CreatePADRXMLFiles();
+            break;
+
+        case "PADRReports":
+            //CreatePADRReportFiles();
+            break;
+
+        case "PADR_PDFXLS":
+            //CreatePADRFiles_PDF_XLS();
+            break;
+
+        case "PADR_PDFXLS_New":
+            //CreatePADRFiles_PDF_XLSFromReport();
+            break;
+
+        case "PADR_AllDocuments":
+            //ReCreatePADRDocuemnts();
+            break;
+
+        case "DebtorLetters":
+            //CreateDebtorLettersPDF();
+            break;
+
+        default:
+            Console.WriteLine("Unknown process: " + processName);
+            break;
+    }
+
 }

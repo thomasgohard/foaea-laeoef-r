@@ -4,11 +4,13 @@ namespace FOAEA3.Model.Interfaces
 {
     public interface IFoaeaConfigurationHelper
     {
-        List<string> ESDsites { get; }
         string FoaeaConnection { get; }
-        List<string> ProductionServers { get; }
         RecipientsConfig Recipients { get; }
         TokenConfig Tokens { get; }
         DeclarationData LicenceDenialDeclaration { get; }
+        List<string> ProductionServers { get; }
+        public List<string> AutoSwear { get; }
+        public List<string> AutoAccept { get; }
+        List<string> ESDsites { get; }
     }
 }

@@ -48,7 +48,18 @@ namespace BackendProcesses.CommandLine
             Console.WriteLine("FOAEA DB: " + mainDB.ConnectionString);
             Console.WriteLine("Email Recipients: " + Config.Recipients.EmailRecipients);
             Console.WriteLine("");
-            Console.WriteLine("OPTION 1 - Run FOAEA Job");
+            Console.WriteLine("OPTION 1 - Nightly Process");
+            Console.WriteLine("OPTION 2 - Process Bring Forwards");
+            Console.WriteLine("OPTION 3 - Close Completed Applications");
+            Console.WriteLine("OPTION 4 - Run Auto Swear");
+            Console.WriteLine("OPTION 5 - Run Auto Swear (QC)");
+            Console.WriteLine("OPTION 6 - ESD Event Processing");
+            Console.WriteLine("OPTION 7 - Update Fixed Amount Recalc Date");
+            Console.WriteLine("OPTION 8 - Create NETP/ESDC Events");
+            Console.WriteLine("OPTION 9 - FTP Batches Without Transactions Notifications");
+            Console.WriteLine("OPTION 10 - Run Amount Owed Calculations");
+            Console.WriteLine("OPTION 11 - Delete CRA Outgoing History Data");
+            Console.WriteLine("");
             Console.WriteLine("OPTION X - Exit");
             Console.WriteLine("");
             Console.Write("Enter OPTION number: ");
@@ -56,26 +67,63 @@ namespace BackendProcesses.CommandLine
 
             string option;
             if (args.Length == 0)
-                option = Console.ReadLine();
+                option = Console.ReadLine() ?? string.Empty;
             else
-                option = args[0];
+                option = args[0] ?? string.Empty;
 
-            if (ValidationHelper.IsValidInteger(option))
+            if ((option.ToUpper() != "X") && (ValidationHelper.IsValidInteger(option)))
             {
                 switch (option)
                 {
                     case "1":
-                        string processName;
-                        if (args.Length > 1)
-                            processName = args[1];
-                        else
-                        {
-                            Console.WriteLine("");
-                            Console.WriteLine("Run FOAEA job:");
-                            processName = Console.ReadLine();
-                        }
-                        await RunFOAEAJob(processName);
+                        var nightlyProcess = new NightlyProcess(DB, DBfinance, Config);
+                        await nightlyProcess.RunAsync();
                         break;
+
+                    case "2":
+                        var bringForwardProcess = new BringForwardEventProcess(DB, DBfinance, Config);
+                        await bringForwardProcess.RunAsync();
+                        break;
+
+                    case "3":
+                        var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config);
+                        await completeI01process.RunAsync();
+                        break;
+
+                    case "4":
+                        //Auto_Swear();
+                        break;
+
+                    case "5":
+                        //Auto_SwearQC();
+                        break;
+
+                    case "6":
+                        var esdEventProcess = new ESDEventProcess(DB, DBfinance, Config);
+                        await esdEventProcess.RunAsync();
+                        break;
+
+                    case "7":
+                        //UpdateFixedAmountRecalcDate();
+                        break;
+
+                    case "8":
+                        //Create_ESDCEvents();
+                        break;
+
+                    case "9":
+                        //FTBatchWithoutTransactionNotice();
+                        break;
+
+                    case "10":
+                        var amountOwedProcess = new AmountOwedProcess(DB, DBfinance);
+                        await amountOwedProcess.RunAsync();
+                        break;
+
+                    case "11":
+                        //DeleteReconcilationData();
+                        break;
+
                     default:
                         Console.WriteLine("Unknown option selected: " + option);
                         break;
@@ -94,111 +142,5 @@ namespace BackendProcesses.CommandLine
 
         }
 
-        private static async Task RunFOAEAJob(string processName)
-        {
-
-            if (processName.ToUpper().IndexOf("CRA") > -1)
-            {
-                // EISO_OUT();
-                return;
-            }
-            switch (processName)
-            {
-                case "daily":
-                    //dailyJob()
-                    break;
-                case "weekly":
-                    //Weeklyjob();
-                    break;
-                case "EISO_OUT":
-                    //EISO_OUT();
-                    break;
-                case "EIEISO_OUT":
-                    //EIEISO_OUT();
-                    break;
-                case "EIEISO_OUT_2":
-                    //EIEISO_OUT_2();
-                    break;
-                case "CPPEISO_OUT":
-                    //CPPEISO_OUT();
-                    break;
-                case "DF_OUT":
-                    //DF_OUT();
-                    break;
-                case "nightly_Process":
-                    //nightly_Process();
-                    break;
-                case "read_bf":
-                    var bringForwardProcess = new BringForwardEventProcess(DB, DBfinance, Config);
-                    await bringForwardProcess.RunAsync();
-                    break;
-                case "app_daily":
-                    //Appl_Daily();
-                    break;
-                case "auto_swear":
-                    //Auto_Swear();
-                    break;
-                case "EISO_FT":
-                    //ProcessEISOFTData();
-                    break;
-                case "RestartFileMonitor":
-                    //RestartFileMonitor();
-                    break;
-                case "auto_swearQC":
-                    //Auto_SwearQC();
-                    break;
-                case "ESDEventProcessing":
-                    var esdEventProcess = new ESDEventProcess(DB, DBfinance, Config);
-                    await esdEventProcess.RunAsync();
-                    break;
-                case "CPPEISOIN":
-                    //CPPEISOIN();
-                    break;
-                case "QC3M01IN":
-                    //QC3M01IN();
-                    break;
-                case "FixedAmount":
-                    //UpdateFixedAmountRecalcDate();
-                    break;
-                case "NETP":
-                    //Create_ESDCEvents();
-                    break;
-                case "EISOIN":   //CR1208
-                    //CRAEISOIN();
-                    break;
-                case "PADRXML":
-                    //CreatePADRXMLFiles();
-                    break;
-                case "PADRReports":
-                    //CreatePADRReportFiles();
-                    break;
-                case "PADR_PDFXLS":
-                    //CreatePADRFiles_PDF_XLS();
-                    break;
-                case "PADR_PDFXLS_New":
-                    //CreatePADRFiles_PDF_XLSFromReport();
-                    break;
-                case "PADR_AllDocuments":
-                    //ReCreatePADRDocuemnts();
-                    break;
-                case "DebtorLetters":
-                    //CreateDebtorLettersPDF();
-                    break;
-                case "FTBatchWithoutTransactionNotice":
-                    //FTBatchWithoutTransactionNotice();
-                    break;
-                case "amountowed":
-                    var amountOwedProcess = new AmountOwedProcess(DB, DBfinance);
-                    await amountOwedProcess.RunAsync();
-                    break;
-                case "Recon":
-                    //DeleteReconcilationData();
-                    break;
-                default:
-                    Console.WriteLine("Unknown process: " + processName);
-                    break;
-            }
-
-        }
     }
 }

@@ -8,6 +8,21 @@
       "French": "J’atteste que les renseignements donnés dans la présente demande sont vrais et sont fournis aux fins de la demande de refus d’autorisation en conformité avec la Loi d’aide à l’exécution des ordonnances et des ententes familiales"
     }
   },
+  "AutoSwear": [
+    "AB01",
+    "BC01",
+    "NS01",
+    "ON01",
+    "QC01",
+    "NF01",
+    "MB01"
+  ],
+  "AutoAccept": [
+    "AB01",
+    "ON01",
+    "MB01",
+    "QC01"
+  ],
   "ESDsites": [
     "AB01",
     "MB01",

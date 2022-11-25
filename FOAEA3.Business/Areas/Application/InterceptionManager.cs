@@ -420,6 +420,32 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
+        public async Task<bool> CompleteApplication()
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            if (!await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            await SetNewStateTo(ApplicationState.EXPIRED_15);
+
+            await UpdateApplicationNoValidationAsync();
+
+            await EventManager.SaveEventsAsync();
+
+            if (InterceptionApplication.Medium_Cd != "FTP")
+                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;
+        }
+
         public async Task<bool> SuspendApplicationAsync()
         {
             if (!IsValidCategory("I01"))
@@ -569,6 +595,16 @@ namespace FOAEA3.Business.Areas.Application
                 interceptions.Add(new InterceptionApplicationData(application));
 
             return interceptions;
+        }
+
+        public async Task<bool> IsRefNumberBlockedAsync()
+        {
+            return await DB.InterceptionTable.IsRefNumberBlocked(InterceptionApplication.Appl_Source_RfrNr);
+        }
+
+        public async Task<bool> IsSinBlockedAsync()
+        {
+            return await DB.InterceptionTable.IsSinBlocked(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
         }
 
         public async Task<bool> AcceptVariationAsync()

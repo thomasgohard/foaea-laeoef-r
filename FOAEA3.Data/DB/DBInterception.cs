@@ -412,7 +412,46 @@ namespace FOAEA3.Data.DB
 
         public async Task<List<ApplicationData>> GetApplicationsForReject()
         {
-            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("", DBApplication.FillApplicationDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetI01ApplicationsForReject", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<List<ApplicationData>> GetTerminatedI01()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetTerminatedI01", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetAutoAcceptGarnisheeOverrideData", parameters, DBApplication.FillApplicationDataFromReader);
+
+            return data.FirstOrDefault();
+        }
+
+        public async Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "sin", appl_Dbtr_Entrd_SIN }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsSINBlocked", parameters);
+
+            return count > 0;
+        }
+        public async Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "refnr", appl_Source_RfrNr }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsRefNrBlocked", parameters);
+
+            return count > 0;
         }
 
         public async Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
@@ -651,6 +690,14 @@ namespace FOAEA3.Data.DB
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
         }
 
+        public Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

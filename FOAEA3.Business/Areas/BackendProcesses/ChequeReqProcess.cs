@@ -8,7 +8,10 @@ namespace FOAEA3.Business.BackendProcesses
     {
         public static void Run()
         {
-
+            // var prodAudit = DB.ProductionAuditTable;
+            // 
+            // await prodAudit.InsertAsync("Cheque Req Process", "Cheque Req Process Started", "O");
+            // await prodAudit.InsertAsync("Cheque Req Process", "Cheque Req Process Completed", "O");
         }
     }
 }
