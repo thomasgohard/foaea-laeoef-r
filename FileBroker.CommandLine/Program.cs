@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FileBroker.CommandLine;
 using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model.Interfaces;
@@ -38,7 +39,6 @@ if ((option.ToUpper() != "X") && ValidationHelper.IsValidInteger(option))
     switch (option)
     {
         case "1":
-            //run file broker job (e.g. daily outgoing files or weekly IFMS file)
             if (args.Length > 1)
                 processName = args[1];
             else
@@ -47,7 +47,7 @@ if ((option.ToUpper() != "X") && ValidationHelper.IsValidInteger(option))
                 Console.WriteLine("Run FileBroker job:");
                 processName = Console.ReadLine();
             }
-            await RunFileBrokerJob(processName);
+            await RunFileBrokerJob(processName, mainDB);
             break;
 
         case "2":
@@ -130,7 +130,7 @@ static async Task<string> EnableFileProcess(string fileName, IDBToolsAsync mainD
         return "Invalid FOAEA File: " + fileName;
 }
 
-static async Task RunFileBrokerJob(string processName)
+static async Task RunFileBrokerJob(string processName, IDBToolsAsync mainDB)
 {
 
     if (processName.ToUpper().IndexOf("CRA") > -1)
@@ -141,7 +141,9 @@ static async Task RunFileBrokerJob(string processName)
     switch (processName)
     {
         case "daily":
-            //dailyJob()
+            var fileTable = new DBFileTable(mainDB);
+            var dailyJob = new DailyJob(fileTable);
+            await dailyJob.RunAsync();
             break;
 
         case "weekly":

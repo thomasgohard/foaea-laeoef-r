@@ -9,6 +9,7 @@ namespace FileBroker.Model.Interfaces
         IDBToolsAsync MainDB { get; }
 
         Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt);
+        Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency);
         Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category);
         Task<List<FileTableData>> GetAllActiveAsync();
 

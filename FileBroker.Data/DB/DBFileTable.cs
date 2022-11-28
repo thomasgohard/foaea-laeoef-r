@@ -23,6 +23,18 @@ namespace FileBroker.Data.DB
 
             return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
         }
+        
+        public async Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "sFrequency", frequency }
+            };
+
+            var fileTableData = await MainDB.GetDataFromStoredProcAsync<FileTableData>("MessageBrokerSchedulerGetDueProcess", parameters, FillFileTableDataFromReader);
+
+            return fileTableData;
+        }
 
         public async Task DisableFileProcess(int processId)
         {
