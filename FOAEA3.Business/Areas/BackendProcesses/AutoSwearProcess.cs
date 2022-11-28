@@ -56,7 +56,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                     {
                         string enfSrv = manager.InterceptionApplication.Appl_EnfSrv_Cd;
                         string ctrlCd = manager.InterceptionApplication.Appl_CtrlCd;
-                        var overrideAppl = await DB.InterceptionTable.GetAutoAcceptGarnisheeOverrideData(enfSrv, ctrlCd);
+                        var overrideAppl = await DB.InterceptionTable.GetAutoAcceptGarnisheeOverrideDataAsync(enfSrv, ctrlCd);
                         DateTime supportingDocDate;
 
                         if ((overrideAppl is not null) && (overrideAppl.Appl_CtrlCd == ctrlCd))

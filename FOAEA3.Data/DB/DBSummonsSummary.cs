@@ -32,6 +32,11 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetAmountOwedRecords", FillDataFromReader);
         }
 
+         public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetFixedAmountRecalcDateRecords", FillDataFromReader);
+        }
+
         public async Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
             var parameters = new Dictionary<string, object>

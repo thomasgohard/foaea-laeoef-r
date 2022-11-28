@@ -26,7 +26,7 @@ namespace FOAEA3.Business.BackendProcesses
 
             await prodAudit.InsertAsync("Completed I01 Process", "Completed I01 Process Started", "O");
 
-            var applTerminated = await DB.InterceptionTable.GetTerminatedI01();
+            var applTerminated = await DB.InterceptionTable.GetTerminatedI01Async();
 
             foreach (var appl in applTerminated)
             {

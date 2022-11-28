@@ -13,6 +13,11 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
+        public Task CreateESDCEventTraceDataAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task CreateTracingDataAsync(TracingApplicationData data)
         {
             throw new NotImplementedException();

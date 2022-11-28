@@ -27,6 +27,11 @@ namespace TestData.TestDB
             return Task.FromResult(38.0M);  // these are the annual fees since 1999-03-01});
         }
 
+        public Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
         {
             if (!string.IsNullOrEmpty(appl_CtrlCd))

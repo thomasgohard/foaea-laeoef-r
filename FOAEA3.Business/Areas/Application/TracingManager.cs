@@ -507,6 +507,11 @@ namespace FOAEA3.Business.Areas.Application
             await responsesDB.MarkResponsesAsViewedAsync(enfService);
         }
 
+        public async Task CreateNETPeventsAsync()
+        {
+            await DB.TracingTable.CreateESDCEventTraceDataAsync();
+        }
+
         public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,

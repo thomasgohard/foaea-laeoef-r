@@ -56,6 +56,11 @@ namespace FOAEA3.Data.DB
             await ChangeTracingDataAsync(data, "TrcApplDtlUpdate");
         }
 
+        public async Task CreateESDCEventTraceDataAsync()
+        {
+            await MainDB.ExecProcAsync("CreateESDCEventTraceData");
+        }
+
         private async Task ChangeTracingDataAsync(TracingApplicationData data, string procName)
         {
             var parameters = new Dictionary<string, object>

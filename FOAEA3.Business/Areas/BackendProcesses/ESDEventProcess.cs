@@ -37,7 +37,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
 
         private async Task ProcessRejectedInterceptions()
         {
-            var applRejects = await DB.InterceptionTable.GetApplicationsForReject();
+            var applRejects = await DB.InterceptionTable.GetApplicationsForRejectAsync();
 
             foreach (var appl in applRejects)
             {

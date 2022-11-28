@@ -23,7 +23,7 @@ namespace FOAEA3.Business.BackendProcesses
             DBfinance = repositoriesFinance;
         }
 
-        public async Task RunAsync()
+        public async Task RunAsync(List<SummonsSummaryData> summSmryData = null)
         {
 
             var prodAudit = DB.ProductionAuditTable;
@@ -31,7 +31,8 @@ namespace FOAEA3.Business.BackendProcesses
 
             await prodAudit.InsertAsync("Amount Owed", "Amount Owed Started", "O");
 
-            List<SummonsSummaryData> summSmryData = await dbSummonsSummary.GetAmountOwedRecordsAsync();
+            if (summSmryData is null)
+                summSmryData = await dbSummonsSummary.GetAmountOwedRecordsAsync();
             await CalculateAndUpdateAmountOwedAsync(summSmryData);
 
             await prodAudit.InsertAsync("Amount Owed", "Amount Owed Completed", "O");

@@ -342,6 +342,11 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecords()
+        {
+            return await DBfinance.SummonsSummaryRepository.GetFixedAmountRecalcDateRecordsAsync();
+        }
+
         public async Task FullyServiceApplicationAsync()
         {
             var applicationManagerCopy = new InterceptionManager(DB, DBfinance, Config)
@@ -599,12 +604,40 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task<bool> IsRefNumberBlockedAsync()
         {
-            return await DB.InterceptionTable.IsRefNumberBlocked(InterceptionApplication.Appl_Source_RfrNr);
+            return await DB.InterceptionTable.IsRefNumberBlockedAsync(InterceptionApplication.Appl_Source_RfrNr);
         }
 
         public async Task<bool> IsSinBlockedAsync()
         {
-            return await DB.InterceptionTable.IsSinBlocked(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
+            return await DB.InterceptionTable.IsSinBlockedAsync(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
+        }
+
+        public async Task  FTBatchNotification_CheckFTTransactionsAdded()
+        {
+            await DB.InterceptionTable.FTBatchNotification_CheckFTTransactionsAddedAsync();
+        }
+
+        public async Task MessageBrokerCRAReconciliation()
+        {
+            await DB.InterceptionTable.MessageBrokerCRAReconciliationAsync();
+        }
+
+        public async Task AutoAcceptVariationsAsync(string enfService)
+        {
+            string processName = $"Process Auto Accept Variation {enfService}";
+            await DB.ProductionAuditTable.InsertAsync(processName, "Auto accept variation", "O");
+
+            DB.CurrentSubmitter = "FO2SSS";
+
+            var applAutomation = await GetApplicationsForVariationAutoAcceptAsync(enfService);
+
+            foreach (var appl in applAutomation)
+            {
+                var thisManager = new InterceptionManager(appl, DB, DBfinance, Config);
+                await thisManager.AcceptVariationAsync();
+            }
+
+            await DB.ProductionAuditTable.InsertAsync(processName, "Ended", "O");
         }
 
         public async Task<bool> AcceptVariationAsync()

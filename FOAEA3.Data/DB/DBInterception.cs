@@ -410,17 +410,17 @@ namespace FOAEA3.Data.DB
             return ((bool)returnValues["NewESDexists"], (DateTime)returnValues["ESDReceivedDate"]);
         }
 
-        public async Task<List<ApplicationData>> GetApplicationsForReject()
+        public async Task<List<ApplicationData>> GetApplicationsForRejectAsync()
         {
             return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetI01ApplicationsForReject", DBApplication.FillApplicationDataFromReader);
         }
 
-        public async Task<List<ApplicationData>> GetTerminatedI01()
+        public async Task<List<ApplicationData>> GetTerminatedI01Async()
         {
             return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetTerminatedI01", DBApplication.FillApplicationDataFromReader);
         }
 
-        public async Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -622,6 +622,16 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetAllDataAsync<HoldbackTypeData>("HldbTyp", FillHolbackTypeFromReader);
         }
 
+        public async Task MessageBrokerCRAReconciliationAsync()
+        {
+            await MainDB.ExecProcAsync("MessageBrokerCRAReconciliation");
+        }
+
+        public async Task FTBatchNotification_CheckFTTransactionsAddedAsync()
+        {
+            await MainDB.ExecProcAsync("FTBatchNotification_CheckFTTransactionsAdded");
+        }
+
         private void FillIntFinHDataFromReader(IDBHelperReader rdr, InterceptionFinancialHoldbackData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
@@ -688,16 +698,6 @@ namespace FOAEA3.Data.DB
             data.HldbTyp_Txt_E = rdr["HldbTyp_Txt_E"] as string; // can be null 
             data.HldbTyp_Txt_F = rdr["HldbTyp_Txt_F"] as string; // can be null 
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
-        }
-
-        public Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr)
-        {
-            throw new NotImplementedException();
         }
     }
 }

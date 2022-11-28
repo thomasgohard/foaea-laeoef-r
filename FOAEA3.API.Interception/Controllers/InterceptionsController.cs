@@ -48,18 +48,17 @@ public class InterceptionsController : FoaeaControllerBase
 
     }
 
-    [HttpGet("GetApplicationsForVariationAutoAccept")]
+    [HttpGet("AutoAcceptVariations")]
     [Authorize(Policy = Policies.ApplicationReadAccess)]
-    public async Task<ActionResult<List<InterceptionApplicationData>>> GetApplicationsForVariationAutoAccept(
-                                                                        [FromServices] IRepositories repositories,
-                                                                        [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                        [FromQuery] string enfService)
+    public async Task<ActionResult> AutoAcceptVariations([FromServices] IRepositories repositories,
+                                                         [FromServices] IRepositories_Finance repositoriesFinance,
+                                                         [FromQuery] string enfService)
     {
         var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
         await interceptionManager.SetCurrentUserAsync(User);
-        var data = await interceptionManager.GetApplicationsForVariationAutoAcceptAsync(enfService);
+        await interceptionManager.AutoAcceptVariationsAsync(enfService);
 
-        return Ok(data);
+        return Ok();
     }
 
     [HttpPost]

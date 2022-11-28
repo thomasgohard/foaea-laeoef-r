@@ -18,6 +18,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task AutoAcceptVariationsAsync(string enfService)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();

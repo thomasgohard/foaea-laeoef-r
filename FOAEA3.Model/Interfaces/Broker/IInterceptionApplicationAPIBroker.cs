@@ -22,7 +22,8 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         Task<InterceptionApplicationData> ValidateFinancialCoreValuesAsync(InterceptionApplicationData application);
 
-        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
+        //        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
+        Task AutoAcceptVariationsAsync(string enfService);
         Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
 
         Task<bool> ESD_CheckIfAlreadyLoaded(string fileName);

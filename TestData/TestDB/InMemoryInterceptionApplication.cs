@@ -62,6 +62,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task FTBatchNotification_CheckFTTransactionsAddedAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<HoldbackConditionData>> GetAllHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
@@ -77,12 +82,12 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationData>> GetApplicationsForReject()
+        public Task<List<ApplicationData>> GetApplicationsForRejectAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
@@ -142,7 +147,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationData>> GetTerminatedI01()
+        public Task<List<ApplicationData>> GetTerminatedI01Async()
         {
             throw new NotImplementedException();
         }
@@ -177,17 +182,22 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr)
+        public Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN)
+        public Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN)
         {
             throw new NotImplementedException();
         }
 
         public Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MessageBrokerCRAReconciliationAsync()
         {
             throw new NotImplementedException();
         }

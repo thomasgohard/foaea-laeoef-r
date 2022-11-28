@@ -95,10 +95,11 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application, token: Token);
         }
 
-        public async Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
+        public async Task AutoAcceptVariationsAsync(string enfService)
         {
-            string apiCall = $"api/v1/interceptions/GetApplicationsForVariationAutoAccept?enfService={enfService}";
-            return await ApiHelper.GetDataAsync<List<InterceptionApplicationData>>(apiCall, token: Token);
+            string apiCall = $"api/v1/interceptions/AutoAcceptVariations?enfService={enfService}";
+            await ApiHelper.SendCommandAsync(apiCall, token: Token);
+            return;
         }
 
         public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)

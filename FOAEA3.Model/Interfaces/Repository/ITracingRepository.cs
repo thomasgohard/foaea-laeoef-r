@@ -25,6 +25,7 @@ namespace FOAEA3.Model.Interfaces.Repository
                                                                       string activeState,
                                                                       string recipientCode,
                                                                       bool isXML = true);
+        Task CreateESDCEventTraceDataAsync();
     }
 
 }

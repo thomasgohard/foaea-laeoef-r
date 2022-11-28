@@ -52,10 +52,10 @@ namespace BackendProcesses.CommandLine
             Console.WriteLine("OPTION 2 - Process Bring Forwards");
             Console.WriteLine("OPTION 3 - Close Completed Applications");
             Console.WriteLine("OPTION 4 - Run Auto Swear");
-            Console.WriteLine("OPTION 5 - Run Auto Swear (QC)");
+            Console.WriteLine("OPTION 5 - Run Auto Accept Variations for QC");
             Console.WriteLine("OPTION 6 - ESD Event Processing");
             Console.WriteLine("OPTION 7 - Update Fixed Amount Recalc Date");
-            Console.WriteLine("OPTION 8 - Create NETP/ESDC Events");
+            Console.WriteLine("OPTION 8 - Create ESDC (NEPT) Trace Events");
             Console.WriteLine("OPTION 9 - FTP Batches Without Transactions Notifications");
             Console.WriteLine("OPTION 10 - Run Amount Owed Calculations");
             Console.WriteLine("OPTION 11 - Delete CRA Outgoing History Data");
@@ -91,11 +91,13 @@ namespace BackendProcesses.CommandLine
                         break;
 
                     case "4":
-                        //Auto_Swear();
+                        var autoSwearProcess = new AutoSwearProcess(DB, DBfinance, Config);
+                        await autoSwearProcess.RunAsync();
                         break;
 
                     case "5":
-                        //Auto_SwearQC();
+                        var autoAcceptProcess = new AutoAcceptProcess(DB, DBfinance, Config);
+                        await autoAcceptProcess.RunAsync("QC");
                         break;
 
                     case "6":
@@ -104,15 +106,18 @@ namespace BackendProcesses.CommandLine
                         break;
 
                     case "7":
-                        //UpdateFixedAmountRecalcDate();
+                        var updateFixedAmountRecalcDate = new UpdateFixedAmountRecalcDate(DB, DBfinance, Config);
+                        await updateFixedAmountRecalcDate.RunAsync();
                         break;
 
                     case "8":
-                        //Create_ESDCEvents();
+                        var createESDC_NETP_eventsProcess = new CreateESDC_NETP_eventsProcess(DB, Config);
+                        await createESDC_NETP_eventsProcess.RunAsync();
                         break;
 
                     case "9":
-                        //FTBatchWithoutTransactionNotice();
+                        var ftBatchWithoutTransactionNotice = new FTBatchWithoutTransactionNoticeProcess(DB, DBfinance, Config);
+                        await ftBatchWithoutTransactionNotice.RunAsync();
                         break;
 
                     case "10":
@@ -121,7 +126,8 @@ namespace BackendProcesses.CommandLine
                         break;
 
                     case "11":
-                        //DeleteReconcilationData();
+                        var deleteReconciliationDataProcess = new DeleteReconciliationDataProcess(DB, DBfinance, Config);
+                        await deleteReconciliationDataProcess.RunAsync();
                         break;
 
                     default:

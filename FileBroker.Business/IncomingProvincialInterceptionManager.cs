@@ -265,14 +265,9 @@ namespace FileBroker.Business
             var prodAudit = APIs.ProductionAudits;
 
             string processName = $"Process Auto Accept Variation {enfService}";
-            await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
+            await prodAudit.InsertAsync(processName, "Auto accept variation", "O");
 
-            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
-
-            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
-
-            foreach (var appl in applAutomation)
-                await APIs.InterceptionApplications.AcceptVariationAsync(appl);
+            await APIs.InterceptionApplications.AutoAcceptVariationsAsync(enfService);
 
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }

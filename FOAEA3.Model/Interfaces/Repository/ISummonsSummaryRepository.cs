@@ -11,6 +11,7 @@ namespace FOAEA3.Model.Interfaces.Repository
 
         Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "");
         Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync();
+        Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync();
         Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative);
         Task CreateSummonsSummaryAsync(SummonsSummaryData summSmryData);
         Task UpdateSummonsSummaryAsync(SummonsSummaryData summSmryData);
