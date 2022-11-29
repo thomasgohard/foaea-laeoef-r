@@ -119,5 +119,10 @@ namespace FileBroker.Business.Tests.InMemory
         {
             throw new System.NotImplementedException();
         }
+
+        public Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

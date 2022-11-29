@@ -141,9 +141,7 @@ static async Task RunFileBrokerJob(string processName, IDBToolsAsync mainDB)
     switch (processName)
     {
         case "daily":
-            var fileTable = new DBFileTable(mainDB);
-            var dailyJob = new DailyJob(fileTable);
-            await dailyJob.RunAsync();
+            await DailyJob.Run();
             break;
 
         case "weekly":

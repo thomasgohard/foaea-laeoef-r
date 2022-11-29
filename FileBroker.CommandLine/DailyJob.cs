@@ -1,22 +1,18 @@
-﻿using FileBroker.Model.Interfaces;
+﻿using Outgoing.FileCreator.Fed.LicenceDenial;
+using Outgoing.FileCreator.Fed.SIN;
+using Outgoing.FileCreator.Fed.Tracing;
+using Outgoing.FileCreator.MEP;
 
 namespace FileBroker.CommandLine
 {
     internal class DailyJob
     {
-        private IFileTableRepository FileTable { get; }
-
-        public DailyJob(IFileTableRepository fileTable)
+        public static async Task Run()
         {
-            FileTable = fileTable;
-        }
-
-        public async Task RunAsync()
-        {
-            // Outgoing.FileCreator.MEP
-            // Outgoing.FileCreator.Fed.SIN
-            // Outgoing.FileCreator.Fed.Tracing
-            // Outgoing.FileCreator.Fed.LicenceDenial
+            await OutgoingFileCreatorMEP.Run();
+            await OutgoingFileCreatorFedSIN.Run();
+            await OutgoingFileCreatorFedTracing.Run();
+            await OutgoingFileCreatorFedLicenceDenial.Run();
         }
     }
 }
