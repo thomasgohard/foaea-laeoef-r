@@ -8,8 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
-		<ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
 		<ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
 		<ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
 		<ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />

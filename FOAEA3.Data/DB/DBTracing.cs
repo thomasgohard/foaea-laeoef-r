@@ -1,12 +1,12 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Base;
+using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FOAEA3.Model.Base;
-using FOAEA3.Model.Enums;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -54,6 +54,11 @@ namespace FOAEA3.Data.DB
         public async Task UpdateTracingDataAsync(TracingApplicationData data)
         {
             await ChangeTracingDataAsync(data, "TrcApplDtlUpdate");
+        }
+
+        public async Task CreateESDCEventTraceDataAsync()
+        {
+            await MainDB.ExecProcAsync("CreateESDCEventTraceData");
         }
 
         private async Task ChangeTracingDataAsync(TracingApplicationData data, string procName)

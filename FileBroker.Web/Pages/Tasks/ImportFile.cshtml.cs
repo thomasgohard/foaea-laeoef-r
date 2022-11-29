@@ -1,11 +1,13 @@
 using DBHelper;
+using FileBroker.Business.Helpers;
 using FileBroker.Common;
+using FileBroker.Common.Helpers;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
-using Incoming.Common;
+using FOAEA3.Model.Structs;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -15,23 +17,21 @@ namespace FileBroker.Web.Pages.Tasks
     public class ImportFileModel : PageModel
     {
         private IFileTableRepository FileTable { get; }
-        private ApiConfig ApiConfig { get; }
         private IAPIBrokerHelper APIHelper { get; }
-        private IConfiguration Config { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         public IFormFile FormFile { get; set; }
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
 
-        public ImportFileModel(IFileTableRepository fileTable, IOptions<ApiConfig> apiConfig, IConfiguration config)
+        public ImportFileModel(IFileTableRepository fileTable, IFileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
-            ApiConfig = apiConfig.Value;
-            APIHelper = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            APIHelper = new APIBrokerHelper(currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             Config = config;
         }
 
-        public async Task OnPostUpload()
+        public async Task OnPostUpload(IConfiguration configuration)
         {
             var file = FormFile;
             if (file is not null)
@@ -52,10 +52,18 @@ namespace FileBroker.Web.Pages.Tasks
 
                 InfoMessage = $"Loading and processing {fileName} [category: {incomingFileInfo.Category}, size: {fileSize} KB]...";
 
-                var provincialFileManager = new IncomingProvincialFile(FileTable, ApiConfig, APIHelper,
-                                                                       interceptionBaseName: string.Empty,
-                                                                       tracingBaseName: string.Empty,
-                                                                       licencingBaseName: string.Empty);
+                var fileBaseName = new FileBaseName
+                {
+                    Interception = string.Empty,
+                    Tracing = string.Empty,
+                    Licencing = string.Empty
+                };
+
+                var fileBrokerDB = new DBToolsAsync(Config.FileBrokerConnection);
+                var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
+
+                var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
+                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
 
                 var errors = new List<string>();
 
@@ -78,22 +86,31 @@ namespace FileBroker.Web.Pages.Tasks
                     {
                         case "INTAPPIN":
 
-                            string userName = Config["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
-                            string userPassword = Config["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
-                            await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, 
-                                                            fileName, fileContentAsJson, userName, userPassword);
-                            if (errors.Any())
+                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, Config.ApiRootData, Config.FileBrokerLogin.UserName,
+                                                                              Config.FileBrokerLogin.Password);
+
+                            await fileBrokerAccess.SystemLoginAsync();
+                            try
                             {
-                                ErrorMessage = String.Empty;
-                                string lastError = errors.Last();
-                                foreach (string error in errors)
+                                // TODO: fix this
+                                //                                await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson, fileBrokerAccess.CurrentToken);
+                                if (errors.Any())
                                 {
-                                    ErrorMessage += error;
-                                    ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                                    ErrorMessage = String.Empty;
+                                    string lastError = errors.Last();
+                                    foreach (string error in errors)
+                                    {
+                                        ErrorMessage += error;
+                                        ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                                    }
                                 }
+                                else
+                                    InfoMessage = $"File {fileName} processed successfully.";
                             }
-                            else
-                                InfoMessage = $"File {fileName} processed successfully.";
+                            finally
+                            {
+                                await fileBrokerAccess.SystemLogoutAsync();
+                            }
                             break;
                         default:
                             ErrorMessage = "Not able to process files of category: " + incomingFileInfo.Category;

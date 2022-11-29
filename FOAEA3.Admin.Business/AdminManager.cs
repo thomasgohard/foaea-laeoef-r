@@ -2,10 +2,11 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Admin.Business
@@ -13,10 +14,10 @@ namespace FOAEA3.Admin.Business
     internal class AdminManager
     {
         private readonly IRepositories DB;
-        private readonly CustomConfig config;
+        private readonly IFoaeaConfigurationHelper config;
         public string LastError { get; set; }
 
-        public AdminManager(IRepositories repositories, CustomConfig config)
+        public AdminManager(IRepositories repositories, IFoaeaConfigurationHelper config)
         {
             this.config = config;
             DB = repositories;
@@ -24,7 +25,8 @@ namespace FOAEA3.Admin.Business
         }
 
 
-        public async Task<bool> ManuallyConfirmSINAsync(string enfService, string controlCode, string sin)
+        public async Task<bool> ManuallyConfirmSINAsync(string enfService, string controlCode, string sin,
+                                                        ClaimsPrincipal user)
         {
             // manually move application from state 3 to state 6 by adding SIN confirmation information to database
             // and processing the state as per normal
@@ -35,6 +37,8 @@ namespace FOAEA3.Admin.Business
                 var applicationData = new ApplicationData();
 
                 var applManager = new ApplicationManager(applicationData, DB, config);
+                await applManager.SetCurrentUserAsync(user);
+
                 if (!await applManager.LoadApplicationAsync(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
 

@@ -1,6 +1,5 @@
 ﻿using FOAEA3.Common.Helpers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.ModelBinders
 {

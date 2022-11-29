@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using FileBroker.Common.Helpers;
+using System.Text;
 
 namespace FileBroker.Business;
 
@@ -7,10 +8,14 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
 
-    public OutgoingFederalLicenceDenialManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    private FoaeaSystemAccess FoaeaAccess { get; }
+
+    public OutgoingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, IFileBrokerConfigurationHelper config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -33,27 +38,35 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
                 return "";
             }
 
-            var outgoingData = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                       processCodes.EnfSrv_Cd);
+            await FoaeaAccess.SystemLoginAsync();
 
-            var eventDetailIds = new List<int>();
-            foreach (var item in outgoingData)
-                eventDetailIds.Add(item.Event_dtl_Id);
+            try
+            {
+                var outgoingData = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd,
+                                                              processCodes.AppLiSt_Cd, processCodes.EnfSrv_Cd);
 
-            string fileContent = GenerateOutputFileContentFromData(outgoingData, newCycle, processCodes.EnfSrv_Cd);
+                var eventDetailIds = new List<int>();
+                foreach (var item in outgoingData)
+                    eventDetailIds.Add(item.Event_dtl_Id);
 
-            await File.WriteAllTextAsync(newFilePath, fileContent);
-            fileCreated = true;
+                string fileContent = GenerateOutputFileContentFromData(outgoingData, newCycle, processCodes.EnfSrv_Cd);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                 "Outbound File created successfully.");
+                await File.WriteAllTextAsync(newFilePath, fileContent);
+                fileCreated = true;
 
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                     "Outbound File created successfully.");
 
-            await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                             processCodes.EnfSrv_Cd,
-                                                             "OK: Written to " + newFilePath, eventDetailIds);
+                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
+                await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                                                 processCodes.EnfSrv_Cd,
+                                                                 "OK: Written to " + newFilePath, eventDetailIds);
+            }
+            finally
+            {
+                await FoaeaAccess.SystemLogoutAsync();
+            }
             return newFilePath;
 
         }
@@ -64,7 +77,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
             await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return string.Empty;

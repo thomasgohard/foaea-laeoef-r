@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces;
-using System.Threading.Tasks;
+using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers.Administration
 {

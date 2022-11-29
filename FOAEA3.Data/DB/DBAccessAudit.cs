@@ -2,14 +2,13 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
-using System;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBAccessAudit : DBbase, IAccessAuditRepository
+    internal class DBAccessAudit : DBbase, IAccessAuditRepository
     {
         public DBAccessAudit(IDBToolsAsync mainDB) : base(mainDB)
         {

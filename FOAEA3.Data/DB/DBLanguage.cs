@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBLanguage : DBbase, ILanguageRepository
+    internal class DBLanguage : DBbase, ILanguageRepository
     {
         public MessageDataList Messages { get; set; }
 

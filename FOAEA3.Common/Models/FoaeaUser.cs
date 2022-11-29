@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Model;
-using System.Collections.Generic;
 
 namespace FOAEA3.Common.Models
 {

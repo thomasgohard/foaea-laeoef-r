@@ -20,13 +20,18 @@ public class FileAuditManager
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
 
-    public async Task GenerateAuditFileAsync(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
+    public async Task<int> GenerateAuditFileAsync(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
     {
         string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
         var auditFileContent = new StringBuilder();
 
         var auditData = await FileAuditDB.GetFileAuditDataForFileAsync(fileName);
+
+        int fileNotLoadedCount = auditData.GroupBy(p => new { p.Appl_EnfSrv_Cd, p.Appl_CtrlCd })
+                                          .Select(g => g.First())
+                                          .Count();
+
         var auditErrorsData = new List<FileAuditData>();
         if (isFrench)
         {
@@ -48,7 +53,7 @@ public class FileAuditManager
                                                 $"{auditError.Appl_Source_RfrNr,-30}\t{auditError.ApplicationMessage}");
             }
 
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
             {
                 auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"Codes XML invalides: {fileName}");
@@ -58,10 +63,11 @@ public class FileAuditManager
             }
 
             auditFileContent.AppendLine("");
-            auditFileContent.AppendLine($"Nombre total de records: {errorCount + warningCount + successCount}");
-            auditFileContent.AppendLine($"Nombre total avec succès: {successCount + warningCount}");
-            auditFileContent.AppendLine($"Nombre total sans succès: {errorCount}");
-            if (unknownTags.Any())
+            auditFileContent.AppendLine($"Nombre d'enregistrements: {errorCount + warningCount + successCount}");
+            auditFileContent.AppendLine($"Enregistrements chargés: {successCount + warningCount}");
+            auditFileContent.AppendLine($"Enregistrements non chargés: {fileNotLoadedCount}");
+            auditFileContent.AppendLine($"Erreurs décelées: {errorCount}");
+            if (unknownTags is not null && unknownTags.Any())
                 auditFileContent.AppendLine($"Nombre total avec avertissements de validation XML: {unknownTags.Count}");
 
         }
@@ -84,7 +90,7 @@ public class FileAuditManager
                                                 $"{auditError.Appl_Source_RfrNr,-23}\t{auditError.ApplicationMessage}");
             }
 
-            if (unknownTags.Any())
+            if (unknownTags is not null && unknownTags.Any())
             {
                 auditFileContent.AppendLine($"");
                 auditFileContent.AppendLine($"XML validation warnings: {fileName}");
@@ -94,19 +100,23 @@ public class FileAuditManager
             }
 
             auditFileContent.AppendLine("");
-            auditFileContent.AppendLine($"Total records: {errorCount + warningCount + successCount}");
-            auditFileContent.AppendLine($"Total success: {successCount + warningCount}");
-            auditFileContent.AppendLine($"Total failed: {errorCount}");
-            if (unknownTags.Any())
+            auditFileContent.AppendLine($"Number of records: {errorCount + warningCount + successCount}");
+            auditFileContent.AppendLine($"Loaded records: {successCount + warningCount}");
+            auditFileContent.AppendLine($"Records not loaded: {fileNotLoadedCount}");
+            auditFileContent.AppendLine($"Errors detected: {errorCount}");
+            if (unknownTags is not null && unknownTags.Any())
                 auditFileContent.AppendLine($"Total XML validation warnings: {unknownTags.Count}");
         }
 
         // save file to proper location
-        string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
+        string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
         await File.WriteAllTextAsync(fullFileName, auditFileContent.ToString());
+
+        return fileNotLoadedCount;
     }
 
-    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount, int successCount, int xmlWarningCount)
+    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount, 
+                                                  int successCount, int xmlWarningCount, int totalFilesCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -116,9 +126,10 @@ public class FileAuditManager
         if (isFrench)
         {
             bodyContent = @"<b>SVP NE PAS RÉPONDRE À CE MESSAGE – CETTE BOÎTE COURRIEL N'EST PAS SURVEILLÉE DE PRÈS<b><br /><br /><br />" +
-                          @$"Nombre total de records: {errorCount + warningCount + successCount}<br /><br />" +
-                          @$"Nombre total avec succès: {successCount + warningCount}<br /><br />" +
-                          @$"Nombre total sans succès: {errorCount}<br /><br />" +
+                          @$"Nombre d'enregistrements: {errorCount + warningCount + successCount}<br /><br />" +
+                          @$"Enregistrements chargés: {successCount + warningCount}<br /><br />" +
+                          @$"Enregistrements non chargés: {totalFilesCount}<br /><br />" +
+                          @$"Erreurs décelées: {errorCount}<br /><br />" +
                           @"Pour toutes questions concernant le contenu de ce courriel, SVP envoyez un courriel à <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
             if (xmlWarningCount > 0)
                 bodyContent += $"Nombre total avec avertissements de validation XML: {xmlWarningCount}";
@@ -126,17 +137,18 @@ public class FileAuditManager
         else
         {
             bodyContent = @"<b>PLEASE DO NOT REPLY TO THIS EMAIL – THIS EMAIL IS NOT CLOSELY MONITORED<b><br /><br /><br />" +
-                          @$"Total records: {errorCount + warningCount + successCount}<br /><br />" +
-                          @$"Total success: {successCount + warningCount}<br /><br />" +
-                          @$"Total failed: {errorCount}<br /><br />" +
+                          @$"Number of records: {errorCount + warningCount + successCount}<br /><br />" +
+                          @$"Loaded records: {successCount + warningCount}<br /><br />" +
+                          @$"Records not loaded: {totalFilesCount}<br /><br />" +
+                          @$"Errors detected: {errorCount}<br /><br />" +
                           @"For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
             if (xmlWarningCount > 0)
                 bodyContent += $"Total XML validation warnings: {xmlWarningCount}";
         }
 
-        string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".xml.audit.txt";
+        string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
 
-        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent, auditFileLocation);
+        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent, auditFileLocation);
 
     }
 
@@ -165,7 +177,7 @@ public class FileAuditManager
             bodyContent += @"<br />For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
         }
 
-        await MailService.SendEmailAsync($"Audit {fileName}.xml", recipients, bodyContent);
+        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent);
 
     }
 }

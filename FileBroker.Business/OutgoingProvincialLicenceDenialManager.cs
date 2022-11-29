@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using FileBroker.Common.Helpers;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace FileBroker.Business;
 
@@ -6,11 +8,13 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+    private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public OutgoingProvincialLicenceDenialManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    public OutgoingProvincialLicenceDenialManager(APIBrokerList apis, RepositoryList repositories, IFileBrokerConfigurationHelper config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
@@ -34,19 +38,28 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
                 return "";
             }
 
-            var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+            await FoaeaAccess.SystemLoginAsync();
 
-            string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+            try
+            {
+                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
-            await File.WriteAllTextAsync(newFilePath, fileContent);
-            fileCreated = true;
+                string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                 "Outbound File created successfully.");
+                await File.WriteAllTextAsync(newFilePath, fileContent);
+                fileCreated = true;
 
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                     "Outbound File created successfully.");
 
-            await APIs.LicenceDenialResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
+                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+
+                await APIs.LicenceDenialResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
+            }
+            finally
+            {
+                await FoaeaAccess.SystemLogoutAsync();
+            }
 
             return newFilePath;
 

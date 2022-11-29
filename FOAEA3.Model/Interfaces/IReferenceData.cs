@@ -21,8 +21,6 @@ namespace FOAEA3.Model.Interfaces
         public ConcurrentDictionary<string, DocumentTypeData> DocumentTypes { get; }
         public List<ApplicationCommentsData> ApplicationComments { get; }
 
-        public ConcurrentDictionary<string, string> Configuration { get; }
-
         public Task LoadActiveStatusesAsync(IActiveStatusRepository activeStatusRepository);
         public Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository);
         public Task LoadFoaEventsAsync(IFoaEventsRepository foaMessageRepository);

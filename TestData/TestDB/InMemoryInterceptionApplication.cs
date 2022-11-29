@@ -1,6 +1,6 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,6 +11,16 @@ namespace TestData.TestDB
     {
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
@@ -42,7 +52,17 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, string confirmedSIN, string creditorFirstName, string creditorSurname)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task FTBatchNotification_CheckFTTransactionsAddedAsync()
         {
             throw new NotImplementedException();
         }
@@ -62,12 +82,32 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetApplicationsForRejectAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> GetDebtorIDAsync(string first3Char)
         {
             throw new NotImplementedException();
         }
 
         public Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
         {
             throw new NotImplementedException();
         }
@@ -107,6 +147,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetTerminatedI01Async()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode)
         {
             throw new NotImplementedException();
@@ -132,7 +177,27 @@ namespace TestData.TestDB
             return Task.FromResult(false);
         }
 
+        public Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MessageBrokerCRAReconciliationAsync()
         {
             throw new NotImplementedException();
         }

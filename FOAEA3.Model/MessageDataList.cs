@@ -131,7 +131,7 @@ namespace FOAEA3.Model
 
         public void AddURL(string description, string url, MessageType severity = MessageType.Information)
         {
-            this.Add(new MessageData(EventCode.UNDEFINED, null, description, severity, url:url));
+            this.Add(new MessageData(EventCode.UNDEFINED, null, description, severity, url: url));
         }
 
         public void AddMessage(string description, string field, MessageType severity, bool isSystemMessage = false)

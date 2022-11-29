@@ -3,8 +3,10 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
 using System.Collections.Generic;
@@ -24,7 +26,7 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventDetailManager EventDetailManager { get; }
 
         protected ApplicationValidation Validation { get; }
-        protected readonly CustomConfig config;
+        protected IFoaeaConfigurationHelper Config { get; }
 
         protected ApplicationStateEngine StateEngine { get; }
 
@@ -32,39 +34,41 @@ namespace FOAEA3.Business.Areas.Application
 
         protected string Appl_CtrlCd => Application.Appl_CtrlCd?.Trim();
 
-        public FoaeaUser CurrentUser { get; set; }
+        private FoaeaUser _currentUser;
 
-        public async Task SetCurrentUser(ClaimsPrincipal user)
+        public FoaeaUser CurrentUser
         {
-            var claims = user.Claims;
-            var userName = claims.Where(m => m.Type == ClaimTypes.Name).FirstOrDefault()?.Value;
-            var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
-            var submitterCode = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
-            var submitterData = (await DB.SubmitterTable.GetSubmitterAsync(submCode: submitterCode)).FirstOrDefault();
-            var enfOffData = (await DB.EnfOffTable.GetEnfOffAsync(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
-
-            CurrentUser = new FoaeaUser
+            get
             {
-                SubjectName = userName,
-                Submitter = submitterData,
-                OfficeCode = enfOffData?.EnfOff_AbbrCd
-            };
+                return _currentUser;
+            }
+            set
+            {
+                _currentUser = value;
 
-            if (userRoles != null)
-                foreach (var userRole in userRoles)
-                    CurrentUser.UserRoles.Add(userRole.Value);
+                if (Validation is not null)
+                    Validation.CurrentUser = this.CurrentUser;
+
+                if (DB is not null)
+                    DB.CurrentSubmitter = this.CurrentUser.Submitter.Subm_SubmCd;
+            }
         }
 
-        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, CustomConfig config,
+        public async Task SetCurrentUserAsync(ClaimsPrincipal user)
+        {
+            CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
+        }
+
+        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
                                   ApplicationValidation applicationValidation = null)
         {
-            this.config = config;
+            this.Config = config;
             Application = applicationData;
             EventManager = new ApplicationEventManager(Application, repositories);
             EventDetailManager = new ApplicationEventDetailManager(Application, repositories);
             DB = repositories;
             if (applicationValidation is null)
-                Validation = new ApplicationValidation(Application, EventManager, DB, config);
+                Validation = new ApplicationValidation(Application, EventManager, DB, Config, CurrentUser);
             else
             {
                 Validation = applicationValidation;
@@ -166,13 +170,17 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // clean data
-            TrimTrailingSpaces();
+            TrimSpaces();
             MakeUpperCase();
 
             Application.Appl_Create_Dte = DateTime.Now;
             Application.Appl_Create_Usr = DB.CurrentSubmitter;
             Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
+            Application.Appl_Lgl_Dte = Application.Appl_Lgl_Dte.Date; // remove time
+
+            Application.Appl_Rcptfrm_Dte = DateTime.Now.Date;
 
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd))
@@ -182,7 +190,8 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             // add reminder
-            EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
+            if (Application.AppCtgy_Cd.NotIn("L03"))
+                EventManager.AddBFEvent(EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION);
 
             // validate data and decide on what state to bring the application to
             await Process_00_InitialState();
@@ -231,9 +240,6 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual async Task UpdateApplicationNoValidationAsync()
         {
-            Application.Appl_LastUpdate_Dte = DateTime.Now;
-            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
-
             await DB.ApplicationTable.UpdateApplicationAsync(Application);
             await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
 
@@ -249,11 +255,12 @@ namespace FOAEA3.Business.Areas.Application
                 return;
             }
 
-            Application.Appl_LastUpdate_Dte = DateTime.Now;
-            Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
-
             // load old data from database
-            var current = new ApplicationManager(new ApplicationData(), DB, config);
+            var current = new ApplicationManager(new ApplicationData(), DB, Config)
+            {
+                CurrentUser = this.CurrentUser
+            };
+
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";
@@ -268,13 +275,16 @@ namespace FOAEA3.Business.Areas.Application
             if (isReset) // reset
             {
                 // clean data
-                TrimTrailingSpaces();
+                TrimSpaces();
                 MakeUpperCase();
 
                 await Process_00_InitialState();
             }
             else // regular update
             {
+                Application.AppLiSt_Cd = current.Application.AppLiSt_Cd;
+                Application.ActvSt_Cd = current.Application.ActvSt_Cd;
+
                 Validation.ValidateAndRevertNonUpdateFields(current.Application);
 
                 // update reason text with message
@@ -375,18 +385,39 @@ namespace FOAEA3.Business.Areas.Application
             await DB.ApplicationTable.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
         }
 
-        protected void TrimTrailingSpaces()
+        protected virtual void TrimSpaces()
         {
+            Application.Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd?.Trim();
+            Application.Appl_CtrlCd = Application.Appl_CtrlCd?.Trim();
+            Application.Subm_SubmCd = Application.Subm_SubmCd?.Trim();
+            Application.Subm_Recpt_SubmCd = Application.Subm_Recpt_SubmCd?.Trim();
+            Application.Appl_CommSubm_Text = Application.Appl_CommSubm_Text?.Trim();
+            Application.Appl_Group_Batch_Cd = Application.Appl_Group_Batch_Cd?.Trim();
             Application.Appl_Source_RfrNr = Application.Appl_Source_RfrNr?.Trim();
-            Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.Trim();
+            Application.Subm_Affdvt_SubmCd = Application.Subm_Affdvt_SubmCd?.Trim();
+            Application.Appl_Affdvt_DocTypCd = Application.Appl_Affdvt_DocTypCd?.Trim();
+            Application.Appl_Crdtr_FrstNme = Application.Appl_Crdtr_FrstNme?.Trim();
+            Application.Appl_Crdtr_MddleNme = Application.Appl_Crdtr_MddleNme?.Trim();
+            Application.Appl_Crdtr_SurNme = Application.Appl_Crdtr_SurNme?.Trim();
             Application.Appl_Dbtr_FrstNme = Application.Appl_Dbtr_FrstNme?.Trim();
             Application.Appl_Dbtr_MddleNme = Application.Appl_Dbtr_MddleNme?.Trim();
-            Application.Appl_Dbtr_Entrd_SIN = Application.Appl_Dbtr_Entrd_SIN?.Trim();
-            Application.Appl_Dbtr_Parent_SurNme = Application.Appl_Dbtr_Parent_SurNme?.Trim();
-            Application.Appl_CommSubm_Text = Application.Appl_CommSubm_Text?.Trim();
+            Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.Trim();
+            Application.Appl_Dbtr_Parent_SurNme_Birth = Application.Appl_Dbtr_Parent_SurNme_Birth?.Trim();
+            Application.Appl_Dbtr_LngCd = Application.Appl_Dbtr_LngCd?.Trim();
+            Application.Appl_Dbtr_Gendr_Cd = Application.Appl_Dbtr_Gendr_Cd?.Trim();
+            Application.Appl_Dbtr_Addr_Ln = Application.Appl_Dbtr_Addr_Ln?.Trim();
+            Application.Appl_Dbtr_Addr_Ln1 = Application.Appl_Dbtr_Addr_Ln1?.Trim();
+            Application.Appl_Dbtr_Addr_CityNme = Application.Appl_Dbtr_Addr_CityNme?.Trim();
+            Application.Appl_Dbtr_Addr_PrvCd = Application.Appl_Dbtr_Addr_PrvCd?.Trim();
+            Application.Appl_Dbtr_Addr_CtryCd = Application.Appl_Dbtr_Addr_CtryCd?.Trim();
+            Application.Appl_Dbtr_Addr_PCd = Application.Appl_Dbtr_Addr_PCd?.Trim();
+            Application.Medium_Cd = Application.Medium_Cd?.Trim();
+            Application.AppCtgy_Cd = Application.AppCtgy_Cd?.Trim();
+            Application.AppReas_Cd = Application.AppReas_Cd?.Trim();
+            Application.ActvSt_Cd = Application.ActvSt_Cd?.Trim();
         }
 
-        public void MakeUpperCase()
+        public virtual void MakeUpperCase()
         {
             Application.Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd?.ToUpper();
             Application.Appl_CtrlCd = Application.Appl_CtrlCd?.ToUpper();
@@ -403,7 +434,7 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_Dbtr_FrstNme = Application.Appl_Dbtr_FrstNme?.ToUpper();
             Application.Appl_Dbtr_MddleNme = Application.Appl_Dbtr_MddleNme?.ToUpper();
             Application.Appl_Dbtr_SurNme = Application.Appl_Dbtr_SurNme?.ToUpper();
-            Application.Appl_Dbtr_Parent_SurNme = Application.Appl_Dbtr_Parent_SurNme?.ToUpper();
+            Application.Appl_Dbtr_Parent_SurNme_Birth = Application.Appl_Dbtr_Parent_SurNme_Birth?.ToUpper();
             Application.Appl_Dbtr_LngCd = Application.Appl_Dbtr_LngCd?.ToUpper();
             Application.Appl_Dbtr_Gendr_Cd = Application.Appl_Dbtr_Gendr_Cd?.ToUpper();
             Application.Appl_Dbtr_Addr_Ln = Application.Appl_Dbtr_Addr_Ln?.ToUpper();
@@ -468,7 +499,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private static string BuildReferenceNumberChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)
         {
-            if (currentAppl.Appl_Source_RfrNr != newAppl.Appl_Source_RfrNr)
+            if (currentAppl.Appl_Source_RfrNr?.Trim() != newAppl.Appl_Source_RfrNr?.Trim())
             {
                 if (currentAppl.Appl_EnfSrv_Cd.Trim() == "QC01")
                     return "Numéro référence de l'autorité provinciale";

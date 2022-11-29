@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBApplicationReason : DBbase, IApplicationReasonRepository
+    internal class DBApplicationReason : DBbase, IApplicationReasonRepository
     {
         public MessageDataList Messages { get; set; }
 
@@ -29,7 +29,7 @@ namespace FOAEA3.Data.DB
             data.AppReas_Txt_E = rdr["AppReas_Txt_E"] as string;
             data.AppReas_Txt_F = rdr["AppReas_Txt_F"] as string;
             data.AppCtgy_Cd = rdr["AppCtgy_Cd"] as string;
-            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string; 
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
         }
     }
 }

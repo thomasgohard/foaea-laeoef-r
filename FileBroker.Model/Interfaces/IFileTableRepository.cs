@@ -9,11 +9,15 @@ namespace FileBroker.Model.Interfaces
         IDBToolsAsync MainDB { get; }
 
         Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt);
+        Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency);
         Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category);
         Task<List<FileTableData>> GetAllActiveAsync();
 
         Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6);
         Task<bool> IsFileLoadingAsync(int processId);
         Task SetIsFileLoadingValueAsync(int processId, bool newValue);
+
+        Task DisableFileProcess(int processId);
+        Task EnableFileProcess(int processId);
     }
 }

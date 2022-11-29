@@ -1,9 +1,6 @@
 ﻿using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources;
-using FOAEA3.Resources.Helpers;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
 namespace FOAEA3.Model
@@ -18,8 +15,6 @@ namespace FOAEA3.Model
         public string Subm_SubmCd { get; set; }
         public string Subm_Recpt_SubmCd { get; set; }
         public DateTime Appl_Lgl_Dte { get; set; }
-
-        [Display(Name = "APPL_COMMENT", ResourceType = typeof(LanguageResource))]
         public string Appl_CommSubm_Text { get; set; }
         public DateTime Appl_Rcptfrm_Dte { get; set; }
         public string Appl_Group_Batch_Cd { get; set; }
@@ -31,30 +26,13 @@ namespace FOAEA3.Model
         public string Appl_Crdtr_FrstNme { get; set; }
         public string Appl_Crdtr_MddleNme { get; set; }
         public string Appl_Crdtr_SurNme { get; set; }
-
-        [Display(Name = "FIRST_NAME", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_FrstNme { get; set; }
-
-        [Display(Name = "SECOND_NAME", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_MddleNme { get; set; }
-
-        [Display(Name = "SURNAME", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_SurNme { get; set; }
-
-        [Display(Name = "MOTHER_MAIDEN_NAME", ResourceType = typeof(LanguageResource))]
-        public string Appl_Dbtr_Parent_SurNme { get; set; }
-
-        [Display(Name = "DOB", ResourceType = typeof(LanguageResource))]
-        [DisplayFormat(DataFormatString = DateTimeExtensions.FOAEA_DATE_FORMAT)]
+        public string Appl_Dbtr_Parent_SurNme_Birth { get; set; }
         public DateTime? Appl_Dbtr_Brth_Dte { get; set; }
-
-        [Display(Name = "LANGUAGE_OF_CHOICE", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_LngCd { get; set; }
-
-        [Display(Name = "GENDER", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_Gendr_Cd { get; set; }
-
-        [Display(Name = "SIN", ResourceType = typeof(LanguageResource))]
         public string Appl_Dbtr_Entrd_SIN { get; set; }
         public string Appl_Dbtr_Cnfrmd_SIN { get; set; }
         public string Appl_Dbtr_RtrndBySrc_SIN { get; set; }
@@ -109,7 +87,7 @@ namespace FOAEA3.Model
             Appl_Dbtr_FrstNme = data.Appl_Dbtr_FrstNme;
             Appl_Dbtr_MddleNme = data.Appl_Dbtr_MddleNme;
             Appl_Dbtr_SurNme = data.Appl_Dbtr_SurNme;
-            Appl_Dbtr_Parent_SurNme = data.Appl_Dbtr_Parent_SurNme;
+            Appl_Dbtr_Parent_SurNme_Birth = data.Appl_Dbtr_Parent_SurNme_Birth;
             Appl_Dbtr_Brth_Dte = data.Appl_Dbtr_Brth_Dte;
             Appl_Dbtr_LngCd = data.Appl_Dbtr_LngCd;
             Appl_Dbtr_Gendr_Cd = data.Appl_Dbtr_Gendr_Cd;

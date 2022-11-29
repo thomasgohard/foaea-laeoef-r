@@ -1,25 +1,19 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class OutgoingFederalSinsController : ControllerBase
-{
-    private readonly CustomConfig config;
-
-    public OutgoingFederalSinsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
+public class OutgoingFederalSinsController : FoaeaControllerBase
+{    
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("OutgoingFederalSins API Version 1.0");
 
@@ -38,6 +32,7 @@ public class OutgoingFederalSinsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var manager = new ApplicationSINManager(appl, applManager);
+        await applManager.SetCurrentUserAsync(User);
 
         var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState, enfServiceCode);
 

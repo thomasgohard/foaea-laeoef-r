@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>warnings</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <Version>1.0.0-alpha</Version>
   </PropertyGroup>
@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
     <ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
     <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />

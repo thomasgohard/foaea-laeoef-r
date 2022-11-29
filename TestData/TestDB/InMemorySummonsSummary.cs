@@ -1,5 +1,5 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +25,11 @@ namespace TestData.TestDB
         public Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
             return Task.FromResult(38.0M);  // these are the annual fees since 1999-03-01});
+        }
+
+        public Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        {
+            throw new NotImplementedException();
         }
 
         public Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")

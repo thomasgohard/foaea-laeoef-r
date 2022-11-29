@@ -1,26 +1,20 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Interception.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize(Roles = Duties.Interception + "," + Roles.FlasUser + "," + Roles.Admin)]
-public class InterceptionsController : ControllerBase
+public class InterceptionsController : FoaeaControllerBase
 {
-    private readonly CustomConfig config;
-
-    public InterceptionsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> Version()
     {
@@ -39,6 +33,7 @@ public class InterceptionsController : ControllerBase
         var applKey = new ApplKey(key);
 
         var manager = new InterceptionManager(repositories, repositoriesFinance, config);
+        await manager.SetCurrentUserAsync(User);
 
         bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
@@ -53,29 +48,37 @@ public class InterceptionsController : ControllerBase
 
     }
 
-    [HttpGet("GetApplicationsForVariationAutoAccept")]
-    public async Task<ActionResult<List<InterceptionApplicationData>>> GetApplicationsForVariationAutoAccept(
-                                                                        [FromServices] IRepositories repositories,
-                                                                        [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                        [FromQuery] string enfService)
+    [HttpGet("AutoAcceptVariations")]
+    [Authorize(Policy = Policies.ApplicationReadAccess)]
+    public async Task<ActionResult> AutoAcceptVariations([FromServices] IRepositories repositories,
+                                                         [FromServices] IRepositories_Finance repositoriesFinance,
+                                                         [FromQuery] string enfService)
     {
         var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-        var data = await interceptionManager.GetApplicationsForVariationAutoAcceptAsync(enfService);
+        await interceptionManager.SetCurrentUserAsync(User);
+        await interceptionManager.AutoAcceptVariationsAsync(enfService);
 
-        return Ok(data);
+        return Ok();
     }
 
     [HttpPost]
-    [Authorize(Roles = Roles.EnforcementOffice + "," + Roles.EnforcementService + "," + Roles.CourtUser + "," + Roles.Admin)]
-    public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories repositories,
-                                                                                   [FromServices] IRepositories_Finance repositoriesFinance)
+    [Authorize(Policy = Policies.ApplicationModifyAccess)]
+    public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories db,
+                                                                                   [FromServices] IRepositories_Finance dbFinance)
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        var interceptionManager = new InterceptionManager(application, db, dbFinance, config);
+        await interceptionManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+        {
+            interceptionManager.CurrentUser.Submitter = submitter;
+            db.CurrentSubmitter = submitter.Subm_SubmCd;
+        }
 
         bool isCreated = await interceptionManager.CreateApplicationAsync();
         if (isCreated)
@@ -106,6 +109,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await interceptionManager.SetCurrentUserAsync(User);
         await interceptionManager.UpdateApplicationAsync();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -114,6 +118,28 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(application);
 
     }
+
+    [HttpPut("{key}/Transfer")]
+    public async Task<ActionResult<InterceptionApplicationData>> Transfer([FromRoute] string key,
+                                                     [FromServices] IRepositories repositories,
+                                                     [FromServices] IRepositories_Finance repositories_finance,
+                                                     [FromQuery] string newRecipientSubmitter,
+                                                     [FromQuery] string newIssuingSubmitter)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+
+        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new InterceptionManager(application, repositories, repositories_finance, config);
+
+        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
+
+        return Ok(application);
+    }
+
 
     [HttpPut("{key}/cancel")]
     [Produces("application/json")]
@@ -129,6 +155,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await interceptionManager.SetCurrentUserAsync(User);
         await interceptionManager.CancelApplication();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -152,6 +179,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await interceptionManager.SetCurrentUserAsync(User);
         await interceptionManager.SuspendApplicationAsync();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -165,7 +193,8 @@ public class InterceptionsController : ControllerBase
     public async Task<ActionResult<ApplicationData>> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
     {
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
-        var interceptionValidation = new InterceptionValidation(appl, repositories, config);
+        var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
+        var interceptionValidation = new InterceptionValidation(appl, repositories, config, currentUser);
 
         bool isValid = interceptionValidation.ValidateFinancialCoreValues();
 
@@ -187,6 +216,7 @@ public class InterceptionsController : ControllerBase
         var application = new InterceptionApplicationData();
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await appManager.SetCurrentUserAsync(User);
         await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
         var sinManager = new ApplicationSINManager(application, appManager);
@@ -208,6 +238,8 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await appManager.SetCurrentUserAsync(User);
+
         if (await appManager.VaryApplicationAsync())
             return Ok(application);
         else
@@ -228,6 +260,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await appManager.SetCurrentUserAsync(User);
 
         if (await appManager.AcceptInterceptionAsync(supportingDocsReceiptDate))
             return Ok(application);
@@ -238,9 +271,7 @@ public class InterceptionsController : ControllerBase
     [HttpPut("{key}/AcceptVariation")]
     public async Task<ActionResult<InterceptionApplicationData>> AcceptVariation([FromRoute] string key,
                                                                      [FromServices] IRepositories repositories,
-                                                                     [FromServices] IRepositories_Finance repositoriesFinance,
-                                                                     [FromQuery] DateTime supportingDocsReceiptDate,
-                                                                     [FromQuery] bool autoAccept)
+                                                                     [FromServices] IRepositories_Finance repositoriesFinance)
     {
         var applKey = new ApplKey(key);
 
@@ -250,8 +281,9 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await appManager.SetCurrentUserAsync(User);
 
-        if (await appManager.AcceptVariationAsync(supportingDocsReceiptDate, autoAccept))
+        if (await appManager.AcceptVariationAsync())
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -271,6 +303,7 @@ public class InterceptionsController : ControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config);
+        await appManager.SetCurrentUserAsync(User);
 
         if (await appManager.RejectVariationAsync(applicationRejectReasons))
             return Ok(application);

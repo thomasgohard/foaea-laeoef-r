@@ -18,12 +18,32 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task AutoAcceptVariationsAsync(string enfService)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> CancelInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
         }
 
         public Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ESD_CheckIfAlreadyLoaded(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived)
         {
             throw new NotImplementedException();
         }

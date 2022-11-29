@@ -1,16 +1,16 @@
 ﻿using FOAEA3.Common.Helpers;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareAppl
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd)
+                                                          string enfSrv, string ctrlCd, string category)
         {
             var diffs = new List<DiffData>();
 
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
             var appl2 = await repositories2.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
             var appl3 = await repositories3.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
@@ -20,15 +20,13 @@ namespace CompareOldAndNewData.CommandLine
 
             if (appl2 is null)
             {
-                diffs.Add(new DiffData(tableName, key: key, colName: "",
-                                       goodValue: "", badValue: "Not found in FOAEA 3!"));
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "", badValue: "Not found in FOAEA 2!"));
                 return diffs;
             }
 
             if (appl3 is null)
             {
-                diffs.Add(new DiffData(tableName, key: key, colName: "",
-                                       goodValue: "Not found in FOAEA 3!", badValue: ""));
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "Not found in FOAEA 3!", badValue: ""));
                 return diffs;
             }
 
@@ -58,7 +56,7 @@ namespace CompareOldAndNewData.CommandLine
             if (appl2.Appl_Dbtr_FrstNme != appl3.Appl_Dbtr_FrstNme) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_FrstNme", goodValue: appl2.Appl_Dbtr_FrstNme, badValue: appl3.Appl_Dbtr_FrstNme));
             if (appl2.Appl_Dbtr_MddleNme != appl3.Appl_Dbtr_MddleNme) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_MddleNme", goodValue: appl2.Appl_Dbtr_MddleNme, badValue: appl3.Appl_Dbtr_MddleNme));
             if (appl2.Appl_Dbtr_SurNme != appl3.Appl_Dbtr_SurNme) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_SurNme", goodValue: appl2.Appl_Dbtr_SurNme, badValue: appl3.Appl_Dbtr_SurNme));
-            if (appl2.Appl_Dbtr_Parent_SurNme != appl3.Appl_Dbtr_Parent_SurNme) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_Parent_SurNme", goodValue: appl2.Appl_Dbtr_Parent_SurNme, badValue: appl3.Appl_Dbtr_Parent_SurNme));
+            if (appl2.Appl_Dbtr_Parent_SurNme_Birth != appl3.Appl_Dbtr_Parent_SurNme_Birth) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_Parent_SurNme_Birth", goodValue: appl2.Appl_Dbtr_Parent_SurNme_Birth, badValue: appl3.Appl_Dbtr_Parent_SurNme_Birth));
             if (appl2.Appl_Dbtr_Brth_Dte != appl3.Appl_Dbtr_Brth_Dte) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_Brth_Dte", goodValue: appl2.Appl_Dbtr_Brth_Dte, badValue: appl3.Appl_Dbtr_Brth_Dte));
             if (appl2.Appl_Dbtr_LngCd != appl3.Appl_Dbtr_LngCd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_LngCd", goodValue: appl2.Appl_Dbtr_LngCd, badValue: appl3.Appl_Dbtr_LngCd));
             if (appl2.Appl_Dbtr_Gendr_Cd != appl3.Appl_Dbtr_Gendr_Cd) diffs.Add(new DiffData(tableName, key: key, colName: "Appl_Dbtr_Gendr_Cd", goodValue: appl2.Appl_Dbtr_Gendr_Cd, badValue: appl3.Appl_Dbtr_Gendr_Cd));

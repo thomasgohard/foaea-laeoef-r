@@ -1,8 +1,8 @@
-﻿using BackendProcesses.Business;
-using FOAEA3.Model;
+﻿using FOAEA3.Business.BackendProcesses;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -13,11 +13,12 @@ namespace BackendProcesses.API.Controllers
     [ApiController]
     public class BringForwardEventsController : Controller
     {
-        private readonly CustomConfig config;
+        private readonly IFoaeaConfigurationHelper config;
 
-        public BringForwardEventsController(IOptions<CustomConfig> config)
+        public BringForwardEventsController()
         {
-            this.config = config.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+            config = configHelper;
         }
 
         [HttpGet]
@@ -27,10 +28,11 @@ namespace BackendProcesses.API.Controllers
         }
 
         [HttpGet("Version")]
-        public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4"); 
-        
+        public ActionResult<string> Version() => Ok("BringForwardEvents API Version 1.4");
+
         [HttpPut("")]
-        public async Task<ActionResult<string>> RunBringForward([FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> RunBringForward([FromServices] IRepositories repositories,
+                                                                [FromServices] IRepositories_Finance repositoriesFinance)
         {
             repositories.CurrentSubmitter = "";
 
@@ -39,7 +41,7 @@ namespace BackendProcesses.API.Controllers
 
             var startTime = DateTime.Now;
 
-            var bringForwardProcess = new BringForwardEventProcess(repositories, config);
+            var bringForwardProcess = new BringForwardEventProcess(repositories, repositoriesFinance, config);
             await bringForwardProcess.RunAsync();
 
             var endTime = DateTime.Now;

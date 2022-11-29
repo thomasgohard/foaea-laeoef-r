@@ -11,7 +11,8 @@ namespace FOAEA3.Business.Areas.Application
         public void InvalidStateChange(ApplicationState oldState, ApplicationState newState)
         {
             EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE,
-                                  $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C");
+                                  $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C", 
+                                  updateSubm: DB.UpdateSubmitter);
         }
 
         public virtual async Task Process_00_InitialState()
@@ -44,7 +45,13 @@ namespace FOAEA3.Business.Areas.Application
 
             bool isValid;
             string reasonText;
-            (isValid, reasonText) = await Validation.IsValidPostalCodeAsync();
+
+            string postalCode = Application.Appl_Dbtr_Addr_PCd;
+            string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
+            string cityName = Application.Appl_Dbtr_Addr_CityNme;
+            string countryCode = Application.Appl_Dbtr_Addr_CtryCd;
+
+            (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
             if (!isValid)
             {
                 EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
@@ -191,7 +198,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             Application.ActvSt_Cd = "X";
             Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
-            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED);
+            EventManager.AddEvent(EventCode.C50843_APPLICATION_CANCELLED, activeState: "X");
 
             return Task.CompletedTask;
         }

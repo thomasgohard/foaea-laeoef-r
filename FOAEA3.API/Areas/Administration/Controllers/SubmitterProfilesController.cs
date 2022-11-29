@@ -1,7 +1,8 @@
 ﻿using FOAEA3.Business.Security;
-using FOAEA3.Common.Helpers;
+using FOAEA3.Common;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,7 @@ namespace FOAEA3.API.Areas.Administration.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class SubmitterProfilesController : ControllerBase
+public class SubmitterProfilesController : FoaeaControllerBase
 {
 
     [HttpGet("Version")]

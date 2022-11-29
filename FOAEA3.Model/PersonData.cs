@@ -7,7 +7,7 @@ namespace FOAEA3.Model
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string Surname { get; set; }
-        public string Appl_Dbtr_Parent_SurNme { get; set; }
+        public string Appl_Dbtr_Parent_SurNme_Birth { get; set; }
         public DateTime Birthdate { get; set; }
         public string Gender { get; set; }
         public string SocialInsuranceNumber { get; set; }

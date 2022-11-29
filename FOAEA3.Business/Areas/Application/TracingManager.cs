@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -18,8 +19,8 @@ namespace FOAEA3.Business.Areas.Application
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
 
-        public TracingManager(TracingApplicationData tracing, IRepositories repositories, CustomConfig config) :
-            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config))
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config) :
+            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
         {
 
             TracingApplication = tracing;
@@ -39,7 +40,7 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public TracingManager(IRepositories repositories, CustomConfig config) :
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
             this(new TracingApplicationData(), repositories, config)
         {
         }
@@ -504,6 +505,11 @@ namespace FOAEA3.Business.Areas.Application
         {
             var responsesDB = DB.TraceResponseTable;
             await responsesDB.MarkResponsesAsViewedAsync(enfService);
+        }
+
+        public async Task CreateNETPeventsAsync()
+        {
+            await DB.TracingTable.CreateESDCEventTraceDataAsync();
         }
 
         public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,

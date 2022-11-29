@@ -1,10 +1,10 @@
 using FOAEA3.Admin.Business;
 using FOAEA3.Admin.Web.Models;
-using FOAEA3.Model;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
@@ -16,11 +16,11 @@ namespace FOAEA3.Admin.Web.Pages.Tools
         public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
 
         private readonly IRepositories DB;
-        private readonly CustomConfig config;
+        private readonly IFoaeaConfigurationHelper Config;
 
-        public SimulateSinConfirmationModel(IRepositories repositories, IOptions<CustomConfig> config)
+        public SimulateSinConfirmationModel(IRepositories repositories)
         {
-            this.config = config.Value;
+            Config = new FoaeaConfigurationHelper();
             DB = repositories;
         }
 
@@ -33,12 +33,13 @@ namespace FOAEA3.Admin.Web.Pages.Tools
 
             if (ModelState.IsValid)
             {
-                var adminManager = new AdminManager(DB, config);
+                var adminManager = new AdminManager(DB, Config);
 
                 try
                 {
-                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService, SimulateSinConfirmation.ControlCode,
-                                                                  SimulateSinConfirmation.Sin);
+                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService,
+                                                                            SimulateSinConfirmation.ControlCode,
+                                                                            SimulateSinConfirmation.Sin, User);
 
                     if (success)
                         ViewData["Message"] = $"{SimulateSinConfirmation.EnfService}-{SimulateSinConfirmation.ControlCode}: SIN has been confirmed.";

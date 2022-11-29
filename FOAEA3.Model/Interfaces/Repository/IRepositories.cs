@@ -1,14 +1,13 @@
 ﻿using DBHelper;
-using FOAEA3.Data.DB;
-using FOAEA3.Model.Interfaces.Repository;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IRepositories
     {
         IDBToolsAsync MainDB { get; }
 
         string CurrentSubmitter { get; set; }
+        string UpdateSubmitter { get; set; }
         string CurrentUser { get; set; }
 
         IApplicationRepository ApplicationTable { get; }

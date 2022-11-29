@@ -1,5 +1,7 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Models;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -7,13 +9,15 @@ namespace FOAEA3.Business.Areas.Application
     {
         private TracingApplicationData TracingApplication { get; }
         public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager, IRepositories repositories,
-                                 CustomConfig config) : base(tracingApplication, eventManager, repositories, config)
+                                 IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                    base(tracingApplication, eventManager, repositories, config, user)
         {
             TracingApplication = tracingApplication;
         }
 
         public TracingValidation(TracingApplicationData tracingApplication, IRepositories repositories,
-                                 CustomConfig config) : base(tracingApplication, repositories, config)
+                                 IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                    base(tracingApplication, repositories, config, user)
         {
             TracingApplication = tracingApplication;
         }

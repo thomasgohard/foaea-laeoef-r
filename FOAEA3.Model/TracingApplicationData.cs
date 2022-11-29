@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
 using System;
 
 namespace FOAEA3.Model
@@ -30,7 +29,7 @@ namespace FOAEA3.Model
             Appl_Affdvt_DocTypCd = "T02";
             Appl_LastUpdate_Dte = Appl_Create_Dte;
         }
-                
+
         public void Merge(TracingApplicationData data)
         {
             Trace_Child_Text = data.Trace_Child_Text;

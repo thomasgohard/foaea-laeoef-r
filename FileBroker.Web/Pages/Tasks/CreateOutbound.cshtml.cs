@@ -1,10 +1,9 @@
 using DBHelper;
 using FileBroker.Business;
+using FileBroker.Common;
 using FileBroker.Data;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -19,7 +18,7 @@ namespace FileBroker.Web.Pages.Tasks
         private IErrorTrackingRepository ErrorTrackingDB { get; }
         private IProcessParameterRepository ProcessParameterTable { get; }
         private IMailServiceRepository MailServiceDB { get; }
-        private ApiConfig ApiConfig { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
 
         public string InfoMessage { get; set; }
         public string ErrorMessage { get; set; }
@@ -32,7 +31,7 @@ namespace FileBroker.Web.Pages.Tasks
                                    IErrorTrackingRepository errorTrackingDB,
                                    IProcessParameterRepository processParameterTable,
                                    IMailServiceRepository mailServiceDB,
-                                   IOptions<ApiConfig> apiConfig)
+                                   IFileBrokerConfigurationHelper config)
         {
             FileTable = fileTable;
             FlatFileSpecs = flatFileSpecs;
@@ -40,7 +39,7 @@ namespace FileBroker.Web.Pages.Tasks
             ErrorTrackingDB = errorTrackingDB;
             ProcessParameterTable = processParameterTable;
             MailServiceDB = mailServiceDB;
-            ApiConfig = apiConfig.Value;
+            Config = config;
         }
 
         public async Task OnGet()
@@ -50,24 +49,7 @@ namespace FileBroker.Web.Pages.Tasks
 
         public async Task OnPostCreateFiles(int[] selectedProcesses)
         {
-            var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-
-            // TODO: fix token
-            string token = "";
-            var apiBrokers = new APIBrokerList
-            {
-                Applications = new ApplicationAPIBroker(applicationApiHelper, token),
-                ApplicationEvents = new ApplicationEventAPIBroker(applicationApiHelper, token),
-                TracingApplications = new TracingApplicationAPIBroker(tracingApiHelper, token),
-                TracingResponses = new TraceResponseAPIBroker(tracingApiHelper, token),
-                TracingEvents = new TracingEventAPIBroker(tracingApiHelper, token),
-                LicenceDenialApplications = new LicenceDenialApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialTerminationApplications = new LicenceDenialTerminationApplicationAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialResponses = new LicenceDenialResponseAPIBroker(licenceDenialApiHelper, token),
-                LicenceDenialEvents = new LicenceDenialEventAPIBroker(licenceDenialApiHelper, token),
-            };
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
 
             var repositories = new RepositoryList
             {
@@ -105,22 +87,22 @@ namespace FileBroker.Web.Pages.Tasks
                     switch (thisProcess.Category)
                     {
                         case "LICAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialLicenceDenialManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialLicenceDenialManager(foaeaApis, repositories, Config);
                             break;
                         case "TRCAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialTracingManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialTracingManager(foaeaApis, repositories, Config);
                             break;
                         case "STATAPPOUT":
-                            outgoingFileManager = new OutgoingProvincialStatusManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingProvincialStatusManager(foaeaApis, repositories, Config);
                             break;
                         case "TRCOUT":
-                            outgoingFileManager = new OutgoingFederalTracingManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalTracingManager(foaeaApis, repositories, Config);
                             break;
                         case "SINOUT":
-                            outgoingFileManager = new OutgoingFederalSinManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalSinManager(foaeaApis, repositories, Config);
                             break;
                         case "LICOUT":
-                            outgoingFileManager = new OutgoingFederalLicenceDenialManager(apiBrokers, repositories);
+                            outgoingFileManager = new OutgoingFederalLicenceDenialManager(foaeaApis, repositories, Config);
                             break;
                     }
 

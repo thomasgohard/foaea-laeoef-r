@@ -3,14 +3,14 @@ using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBApplicationLifeState : DBbase, IApplicationLifeStateRepository
+    internal class DBApplicationLifeState : DBbase, IApplicationLifeStateRepository
     {
         public DBApplicationLifeState(IDBToolsAsync mainDB) : base(mainDB)
         {

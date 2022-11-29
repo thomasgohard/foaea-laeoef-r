@@ -1,14 +1,20 @@
-﻿namespace FileBroker.Business;
+﻿using FileBroker.Common.Helpers;
+
+namespace FileBroker.Business;
 
 public class IncomingFederalSinManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+    private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public IncomingFederalSinManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
+                                     IFileBrokerConfigurationHelper config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
@@ -77,17 +83,25 @@ public class IncomingFederalSinManager
 
     private async Task SendSinResultsToFOAEAAsync(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
-        var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
-        var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
+        await FoaeaAccess.SystemLoginAsync();
+        try
+        {
+            var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
+            var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
 
-        foreach (var sinResult in sinResults)
-            UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
+            foreach (var sinResult in sinResults)
+                UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
 
-        UpdateSinResultTable(sinResults);
+            UpdateSinResultTable(sinResults);
 
-        var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
-        foreach (var updatedSinDataSummary in latestUpdatedSinData)
-            await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
+            var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
+            foreach (var updatedSinDataSummary in latestUpdatedSinData)
+                await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
+        }
+        finally
+        {
+            await FoaeaAccess.SystemLogoutAsync();
+        }
 
     }
 
@@ -136,7 +150,7 @@ public class IncomingFederalSinManager
         if (!updatedSinDataSummary.ValStat_Cd.HasValue)
         {
             // this hasn't occurred since 1997 -- probably not needed anymore???
-           await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50483_NO_MATCHING_ACTIVE_DETAIL_EVENTS_WERE_FOUND_FOR_INBOUND_RECORD);
             return;
         }
@@ -154,7 +168,7 @@ public class IncomingFederalSinManager
         }
 
         appl.Appl_LastUpdate_Dte = DateTime.Now;
-        appl.Appl_LastUpdate_Usr = "MSGBRO";
+        appl.Appl_LastUpdate_Usr = LoginsAPIBroker.SYSTEM_SUBMITTER;
 
         if (IsSinConfirmed(updatedSinDataSummary))
         {
@@ -194,8 +208,8 @@ public class IncomingFederalSinManager
             Appl_CtrlCd = appl_CtrlCd,
             Queue = EventQueue.EventSYS,
             Event_Reas_Cd = eventCode,
-            Subm_SubmCd = "MSGBRO",
-            Subm_Recpt_SubmCd = "MSGBRO",
+            Subm_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
+            Subm_Recpt_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
             Event_TimeStamp = DateTime.Now,
             Event_RecptSubm_ActvStCd = "A",
             Event_Effctv_Dte = DateTime.Now,
@@ -214,8 +228,8 @@ public class IncomingFederalSinManager
             Queue = EventQueue.EventAM,
             Event_Reas_Cd = eventCode,
             Event_Reas_Text = reasonText,
-            Subm_SubmCd = "MSGBRO",
-            Subm_Recpt_SubmCd = "MSGBRO",
+            Subm_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
+            Subm_Recpt_SubmCd = LoginsAPIBroker.SYSTEM_SUBMITTER,
             Event_TimeStamp = DateTime.Now,
             Event_RecptSubm_ActvStCd = "A",
             Event_Effctv_Dte = DateTime.Now,

@@ -1,24 +1,18 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ApplicationFederalSinsController : ControllerBase
+public class ApplicationFederalSinsController : FoaeaControllerBase
 {
-    private readonly CustomConfig config;
-
-    public ApplicationFederalSinsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("ApplicationFederalSins API Version 1.0");
 
@@ -35,6 +29,7 @@ public class ApplicationFederalSinsController : ControllerBase
 
         var applManager = new ApplicationManager(application, repositories, config);
         var sinManager = new ApplicationSINManager(application, applManager);
+        await applManager.SetCurrentUserAsync(User);
 
         await sinManager.CreateResultDataAsync(responseData);
 

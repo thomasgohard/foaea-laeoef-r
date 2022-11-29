@@ -1,12 +1,12 @@
 ﻿using FOAEA3.Business.Areas.Application;
-using TestData.TestDB;
-using TestData.TestDataBase;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Model.Enums;
 using System;
-using Xunit;
-using FOAEA3.Model;
 using System.Threading.Tasks;
+using TestData.TestDataBase;
+using TestData.TestDB;
+using Xunit;
 
 namespace FOAEA3.Data.Tests.Areas.Application
 {
@@ -16,9 +16,9 @@ namespace FOAEA3.Data.Tests.Areas.Application
         public async Task TestProcessFinancialTermsVaried_17GenerateEvent50933()
         {
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
-                await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
+            await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
-            var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());
+            var tracingManager = new TracingManager(new InMemory_Repositories(), new FoaeaConfigurationHelper());
 
             await tracingManager.SetNewStateTo(ApplicationState.FINANCIAL_TERMS_VARIED_17);
 
@@ -43,9 +43,9 @@ namespace FOAEA3.Data.Tests.Areas.Application
         public async Task TestProcessFinancialTermsVaried_17StateNotChanged()
         {
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
-                await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
+            await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
 
-            var tracingManager = new TracingManager(new InMemory_Repositories(), new CustomConfig());
+            var tracingManager = new TracingManager(new InMemory_Repositories(), new FoaeaConfigurationHelper());
 
             ApplicationState oldState = tracingManager.TracingApplication.AppLiSt_Cd;
             await tracingManager.SetNewStateTo(ApplicationState.FINANCIAL_TERMS_VARIED_17);

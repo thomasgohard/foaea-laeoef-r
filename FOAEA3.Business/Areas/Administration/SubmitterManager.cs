@@ -1,13 +1,12 @@
-﻿using FOAEA3.Resources.Helpers;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Exceptions;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FOAEA3.Business.Areas.Application;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Administration

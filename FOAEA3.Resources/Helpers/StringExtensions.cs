@@ -42,6 +42,25 @@ namespace FOAEA3.Resources.Helpers
             return result;
         }
 
+        public static string AppendToPath(this string basePath, string additionalPath, bool isFileName = false)
+        {
+            string result = basePath;
+
+            if (string.IsNullOrEmpty(result))
+                result = additionalPath;
+            else
+            {
+                if (!result.EndsWith(@"\"))
+                    result += @"\";
+
+                result += additionalPath;
+                if (!result.EndsWith(@"\") && !isFileName)
+                    result += @"\";
+            }
+
+            return result;
+        }
+
         public static string ReplaceVariablesWithEnvironmentValues(this string data)
         {
             if (string.IsNullOrEmpty(data))

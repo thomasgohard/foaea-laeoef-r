@@ -1,6 +1,6 @@
-﻿using FOAEA3.Common.Helpers;
-using FOAEA3.Helpers;
-using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Helpers;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

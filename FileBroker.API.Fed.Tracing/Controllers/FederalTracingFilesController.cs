@@ -1,14 +1,7 @@
-﻿using FileBroker.Business;
-using FileBroker.Data;
-using FileBroker.Model;
+﻿using FileBroker.Common;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,6 +40,12 @@ public class FederalTracingFilesController : ControllerBase
         return File(result, "text/plain", fileName + "." + lastFileCycleString);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
+    {
+        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);
+    }
+
     private static async Task<(string, string)> LoadLatestFederalTracingFileAsync(string fileName, IFileTableRepository fileTable,
                                                        int fileCycleLength)
     {
@@ -69,59 +68,5 @@ public class FederalTracingFilesController : ControllerBase
         else
             return (null, null);
 
-    }
-
-    [HttpPost]
-    public async Task<ActionResult> ProcessTracingFileAsync([FromQuery] string fileName,
-                                           [FromServices] IFileAuditRepository fileAuditDB,
-                                           [FromServices] IFileTableRepository fileTableDB,
-                                           [FromServices] IMailServiceRepository mailService,
-                                           [FromServices] IFlatFileSpecificationRepository flatFileSpecs,
-                                           [FromServices] IOptions<ProvincialAuditFileConfig> auditConfig,
-                                           [FromServices] IOptions<ApiConfig> apiConfig,
-                                           [FromHeader] string currentSubmitter,
-                                           [FromHeader] string currentSubject)
-    {
-        string flatFileContent;
-        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-        {
-            flatFileContent = await reader.ReadToEndAsync();
-        }
-
-        if (string.IsNullOrEmpty(fileName))
-            return UnprocessableEntity("Missing fileName");
-
-        if (fileName.ToUpper().EndsWith(".XML"))
-            fileName = fileName[0..^4]; // remove .XML extension
-
-        // TODO: fix token
-        string token = "";
-        var apiHelper = new APIBrokerHelper(apiConfig.Value.FoaeaTracingRootAPI, currentSubmitter, currentSubject);
-        var tracingApplicationAPIs = new TracingApplicationAPIBroker(apiHelper, token);
-
-        var apis = new APIBrokerList
-        {
-            TracingApplications = tracingApplicationAPIs
-        };
-
-        var repositories = new RepositoryList
-        {
-            FlatFileSpecs = flatFileSpecs,
-            FileAudit = fileAuditDB,
-            FileTable = fileTableDB,
-            MailService = mailService
-        };
-
-        var tracingManager = new IncomingFederalTracingManager(apis, repositories);
-
-        var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-        var fileTableData = await fileTableDB.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-        if (!fileTableData.IsLoading)
-        {
-            await tracingManager.ProcessFlatFileAsync(flatFileContent, fileName);
-            return Ok("File processed.");
-        }
-        else
-            return UnprocessableEntity("File was already loading?");
     }
 }

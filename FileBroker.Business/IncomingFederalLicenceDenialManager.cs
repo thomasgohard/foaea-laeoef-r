@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FileBroker.Common.Helpers;
+using Newtonsoft.Json;
 
 namespace FileBroker.Business
 {
@@ -7,16 +8,21 @@ namespace FileBroker.Business
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
 
+        private FoaeaSystemAccess FoaeaAccess { get; }
+
         private List<ApplicationEventData> ValidEvents { get; set; }
 
         private List<ApplicationEventDetailData> ValidEventDetails { get; set; }
 
-        public IncomingFederalLicenceDenialManager(APIBrokerList apiBrokers, RepositoryList repositories)
+        public IncomingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories,
+                                                   IFileBrokerConfigurationHelper config)
         {
-            APIs = apiBrokers;
+            APIs = apis;
             DB = repositories;
             ValidEvents = new List<ApplicationEventData>();
             ValidEventDetails = new List<ApplicationEventDetailData>();
+
+            FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
 
         public async Task<List<string>> ProcessJsonFileAsync(string jsonFileContent, string fileName)
@@ -53,29 +59,37 @@ namespace FileBroker.Business
             string fileCycle = Path.GetExtension(fileName)[1..];
             try
             {
-                var licenceDenialResponses = ExtractLicenceDenialResponsesFromJson(jsonFileContent, ref errors);
-
-                if (errors.Any())
-                    return errors;
-
-                var result = new MessageDataList();
-
-                ValidateHeader(licenceDenialResponses.NewDataSet, fileName, ref errors);
-                ValidateFooter(licenceDenialResponses.NewDataSet, ref errors);
-                await ValidateDetailsAsync(licenceDenialResponses.NewDataSet, fedSource, errors);
-
-                if (errors.Any())
-                    return errors;
-
-                var licenceDenialFoaeaResponseData = GenerateLicenceDenialResponseDataFromIncomingResponses(
-                                                                                                    licenceDenialResponses,
-                                                                                                    fileName, fedSource);
-
-                if ((licenceDenialFoaeaResponseData != null) && (licenceDenialFoaeaResponseData.Count > 0))
+                await FoaeaAccess.SystemLoginAsync();
+                try
                 {
-                    await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
+                    var licenceDenialResponses = ExtractLicenceDenialResponsesFromJson(jsonFileContent, ref errors);
 
-                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                    if (errors.Any())
+                        return errors;
+
+                    var result = new MessageDataList();
+
+                    ValidateHeader(licenceDenialResponses.NewDataSet, fileName, ref errors);
+                    ValidateFooter(licenceDenialResponses.NewDataSet, ref errors);
+                    await ValidateDetailsAsync(licenceDenialResponses.NewDataSet, fedSource, errors);
+
+                    if (errors.Any())
+                        return errors;
+
+                    var licenceDenialFoaeaResponseData = GenerateLicenceDenialResponseDataFromIncomingResponses(
+                                                                                                        licenceDenialResponses,
+                                                                                                        fileName, fedSource);
+
+                    if ((licenceDenialFoaeaResponseData != null) && (licenceDenialFoaeaResponseData.Count > 0))
+                    {
+                        await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
+
+                        await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                    }
+                }
+                finally
+                {
+                    await FoaeaAccess.SystemLogoutAsync();
                 }
 
             }
@@ -219,7 +233,7 @@ namespace FileBroker.Business
         }
 
         public async Task SendLicenceDenialResponsesToFOAEAAsync(List<LicenceDenialResponseData> licenceDenialResponseData,
-                                                      string fedSource, string fileName, 
+                                                      string fedSource, string fileName,
                                                       List<string> errors)
         {
             try
@@ -261,7 +275,7 @@ namespace FileBroker.Business
             if ((responseType == "L01") && (item.ActvSt_Cd == "A"))
             {
                 var applLicenceDenial = await APIs.LicenceDenialApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-                
+
                 if (applLicenceDenial.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
                     foreach (var error in applLicenceDenial.Messages.GetMessagesForType(MessageType.Error))
@@ -279,7 +293,7 @@ namespace FileBroker.Business
             else if (responseType == "L03")
             {
                 var applLicenceDenialTermination = await APIs.LicenceDenialTerminationApplications.ProcessLicenceDenialResponseAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-                
+
                 if (applLicenceDenialTermination.Messages.ContainsMessagesOfType(MessageType.Error))
                 {
                     foreach (var error in applLicenceDenialTermination.Messages.GetMessagesForType(MessageType.Error))
@@ -288,7 +302,7 @@ namespace FileBroker.Business
                         if (error.Description == SystemMessage.APPLICATION_NOT_FOUND)
                         {
                             string errorMsg = $"{item.Appl_EnfSrv_Cd}-{item.Appl_CtrlCd} no record found. File {fileName} was loaded";
-                            await  DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
+                            await DB.ErrorTrackingTable.MessageBrokerErrorAsync("MessageBrokerService", "File Broker Service Error",
                                                                                         new Exception(errorMsg), displayExceptionError: true);
                         }
                     }

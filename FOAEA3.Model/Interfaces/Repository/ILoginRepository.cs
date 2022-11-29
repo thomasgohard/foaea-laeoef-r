@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ILoginRepository
     {
@@ -12,5 +12,8 @@ namespace FOAEA3.Model.Interfaces
         Task<bool> GetAllowedAccessAsync(string username);
         Task AcceptNewTermsOfReferernceAsync(string username);
         Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays);
+        Task PostConfirmationCodeAsync(int subjectId, string confirmationCode);
+        Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode);
+        Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial);
     }
 }

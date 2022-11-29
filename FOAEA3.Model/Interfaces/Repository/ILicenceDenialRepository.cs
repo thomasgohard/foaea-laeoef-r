@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ILicenceDenialRepository
     {
@@ -28,5 +28,7 @@ namespace FOAEA3.Model.Interfaces
                                                                             string activeState,
                                                                             string recipientCode,
                                                                             bool isXML = true);
+
+        Task<List<SingleStringColumnData>> GetActiveLO1ApplsForDebtor(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }
 }

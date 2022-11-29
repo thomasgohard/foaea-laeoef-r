@@ -1,14 +1,14 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBProvince : DBbase, IProvinceRepository
+    internal class DBProvince : DBbase, IProvinceRepository
     {
         public DBProvince(IDBToolsAsync mainDB) : base(mainDB)
         {

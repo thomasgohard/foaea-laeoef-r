@@ -19,7 +19,7 @@ namespace FileBroker.Data.DB
         {
             var parameters = new Dictionary<string, object>
             {
-                {"InboundFilename", fileName + ".XML" }
+                {"InboundFilename", fileName}
             };
 
             return await MainDB.GetDataFromStoredProcAsync<FileAuditData>("FileAuditSelect", parameters, FillAuditDataFromReader);

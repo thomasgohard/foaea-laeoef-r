@@ -2,7 +2,7 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -391,6 +391,92 @@ namespace FOAEA3.Data.DB
             data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
         }
 
+        public async Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd },
+                { "AmendedESDRequired", originalESDrequired }
+            };
+            var returnParameters = new Dictionary<string, string>
+            {
+                { "NewESDexists", "B" },
+                { "ESDReceivedDate", "D" }
+            };
+            
+            var returnValues = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("IsNewESDReceived", parameters, returnParameters);
+
+            return ((bool)returnValues["NewESDexists"], (DateTime)returnValues["ESDReceivedDate"]);
+        }
+
+        public async Task<List<ApplicationData>> GetApplicationsForRejectAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetI01ApplicationsForReject", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<List<ApplicationData>> GetTerminatedI01Async()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetTerminatedI01", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetAutoAcceptGarnisheeOverrideData", parameters, DBApplication.FillApplicationDataFromReader);
+
+            return data.FirstOrDefault();
+        }
+
+        public async Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "sin", appl_Dbtr_Entrd_SIN }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsSINBlocked", parameters);
+
+            return count > 0;
+        }
+        public async Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "refnr", appl_Source_RfrNr }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsRefNrBlocked", parameters);
+
+            return count > 0;
+        }
+
+        public async Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentRequiredData>("GetESDRequiredData", FillESDrequiredData);
+        }
+
+        private void FillESDrequiredData(IDBHelperReader rdr, ElectronicSummonsDocumentRequiredData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.ESDRequired = (ESDrequired)rdr["ESDRequired"];
+            data.ESDRequiredDate = (DateTime)rdr["ESDRequiredDate"];
+            if (rdr.ColumnExists("ESDReceivedDate"))
+                data.ESDReceivedDate = (DateTime?)rdr["ESDReceivedDate"];
+            if (rdr.ColumnExists("Subm_SubmCd"))
+                data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            if (rdr.ColumnExists("Subm_Recpt_SubmCd"))
+                data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
+            if (rdr.ColumnExists("AppLiSt_Cd"))
+                data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
+            if (rdr.ColumnExists("ActvSt_Cd"))
+                data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+        }
+
         public async Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,
                                       DateTime? esdReceivedDate = null)
         {
@@ -424,6 +510,80 @@ namespace FOAEA3.Data.DB
 
             await MainDB.ExecProcAsync("UpdateESDRequired", parameters);
 
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"FileName", fileName }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentZipData>("ESDZIPs_FindByFileName", parameters, FillElectronicSummonsDocumentZipDataFromReader);
+
+            return data.SingleOrDefault();
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"PrcID", processId },
+                {"ZipName", fileName },
+                {"DateReceived", dateReceived }
+            };
+
+            await MainDB.ExecProcAsync("ESDZipsInsert", parameters);
+
+            return new ElectronicSummonsDocumentZipData
+            {
+                ZipID = MainDB.LastReturnValue,
+                PrcID = processId,
+                ZipName = fileName,
+                DateReceived = dateReceived
+            };
+        }
+
+        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ZipID", newPDFentry.ZipID },
+                {"PDFName", newPDFentry.PDFName },
+                {"EnfSrv", newPDFentry.EnfSrv[..2] },
+                {"Ctrl", newPDFentry.Ctrl }
+            };
+
+            await MainDB.ExecProcAsync("ESDPDFsInsert", parameters);
+
+            newPDFentry.PDFid = MainDB.LastReturnValue;
+
+            return newPDFentry;
+        }
+
+        public async Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"EnfSrv", appl_EnfSrv_Cd },
+                {"Ctrl", appl_CtrlCd }
+            };
+
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentData>("ESDFindDocuments", parameters, FillElectronicSummonsDocumentDataFromReader);
+        }
+
+        private void FillElectronicSummonsDocumentDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentData data)
+        {
+            data.ZipName = rdr["ZipName"] as string;
+            data.PdfName = rdr["PDFName"] as string;
+        }
+
+        private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)
+        {
+            data.ZipID = (int)rdr["ZipID"];
+            data.PrcID = (int)rdr["PrcID"];
+            data.ZipName = rdr["ZipName"] as string;
+            data.DateReceived = (DateTime)rdr["DateReceived"];
         }
 
         public async Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
@@ -460,6 +620,16 @@ namespace FOAEA3.Data.DB
         public async Task<List<HoldbackTypeData>> GetHoldbackTypesAsync()
         {
             return await MainDB.GetAllDataAsync<HoldbackTypeData>("HldbTyp", FillHolbackTypeFromReader);
+        }
+
+        public async Task MessageBrokerCRAReconciliationAsync()
+        {
+            await MainDB.ExecProcAsync("MessageBrokerCRAReconciliation");
+        }
+
+        public async Task FTBatchNotification_CheckFTTransactionsAddedAsync()
+        {
+            await MainDB.ExecProcAsync("FTBatchNotification_CheckFTTransactionsAdded");
         }
 
         private void FillIntFinHDataFromReader(IDBHelperReader rdr, InterceptionFinancialHoldbackData data)
@@ -529,7 +699,5 @@ namespace FOAEA3.Data.DB
             data.HldbTyp_Txt_F = rdr["HldbTyp_Txt_F"] as string; // can be null 
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
         }
-
-
     }
 }

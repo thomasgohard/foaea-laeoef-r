@@ -1,7 +1,9 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
 using System.Linq;
@@ -16,13 +18,15 @@ namespace FOAEA3.Business.Areas.Application
 
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, ApplicationEventManager eventManager,
-                                      IRepositories repositories, CustomConfig config) : base(interceptionApplication, eventManager, repositories, config)
+                                      IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                        base(interceptionApplication, eventManager, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }
 
         public InterceptionValidation(InterceptionApplicationData interceptionApplication, IRepositories repositories,
-                                      CustomConfig config) : base(interceptionApplication, repositories, config)
+                                      IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                        base(interceptionApplication, repositories, config, user)
         {
             InterceptionApplication = interceptionApplication;
         }
@@ -89,10 +93,10 @@ namespace FOAEA3.Business.Areas.Application
         public async Task CheckCreditorSurnameAsync()
         {
             var applications = await DB.InterceptionTable.GetSameCreditorForI01Async(InterceptionApplication.Appl_CtrlCd,
-                                                                                         InterceptionApplication.Subm_SubmCd,
-                                                                                         InterceptionApplication.Appl_Dbtr_Entrd_SIN,
-                                                                                         InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
-                                                                                         InterceptionApplication.ActvSt_Cd);
+                                                                                     InterceptionApplication.Subm_SubmCd,
+                                                                                     InterceptionApplication.Appl_Dbtr_Entrd_SIN,
+                                                                                     InterceptionApplication.Appl_SIN_Cnfrmd_Ind,
+                                                                                     InterceptionApplication.ActvSt_Cd);
 
             if (applications.Count > 0)
             {
@@ -201,7 +205,7 @@ namespace FOAEA3.Business.Areas.Application
                         }
                     }
                 }
-            }           
+            }
 
             if (intFinH.IntFinH_DefHldbPrcnt is null)
                 intFinH.IntFinH_DefHldbPrcnt = 0;
@@ -390,7 +394,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money is null)
             {
-                await ApplicationManager.AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await ApplicationManager.AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                                   $"CalculateMaxAmountPeriodicForPeriodCode for {InterceptionApplication.Appl_EnfSrv_Cd}-{InterceptionApplication.Appl_CtrlCd}" +
                                                   $" (with periodic code {paymentPeriodicCode}) was called even though IntFinH_PerPym_Money is null!");
                 return 0.0M;

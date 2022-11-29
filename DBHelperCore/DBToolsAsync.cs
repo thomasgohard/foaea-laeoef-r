@@ -19,6 +19,8 @@ namespace DBHelper
         public string UserId { get; set; }
 
         public string Submitter { get; set; }
+        
+        public string UpdateSubmitter { get; set; }
 
         private Exception LastException
         {
@@ -490,6 +492,8 @@ namespace DBHelper
                     {
                         'S' => SqlDbType.VarChar,
                         'C' => SqlDbType.Char,
+                        'D' => SqlDbType.DateTime,
+                        'B' => SqlDbType.Bit,
                         'I' => SqlDbType.Int,
                         _ => throw new Exception($"Unsupported DB type! ({returnedValue})"),
                     };
@@ -595,8 +599,7 @@ namespace DBHelper
             }
             catch (Exception e)
             {
-                if (tran is not null)
-                    tran.Rollback();
+                tran?.Rollback();
                 LastException = new Exception(procName, e);
             }
 

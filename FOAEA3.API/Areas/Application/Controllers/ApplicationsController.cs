@@ -1,26 +1,20 @@
 ﻿using FOAEA3.API.Filters;
 using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ApplicationsController : ControllerBase
-{
-    private readonly CustomConfig config;
-
-    public ApplicationsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
+public class ApplicationsController : FoaeaControllerBase
+{    
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 
@@ -30,6 +24,7 @@ public class ApplicationsController : ControllerBase
 
     [HttpGet("{id}")]
     [HttpGet("{id}/friendly")]
+    [Authorize(Policy = Policies.ApplicationReadAccess)]
     [ApplicationDataFriendlyResultFilter]
     public async Task<ActionResult<ApplicationData>> GetApplication(
                                 [FromRoute] ApplKey id,
@@ -37,8 +32,7 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
-        
-        applManager.SetCurrentUser(User);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
@@ -51,7 +45,8 @@ public class ApplicationsController : ControllerBase
                                                             [FromServices] IRepositories repositories)
     {
         var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
-        var applicationValidation = new ApplicationValidation(appl, repositories, config);
+        var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
+        var applicationValidation = new ApplicationValidation(appl, repositories, config, currentUser);
 
         bool isValid = await applicationValidation.ValidateCodeValues();
 
@@ -68,6 +63,7 @@ public class ApplicationsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsAsync());
@@ -82,6 +78,7 @@ public class ApplicationsController : ControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
         var sinManager = new ApplicationSINManager(appl, applManager);
+        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsWithHistoryAsync());
@@ -100,6 +97,7 @@ public class ApplicationsController : ControllerBase
 
         var appManager = new ApplicationManager(application, repositories, config);
         await appManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
+        await appManager.SetCurrentUserAsync(User);
 
         ApplicationSINManager sinManager;
 
@@ -112,6 +110,7 @@ public class ApplicationsController : ControllerBase
                 break;
             case "I01":
                 var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
+                await interceptionManager.SetCurrentUserAsync(User);
                 await interceptionManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
@@ -140,6 +139,7 @@ public class ApplicationsController : ControllerBase
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config);
+        await applManager.SetCurrentUserAsync(User);
 
         return await applManager.GetProvincialStatsOutgoingDataAsync(maxRecords, activeState, recipientCode);
     }

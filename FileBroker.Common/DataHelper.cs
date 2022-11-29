@@ -1,6 +1,9 @@
 ﻿using DBHelper;
+using FileBroker.Data;
 using FileBroker.Data.DB;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Resources.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileBroker.Common
@@ -25,6 +28,23 @@ namespace FileBroker.Common
             services.AddScoped<ISecurityTokenRepository>(m => ActivatorUtilities.CreateInstance<DBSecurityToken>(m, fileBrokerDB));
 
             return fileBrokerDB.ConnectionString;
+        }
+
+        public static RepositoryList SetupFileBrokerRepositories(IDBToolsAsync fileBrokerDB)
+        {
+            return new RepositoryList
+            {
+                FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
+                FileTable = new DBFileTable(fileBrokerDB),
+                FileAudit = new DBFileAudit(fileBrokerDB),
+                ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
+                OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),
+                ErrorTrackingTable = new DBErrorTracking(fileBrokerDB),
+                MailService = new DBMailService(fileBrokerDB),
+                TranslationTable = new DBTranslation(fileBrokerDB),
+                RequestLogTable = new DBRequestLog(fileBrokerDB),
+                LoadInboundAuditTable = new DBLoadInboundAudit(fileBrokerDB)
+            };
         }
     }
 }

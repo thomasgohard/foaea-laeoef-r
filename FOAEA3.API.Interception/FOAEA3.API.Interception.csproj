@@ -21,15 +21,11 @@
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
 		<PackageReference Include="Serilog.Sinks.EventLog" Version="3.1.0" />
-		<PackageReference Include="Serilog.Sinks.MSSqlServer" Version="5.8.0" />
+		<PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BackendProcesses.Business\BackendProcesses.Business.csproj" />
-		<ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
-		<ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
-		<ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
 		<ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
 		<ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
 		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />

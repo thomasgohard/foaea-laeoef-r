@@ -1,5 +1,5 @@
-﻿using BackendProcesses.Business;
-using DBHelper;
+﻿using DBHelper;
+using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
@@ -25,7 +25,10 @@ namespace FOAEA3.Business.Areas.Application
 
         private static string GetDebtorID(string justiceID)
         {
-            return justiceID.Trim()[..7];
+            if (!string.IsNullOrEmpty(justiceID))
+                return justiceID.Trim()[..7];
+            else
+                return null;
         }
 
         private static string DebtorPrefix(string name)
@@ -33,7 +36,7 @@ namespace FOAEA3.Business.Areas.Application
             name = name.Trim();
             name = name.Replace("'", "");
             if (name.Length >= 3)
-                return name.Substring(0, 3);
+                return name[..3];
             else
                 return name.PadRight(3, '-');
         }
@@ -46,7 +49,7 @@ namespace FOAEA3.Business.Areas.Application
         private async Task<string> NextJusticeIDAsync(string justiceID)
         {
             string justiceSuffix = justiceID.Substring(justiceID.Length - 1, 1);
-            string debtorID = justiceID.Substring(0, 7);
+            string debtorID = justiceID[..7];
             if (string.IsNullOrEmpty(justiceID))
                 justiceSuffix = "A";
             else
@@ -82,7 +85,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private bool IsESD_MEP(string enforcementServiceCode)
         {
-            return config.ESDsites.Contains(enforcementServiceCode);
+            return Config.ESDsites.Contains(enforcementServiceCode);
         }
 
         private async Task ProcessSummSmryBFNAsync(string debtorId, EventCode eventBFNreasonCode)
@@ -96,14 +99,20 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var thisApplicationManager = new InterceptionManager(DB, DBfinance, config);
-            var thisApplication = thisApplicationManager.InterceptionApplication;
-            var applEventManager = new ApplicationEventManager(thisApplication, DB);
-            var applEventDetailManager = new ApplicationEventDetailManager(thisApplication, DB);
+            var bfApplicationManager = new InterceptionManager(DB, DBfinance, Config)
+            {
+                CurrentUser = this.CurrentUser
+            };
 
-            var eventBFNs = (await applEventManager.GetApplicationEventsForQueueAsync(EventQueue.EventBFN))
+            await bfApplicationManager.LoadApplicationAsync(applEnfSrvCode, applControlCode);
+            var bfApplication = bfApplicationManager.InterceptionApplication;
+            var bfEventManager = new ApplicationEventManager(bfApplication, DB);
+            var bfEventDetailManager = new ApplicationEventDetailManager(bfApplication, DB);
+
+            var eventBFNs = (await bfEventManager.GetApplicationEventsForQueueAsync(EventQueue.EventBFN))
                                 .Where(m => m.ActvSt_Cd == "A");
-            var eventBFNDetails = (await applEventDetailManager.GetApplicationEventDetailsForQueueAsync(EventQueue.EventBFN_dtl))
+
+            var eventBFNDetails = (await bfEventDetailManager.GetApplicationEventDetailsForQueueAsync(EventQueue.EventBFN_dtl))
                                     .Where(m => m.ActvSt_Cd == "A");
 
             foreach (var thisEventBFN in eventBFNs)
@@ -142,12 +151,12 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     thisEventBFNdetail.ActvSt_Cd = "C";
                     thisEventBFNdetail.Event_Compl_Dte = DateTime.Now;
-                    thisEventBFNdetail.Event_Reas_Text = $"Application {thisApplication.Appl_EnfSrv_Cd}-{thisApplication.Appl_CtrlCd} became active, STOP BLOCK not sent";
+                    thisEventBFNdetail.Event_Reas_Text = $"Application {bfApplication.Appl_EnfSrv_Cd}-{bfApplication.Appl_CtrlCd} became active, STOP BLOCK not sent";
                 }
             }
 
-            await applEventManager.SaveEventsAsync();
-            await applEventDetailManager.SaveEventDetailsAsync();
+            await bfEventManager.SaveEventsAsync();
+            await bfEventDetailManager.SaveEventDetailsAsync();
         }
 
         private async Task<DateTime> RecalculateFixedAmountRecalcDateAfterVariationAsync(InterceptionFinancialHoldbackData newFinTerms, DateTime variationCalcDate)
@@ -188,7 +197,7 @@ namespace FOAEA3.Business.Areas.Application
 
                     if (InterceptionApplication.Appl_RecvAffdvt_Dte is null)
                     {
-                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
+                        await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.EmailRecipients,
                                        $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot recalculate fixed amount recalc date after variation!");
                         return fixedAmountRecalcDate;
                     }
@@ -481,7 +490,7 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        private async Task StopBlockFundsAsync(ApplicationState fromState)
+        private async Task StopBlockFundsAsync(ApplicationState requestedState, ApplicationState previousState)
         {
             string debtorID = GetDebtorID(InterceptionApplication.Appl_JusticeNr);
             int summSmryCount = 0;
@@ -505,27 +514,31 @@ namespace FOAEA3.Business.Areas.Application
 
             var summSmryForCurrentAppl = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd))
                                             .FirstOrDefault();
-            if (summSmryForCurrentAppl is null)
+            if ((summSmryForCurrentAppl is null) && (previousState >= ApplicationState.APPLICATION_ACCEPTED_10))
             {
-                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.SystemErrorRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                $"Could not find summSmry record for {Appl_EnfSrv_Cd}-{Appl_CtrlCd} in StopBlockFunds!");
                 return;
             }
-            switch (fromState)
-            {
-                case ApplicationState.FULLY_SERVICED_13:
-                case ApplicationState.MANUALLY_TERMINATED_14:
-                    summSmryForCurrentAppl.ActualEnd_Dte = DateTime.Now;
-                    break;
-                case ApplicationState.EXPIRED_15:
-                    summSmryForCurrentAppl.ActualEnd_Dte = summSmryForCurrentAppl.End_Dte;
-                    break;
-                default:
-                    // Throw New Exception("Invalid State for the current application.")
-                    break;
-            }
 
-            await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
+            if (summSmryForCurrentAppl is not null)
+            {
+                switch (requestedState)
+                {
+                    case ApplicationState.FULLY_SERVICED_13:
+                    case ApplicationState.MANUALLY_TERMINATED_14:
+                        summSmryForCurrentAppl.ActualEnd_Dte = DateTime.Now;
+                        break;
+                    case ApplicationState.EXPIRED_15:
+                        summSmryForCurrentAppl.ActualEnd_Dte = summSmryForCurrentAppl.End_Dte;
+                        break;
+                    default:
+                        // Throw New Exception("Invalid State for the current application.")
+                        break;
+                }
+
+                await DBfinance.SummonsSummaryRepository.UpdateSummonsSummaryAsync(summSmryForCurrentAppl);
+            }
 
             await DB.InterceptionTable.EISOHistoryDeleteBySINAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
 

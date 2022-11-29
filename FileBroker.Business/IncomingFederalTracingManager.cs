@@ -1,10 +1,14 @@
 ﻿using DBHelper;
+using FileBroker.Common.Helpers;
+
 namespace FileBroker.Business;
 
 public class IncomingFederalTracingManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+
+    private FoaeaSystemAccess FoaeaAccess { get; }
 
     public enum EFederalSource
     {
@@ -14,10 +18,13 @@ public class IncomingFederalTracingManager
         NETP
     }
 
-    public IncomingFederalTracingManager(APIBrokerList apiBrokers, RepositoryList repositories)
+    public IncomingFederalTracingManager(APIBrokerList apis, RepositoryList repositories,
+                                         IFileBrokerConfigurationHelper config)
     {
-        APIs = apiBrokers;
+        APIs = apis;
         DB = repositories;
+
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
@@ -54,19 +61,28 @@ public class IncomingFederalTracingManager
             if (errors.Any())
                 return errors;
 
-            if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == EFederalSource.NETP))
-                await CloseNETPTraceEventsAsync();
-            else
+            await FoaeaAccess.SystemLoginAsync();
+            try
             {
-                var tracingResponses = await ExtractTracingResponsesFromFileDataAsync(tracingFileData, enfSrvCd, fileCycle, errors);
 
-                if (errors.Any())
-                    return errors;
+                if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == EFederalSource.NETP))
+                    await CloseNETPTraceEventsAsync();
+                else
+                {
+                    var tracingResponses = await ExtractTracingResponsesFromFileDataAsync(tracingFileData, enfSrvCd, fileCycle, errors);
 
-                if ((tracingResponses != null) && (tracingFileData.TRCIN02.Count > 0))
-                    await SendTracingResponsesToFOAEAAsync(tracingFileData.TRCIN02, tracingResponses, fileTableData.PrcId,
-                                                           enfSrvCd, fedSource, fileCycle,
-                                                           flatFileName, errors);
+                    if (errors.Any())
+                        return errors;
+
+                    if ((tracingResponses != null) && (tracingFileData.TRCIN02.Count > 0))
+                        await SendTracingResponsesToFOAEAAsync(tracingFileData.TRCIN02, tracingResponses, fileTableData.PrcId,
+                                                               enfSrvCd, fedSource, fileCycle,
+                                                               flatFileName, errors);
+                }
+            }
+            finally
+            {
+                await FoaeaAccess.SystemLogoutAsync();
             }
 
         }

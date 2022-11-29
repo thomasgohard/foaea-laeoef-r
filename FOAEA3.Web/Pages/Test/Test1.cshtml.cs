@@ -5,9 +5,7 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Test
@@ -47,8 +45,8 @@ namespace FOAEA3.Web.Pages.Test
         public async Task OnPostLogout()
         {
             string currentToken = HttpContext.Session.GetString("Token");
-            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken"); 
-            
+            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
+
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
@@ -67,8 +65,9 @@ namespace FOAEA3.Web.Pages.Test
 
             if (string.IsNullOrEmpty(currentToken))
                 Message = "No logged in user.";
-            else {
-                var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI, 
+            else
+            {
+                var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI,
                                                     getRefreshedToken: OnRefreshTokenAsync);
                 var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
@@ -82,7 +81,7 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI, 
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI,
                                                 getRefreshedToken: OnRefreshTokenAsync);
             var appAPIs = new ApplicationAPIBroker(apiHelper, currentToken);
 
@@ -96,7 +95,7 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaInterceptionRootAPI, 
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaInterceptionRootAPI,
                                                 getRefreshedToken: OnRefreshTokenAsync);
             var interceptionAPIs = new InterceptionApplicationAPIBroker(apiHelper, currentToken);
 

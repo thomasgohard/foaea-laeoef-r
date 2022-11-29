@@ -1,19 +1,20 @@
 ﻿using FOAEA3.Business.Areas.Administration;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace FOAEA3.API.Areas.Administration.Controllers;
+namespace FOAEA3.API.Areas.Administration;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class SubmittersController : ControllerBase
+public class SubmittersController : FoaeaControllerBase
 {
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Submitters API Version 1.0");
 
@@ -34,7 +35,7 @@ public class SubmittersController : ControllerBase
             return Ok(await submitterManager.GetSubmittersForProvinceAndOfficeAsync(provCd, enfOffCode, enfSrvCode, onlyActive == "true"));
     }
 
-    [HttpGet("{submCd}")]
+    [HttpGet("{submCd}", Name = "GetSubmitter")]
     public async Task<ActionResult<SubmitterData>> GetSubmitter([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterManager = new SubmitterManager(repositories);
@@ -90,7 +91,7 @@ public class SubmittersController : ControllerBase
             var actionPath = HttpContext.Request.Path.Value + Path.AltDirectorySeparatorChar + submitterData.Subm_SubmCd;
             var getURI = new Uri("https://" + HttpContext.Request.Host.ToString() + actionPath);
 
-            return Created(getURI, submitterData);
+            return CreatedAtRoute("GetSubmitter", new { submCd = submitterData.Subm_SubmCd }, submitterData);
         }
         else
         {

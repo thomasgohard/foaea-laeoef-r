@@ -1,9 +1,8 @@
-﻿using System;
+﻿using FOAEA3.Model.Exceptions;
+using FOAEA3.Resources.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using FOAEA3.Model.Exceptions;
-using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 
 namespace FOAEA3.Model
 {
@@ -54,7 +53,7 @@ namespace FOAEA3.Model
             }
             return this.CompareTo(other) == 0;
         }
-        
+
         public static bool operator ==(GenderData left, GenderData right)
         {
             if (left is null)

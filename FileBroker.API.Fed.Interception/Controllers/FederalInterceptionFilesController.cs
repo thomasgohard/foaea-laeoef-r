@@ -1,4 +1,5 @@
-﻿using FileBroker.Model.Interfaces;
+﻿using FileBroker.Common;
+using FileBroker.Model.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -25,5 +26,11 @@ public class FederalInterceptionFilesController : ControllerBase
             return Ok();
         else
             return UnprocessableEntity(fileTable.MainDB.LastError);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
+    {
+        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);
     }
 }

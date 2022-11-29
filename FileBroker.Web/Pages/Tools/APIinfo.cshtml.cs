@@ -8,6 +8,7 @@ using FOAEA3.Model.Interfaces.Broker;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using FileBroker.Model.Interfaces;
 
 namespace FileBroker.Web.Pages.Tools
 {
@@ -17,31 +18,32 @@ namespace FileBroker.Web.Pages.Tools
 
         public Dictionary<string, ApiInfo> ApiData { get; }
 
-        public APIinfoModel(IOptions<ApiConfig> apiConfig)
+        public APIinfoModel()
         {
-            ApiConfig = apiConfig.Value;
+            var config = new FileBrokerConfigurationHelper();
+            ApiConfig = config.ApiRootData;
             ApiData = new Dictionary<string, ApiInfo>();
         }
 
-        public async Task OnGet([FromServices] IConfiguration config)
+        public async Task OnGet([FromServices] IFileBrokerConfigurationHelper config)
         {
-            var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FoaeaLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var applicationApiHelper = new APIBrokerHelper(ApiConfig.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var interceptionApiHelper = new APIBrokerHelper(ApiConfig.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var tracingApiHelper = new APIBrokerHelper(ApiConfig.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            var fb_accountApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerAccountRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var fb_accountApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerAccountRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            var fb_interceptionApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var fb_licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var fb_tracingApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var fb_interceptionApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var fb_licenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var fb_tracingApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerMEPTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            var fb_FederalInterceptionApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalInterceptionRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var fb_FederalLicenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalLicenceDenialRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var fb_FederalTracingApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalTracingRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-            var fb_FederalSINApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalSINRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var fb_FederalInterceptionApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var fb_FederalLicenceDenialApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var fb_FederalTracingApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var fb_FederalSINApiHelper = new APIBrokerHelper(ApiConfig.FileBrokerFederalSINRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
+            var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
             string foaeaToken = await TokenHelper.GetFoaeaApiTokenAsync(applicationApiHelper, config);
 

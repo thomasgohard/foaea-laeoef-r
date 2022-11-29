@@ -2,8 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -98,8 +96,6 @@ namespace FOAEA3.Common.Brokers
                                                                                               tracingApplication, token: Token);
             return data;
         }
-
-
 
         public async Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords,
                                                                                   string activeState,

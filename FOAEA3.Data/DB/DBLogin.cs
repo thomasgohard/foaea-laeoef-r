@@ -1,7 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBLogin : DBbase, ILoginRepository
+    internal class DBLogin : DBbase, ILoginRepository
     {
         private const int PREVIOUS_PASSWORDS_HISTORY = 5;
         public DBLogin(IDBToolsAsync mainDB) : base(mainDB)
@@ -249,6 +249,6 @@ namespace FOAEA3.Data.DB
             data.PKIExpiration = (DateTime?)(rdr["PKIExpiration"]);
             data.HasAcceptedNewTermsOfRef = (bool)(rdr["HasAcceptedNewTermsOfRef"]);
         }
-        
+
     }
 }

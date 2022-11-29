@@ -1,9 +1,12 @@
 ﻿using DBHelper;
+using FOAEA3.Common.Helpers;
+using FOAEA3.Common.Models;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Exceptions;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
@@ -20,26 +23,31 @@ namespace FOAEA3.Business.Areas.Application
         protected IRepositories DB { get; }
         private ApplicationData Application { get; }
 
-        protected readonly CustomConfig config;
+        protected IFoaeaConfigurationHelper Config { get; }
 
         public ApplicationEventManager EventManager { get; set; }
 
         public bool IsSystemGeneratedControlCode { get; set; }
 
+        public FoaeaUser CurrentUser { get; set; }
+
         public ApplicationValidation(ApplicationData application, ApplicationEventManager eventManager,
-                                     IRepositories repositories, CustomConfig config)
+                                     IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser currentUser)
         {
-            this.config = config;
+            Config = config;
             Application = application;
             DB = repositories;
             EventManager = eventManager;
+            CurrentUser = currentUser;
         }
 
-        public ApplicationValidation(ApplicationData application, IRepositories repositories, CustomConfig config)
+        public ApplicationValidation(ApplicationData application, IRepositories repositories,
+                                     IFoaeaConfigurationHelper config, FoaeaUser currentUser)
         {
-            this.config = config;
+            Config = config;
             Application = application;
             DB = repositories;
+            CurrentUser = currentUser;
         }
 
         public virtual void VerifyPresets()
@@ -62,7 +70,11 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                var existingApp = new ApplicationManager(new ApplicationData(), DB, config);
+                var existingApp = new ApplicationManager(new ApplicationData(), DB, Config)
+                {
+                    CurrentUser = this.CurrentUser
+                };
+
                 if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
                     // update
@@ -186,7 +198,9 @@ namespace FOAEA3.Business.Areas.Application
             isSuccess = IsValidMandatory(isSuccess, Application.AppCtgy_Cd, Resources.ErrorResource.MISSING_CATEGORY_CODE);
             isSuccess = IsValidMandatory(isSuccess, Application.Appl_Dbtr_Brth_Dte, Resources.ErrorResource.MISSING_DEBTOR_DOB);
 
-            if ((!string.IsNullOrEmpty(Application.Medium_Cd)) && (Application.Medium_Cd.ToUpper() == "FTP"))
+            if ((!string.IsNullOrEmpty(Application.Medium_Cd)) &&
+                (Application.Medium_Cd.ToUpper() == "FTP") &&
+                (Application.AppCtgy_Cd != "L03"))
                 isSuccess = IsValidMandatory(isSuccess, Application.Appl_Group_Batch_Cd, Resources.ErrorResource.MISSING_GROUP_BATCH_CODE);
 
             return isSuccess;
@@ -214,7 +228,8 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual async Task<(bool, string)> IsValidPostalCodeAsync()
+        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName,
+                                                                         string countryCode)
         {
             // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
             // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
@@ -222,15 +237,16 @@ namespace FOAEA3.Business.Areas.Application
             // 3-Postal code does not match City (if the City associated to the postal code is not the same in the application VS the two found in the Canada Post file)
             // More than one of these can occur for the same triggering of Event 50772 (really just 2 and 3).
 
-            string postalCode = Application.Appl_Dbtr_Addr_PCd;
-            string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
-            string cityName = Application.Appl_Dbtr_Addr_CityNme;
             string reasonText = string.Empty;
 
             if (postalCode == "-")
             {
-                if (Application.Medium_Cd != "FTP") Application.Messages.AddError("Invalid Single Dash Postal Code");
-                return (false, reasonText);
+                var thisCountry = ReferenceData.Instance().Countries[countryCode];
+                if (thisCountry is { Ctry_PCd_Ind: true })
+                {
+                    Application.Messages.AddError("Invalid Single Dash Postal Code");
+                    return (false, reasonText);
+                }
             }
 
             if (Application.Appl_Dbtr_Addr_CtryCd == "CAN")
@@ -391,7 +407,8 @@ namespace FOAEA3.Business.Areas.Application
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
-                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED, errorDiffEnfOff);
+                    EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
+                                          errorDiffEnfOff);
 
                     string errorMessage = Application.Appl_EnfSrv_Cd.Trim() + "-" + Application.Subm_SubmCd.Trim() + "-" + Application.Appl_CtrlCd.Trim();
                     foreach (ApplicationConfirmedSINData confirmedAppl in applsInOtherJurisdictions)
@@ -477,16 +494,15 @@ namespace FOAEA3.Business.Areas.Application
                     break;
 
                 case ApplicationState.SIN_CONFIRMATION_PENDING_3:
-                case ApplicationState.APPLICATION_REJECTED_9:
 
                     // nothing can be changed
-
-                    if(Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
+                    if (Application.Medium_Cd != "FTP") Application.Messages.AddError(EventCode.C50500_INVALID_UPDATE);
 
                     break;
 
                 case ApplicationState.PENDING_ACCEPTANCE_SWEARING_6:
                 case ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7:
+                case ApplicationState.APPLICATION_REJECTED_9:
                 case ApplicationState.APPLICATION_ACCEPTED_10:
                 case ApplicationState.PARTIALLY_SERVICED_12:
 
@@ -541,7 +557,7 @@ namespace FOAEA3.Business.Areas.Application
                 (Application.Appl_Dbtr_FrstNme != current.Appl_Dbtr_FrstNme) ||
                 (Application.Appl_Dbtr_MddleNme != current.Appl_Dbtr_MddleNme) ||
                 (Application.Appl_Dbtr_SurNme != current.Appl_Dbtr_SurNme) ||
-                (Application.Appl_Dbtr_Parent_SurNme != current.Appl_Dbtr_Parent_SurNme) ||
+                (Application.Appl_Dbtr_Parent_SurNme_Birth != current.Appl_Dbtr_Parent_SurNme_Birth) ||
                 (!Application.Appl_Dbtr_Brth_Dte.AreDatesEqual(current.Appl_Dbtr_Brth_Dte)) ||
                 (Application.Appl_Dbtr_LngCd != current.Appl_Dbtr_LngCd) ||
                 (Application.Appl_Dbtr_Gendr_Cd != current.Appl_Dbtr_Gendr_Cd) ||
@@ -577,7 +593,7 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_Dbtr_FrstNme = current.Appl_Dbtr_FrstNme;
                 Application.Appl_Dbtr_MddleNme = current.Appl_Dbtr_MddleNme;
                 Application.Appl_Dbtr_SurNme = current.Appl_Dbtr_SurNme;
-                Application.Appl_Dbtr_Parent_SurNme = current.Appl_Dbtr_Parent_SurNme;
+                Application.Appl_Dbtr_Parent_SurNme_Birth = current.Appl_Dbtr_Parent_SurNme_Birth;
                 Application.Appl_Dbtr_Brth_Dte = current.Appl_Dbtr_Brth_Dte;
                 Application.Appl_Dbtr_LngCd = current.Appl_Dbtr_LngCd;
                 Application.Appl_Dbtr_Gendr_Cd = current.Appl_Dbtr_Gendr_Cd;

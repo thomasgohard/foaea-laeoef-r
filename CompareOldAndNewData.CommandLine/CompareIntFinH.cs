@@ -1,13 +1,13 @@
 ﻿using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareIntFinH
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd)
+                                         string enfSrv, string ctrlCd, string category, DateTime foaea2run, DateTime foaea3run)
         {
             var diffs = new List<DiffData>();
 
@@ -16,7 +16,7 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var intFinH2item in allIntFinHdata2)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{intFinH2item.ActvSt_Cd}]/[{intFinH2item.IntFinH_Dte.Date}]";
+                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " " + $" [{intFinH2item.ActvSt_Cd}]/[{intFinH2item.IntFinH_Dte.Date}]";
                 var intFinH3item = allIntFinHdata3.Where(m => (m.IntFinH_Dte.Date == intFinH2item.IntFinH_Dte.Date) ||
                                                               ((m.ActvSt_Cd == "A") && (m.ActvSt_Cd == intFinH2item.ActvSt_Cd)) ||
                                                               ((m.ActvSt_Cd == "P") && (m.ActvSt_Cd == intFinH2item.ActvSt_Cd))).FirstOrDefault();

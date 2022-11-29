@@ -1,23 +1,40 @@
 ﻿using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareEvents
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
-                                         string enfSrv, string ctrlCd, EventQueue queue)
+                                         string enfSrv, string ctrlCd, string category, EventQueue queue)
         {
             var diffs = new List<DiffData>();
+
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
             var evnt2 = await repositories2.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
             var evnt3 = await repositories3.ApplicationEventTable.GetApplicationEventsAsync(enfSrv, ctrlCd, queue);
 
+            if ((evnt2 is null) && (evnt3 is null))
+                return diffs;
+
+            if (evnt2 is null)
+            {
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "", badValue: "Not found in FOAEA 2!"));
+                return diffs;
+            }
+
+            if (evnt3 is null)
+            {
+                diffs.Add(new DiffData(tableName, key: key, colName: "", goodValue: "Not found in FOAEA 3!", badValue: ""));
+                return diffs;
+            }
+
             foreach (var evntItem2 in evnt2)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem2.ActvSt_Cd}]/[{evntItem2.Event_TimeStamp.Date}]/[{(int)evntItem2.Event_Reas_Cd}][{(int)evntItem2.AppLiSt_Cd}]";
+                key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem2.ActvSt_Cd}]/[{evntItem2.Event_TimeStamp.Date}]/[{(int)evntItem2.Event_Reas_Cd}][{(int)evntItem2.AppLiSt_Cd}]";
                 string description = evntItem2.Event_Reas_Cd?.ToString() ?? "";
 
                 var evntItem3 = evnt3.Where(m => ((m.Event_TimeStamp.Date == evntItem2.Event_TimeStamp.Date) && (m.Event_Reas_Cd == evntItem2.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem2.AppLiSt_Cd)) ||
@@ -30,7 +47,7 @@ namespace CompareOldAndNewData.CommandLine
 
             foreach (var evntItem3 in evnt3)
             {
-                string key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem3.ActvSt_Cd}]/[{evntItem3.Event_TimeStamp.Date}]/[{(int)evntItem3.Event_Reas_Cd}][{(int)evntItem3.AppLiSt_Cd}]";
+                key = ApplKey.MakeKey(enfSrv, ctrlCd) + $" [{evntItem3.ActvSt_Cd}]/[{evntItem3.Event_TimeStamp.Date}]/[{(int)evntItem3.Event_Reas_Cd}][{(int)evntItem3.AppLiSt_Cd}]";
                 string description = evntItem3.Event_Reas_Cd?.ToString() ?? "";
 
                 var evntItem2 = evnt2.Where(m => ((m.Event_TimeStamp.Date == evntItem3.Event_TimeStamp.Date) && (m.Event_Reas_Cd == evntItem3.Event_Reas_Cd) && (m.AppLiSt_Cd == evntItem3.AppLiSt_Cd)) ||

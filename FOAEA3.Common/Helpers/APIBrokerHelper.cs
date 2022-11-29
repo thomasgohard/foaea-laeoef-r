@@ -4,13 +4,8 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Helpers
 {
@@ -290,8 +285,21 @@ namespace FOAEA3.Common.Helpers
                                     attemptCount++;
                             }
                         }
+                        else
+                        {
+                            try
+                            {
+                                string content = await callResult.Content.ReadAsStringAsync();
+                                result = JsonConvert.DeserializeObject<T>(content);
+                            }
+                            catch
+                            {
+                                // no content or invalid content so ignore?
+                            }
+                            completed = true;
+                        }
                     }
-                    else 
+                    else
                         completed = true;
                 }
                 catch (Exception e)
@@ -373,6 +381,8 @@ namespace FOAEA3.Common.Helpers
                                     attemptCount++;
                             }
                         }
+                        else
+                            completed = true;
                     }
                     else
                         completed = true;

@@ -1,7 +1,8 @@
-﻿using FOAEA3.Common.Helpers;
+﻿using FOAEA3.Common;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,7 @@ namespace FOAEA3.API.Areas.Administration.Controllers;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-public class ApplicationLifeStatesController : ControllerBase
+public class ApplicationLifeStatesController : FoaeaControllerBase
 {
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("ApplicationLifeStates API Version 1.0");

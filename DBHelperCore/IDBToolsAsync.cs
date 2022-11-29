@@ -16,6 +16,7 @@ namespace DBHelper
         string UserId { get; set; }
 
         string Submitter { get; set; }
+        string UpdateSubmitter { get; set; }
 
         string LastError { get; set; }
 

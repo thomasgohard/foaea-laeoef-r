@@ -2,8 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -97,10 +95,11 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall, application, token: Token);
         }
 
-        public async Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService)
+        public async Task AutoAcceptVariationsAsync(string enfService)
         {
-            string apiCall = $"api/v1/interceptions/GetApplicationsForVariationAutoAccept?enfService={enfService}";
-            return await ApiHelper.GetDataAsync<List<InterceptionApplicationData>>(apiCall, token: Token);
+            string apiCall = $"api/v1/interceptions/AutoAcceptVariations?enfService={enfService}";
+            await ApiHelper.SendCommandAsync(apiCall, token: Token);
+            return;
         }
 
         public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
@@ -111,5 +110,37 @@ namespace FOAEA3.Common.Brokers
                                                                                            interceptionApplication, token: Token);
             return data;
         }
+
+        public async Task<bool> ESD_CheckIfAlreadyLoaded(string fileName)
+        {
+            string apiCall = $"api/v1/ESDs/{fileName}";
+            var data = await ApiHelper.GetDataAsync<ElectronicSummonsDocumentZipData>(apiCall, token: Token);
+
+            return data.ZipName != null;
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived)
+        {
+            var newFile = new ElectronicSummonsDocumentZipData
+            {
+                PrcID = processId,
+                ZipName = fileName,
+                DateReceived = dateReceived
+            };
+
+            string apiCall = $"api/v1/ESDs";
+            var data = await ApiHelper.PostDataAsync<ElectronicSummonsDocumentZipData, ElectronicSummonsDocumentZipData>(apiCall, newFile, token: Token);
+
+            return data;
+        }
+
+        public async Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf)
+        {
+            string apiCall = $"api/v1/ESDPDFs";
+            var data = await ApiHelper.PostDataAsync<ElectronicSummonsDocumentPdfData, ElectronicSummonsDocumentPdfData>(apiCall, newPdf, token: Token);
+
+            return data;
+        }
+
     }
 }

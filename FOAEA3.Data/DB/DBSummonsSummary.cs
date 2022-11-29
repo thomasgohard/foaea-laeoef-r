@@ -1,7 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,6 +30,11 @@ namespace FOAEA3.Data.DB
         public async Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync()
         {
             return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetAmountOwedRecords", FillDataFromReader);
+        }
+
+         public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetFixedAmountRecalcDateRecords", FillDataFromReader);
         }
 
         public async Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)

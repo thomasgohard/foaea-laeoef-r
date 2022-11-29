@@ -21,21 +21,55 @@ namespace FileBroker.Data.DB
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
+            return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
+        }
+        
+        public async Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "sFrequency", frequency }
+            };
+
+            var fileTableData = await MainDB.GetDataFromStoredProcAsync<FileTableData>("MessageBrokerSchedulerGetDueProcess", parameters, FillFileTableDataFromReader);
+
+            return fileTableData;
+        }
+
+        public async Task DisableFileProcess(int processId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "nProcessID", processId },
+                { "bActive", false }
+            };
+
+            await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
+        }
+
+        public async Task EnableFileProcess(int processId)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "nProcessID", processId },
+                { "bActive", true }
+            };
+
+            await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
         }
 
         public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Category == category).ToList();
+            return fileTableData.AsParallel().Where(f => f.Category == category).ToList();
         }
 
         public async Task<List<FileTableData>> GetAllActiveAsync()
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
-            return fileTableData.Where(f => f.Active is true).ToList();
+            return fileTableData.AsParallel().Where(f => f.Active is true).ToList();
         }
 
         public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)

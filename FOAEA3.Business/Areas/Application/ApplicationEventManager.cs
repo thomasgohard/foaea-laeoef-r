@@ -1,7 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace FOAEA3.Business.Areas.Application
         public void AddEvent(EventCode eventCode, string eventReasonText = null, EventQueue queue = EventQueue.EventSubm,
                              ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
                              string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
-                             string activeState = "A")
+                             string activeState = "A", string updateSubm = null)
         {
             if (appState == ApplicationState.UNDEFINED)
                 appState = Application.AppLiSt_Cd;
@@ -48,14 +48,14 @@ namespace FOAEA3.Business.Areas.Application
                         eventEffectiveDateTime = DateTime.Now.AddDays(10);
                 }
             }
-                        
+
             Events.Add(new ApplicationEventData
             {
                 Queue = queue,
                 Event_Reas_Cd = eventCode,
                 Event_Reas_Text = eventReasonText,
                 Appl_CtrlCd = string.IsNullOrEmpty(controlCode) ? Application.Appl_CtrlCd : controlCode,
-                Appl_EnfSrv_Cd = string.IsNullOrEmpty(enfSrv) ? Application.Appl_EnfSrv_Cd :  enfSrv,
+                Appl_EnfSrv_Cd = string.IsNullOrEmpty(enfSrv) ? Application.Appl_EnfSrv_Cd : enfSrv,
                 AppLiSt_Cd = appState == ApplicationState.UNDEFINED ? ApplicationState.INITIAL_STATE_0 : appState,
                 Subm_Recpt_SubmCd = recipientSubm ?? Application.Subm_Recpt_SubmCd,
                 Event_TimeStamp = DateTime.Now,
@@ -64,7 +64,7 @@ namespace FOAEA3.Business.Areas.Application
                 Event_Effctv_Dte = eventEffectiveDateTime,
                 ActvSt_Cd = activeState,
                 Subm_SubmCd = string.IsNullOrEmpty(submCd) ? Application.Subm_SubmCd : submCd,
-                Subm_Update_SubmCd = Application.Appl_LastUpdate_Usr
+                Subm_Update_SubmCd = updateSubm ?? Application.Appl_LastUpdate_Usr
             });
         }
 
@@ -148,7 +148,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             return await EventDB.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
-        
+
         public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
         {
             return await EventDB.GetLatestSinEventDataSummaryAsync();

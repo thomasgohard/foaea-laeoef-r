@@ -1,16 +1,16 @@
 ﻿using DBHelper;
+using FileBroker.Business.Helpers;
+using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+using FileBroker.Model.Interfaces;
+using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
-using Incoming.Common;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static FOAEA3.Resources.Helpers.ColourConsole;
 
 namespace Incoming.FileWatcher.MEP;
 
@@ -18,113 +18,87 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        var config = new FileBrokerConfigurationHelper(args);
 
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-            .AddCommandLine(args);
+        var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+        var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-        IConfiguration configuration = builder.Build();
+        await db.RequestLogTable.DeleteAllAsync();
 
-        var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-        var requestLogDB = new DBRequestLog(fileBrokerDB);
-        await requestLogDB.DeleteAllAsync();
+        string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
+        var filesToProcess = await GetFileTableDataForArgsOrAllAsync(args, new DBFileTable(fileBrokerDB));
 
-        string provinceCode = GetProvinceCodeBasedOnArgs(args);
-        var fileTableData = await GetFileTableDataBasedOnArgsAsync(args, new DBFileTable(fileBrokerDB));
-
-        var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
-
-        if (!fileTableData.Any())
+        if (!filesToProcess.Any())
         {
-            string error = $"No items found in FileTable?";
-            ColourConsole.WriteEmbeddedColorLine(error);
-            await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
-                                                          new Exception(error), displayExceptionError: true);
+            await GenerateError(db.ErrorTrackingTable, "No items found in FileTable?");
             return;
         }
 
-        var validProvinces = fileTableData.Where(f => f.Active.HasValue && f.Active.Value)
-                                          .GroupBy(f => f.Name[..2].ToUpper())
-                                          .Select(group => group.First().Name[..2].ToUpper())
-                                          .ToList();
+        var provinces = GetSelectedProvinceCodes(filesToProcess);
 
-        if ((string.IsNullOrEmpty(provinceCode) || !validProvinces.Contains(provinceCode)) && (provinceCode != "ALL"))
+        if ((string.IsNullOrEmpty(provinceCode) || !provinces.Contains(provinceCode)) && (provinceCode != "ALL"))
         {
-            string error = $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
-                             string.Join(", ", validProvinces + " or ALL");
-            ColourConsole.WriteEmbeddedColorLine(error);
-            await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
-                                                          new Exception(error), displayExceptionError: true);
+            await GenerateError(db.ErrorTrackingTable, $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
+                                                       string.Join(", ", provinces + " or ALL"));
             return;
         }
 
-        ColourConsole.WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
+        DateTime start = DateTime.Now;
+        WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
+        WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
 
-        var provinceFilesData = fileTableData.Where(f => (f.Name[..2].ToUpper() == provinceCode) || (provinceCode == "ALL"))
-                                             .ToList();
-        var provinces = (from data in provinceFilesData
-                         select data.Name[..2]).Distinct().ToList();
-
-        var apiBroker = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-        var apiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
-
-        string tracingName = null;
-        string interceptionName = null;
-        string licenceName = null;
+        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
 
         int totalFilesFound = 0;
         foreach (var itemProvince in provinces)
         {
-            var searchPaths = new List<string>();
-
-            var thisProvinceFilesData = provinceFilesData.Where(f => f.Name[..2].ToUpper() == itemProvince.ToUpper());
-            foreach (var provinceFileData in thisProvinceFilesData)
-            {
-                if (provinceFileData.Category.ToUpper() == "TRCAPPIN") tracingName = provinceFileData.Name.Trim().ToUpper();
-                if (provinceFileData.Category.ToUpper() == "INTAPPIN") interceptionName = provinceFileData.Name.Trim().ToUpper();
-                if (provinceFileData.Category.ToUpper() == "LICAPPIN") licenceName = provinceFileData.Name.Trim().ToUpper();
-
-                string thisPath = provinceFileData.Path.ToUpper();
-                if (!searchPaths.Contains(thisPath))
-                    searchPaths.Add(thisPath);
-            }
+            string provCode = itemProvince.ToUpper();
+            var searchPaths = GetFileSearchPaths(filesToProcess, out FileBaseName fileBaseName, provCode);
 
             var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(fileTable, apiRootData, apiBroker,
-                                                                   interceptionBaseName: interceptionName,
-                                                                   tracingBaseName: tracingName,
-                                                                   licencingBaseName: licenceName);
+            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, config);
+
+            bool foundZero = true;
+
+            var processedFiles = new List<string>();
+            bool AlreadyProcessed(string f) => processedFiles.Contains(f);
 
             bool finishedForProvince = false;
-            bool displayFoundZero = true;
             while (!finishedForProvince)
             {
-                var allNewFiles = new List<string>();
-                foreach (string searchPath in searchPaths)
-                    await provincialFileManager.AddNewFilesAsync(searchPath, allNewFiles);
-                totalFilesFound += allNewFiles.Count;
+                var allNewFiles = await provincialFileManager.GetWaitingFiles(searchPaths);
 
-                if (allNewFiles.Count > 0)
+                if (allNewFiles.Any())
                 {
-                    displayFoundZero = false;
+                    foundZero = false;
                     string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
-                    ColourConsole.WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+
+                    if (!AlreadyProcessed(allNewFiles.First()))
+                    {
+                        WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+                        totalFilesFound += allNewFiles.Count;
+                    }
 
                     foreach (var newFile in allNewFiles)
                     {
-                        ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                        if (AlreadyProcessed(newFile))
+                        {
+                            finishedForProvince = true;
+                            break;
+                        }
+
+                        processedFiles.Add(newFile);
+
+                        WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
 
                         var errors = new List<string>();
-                        string userName = configuration["FILE_BROKER:userName"].ReplaceVariablesWithEnvironmentValues();
-                        string userPassword = configuration["FILE_BROKER:userPassword"].ReplaceVariablesWithEnvironmentValues();
-                        await provincialFileManager.ProcessNewFileAsync(newFile, errors, userName, userPassword);
+
+                        await provincialFileManager.ProcessWaitingFile(newFile, errors);
+
                         if (errors.Any())
                         {
                             foreach (var error in errors)
-                                await errorTrackingDB.MessageBrokerErrorAsync($"{provinceCode} APPIN", newFile, new Exception(error), displayExceptionError: true);
+                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", newFile, new Exception(error), displayExceptionError: true);
                             finishedForProvince = true;
                         }
                     }
@@ -132,21 +106,82 @@ internal class Program
                 else
                 {
                     finishedForProvince = true;
-                    if (displayFoundZero)
-                        ColourConsole.WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
+                    if (foundZero)
+                        WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
                 }
             }
 
         }
 
-        ColourConsole.WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+        WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+
+        DateTime end = DateTime.Now;
+        var duration = end - start;
+
+        WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+
         Console.ReadKey();
 
     }
 
-    private static string GetProvinceCodeBasedOnArgs(string[] args) => (args.Length > 0) ? args[0]?.ToUpper() : "ALL";
+    private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)
+    {
+        WriteEmbeddedColorLine(error);
+        await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
+                                                      new Exception(error), displayExceptionError: true);
+    }
 
-    private static async Task<List<FileTableData>> GetFileTableDataBasedOnArgsAsync(string[] args, DBFileTable fileTable)
+    private static List<string> GetFileSearchPaths(List<FileTableData> filesToProcess, out FileBaseName fileBaseName, string provinceCode)
+    {
+        var searchPaths = new List<string>();
+        fileBaseName = new FileBaseName();
+
+        var thisProvinceFilesData = filesToProcess.Where(f => f.Name[..2].ToUpper() == provinceCode);
+        string interceptionPath = string.Empty;
+        foreach (var provinceFileData in thisProvinceFilesData)
+        {
+            string category = provinceFileData.Category.ToUpper().Trim();
+
+            switch (category)
+            {
+                case "TRCAPPIN":
+                    fileBaseName.Tracing = provinceFileData.Name.Trim().ToUpper();
+                    break;
+                case "INTAPPIN":
+                    fileBaseName.Interception = provinceFileData.Name.Trim().ToUpper();
+                    interceptionPath = provinceFileData.Path.ToUpper();
+                    break;
+                case "ESD":
+                    fileBaseName.ESD = provinceFileData.Name.Trim().ToUpper();
+                    break;
+                case "LICAPPIN":
+                    fileBaseName.Licencing = provinceFileData.Name.Trim().ToUpper();
+                    break;
+                default:
+                    // ignore all other categories
+                    break;
+            }
+
+            string thisPath = provinceFileData.Path.ToUpper();
+            if ((!searchPaths.Contains(thisPath)) && (category != "ESD"))
+                searchPaths.Add(thisPath);
+        }
+
+        if (!string.IsNullOrEmpty(interceptionPath))
+            searchPaths.Add(interceptionPath.AppendToPath("ESD"));
+
+        return searchPaths;
+    }
+
+    private static List<string> GetSelectedProvinceCodes(List<FileTableData> fileTableData)
+    {
+        return fileTableData.Where(f => f.Active.HasValue && f.Active.Value)
+                            .GroupBy(f => f.Name[..2].ToUpper())
+                            .Select(group => group.First().Name[..2].ToUpper())
+                            .ToList();
+    }
+
+    private static async Task<List<FileTableData>> GetFileTableDataForArgsOrAllAsync(string[] args, DBFileTable fileTable)
     {
         var fileTableData = new List<FileTableData>();
 
@@ -162,6 +197,7 @@ internal class Program
                     break;
                 case "INTERCEPTION_ONLY":
                     fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
                     loadAllCategories = false;
                     break;
                 case "LICENCE_ONLY":
@@ -176,6 +212,7 @@ internal class Program
         {
             fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("TRCAPPIN"));
             fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
             fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("LICAPPIN"));
         }
 
@@ -183,4 +220,7 @@ internal class Program
 
         return fileTableData;
     }
+
 }
+
+

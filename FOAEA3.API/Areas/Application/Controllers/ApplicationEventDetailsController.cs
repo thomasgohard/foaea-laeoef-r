@@ -1,26 +1,19 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ApplicationEventDetailsController : ControllerBase
+public class ApplicationEventDetailsController : FoaeaControllerBase
 {
-    private readonly CustomConfig config;
-
-    public ApplicationEventDetailsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("ApplicationEventDetails API Version 1.0");
 
@@ -79,6 +72,7 @@ public class ApplicationEventDetailsController : ControllerBase
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config);
+        await manager.SetCurrentUserAsync(User);
 
         if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));

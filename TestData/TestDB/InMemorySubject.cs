@@ -1,5 +1,5 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,10 +10,18 @@ namespace TestData.TestDB
     {
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
-                
+
         public Task<SubjectData> GetSubjectAsync(string subjectName)
         {
-            throw new NotImplementedException();
+            var subjectData = new SubjectData
+            {
+                SubjectName = subjectName,
+                IsAccountLocked = false,
+                Password = "9KnDVQ6m/Te4rH8Mae5aX+2gVVSMzTktJvAQTNMgSfA=",
+                PasswordSalt = ""
+            };
+
+            return Task.FromResult(subjectData);
         }
 
         public Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)

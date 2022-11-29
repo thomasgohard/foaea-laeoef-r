@@ -1,6 +1,6 @@
 ﻿using DBHelper;
+using FileBroker.Common.Helpers;
 using FOAEA3.Resources;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business
@@ -10,50 +10,53 @@ namespace FileBroker.Business
         private string FileName { get; }
         private APIBrokerList APIs { get; }
         private RepositoryList DB { get; }
-        private ProvincialAuditFileConfig AuditConfiguration { get; }
+        private IFileBrokerConfigurationHelper Config { get; }
         private Dictionary<string, string> Translations { get; }
         private bool IsFrench { get; }
         private string EnfSrv_Cd { get; }
 
-        private string FOAEA_userName { get; }
-        private string FOAEA_userPassword { get; }
-        private string FOAEA_submitter { get; }
+        private IncomingProvincialHelper IncomingFileHelper { get; }
 
-        private string CurrentToken { get; set; }
-        private string CurrentRefreshToken { get; set; }
+        private FoaeaSystemAccess FoaeaAccess { get; }
 
-        public IncomingProvincialInterceptionManager(string fileName,
-                                                     APIBrokerList apis,
-                                                     RepositoryList repositories,
-                                                     ProvincialAuditFileConfig auditConfig,
-                                                     IConfiguration config)
+        public IncomingProvincialInterceptionManager(RepositoryList db,
+                                                     APIBrokerList foaeaApis,
+                                                     string fileName,
+                                                     IFileBrokerConfigurationHelper config)
         {
             FileName = fileName;
-            APIs = apis;
-            DB = repositories;
-            AuditConfiguration = auditConfig;
-            Translations = new Dictionary<string, string>();
-
-            FOAEA_userName = config["FOAEA:userName"].ReplaceVariablesWithEnvironmentValues();
-            FOAEA_userPassword = config["FOAEA:userPassword"].ReplaceVariablesWithEnvironmentValues();
-            FOAEA_submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues();
-
-            // load translations
+            APIs = foaeaApis;
+            DB = db;
+            Config = config;
 
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = auditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+            IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+
+            Translations = LoadTranslations();
+
+            EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
+
+            string provCode = FileName[..2].ToUpper();
+            IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
+
+            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
+        }
+
+        private Dictionary<string, string> LoadTranslations()
+        {
+            var translations = new Dictionary<string, string>();
 
             if (IsFrench)
             {
-                var translations = repositories.TranslationTable.GetTranslationsAsync().Result;
-                foreach (var translation in translations)
-                    Translations.Add(translation.EnglishText, translation.FrenchText);
+                var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
+                foreach (var translation in Translations)
+                    translations.Add(translation.EnglishText, translation.FrenchText);
+
                 APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
                 LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
             }
 
-            EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
-
+            return translations;
         }
 
         private string Translate(string englishText)
@@ -66,11 +69,12 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags,
+                                                                                bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfiguration, DB.MailService);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
             var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -101,7 +105,7 @@ namespace FileBroker.Business
             }
             else
             {
-                ValidateHeader(interceptionFile, ref result, ref isValid);
+                ValidateHeader(interceptionFile.INTAPPIN01, ref result, ref isValid);
                 ValidateFooter(interceptionFile, ref result, ref isValid);
 
                 if (isValid)
@@ -110,24 +114,7 @@ namespace FileBroker.Business
                     int warningCount = 0;
                     int successCount = 0;
 
-                    var loginData = new FoaeaLoginData
-                    {
-                        UserName = FOAEA_userName,
-                        Password = FOAEA_userPassword,
-                        Submitter = FOAEA_submitter
-                    };
-
-                    var tokenData = await APIs.Accounts.LoginAsync(loginData);
-
-                    CurrentToken = tokenData.Token;
-                    CurrentRefreshToken = tokenData.RefreshToken;
-
-                    SetTokenForAPIs();
-
-                    APIs.Applications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.ProductionAudits.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
-                    APIs.Accounts.ApiHelper.GetRefreshedToken = OnRefreshTokenAsync;
+                    await FoaeaAccess.SystemLoginAsync();
 
                     try
                     {
@@ -171,7 +158,16 @@ namespace FileBroker.Business
                                 };
                                 errorCount += thisErrorCount;
 
-                                await AddRequestToAuditAsync(interceptionMessage);
+                                var requestLogData = new RequestLogData
+                                {
+                                    MaintenanceAction = interceptionMessage.MaintenanceAction,
+                                    MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
+                                    Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
+                                    Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
+                                    LoadedDateTime = DateTime.Now
+                                };
+
+                                _ = await DB.RequestLogTable.AddAsync(requestLogData);
 
                                 if (isValidData)
                                 {
@@ -232,17 +228,18 @@ namespace FileBroker.Business
 
                         }
 
-                        await fileAuditManager.GenerateAuditFileAsync(FileName, unknownTags, errorCount, warningCount, successCount);
-                        await fileAuditManager.SendStandardAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients,
-                                                                           errorCount, warningCount, successCount, unknownTags.Count);
+                        int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                                                                           errorCount, warningCount, successCount, unknownTags.Count,
+                                                                           totalFilesCount);
 
-                        if (AuditConfiguration.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                        if (Config.AuditConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
                             await AutoAcceptVariationsAsync(EnfSrv_Cd);
 
                     }
                     finally
                     {
-                        await APIs.Accounts.LogoutAsync(loginData);
+                        await FoaeaAccess.SystemLogoutAsync();
                     }
 
                 }
@@ -253,7 +250,7 @@ namespace FileBroker.Business
             {
                 result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfiguration.AuditRecipients, result);
+                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
             }
 
             await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
@@ -263,33 +260,14 @@ namespace FileBroker.Business
             return result;
         }
 
-        private async Task AddRequestToAuditAsync(MessageData<InterceptionApplicationData> interceptionMessage)
-        {
-            var requestLogData = new RequestLogData
-            {
-                MaintenanceAction = interceptionMessage.MaintenanceAction,
-                MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
-                Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
-                Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
-                LoadedDateTime = DateTime.Now
-            };
-
-            _ = await DB.RequestLogTable.AddAsync(requestLogData);
-        }
-
         public async Task AutoAcceptVariationsAsync(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
 
             string processName = $"Process Auto Accept Variation {enfService}";
-            await prodAudit.InsertAsync(processName, "Divert Funds Started", "O");
+            await prodAudit.InsertAsync(processName, "Auto accept variation", "O");
 
-            APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = "FO2SSS";
-
-            var applAutomation = await APIs.InterceptionApplications.GetApplicationsForVariationAutoAcceptAsync(enfService);
-
-            foreach (var appl in applAutomation)
-                await APIs.InterceptionApplications.AcceptVariationAsync(appl);
+            await APIs.InterceptionApplications.AutoAcceptVariationsAsync(enfService);
 
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
@@ -355,13 +333,19 @@ namespace FileBroker.Business
             return thisErrorDescription;
         }
 
-        private void ValidateHeader(MEPInterception_InterceptionDataSet interceptionFile, ref MessageDataList result, ref bool isValid)
+        private void ValidateHeader(MEPInterception_RecType01 interceptionFile, ref MessageDataList result, ref bool isValid)
         {
             int cycle = FileHelper.GetCycleFromFilename(FileName);
-            if (int.Parse(interceptionFile.INTAPPIN01.Cycle) != cycle)
+            if (int.Parse(interceptionFile.Cycle) != cycle)
             {
                 isValid = false;
-                result.AddSystemError($"Cycle in file [{interceptionFile.INTAPPIN01.Cycle}] does not match cycle of file [{cycle}]");
+                result.AddSystemError($"Cycle in file [{interceptionFile.Cycle}] does not match cycle of file [{cycle}]");
+            }
+
+            if (!IncomingFileHelper.IsValidTermsAccepted(interceptionFile.TermsAccepted))
+            {
+                isValid = false;
+                result.AddSystemError($"type 01 Terms Accepted invalid text: {interceptionFile.TermsAccepted}");
             }
 
         }
@@ -570,7 +554,7 @@ namespace FileBroker.Business
                 Appl_Dbtr_Brth_Dte = baseData.dat_Appl_Dbtr_Brth_Dte.ConvertToDateTimeIgnoringTimeZone()?.Date,
                 Appl_Dbtr_Gendr_Cd = baseData.dat_Appl_Dbtr_Gendr_Cd.Trim() == "" ? "M" : baseData.dat_Appl_Dbtr_Gendr_Cd.Trim(),
                 Appl_Dbtr_Entrd_SIN = baseData.dat_Appl_Dbtr_Entrd_SIN,
-                Appl_Dbtr_Parent_SurNme = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
+                Appl_Dbtr_Parent_SurNme_Birth = baseData.dat_Appl_Dbtr_Parent_SurNme_Birth,
                 Appl_CommSubm_Text = baseData.dat_Appl_CommSubm_Text,
                 Appl_Rcptfrm_Dte = now, // as per spec, ignore the baseData.dat_Appl_Rcptfrm_dte.Date value
                 AppCtgy_Cd = baseData.dat_Appl_AppCtgy_Cd,
@@ -691,26 +675,6 @@ namespace FileBroker.Business
             }
 
             return (newHoldback, isValidData);
-        }
-
-        private async Task<string> OnRefreshTokenAsync()
-        {
-            var result = await APIs.Accounts.RefreshTokenAsync(CurrentToken, CurrentRefreshToken);
-
-            CurrentToken = result.Token;
-            CurrentRefreshToken = result.RefreshToken;
-
-            SetTokenForAPIs();
-
-            return result.Token;
-        }
-
-        private void SetTokenForAPIs()
-        {
-            APIs.Applications.Token = CurrentToken;
-            APIs.InterceptionApplications.Token = CurrentToken;
-            APIs.ProductionAudits.Token = CurrentToken;
-            APIs.Accounts.Token = CurrentToken;
         }
 
     }

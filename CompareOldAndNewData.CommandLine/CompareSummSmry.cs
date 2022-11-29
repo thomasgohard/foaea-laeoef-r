@@ -1,16 +1,16 @@
 ﻿using FOAEA3.Common.Helpers;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareSummSmry
     {
         public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories_Finance repositories2, IRepositories_Finance repositories3,
-                                         string enfSrv, string ctrlCd)
+                                         string enfSrv, string ctrlCd, string category)
         {
             var diffs = new List<DiffData>();
 
-            string key = ApplKey.MakeKey(enfSrv, ctrlCd);
+            string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
             var summSmry2 = (await repositories2.SummonsSummaryRepository.GetSummonsSummaryAsync(enfSrv, ctrlCd)).FirstOrDefault();
             var summSmry3 = (await repositories3.SummonsSummaryRepository.GetSummonsSummaryAsync(enfSrv, ctrlCd)).FirstOrDefault();

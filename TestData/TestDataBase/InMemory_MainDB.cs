@@ -8,12 +8,13 @@ namespace TestData.TestDataBase
 {
     public class InMemory_MainDB : IDBToolsAsync
     {
-        public string ConnectionString => throw new NotImplementedException();
+        public string ConnectionString => "";
 
-        public string LastError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Submitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int LastReturnValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string LastError { get; set; }
+        public string Submitter { get; set; }
+        public string UserId { get; set; }
+        public int LastReturnValue { get; set; }
+        public string UpdateSubmitter { get; set; }
 
         public Task BulkUpdateAsync<T>(List<T> data, string tableName)
         {

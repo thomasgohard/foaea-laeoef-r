@@ -1,13 +1,14 @@
 ﻿using FOAEA3.API.Security;
+using FOAEA3.Business.Areas.Administration;
 using FOAEA3.Business.Security;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
-using FOAEA3.Data.DB;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using SecurityTokenData = FOAEA3.Model.SecurityTokenData;
@@ -17,7 +18,7 @@ namespace FOAEA3.API.Controllers
     [ApiController]
     [Route("api/v1/[controller]")]
     [Authorize()]
-    public class LoginsController : ControllerBase
+    public class LoginsController : FoaeaControllerBase
     {
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
@@ -29,11 +30,12 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
-                                                        [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                         [FromServices] IRepositories db)
         {
+            var configHelper = new FoaeaConfigurationHelper();
+
             // WARNING: not for production use!
-            var tokenConfig = tokenConfigOptions.Value;
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 
@@ -113,10 +115,12 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("TestRefreshToken")]
         public async Task<ActionResult> TestRefreshToken([FromBody] TokenRefreshData refreshData,
-                                                         [FromServices] IOptions<TokenConfig> tokenConfigOptions,
                                                          [FromServices] IRepositories db)
         {
-            var tokenConfig = tokenConfigOptions.Value;
+            var configHelper = new FoaeaConfigurationHelper();
+
+            // WARNING: not for production use!
+            var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 
@@ -247,9 +251,8 @@ namespace FOAEA3.API.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            var dbLogin = new DBLogin(repositories.MainDB);
-
-            await dbLogin.PostConfirmationCodeAsync(subjectId, confirmationCode);
+            var loginManager = new LoginManager(repositories);
+            await loginManager.PostConfirmationCodeAsync(subjectId, confirmationCode);
 
             return Ok(string.Empty);
         }
@@ -258,18 +261,18 @@ namespace FOAEA3.API.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<string>> GetEmailByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            var dbLogin = new DBLogin(repositories.MainDB);
+            var loginManager = new LoginManager(repositories);
 
-            return Ok(await dbLogin.GetEmailByConfirmationCodeAsync(confirmationCode));
+            return Ok(await loginManager.GetEmailByConfirmationCodeAsync(confirmationCode));
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
         [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<SubjectData>> GetSubjectByConfirmationCode([FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
-            var dbSubject = new DBSubject(repositories.MainDB);
+            var subjectManager = new SubjectManager(repositories);
 
-            return Ok(await dbSubject.GetSubjectByConfirmationCodeAsync(confirmationCode));
+            return Ok(await subjectManager.GetSubjectByConfirmationCodeAsync(confirmationCode));
         }
 
         [HttpPut("PostPassword")]
@@ -278,8 +281,8 @@ namespace FOAEA3.API.Controllers
         {
             var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
 
-            var dbLogin = new DBLogin(repositories.MainDB);
-            await dbLogin.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
+            var loginManager = new LoginManager(repositories);
+            await loginManager.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
 
             return Ok(passwordData);
         }

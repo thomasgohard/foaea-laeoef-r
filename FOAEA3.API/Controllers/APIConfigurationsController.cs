@@ -1,13 +1,14 @@
-﻿using FOAEA3.Data.Base;
+﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FOAEA3.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class APIConfigurationsController : ControllerBase
+    public class APIConfigurationsController : FoaeaControllerBase
     {
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("APIConfigurations API Version 1.0");

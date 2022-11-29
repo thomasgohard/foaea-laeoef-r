@@ -85,7 +85,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (TracingApplication.Appl_RecvAffdvt_Dte is null)
             {
-                await AddSystemErrorAsync(DB, TracingApplication.Messages, config.SystemErrorRecipients,
+                await AddSystemErrorAsync(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
                 return;
             }
@@ -101,7 +101,7 @@ namespace FOAEA3.Business.Areas.Application
             switch (eventTraceCount)
             {
                 case 0:
-                    await AddSystemErrorAsync(DB, TracingApplication.Messages, config.SystemErrorRecipients,
+                    await AddSystemErrorAsync(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                    $"Reinstate requested for T01 ({Appl_EnfSrv_Cd}-{Appl_CtrlCd}) with no previous trace requests");
                     return;
                 case 1:
@@ -142,7 +142,7 @@ namespace FOAEA3.Business.Areas.Application
                     else
                     {
                         await DB.NotificationService.SendEmailAsync("Trace Cycle requests exceed yearly limit",
-                                                                      config.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
+                                                                      Config.Recipients.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
                         await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }
                 }

@@ -1,14 +1,9 @@
 ﻿using DBHelper;
-using FileBroker.Data.DB;
-using FileBroker.Model;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
+using FileBroker.Business.Helpers;
+using FileBroker.Common;
 using FOAEA3.Resources.Helpers;
-using Incoming.Common;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,34 +11,24 @@ namespace Incoming.FileWatcher.Fed.Tracing
 {
     class Program
     {
-        private static IncomingFederalLicenceDenialFile FederalFileManager;
+        // private static IncomingFederalLicenceDenialFile FederalFileManager;
 
         static async Task Main(string[] args)
         {
             ColourConsole.WriteEmbeddedColorLine("Starting Federal Licence Denial File Monitor");
 
-            string aspnetCoreEnvironment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var config = new FileBrokerConfigurationHelper(args);
 
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{aspnetCoreEnvironment}.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args);
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            IConfiguration configuration = builder.Build();
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
 
-            var fileBrokerDB = new DBToolsAsync(configuration.GetConnectionString("FileBroker").ReplaceVariablesWithEnvironmentValues());
-            var errorTrackingDB = new DBErrorTracking(fileBrokerDB);
-            var apiRootForFiles = configuration.GetSection("APIroot").Get<ApiConfig>();
-            var apiAction = new APIBrokerHelper(currentSubmitter: "MSGBRO", currentUser: "MSGBRO");
-
-            FederalFileManager = new(fileBrokerDB, apiRootForFiles, apiAction);
-
-            string ftpRoot = configuration["FTProot"];
+            var federalFileManager = new IncomingFederalLicenceDenialFile(db, foaeaApis, config);
 
             var allNewFiles = new List<string>();
-            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
-            await FederalFileManager.AddNewFilesAsync(ftpRoot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
+            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
+            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {
@@ -52,15 +37,15 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    await FederalFileManager.ProcessNewFileAsync(newFile);
-                    if (FederalFileManager.Errors.Any())
+                    await federalFileManager.ProcessNewFileAsync(newFile);
+                    if (federalFileManager.Errors.Any())
                         foreach (var error in errors)
-                            await errorTrackingDB.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
+                            await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
                 }
             }
             else
                 ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
         }
-   
+
     }
 }

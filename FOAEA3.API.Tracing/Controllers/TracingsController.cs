@@ -1,26 +1,20 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
+using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace FOAEA3.API.Tracing.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class TracingsController : ControllerBase
+public class TracingsController : FoaeaControllerBase
 {
-    private readonly CustomConfig config;
-
-    public TracingsController(IOptions<CustomConfig> config)
-    {
-        this.config = config.Value;
-    }
-
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.0");
 
@@ -51,14 +45,22 @@ public class TracingsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories db)
     {
         var tracingData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
         if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var tracingManager = new TracingManager(tracingData, repositories, config);
+        var tracingManager = new TracingManager(tracingData, db, config);
+        await tracingManager.SetCurrentUserAsync(User);
+        var submitter = (await db.SubmitterTable.GetSubmitterAsync(tracingData.Subm_SubmCd)).FirstOrDefault();
+        if (submitter is not null)
+        {
+            tracingManager.CurrentUser.Submitter = submitter;
+            db.CurrentSubmitter = submitter.Subm_SubmCd;
+        }
+
         var appl = tracingManager.TracingApplication;
 
         bool isCreated = await tracingManager.CreateApplicationAsync();
@@ -123,9 +125,9 @@ public class TracingsController : ControllerBase
 
     [HttpPut("{key}/Transfer")]
     public async Task<ActionResult<TracingApplicationData>> Transfer([FromRoute] string key,
-                                                         [FromServices] IRepositories repositories,
-                                                         [FromQuery] string newRecipientSubmitter,
-                                                         [FromQuery] string newIssuingSubmitter)
+                                                 [FromServices] IRepositories repositories,
+                                                 [FromQuery] string newRecipientSubmitter,
+                                                 [FromQuery] string newIssuingSubmitter)
     {
         var applKey = new ApplKey(key);
 

@@ -1,8 +1,10 @@
-﻿using BackendProcesses.Business;
-using DBHelper;
+﻿using DBHelper;
+using FOAEA3.Business.BackendProcesses;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +20,9 @@ namespace FOAEA3.Business.Areas.Application
         public InterceptionApplicationData InterceptionApplication { get; }
         private IRepositories_Finance DBfinance { get; }
         private InterceptionValidation InterceptionValidation { get; }
-        private bool? AcceptedWithin30Days { get; set; } = null;
-        private bool ESDReceived { get; set; } = true;
-        private DateTime? GarnisheeSummonsReceiptDate { get; set; }
+        public bool? AcceptedWithin30Days { get; set; } = null;
+        public bool ESDReceived { get; set; } = true;
+        public DateTime? GarnisheeSummonsReceiptDate { get; set; }
 
         private int nextJusticeID_callCount = 0;
 
@@ -33,8 +35,9 @@ namespace FOAEA3.Business.Areas.Application
         private VariationDocumentAction VariationAction { get; set; }
 
         public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
-                                   IRepositories_Finance repositoriesFinance, CustomConfig config) :
-                                  base(interception, repositories, config, new InterceptionValidation(interception, repositories, config))
+                                   IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
+                                  base(interception, repositories, config,
+                                      new InterceptionValidation(interception, repositories, config, null))
         {
             InterceptionApplication = interception;
             InterceptionValidation = Validation as InterceptionValidation;
@@ -81,7 +84,7 @@ namespace FOAEA3.Business.Areas.Application
                         });
         }
 
-        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, CustomConfig config) :
+        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
             this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
         {
 
@@ -159,7 +162,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await IncrementGarnSmryAsync(isNewApplication: true);
 
-                if (config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
+                if (Config.ESDsites.Contains(Appl_EnfSrv_Cd) && (InterceptionApplication.Medium_Cd == "FTP"))
                     await DB.InterceptionTable.InsertESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, ESDrequired.OriginalESDrequired);
 
                 await EventManager.SaveEventsAsync();
@@ -171,45 +174,12 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new InterceptionManager(DB, DBfinance, config);
-            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-
-            bool isCancelled = current.InterceptionApplication.ActvSt_Cd == "X";
-            bool isReset = current.InterceptionApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
-
-            // keep these stored values
-            InterceptionApplication.Appl_Create_Dte = current.InterceptionApplication.Appl_Create_Dte;
-            InterceptionApplication.Appl_Create_Usr = current.InterceptionApplication.Appl_Create_Usr;
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             await base.UpdateApplicationAsync();
-
-            if (isReset && !isCancelled) // reset
-            {
-                // delete any existing intfinh and hldbcnd records for this application and then recreate them with the new data
-
-                // IMPORTANT: must delete holdbacks first since they have a dependancy on IntFinH
-                var allHoldbacks = await DB.InterceptionTable.GetAllHoldbackConditionsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-                foreach (var holdback in allHoldbacks)
-                    await DB.InterceptionTable.DeleteHoldbackConditionAsync(holdback);
-
-                var allIntFinH = await DB.InterceptionTable.GetAllInterceptionFinancialTermsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
-                foreach (var intFinH in allIntFinH)
-                    await DB.InterceptionTable.DeleteInterceptionFinancialTermsAsync(intFinH);
-
-                InterceptionApplication.IntFinH.ActvSt_Cd = "P";
-                await DB.InterceptionTable.CreateInterceptionFinancialTermsAsync(InterceptionApplication.IntFinH);
-
-                foreach (var holdback in InterceptionApplication.HldbCnd)
-                    holdback.ActvSt_Cd = "P";
-                await DB.InterceptionTable.CreateHoldbackConditionsAsync(InterceptionApplication.HldbCnd);
-            }
-            else
-            {
-                await DB.InterceptionTable.UpdateInterceptionFinancialTermsAsync(InterceptionApplication.IntFinH);
-                await DB.InterceptionTable.UpdateHoldbackConditionsAsync(InterceptionApplication.HldbCnd);
-            }
-
         }
+
 
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {
@@ -267,6 +237,8 @@ namespace FOAEA3.Business.Areas.Application
 
             if (InterceptionApplication.Medium_Cd == "FTP")
             {
+                InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
+
                 InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
                 InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
                 InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
@@ -279,7 +251,7 @@ namespace FOAEA3.Business.Areas.Application
             var summSmry = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd)).FirstOrDefault();
             if (summSmry is null)
             {
-                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, config.EmailRecipients,
+                await AddSystemErrorAsync(DB, InterceptionApplication.Messages, Config.Recipients.EmailRecipients,
                                $"No summsmry record was found for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot vary.");
                 return false;
             }
@@ -293,13 +265,15 @@ namespace FOAEA3.Business.Areas.Application
             }
 
 
-            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, config);
+            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config)
+            {
+                CurrentUser = this.CurrentUser
+            };
             await currentInterceptionManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
 
             if (!StateEngine.IsValidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17))
             {
-
                 InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
                 await EventManager.SaveEventsAsync();
 
@@ -361,8 +335,6 @@ namespace FOAEA3.Business.Areas.Application
                         break;
                 }
 
-                // don't update the application in the database, but only save the events
-
                 await EventManager.SaveEventsAsync();
 
                 return false;
@@ -370,13 +342,22 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecords()
+        {
+            return await DBfinance.SummonsSummaryRepository.GetFixedAmountRecalcDateRecordsAsync();
+        }
+
         public async Task FullyServiceApplicationAsync()
         {
-            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, config);
+            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, Config)
+            {
+                CurrentUser = this.CurrentUser
+            };
 
             if (!await applicationManagerCopy.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
-                // TODO: generate error that application does not exists
+                string key = ApplKey.MakeKey(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                InterceptionApplication.Messages.AddError($"Application {key} does not exists");
                 return;
             }
 
@@ -410,7 +391,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
@@ -433,6 +414,32 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+
+            await UpdateApplicationNoValidationAsync();
+
+            await EventManager.SaveEventsAsync();
+
+            if (InterceptionApplication.Medium_Cd != "FTP")
+                InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+
+            return true;
+        }
+
+        public async Task<bool> CompleteApplication()
+        {
+            if (!IsValidCategory("I01"))
+                return false;
+
+            if (!await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
+            {
+                InterceptionApplication.Messages.AddError($"No application was found in the database for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}");
+                return false;
+            }
+
+            InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
+            InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+            await SetNewStateTo(ApplicationState.EXPIRED_15);
 
             await UpdateApplicationNoValidationAsync();
 
@@ -530,7 +537,7 @@ namespace FOAEA3.Business.Areas.Application
 
             bool result = await AcceptGarnisheeAsync(supportingDocsDate, isAutoAccept: false);
 
-            if (config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
+            if (Config.ESDsites.Contains(Appl_EnfSrv_Cd.Trim()) && (InterceptionApplication.Medium_Cd == "FTP"))
                 await DB.InterceptionTable.UpdateESDrequiredAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, supportingDocsDate);
 
             await EventManager.SaveEventsAsync();
@@ -595,7 +602,45 @@ namespace FOAEA3.Business.Areas.Application
             return interceptions;
         }
 
-        public async Task<bool> AcceptVariationAsync(DateTime supportingDocsDate, bool isAutoAccept = false)
+        public async Task<bool> IsRefNumberBlockedAsync()
+        {
+            return await DB.InterceptionTable.IsRefNumberBlockedAsync(InterceptionApplication.Appl_Source_RfrNr);
+        }
+
+        public async Task<bool> IsSinBlockedAsync()
+        {
+            return await DB.InterceptionTable.IsSinBlockedAsync(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
+        }
+
+        public async Task  FTBatchNotification_CheckFTTransactionsAdded()
+        {
+            await DB.InterceptionTable.FTBatchNotification_CheckFTTransactionsAddedAsync();
+        }
+
+        public async Task MessageBrokerCRAReconciliation()
+        {
+            await DB.InterceptionTable.MessageBrokerCRAReconciliationAsync();
+        }
+
+        public async Task AutoAcceptVariationsAsync(string enfService)
+        {
+            string processName = $"Process Auto Accept Variation {enfService}";
+            await DB.ProductionAuditTable.InsertAsync(processName, "Auto accept variation", "O");
+
+            DB.CurrentSubmitter = "FO2SSS";
+
+            var applAutomation = await GetApplicationsForVariationAutoAcceptAsync(enfService);
+
+            foreach (var appl in applAutomation)
+            {
+                var thisManager = new InterceptionManager(appl, DB, DBfinance, Config);
+                await thisManager.AcceptVariationAsync();
+            }
+
+            await DB.ProductionAuditTable.InsertAsync(processName, "Ended", "O");
+        }
+
+        public async Task<bool> AcceptVariationAsync()
         {
             if (!IsValidCategory("I01"))
                 return false;
@@ -618,7 +663,10 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+            if (InterceptionApplication.Medium_Cd == "FTP")
+                InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
+            else
+                InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
             EventManager.AddEvent(EventCode.C51111_VARIATION_ACCEPTED);
@@ -760,6 +808,10 @@ namespace FOAEA3.Business.Areas.Application
                     var dbNotification = DB.NotificationService;
                     switch (bfEvent.Event_Reas_Cd)
                     {
+                        case EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION:
+                            // do nothing for I01 -- this is now handled by the ESD event processing that every morning
+                            break;
+
                         case EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION:
                             if (InterceptionApplication.AppLiSt_Cd == ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19)
                             {
@@ -777,7 +829,6 @@ namespace FOAEA3.Business.Areas.Application
                                 }
                             }
                             break;
-
 
                         case EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR:
                             if (InterceptionApplication.Appl_Rcptfrm_Dte.AddDays(20) < DateTime.Now)
