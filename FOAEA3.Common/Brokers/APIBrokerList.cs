@@ -23,6 +23,8 @@ namespace FOAEA3.Common.Brokers
 
         public ISinAPIBroker Sins { get; set; }
 
+        public IFinancialEventAPIBroker FinancialEvents { get; set; }
+
         public IProductionAuditAPIBroker ProductionAudits { get; set; }
     }
 }

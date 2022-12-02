@@ -31,7 +31,7 @@ namespace FOAEA3.Web.Pages.Test
         public async Task OnPostLogin()
         {
             string token = string.Empty;
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, token);
 
             var result = await loginAPIs.LoginAsync(LoginData);
@@ -47,7 +47,7 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
             await loginAPIs.LogoutAsync(LoginData);
@@ -67,7 +67,7 @@ namespace FOAEA3.Web.Pages.Test
                 Message = "No logged in user.";
             else
             {
-                var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI,
+                var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI,
                                                     getRefreshedToken: OnRefreshTokenAsync);
                 var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
@@ -81,7 +81,7 @@ namespace FOAEA3.Web.Pages.Test
             string currentToken = HttpContext.Session.GetString("Token");
             string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
 
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI,
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI,
                                                 getRefreshedToken: OnRefreshTokenAsync);
             var appAPIs = new ApplicationAPIBroker(apiHelper, currentToken);
 
@@ -112,7 +112,7 @@ namespace FOAEA3.Web.Pages.Test
             if (string.IsNullOrEmpty(oldToken))
                 return string.Empty;
 
-            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaApplicationRootAPI);
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, oldToken);
 
             var result = await loginAPIs.RefreshTokenAsync(oldToken, oldRefreshToken);

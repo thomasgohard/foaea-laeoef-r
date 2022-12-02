@@ -18,5 +18,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         public ISummFAFR_DERepository SummFAFR_DERepository { get; }
         public ISummFAFRRepository SummFAFRRepository { get; }
         public IControlBatchRepository ControlBatchRepository { get; }
+        public IPADRRepository PADRrepository { get; }
     }
 }

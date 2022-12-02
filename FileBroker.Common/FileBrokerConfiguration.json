@@ -1,6 +1,6 @@
 {
   "APIroot": {
-    "FoaeaApplicationRootAPI": "https://%FOAEA_API_SERVER%:12011/",
+    "FoaeaRootAPI": "https://%FOAEA_API_SERVER%:12011/",
     "FoaeaInterceptionRootAPI": "https://%FOAEA_API_SERVER%:12012/",
     "FoaeaLicenceDenialRootAPI": "https://%FOAEA_API_SERVER%:12013/",
     "FoaeaTracingRootAPI": "https://%FOAEA_API_SERVER%:12014/",

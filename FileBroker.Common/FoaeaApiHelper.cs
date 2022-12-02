@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Common.Brokers.Financials;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 
@@ -9,13 +10,14 @@ namespace FileBroker.Common
         public static APIBrokerList SetupFoaeaAPIs(ApiConfig apiRootData)
         {
             string token = "";
-            var apiApplHelper = new APIBrokerHelper(apiRootData.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
-                                                    currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
-            var applicationEventsAPIs = new ApplicationEventAPIBroker(apiApplHelper, token);
-            var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
-            var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
-            var sinsAPIs = new SinAPIBroker(apiApplHelper, token);
+            var apiFoaeaHelper = new APIBrokerHelper(apiRootData.FoaeaRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
+                                                     currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var applicationAPIs = new ApplicationAPIBroker(apiFoaeaHelper, token);
+            var applicationEventsAPIs = new ApplicationEventAPIBroker(apiFoaeaHelper, token);
+            var productionAuditAPIs = new ProductionAuditAPIBroker(apiFoaeaHelper, token);
+            var loginAPIs = new LoginsAPIBroker(apiFoaeaHelper, token);
+            var sinsAPIs = new SinAPIBroker(apiFoaeaHelper, token);
+            var financialEventsAPIs = new FinancialEventAPIBroker(apiFoaeaHelper, token);
 
             var apiTracingHelper = new APIBrokerHelper(apiRootData.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                        currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
@@ -36,11 +38,12 @@ namespace FileBroker.Common
 
             var foaeaApis = new APIBrokerList
             {
-                Applications = applicationApplicationAPIs,
+                Applications = applicationAPIs,
                 ApplicationEvents = applicationEventsAPIs,
                 ProductionAudits = productionAuditAPIs,
                 Accounts = loginAPIs,
                 Sins = sinsAPIs,
+                FinancialEvents = financialEventsAPIs,
 
                 TracingApplications = tracingApplicationAPIs,
                 TracingResponses = tracingResponsesAPIs,

@@ -1,0 +1,1 @@
+﻿await OutgoingFileCreatorIFMS.Run(args);

@@ -4,7 +4,7 @@ namespace FOAEA3.Model
 {
     public class ApiConfig
     {
-        private string foaeaApplicationRootAPI;
+        private string foaeaRootAPI;
         private string foaeaInterceptionRootAPI;
         private string foaeaLicenceDenialRootAPI;
         private string foaeaTracingRootAPI;
@@ -18,10 +18,10 @@ namespace FOAEA3.Model
         private string backendProcessesRootAPI;
         private string fileBrokerAccountRootAPI;
 
-        public string FoaeaApplicationRootAPI
+        public string FoaeaRootAPI
         {
-            get => foaeaApplicationRootAPI;
-            set => foaeaApplicationRootAPI = value.ReplaceVariablesWithEnvironmentValues();
+            get => foaeaRootAPI;
+            set => foaeaRootAPI = value.ReplaceVariablesWithEnvironmentValues();
         }
         public string FoaeaInterceptionRootAPI
         {
