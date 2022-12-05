@@ -17,7 +17,7 @@ namespace FOAEA3.Data.Base
         private ISummFAFR_DERepository summFAFR_DEDB;
         private ISummFAFRRepository summFAFRDB;
         private IControlBatchRepository controlBatchDB;
-        private IPADRRepository padrDB;
+        private IFinancialRepository padrDB;
 
         public string CurrentSubmitter
         {
@@ -126,11 +126,11 @@ namespace FOAEA3.Data.Base
             }
         }
 
-        public IPADRRepository PADRrepository
+        public IFinancialRepository FinancialRepository
         {
             get
             {
-                padrDB ??= new DBPADR(MainDB);
+                padrDB ??= new DBFinancial(MainDB);
                 return padrDB;
             }
         }

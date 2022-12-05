@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    internal class DBPADR : DBbase, IPADRRepository
+    internal class DBFinancial : DBbase, IFinancialRepository
     {
-        public DBPADR(IDBToolsAsync mainDB) : base(mainDB)
+        public DBFinancial(IDBToolsAsync mainDB) : base(mainDB)
         {
         }
 
@@ -24,6 +24,17 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<CR_PADReventData>("MessageBrokerFinancialPADRBatchExists", parameters, FillCR_PADReventsFromReader);
         }
 
+        public async Task CloseCR_PADReventsAsync(string batchId, string enfSrv)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    { "batchID",  batchId},
+                    { "enfSvrCode",  enfSrv}
+                };
+
+            await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
+        }
+
         public async Task<List<IFMSdata>> GetIFMSdataAsync(string batchId)
         {
             var parameters = new Dictionary<string, object>
@@ -32,6 +43,16 @@ namespace FOAEA3.Data.DB
                 };
 
             return await MainDB.GetDataFromStoredProcAsync<IFMSdata>("MessageBrokerGetIFMSBatchData", parameters, FillIFMSdataFromReader);
+        }
+
+        public async Task CloseControlBatchAsync(string batchId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    { "batchID",  batchId}
+                };
+
+            await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
         }
 
         private void FillIFMSdataFromReader(IDBHelperReader rdr, IFMSdata data)

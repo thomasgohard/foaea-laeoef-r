@@ -40,5 +40,7 @@ namespace TestData.TestDataBase
         public IControlBatchRepository ControlBatchRepository => throw new NotImplementedException();
 
         public IGarnSummaryRepository GarnSummaryRepository => throw new NotImplementedException();
+
+        public IFinancialRepository FinancialRepository => throw new NotImplementedException();
     }
 }

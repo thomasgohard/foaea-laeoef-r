@@ -1,6 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Logging;
-using System.Linq;
 using System.Text;
 
 namespace FileBroker.Business
@@ -19,6 +17,7 @@ namespace FileBroker.Business
 
             FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
+
         public async Task<string> CreateIFMSfile(string fileBaseName, List<string> errors)
         {
             var fileTableData = (await DB.FileTable.GetFileTableDataForCategoryAsync("IFMSFDOUT"))
@@ -36,8 +35,8 @@ namespace FileBroker.Business
             try
             {
                 var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
-                
-                var batches = await APIs.FinancialEvents.GetActiveCR_PADReventsAsync(processCodes.EnfSrv_Cd); 
+
+                var batches = await APIs.Financials.GetActiveCR_PADReventsAsync(processCodes.EnfSrv_Cd);
 
                 if ((batches is null) || (batches.Count() != 1))
                 {
@@ -46,23 +45,27 @@ namespace FileBroker.Business
                 }
 
                 var batch = batches.First();
-                
-                var data = await APIs.FinancialEvents.GetIFMSasync(batch.Batch_Id);
 
-                string newCycle = (int.Parse(cycle) + 1).ToString();
-                string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+                var data = await APIs.Financials.GetIFMSasync(batch.Batch_Id);
 
+                string fileContent = GenerateOutputFileContentFromData(data, cycle);
                 await File.WriteAllTextAsync(newFilePath, fileContent);
 
-                /*
-                Dim finDataBatch As New MidTier.Business.DataEntryControlBatchSystem(dataservice.ConnectionStringFOAEA)
-                finDataBatch.UpdateFTPControlBatch(BatchID)
+                await APIs.Financials.CloseCR_PADReventsAsync(batch.Batch_Id, processCodes.EnfSrv_Cd);
+                await APIs.Financials.CloseControlBatch(batch.Batch_Id);
 
-                'close events
-                finData.UpdatePADRBatchEventData(BatchID, dataservice.EnfSrv_Cd)
+                string newCycle = (int.Parse(cycle) + 1).ToString();
+                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
-                dataservice.InsertOutboundAudit(dataservice.FileName, Date.Now, True, dataservice.ProcessCategory & " Outbound IFMS File created successfully.")
-                 */
+                string message = fileTableData.Category + " Outbound IFMS File created successfully.";
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + cycle, DateTime.Now,
+                                                                         fileCreated: true, message);
+
+            }
+            catch (Exception e)
+            {
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + cycle, DateTime.Now,
+                                                         fileCreated: true, e.Message);
             }
             finally
             {

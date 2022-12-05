@@ -4,11 +4,6 @@ using FileBroker.Common;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Outgoing.FileCreator.IFMS
 {
@@ -41,7 +36,7 @@ namespace Outgoing.FileCreator.IFMS
             var outgoingIFMSdata = (await db.FileTable.GetFileTableDataForCategoryAsync("IFMSFDOUT"))
                                     .Where(s => s.Active == true).ToList();
 
-            if ((outgoingIFMSdata is null) || (outgoingIFMSdata.Count > 1)) 
+            if ((outgoingIFMSdata is null) || (outgoingIFMSdata.Count > 1))
             {
                 ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]IFMS[/cyan] file: [red]Too many active IFMSFDOUT entries![/red]");
                 await db.ErrorTrackingTable.MessageBrokerErrorAsync("IFMSFDOUT", "IFMSFDOUT",
@@ -51,7 +46,7 @@ namespace Outgoing.FileCreator.IFMS
 
             var errors = new List<string>();
             var outgoingIFMSfile = outgoingIFMSdata.First();
-            
+
             string filePath = await financialManager.CreateIFMSfile(outgoingIFMSfile.Name, errors);
 
             if (errors.Count == 0)
