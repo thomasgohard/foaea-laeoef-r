@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -42,7 +43,12 @@ namespace FOAEA3.Data.DB
                     { "enfSvrCode",  enfSrv}
                 };
 
-            return await MainDB.GetDataFromStoredProcAsync<BlockFundData>("MessageBrokerGetFinancialBlockFundsData", parameters, FillBlockFundDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<BlockFundData>("MessageBrokerGetFinancialBlockFundsData", parameters, FillBlockFundDataFromReader);
+
+            if (enfSrv.ToUpper() != "OA00")
+                return data.OrderBy(m => m.Appl_Dbtr_Cnfrmd_SIN).ToList();
+            else
+                return data.OrderBy(m => m.Dbtr_Id).ToList();
         }
 
         private void FillBlockFundDataFromReader(IDBHelperReader rdr, BlockFundData data)
