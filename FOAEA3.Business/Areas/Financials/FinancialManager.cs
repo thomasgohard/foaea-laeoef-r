@@ -26,6 +26,11 @@ namespace FOAEA3.Business.Areas.Financials
             await DBfinance.FinancialRepository.CloseCR_PADReventsAsync(batchId, enfSrv);
         }
 
+        public async Task<List<BlockFundData>> GetBlockFundsData(string enfSrv)
+        {
+            return await DBfinance.FinancialRepository.GetBlockFundsData(enfSrv);
+        }
+
         public async Task<List<IFMSdata>> GetIFMSdataAsync(string batchId)
         {
             return await DBfinance.FinancialRepository.GetIFMSdataAsync(batchId);

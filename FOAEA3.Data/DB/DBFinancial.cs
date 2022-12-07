@@ -35,6 +35,38 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
         }
 
+        public async Task<List<BlockFundData>> GetBlockFundsData(string enfSrv)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    { "enfSvrCode",  enfSrv}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<BlockFundData>("MessageBrokerGetFinancialBlockFundsData", parameters, FillBlockFundDataFromReader);
+        }
+
+        private void FillBlockFundDataFromReader(IDBHelperReader rdr, BlockFundData data)
+        {
+            data.Dbtr_Id = rdr["Dbtr_Id"] as string;
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Appl_Dbtr_Cnfrmd_SIN"] as string;
+            data.Start_Dte = (DateTime) rdr["Start_Dte"];
+            data.End_Dte = (DateTime) rdr["End_Dte"];
+            data.Appl_Dbtr_FrstNme = rdr["Appl_Dbtr_FrstNme"] as string;
+            data.Appl_Dbtr_MddleNme = rdr["Appl_Dbtr_MddleNme"] as string;
+            data.Appl_Dbtr_SurNme = rdr["Appl_Dbtr_SurNme"] as string;
+            data.Appl_Dbtr_LngCd = rdr["Appl_Dbtr_LngCd"] as string;
+            
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_Ln")) data.Appl_Dbtr_Addr_Ln = rdr["Appl_Dbtr_Addr_Ln"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_Ln1")) data.Appl_Dbtr_Addr_Ln1 = rdr["Appl_Dbtr_Addr_Ln1"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_CityNme")) data.Appl_Dbtr_Addr_CityNme = rdr["Appl_Dbtr_Addr_CityNme"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_PrvCd")) data.Appl_Dbtr_Addr_PrvCd = rdr["Appl_Dbtr_Addr_PrvCd"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_CtryCd")) data.Appl_Dbtr_Addr_CtryCd = rdr["Appl_Dbtr_Addr_CtryCd"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Addr_PCd")) data.Appl_Dbtr_Addr_PCd = rdr["Appl_Dbtr_Addr_PCd"] as string;
+            
+            if (rdr.ColumnExists("Appl_Dbtr_Gendr_Cd")) data.Appl_Dbtr_Gendr_Cd = rdr["Appl_Dbtr_Gendr_Cd"] as string;
+            if (rdr.ColumnExists("Appl_Dbtr_Brth_Dte")) data.Appl_Dbtr_Brth_Dte = (DateTime) rdr["Appl_Dbtr_Brth_Dte"];
+        }
+
         public async Task<List<IFMSdata>> GetIFMSdataAsync(string batchId)
         {
             var parameters = new Dictionary<string, object>

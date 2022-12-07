@@ -1,4 +1,6 @@
 ﻿using FileBroker.Model.Interfaces;
+using Outgoing.FileCreator.Fed.Interception;
+using Outgoing.FileCreator.IFMS;
 
 namespace FileBroker.CommandLine
 {
@@ -12,17 +14,17 @@ namespace FileBroker.CommandLine
             {
                 switch (job.Category.ToUpper())
                 {
-                    case "IFMSFDOUT":
-                        // CreateIFMSOutboundFile(r)
+                    case "IFMSFDOUT": // PrcId = 300
+                        await OutgoingFileCreatorIFMS.Run();
                         break;
 
-                    case "CPPBFOUT":
-                    case "OASBFOUT":
-                    case "TRBFOUT":
-                        // CreateFinancialBlockedFundsOutBoundFile(r)
+                    case "OASBFOUT":  // PrcId = 43
+                    case "TRBFOUT":   // PrcId = 46
+                        var process = new string[] { job.Category.ToUpper() };
+                        await OutgoingFileCreatorFedInterception.RunBlockFunds(process);
                         break;
 
-                    case "CHEQRECFD":
+                    case "CHEQRECFD": // PrcId = (301, 302, 303, 304, 310, 322, 323, 324, 325, 326, 328)
                         // CreateCheqRecFinancialDetailOutboundFile(r)
                         break;
 

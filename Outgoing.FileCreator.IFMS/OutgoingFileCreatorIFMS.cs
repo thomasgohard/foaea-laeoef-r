@@ -31,7 +31,7 @@ namespace Outgoing.FileCreator.IFMS
 
             var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            var financialManager = new OutgoingFinancialManager(foaeaApis, db, config);
+            var financialManager = new OutgoingFinancialIFMSmanager(foaeaApis, db, config);
 
             var outgoingIFMSdata = (await db.FileTable.GetFileTableDataForCategoryAsync("IFMSFDOUT"))
                                     .Where(s => s.Active == true).ToList();

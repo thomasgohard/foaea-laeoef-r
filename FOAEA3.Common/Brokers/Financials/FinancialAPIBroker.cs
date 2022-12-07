@@ -27,6 +27,12 @@ namespace FOAEA3.Common.Brokers.Financials
             await ApiHelper.SendCommandAsync(apiCall, token: Token);
         }
 
+        public async Task<List<BlockFundData>> GetBlockFundsAsync(string enfSrv)
+        {
+            string apiCall = $"api/v1/BlockFunds?enfSrv={enfSrv}";
+            return await ApiHelper.GetDataAsync<List<BlockFundData>>(apiCall, token: Token);
+        }
+
         public async Task<List<IFMSdata>> GetIFMSasync(string batchId)
         {
             string apiCall = $"api/v1/IFMS?batchId={batchId}";
