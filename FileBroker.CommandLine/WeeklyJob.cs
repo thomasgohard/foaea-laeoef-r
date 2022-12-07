@@ -12,7 +12,9 @@ namespace FileBroker.CommandLine
             var jobs = (await fileTable.GetAllActiveAsync()).Where(j => j.Frequency == (int)DateTime.Now.DayOfWeek);
             foreach (var job in jobs)
             {
-                switch (job.Category.ToUpper())
+                string category = job.Category.ToUpper();
+
+                switch (category)
                 {
                     case "IFMSFDOUT": // PrcId = 300
                         await OutgoingFileCreatorIFMS.Run();
@@ -20,8 +22,7 @@ namespace FileBroker.CommandLine
 
                     case "OASBFOUT":  // PrcId = 43
                     case "TRBFOUT":   // PrcId = 46
-                        var process = new string[] { job.Category.ToUpper() };
-                        await OutgoingFileCreatorFedInterception.RunBlockFunds(process);
+                        await OutgoingFileCreatorFedInterception.RunBlockFunds(new string[] { category });
                         break;
 
                     case "CHEQRECFD": // PrcId = (301, 302, 303, 304, 310, 322, 323, 324, 325, 326, 328)

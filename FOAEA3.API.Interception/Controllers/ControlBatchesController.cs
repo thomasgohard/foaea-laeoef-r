@@ -5,7 +5,7 @@ using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FOAEA3.API.Areas.Financials.Controllers;
+namespace FOAEA3.API.Interception.Controllers;
 
 [Route("api/v1/[controller]")]
 [ApiController]

@@ -17,7 +17,6 @@ namespace FileBroker.Common
             var productionAuditAPIs = new ProductionAuditAPIBroker(apiFoaeaHelper, token);
             var loginAPIs = new LoginsAPIBroker(apiFoaeaHelper, token);
             var sinsAPIs = new SinAPIBroker(apiFoaeaHelper, token);
-            var financialAPIs = new FinancialAPIBroker(apiFoaeaHelper, token);
 
             var apiTracingHelper = new APIBrokerHelper(apiRootData.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                        currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
@@ -28,6 +27,7 @@ namespace FileBroker.Common
             var apiInterceptionHelper = new APIBrokerHelper(apiRootData.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                                 currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionHelper, token);
+            var financialAPIs = new FinancialAPIBroker(apiInterceptionHelper, token);
 
             var apiLicenceDenialHelper = new APIBrokerHelper(apiRootData.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                              currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
