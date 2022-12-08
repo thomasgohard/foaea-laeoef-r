@@ -372,9 +372,14 @@ namespace FOAEA3.Data.DB
                 {"ConfirmedSIN", confirmedSIN}
             };
 
-            var data = await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN", parameters, FillEISOOUTFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN", 
+                                                                                      parameters, FillEISOOUTFromReader);
+        }
 
-            return data;
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("MessageBrokerGetEISOValidApplicationData", 
+                                                                                      FillEISOOUTFromReader);
         }
 
         private void FillEISOOUTFromReader(IDBHelperReader rdr, ProcessEISOOUTHistoryData data)
@@ -385,7 +390,7 @@ namespace FOAEA3.Data.DB
             data.RQST_RFND_EID = rdr["RQST_RFND_EID"] as string;
             data.OUTPUT_DEST_CD = rdr["OUTPUT_DEST_CD"] as string;
             data.XREF_ACCT_NBR = rdr["XREF_ACCT_NBR"] as string;
-            data.FOA_DELETE_IND = rdr["FOA_DELETE_IND"] as string;
+            data.FOA_DELETE_IND = ((int)rdr["FOA_DELETE_IND"]).ToString();
             data.FOA_RECOUP_PRCNT = rdr["FOA_RECOUP_PRCNT"] as string;
             data.BLANK_AREA = rdr["BLANK_AREA"] as string;
             data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 

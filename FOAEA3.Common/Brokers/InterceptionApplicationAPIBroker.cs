@@ -142,5 +142,11 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            string apiCall = $"api/v1/EISOrequests";
+            return await ApiHelper.GetDataAsync<List<ProcessEISOOUTHistoryData>>(apiCall, token: Token);
+        }
+
     }
 }

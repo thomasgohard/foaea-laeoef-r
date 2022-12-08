@@ -24,7 +24,7 @@ namespace FileBroker.Business
                                     .Where(s => s.Active == true).First();
             
             string newCycle = (fileTableData.Cycle + 1).ToString();
-            string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + newCycle, isFileName: true);
+            string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + "." + newCycle, isFileName: true);
 
             if (File.Exists(newFilePath))
             {
@@ -70,8 +70,9 @@ namespace FileBroker.Business
             }
             catch (Exception e)
             {
+                string errorMessage = e.Message;
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
-                                                         fileCreated: true, e.Message);
+                                                                         fileCreated: true, errorMessage);
             }
             finally
             {

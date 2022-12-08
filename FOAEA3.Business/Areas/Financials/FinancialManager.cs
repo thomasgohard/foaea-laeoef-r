@@ -40,5 +40,10 @@ namespace FOAEA3.Business.Areas.Financials
         {
             await DBfinance.FinancialRepository.CloseControlBatchAsync(batchId);
         }
+
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await DB.InterceptionTable.GetEISOvalidApplications();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
+using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -777,6 +778,11 @@ namespace FOAEA3.Business.Areas.Application
             if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
+        }
+
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await DB.InterceptionTable.GetEISOvalidApplications();
         }
 
         public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)

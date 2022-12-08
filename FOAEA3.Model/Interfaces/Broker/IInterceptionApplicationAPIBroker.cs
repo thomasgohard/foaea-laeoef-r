@@ -29,5 +29,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<bool> ESD_CheckIfAlreadyLoaded(string fileName);
         Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived);
         Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf);
+
+        Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications();
     }
 }

@@ -145,12 +145,11 @@ static async Task RunFileBrokerJob(string processName, IDBToolsAsync mainDB)
             break;
 
         case "weekly":
-
             await WeeklyJob.Run(new DBFileTable(mainDB));
             break;
 
         case "EISO_OUT":
-            //EISO_OUT();
+            await EisoOut.RunCRA();
             break;
 
         case "EIEISO_OUT":

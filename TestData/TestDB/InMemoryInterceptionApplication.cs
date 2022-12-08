@@ -102,6 +102,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
         {
             throw new NotImplementedException();
