@@ -89,7 +89,6 @@ namespace Outgoing.FileCreator.Fed.Interception
                     await db.ErrorTrackingTable.MessageBrokerErrorAsync(outgoingProcessData.Category, outgoingProcessData.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
-
         }
 
         public static async Task RunCPP(string[] args = null)

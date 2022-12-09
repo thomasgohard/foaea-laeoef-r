@@ -1,10 +1,30 @@
 ﻿using Outgoing.FileCreator.Fed.Interception;
 
-//var process = new string[] { "OASBFOUT", "TRBFOUT" };
-//await OutgoingFileCreatorFedInterception.RunBlockFunds(process);
+if ((args.Length == 0) || args.Contains("OAS") || args.Contains("TR"))
+{
+    var processList = new List<string>();
 
-//await OutgoingFileCreatorFedInterception.RunCRA();
-await OutgoingFileCreatorFedInterception.RunEI();
-//await OutgoingFileCreatorFedInterception.RunCPP();
+    if ((args.Length == 0) || args.Contains("OAS"))
+        processList.Add("OASBFOUT");
 
-Console.ReadKey();
+    if ((args.Length == 0) || args.Contains("TR"))
+        processList.Add("TRBFOUT");
+
+    await OutgoingFileCreatorFedInterception.RunBlockFunds(processList.ToArray());
+}
+
+if ((args.Length == 0) || args.Contains("CRA"))
+{
+    await OutgoingFileCreatorFedInterception.RunCRA();
+}
+
+if ((args.Length == 0) || args.Contains("EI"))
+{
+    await OutgoingFileCreatorFedInterception.RunEI();
+}
+
+if ((args.Length == 0) || args.Contains("CPP"))
+{
+    await OutgoingFileCreatorFedInterception.RunCPP();
+}
+
