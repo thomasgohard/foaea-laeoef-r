@@ -50,7 +50,7 @@ namespace Outgoing.FileCreator.Fed.Interception
                 }
         }
 
-        public static async Task RunEI(string[] args = null)
+        public static async Task RunEI(string[] args = null, bool skipChecks = false)
         {
             args ??= Array.Empty<string>();
 
@@ -60,13 +60,13 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            await CreateOutgoingEIasync(fileBrokerDB, config.ApiRootData, config);
+            await CreateOutgoingEIasync(fileBrokerDB, config.ApiRootData, config, skipChecks);
 
             ColourConsole.Write("Completed.\n");
         }
 
         private static async Task CreateOutgoingEIasync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
-                                                        IFileBrokerConfigurationHelper config)
+                                                        IFileBrokerConfigurationHelper config, bool skipChecks = false)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
 
@@ -78,7 +78,7 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var errors = new List<string>();
 
-            string filePath = await financialManager.CreateEIfile(outgoingProcessData.Name, errors);
+            string filePath = await financialManager.CreateEIfile(outgoingProcessData.Name, errors, skipChecks);
 
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");

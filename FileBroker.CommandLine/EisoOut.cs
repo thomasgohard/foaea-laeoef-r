@@ -9,9 +9,9 @@ namespace FileBroker.CommandLine
             await OutgoingFileCreatorFedInterception.RunCRA();
         }
 
-        public static async Task RunEI()
+        public static async Task RunEI(bool skipChecks = false)
         {
-            await OutgoingFileCreatorFedInterception.RunEI();
+            await OutgoingFileCreatorFedInterception.RunEI(skipChecks: skipChecks);
         }
 
         public static async Task RunCPP()

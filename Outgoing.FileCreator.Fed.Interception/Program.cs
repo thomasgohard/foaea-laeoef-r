@@ -1,5 +1,7 @@
 ﻿using Outgoing.FileCreator.Fed.Interception;
 
+args = args.Append("CPP").ToArray();
+
 if ((args.Length == 0) || args.Contains("OAS") || args.Contains("TR"))
 {
     var processList = new List<string>();

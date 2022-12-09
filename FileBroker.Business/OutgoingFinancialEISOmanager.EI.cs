@@ -5,7 +5,7 @@ namespace FileBroker.Business
 {
     public partial class OutgoingFinancialEISOmanager
     {
-        public async Task<string> CreateEIfile(string fileBaseName, List<string> errors)
+        public async Task<string> CreateEIfile(string fileBaseName, List<string> errors, bool skipChecks = false)
         {
             var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
 
@@ -21,7 +21,7 @@ namespace FileBroker.Business
             await FoaeaAccess.SystemLoginAsync();
             try
             {
-                if (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday))
+                if (!skipChecks && (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday)))
                 {
                     var dateLastUiBatchLoaded = await APIs.Financials.GetLastUiBatchLoaded();
                     var diff = DateTime.Now - dateLastUiBatchLoaded;
@@ -35,25 +35,27 @@ namespace FileBroker.Business
                 var incomingEIdata = await DB.FileTable.GetFileTableDataForFileNameAsync("DOJEEINB");
                 var fileName = incomingEIdata.Name + "." + newCycle.ToString().PadLeft(3, '0');
                 var expectedIncomingEIfilePath = incomingEIdata.Path.AppendToPath(fileName, isFileName: true);
-                if (File.Exists(expectedIncomingEIfilePath))
+                if (!skipChecks && File.Exists(expectedIncomingEIfilePath))
                 {
                     errors.Add($"** Error: Expected file {fileName} received but not loaded.");
                     return "";
                 }
 
-                var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                if (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday))
+                {
+                    var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
-                var data = await APIs.InterceptionApplications.GetEIexchangeOutData(processCodes.EnfSrv_Cd);
+                    var data = await APIs.InterceptionApplications.GetEIexchangeOutData(processCodes.EnfSrv_Cd);
 
-                string fileContent = GenerateEIOutputFileContentFromData(data, newCycle);
-                await File.WriteAllTextAsync(newFilePath, fileContent);
+                    string fileContent = GenerateEIOutputFileContentFromData(data, newCycle);
+                    await File.WriteAllTextAsync(newFilePath, fileContent);
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 
-                string message = fileTableData.Category + " Outbound EI EISO File created successfully.";
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
-                                                                         fileCreated: true, message);
-
+                    string message = fileTableData.Category + " Outbound EI EISO File created successfully.";
+                    await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+                                                                             fileCreated: true, message);
+                }
             }
             catch (Exception e)
             {

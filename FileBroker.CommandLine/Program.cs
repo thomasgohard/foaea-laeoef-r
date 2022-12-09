@@ -153,11 +153,11 @@ static async Task RunFileBrokerJob(string processName, IDBToolsAsync mainDB)
             break;
 
         case "EIEISO_OUT":
-            //EIEISO_OUT();
+            await EisoOut.RunEI();
             break;
 
         case "EIEISO_OUT_2":
-            //EIEISO_OUT_2();
+            await EisoOut.RunEI(skipChecks: true);
             break;
 
         case "CPPEISO_OUT":
