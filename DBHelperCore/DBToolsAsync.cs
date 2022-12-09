@@ -108,7 +108,6 @@ namespace DBHelper
                     }
                 }
 
-
                 var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                 retParameter.Direction = ParameterDirection.ReturnValue;
 

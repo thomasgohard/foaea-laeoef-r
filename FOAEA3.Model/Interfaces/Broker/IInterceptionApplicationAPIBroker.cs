@@ -31,5 +31,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf);
 
         Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications();
+        Task<List<EIoutgoingFederalData>> GetEIexchangeOutData(string enfSrv);
     }
 }

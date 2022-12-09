@@ -1,6 +1,7 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using Newtonsoft.Json;
 
 namespace FOAEA3.Common.Brokers.Financials
 {
@@ -44,5 +45,12 @@ namespace FOAEA3.Common.Brokers.Financials
             string apiCall = $"api/v1/ControlBatches/close?batchId={batchId}";
             await ApiHelper.SendCommandAsync(apiCall, token: Token);
         }
+
+        public async Task<DateTime> GetLastUiBatchLoaded()
+        {
+            string apiCall = $"api/v1/ControlBatches/LastUiBatchLoaded";
+            return await ApiHelper.GetDataAsync<DateTime>(apiCall, token: Token);
+        }
+
     }
 }

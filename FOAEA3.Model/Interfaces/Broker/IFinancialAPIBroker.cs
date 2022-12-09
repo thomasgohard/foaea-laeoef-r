@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
@@ -13,5 +14,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<List<BlockFundData>> GetBlockFundsAsync(string enfSrv);
         Task<List<IFMSdata>> GetIFMSasync(string batchId);
         Task CloseControlBatch(string batchId);
+        Task<DateTime> GetLastUiBatchLoaded();
     }
 }

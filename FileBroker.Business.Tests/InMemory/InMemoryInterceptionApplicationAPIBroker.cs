@@ -58,6 +58,16 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<List<EIoutgoingFederalData>> GetEIexchangeOutData(string enfSrv)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();

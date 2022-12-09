@@ -14,7 +14,7 @@ namespace FOAEA3.Model.Interfaces
         Func<Task<string>> GetRefreshedToken { get; set; }
 
         MessageDataList Messages { get; set; }
-        Task<T> GetDataAsync<T>(string api, string root = "", string token = null) where T : class, new();
+        Task<T> GetDataAsync<T>(string api, string root = "", string token = null) where T : new();
         Task<string> GetStringAsync(string api, string root = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS, string token = null);
         Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData, string rootAPI = null, string token = null);
         Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData, string rootAPI = null, string token = null);

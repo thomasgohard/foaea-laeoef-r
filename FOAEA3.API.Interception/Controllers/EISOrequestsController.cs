@@ -12,14 +12,24 @@ namespace FOAEA3.API.Interception.Controllers
     [ApiController]
     public class EISOrequestsController : FoaeaControllerBase
     {
-        // Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
-        [HttpGet("")]
+        [HttpGet("CRA")]
         [Authorize(Policy = Policies.ApplicationReadAccess)]
-        public async Task<ActionResult<List<ProcessEISOOUTHistoryData>>> GetBlockFunds([FromServices] IRepositories db,
-                                                                                       [FromServices] IRepositories_Finance dbFinance)
+        public async Task<ActionResult<List<ProcessEISOOUTHistoryData>>> GetEISOvalidApplications([FromServices] IRepositories db,
+                                                                                                  [FromServices] IRepositories_Finance dbFinance)
         {
             var manager = new InterceptionManager(db, dbFinance, config);
             return await manager.GetEISOvalidApplications();
         }
+
+        [HttpGet("EI")]
+        [Authorize(Policy = Policies.ApplicationReadAccess)]
+        public async Task<ActionResult<List<EIoutgoingFederalData>>> GetEIvalidApplications(string enfSrv,
+                                                                                            [FromServices] IRepositories db,
+                                                                                            [FromServices] IRepositories_Finance dbFinance)
+        {
+            var manager = new InterceptionManager(db, dbFinance, config);
+            return await manager.GetEIoutgoingData(enfSrv);
+        }
+
     }
 }

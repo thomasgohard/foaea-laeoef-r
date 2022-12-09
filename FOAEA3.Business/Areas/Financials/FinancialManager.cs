@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -41,9 +42,10 @@ namespace FOAEA3.Business.Areas.Financials
             await DBfinance.FinancialRepository.CloseControlBatchAsync(batchId);
         }
 
-        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        public async Task<DateTime> GetDateLastUIBatchLoaded()
         {
-            return await DB.InterceptionTable.GetEISOvalidApplications();
+            return await DB.InterceptionTable.GetDateLastUIBatchLoaded();
         }
+
     }
 }

@@ -41,7 +41,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN);
         Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN);
         Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications();
-
+        Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv);
+        Task<DateTime> GetDateLastUIBatchLoaded();
         Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync();
         Task<List<ApplicationData>> GetApplicationsForRejectAsync();
         Task<List<ApplicationData>> GetTerminatedI01Async();

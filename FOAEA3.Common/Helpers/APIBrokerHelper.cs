@@ -117,10 +117,9 @@ namespace FOAEA3.Common.Helpers
         }
 
         public async Task<T> GetDataAsync<T>(string api, string root = "", string token = null)
-            where T : class, new()
+            where T : new()
         {
-
-            T result = null;
+            T result = default;
 
             if (root == "")
                 root = APIroot;

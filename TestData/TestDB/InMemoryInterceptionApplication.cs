@@ -92,7 +92,17 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<DateTime> GetDateLastUIBatchLoaded()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> GetDebtorIDAsync(string first3Char)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
         {
             throw new NotImplementedException();
         }

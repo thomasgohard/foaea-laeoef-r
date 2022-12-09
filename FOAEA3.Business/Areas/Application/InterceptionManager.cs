@@ -785,6 +785,11 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.InterceptionTable.GetEISOvalidApplications();
         }
 
+        public async Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
+        {
+            return await DB.InterceptionTable.GetEIoutgoingData(enfSrv);
+        }
+
         public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
