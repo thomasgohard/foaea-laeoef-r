@@ -214,19 +214,19 @@ namespace FOAEA3.Business.BackendProcesses
         private async Task ProcessFRBatchesAsync(int summFAFR_Id)
         {
             var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
-            var summFAFR_DB = DBfinance.SummFAFRRepository;
-            var summDF_DB = DBfinance.SummDFRepository;
+            //var summFAFR_DB = DBfinance.SummFAFRRepository;
+            //var summDF_DB = DBfinance.SummDFRepository;
 
-            var summFAFR_DE_List = await summFAFR_DE_DB.GetSummFaFrDeAsync(summFAFR_Id);
-            var summFAFR_List = await summFAFR_DB.GetSummFaFrListAsync(summFAFR_DE_List.Items);
+            var summFAFR_DE = await summFAFR_DE_DB.GetSummFaFrDeAsync(summFAFR_Id);
+            //var summFAFR_List = await summFAFR_DB.GetSummFaFrListAsync(summFAFR_DE_List.Items);
             //var summDF_List = new DataList<SummDF_Data>();
 
-            foreach (var rowSummFAFR in summFAFR_List.Items)
-            {
-                var summDF_List = summDF_DB.GetSummDFList(rowSummFAFR.SummFAFR_Id);
+            //foreach (var rowSummFAFR in summFAFR_List.Items)
+            //{
+            //    var summDF_List = summDF_DB.GetSummDFList(rowSummFAFR.SummFAFR_Id);
 
 
-            }
+            //}
 
             /*
             Private Sub ProcessFRBatches(ByVal summFaFrId As Integer)

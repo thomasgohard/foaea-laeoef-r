@@ -1,5 +1,4 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model.Interfaces.Broker;
+﻿using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -24,6 +23,7 @@ namespace FOAEA3.Common.Brokers
         public ISinAPIBroker Sins { get; set; }
 
         public IFinancialAPIBroker Financials { get; set; }
+        public ITransactionAPIBroker Transactions { get; set; }
 
         public IProductionAuditAPIBroker ProductionAudits { get; set; }
     }

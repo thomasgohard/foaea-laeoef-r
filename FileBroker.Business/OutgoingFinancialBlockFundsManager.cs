@@ -22,7 +22,7 @@ public class OutgoingFinancialBlockFundsManager
     {
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
 
-        string newCycle = BuildNewCycle(fileBaseName, fileTableData.Cycle);
+        string newCycle = OutgoingFinancialDivertFundsManager.BuildNewCycle(fileBaseName, fileTableData.Cycle);
 
         string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + "." + newCycle, isFileName: true);
 
@@ -113,28 +113,5 @@ public class OutgoingFinancialBlockFundsManager
     {
         return $"99{itemCount:00000000}0000000000{sinHashTotal}";
     }
-
-    private static string BuildNewCycle(string fileBaseName, int cycle)
-    {
-        int thisNewCycle = cycle + 1;
-
-        int cycleLength;
-        if (fileBaseName.ToUpper() == "TR3SISOB")
-        {
-            cycleLength = 6;
-            if (thisNewCycle == 1000000)
-                thisNewCycle = 1;
-        }
-        else
-        {
-            cycleLength = 3;
-            if (thisNewCycle == 1000)
-                thisNewCycle = 1;
-        }
-
-        string newCycle = thisNewCycle.ToString(new string('0', cycleLength));
-
-        return newCycle;
-    }
-
+        
 }

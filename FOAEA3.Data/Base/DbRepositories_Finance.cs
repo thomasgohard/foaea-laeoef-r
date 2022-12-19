@@ -1,6 +1,9 @@
 ﻿using DBHelper;
 using FOAEA3.Data.DB;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.Base
 {

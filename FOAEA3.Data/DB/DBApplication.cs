@@ -253,6 +253,23 @@ namespace FOAEA3.Data.DB
 
         }
 
+        public async Task<List<ConfirmedSinData>> GetConfirmedSinByDebtorId(string debtorId, bool isActiveOnly)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrDebtor_Id", debtorId},
+                    { "bitActvst_cd", isActiveOnly}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ConfirmedSinData>("GetCnfrmdSINByDebtorID", parameters, FillConfirmedSinForDebtor);
+        }
+
+        private void FillConfirmedSinForDebtor(IDBHelperReader rdr, ConfirmedSinData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.SVR_SIN = rdr["SVR_SIN"] as string;
+        }
+
         public async Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             var parameters = new Dictionary<string, object>

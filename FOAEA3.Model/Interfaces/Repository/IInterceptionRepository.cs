@@ -34,7 +34,9 @@ namespace FOAEA3.Model.Interfaces.Repository
                                                                  string activeState);
         Task<List<ExGratiaListData>> GetExGratiasAsync();
         Task<string> GetApplicationJusticeNumberAsync(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<string> GetDebtorIDAsync(string first3Char);
+        Task<string> GetDebtorIdAsync(string first3Char);
+        Task<string> GetDebtorIdByConfirmedSin(string sin, string category);
+        Task<bool> CheckDebtorIdExists(string debtorId);
         Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber);
         Task<DateTime> GetGarnisheeSummonsReceiptDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD);
         Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode);

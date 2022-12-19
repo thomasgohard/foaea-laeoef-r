@@ -296,7 +296,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromProcSingleValueAsync<string>("GetApplJusticeNr", parameters);
         }
 
-        public async Task<string> GetDebtorIDAsync(string first3Char)
+        public async Task<string> GetDebtorIdAsync(string first3Char)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -304,6 +304,29 @@ namespace FOAEA3.Data.DB
                 };
 
             return await MainDB.GetDataFromProcSingleValueAsync<string>("GetSummSmryDebtorID", parameters);
+        }
+
+        public async Task<bool> CheckDebtorIdExists(string debtorId)
+        {
+            if (string.IsNullOrEmpty(debtorId))
+                return false;
+
+            var parameters = new Dictionary<string, object> {
+                    { "chrDebtor_Id",  debtorId}
+                };
+
+            string result = await MainDB.GetDataFromProcSingleValueAsync<string>("CheckDebtorIdExists", parameters);
+            return string.Equals(debtorId, result, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public async Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrDbtr_Cnfrmd_SIN",  sin},
+                    { "chrAppctgy_Cd",  category}
+                };
+
+            return await MainDB.GetDataFromProcSingleValueAsync<string>("GetDebtorIdByCnfrmdSIN", parameters);
         }
 
         public async Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber)
@@ -423,7 +446,7 @@ namespace FOAEA3.Data.DB
             data.Debtor_Fixed_Amt = (decimal?)rdr["Debtor_Fixed_Amt"]; // can be null
             data.Amount_Per_Payment = (decimal?)rdr["Amount_Per_Payment"]; // can be null
             data.EnfOff_Fin_VndrCd = rdr["EnfOff_Fin_VndrCd"] as string;
-            data.Fixed_Amt_Flag = (int) rdr["Fixed_Amt_Flag"] == 1;
+            data.Fixed_Amt_Flag = (int)rdr["Fixed_Amt_Flag"] == 1;
         }
 
         public async Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)

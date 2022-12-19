@@ -137,6 +137,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Outgoing.FileCreator.IFMS",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.Interception", "Outgoing.FileCreator.Fed.Interception\Outgoing.FileCreator.Fed.Interception.csproj", "{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Incoming.FileWatcher.Fed.Interception", "Incoming.FileWatcher.Fed.Interception\Incoming.FileWatcher.Fed.Interception.csproj", "{69C35453-1D62-485F-B585-1458F2D6E8BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BackendProcesses Debug|Any CPU = BackendProcesses Debug|Any CPU
@@ -929,6 +931,20 @@ Global
 		{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}.Tests|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.BackendProcesses Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.BackendProcesses Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.FileBroker Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.FileBroker Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.FOAEA Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.FOAEA Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Ops Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Ops Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C35453-1D62-485F-B585-1458F2D6E8BF}.Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -972,6 +988,7 @@ Global
 		{DEDC8960-EE46-42F3-B0E0-206E20CD7ED3} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{EC4FD2FB-B341-4F4E-A2AB-32D3C6F81F37} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 		{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
+		{69C35453-1D62-485F-B585-1458F2D6E8BF} = {1C1C9BAE-8056-48E4-B980-06D1EF2C655D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99246A42-D532-41A0-9F19-8559DBF2F7F4}

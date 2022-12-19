@@ -46,6 +46,7 @@ namespace FileBroker.Common.Helpers
             if (APIs.TracingEvents is not null) APIs.TracingEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
             if (APIs.TracingResponses is not null) APIs.TracingResponses.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
             if (APIs.Financials is not null) APIs.Financials.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.Transactions is not null) APIs.Transactions.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
 
             if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
 
@@ -74,6 +75,7 @@ namespace FileBroker.Common.Helpers
             if (APIs.TracingEvents is not null) APIs.TracingEvents.Token = CurrentToken;
             if (APIs.TracingResponses is not null) APIs.TracingResponses.Token = CurrentToken;
             if (APIs.Financials is not null) APIs.Financials.Token = CurrentToken;
+            if (APIs.Transactions is not null) APIs.Transactions.Token = CurrentToken;
 
             if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.Token = CurrentToken;
 

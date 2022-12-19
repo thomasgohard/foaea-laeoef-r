@@ -43,7 +43,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<string> GenerateDebtorIDAsync(string debtorLastName)
         {
-            return await DB.InterceptionTable.GetDebtorIDAsync(DebtorPrefix(debtorLastName)); ;
+            return await DB.InterceptionTable.GetDebtorIdAsync(DebtorPrefix(debtorLastName)); ;
         }
 
         private async Task<string> NextJusticeIDAsync(string justiceID)

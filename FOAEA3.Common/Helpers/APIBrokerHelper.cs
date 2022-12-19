@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using Azure.Core;
+using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -192,6 +193,94 @@ namespace FOAEA3.Common.Helpers
             return result;
 
         }
+
+        public async Task<T> GetDataAsync<T, P>(string api, P data, string root = "", string token = null) where T : new()
+        {
+            T result = default;
+
+            if (root == "")
+                root = APIroot;
+
+            using (var httpClient = new HttpClient())
+            {
+                int attemptCount = 0;
+                bool completed = false;
+
+                while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
+                {
+                    try
+                    {
+
+                        httpClient.Timeout = DEFAULT_TIMEOUT;
+                        httpClient.DefaultRequestHeaders.Accept.Clear();
+                        httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
+                        httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
+                        if (token is not null && !string.IsNullOrEmpty(token))
+                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                        if (!string.IsNullOrEmpty(CurrentLanguage))
+                            httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
+
+                        string keyData = JsonConvert.SerializeObject(data);
+
+                        HttpResponseMessage callResult;                        
+                        using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
+                        {
+                            var request = new HttpRequestMessage
+                            {
+                                Method = HttpMethod.Get,
+                                RequestUri = new Uri(root + api),
+                                Content = content
+                            };
+                            callResult = await httpClient.SendAsync(request).ConfigureAwait(false);
+                        }
+
+                        if (callResult.IsSuccessStatusCode)
+                        {
+                            string content = await callResult.Content.ReadAsStringAsync();
+                            result = JsonConvert.DeserializeObject<T>(content);
+                        }
+                        else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
+                        {
+                            string content = await callResult.Content.ReadAsStringAsync();
+                            Messages = JsonConvert.DeserializeObject<MessageDataList>(content);
+                        }
+                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            if (GetRefreshedToken is null)
+                                completed = true;
+                            else
+                            {
+                                token = await GetRefreshedToken();
+                                if (string.IsNullOrEmpty(token))
+                                    completed = true; // API failed and refreshed token expired
+                                else
+                                    attemptCount++;
+                            }
+                        }
+                        completed = true;
+                    }
+                    catch (Exception e)
+                    {
+                        attemptCount++;
+                        Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                        if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                        {
+                            // log error
+                            Messages = new MessageDataList();
+                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                            Messages.Add(errorMessageData);
+                        }
+                    }
+                }
+
+            }
+
+            if (result is null)
+                result = new T();
+
+            return result;
+        }
+
 
         public async Task<T> PostDataAsync<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()

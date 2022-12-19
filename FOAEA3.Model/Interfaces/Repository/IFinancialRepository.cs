@@ -8,6 +8,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<CR_PADReventData>> GetActiveCR_PADReventsAsync(string enfSrv);
         Task CloseCR_PADReventsAsync(string batchId, string enfSrv);
         Task<List<BlockFundData>> GetBlockFundsData(string enfSrv);
+        Task<List<DivertFundData>> GetDivertFundsData(string enfSrv, string batchId);
         Task<List<IFMSdata>> GetIFMSdataAsync(string batchId);
         Task CloseControlBatchAsync(string batchId);
     }

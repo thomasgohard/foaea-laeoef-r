@@ -42,6 +42,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ConfirmedSinData>> GetConfirmedSinByDebtorId(string debtorId, bool isActiveOnly)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             throw new NotImplementedException();

@@ -50,6 +50,31 @@ namespace FOAEA3.Data.DB
             else
                 return data.OrderBy(m => m.Dbtr_Id).ToList();
         }
+        
+        public async Task<List<DivertFundData>> GetDivertFundsData(string enfSrv, string batchId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    { "enfSvrCode",  enfSrv},
+                    { "batchId",  batchId}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<DivertFundData>("MessageBrokerGetFinancialDivertFundsBatchData", 
+                                                                               parameters, FillDivertFundDataFromReader);
+
+            return data.OrderBy(m => m.Dbtr_Id).ToList();
+        }
+
+        private void FillDivertFundDataFromReader(IDBHelperReader rdr, DivertFundData data)
+        {
+            data.Dbtr_Id = rdr["Dbtr_Id"] as string;
+            data.SummFAFR_FA_Pym_Id = rdr["SummFAFR_FA_Pym_Id"] as string; // can be null
+            data.SummFAFR_FA_Payable_Dte = rdr["SummFAFR_FA_Payable_Dte"] as DateTime?; // can be null 
+            data.SummDF_DivertedDbtrAmt_Money = rdr["SummDF_DivertedDbtrAmt_Money"] as decimal?; // can be null 
+            data.EnfSrv_Loc_Cd = rdr["EnfSrv_Loc_Cd"] as string; // can be null 
+            data.EnfSrv_SubLoc_Cd = rdr["EnfSrv_SubLoc_Cd"] as string; // can be null 
+            data.SummFAFR_AvailDbtrAmt_Money = rdr["SummFAFR_AvailDbtrAmt_Money"] as decimal?; // can be null 
+        }
 
         private void FillBlockFundDataFromReader(IDBHelperReader rdr, BlockFundData data)
         {

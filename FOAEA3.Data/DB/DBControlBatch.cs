@@ -5,6 +5,7 @@ using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
@@ -29,6 +30,57 @@ namespace FOAEA3.Data.DB
             var data = await MainDB.GetDataFromStoredProcAsync<ControlBatchData>("CtrlBatchGetDAFAReadyBatches", parameters, FillDataFromReader);
 
             return new DataList<ControlBatchData>(data, MainDB.LastError);
+        }
+
+        public async Task<ControlBatchData> GetControlBatchAsync(string batchId)
+        {
+
+            var parameters = new Dictionary<string, object> {
+                { "Batch_Id", batchId }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ControlBatchData>("CtrlBatchGetCtrlBatchByBatchID", parameters, FillControlBatchData);
+
+            return data.FirstOrDefault();
+        }
+
+        private void FillControlBatchData(IDBHelperReader rdr, ControlBatchData data)
+        {
+            data.Batch_Id = rdr["Batch_Id"] as string;
+            data.EnfSrv_Src_Cd = rdr["EnfSrv_Src_Cd"] as string; // can be null 
+            data.DataEntryBatch_Id = rdr["DataEntryBatch_Id"] as string; // can be null 
+            data.BatchType_Cd = rdr["BatchType_Cd"] as string;
+            data.Batch_Post_Dte = (DateTime)rdr["Batch_Post_Dte"];
+            data.Batch_Compl_Dte = rdr["Batch_Compl_Dte"] as DateTime?; // can be null 
+            data.Medium_Cd = rdr["Medium_Cd"] as string;
+            data.SourceRecCnt = rdr["SourceRecCnt"] as int?; // can be null 
+            data.DoJRecCnt = rdr["DoJRecCnt"] as int?; // can be null 
+            data.SourceTtlAmt_Money = rdr["SourceTtlAmt_Money"] as decimal?; // can be null 
+            data.DoJTtlAmt_Money = rdr["DoJTtlAmt_Money"] as decimal?; // can be null 
+            data.BatchLiSt_Cd = (short)rdr["BatchLiSt_Cd"];
+            data.Batch_Reas_Cd = rdr["Batch_Reas_Cd"] as int?; // can be null 
+            data.Batch_Pend_Ind = (byte)rdr["Batch_Pend_Ind"];
+            data.PendTtlAmt_Money = rdr["PendTtlAmt_Money"] as decimal?; // can be null 
+            data.FeesTtlAmt_Money = rdr["FeesTtlAmt_Money"] as decimal?; // can be null 
+        }
+
+        public async Task<List<BatchSimpleData>> GetReadyDivertFundsBatches(string enfSrv_Cd, string enfSrv_Loc_Cd)
+        {
+            var parameters = new Dictionary<string, object>()
+            {
+                {"enfSvrCode", enfSrv_Cd}, 
+                {"enfSvrLocCode", enfSrv_Loc_Cd }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<BatchSimpleData>("MessageBrokerFinancialDFBatchExists", parameters, FillBatchSimpleData);
+
+            return data;
+        }
+
+        private void FillBatchSimpleData(IDBHelperReader rdr, BatchSimpleData data)
+        {
+            data.Batch_Id = rdr["Batch_Id"] as string;
+            data.DataEntryBatch_Id = rdr["DataEntryBatch_Id"] as string; // can be null 
         }
 
         public async Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values)
@@ -88,6 +140,19 @@ namespace FOAEA3.Data.DB
             data.Batch_Pend_Ind = (byte)rdr["Batch_Pend_Ind"];
             data.PendTtlAmt_Money = rdr["PendTtlAmt_Money"] as decimal?; // can be null 
             data.FeesTtlAmt_Money = rdr["FeesTtlAmt_Money"] as decimal?; // can be null 
+        }
+
+        public async Task<bool> GetPaymentIdIsSinIndicator(string batchId)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrBatchId", batchId }
+                };
+
+            var result = await MainDB.GetDataFromProcSingleValueAsync<string>("GetPaymentIDIsSINInd", parameters);
+            if ((result is not null) && (result == "Y"))
+                return true;
+            else
+                return false;
         }
     }
 }
