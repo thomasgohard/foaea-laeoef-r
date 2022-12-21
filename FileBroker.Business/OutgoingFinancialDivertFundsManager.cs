@@ -37,7 +37,7 @@ namespace FileBroker.Business
             {
                 var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
-                var readyDivertFundsBatches = await APIs.Financials.GetReadyDivertFundsBatches(processCodes.EnfSrv_Cd, processCodes.EnfSrv_Loc_Cd);
+                var readyDivertFundsBatches = await APIs.ControlBatches.GetReadyDivertFundsBatches(processCodes.EnfSrv_Cd, processCodes.EnfSrv_Loc_Cd);
                 if ((readyDivertFundsBatches is null) || !readyDivertFundsBatches.Any())
                 {
                     errors.Add("No ready DF batches found!");
@@ -101,7 +101,7 @@ namespace FileBroker.Business
         {
             var result = new StringBuilder();
 
-            var fundsAvailableData = await DB.FundsAvailableTable.GetFundsAvailableIncomingTrainingData(batchId);
+            var fundsAvailableData = await DB.FundsAvailableIncomingTable.GetFundsAvailableIncomingTrainingData(batchId);
 
             result.AppendLine(GenerateHeaderLine(newCycle, enfSrv, dataEntryBatchId));
             int itemCount = 0;

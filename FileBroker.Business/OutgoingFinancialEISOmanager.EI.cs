@@ -23,7 +23,7 @@ namespace FileBroker.Business
             {
                 if (!skipChecks && (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday)))
                 {
-                    var dateLastUiBatchLoaded = await APIs.Financials.GetLastUiBatchLoaded();
+                    var dateLastUiBatchLoaded = await APIs.ControlBatches.GetLastUiBatchLoaded();
                     var diff = DateTime.Now - dateLastUiBatchLoaded;
                     if (diff.TotalHours >= 12)
                     {

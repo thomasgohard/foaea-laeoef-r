@@ -34,7 +34,6 @@ namespace FOAEA3.Data.DB
 
         public async Task<ControlBatchData> GetControlBatchAsync(string batchId)
         {
-
             var parameters = new Dictionary<string, object> {
                 { "Batch_Id", batchId }
             };
@@ -42,6 +41,50 @@ namespace FOAEA3.Data.DB
             var data = await MainDB.GetDataFromStoredProcAsync<ControlBatchData>("CtrlBatchGetCtrlBatchByBatchID", parameters, FillControlBatchData);
 
             return data.FirstOrDefault();
+        }
+
+        public async Task CloseControlBatchAsync(string batchId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    { "batchID",  batchId}
+                };
+
+            await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
+        }
+
+        public async Task UpdateBatchAsync(ControlBatchData batch)
+        {
+            var parameters = new Dictionary<string, object>() {
+                { "Batch_Id", batch.Batch_Id },
+                { "BatchType_Cd", batch.BatchType_Cd },
+                { "Batch_Post_Dte", batch.Batch_Post_Dte },
+                { "BatchLiSt_Cd", batch.BatchLiSt_Cd},
+                { "Batch_Pend_Ind", batch.Batch_Pend_Ind},
+                { "EnfSrv_Src_Cd", batch.EnfSrv_Src_Cd},
+                { "DataEntryBatch_Id", batch.DataEntryBatch_Id},
+                { "Batch_Compl_Dte", batch.Batch_Compl_Dte},
+                { "Medium_Cd", batch.Medium_Cd},
+                { "SourceRecCnt", batch.SourceRecCnt},
+                { "DoJRecCnt", batch.DoJRecCnt},
+                { "SourceTtlAmt_Money", batch.SourceTtlAmt_Money},
+                { "DoJTtlAmt_Money", batch.DoJTtlAmt_Money},
+                { "Batch_Reas_Cd", batch.Batch_Reas_Cd},
+                { "PendTtlAmt_Money", batch.PendTtlAmt_Money},
+                { "FeesTtlAmt_Money", batch.FeesTtlAmt_Money}
+            };
+
+            await MainDB.ExecProcAsync("CtrlBatchUpdateNew", parameters);            
+        }
+
+        public async Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount)
+        {
+            var parameters = new Dictionary<string, object>() {
+                { "Batch_Id", batchId },
+                { "RecordCount", recordCount}
+            };
+
+            await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatchLiSt", parameters);
         }
 
         private void FillControlBatchData(IDBHelperReader rdr, ControlBatchData data)

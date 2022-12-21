@@ -19,23 +19,111 @@ namespace FOAEA3.Business.Areas.Financials
             DBfinance = dbFinance;
         }
 
-        public async Task<TransactionResult> InsertFaFrDe(string transactionType, SummFAFR_DE_Data data)
+        public async Task<TransactionResult> CreateFaFrDe(string transactionType, SummFAFR_DE_Data faTransaction)
         {
-            var result = await ValidateTransaction(transactionType, data);
+            var result = await ValidateTransaction(transactionType, faTransaction);
 
-            if (result.ReturnCode == ReturnCode.Valid)
-            {
-                await DBfinance.SummFAFR_DERepository.InsertFaFrDe(data);
-            }
+            ControlBatchData batch;
+            SummFAFR_DE_Data newTransaction;
+
+            if (result.ReturnCode != ReturnCode.Invalid)
+                (newTransaction, batch) = await BuildFA(transactionType, faTransaction);
             else
-            {
-                // create pending
-                await DBfinance.SummFAFR_DERepository.InsertFaFrDe(data);
-            }
+                (newTransaction, batch) = await BuildPendingFA(transactionType, faTransaction, result.ReasonCode);
+
+            await DBfinance.SummFAFR_DERepository.CreateFaFrDeAsync(newTransaction);
+            await DBfinance.ControlBatchRepository.UpdateBatchAsync(batch);
 
             return result;
         }
-               
+
+        private async Task<(SummFAFR_DE_Data, ControlBatchData)> BuildFA(string transactionType, SummFAFR_DE_Data data)
+        {
+            byte pend_SummFAFR_OrigFA_Ind = transactionType switch
+            {
+                TransactionType.FundAvailable => 1,
+                TransactionType.FundReversal => 0,
+                TransactionType.FundTransferred => 9,
+                _ => 1
+            };
+
+            var newFaTransaction = new SummFAFR_DE_Data
+            {
+                Appl_EnfSrv_Cd = "FO01",
+                Appl_CtrlCd = "PEND",
+                Batch_Id = data.Batch_Id,
+                SummFAFR_OrigFA_Ind = pend_SummFAFR_OrigFA_Ind,
+                SummFAFRLiSt_Cd = 0,
+                EnfSrv_Src_Cd = data.EnfSrv_Src_Cd,
+                EnfSrv_Loc_Cd = data.EnfSrv_Loc_Cd,
+                EnfSrv_SubLoc_Cd = data.EnfSrv_SubLoc_Cd,
+                SummFAFR_FA_Pym_Id = data.SummFAFR_FA_Pym_Id,
+                SummFAFR_MultiSumm_Ind = 0,
+                SummFAFR_Post_Dte = DateTime.Now,
+                SummFAFR_FA_Payable_Dte = data.SummFAFR_FA_Payable_Dte,
+                SummFAFR_AvailDbtrAmt_Money = data.SummFAFR_AvailAmt_Money,
+                SummFAFR_AvailAmt_Money = data.SummFAFR_AvailAmt_Money,
+                Dbtr_Id = data.Dbtr_Id,
+                SummFAFR_Comments = data.Dbtr_Id
+            };
+
+            var batch = await DBfinance.ControlBatchRepository.GetControlBatchAsync(data.Batch_Id);
+            if (batch is null)
+                throw new Exception("BatchID does not exist");
+
+            batch.BatchLiSt_Cd = 1; // in progress
+
+            return (newFaTransaction, batch);
+
+        }
+
+        private async Task<(SummFAFR_DE_Data, ControlBatchData)> BuildPendingFA(string transactionType, SummFAFR_DE_Data data,
+                                                                                EventCode reasonCode)
+        {
+            byte pend_SummFAFR_OrigFA_Ind = transactionType switch
+            {
+                TransactionType.FundAvailable => 1,
+                TransactionType.FundReversal => 0,
+                TransactionType.FundTransferred => 9,
+                _ => 1
+            };
+
+            var newPendingTransaction = new SummFAFR_DE_Data
+            {
+                Appl_EnfSrv_Cd = "FO01",
+                Appl_CtrlCd = "PEND",
+                Batch_Id = data.Batch_Id,
+                SummFAFR_OrigFA_Ind = pend_SummFAFR_OrigFA_Ind,
+                SummFAFRLiSt_Cd = 51,
+                SummFAFR_Reas_Cd = (int)reasonCode,
+                EnfSrv_Src_Cd = data.EnfSrv_Src_Cd,
+                EnfSrv_Loc_Cd = data.EnfSrv_Loc_Cd,
+                EnfSrv_SubLoc_Cd = data.EnfSrv_SubLoc_Cd,
+                SummFAFR_FA_Pym_Id = data.SummFAFR_FA_Pym_Id,
+                SummFAFR_MultiSumm_Ind = 0,
+                SummFAFR_Post_Dte = DateTime.Now,
+                SummFAFR_FA_Payable_Dte = data.SummFAFR_FA_Payable_Dte,
+                SummFAFR_AvailDbtrAmt_Money = data.SummFAFR_AvailAmt_Money,
+                SummFAFR_AvailAmt_Money = data.SummFAFR_AvailAmt_Money,
+                Dbtr_Id = data.Dbtr_Id,
+                SummFAFR_Comments = data.Dbtr_Id
+            };
+
+            var batch = await DBfinance.ControlBatchRepository.GetControlBatchAsync(data.Batch_Id);
+            if (batch is null)
+                throw new Exception("BatchID does not exist for InsertPendingForProcessingFAFR");
+
+            batch.Batch_Pend_Ind = 1;
+            if (batch.PendTtlAmt_Money is null)
+                batch.PendTtlAmt_Money = data.SummFAFR_AvailAmt_Money;
+            else
+                batch.PendTtlAmt_Money += data.SummFAFR_AvailAmt_Money;
+            batch.BatchLiSt_Cd = 1; // in progress
+
+            return (newPendingTransaction, batch);
+
+        }
+
         public async Task<SummFAFR_DE_Data> GetFaFrDe(int summFaFrDeId)
         {
             return await DBfinance.SummFAFR_DERepository.GetSummFaFrDeAsync(summFaFrDeId);
@@ -121,7 +209,7 @@ namespace FOAEA3.Business.Areas.Financials
 
             if (data.SummFAFR_FA_Pym_Id[0..9] == confirmedSin.SVR_SIN)
                 return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
-            
+
             return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57002_INVALID_SIN__DOES_NOT_MATCH_SIN_ON_SUMMONS };
         }
 
@@ -129,7 +217,7 @@ namespace FOAEA3.Business.Areas.Financials
         {
             if (data.SummFAFR_FA_Payable_Dte > DateTime.Now)
                 return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57003_WARNING__PAYABLE_DATE_IS_IN_FUTURE };
-            
+
             return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
         }
 

@@ -79,7 +79,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromProcSingleValueAsync<int>("CountDuplicateFR", parameters);
         }
 
-        public async Task<SummFAFR_DE_Data> InsertFaFrDe(SummFAFR_DE_Data data)
+        public async Task<SummFAFR_DE_Data> CreateFaFrDeAsync(SummFAFR_DE_Data data)
         {
             var parameters = new Dictionary<string, object> {
                 {"Appl_EnfSrv_Cd", data.Appl_EnfSrv_Cd },

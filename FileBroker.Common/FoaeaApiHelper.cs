@@ -28,6 +28,7 @@ namespace FileBroker.Common
                                                                 currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionHelper, token);
             var financialAPIs = new FinancialAPIBroker(apiInterceptionHelper, token);
+            var controlBatchAPIs = new ControlBatchAPIBroker(apiInterceptionHelper, token);
             var transactionAPIs = new TransactionAPIBroker(apiInterceptionHelper, token);
 
             var apiLicenceDenialHelper = new APIBrokerHelper(apiRootData.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
@@ -45,6 +46,7 @@ namespace FileBroker.Common
                 Accounts = loginAPIs,
                 Sins = sinsAPIs,
                 Financials = financialAPIs,
+                ControlBatches = controlBatchAPIs,
                 Transactions = transactionAPIs,
 
                 TracingApplications = tracingApplicationAPIs,

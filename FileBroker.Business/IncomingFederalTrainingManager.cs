@@ -1,7 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
-using FOAEA3.Model.Enums;
-using FOAEA3.Model.Structs;
 
 namespace FileBroker.Business
 {
@@ -46,7 +44,7 @@ namespace FileBroker.Business
                 if (errors.Any())
                     return errors;
 
-                string subCategory = fileTableData.Category[6..];
+                string subCategory = fileTableData.Category[6..]; 
 
                 ValidateHeader(trainingFileData.TRIN01, flatFileName, ref errors);
                 ValidateDetails(trainingFileData.TRIN02, subCategory, ref errors);
@@ -67,11 +65,23 @@ namespace FileBroker.Business
                     if (!errors.Any())
                     {
                         var incomingTrainingTable = BuildIncomingTrainingData(batchName, trainingFileData.TRIN02,
-                                                                              out int recordCountFAFR, out decimal totalAmountFAFR);
+                                                                              out int recordCountFAFR,
+                                                                              out decimal totalAmountFAFR);
 
                         var controlBatchData = await CreateControlBatch(batchName, recordCountFAFR, totalAmountFAFR);
 
-                        await CreateTransactions(flatFileName, controlBatchData, trainingFileData.TRIN02);
+                        bool success = await CreateTransactions(flatFileName, controlBatchData, trainingFileData.TRIN02);
+
+                        if (success)
+                        {
+                            if (recordCountFAFR > 0)
+                                await APIs.ControlBatches.MarkBatchAsLoaded(controlBatchData);
+
+                            await DB.FundsAvailableIncomingTable.UpdateFundsAvailableIncomingTraining(incomingTrainingTable);
+
+                            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                        }
+
                     }
                 }
                 finally
@@ -86,7 +96,6 @@ namespace FileBroker.Business
             }
             finally
             {
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
                 await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
             }
 
@@ -236,10 +245,10 @@ namespace FileBroker.Business
                 PendTtlAmt_Money = null
             };
 
-            return await APIs.Financials.CreateControlBatch(batchData);
+            return await APIs.ControlBatches.CreateControlBatch(batchData);
         }
 
-        private async Task<bool> CreateTransactions(string flatFileName, ControlBatchData controlBatchData, 
+        private async Task<bool> CreateTransactions(string flatFileName, ControlBatchData controlBatchData,
                                                     List<FedInterceptionTraining_RecType02> details)
         {
             try
@@ -271,7 +280,7 @@ namespace FileBroker.Business
             catch (Exception e)
             {
                 await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"Error Sending Transactions. Batch Cancelled",
-                                                                    $"Error processing  {flatFileName}", e, displayExceptionError: true); 
+                                                                    $"Error processing  {flatFileName}", e, displayExceptionError: true);
                 return false;
             }
 

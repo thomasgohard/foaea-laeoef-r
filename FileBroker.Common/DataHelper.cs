@@ -19,7 +19,7 @@ namespace FileBroker.Common
             services.AddScoped<IFileAuditRepository>(m => ActivatorUtilities.CreateInstance<DBFileAudit>(m, fileBrokerDB));
             services.AddScoped<IRequestLogRepository>(m => ActivatorUtilities.CreateInstance<DBRequestLog>(m, fileBrokerDB));
             services.AddScoped<ITranslationRepository>(m => ActivatorUtilities.CreateInstance<DBTranslation>(m, fileBrokerDB));
-            services.AddScoped<IFundsAvailableRepository>(m => ActivatorUtilities.CreateInstance<DBFundsAvailable>(m, fileBrokerDB));
+            services.AddScoped<IFundsAvailableIncomingRepository>(m => ActivatorUtilities.CreateInstance<DBFundsAvailable>(m, fileBrokerDB));
             services.AddScoped<IProcessParameterRepository>(m => ActivatorUtilities.CreateInstance<DBProcessParameter>(m, fileBrokerDB));
             services.AddScoped<IOutboundAuditRepository>(m => ActivatorUtilities.CreateInstance<DBOutboundAudit>(m, fileBrokerDB));
             services.AddScoped<IErrorTrackingRepository>(m => ActivatorUtilities.CreateInstance<DBErrorTracking>(m, fileBrokerDB));
@@ -45,7 +45,7 @@ namespace FileBroker.Common
                 TranslationTable = new DBTranslation(fileBrokerDB),
                 RequestLogTable = new DBRequestLog(fileBrokerDB),
                 LoadInboundAuditTable = new DBLoadInboundAudit(fileBrokerDB),
-                FundsAvailableTable = new DBFundsAvailable(fileBrokerDB)
+                FundsAvailableIncomingTable = new DBFundsAvailable(fileBrokerDB)
             };
         }
     }

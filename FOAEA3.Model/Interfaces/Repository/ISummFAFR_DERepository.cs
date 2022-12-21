@@ -16,6 +16,6 @@ namespace FOAEA3.Model.Interfaces.Repository
                                                string paymentId, DateTime payableDate, int summFaFrId = 0);
         Task<int> CountDuplicateFundsReversal(string debtorId, string enfsrv_src_cd, string enfsrv_loc_cd,
                                               string paymentId, DateTime payableDate, int summFaFrId = 0);
-        Task<SummFAFR_DE_Data> InsertFaFrDe(SummFAFR_DE_Data data);
+        Task<SummFAFR_DE_Data> CreateFaFrDeAsync(SummFAFR_DE_Data data);
     }
 }

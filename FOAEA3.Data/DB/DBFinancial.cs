@@ -108,16 +108,6 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<IFMSdata>("MessageBrokerGetIFMSBatchData", parameters, FillIFMSdataFromReader);
         }
 
-        public async Task CloseControlBatchAsync(string batchId)
-        {
-            var parameters = new Dictionary<string, object>
-                {
-                    { "batchID",  batchId}
-                };
-
-            await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
-        }
-
         private void FillIFMSdataFromReader(IDBHelperReader rdr, IFMSdata data)
         {
             data.IPU_Nr = rdr["IPU_Nr"] as string;

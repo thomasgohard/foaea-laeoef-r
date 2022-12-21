@@ -10,6 +10,5 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<BlockFundData>> GetBlockFundsData(string enfSrv);
         Task<List<DivertFundData>> GetDivertFundsData(string enfSrv, string batchId);
         Task<List<IFMSdata>> GetIFMSdataAsync(string batchId);
-        Task CloseControlBatchAsync(string batchId);
     }
 }

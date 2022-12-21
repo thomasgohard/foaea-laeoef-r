@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 
 namespace FileBroker.Model.Interfaces
 {
-    public interface IFundsAvailableRepository
+    public interface IFundsAvailableIncomingRepository
     {
         Task<List<FundsAvailableIncomingTrainingData>> GetFundsAvailableIncomingTrainingData(string batchId);
+        Task UpdateFundsAvailableIncomingTraining(List<FundsAvailableIncomingTrainingData> data);
     }
 }

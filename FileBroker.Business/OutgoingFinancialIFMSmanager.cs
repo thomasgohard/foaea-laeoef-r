@@ -59,7 +59,7 @@ namespace FileBroker.Business
                 await File.WriteAllTextAsync(newFilePath, fileContent);
 
                 await APIs.Financials.CloseCR_PADReventsAsync(batch.Batch_Id, processCodes.EnfSrv_Cd);
-                await APIs.Financials.CloseControlBatch(batch.Batch_Id);
+                await APIs.ControlBatches.CloseControlBatch(batch.Batch_Id);
 
                 await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
 

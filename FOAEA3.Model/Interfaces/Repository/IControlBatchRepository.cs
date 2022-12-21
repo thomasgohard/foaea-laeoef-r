@@ -13,6 +13,9 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<BatchSimpleData>> GetReadyDivertFundsBatches(string enfSrv_Cd, string enfSrv_Loc_Cd);
         Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values);
         Task<ControlBatchData> GetControlBatchAsync(string batchId);
+        Task CloseControlBatchAsync(string batchId);
+        Task UpdateBatchAsync(ControlBatchData batch);
+        Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount);
         Task<bool> GetPaymentIdIsSinIndicator(string batchId);
     }
 }

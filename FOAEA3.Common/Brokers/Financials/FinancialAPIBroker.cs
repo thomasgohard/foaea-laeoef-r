@@ -43,41 +43,6 @@ namespace FOAEA3.Common.Brokers.Financials
         {
             string apiCall = $"api/v1/IFMS?batchId={batchId}";
             return await ApiHelper.GetDataAsync<List<IFMSdata>>(apiCall, token: Token);
-        }
-
-        public async Task CloseControlBatch(string batchId)
-        {
-            string apiCall = $"api/v1/ControlBatches/close?batchId={batchId}";
-            await ApiHelper.SendCommandAsync(apiCall, token: Token);
-        }
-
-        public async Task<DateTime> GetLastUiBatchLoaded()
-        {
-            string apiCall = $"api/v1/ControlBatches/LastUiBatchLoaded";
-            return await ApiHelper.GetDataAsync<DateTime>(apiCall, token: Token);
-        }
-
-        public async Task<List<BatchSimpleData>> GetReadyDivertFundsBatches(string enfSrv, string enfSrvLoc)
-        {
-            string apiCall = $"api/v1/ControlBatches/readyDivertFunds?enfSrv={enfSrv}&enfSrvLoc={enfSrvLoc}";
-            return await ApiHelper.GetDataAsync<List<BatchSimpleData>>(apiCall, token: Token);
-        }
-
-        public async Task<ControlBatchData> GetBatchById(string batchId)
-        {
-            string apiCall = $"api/v1/ControlBatches/{batchId}";
-            return await ApiHelper.GetDataAsync<ControlBatchData>(apiCall, token: Token);
-        }
-
-        public async Task<ControlBatchData> CreateControlBatch(ControlBatchData controlBatchData)
-        {
-            string apiCall = $"api/v1/ControlBatches";
-            return await ApiHelper.PostDataAsync<ControlBatchData, ControlBatchData>(apiCall, controlBatchData, token: Token);
-        }
-
-        public Task<ControlBatchData> GetControlBatch(string batchId)
-        {
-            throw new NotImplementedException();
-        }
+        }       
     }
 }

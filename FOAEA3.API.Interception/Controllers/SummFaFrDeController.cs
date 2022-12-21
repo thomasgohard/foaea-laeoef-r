@@ -32,7 +32,7 @@ namespace FOAEA3.API.Interception.Controllers
             var fafrdeData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SummFAFR_DE_Data>(Request);
 
             var manager = new TransactionManager(db, dbFinance);
-            var result = await manager.InsertFaFrDe(transactionType, fafrdeData);
+            var result = await manager.CreateFaFrDe(transactionType, fafrdeData);
 
             if (result.ReturnCode == Model.Enums.ReturnCode.Valid)
             {

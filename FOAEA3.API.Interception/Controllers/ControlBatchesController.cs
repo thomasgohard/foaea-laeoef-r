@@ -19,7 +19,7 @@ public class ControlBatchesController : FoaeaControllerBase
                                                                       [FromServices] IRepositories db,
                                                                       [FromServices] IRepositories_Finance dbFinance)
     {
-        var manager = new FinancialManager(db, dbFinance);
+        var manager = new ControlBatchManager(db, dbFinance);
         var controlBatchData = await manager.GetControlBatch(batchId);
 
         if (controlBatchData is not null)
@@ -28,13 +28,27 @@ public class ControlBatchesController : FoaeaControllerBase
             return NotFound();
     }
 
-    [HttpPost("close")]
-    public async Task<ActionResult> CloseControlBatch([FromQuery] string batchId,
+    [HttpPut("{batchId}/close")]
+    public async Task<ActionResult> CloseControlBatch([FromRoute] string batchId,
                                                       [FromServices] IRepositories db,
                                                       [FromServices] IRepositories_Finance dbFinance)
     {
-        var manager = new FinancialManager(db, dbFinance);
+        var manager = new ControlBatchManager(db, dbFinance);
         await manager.CloseControlBatchAsync(batchId);
+
+        return Ok();
+    }
+
+    [HttpPut("{batchId}/markAsLoaded")]
+    public async Task<ActionResult> MarkBatchAsLoaded([FromRoute] string batchId,
+                                                      [FromServices] IRepositories db,
+                                                      [FromServices] IRepositories_Finance dbFinance)
+    {
+        var controlBatchData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ControlBatchData>(Request);
+       
+        var manager = new ControlBatchManager(db, dbFinance);
+        if (controlBatchData.BatchType_Cd == "FA")
+            await manager.UpdateBatchStateFtpProcessedAsync(batchId, -1);
 
         return Ok();
     }
@@ -43,7 +57,7 @@ public class ControlBatchesController : FoaeaControllerBase
     public async Task<ActionResult<DateTime>> GetDateLastUIBatchLoaded([FromServices] IRepositories db,
                                                                        [FromServices] IRepositories_Finance dbFinance)
     {
-        var manager = new FinancialManager(db, dbFinance);
+        var manager = new ControlBatchManager(db, dbFinance);
         return Ok(await manager.GetDateLastUIBatchLoaded());
     }
 
@@ -52,7 +66,7 @@ public class ControlBatchesController : FoaeaControllerBase
                                                                    [FromServices] IRepositories db,
                                                                    [FromServices] IRepositories_Finance dbFinance)
     {
-        var manager = new FinancialManager(db, dbFinance);
+        var manager = new ControlBatchManager(db, dbFinance);
         return Ok(await manager.GetReadyDivertFundsBatches(enfSrv, enfSrvLoc));
     }
 
@@ -62,15 +76,16 @@ public class ControlBatchesController : FoaeaControllerBase
     {
         var controlBatchData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ControlBatchData>(Request);
 
-        var manager = new FinancialManager(db, dbFinance);
+        var manager = new ControlBatchManager(db, dbFinance);
         controlBatchData = await manager.CreateControlBatchAsync(controlBatchData);
 
-        if (controlBatchData is not null) {
+        if (controlBatchData is not null)
+        {
             var rootPath = $"https://{HttpContext.Request.Host}/{controlBatchData.Batch_Id}";
             return Created(rootPath, controlBatchData);
         }
         else
             return BadRequest();
     }
-        
+
 }
