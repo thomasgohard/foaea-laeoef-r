@@ -6,7 +6,7 @@ namespace FileBroker.Model
     public struct FedInterceptionTraining_RecType01
     {
         public int RecType;
-        public int Cycle;
+        public string Cycle;
         public DateTime FileDate;
         public string EnfSrv_Src_Cd;
         public string EnfSrv_Loc_Cd;

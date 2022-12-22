@@ -64,11 +64,10 @@ namespace FileBroker.Web.Pages.Tasks
                 var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
                 var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
-                //var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
 
                 var errors = new List<string>();
 
-                if (file.ContentType.ToLower().In("text/xml", "application/json"))
+                if (file.ContentType.ToLower().In("text/xml", "application/json", "application/octet-stream"))
                 {
                     var result = new StringBuilder();
                     using (var reader = new StreamReader(file.OpenReadStream()))
@@ -77,22 +76,22 @@ namespace FileBroker.Web.Pages.Tasks
                             result.AppendLine(reader.ReadLine());
                     }
 
-                    string fileContentAsJson;
+                    string fileContent;
                     if (file.ContentType.ToLower() == "text/xml")
-                        fileContentAsJson = FileHelper.ConvertXmlToJson(result.ToString(), errors);
-                    else // else already json
-                        fileContentAsJson = result.ToString();
+                        fileContent = FileHelper.ConvertXmlToJson(result.ToString(), errors);
+                    else // file content is either json or flat file
+                        fileContent = result.ToString();
 
                     switch (incomingFileInfo.Category)
                     {
                         case "INTAPPIN": // MEP Interception
                             var provincialFileHelper = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
-                            await provincialFileHelper.ProcessIncomingInterception(fileContentAsJson, fileName, errors);                            
+                            await provincialFileHelper.ProcessIncomingInterception(fileContent, fileName, errors);                            
                             break;
 
                         case "FAFRFTTRA": // FED Training FAs
                             var trainingFileManager = new IncomingFederalTrainingManager(foaeaApis, db, Config);
-                            errors = await trainingFileManager.ProcessIncomingTraining(fileContentAsJson, fileName);
+                            errors = await trainingFileManager.ProcessIncomingTraining(fileContent, fileName);
                             break;
 
                         case "FAFRFTTRT": // FED Training FTs

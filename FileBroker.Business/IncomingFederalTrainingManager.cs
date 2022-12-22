@@ -44,9 +44,9 @@ namespace FileBroker.Business
                 if (errors.Any())
                     return errors;
 
-                string subCategory = fileTableData.Category[6..]; 
+                string subCategory = fileTableData.Category[6..];
 
-                ValidateHeader(trainingFileData.TRIN01, flatFileName, ref errors);
+                ValidateHeader(trainingFileData.TRIN01, flatFileName, fileTableData.Cycle, ref errors);
                 ValidateDetails(trainingFileData.TRIN02, subCategory, ref errors);
                 ValidateFooter(trainingFileData.TRIN99, trainingFileData.TRIN02, ref errors);
 
@@ -60,7 +60,7 @@ namespace FileBroker.Business
                     if (string.IsNullOrEmpty(trainingFileData.TRIN01.Batch_Identifier))
                         batchName = trainingFileData.TRIN01.Batch_Identifier;
                     else
-                        batchName = trainingFileData.TRIN01.Cycle.ToString();
+                        batchName = trainingFileData.TRIN01.Cycle;
 
                     if (!errors.Any())
                     {
@@ -110,10 +110,18 @@ namespace FileBroker.Business
             return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         }
 
-        private static void ValidateHeader(FedInterceptionTraining_RecType01 dataFromFile, string flatFileName, ref List<string> errors)
+        private static void ValidateHeader(FedInterceptionTraining_RecType01 dataFromFile, string flatFileName, int nextCycle, ref List<string> errors)
         {
             int cycle = FileHelper.GetCycleFromFilename(flatFileName);
-            if (dataFromFile.Cycle != cycle)
+            if (cycle != nextCycle)
+            {
+                errors.Add($"Next expected cycle [{nextCycle}] does not match cycle of file [{cycle}]");
+            }
+
+            // TODO: should be checking cycle in header but there is bad data in incoming Training file and the cycle is off
+            //       so we can't do that right now
+            bool checkHeaderCycle = false;
+            if (checkHeaderCycle && (int.Parse(dataFromFile.Cycle) != cycle))
             {
                 errors.Add($"Cycle in file [{dataFromFile.Cycle}] does not match cycle of file [{cycle}]");
             }
@@ -165,7 +173,7 @@ namespace FileBroker.Business
 
             if ((hashSum != dataFromFile.SINHashTotal) && (dataFromFile.SINHashTotal != 0))
             {
-                long rightMost9 = long.Parse(hashSum.ToString().Substring(hashSum.ToString().Length - 9));
+                long rightMost9 = long.Parse(hashSum.ToString()[^9..]);
                 if (rightMost9 != dataFromFile.SINHashTotal)
                     errors.Add($"Hash Sum Invalid: {dataFromFile.SINHashTotal}");
             }
@@ -183,7 +191,7 @@ namespace FileBroker.Business
             decimal totalAmountFT = 0;
             int recordCountFT = 0;
 
-            for (int i = 0; i == details.Count; i++)
+            for (int i = 0; i < details.Count; i++)
             {
                 var thisData = details[i];
                 details[i] = new FedInterceptionTraining_RecType02

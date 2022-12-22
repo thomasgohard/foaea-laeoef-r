@@ -129,7 +129,7 @@ namespace FOAEA3.Data.DB
         public async Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values)
         {
             var parameters = new Dictionary<string, object>() {
-                { "chrEnfSrv_Src_Cd", "FO01" },
+                { "chrEnfSrv_Src_Cd", values.EnfSrv_Src_Cd },
                 { "chrBatchType_Cd", values.BatchType_Cd },
                 { "dtmBatch_Post_Dte", values.Batch_Post_Dte },
                 { "sntBatchLiSt_Cd", values.BatchLiSt_Cd},
@@ -137,7 +137,6 @@ namespace FOAEA3.Data.DB
             };
 
             if (!string.IsNullOrEmpty(values.Batch_Id)) parameters.Add("chrBatch_Id", values.Batch_Id);
-            if (!string.IsNullOrEmpty(values.EnfSrv_Src_Cd)) parameters.Add("chrEnfSrv_Src_Cd", values.EnfSrv_Src_Cd);
             if (!string.IsNullOrEmpty(values.DataEntryBatch_Id)) parameters.Add("chrDataEntryBatch_Id", values.DataEntryBatch_Id);
             if (values.Batch_Compl_Dte.HasValue) parameters.Add("dtmBatch_Compl_Dte", values.Batch_Compl_Dte.Value);
             if (!string.IsNullOrEmpty(values.Medium_Cd)) parameters.Add("chrMedium_Cd", values.Medium_Cd);
@@ -150,9 +149,9 @@ namespace FOAEA3.Data.DB
 
             var outputParameters = new Dictionary<string, string> {
                 {"intReturnCode", "I"},
-                {"chrBatchId", "C"},
+                {"chrBatchId", "C8"},
                 {"intReasonCode", "I"},
-                {"vchReasonText", "S"}
+                {"vchReasonText", "S255"}
             };
 
             var data = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("fp_XFCtrlBatch", parameters, outputParameters);
