@@ -35,7 +35,7 @@ namespace FileBroker.Business.Helpers
             return errors.Any();
         }
 
-        private async Task ProcessIncomingXmlFile(string fullPath, List<string> errors)
+        public async Task ProcessIncomingXmlFile(string fullPath, List<string> errors)
         {
             string fileNameNoExtension = Path.GetFileNameWithoutExtension(fullPath);
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
@@ -110,7 +110,7 @@ namespace FileBroker.Business.Helpers
                 errors.Add("File was already loading?");
         }
 
-        private async Task ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)
+        public async Task ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)
         {
             errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
 

@@ -19,7 +19,7 @@ namespace FileBroker.Business
             FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
 
-        public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
+        public async Task<List<string>> ProcessIncomingTraining(string flatFileContent, string flatFileName)
         {
             var fileTableData = await GetFileTableDataAsync(flatFileName);
 

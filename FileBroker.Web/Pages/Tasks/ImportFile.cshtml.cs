@@ -1,4 +1,5 @@
 using DBHelper;
+using FileBroker.Business;
 using FileBroker.Business.Helpers;
 using FileBroker.Common;
 using FileBroker.Common.Helpers;
@@ -31,7 +32,7 @@ namespace FileBroker.Web.Pages.Tasks
             Config = config;
         }
 
-        public async Task OnPostUpload(IConfiguration configuration)
+        public async Task OnPostUpload()
         {
             var file = FormFile;
             if (file is not null)
@@ -63,7 +64,7 @@ namespace FileBroker.Web.Pages.Tasks
                 var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
                 var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(Config.ApiRootData);
-                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
+                //var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
 
                 var errors = new List<string>();
 
@@ -84,38 +85,40 @@ namespace FileBroker.Web.Pages.Tasks
 
                     switch (incomingFileInfo.Category)
                     {
-                        case "INTAPPIN":
-
-                            var fileBrokerAccess = new FileBrokerSystemAccess(APIHelper, Config.ApiRootData, Config.FileBrokerLogin.UserName,
-                                                                              Config.FileBrokerLogin.Password);
-
-                            await fileBrokerAccess.SystemLoginAsync();
-                            try
-                            {
-                                // TODO: fix this
-                                //                                await provincialFileManager.ProcessMEPincomingInterceptionFileAsync(errors, fileName, fileContentAsJson, fileBrokerAccess.CurrentToken);
-                                if (errors.Any())
-                                {
-                                    ErrorMessage = String.Empty;
-                                    string lastError = errors.Last();
-                                    foreach (string error in errors)
-                                    {
-                                        ErrorMessage += error;
-                                        ErrorMessage += (error == lastError) ? string.Empty : "; ";
-                                    }
-                                }
-                                else
-                                    InfoMessage = $"File {fileName} processed successfully.";
-                            }
-                            finally
-                            {
-                                await fileBrokerAccess.SystemLogoutAsync();
-                            }
+                        case "INTAPPIN": // MEP Interception
+                            var provincialFileHelper = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
+                            await provincialFileHelper.ProcessIncomingInterception(fileContentAsJson, fileName, errors);                            
                             break;
+
+                        case "FAFRFTTRA": // FED Training FAs
+                            var trainingFileManager = new IncomingFederalTrainingManager(foaeaApis, db, Config);
+                            errors = await trainingFileManager.ProcessIncomingTraining(fileContentAsJson, fileName);
+                            break;
+
+                        case "FAFRFTTRT": // FED Training FTs
+                            break;
+
+                        case "FAFRFTOAS": // FED OAS FAs
+                            break;
+
                         default:
                             ErrorMessage = "Not able to process files of category: " + incomingFileInfo.Category;
                             return;
                     }
+
+                    if (errors.Any())
+                    {
+                        ErrorMessage = String.Empty;
+                        string lastError = errors.Last();
+                        foreach (string error in errors)
+                        {
+                            ErrorMessage += error;
+                            ErrorMessage += (error == lastError) ? string.Empty : "; ";
+                        }
+                    }
+                    else
+                        InfoMessage = $"File {fileName} processed successfully.";
+
                 }
                 else
                 {
