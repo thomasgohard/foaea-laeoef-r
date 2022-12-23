@@ -21,12 +21,9 @@ namespace FileBroker.Business
 
         public async Task<List<string>> ProcessIncomingTraining(string flatFileContent, string flatFileName)
         {
-            var fileTableData = await GetFileTableDataAsync(flatFileName);
-
-            var trainingFileData = new FedInterceptionTrainingBase();
-
             var errors = new List<string>();
 
+            var fileTableData = await GetFileTableDataAsync(flatFileName);
             if (!fileTableData.Active.HasValue || !fileTableData.Active.Value)
             {
                 errors.Add($"[{fileTableData.Name}] is not active.");
@@ -35,15 +32,17 @@ namespace FileBroker.Business
 
             await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
-            string fileCycle = Path.GetExtension(flatFileName)[1..];
             try
             {
+                var trainingFileData = new FedInterceptionTrainingBase();
+
                 var fileLoader = new IncomingFederalTrainingFileLoader(DB.FlatFileSpecs, fileTableData.PrcId);
                 await fileLoader.FillFederalTrainingFileDataFromFlatFileAsync(trainingFileData, flatFileContent, errors);
 
                 if (errors.Any())
                     return errors;
 
+                string fileCycle = Path.GetExtension(flatFileName)[1..];
                 string subCategory = fileTableData.Category[6..];
 
                 ValidateHeader(trainingFileData.TRIN01, flatFileName, fileTableData.Cycle, ref errors);
@@ -56,11 +55,7 @@ namespace FileBroker.Business
                 await FoaeaAccess.SystemLoginAsync();
                 try
                 {
-                    string batchName;
-                    if (string.IsNullOrEmpty(trainingFileData.TRIN01.Batch_Identifier))
-                        batchName = trainingFileData.TRIN01.Batch_Identifier;
-                    else
-                        batchName = trainingFileData.TRIN01.Cycle;
+                    string batchName = GetBatchName(trainingFileData.TRIN01);
 
                     if (!errors.Any())
                     {
@@ -103,6 +98,14 @@ namespace FileBroker.Business
 
         }
 
+        private static string GetBatchName(FedInterceptionTraining_RecType01 header)
+        {
+            if (string.IsNullOrEmpty(header.Batch_Identifier))
+                return header.Batch_Identifier;
+            else
+                return header.Cycle;
+        }
+
         private async Task<FileTableData> GetFileTableDataAsync(string flatFileName)
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
@@ -110,7 +113,7 @@ namespace FileBroker.Business
             return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
         }
 
-        private static void ValidateHeader(FedInterceptionTraining_RecType01 dataFromFile, string flatFileName, int nextCycle, ref List<string> errors)
+        private static void ValidateHeader(FedInterceptionTraining_RecType01 header, string flatFileName, int nextCycle, ref List<string> errors)
         {
             int cycle = FileHelper.GetCycleFromFilename(flatFileName);
             if (cycle != nextCycle)
@@ -121,9 +124,9 @@ namespace FileBroker.Business
             // TODO: should be checking cycle in header but there is bad data in incoming Training file and the cycle is off
             //       so we can't do that right now
             bool checkHeaderCycle = false;
-            if (checkHeaderCycle && (int.Parse(dataFromFile.Cycle) != cycle))
+            if (checkHeaderCycle && (int.Parse(header.Cycle) != cycle))
             {
-                errors.Add($"Cycle in file [{dataFromFile.Cycle}] does not match cycle of file [{cycle}]");
+                errors.Add($"Cycle in file [{header.Cycle}] does not match cycle of file [{cycle}]");
             }
         }
 
@@ -154,7 +157,7 @@ namespace FileBroker.Business
             }
         }
 
-        private static void ValidateFooter(FedInterceptionTraining_RecType99 dataFromFile, List<FedInterceptionTraining_RecType02> details,
+        private static void ValidateFooter(FedInterceptionTraining_RecType99 footer, List<FedInterceptionTraining_RecType02> details,
                                            ref List<string> errors)
         {
             long totalAmount = 0;
@@ -165,17 +168,17 @@ namespace FileBroker.Business
                 hashSum += long.Parse(detail.PaymentIdentifier.Substring(7, 9));
             }
 
-            if (totalAmount != dataFromFile.AmountTotal)
-                errors.Add($"FAFRTotalAmount and FTTotalAmount: {totalAmount} does not match trailer record total: {dataFromFile.AmountTotal}");
+            if (totalAmount != footer.AmountTotal)
+                errors.Add($"FAFRTotalAmount and FTTotalAmount: {totalAmount} does not match trailer record total: {footer.AmountTotal}");
 
-            if (dataFromFile.ResponseCnt != details.Count)
-                errors.Add($"FAFRRecordCount and FTRecordCount: {details.Count} does not match trailer record total: {dataFromFile.ResponseCnt}");
+            if (footer.ResponseCnt != details.Count)
+                errors.Add($"FAFRRecordCount and FTRecordCount: {details.Count} does not match trailer record total: {footer.ResponseCnt}");
 
-            if ((hashSum != dataFromFile.SINHashTotal) && (dataFromFile.SINHashTotal != 0))
+            if ((hashSum != footer.SINHashTotal) && (footer.SINHashTotal != 0))
             {
                 long rightMost9 = long.Parse(hashSum.ToString()[^9..]);
-                if (rightMost9 != dataFromFile.SINHashTotal)
-                    errors.Add($"Hash Sum Invalid: {dataFromFile.SINHashTotal}");
+                if (rightMost9 != footer.SINHashTotal)
+                    errors.Add($"Hash Sum Invalid: {footer.SINHashTotal}");
             }
         }
 
