@@ -92,7 +92,6 @@ namespace DBHelper
         public async Task<List<Tdata>> GetDataFromStoredProcAsync<Tdata>(string procName, Dictionary<string, object> parameters,
                                                         Action<IDBHelperReader, Tdata> fillDataFromReader) where Tdata : class, new()
         {
-
             ValidateConfiguration();
 
             var result = new ConcurrentBag<Tdata>();
@@ -104,7 +103,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -162,7 +161,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -212,7 +211,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -262,7 +261,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -353,7 +352,9 @@ namespace DBHelper
                 using SqlCommand cmd = CreateCommand(procName, con);
                 if ((parameters != null) && (parameters.Count > 0))
                     foreach (var item in parameters)
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                       AddParameter(cmd.Parameters, item.Key, item.Value);
+
+                //AddParameter(cmd.Parameters, item.Key, item.Value);
 
                 var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                 retParameter.Direction = ParameterDirection.ReturnValue;
@@ -396,7 +397,7 @@ namespace DBHelper
                 using SqlCommand cmd = CreateCommandFromSql(sql, con);
                 if ((parameters != null) && (parameters.Count > 0))
                     foreach (var item in parameters)
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
 
                 LastException = null;
                 try
@@ -434,7 +435,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -478,10 +479,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        if (item.Value == null)
-                            cmd.Parameters.AddWithValue("@" + item.Key, DBNull.Value);
-                        else
-                            cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -545,7 +543,7 @@ namespace DBHelper
                 {
                     foreach (var item in parameters)
                     {
-                        cmd.Parameters.AddWithValue("@" + item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
                     }
                 }
 
@@ -705,10 +703,7 @@ namespace DBHelper
 
             if (extraParameters.Count > 0)
                 foreach (var extraParameter in extraParameters)
-                    if (extraParameter.Value is null)
-                        cmd.Parameters.AddWithValue("@" + extraParameter.Key, DBNull.Value);
-                    else
-                        cmd.Parameters.AddWithValue("@" + extraParameter.Key, extraParameter.Value);
+                    AddParameter(cmd.Parameters, extraParameter.Key, extraParameter.Value);
 
             var retParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
             retParameter.Direction = ParameterDirection.ReturnValue;
@@ -972,6 +967,14 @@ namespace DBHelper
                 CommandType = CommandType.Text,
                 CommandTimeout = 240
             };
+        }
+
+        private static void AddParameter(SqlParameterCollection parameters, string key, object value)
+        {
+            if (value is not null)
+                parameters.AddWithValue("@" + key, value);
+            else
+                parameters.AddWithValue("@" + key, DBNull.Value);
         }
 
     }
