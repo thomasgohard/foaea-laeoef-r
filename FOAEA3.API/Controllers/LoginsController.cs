@@ -28,6 +28,121 @@ namespace FOAEA3.API.Controllers
         public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
         [AllowAnonymous]
+        [HttpPost("SubjectLogin")]
+        public async Task<ActionResult> SubjectLoginAction([FromBody] FoaeaLoginData loginData,
+                                                           [FromServices] IRepositories db)
+        {
+            var configHelper = new FoaeaConfigurationHelper();
+
+            var tokenConfig = configHelper.Tokens;
+            if (tokenConfig == null)
+                return StatusCode(500);
+
+            (var principal, var submitters) = await LoginHandler.LoginSubject(loginData.UserName, loginData.Password, db);
+            if (principal is not null && principal.Identity is not null)
+            {
+                string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
+                string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
+                string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
+                int expireMinutes = tokenConfig.ExpireMinutes;
+                int refreshExpireMinutes = tokenConfig.RefreshTokenExpireMinutes;
+
+                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey,
+                                                                           claims: principal.Claims.ToList());
+                string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+                DateTime refreshTokenExpiration = DateTime.Now.AddMinutes(refreshExpireMinutes);
+
+                var tokenData = new TokenData
+                {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    TokenExpiration = token.ValidTo,
+                    RefreshToken = refreshToken,
+                    RefreshTokenExpiration = refreshTokenExpiration
+                };
+
+                var securityToken = new SecurityTokenData
+                {
+                    Token = tokenData.Token,
+                    TokenExpiration = tokenData.TokenExpiration,
+                    RefreshToken = tokenData.RefreshToken,
+                    RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
+                    SubjectName = loginData.UserName,
+                    Subm_SubmCd = loginData.Submitter,
+                    // fix this to handle multiple roles
+                    Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
+                };
+                await db.SecurityTokenTable.CreateAsync(securityToken);
+
+
+
+                return Ok(new TokenAndSubmittersData { Token = tokenData, Submitters = submitters });
+            }
+            else
+            {
+                return BadRequest("Login failed.");
+            }
+        }
+
+        [HttpPut("SelectSubmitter")]
+        [Authorize(Roles = "SelectSubmitter")]
+        public async Task<ActionResult> SelectSubmitterAction([FromQuery] string submitter,
+                                                              [FromServices] IRepositories db)
+        {
+            var user = User;
+            string subjectName = user?.Identity?.Name;
+
+            var configHelper = new FoaeaConfigurationHelper();
+
+            var tokenConfig = configHelper.Tokens;
+            if (tokenConfig == null)
+                return StatusCode(500);
+
+            var principal = await LoginHandler.SelectSubmitter(subjectName, submitter, db);
+            if (principal is not null && principal.Identity is not null)
+            {
+                string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
+                string issuer = tokenConfig.Issuer.ReplaceVariablesWithEnvironmentValues();
+                string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
+                int expireMinutes = tokenConfig.ExpireMinutes;
+                int refreshExpireMinutes = tokenConfig.RefreshTokenExpireMinutes;
+
+                JwtSecurityToken token = SecurityTokenHelper.GenerateToken(issuer, audience, expireMinutes, apiKey,
+                                                                           claims: principal.Claims.ToList());
+                string refreshToken = SecurityTokenHelper.GenerateRefreshToken();
+
+                DateTime refreshTokenExpiration = DateTime.Now.AddMinutes(refreshExpireMinutes);
+
+                var tokenData = new TokenData
+                {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    TokenExpiration = token.ValidTo,
+                    RefreshToken = refreshToken,
+                    RefreshTokenExpiration = refreshTokenExpiration
+                };
+
+                var securityToken = new SecurityTokenData
+                {
+                    Token = tokenData.Token,
+                    TokenExpiration = tokenData.TokenExpiration,
+                    RefreshToken = tokenData.RefreshToken,
+                    RefreshTokenExpiration = tokenData.RefreshTokenExpiration,
+                    SubjectName = subjectName,
+                    Subm_SubmCd = submitter,
+                    // fix this to handle multiple roles
+                    Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
+                };
+                await db.SecurityTokenTable.CreateAsync(securityToken);
+
+                return Ok(tokenData);
+            }
+            else
+            {
+                return BadRequest("Login failed.");
+            }
+        }
+
+        [AllowAnonymous]
         [HttpPost("TestLogin")]
         public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
                                                         [FromServices] IRepositories db)

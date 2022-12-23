@@ -31,7 +31,6 @@ namespace FileBroker.Business
             }
 
             await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
-
             try
             {
                 var trainingFileData = new FedInterceptionTrainingBase();

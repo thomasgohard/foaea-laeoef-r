@@ -135,9 +135,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileBroker.CommandLine", "F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Outgoing.FileCreator.IFMS", "Outgoing.FileCreator.IFMS\Outgoing.FileCreator.IFMS.csproj", "{EC4FD2FB-B341-4F4E-A2AB-32D3C6F81F37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outgoing.FileCreator.Fed.Interception", "Outgoing.FileCreator.Fed.Interception\Outgoing.FileCreator.Fed.Interception.csproj", "{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Outgoing.FileCreator.Fed.Interception", "Outgoing.FileCreator.Fed.Interception\Outgoing.FileCreator.Fed.Interception.csproj", "{3B393E38-DDE3-4960-8FC3-A5DED5E05D0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Incoming.FileWatcher.Fed.Interception", "Incoming.FileWatcher.Fed.Interception\Incoming.FileWatcher.Fed.Interception.csproj", "{69C35453-1D62-485F-B585-1458F2D6E8BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Incoming.FileWatcher.Fed.Interception", "Incoming.FileWatcher.Fed.Interception\Incoming.FileWatcher.Fed.Interception.csproj", "{69C35453-1D62-485F-B585-1458F2D6E8BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

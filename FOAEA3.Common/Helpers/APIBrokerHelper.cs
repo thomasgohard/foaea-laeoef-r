@@ -36,6 +36,7 @@ namespace FOAEA3.Common.Helpers
             CurrentSubmitter = currentSubmitter;
             CurrentUser = currentUser;
             GetRefreshedToken = getRefreshedToken;
+            Messages = new MessageDataList();
         }
 
         public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
@@ -222,7 +223,7 @@ namespace FOAEA3.Common.Helpers
 
                         string keyData = JsonConvert.SerializeObject(data);
 
-                        HttpResponseMessage callResult;                        
+                        HttpResponseMessage callResult;
                         using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
                         {
                             var request = new HttpRequestMessage

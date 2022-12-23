@@ -30,6 +30,21 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
         }
 
+        public async Task<TokenAndSubmittersData> SubjectLoginAsync(FoaeaLoginData loginData)
+        {
+            string apiCall = "api/v1/logins/SubjectLogin";
+            var data = await ApiHelper.PostDataAsync<TokenAndSubmittersData, FoaeaLoginData>(apiCall, loginData);
+            return data;
+        }
+
+        public async Task<TokenData> SelectSubmitterAsync(string submitter)
+        {
+            string apiCall = $"api/v1/logins/SelectSubmitter?submitter={submitter}";
+            var data = await ApiHelper.PutDataAsync<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
+            var msgs = ApiHelper.Messages;
+            return data;
+        }
+
         public async Task<TokenData> LoginAsync(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testLogin";

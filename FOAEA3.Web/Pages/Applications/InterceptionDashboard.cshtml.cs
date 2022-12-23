@@ -2,6 +2,7 @@ using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -42,12 +43,13 @@ namespace FOAEA3.Web.Pages.Applications
             if (!ModelState.IsValid)
             {
                 // TODO: fix token
-                string token = "";
+                string currentToken = HttpContext.Session.GetString("Token");
+                string refreshToken = HttpContext.Session.GetString("RefreshToken");
                 // call API to do search and display result
                 string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
                 string currentUser = "system_support"; // TODO: fix when log in is done
                 var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, currentSubmitter, currentUser);
-                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, token);
+                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, currentToken);
 
                 var quickSearch = new QuickSearchData
                 {
@@ -63,6 +65,7 @@ namespace FOAEA3.Web.Pages.Applications
                     JusticeNumber = SearchCriteria.JusticeNumber
                 };
 
+                apiBroker.Token = currentToken;
                 ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
                 ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
 
