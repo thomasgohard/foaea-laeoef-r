@@ -21,11 +21,17 @@ namespace FOAEA3.Business.Areas.Financials
 
         public async Task<TransactionResult> CreateFaFrDe(string transactionType, SummFAFR_DE_Data faTransaction)
         {
-            var result = await ValidateTransaction(transactionType, faTransaction);
+            var confirmedSinData = await GetConfirmedSinData(faTransaction.Dbtr_Id);
+            if (confirmedSinData is not null)
+            {
+                faTransaction.Appl_EnfSrv_Cd = confirmedSinData.Appl_EnfSrv_Cd;
+                faTransaction.Appl_CtrlCd = confirmedSinData.Appl_CtrlCd;
+            }
+
+            var result = await ValidateTransaction(transactionType, faTransaction, confirmedSinData);
 
             ControlBatchData batch;
             SummFAFR_DE_Data newTransaction;
-
             if (result.ReturnCode != ReturnCode.Invalid)
                 (newTransaction, batch) = await BuildFA(transactionType, faTransaction);
             else
@@ -129,7 +135,8 @@ namespace FOAEA3.Business.Areas.Financials
             return await DBfinance.SummFAFR_DERepository.GetSummFaFrDeAsync(summFaFrDeId);
         }
 
-        private async Task<TransactionResult> ValidateTransaction(string transactionType, SummFAFR_DE_Data newTransaction)
+        private async Task<TransactionResult> ValidateTransaction(string transactionType, SummFAFR_DE_Data newTransaction, 
+                                                                  ConfirmedSinData confirmedSinData)
         {
             TransactionResult result;
 
@@ -137,21 +144,16 @@ namespace FOAEA3.Business.Areas.Financials
             if (result.ReturnCode == ReturnCode.Invalid)
                 return result;
 
-            (result, string sin) = await ValidateDebtorId(newTransaction);
+            result = await ValidateDebtorId(newTransaction);
             if (result.ReturnCode == ReturnCode.Invalid)
                 return result;
 
             if (string.IsNullOrEmpty(newTransaction.Batch_Id))
                 return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.UNDEFINED };
 
-            (result, ConfirmedSinData sinData) = await ValidateSin(newTransaction);
+            result = await ValidateSin(newTransaction, confirmedSinData);
             if (result.ReturnCode == ReturnCode.Invalid)
                 return result;
-            else
-            {
-                newTransaction.Appl_EnfSrv_Cd = sinData.Appl_EnfSrv_Cd;
-                newTransaction.Appl_CtrlCd = sinData.Appl_CtrlCd;
-            }
 
             result = ValidatePayableDate(newTransaction);
             if (result.ReturnCode == ReturnCode.Invalid)
@@ -176,92 +178,45 @@ namespace FOAEA3.Business.Areas.Financials
             return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
         }
 
-        private async Task<(TransactionResult, string sin)> ValidateDebtorId(SummFAFR_DE_Data data)
+        private async Task<TransactionResult> ValidateDebtorId(SummFAFR_DE_Data data)
         {
             string sin = data.SummFAFR_FA_Pym_Id[0..9];
-
             string debtorId = data.Dbtr_Id;
+
             if ((data.EnfSrv_Src_Cd == "UI00") && (data.Dbtr_Id == "9999999"))
                 debtorId = await DB.InterceptionTable.GetDebtorIdByConfirmedSin(sin, "I01");
 
             bool debtorExists = await DB.InterceptionTable.CheckDebtorIdExists(debtorId);
             if (!debtorExists)
-                return (new TransactionResult
-                {
-                    ReturnCode = ReturnCode.Invalid,
-                    ReasonCode = EventCode.C57001_INVALID_DEBTORID__COULD_NOT_LOCATE_ANY_SUMMONS
-                }, sin);
+                return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57001_INVALID_DEBTORID__COULD_NOT_LOCATE_ANY_SUMMONS };
 
-            return (new TransactionResult
-            {
-                ReturnCode = ReturnCode.Valid,
-                ReasonCode = EventCode.UNDEFINED
-            }, sin);
+            return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
         }
 
-        private async Task<(TransactionResult, ConfirmedSinData)> ValidateSin(SummFAFR_DE_Data data)
+        private async Task<TransactionResult> ValidateSin(SummFAFR_DE_Data data, ConfirmedSinData confirmedSinData)
         {
-            var confirmedSinData = await DB.ApplicationTable.GetConfirmedSinByDebtorId(data.Dbtr_Id, isActiveOnly: false);
-            if ((confirmedSinData is null) || !confirmedSinData.Any())
-                confirmedSinData = await DB.ApplicationTable.GetConfirmedSinByDebtorId(data.Dbtr_Id, isActiveOnly: true);
-            if ((confirmedSinData is null) || !confirmedSinData.Any())
-                return (new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57002_INVALID_SIN__DOES_NOT_MATCH_SIN_ON_SUMMONS }, null);
-
-            var confirmedSin = confirmedSinData.First();
+            if (confirmedSinData is null)
+                return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57002_INVALID_SIN__DOES_NOT_MATCH_SIN_ON_SUMMONS };
 
             if (await DBfinance.ControlBatchRepository.GetPaymentIdIsSinIndicator(data.Batch_Id))
-                return (new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED }, confirmedSin);
+                return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
 
-            if (data.SummFAFR_FA_Pym_Id[0..9] == confirmedSin.SVR_SIN)
-                return (new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED }, confirmedSin);
+            if (data.SummFAFR_FA_Pym_Id[0..9] == confirmedSinData.SVR_SIN)
+                return new TransactionResult { ReturnCode = ReturnCode.Valid, ReasonCode = EventCode.UNDEFINED };
 
-            return (new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57002_INVALID_SIN__DOES_NOT_MATCH_SIN_ON_SUMMONS }, null);
+            return new TransactionResult { ReturnCode = ReturnCode.Invalid, ReasonCode = EventCode.C57002_INVALID_SIN__DOES_NOT_MATCH_SIN_ON_SUMMONS };
         }
 
-        /*
-Public Function ValidateSIN(ByVal Debtor_Id As String, ByVal FAPym_Id As String, ByRef SIN As String, ByVal BatchID As String, 
-                            ByRef Appl_EnfSrv_Cd As String, ByRef Appl_CtrlCd As String, ByRef ReturnCode As Integer, 
-                            ByRef ReasonCode As Integer) As Boolean
-        
+        private async Task<ConfirmedSinData> GetConfirmedSinData(string debtorId)
+        {
+            var confirmedSinData = await DB.ApplicationTable.GetConfirmedSinByDebtorId(debtorId, isActiveOnly: false);
+            if ((confirmedSinData is null) || !confirmedSinData.Any())
+                confirmedSinData = await DB.ApplicationTable.GetConfirmedSinByDebtorId(debtorId, isActiveOnly: true);
+            if ((confirmedSinData is null) || !confirmedSinData.Any())
+                return null;
 
-        If SINValRsltData.Tables(0).Rows.Count = 0 Then
-            ReturnCode = Common.GlobalTypes.ReturnCode.Invalid 'Invalid = 1
-            ReasonCode = 57002
-            retFlag = False
-            Exit Function
-        Else
-            Appl_EnfSrv_Cd = SINValRsltData.Tables(0).Rows(0).Item("Appl_EnfSrv_Cd").ToString
-            Appl_CtrlCd = SINValRsltData.Tables(0).Rows(0).Item("Appl_CtrlCd").ToString
-            DbtrSIN = SINValRsltData.Tables(0).Rows(0).Item("SVR_SIN").ToString
-        End If
-
-        Dim PaymentID_Is_SIN_Ind As Boolean
-        With New Justice.FOAEA.MidTier.DataAccess.Transaction(_connectionString)
-            PaymentID_Is_SIN_Ind = .GetPaymentIDIsSINInd(BatchID)
-        End With
-
-        If PaymentID_Is_SIN_Ind = False Then
-            SIN_Valid = Common.GlobalTypes.ReturnCode.Valid 'Valid
-        Else
-            If Mid(FAPym_Id, 1, 9) = DbtrSIN Then
-                'fp_FAFTVal: First 9 char of @chrFAPym_Id = @chrDbtrSin'
-                SIN_Valid = Common.GlobalTypes.ReturnCode.Valid 'Valid = 0
-            Else
-                SIN_Valid = Common.GlobalTypes.ReturnCode.Invalid 'inValid = 1
-                ReturnCode = Common.GlobalTypes.ReturnCode.Invalid 'Invalid = 1
-                ReasonCode = 57002
-                SIN = Mid(FAPym_Id, 1, 9)
-                retFlag = False
-                Exit Function
-            End If
-        End If
-
-        SIN = DbtrSIN
-
-        Return retFlag
-    End Function         
-         */
-
+            return confirmedSinData.First();
+        }
 
         private static TransactionResult ValidatePayableDate(SummFAFR_DE_Data data)
         {
