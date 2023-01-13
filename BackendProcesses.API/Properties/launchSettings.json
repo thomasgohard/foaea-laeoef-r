@@ -3,9 +3,6 @@
     "BackendProcesses.API": {
       "commandName": "Project",
       "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
       "applicationUrl": "https://localhost:13728;http://localhost:13729"
     }
   },
@@ -14,7 +11,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "https://localhost:38348"
+      "applicationUrl": "https://localhost:51053"
     }
   }
 }
