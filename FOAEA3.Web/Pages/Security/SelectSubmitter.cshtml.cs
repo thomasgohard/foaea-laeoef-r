@@ -13,6 +13,8 @@ namespace FOAEA3.Web.Pages.Security
 {
     public class SelectSubmitterModel : PageModel
     {
+        public const string AvailableSubmitters = "AvailableSubmitters";
+
         private ApiConfig ApiConfig { get; set; }
 
         public SelectSubmitterModel([FromServices] IOptions<ApiConfig> apiConfigOption)
@@ -26,9 +28,13 @@ namespace FOAEA3.Web.Pages.Security
 
         public List<string> Submitters { get; set; }
 
-        public void OnGet()
+        public async Task OnGet()
         {
-            Submitters = TempData.Get<List<string>>("SubmitterData");
+            string currentToken = HttpContext.Session.GetString("Token");
+            var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
+            var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
+
+            Submitters = await loginAPIs.GetAvailableSubmittersAsync();
         }
 
         public async Task<ActionResult> OnPostSelectSubmitter()

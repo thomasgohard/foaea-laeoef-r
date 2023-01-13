@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
-using System;
 
 namespace FOAEA3.Web.Helpers
 {

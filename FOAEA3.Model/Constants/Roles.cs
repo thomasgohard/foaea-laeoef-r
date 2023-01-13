@@ -3,6 +3,8 @@
     public static class Roles
     {
         public const string Admin = "Admin";
+        public const string SelectSubmitter = "SelectSubmitter";
+        public const string AcceptTermsOfReference = "AcceptTermsOfReference";
 
         public const string EnforcementService = "ES";
         public const string EnforcementServiceReadOnly = "R1";

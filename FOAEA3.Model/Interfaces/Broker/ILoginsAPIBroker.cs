@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
 {
@@ -7,9 +8,10 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<TokenAndSubmittersData> SubjectLoginAsync(FoaeaLoginData loginData);
+        Task<TokenData> SubjectLoginAsync(FoaeaLoginData loginData);
+        Task<List<string>> GetAvailableSubmittersAsync();
         Task<TokenData> SelectSubmitterAsync(string submitter);
-
+        Task<TokenData> AcceptTerms();
         Task<TokenData> LoginAsync(FoaeaLoginData loginData);
         Task<string> LoginVerificationAsync(FoaeaLoginData loginData);
         Task<string> LogoutAsync(FoaeaLoginData loginData);

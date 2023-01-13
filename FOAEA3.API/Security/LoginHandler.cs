@@ -9,35 +9,47 @@ namespace FOAEA3.API.Security
 {
     public class LoginHandler
     {
-        public static async Task<(ClaimsPrincipal, List<string>)> LoginSubject(string user, string password, IRepositories db)
+        public static async Task<ClaimsPrincipal> LoginSubject(string user, string password, IRepositories db)
         {
             var subject = await db.SubjectTable.GetSubjectAsync(user);
 
             if (subject is null || subject.IsAccountLocked is true)
-                return (new ClaimsPrincipal(), null);
+                return new ClaimsPrincipal();
 
             string encryptedPassword = subject.Password;
             string salt = subject.PasswordSalt;
 
             if (!PasswordHelper.IsValidPassword(password, salt, encryptedPassword))
-                return (new ClaimsPrincipal(), null);
+                return new ClaimsPrincipal();
 
             string userName = subject.SubjectName;
-
-            var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(userName);
-            var validSubmitters = (from role in roles select role.RoleName).ToList();
-
+                       
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, "SelectSubmitter"),
+                new Claim(ClaimTypes.Role, Roles.AcceptTermsOfReference),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            return (principal, validSubmitters);
+            return principal;
+        }
+
+        public static ClaimsPrincipal AcceptTermsOfReference(string userName, IRepositories db)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, Roles.SelectSubmitter),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            return principal;
         }
 
         public static async Task<ClaimsPrincipal> SelectSubmitter(string userName, string submitter, IRepositories db)

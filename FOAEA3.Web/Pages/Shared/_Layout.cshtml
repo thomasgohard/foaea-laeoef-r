@@ -3,7 +3,7 @@
 
 @{
     bool isLoggedIn = false;
-    string currentToken = Accessor.HttpContext.Session.GetString("Token");
+    string currentToken = Accessor?.HttpContext?.Session.GetString("Token");
     if (!string.IsNullOrEmpty(currentToken))
     {
         isLoggedIn = true;

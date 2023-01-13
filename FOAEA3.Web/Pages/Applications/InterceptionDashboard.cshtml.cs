@@ -2,11 +2,15 @@ using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
+using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications
@@ -16,6 +20,9 @@ namespace FOAEA3.Web.Pages.Applications
         private readonly ApiConfig ApiRoots;
 
         private List<ApplicationLifeStateData> ApplLifeStates { get; set; }
+
+        public string UserName { get; set; }
+        public string Submitter { get; set; }
 
         [BindProperty]
         public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -31,11 +38,18 @@ namespace FOAEA3.Web.Pages.Applications
             {
                 Category = "I01"
             };
+
+            
         }
 
         public void OnGet()
         {
             ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
+
+            string currentToken = HttpContext.Session.GetString("Token");
+
+            UserName = TokenDataHelper.UserName(currentToken);
+            Submitter = TokenDataHelper.SubmitterCode(currentToken);
         }
 
         public async Task<IActionResult> OnPostAdvancedSearch()

@@ -9,16 +9,14 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Security
 {
-    public class LoginModel : PageModel
+    public class TermsOfReferenceModel : PageModel
     {
-        public string Message { get; set; }
-
-        [BindProperty]
-        public FoaeaLoginData LoginData { get; set; }
-
         private ApiConfig ApiConfig { get; set; }
 
-        public LoginModel([FromServices] IOptions<ApiConfig> apiConfigOption)
+        [BindProperty]
+        public string Message { get; set; }
+
+        public TermsOfReferenceModel([FromServices] IOptions<ApiConfig> apiConfigOption)
         {
             ApiConfig = apiConfigOption.Value;
         }
@@ -27,17 +25,17 @@ namespace FOAEA3.Web.Pages.Security
         {
         }
 
-        public async Task<ActionResult> OnPostLogin()
+        public async Task<ActionResult> OnPostAccept()
         {
-            string token = string.Empty; // no token since not logged in yet
+            string currentToken = HttpContext.Session.GetString("Token");
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
-            var loginAPIs = new LoginsAPIBroker(apiHelper, token);
+            var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
-            var result = await loginAPIs.SubjectLoginAsync(LoginData);
+            var result = await loginAPIs.AcceptTerms();
 
             if ((result == null) || string.IsNullOrEmpty(result.Token))
             {
-                Message = "Error: login failed.";
+                Message = "Error: accept failed.";
                 return null;
             }
             else
@@ -45,7 +43,7 @@ namespace FOAEA3.Web.Pages.Security
                 HttpContext.Session.SetString("Token", result.Token);
                 HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
 
-                return RedirectToPage("TermsOfReference");
+                return RedirectToPage("SelectSubmitter");
             }
         }
     }
