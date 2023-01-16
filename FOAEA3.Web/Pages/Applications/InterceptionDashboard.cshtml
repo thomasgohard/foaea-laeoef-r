@@ -1,13 +1,20 @@
 ﻿@page
 @using FOAEA3.Model
+@using FOAEA3.Web.Helpers
+@using Microsoft.AspNetCore.Http
+
 @model InterceptionDashboardModel
 @{
     var searchResult = ViewData["SearchResult"] as List<ApplicationSearchResultData>;
     var appLifeStates = ViewData["ApplLifeStates"] as List<ApplicationLifeStateData>;
 }
-<div>@Model.UserName (@Model.Submitter)</div>
+<div>@HttpContext.Session.GetString(SessionValue.USER_NAME) (@HttpContext.Session.GetString(SessionValue.SUBMITTER))</div>
 <div class="text-center interception">
-
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage)) {
+        <div id="errorMessage" class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+    }
     <div class="row">
         <div class="col-md-6 align-middle"><h3>Search</h3></div>
         <div class="col-md-6 text-right align-middle"><br /><br /><span class="glyphicon glyphicon-check"></span> Select to add to My Search - 5 Max</div>

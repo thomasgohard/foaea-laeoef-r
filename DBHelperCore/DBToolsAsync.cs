@@ -19,7 +19,7 @@ namespace DBHelper
         public string UserId { get; set; }
 
         public string Submitter { get; set; }
-        
+
         public string UpdateSubmitter { get; set; }
 
         private Exception LastException
@@ -28,6 +28,7 @@ namespace DBHelper
             {
                 // try to log the error to the database
                 if (value != null)
+                {
                     try
                     {
                         LastError = value.Message + ": " + value.InnerException?.Message;
@@ -47,13 +48,14 @@ namespace DBHelper
                         con.Open();
 
                         cmd.ExecuteNonQuery();
-
                     }
                     catch // (Exception e)
                     {
                         // string error = e.Message;
                         // ignore error -- can't log it to the database for some reason so nowhere to log?
                     }
+                    throw value;
+                }
                 else
                     LastError = string.Empty;
             }
@@ -120,7 +122,7 @@ namespace DBHelper
                     {
 
                         var data = new Tdata();
-                        
+
                         var dataReader = new DBHelperReader(rdr);
 
                         fillDataFromReader(dataReader, data);
@@ -352,7 +354,7 @@ namespace DBHelper
                 using SqlCommand cmd = CreateCommand(procName, con);
                 if ((parameters != null) && (parameters.Count > 0))
                     foreach (var item in parameters)
-                       AddParameter(cmd.Parameters, item.Key, item.Value);
+                        AddParameter(cmd.Parameters, item.Key, item.Value);
 
                 //AddParameter(cmd.Parameters, item.Key, item.Value);
 
@@ -626,7 +628,7 @@ namespace DBHelper
                     {
 
                         var data = new Tdata();
-                        
+
                         var dataReader = new DBHelperReader(rdr);
                         fillDataFromReader(dataReader, data);
 
@@ -654,7 +656,7 @@ namespace DBHelper
             ValidateConfiguration();
 
             var data = new Tdata();
-            
+
             using (var con = new SqlConnection(ConnectionString))
             {
                 using SqlCommand cmd = CreateCommand(tableName + "_Select", con);

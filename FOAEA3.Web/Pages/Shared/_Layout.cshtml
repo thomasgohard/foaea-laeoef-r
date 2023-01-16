@@ -1,9 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using FOAEA3.Web.Helpers
 @inject IHttpContextAccessor Accessor
 
 @{
     bool isLoggedIn = false;
-    string currentToken = Accessor?.HttpContext?.Session.GetString("Token");
+    string currentToken = Accessor?.HttpContext?.Session.GetString(SessionValue.TOKEN);
     if (!string.IsNullOrEmpty(currentToken))
     {
         isLoggedIn = true;

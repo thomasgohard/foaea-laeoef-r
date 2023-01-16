@@ -1,4 +1,5 @@
 using FOAEA3.Common.Brokers;
+using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Web.Helpers;
@@ -30,7 +31,7 @@ namespace FOAEA3.Web.Pages.Security
 
         public async Task OnGet()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
@@ -39,7 +40,7 @@ namespace FOAEA3.Web.Pages.Security
 
         public async Task<ActionResult> OnPostSelectSubmitter()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
@@ -52,8 +53,15 @@ namespace FOAEA3.Web.Pages.Security
             }
             else
             {
-                HttpContext.Session.SetString("Token", result.Token);
-                HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
+                var submitterAPIs = new SubmitterAPIBroker(apiHelper, currentToken);
+                var submitter = await submitterAPIs.GetSubmitterAsync(Submitter);
+
+                HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+                HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
+
+                HttpContext.Session.SetString(SessionValue.USER_NAME, TokenDataHelper.UserName(result.Token));
+                HttpContext.Session.SetString(SessionValue.SUBMITTER, Submitter);
+                HttpContext.Session.SetString(SessionValue.ENF_SERVICE, submitter.EnfSrv_Cd);
 
                 return RedirectToPage("/Applications/InterceptionDashboard");
             }

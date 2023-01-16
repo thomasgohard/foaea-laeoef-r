@@ -1,28 +1,19 @@
 using FOAEA3.Common.Brokers;
-using FOAEA3.Common.Helpers;
+using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications
 {
-    public class InterceptionDashboardModel : PageModel
+    public class InterceptionDashboardModel : FoaeaPageModel
     {
-        private readonly ApiConfig ApiRoots;
-
-        private List<ApplicationLifeStateData> ApplLifeStates { get; set; }
-
-        public string UserName { get; set; }
-        public string Submitter { get; set; }
+        public string ErrorMessage { get; set; }
 
         [BindProperty]
         public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -30,40 +21,32 @@ namespace FOAEA3.Web.Pages.Applications
         [BindProperty]
         public ApplicationSearchCriteriaData MySearchCriteria { get; set; }
 
-        public InterceptionDashboardModel(IOptions<ApiConfig> apiConfig)
+        public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) : base(httpContextAccessor, apiConfig.Value)
         {
-            ApiRoots = apiConfig.Value;
-
             SearchCriteria = new ApplicationSearchCriteriaData
             {
                 Category = "I01"
             };
-
-            
         }
 
-        public void OnGet()
+        public async Task OnGet()
         {
-            ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
-
-            string currentToken = HttpContext.Session.GetString("Token");
-
-            UserName = TokenDataHelper.UserName(currentToken);
-            Submitter = TokenDataHelper.SubmitterCode(currentToken);
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            var apiRefBroker = new ApplicationLifeStatesAPIBroker(APIs, currentToken);
+            
+            var data = await apiRefBroker.GetApplicationLifeStatesAsync();
+            ViewData["ApplLifeStates"] = data;
         }
 
         public async Task<IActionResult> OnPostAdvancedSearch()
         {
             if (!ModelState.IsValid)
             {
-                // TODO: fix token
-                string currentToken = HttpContext.Session.GetString("Token");
-                string refreshToken = HttpContext.Session.GetString("RefreshToken");
-                // call API to do search and display result
-                string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
-                string currentUser = "system_support"; // TODO: fix when log in is done
-                var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, currentSubmitter, currentUser);
-                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, currentToken);
+                string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+                string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+
+                var apiBroker = new ApplicationSearchesAPIBroker(APIs, currentToken);
+                var apiRefBroker = new ApplicationLifeStatesAPIBroker(APIs, currentToken);
 
                 var quickSearch = new QuickSearchData
                 {
@@ -74,14 +57,18 @@ namespace FOAEA3.Web.Pages.Applications
                     Status = SearchCriteria.Status,
                     Category = SearchCriteria.Category,
                     ControlCode = SearchCriteria.ControlCode,
-                    EnforcementService = "ON01",
+                    EnforcementService = enfService,
                     ReferenceNumber = SearchCriteria.EnfSourceRefNumber,
                     JusticeNumber = SearchCriteria.JusticeNumber
                 };
 
                 apiBroker.Token = currentToken;
                 ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
-                ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
+                var data = await apiRefBroker.GetApplicationLifeStatesAsync();
+                ViewData["ApplLifeStates"] = data;
+
+                if (base.APIs.Messages.Any())
+                    ErrorMessage = APIs.Messages[0].Description;
 
                 return Page();
             }
@@ -93,13 +80,11 @@ namespace FOAEA3.Web.Pages.Applications
         {
             if (!ModelState.IsValid)
             {
-                // TODO: fix token
-                string token = "";
-                // call API to do search and display result
-                string currentSubmitter = "ON2D68"; // TODO: fix when log in is done
-                string currentUser = "system_support"; // TODO: fix when log in is done
-                var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, currentSubmitter, currentUser);
-                var apiBroker = new ApplicationSearchesAPIBroker(apiHelper, token);
+                string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+                string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+
+                var apiBroker = new ApplicationSearchesAPIBroker(APIs, currentToken);
+                var apiRefBroker = new ApplicationLifeStatesAPIBroker(APIs, currentToken);
 
                 var quickSearch = new QuickSearchData
                 {
@@ -110,14 +95,18 @@ namespace FOAEA3.Web.Pages.Applications
                     Status = MySearchCriteria.Status,
                     Category = MySearchCriteria.Category,
                     ControlCode = MySearchCriteria.ControlCode,
-                    EnforcementService = "ON01", // TODO: fix when log in is done
+                    EnforcementService = enfService,
                     ReferenceNumber = MySearchCriteria.EnfSourceRefNumber,
                     JusticeNumber = MySearchCriteria.JusticeNumber
                 };
 
                 ViewData["SearchResult"] = await apiBroker.SearchAsync(quickSearch);
-                ViewData["ApplLifeStates"] = ReferenceData.Instance().ApplicationLifeStates;
+                var data = await apiRefBroker.GetApplicationLifeStatesAsync();
+                ViewData["ApplLifeStates"] = data;
 
+                if (base.APIs.Messages.Any())
+                    ErrorMessage = APIs.Messages[0].Description;
+                
                 return Page();
             }
 

@@ -25,20 +25,27 @@ public class ApplicationSearchesController : ControllerBase
                                                                                 [FromQuery] int perPage = 1000,
                                                                                 [FromQuery] string orderBy = "EnforcementService, ControlCode")
     {
-        var searchManager = new ApplicationSearchManager(repositories);
-        List<ApplicationSearchResultData> result;
-        int totalCount;
-        (result, totalCount) = await searchManager.SearchAsync(quickSearchCriteria, page, perPage, orderBy);
+        try
+        {
+            var searchManager = new ApplicationSearchManager(repositories);
+            List<ApplicationSearchResultData> result;
+            int totalCount;
+            (result, totalCount) = await searchManager.SearchAsync(quickSearchCriteria, page, perPage, orderBy);
 
-        Response.Headers.Add("Page", page.ToString());
-        Response.Headers.Add("PerPage", perPage.ToString());
-        Response.Headers.Add("OrderBy", orderBy);
-        Response.Headers.Add("TotalCount", totalCount.ToString());
+            Response.Headers.Add("Page", page.ToString());
+            Response.Headers.Add("PerPage", perPage.ToString());
+            Response.Headers.Add("OrderBy", orderBy);
+            Response.Headers.Add("TotalCount", totalCount.ToString());
 
-        if (string.IsNullOrEmpty(searchManager.LastError))
-            return Ok(result);
-        else
-            return UnprocessableEntity(searchManager.LastError);
+            if (string.IsNullOrEmpty(searchManager.LastError))
+                return Ok(result);
+            else
+                return UnprocessableEntity(searchManager.LastError);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
     }
 
 }

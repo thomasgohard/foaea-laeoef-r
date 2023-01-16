@@ -17,11 +17,11 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
+        public async Task<List<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
         {
             string apiCall = $"api/v1/ApplicationLifeStates";
-            return await ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall, token: Token);
+            var result = await ApiHelper.GetDataAsync<DataList<ApplicationLifeStateData>>(apiCall, token: Token);
+            return result.Items;
         }
-
     }
 }

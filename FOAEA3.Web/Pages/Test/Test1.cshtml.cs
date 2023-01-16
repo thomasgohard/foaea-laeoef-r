@@ -2,6 +2,7 @@ using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
+using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -36,32 +37,32 @@ namespace FOAEA3.Web.Pages.Test
 
             var result = await loginAPIs.LoginAsync(LoginData);
 
-            HttpContext.Session.SetString("Token", result.Token);
-            HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
+            HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+            HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
 
             Message = "Token: " + result.Token;
         }
 
         public async Task OnPostLogout()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
-            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            string currentRefreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI);
             var loginAPIs = new LoginsAPIBroker(apiHelper, currentToken);
 
             await loginAPIs.LogoutAsync(LoginData);
 
-            HttpContext.Session.SetString("Token", "");
-            HttpContext.Session.SetString("RefreshToken", "");
+            HttpContext.Session.SetString(SessionValue.TOKEN, "");
+            HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, "");
 
             Message = "Logged out";
         }
 
         public async Task OnPostVerify()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
-            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            string currentRefreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
             if (string.IsNullOrEmpty(currentToken))
                 Message = "No logged in user.";
@@ -78,8 +79,8 @@ namespace FOAEA3.Web.Pages.Test
 
         public async Task OnPostGetAppAPIVersion()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
-            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            string currentRefreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaRootAPI,
                                                 getRefreshedToken: OnRefreshTokenAsync);
@@ -92,8 +93,8 @@ namespace FOAEA3.Web.Pages.Test
 
         public async Task OnPostGetIntAPIVersion()
         {
-            string currentToken = HttpContext.Session.GetString("Token");
-            string currentRefreshToken = HttpContext.Session.GetString("RefreshToken");
+            string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            string currentRefreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
             var apiHelper = new APIBrokerHelper(apiRoot: ApiConfig.FoaeaInterceptionRootAPI,
                                                 getRefreshedToken: OnRefreshTokenAsync);
@@ -106,8 +107,8 @@ namespace FOAEA3.Web.Pages.Test
 
         private async Task<string> OnRefreshTokenAsync()
         {
-            string oldToken = HttpContext.Session.GetString("Token");
-            string oldRefreshToken = HttpContext.Session.GetString("RefreshToken");
+            string oldToken = HttpContext.Session.GetString(SessionValue.TOKEN);
+            string oldRefreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
             if (string.IsNullOrEmpty(oldToken))
                 return string.Empty;
@@ -117,8 +118,8 @@ namespace FOAEA3.Web.Pages.Test
 
             var result = await loginAPIs.RefreshTokenAsync(oldToken, oldRefreshToken);
 
-            HttpContext.Session.SetString("Token", result.Token);
-            HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
+            HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+            HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
 
             return result.Token;
         }

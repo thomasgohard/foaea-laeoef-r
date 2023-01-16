@@ -1,4 +1,4 @@
-﻿using FOAEA3.Model.Base;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
@@ -8,6 +8,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync();
+        Task<List<ApplicationLifeStateData>> GetApplicationLifeStatesAsync();
     }
 }

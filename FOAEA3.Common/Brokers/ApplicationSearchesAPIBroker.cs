@@ -18,7 +18,9 @@ namespace FOAEA3.Common.Brokers
         public async Task<List<ApplicationSearchResultData>> SearchAsync(QuickSearchData searchCriteria)
         {
             string apiCall = $"api/v1/applicationSearches";
-            return await ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria, token: Token);
+            var result = await ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria, token: Token);
+
+            return result;
         }
     }
 }

@@ -1,6 +1,7 @@
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -42,8 +43,8 @@ namespace FOAEA3.Web.Pages.Security
             }
             else
             {
-                HttpContext.Session.SetString("Token", result.Token);
-                HttpContext.Session.SetString("RefreshToken", result.RefreshToken);
+                HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+                HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
 
                 return RedirectToPage("TermsOfReference");
             }

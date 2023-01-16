@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
@@ -19,7 +20,6 @@ namespace FOAEA3.Common.Helpers
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
         public Func<Task<string>> GetRefreshedToken { get; set; }
-
 
         public MessageDataList Messages { get; set; }
 
@@ -376,14 +376,20 @@ namespace FOAEA3.Common.Helpers
                         }
                         else
                         {
+                            string content = string.Empty;
                             try
                             {
-                                string content = await callResult.Content.ReadAsStringAsync();
+                                content = await callResult.Content.ReadAsStringAsync();
                                 result = JsonConvert.DeserializeObject<T>(content);
                             }
                             catch
                             {
                                 // no content or invalid content so ignore?
+                                if (Messages is null)
+                                    Messages = new MessageDataList();
+                                string message = $"API return code: {callResult.StatusCode} Content: [{content}]";
+                                var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", message, MessageType.Error);
+                                Messages.Add(errorMessageData);
                             }
                             completed = true;
                         }
