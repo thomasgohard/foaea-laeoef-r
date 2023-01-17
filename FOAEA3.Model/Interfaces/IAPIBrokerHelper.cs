@@ -11,9 +11,10 @@ namespace FOAEA3.Model.Interfaces
         string CurrentSubmitter { get; set; }
         string CurrentUser { get; set; }
         string CurrentLanguage { get; set; }
+        Func<string> GetToken { get; set; }
         Func<Task<string>> GetRefreshedToken { get; set; }
 
-        MessageDataList Messages { get; set; }
+        MessageDataList ErrorData { get; set; }
         Task<T> GetDataAsync<T>(string api, string root = "", string token = null) where T : new();
         Task<T> GetDataAsync<T, P>(string api, P data, string root = "", string token = null) where T : new();
         Task<string> GetStringAsync(string api, string root = "", int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS, string token = null);

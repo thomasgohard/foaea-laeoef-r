@@ -1,11 +1,17 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using FOAEA3.Model;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
-namespace FOAEA3.Web.Pages.Applications
+namespace FOAEA3.Web.Pages.Applications;
+
+public class InterceptionModel : FoaeaPageModel
 {
-    public class InterceptionModel : PageModel
+    public InterceptionModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
+                                                                                                base(httpContextAccessor, apiConfig.Value)
     {
-        public void OnGet()
-        {
-        }
+    }
+
+    public void OnGet()
+    {
     }
 }

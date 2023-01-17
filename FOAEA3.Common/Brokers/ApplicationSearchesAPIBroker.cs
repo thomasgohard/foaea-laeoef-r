@@ -9,7 +9,7 @@ namespace FOAEA3.Common.Brokers
         public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
-        public ApplicationSearchesAPIBroker(IAPIBrokerHelper apiHelper, string token)
+        public ApplicationSearchesAPIBroker(IAPIBrokerHelper apiHelper, string token = null)
         {
             ApiHelper = apiHelper;
             Token = token;

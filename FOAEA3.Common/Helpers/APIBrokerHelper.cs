@@ -1,6 +1,4 @@
-﻿using FOAEA3.Common.Brokers;
-using FOAEA3.Data.DB;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -19,9 +17,10 @@ namespace FOAEA3.Common.Helpers
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
+        public Func<string> GetToken { get; set; }
         public Func<Task<string>> GetRefreshedToken { get; set; }
 
-        public MessageDataList Messages { get; set; }
+        public MessageDataList ErrorData { get; set; } = new MessageDataList();
 
         public string APIroot
         {
@@ -30,13 +29,13 @@ namespace FOAEA3.Common.Helpers
         }
 
         public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "",
-                               Func<Task<string>> getRefreshedToken = null)
+                               Func<string> getToken = null, Func < Task<string>> getRefreshedToken = null)
         {
             APIroot = apiRoot;
             CurrentSubmitter = currentSubmitter;
             CurrentUser = currentUser;
+            GetToken = getToken;
             GetRefreshedToken = getRefreshedToken;
-            Messages = new MessageDataList();
         }
 
         public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
@@ -54,6 +53,8 @@ namespace FOAEA3.Common.Helpers
                                                  int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS,
                                                  string token = null)
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
 
             string result = string.Empty;
 
@@ -107,9 +108,8 @@ namespace FOAEA3.Common.Helpers
                     if (attemptCount == maxAttempts)
                     {
                         // log error
-                        Messages = new MessageDataList();
                         var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
-                        Messages.Add(errorMessageData);
+                        ErrorData.Add(errorMessageData);
                     }
                 }
             }
@@ -121,6 +121,9 @@ namespace FOAEA3.Common.Helpers
         public async Task<T> GetDataAsync<T>(string api, string root = "", string token = null)
             where T : new()
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             T result = default;
 
             if (root == "")
@@ -155,7 +158,7 @@ namespace FOAEA3.Common.Helpers
                         else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
                         {
                             string content = await callResult.Content.ReadAsStringAsync();
-                            Messages = JsonConvert.DeserializeObject<MessageDataList>(content);
+                            ErrorData = JsonConvert.DeserializeObject<MessageDataList>(content);
                         }
                         else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
                         {
@@ -179,9 +182,8 @@ namespace FOAEA3.Common.Helpers
                         if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                         {
                             // log error
-                            Messages = new MessageDataList();
                             var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
-                            Messages.Add(errorMessageData);
+                            ErrorData.Add(errorMessageData);
                         }
                     }
                 }
@@ -197,6 +199,9 @@ namespace FOAEA3.Common.Helpers
 
         public async Task<T> GetDataAsync<T, P>(string api, P data, string root = "", string token = null) where T : new()
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             T result = default;
 
             if (root == "")
@@ -243,7 +248,7 @@ namespace FOAEA3.Common.Helpers
                         else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
                         {
                             string content = await callResult.Content.ReadAsStringAsync();
-                            Messages = JsonConvert.DeserializeObject<MessageDataList>(content);
+                            ErrorData = JsonConvert.DeserializeObject<MessageDataList>(content);
                         }
                         else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
                         {
@@ -267,9 +272,8 @@ namespace FOAEA3.Common.Helpers
                         if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                         {
                             // log error
-                            Messages = new MessageDataList();
                             var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
-                            Messages.Add(errorMessageData);
+                            ErrorData.Add(errorMessageData);
                         }
                     }
                 }
@@ -317,6 +321,8 @@ namespace FOAEA3.Common.Helpers
             where T : class, new()
             where P : class
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
 
             T result = null;
 
@@ -385,11 +391,9 @@ namespace FOAEA3.Common.Helpers
                             catch
                             {
                                 // no content or invalid content so ignore?
-                                if (Messages is null)
-                                    Messages = new MessageDataList();
                                 string message = $"API return code: {callResult.StatusCode} Content: [{content}]";
                                 var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", message, MessageType.Error);
-                                Messages.Add(errorMessageData);
+                                ErrorData.Add(errorMessageData);
                             }
                             completed = true;
                         }
@@ -404,9 +408,8 @@ namespace FOAEA3.Common.Helpers
                     if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
                         // log error
-                        Messages = new MessageDataList();
                         var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
-                        Messages.Add(errorMessageData);
+                        ErrorData.Add(errorMessageData);
                     }
                 }
             }
@@ -422,6 +425,9 @@ namespace FOAEA3.Common.Helpers
                                                              string root = "", string token = null)
                                             where P : class
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             string result = string.Empty;
 
             if (root == "")
@@ -490,9 +496,8 @@ namespace FOAEA3.Common.Helpers
                     if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
                         // log error
-                        Messages = new MessageDataList();
                         var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
-                        Messages.Add(errorMessageData);
+                        ErrorData.Add(errorMessageData);
                     }
                 }
             }
@@ -503,6 +508,9 @@ namespace FOAEA3.Common.Helpers
 
         private async Task SendCommandAsync(string api, string method, string root = "", string token = null)
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             if (root == "")
                 root = APIroot;
 
@@ -528,6 +536,9 @@ namespace FOAEA3.Common.Helpers
         public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData,
                                                                  string rootAPI = null, string token = null)
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
@@ -546,6 +557,9 @@ namespace FOAEA3.Common.Helpers
         public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData,
                                                                  string rootAPI = null, string token = null)
         {
+            if ((token is null) && (GetToken is not null))
+                token = GetToken();
+
             using var httpClient = new HttpClient();
             httpClient.Timeout = DEFAULT_TIMEOUT;
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);

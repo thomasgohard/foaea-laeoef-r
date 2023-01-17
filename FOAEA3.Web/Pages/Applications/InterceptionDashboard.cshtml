@@ -4,10 +4,7 @@
 @using Microsoft.AspNetCore.Http
 
 @model InterceptionDashboardModel
-@{
-    var searchResult = ViewData["SearchResult"] as List<ApplicationSearchResultData>;
-    var appLifeStates = ViewData["ApplLifeStates"] as List<ApplicationLifeStateData>;
-}
+
 <div>@HttpContext.Session.GetString(SessionValue.USER_NAME) (@HttpContext.Session.GetString(SessionValue.SUBMITTER))</div>
 <div class="text-center interception">
     @if (!string.IsNullOrEmpty(Model.ErrorMessage)) {
@@ -125,9 +122,9 @@
                                 <select class="form-control multiColControl" asp-for="SearchCriteria.State">
                                     @{
                                         <option value="">All</option>
-                                        if (appLifeStates is not null)
+                                        if (Model.LifeStates is not null)
                                         {
-                                            foreach (var state in appLifeStates)
+                                            foreach (var state in Model.LifeStates)
                                             {
                                                 <option value="@state.AppLiSt_Cd">@state.Description</option>
                                             }
@@ -222,7 +219,7 @@
         </div>
     </form>
     <br />
-    @if (searchResult != null)
+    @if (Model.SearchResults != null)
     {
         <div class="row">
             <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
@@ -243,11 +240,11 @@
                 </thead>
                 <tbody>
                     @{
-                        if (appLifeStates is not null)
+                        if (Model.LifeStates is not null)
                         {
-                            foreach (var result in searchResult)
+                            foreach (var result in Model.SearchResults)
                             {
-                                var applListState = appLifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
+                                var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
 
                                 <tr class="gradeX">
                                     <td>@result.AppCtgy_Cd</td>
