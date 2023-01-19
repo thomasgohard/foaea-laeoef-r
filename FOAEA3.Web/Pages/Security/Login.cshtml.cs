@@ -26,7 +26,7 @@ public class LoginModel : FoaeaPageModel
 
     public async Task<ActionResult> OnPostLogin()
     {
-        var loginAPIs = new LoginsAPIBroker(APIs);
+        var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
         var result = await loginAPIs.SubjectLoginAsync(LoginData);
 

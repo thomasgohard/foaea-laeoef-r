@@ -27,14 +27,14 @@ public class SelectSubmitterModel : FoaeaPageModel
 
     public async Task OnGet()
     {
-        var loginAPIs = new LoginsAPIBroker(APIs);
+        var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
         Submitters = await loginAPIs.GetAvailableSubmittersAsync();
     }
 
     public async Task<ActionResult> OnPostSelectSubmitter()
     {
-        var loginAPIs = new LoginsAPIBroker(APIs);
+        var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
         var result = await loginAPIs.SelectSubmitterAsync(Submitter);
 
@@ -45,7 +45,7 @@ public class SelectSubmitterModel : FoaeaPageModel
         }
         else
         {
-            var submitterAPIs = new SubmitterAPIBroker(APIs);
+            var submitterAPIs = new SubmitterAPIBroker(BaseAPIs);
             var submitter = await submitterAPIs.GetSubmitterAsync(Submitter);
 
             HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);

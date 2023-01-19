@@ -26,13 +26,12 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
-        var apiRefBroker = new ApplicationLifeStatesAPIBroker(APIs);
-
+        var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
         LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
 
         SearchCriteria = new ApplicationSearchCriteriaData
         {
-            Category = "I01"
+            Category = "I01" // default
         };
     }
 
@@ -40,28 +39,10 @@ public class InterceptionDashboardModel : FoaeaPageModel
     {
         if (!ModelState.IsValid)
         {
-            string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+            SearchResults = await GetSearchResults(SearchCriteria);
 
-            var searchApi = new ApplicationSearchesAPIBroker(APIs);
-
-            var quickSearch = new QuickSearchData
-            {
-                DebtorFirstName = SearchCriteria.FirstName,
-                DebtorSurname = SearchCriteria.LastName,
-                SIN = SearchCriteria.SIN,
-                State = SearchCriteria.State,
-                Status = SearchCriteria.Status,
-                Category = SearchCriteria.Category,
-                ControlCode = SearchCriteria.ControlCode,
-                EnforcementService = enfService,
-                ReferenceNumber = SearchCriteria.EnfSourceRefNumber,
-                JusticeNumber = SearchCriteria.JusticeNumber
-            };
-
-            SearchResults = await searchApi.SearchAsync(quickSearch);
-
-            if (base.APIs.ErrorData.Any())
-                ErrorMessage = APIs.ErrorData[0].Description;
+            if (BaseAPIs.ErrorData.Any())
+                ErrorMessage = BaseAPIs.BuildErrorMessage();
 
             return Page();
         }
@@ -73,33 +54,37 @@ public class InterceptionDashboardModel : FoaeaPageModel
     {
         if (!ModelState.IsValid)
         {
-            string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+            SearchResults = await GetSearchResults(MySearchCriteria);
 
-            var searchApi = new ApplicationSearchesAPIBroker(APIs);
-
-            var quickSearch = new QuickSearchData
-            {
-                DebtorFirstName = MySearchCriteria.FirstName,
-                DebtorSurname = MySearchCriteria.LastName,
-                SIN = MySearchCriteria.SIN,
-                State = MySearchCriteria.State,
-                Status = MySearchCriteria.Status,
-                Category = MySearchCriteria.Category,
-                ControlCode = MySearchCriteria.ControlCode,
-                EnforcementService = enfService,
-                ReferenceNumber = MySearchCriteria.EnfSourceRefNumber,
-                JusticeNumber = MySearchCriteria.JusticeNumber
-            };
-
-            SearchResults = await searchApi.SearchAsync(quickSearch);
-
-            if (base.APIs.ErrorData.Any())
-                ErrorMessage = APIs.ErrorData[0].Description;
+            if (BaseAPIs.ErrorData.Any())
+                ErrorMessage = BaseAPIs.BuildErrorMessage();
 
             return Page();
         }
 
         return RedirectToPage("./Index");
+    }
+
+    private async Task<List<ApplicationSearchResultData>> GetSearchResults(ApplicationSearchCriteriaData searchCriteria)
+    {
+        string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+
+        var quickSearch = new QuickSearchData
+        {
+            DebtorFirstName = searchCriteria.FirstName,
+            DebtorSurname = searchCriteria.LastName,
+            SIN = searchCriteria.SIN,
+            State = searchCriteria.State,
+            Status = searchCriteria.Status,
+            Category = searchCriteria.Category,
+            ControlCode = searchCriteria.ControlCode,
+            EnforcementService = enfService,
+            ReferenceNumber = searchCriteria.EnfSourceRefNumber,
+            JusticeNumber = searchCriteria.JusticeNumber
+        };
+
+        var searchApi = new ApplicationSearchesAPIBroker(BaseAPIs);
+        return await searchApi.SearchAsync(quickSearch);
     }
 
 }

@@ -12,7 +12,8 @@ namespace FOAEA3.Web.Pages;
 public class FoaeaPageModel : PageModel
 {
     protected readonly ApiConfig ApiRoots;
-    protected readonly APIBrokerHelper APIs;
+    protected readonly APIBrokerHelper BaseAPIs;
+    protected readonly APIBrokerHelper InterceptionAPIs;
     private IHttpContextAccessor ContextAccessor;
 
     public FoaeaPageModel(IHttpContextAccessor httpContextAccessor, ApiConfig apiConfig)
@@ -26,9 +27,11 @@ public class FoaeaPageModel : PageModel
 
             ContextAccessor = httpContextAccessor;
 
-            APIs = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName,
+            BaseAPIs = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName,
                                        getToken: GetToken, getRefreshedToken: GetRefreshedToken);
-            
+            InterceptionAPIs = new APIBrokerHelper(ApiRoots.FoaeaInterceptionRootAPI, submitter, userName,
+                                       getToken: GetToken, getRefreshedToken: GetRefreshedToken);
+
         }
     }
 

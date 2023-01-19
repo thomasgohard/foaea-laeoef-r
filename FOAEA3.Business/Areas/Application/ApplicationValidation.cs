@@ -147,7 +147,6 @@ namespace FOAEA3.Business.Areas.Application
             if (string.IsNullOrEmpty(debtorSurname))
             {
                 isValid = false;
-                errorMessage = Resources.ErrorResource.MISSING_DEBTOR_SURNAME;
             }
             else
             {

@@ -22,6 +22,20 @@ namespace FOAEA3.Common.Helpers
 
         public MessageDataList ErrorData { get; set; } = new MessageDataList();
 
+        public string BuildErrorMessage()
+        {
+            string message = string.Empty;
+            foreach (var error in ErrorData)
+            {
+                message += error.Description;
+
+                if (!error.Equals(ErrorData.Last())) 
+                    message += "; ";
+            }
+
+            return message;
+        }
+
         public string APIroot
         {
             get => _APIroot;
@@ -29,7 +43,7 @@ namespace FOAEA3.Common.Helpers
         }
 
         public APIBrokerHelper(string apiRoot = "", string currentSubmitter = "", string currentUser = "",
-                               Func<string> getToken = null, Func < Task<string>> getRefreshedToken = null)
+                               Func<string> getToken = null, Func<Task<string>> getRefreshedToken = null)
         {
             APIroot = apiRoot;
             CurrentSubmitter = currentSubmitter;
@@ -388,13 +402,16 @@ namespace FOAEA3.Common.Helpers
                                 content = await callResult.Content.ReadAsStringAsync();
                                 result = JsonConvert.DeserializeObject<T>(content);
                             }
-                            catch
+                            catch (Exception e)
                             {
                                 // no content or invalid content so ignore?
-                                string message = $"API return code: {callResult.StatusCode} Content: [{content}]";
-                                var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", message, MessageType.Error);
-                                ErrorData.Add(errorMessageData);
+                                content = e.Message;
                             }
+
+                            string message = $"API return code: {callResult.StatusCode} for call [{method} {root + api}] Content: [{content}]";
+                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", message, MessageType.Error);
+                            ErrorData.Add(errorMessageData);
+
                             completed = true;
                         }
                     }

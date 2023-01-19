@@ -24,7 +24,7 @@ public class TermsOfReferenceModel : FoaeaPageModel
 
     public async Task<ActionResult> OnPostAccept()
     {
-        var loginAPIs = new LoginsAPIBroker(APIs);
+        var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
         var result = await loginAPIs.AcceptTerms();
 

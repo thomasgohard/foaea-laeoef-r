@@ -4,3 +4,92 @@
 }
 
 <p>Interception</p>
+
+@if ((Model.ErrorMessage != null) && (Model.ErrorMessage.Any()))
+{
+    <div id="errorMessage" class="alert alert-danger">
+        <div>Error(s):</div>
+        @foreach (var error in Model.ErrorMessage)
+        {
+            <div>@error.Description</div>
+        }
+    </div>
+}
+@if ((Model.WarningMessage != null) && (Model.WarningMessage.Any()))
+{
+    <div id="warningMessage" class="alert alert-warning">
+        <div>Warning(s):</div>
+        @foreach (var warning in Model.WarningMessage)
+        {
+            <div>@warning.Description</div>
+        }
+    </div>
+}
+@if ((Model.InfoMessage != null) && (Model.InfoMessage.Any()))
+{
+    <div id="infoMessage" class="alert alert-info">
+        <div>Information:</div>
+        @foreach (var info in Model.InfoMessage)
+        {
+            <div>@info.Description</div>
+        }
+    </div>
+}
+
+<form method="post" class="form-inline">
+    <div class="wb-tabs">
+        <div class="tabpanels">
+            <details id="details-panel1" open="open">
+                <summary>Part 1</summary>
+                <p>
+                    <input type="hidden" asp-for="InterceptionApplication.Appl_EnfSrv_Cd" />
+                    <input type="hidden" asp-for="InterceptionApplication.Subm_SubmCd" />
+                    Part 1: Application Identification
+                    <div class="form-group">
+                        <label>Application Reference Code No:</label>
+                        <input type="text" class="form-control multiColControl" id="Appl_CtrlCd" asp-for="InterceptionApplication.Appl_CtrlCd">
+                    </div>
+                    <div class="form-group">
+                        <label>Court or provincial enforcement service reference no:</label>
+                        <input type="text" class="form-control multiColControl" id="Appl_Source_RfrNr" asp-for="InterceptionApplication.Appl_Source_RfrNr">
+                    </div>
+                </p>
+            </details>
+            <details id="details-panel2">
+                <summary>Part 2</summary>
+                <p>
+                    Part 2: Support Payer / Support Recipient Information
+                </p>
+            </details>
+            <details id="details-panel3">
+                <summary>Part 3</summary>
+                <p>
+                    Part 3: Garnishee Summons Financial Terms
+                </p>
+            </details>
+            <details id="details-panel4">
+                <summary>Attachments</summary>
+                <p>
+                    Attachments
+                </p>
+            </details>
+            <details id="details-panel5">
+                <summary>Comments</summary>
+                <p>
+                    <div class="form-group">
+                        <label>Comment</label>
+                        <input type="text" class="form-control multiColControl" id="Appl_CommSubm_Text" asp-for="InterceptionApplication.Appl_CommSubm_Text">
+                    </div>
+                </p>
+            </details>
+            <details id="details-panel6">
+                <summary>Submit to FOAEA</summary>
+                <p>
+                    Submit to FOAEA
+                    <div><input type="submit" value="Submit to FOAEA" asp-page-handler="SubmitNewApplication" /></div>
+                </p>
+            </details>
+        </div>
+        <p class="mrgn-tp-md"><a href="#details-panel3" class="wb-tabs-ext">Show the third panel</a></p>
+    </div>
+</form>

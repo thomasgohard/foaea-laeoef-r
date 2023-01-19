@@ -10,7 +10,7 @@ namespace FOAEA3.Common.Brokers
         public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
-        public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)
+        public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token = null)
         {
             ApiHelper = apiHelper;
             Token = token;
@@ -40,6 +40,15 @@ namespace FOAEA3.Common.Brokers
             string apiCall = "api/v1/Interceptions";
             var data = await ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
                                                                                                interceptionApplication, token: Token);
+            
+            if (ApiHelper.ErrorData.Any() && !data.Messages.Any())
+            {
+                foreach(var error in ApiHelper.ErrorData)
+                    data.Messages.Add(error);
+            }
+
+            // IMessageList
+
             return data;
         }
 
