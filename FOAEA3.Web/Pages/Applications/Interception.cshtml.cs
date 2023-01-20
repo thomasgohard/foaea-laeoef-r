@@ -53,13 +53,7 @@ public class InterceptionModel : FoaeaPageModel
     {
         if (!ModelState.IsValid)
         {
-            ErrorMessage = new List<MessageData>();
-            foreach (var value in ModelState.Values)
-            {
-                if (value.Errors.Any())
-                    foreach (var error in value.Errors)
-                        ErrorMessage.Add(new MessageData(EventCode.UNDEFINED, null, error.ErrorMessage, MessageType.Error));
-            }
+            ErrorMessage = GetValidationErrors();
 
             return Page();
         }
@@ -76,7 +70,24 @@ public class InterceptionModel : FoaeaPageModel
         if (newApplication.Messages.ContainsMessagesOfType(MessageType.Information))
             InfoMessage = newApplication.Messages.GetMessagesForType(MessageType.Information);
 
+        InterceptionApplication = newApplication;
+
+        if (!InterceptionApplication.HldbCnd.Any())
+            InterceptionApplication.HldbCnd.Add(new HoldbackConditionData());
+
         return Page();
     }
 
+    private List<MessageData> GetValidationErrors()
+    {
+        var errorMessages = new List<MessageData>();
+        foreach (var value in ModelState.Values)
+        {
+            if (value.Errors.Any())
+                foreach (var error in value.Errors)
+                    errorMessages.Add(new MessageData(EventCode.UNDEFINED, null, error.ErrorMessage, MessageType.Error));
+        }
+
+        return errorMessages;
+    }
 }

@@ -49,20 +49,25 @@ public class FoaeaPageModel : PageModel
 
     public async Task<string> GetRefreshedToken()
     {
-        string currentToken = HttpContext.Session.GetString(SessionValue.TOKEN);
-        string refreshToken = HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
+        if ((ContextAccessor is not null) && (ContextAccessor.HttpContext is not null))
+        {
+            string currentToken = ContextAccessor.HttpContext.Session.GetString(SessionValue.TOKEN);
+            string refreshToken = ContextAccessor.HttpContext.Session.GetString(SessionValue.REFRESH_TOKEN);
 
-        string userName = TokenDataHelper.UserName(currentToken);
-        string submitter = TokenDataHelper.SubmitterCode(currentToken);
+            string userName = TokenDataHelper.UserName(currentToken);
+            string submitter = TokenDataHelper.SubmitterCode(currentToken);
 
-        var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName);
-        var apiBroker = new LoginsAPIBroker(apiHelper, currentToken);
+            var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName);
+            var apiBroker = new LoginsAPIBroker(apiHelper, currentToken);
 
-        var result = await apiBroker.RefreshTokenAsync(currentToken, refreshToken);
+            var result = await apiBroker.RefreshTokenAsync(currentToken, refreshToken);
 
-        HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
-        HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
+            HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+            HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
 
-        return result.Token;
+            return result.Token;
+        }
+        else
+            return "";
     }
 }
