@@ -45,26 +45,92 @@
                     <input type="hidden" asp-for="InterceptionApplication.Appl_EnfSrv_Cd" />
                     <input type="hidden" asp-for="InterceptionApplication.Subm_SubmCd" />
                     Part 1: Application Identification
-                    <div class="form-group">
-                        <label>Application Reference Code No:</label>
-                        <input type="text" class="form-control multiColControl" id="Appl_CtrlCd" asp-for="InterceptionApplication.Appl_CtrlCd">
+                    <div>
+                        <label>01 Court of provincial enforcement service name:</label>
+                        <input type="text" disabled="disabled" class="form-control multiColGroup" id="Appl_EnfSrv_Cd_Desc" value="@Model.EnfServiceDescription">
                     </div>
-                    <div class="form-group">
-                        <label>Court or provincial enforcement service reference no:</label>
-                        <input type="text" class="form-control multiColControl" id="Appl_Source_RfrNr" asp-for="InterceptionApplication.Appl_Source_RfrNr">
+                    <div>
+                        <label>02 Application Reference Code No:</label>
+                        <input type="text" class="form-control multiColGroup" id="Appl_CtrlCd" asp-for="InterceptionApplication.Appl_CtrlCd">
+                    </div>
+                    <div>
+                        <label>03 Court or provincial enforcement service reference no:</label>
+                        <input type="text" class="form-control multiColGroup" id="Appl_Source_RfrNr" asp-for="InterceptionApplication.Appl_Source_RfrNr">
+                    </div>
+                    <div>
+                        <label>[*] 04 Garnishee summons issue date: (YYYY-MM-DD)</label>
+                        <input type="text" class="form-control multiColGroup" id="Appl_Lgl_Dte"
+                               asp-for="InterceptionApplication.Appl_Lgl_Dte" asp-format="{0:yyyy-MM-dd}">
                     </div>
                 </p>
             </details>
             <details id="details-panel2">
                 <summary>Part 2</summary>
-                <p>
-                    Part 2: Support Payer / Support Recipient Information
-                </p>
+                <div class="wb-tabs">
+                    <div class="tabpanels">
+                        <details id="details-panelSupportPayer">
+                            <summary>Support Payer</summary>
+                            <p>
+                                <div>
+                                    <label>[*] 05 Surname:</label>
+                                    <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_SurNme" asp-for="InterceptionApplication.Appl_Dbtr_SurNme">
+                                </div>
+                                <div>
+                                    <label>[*] 06 Given Name:</label>
+                                    <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_FrstNme" asp-for="InterceptionApplication.Appl_Dbtr_FrstNme">
+                                </div>
+                            </p>
+                        </details>
+                        <details id="details-panelSupportRecipient" open="open">
+                            <summary>Support Recipient</summary>
+                            <p>
+                                <div>
+                                    <label>[*] 17 Surname:</label>
+                                    <input type="text" class="form-control multiColGroup" id="Appl_Crdtr_SurNme" asp-for="InterceptionApplication.Appl_Crdtr_SurNme">
+                                </div>
+                                <div>
+                                    <label>[*] 18 Given Name:</label>
+                                    <input type="text" class="form-control multiColGroup" id="Appl_Crdtr_FrstNme" asp-for="InterceptionApplication.Appl_Crdtr_FrstNme">
+                                </div>
+                            </p>
+                        </details>
+                    </div>
+                </div>
             </details>
             <details id="details-panel3">
                 <summary>Part 3</summary>
                 <p>
                     Part 3: Garnishee Summons Financial Terms
+                    <div class="wb-tabs">
+                        <div class="tabpanels">
+                            <details id="details-panelSection1">
+                                <summary>Section 1</summary>
+                                <p>
+                                    <div>
+                                        <label>21 Lump sum amount $:</label>
+                                        <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_SurNme" asp-for="InterceptionApplication.IntFinH.IntFinH_LmpSum_Money">
+                                    </div>
+                                    <div>
+                                        <label>22 Periodic payment $:</label>
+                                        <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_FrstNme" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
+                                    </div>
+                                </p>
+                            </details>
+                            <details id="details-panelSection2" open="open">
+                                <summary>Section 2</summary>
+                                <p>
+                                    <div>
+                                        <label>Source department</label>
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="CP01" id="SourceCPP" />CPP
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="EI01" id="SourceEI" />Employment Insurance
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="OA01" id="SourceOAS" />Old Age Security
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="RC01" id="SourceRC" />Revenue Canada
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="TR01" id="SourceTR" />Training Benefits
+                                    </div>
+                                </p>
+                            </details>
+                        </div>
+                    </div>
                 </p>
             </details>
             <details id="details-panel4">
@@ -86,10 +152,9 @@
                 <summary>Submit to FOAEA</summary>
                 <p>
                     Submit to FOAEA
-                    <div><input type="submit" value="Submit to FOAEA" asp-page-handler="SubmitNewApplication" /></div>
+                    <div><input type="submit" class="btn btn-primary" value="Submit to FOAEA" asp-page-handler="SubmitNewApplication" /></div>
                 </p>
             </details>
-        </div>
-        <p class="mrgn-tp-md"><a href="#details-panel3" class="wb-tabs-ext">Show the third panel</a></p>
+        </div>        
     </div>
 </form>
