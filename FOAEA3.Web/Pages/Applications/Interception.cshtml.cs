@@ -6,7 +6,6 @@ using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,10 +14,6 @@ namespace FOAEA3.Web.Pages.Applications;
 
 public class InterceptionModel : FoaeaPageModel
 {
-    public List<MessageData> ErrorMessage { get; set; }
-    public List<MessageData> WarningMessage { get; set; }
-    public List<MessageData> InfoMessage { get; set; }
-
     public string EnfServiceDescription { get; set; }
 
     [BindProperty]
@@ -61,14 +56,7 @@ public class InterceptionModel : FoaeaPageModel
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
         var newApplication = await interceptionApi.CreateInterceptionApplicationAsync(InterceptionApplication);
 
-        if (newApplication.Messages.ContainsMessagesOfType(MessageType.Error))
-            ErrorMessage = newApplication.Messages.GetMessagesForType(MessageType.Error);
-
-        if (newApplication.Messages.ContainsMessagesOfType(MessageType.Warning))
-            WarningMessage = newApplication.Messages.GetMessagesForType(MessageType.Warning);
-
-        if (newApplication.Messages.ContainsMessagesOfType(MessageType.Information))
-            InfoMessage = newApplication.Messages.GetMessagesForType(MessageType.Information);
+        SetDisplayMessages(newApplication.Messages);
 
         InterceptionApplication = newApplication;
 

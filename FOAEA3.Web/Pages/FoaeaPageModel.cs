@@ -1,9 +1,11 @@
 ﻿using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +17,10 @@ public class FoaeaPageModel : PageModel
     protected readonly APIBrokerHelper BaseAPIs;
     protected readonly APIBrokerHelper InterceptionAPIs;
     private IHttpContextAccessor ContextAccessor;
+
+    public List<MessageData> ErrorMessage { get; set; }
+    public List<MessageData> WarningMessage { get; set; }
+    public List<MessageData> InfoMessage { get; set; }
 
     public FoaeaPageModel(IHttpContextAccessor httpContextAccessor, ApiConfig apiConfig)
     {
@@ -69,5 +75,17 @@ public class FoaeaPageModel : PageModel
         }
         else
             return "";
+    }
+
+    public void SetDisplayMessages(MessageDataList messages)
+    {
+        if (messages.ContainsMessagesOfType(MessageType.Error))
+            ErrorMessage = messages.GetMessagesForType(MessageType.Error);
+
+        if (messages.ContainsMessagesOfType(MessageType.Warning))
+            WarningMessage = messages.GetMessagesForType(MessageType.Warning);
+
+        if (messages.ContainsMessagesOfType(MessageType.Information))
+            InfoMessage = messages.GetMessagesForType(MessageType.Information);
     }
 }
