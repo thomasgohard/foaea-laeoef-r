@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Constants;
@@ -20,9 +21,11 @@ public class GendersController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
-    public async Task<ActionResult<DataList<GenderData>>> GetGenders([FromServices] IGenderRepository genderRepository)
+    public ActionResult<DataList<GenderData>> GetGenders()
     {
-        var data = await genderRepository.GetGendersAsync();
+        List<GenderData> items = ReferenceData.Instance().Genders.Values.ToList();
+        items.Sort();
+        var data = new DataList<GenderData>(items, string.Empty);
 
         return Ok(data);
     }

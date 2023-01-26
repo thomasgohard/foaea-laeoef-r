@@ -17,24 +17,11 @@ namespace FOAEA3.Common.Helpers
         public string CurrentSubmitter { get; set; }
         public string CurrentUser { get; set; }
         public string CurrentLanguage { get; set; }
+
         public Func<string> GetToken { get; set; }
         public Func<Task<string>> GetRefreshedToken { get; set; }
 
-        public MessageDataList ErrorData { get; set; } = new MessageDataList();
-
-        public string BuildErrorMessage()
-        {
-            string message = string.Empty;
-            foreach (var error in ErrorData)
-            {
-                message += error.Description;
-
-                if (!error.Equals(ErrorData.Last())) 
-                    message += "; ";
-            }
-
-            return message;
-        }
+        public MessageDataList ErrorData { get; set; }
 
         public string APIroot
         {
@@ -50,6 +37,7 @@ namespace FOAEA3.Common.Helpers
             CurrentUser = currentUser;
             GetToken = getToken;
             GetRefreshedToken = getRefreshedToken;
+            ErrorData = new MessageDataList();
         }
 
         public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
@@ -78,20 +66,12 @@ namespace FOAEA3.Common.Helpers
             int attemptCount = 0;
             bool completed = false;
 
+            using var httpClient = CreateHttpClient(token);
+
             while ((attemptCount < maxAttempts) && (!completed))
             {
                 try
                 {
-                    using var httpClient = new HttpClient();
-
-                    httpClient.Timeout = DEFAULT_TIMEOUT;
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                    if (token is not null && !string.IsNullOrEmpty(token))
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                    if (!string.IsNullOrEmpty(CurrentLanguage))
-                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
                     var callResult = await httpClient.GetAsync(root + api);
 
                     if (callResult.IsSuccessStatusCode)
@@ -121,8 +101,7 @@ namespace FOAEA3.Common.Helpers
                     Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
                     if (attemptCount == maxAttempts)
                     {
-                        // log error
-                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);
                         ErrorData.Add(errorMessageData);
                     }
                 }
@@ -143,69 +122,71 @@ namespace FOAEA3.Common.Helpers
             if (root == "")
                 root = APIroot;
 
-            using (var httpClient = new HttpClient())
+            using var httpClient = CreateHttpClient(token);
+
+            int attemptCount = 0;
+            bool completed = false;
+
+            while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
             {
-                int attemptCount = 0;
-                bool completed = false;
-
-                while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
+                try
                 {
-                    try
+                    var callResult = await httpClient.GetAsync(root + api);
+
+                    if (callResult.IsSuccessStatusCode)
                     {
-
-                        httpClient.Timeout = DEFAULT_TIMEOUT;
-                        httpClient.DefaultRequestHeaders.Accept.Clear();
-                        httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-                        httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                        if (token is not null && !string.IsNullOrEmpty(token))
-                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                        if (!string.IsNullOrEmpty(CurrentLanguage))
-                            httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
-                        var callResult = await httpClient.GetAsync(root + api);
-
-                        if (callResult.IsSuccessStatusCode)
-                        {
-                            string content = await callResult.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<T>(content);
-                        }
-                        else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
-                        {
-                            string content = await callResult.Content.ReadAsStringAsync();
-                            ErrorData = JsonConvert.DeserializeObject<MessageDataList>(content);
-                        }
-                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            if (GetRefreshedToken is null)
-                                completed = true;
-                            else
-                            {
-                                token = await GetRefreshedToken();
-                                if (string.IsNullOrEmpty(token))
-                                    completed = true; // API failed and refreshed token expired
-                                else
-                                    attemptCount++;
-                            }
-                        }
-                        completed = true;
+                        string content = await callResult.Content.ReadAsStringAsync();
+                        result = JsonConvert.DeserializeObject<T>(content);
                     }
-                    catch (Exception e)
+                    else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
                     {
-                        attemptCount++;
-                        Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                        if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                        string content = await callResult.Content.ReadAsStringAsync();
+                        try
                         {
-                            // log error
-                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                            var errorData = JsonConvert.DeserializeObject<MessageDataList>(content);
+                            for (int i = 0; i < errorData?.Count; i++)
+                            {
+                                var thisError = errorData[i];
+                                var error = new MessageData(thisError.Code, thisError.Field, api + ":" + thisError.Description, thisError.Severity, thisError.IsSystemMessage, thisError.URL);
+                                errorData[i] = error;
+                            }
+                            if (errorData is not null)
+                                ErrorData = errorData;
+                        }
+                        catch
+                        {
+                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + content, MessageType.Error);
                             ErrorData.Add(errorMessageData);
                         }
                     }
+                    else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        if (GetRefreshedToken is null)
+                            completed = true;
+                        else
+                        {
+                            token = await GetRefreshedToken();
+                            if (string.IsNullOrEmpty(token))
+                                completed = true; // API failed and refreshed token expired
+                            else
+                                attemptCount++;
+                        }
+                    }
+                    completed = true;
                 }
-
+                catch (Exception e)
+                {
+                    attemptCount++;
+                    Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                    {
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);
+                        ErrorData.Add(errorMessageData);
+                    }
+                }
             }
 
-            if (result is null)
-                result = new T();
+            result ??= new T();
 
             return result;
 
@@ -221,85 +202,86 @@ namespace FOAEA3.Common.Helpers
             if (root == "")
                 root = APIroot;
 
-            using (var httpClient = new HttpClient())
+            using var httpClient = CreateHttpClient(token);
+
+            int attemptCount = 0;
+            bool completed = false;
+
+            string keyData = JsonConvert.SerializeObject(data);
+
+            while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
             {
-                int attemptCount = 0;
-                bool completed = false;
-
-                while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
+                try
                 {
-                    try
+                    HttpResponseMessage callResult;
+                    using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
                     {
-
-                        httpClient.Timeout = DEFAULT_TIMEOUT;
-                        httpClient.DefaultRequestHeaders.Accept.Clear();
-                        httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-                        httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                        if (token is not null && !string.IsNullOrEmpty(token))
-                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                        if (!string.IsNullOrEmpty(CurrentLanguage))
-                            httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
-                        string keyData = JsonConvert.SerializeObject(data);
-
-                        HttpResponseMessage callResult;
-                        using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
+                        var request = new HttpRequestMessage
                         {
-                            var request = new HttpRequestMessage
-                            {
-                                Method = HttpMethod.Get,
-                                RequestUri = new Uri(root + api),
-                                Content = content
-                            };
-                            callResult = await httpClient.SendAsync(request).ConfigureAwait(false);
-                        }
-
-                        if (callResult.IsSuccessStatusCode)
-                        {
-                            string content = await callResult.Content.ReadAsStringAsync();
-                            result = JsonConvert.DeserializeObject<T>(content);
-                        }
-                        else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
-                        {
-                            string content = await callResult.Content.ReadAsStringAsync();
-                            ErrorData = JsonConvert.DeserializeObject<MessageDataList>(content);
-                        }
-                        else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            if (GetRefreshedToken is null)
-                                completed = true;
-                            else
-                            {
-                                token = await GetRefreshedToken();
-                                if (string.IsNullOrEmpty(token))
-                                    completed = true; // API failed and refreshed token expired
-                                else
-                                    attemptCount++;
-                            }
-                        }
-                        completed = true;
+                            Method = HttpMethod.Get,
+                            RequestUri = new Uri(root + api),
+                            Content = content
+                        };
+                        callResult = await httpClient.SendAsync(request).ConfigureAwait(false);
                     }
-                    catch (Exception e)
+
+                    if (callResult.IsSuccessStatusCode)
                     {
-                        attemptCount++;
-                        Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
-                        if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                        string content = await callResult.Content.ReadAsStringAsync();
+                        result = JsonConvert.DeserializeObject<T>(content);
+                    }
+                    else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
+                    {
+                        string content = await callResult.Content.ReadAsStringAsync();
+                        try
                         {
-                            // log error
-                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                            var errorData = JsonConvert.DeserializeObject<MessageDataList>(content);
+                            for (int i = 0; i < errorData?.Count; i++)
+                            {
+                                var thisError = errorData[i];
+                                var error = new MessageData(thisError.Code, thisError.Field, api + ":" + thisError.Description, thisError.Severity, thisError.IsSystemMessage, thisError.URL);
+                                errorData[i] = error;
+                            }
+                            if (errorData is not null)
+                                ErrorData = errorData;
+                        }
+                        catch
+                        {
+                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + content, MessageType.Error);
                             ErrorData.Add(errorMessageData);
                         }
                     }
+                    else if (callResult.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        if (GetRefreshedToken is null)
+                            completed = true;
+                        else
+                        {
+                            token = await GetRefreshedToken();
+                            if (string.IsNullOrEmpty(token))
+                                completed = true; // API failed and refreshed token expired
+                            else
+                                attemptCount++;
+                        }
+                    }
+                    completed = true;
                 }
-
+                catch (Exception e)
+                {
+                    attemptCount++;
+                    Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
+                    if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
+                    {
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);                        
+                        ErrorData.Add(errorMessageData);
+                    }
+                }
             }
 
-            if (result is null)
-                result = new T();
+            result ??= new T();
 
             return result;
         }
-
 
         public async Task<T> PostDataAsync<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()
@@ -346,24 +328,14 @@ namespace FOAEA3.Common.Helpers
             int attemptCount = 0;
             bool completed = false;
 
+            using var httpClient = CreateHttpClient(token);
+
+            string keyData = JsonConvert.SerializeObject(data);
+
             while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
             {
                 try
                 {
-
-                    using var httpClient = new HttpClient();
-
-                    httpClient.Timeout = DEFAULT_TIMEOUT;
-                    httpClient.DefaultRequestHeaders.Accept.Clear();
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                    if (token is not null && !string.IsNullOrEmpty(token))
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                    if (!string.IsNullOrEmpty(CurrentLanguage))
-                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
-                    string keyData = JsonConvert.SerializeObject(data);
-
                     HttpResponseMessage callResult;
                     using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
                         callResult = method switch
@@ -409,7 +381,7 @@ namespace FOAEA3.Common.Helpers
                             }
 
                             string message = $"API return code: {callResult.StatusCode} for call [{method} {root + api}] Content: [{content}]";
-                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", message, MessageType.Error);
+                            var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + message, MessageType.Error);
                             ErrorData.Add(errorMessageData);
 
                             completed = true;
@@ -424,23 +396,20 @@ namespace FOAEA3.Common.Helpers
                     Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
                     if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
-                        // log error
-                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);
                         ErrorData.Add(errorMessageData);
                     }
                 }
             }
 
-            if (result is null)
-                result = new T();
+            result ??= new T();
 
             return result;
 
         }
 
         private async Task<string> SendDataGetStringAsync<P>(string api, P data, string method,
-                                                             string root = "", string token = null)
-                                            where P : class
+                                                             string root = "", string token = null) where P : class
         {
             if ((token is null) && (GetToken is not null))
                 token = GetToken();
@@ -453,23 +422,14 @@ namespace FOAEA3.Common.Helpers
             int attemptCount = 0;
             bool completed = false;
 
+            using var httpClient = CreateHttpClient(token);
+
+            string keyData = JsonConvert.SerializeObject(data);
+
             while ((attemptCount < GlobalConfiguration.MAX_API_ATTEMPTS) && (!completed))
             {
                 try
                 {
-                    using var httpClient = new HttpClient();
-
-                    httpClient.Timeout = DEFAULT_TIMEOUT;
-                    httpClient.DefaultRequestHeaders.Accept.Clear();
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-                    httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-                    if (token is not null && !string.IsNullOrEmpty(token))
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                    if (!string.IsNullOrEmpty(CurrentLanguage))
-                        httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
-
-                    string keyData = JsonConvert.SerializeObject(data);
-
                     HttpResponseMessage callResult;
                     using (var content = new StringContent(keyData, Encoding.UTF8, "application/json"))
                         callResult = method switch
@@ -513,7 +473,7 @@ namespace FOAEA3.Common.Helpers
                     if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
                         // log error
-                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", e.Message, MessageType.Error);
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);
                         ErrorData.Add(errorMessageData);
                     }
                 }
@@ -531,14 +491,7 @@ namespace FOAEA3.Common.Helpers
             if (root == "")
                 root = APIroot;
 
-            using var httpClient = new HttpClient();
-            httpClient.Timeout = DEFAULT_TIMEOUT;
-            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            if (token is not null && !string.IsNullOrEmpty(token))
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-            if (!string.IsNullOrEmpty(CurrentLanguage))
-                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
+            using var httpClient = CreateHttpClient(token);
 
             HttpResponseMessage callResult;
             callResult = method switch
@@ -556,14 +509,7 @@ namespace FOAEA3.Common.Helpers
             if ((token is null) && (GetToken is not null))
                 token = GetToken();
 
-            using var httpClient = new HttpClient();
-            httpClient.Timeout = DEFAULT_TIMEOUT;
-            httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
-            httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
-            if (token is not null && !string.IsNullOrEmpty(token))
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-            if (!string.IsNullOrEmpty(CurrentLanguage))
-                httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
+            using var httpClient = CreateHttpClient(token);
 
             using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
@@ -577,8 +523,22 @@ namespace FOAEA3.Common.Helpers
             if ((token is null) && (GetToken is not null))
                 token = GetToken();
 
-            using var httpClient = new HttpClient();
-            httpClient.Timeout = DEFAULT_TIMEOUT;
+            using var httpClient = CreateHttpClient(token);
+
+            using var content = new StringContent(flatFileData, Encoding.UTF8, "text/plain");
+
+            string root = rootAPI ?? APIroot;
+            return await httpClient.PostAsync(root + api, content);
+        }
+
+        private HttpClient CreateHttpClient(string token)
+        {
+            var httpClient = new HttpClient
+            {
+                Timeout = DEFAULT_TIMEOUT
+            };
+
+            httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Add("CurrentSubmitter", CurrentSubmitter);
             httpClient.DefaultRequestHeaders.Add("CurrentSubject", CurrentUser);
             if (token is not null && !string.IsNullOrEmpty(token))
@@ -586,10 +546,7 @@ namespace FOAEA3.Common.Helpers
             if (!string.IsNullOrEmpty(CurrentLanguage))
                 httpClient.DefaultRequestHeaders.Add("Accept-Language", CurrentLanguage);
 
-            using var content = new StringContent(flatFileData, Encoding.UTF8, "text/plain");
-
-            string root = rootAPI ?? APIroot;
-            return await httpClient.PostAsync(root + api, content);
+            return httpClient;
         }
 
     }

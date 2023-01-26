@@ -18,9 +18,9 @@ public class FoaeaPageModel : PageModel
     protected readonly APIBrokerHelper InterceptionAPIs;
     private IHttpContextAccessor ContextAccessor;
 
-    public List<MessageData> ErrorMessage { get; set; }
-    public List<MessageData> WarningMessage { get; set; }
-    public List<MessageData> InfoMessage { get; set; }
+    public List<MessageData> ErrorMessage { get; set; } = new List<MessageData>();
+    public List<MessageData> WarningMessage { get; set; } = new List<MessageData>();
+    public List<MessageData> InfoMessage { get; set; } = new List<MessageData>();
 
     public FoaeaPageModel(IHttpContextAccessor httpContextAccessor, ApiConfig apiConfig)
     {

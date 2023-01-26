@@ -18,19 +18,19 @@
                     Part 1: Application Identification
                     <div>
                         <label>01 Court of provincial enforcement service name:</label>
-                        <input type="text" disabled="disabled" class="form-control multiColGroup" id="Appl_EnfSrv_Cd_Desc" value="@Model.EnfServiceDescription">
+                        <input type="text" disabled="disabled" class="form-control multiColGroup" value="@Model.EnfServiceDescription">
                     </div>
                     <div>
                         <label>02 Application Reference Code No:</label>
-                        <input type="text" class="form-control multiColGroup" id="Appl_CtrlCd" asp-for="InterceptionApplication.Appl_CtrlCd">
+                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_CtrlCd">
                     </div>
                     <div>
                         <label>03 Court or provincial enforcement service reference no:</label>
-                        <input type="text" class="form-control multiColGroup" id="Appl_Source_RfrNr" asp-for="InterceptionApplication.Appl_Source_RfrNr">
+                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Source_RfrNr">
                     </div>
                     <div>
                         <label>[*] 04 Garnishee summons issue date: (YYYY-MM-DD)</label>
-                        <input type="text" class="form-control multiColGroup" id="Appl_Lgl_Dte"
+                        <input type="text" class="form-control multiColGroup"
                                asp-for="InterceptionApplication.Appl_Lgl_Dte" asp-format="{0:yyyy-MM-dd}">
                     </div>
                 </p>
@@ -41,27 +41,87 @@
                     <div class="tabpanels">
                         <details id="details-panelSupportPayer" open="open">
                             <summary>Support Payer</summary>
-                            <p>
-                                <div>
-                                    <label>[*] 05 Surname:</label>
-                                    <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_SurNme" asp-for="InterceptionApplication.Appl_Dbtr_SurNme">
+                            <div class="container">
+                                <div class="col-lg-6 col-md-6">
+                                    <div>
+                                        <label>[*] 05 Surname:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_SurNme">
+                                    </div>
+                                    <div>
+                                        <label>[*] 06 Given Name:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_FrstNme">
+                                    </div>
+                                    <div>
+                                        <label>07 Other Given Name(s):</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_MddleNme">
+                                    </div>
+                                    <div>
+                                        <label>[*] 08 Date of birth: (YYYY-MM-DD)</label>
+                                        <input type="text" class="form-control multiColGroup"
+                                               asp-for="InterceptionApplication.Appl_Dbtr_Brth_Dte" asp-format="{0:yyyy-MM-dd}">
+                                    </div>
+                                    <div>
+                                        <label>[*] 09 Gender:</label><br \>
+                                        @foreach (var gender in Model.Genders)
+                                        {
+                                            <input type="radio" asp-for="InterceptionApplication.Appl_Dbtr_Gendr_Cd" value="@gender.Gender_Cd" /> @gender.Description
+                                            <br />
+                                        }
+                                    </div>
                                 </div>
-                                <div>
-                                    <label>[*] 06 Given Name:</label>
-                                    <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_FrstNme" asp-for="InterceptionApplication.Appl_Dbtr_FrstNme">
+                                <div class="col-lg-6 col-md-6">
+                                    <div>
+                                        <label>10 Social Insurance Number:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Entrd_SIN">
+                                    </div>
+                                    <div>
+                                        <label>11 Parent's surname at birth:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Parent_SurNme_Birth">
+                                    </div>
+                                    <div>
+                                        <label>* 12 Language of choice:</label><br />
+                                        <input type="radio" asp-for="InterceptionApplication.Appl_Dbtr_LngCd" value="E" /> English<br />
+                                        <input type="radio" asp-for="InterceptionApplication.Appl_Dbtr_LngCd" value="F" /> Français<br />
+                                    </div>
+                                    <div>
+                                        <label>13 Address:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln">
+                                    </div>
+                                    <div>
+                                        <label>14 City:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_CityNme">
+                                    </div>
+                                    <div>
+                                        <label>14 Country:</label>
+                                        <select asp-for="InterceptionApplication.Appl_Dbtr_Addr_CtryCd" id="Appl_Dbtr_Addr_CtryCd">
+                                            @foreach (var country in Model.Countries.OrderBy(m => m.Ctry_Txt_E))
+                                            {
+                                                <option value="@country.Ctry_Cd">@country.Ctry_Txt_E</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>15 Postal Code:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_PCd">
+                                    </div>
+                                    <div>
+                                        <label>16 Province:</label>
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_PrvCd"
+                                               id="Appl_Dbtr_Addr_PrvCd">
+                                    </div>
                                 </div>
-                            </p>
+                            </div>
                         </details>
                         <details id="details-panelSupportRecipient">
                             <summary>Support Recipient</summary>
                             <p>
                                 <div>
                                     <label>[*] 17 Surname:</label>
-                                    <input type="text" class="form-control multiColGroup" id="Appl_Crdtr_SurNme" asp-for="InterceptionApplication.Appl_Crdtr_SurNme">
+                                    <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_SurNme">
                                 </div>
                                 <div>
                                     <label>[*] 18 Given Name:</label>
-                                    <input type="text" class="form-control multiColGroup" id="Appl_Crdtr_FrstNme" asp-for="InterceptionApplication.Appl_Crdtr_FrstNme">
+                                    <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_FrstNme">
                                 </div>
                             </p>
                         </details>
@@ -79,11 +139,11 @@
                                 <p>
                                     <div>
                                         <label>21 Lump sum amount $:</label>
-                                        <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_SurNme" asp-for="InterceptionApplication.IntFinH.IntFinH_LmpSum_Money">
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_LmpSum_Money">
                                     </div>
                                     <div>
                                         <label>22 Periodic payment $:</label>
-                                        <input type="text" class="form-control multiColGroup" id="Appl_Dbtr_FrstNme" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
                                     </div>
                                 </p>
                             </details>
@@ -92,11 +152,11 @@
                                 <p>
                                     <div>
                                         <label>Source department</label>
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="CP01" id="SourceCPP" />CPP
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="EI01" id="SourceEI" />Employment Insurance
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="OA01" id="SourceOAS" />Old Age Security
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="RC01" id="SourceRC" />Revenue Canada
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="TR01" id="SourceTR" />Training Benefits
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="CP01" />CPP
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="EI01" />Employment Insurance
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="OA01" />Old Age Security
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="RC01" />Revenue Canada
+                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="TR01" />Training Benefits
                                     </div>
                                 </p>
                             </details>
@@ -115,7 +175,7 @@
                 <p>
                     <div class="form-group">
                         <label>Comment</label>
-                        <input type="text" class="form-control multiColControl" id="Appl_CommSubm_Text" asp-for="InterceptionApplication.Appl_CommSubm_Text">
+                        <input type="text" class="form-control multiColControl" asp-for="InterceptionApplication.Appl_CommSubm_Text">
                     </div>
                 </p>
             </details>
@@ -126,6 +186,29 @@
                     <div><input type="submit" class="btn btn-primary" value="Submit to FOAEA" asp-page-handler="SubmitNewApplication" /></div>
                 </p>
             </details>
-        </div>        
+        </div>
     </div>
 </form>
+
+@section Scripts
+    {
+    <script>
+        $(function () {
+            $("#Appl_Dbtr_Addr_CtryCd").on("change", function () {
+                alert("A!");
+                var countryCode = $(this).val();
+                $("#Appl_Dbtr_Addr_PrvCd").empty();
+                $.getJSON(`?handler=SelectProvinceForCountry&countryCode=${countryCode}`, (data) => {
+                    $.each(data, function (i, item) {
+                        //console.log(data);
+                        //console.log(item);
+                        alert("B");
+                        alert(item);
+                        $("#Appl_Dbtr_Addr_PrvCd").append(`<option value="${item.PrvCd}">${item.PrvTxtE}</option>`);
+                    });
+                });
+            });
+        });
+
+    </script>
+}

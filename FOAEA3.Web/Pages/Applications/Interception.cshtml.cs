@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications;
@@ -15,6 +16,12 @@ namespace FOAEA3.Web.Pages.Applications;
 public class InterceptionModel : FoaeaPageModel
 {
     public string EnfServiceDescription { get; set; }
+    public List<GenderData> Genders { get; set; }
+    public List<CountryData> Countries { get; set; }
+    public List<ApplicationLifeStateData> LifeStates { get; set; }
+    public List<ProvinceData> ValidProvinces { get; set; }
+
+    public List<ProvinceData> AllProvinces { get; set; }
 
     [BindProperty]
     public InterceptionApplicationData InterceptionApplication { get; set; }
@@ -36,12 +43,39 @@ public class InterceptionModel : FoaeaPageModel
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
             EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
+
+            var apiLifeStatesBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
+            LifeStates = apiLifeStatesBroker.GetApplicationLifeStatesAsync().Result;
+            if (apiLifeStatesBroker.ApiHelper.ErrorData.Any())
+                ErrorMessage.AddRange(apiLifeStatesBroker.ApiHelper.ErrorData);
+
+            var apiGenderBroker = new GendersAPIBroker(BaseAPIs);
+            Genders = apiGenderBroker.GetGendersAsync().Result;
+            if (apiGenderBroker.ApiHelper.ErrorData.Any())
+                ErrorMessage.AddRange(apiGenderBroker.ApiHelper.ErrorData);
+
+            var apiCountryBroker = new CountriesAPIBroker(BaseAPIs);
+            Countries = apiCountryBroker.GetCountriesAsync().Result;
+            if (apiCountryBroker.ApiHelper.ErrorData.Any())
+                ErrorMessage.AddRange(apiCountryBroker.ApiHelper.ErrorData);
+
+            var apiProvinceBroker = new ProvincesAPIBroker(BaseAPIs);
+            AllProvinces = apiProvinceBroker.GetProvincesAsync().Result;
+            if (apiProvinceBroker.ApiHelper.ErrorData.Any())
+                ErrorMessage.AddRange(apiProvinceBroker.ApiHelper.ErrorData);
         }
     }
 
     public void OnGet()
     {
 
+    }
+
+    public JsonResult OnGetSelectProvinceForCountry(string countryCode)
+    {
+        ValidProvinces = AllProvinces.Where(m => m.PrvCtryCd == countryCode).ToList();
+
+        return new JsonResult(ValidProvinces);
     }
 
     public async Task<IActionResult> OnPostSubmitNewApplication()

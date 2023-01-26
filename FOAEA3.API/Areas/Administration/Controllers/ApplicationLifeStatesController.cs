@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Constants;
@@ -20,9 +21,11 @@ public class ApplicationLifeStatesController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
-    public async Task<ActionResult<DataList<ApplicationLifeStateData>>> GetApplicationLifeStates(
-                            [FromServices] IApplicationLifeStateRepository applicationLifeStateRepository)
+    public ActionResult<DataList<ApplicationLifeStateData>> GetApplicationLifeStates()
     {
-        return Ok(await applicationLifeStateRepository.GetApplicationLifeStatesAsync());
+        List<ApplicationLifeStateData> items = ReferenceData.Instance().ApplicationLifeStates.Values.ToList();
+        var data = new DataList<ApplicationLifeStateData>(items, string.Empty);
+
+        return Ok(data);
     }
 }

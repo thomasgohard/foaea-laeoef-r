@@ -1,6 +1,7 @@
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,6 @@ namespace FOAEA3.Web.Pages.Applications;
 
 public class InterceptionDashboardModel : FoaeaPageModel
 {
-    public string ErrorMessage { get; set; }
     public List<ApplicationLifeStateData> LifeStates { get; set; }
     public List<ApplicationSearchResultData> SearchResults { get; set; }
 
@@ -42,7 +42,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
             SearchResults = await GetSearchResults(SearchCriteria);
 
             if (BaseAPIs.ErrorData.Any())
-                ErrorMessage = BaseAPIs.BuildErrorMessage();
+                ErrorMessage = BaseAPIs.ErrorData;
 
             return Page();
         }
@@ -57,7 +57,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
             SearchResults = await GetSearchResults(MySearchCriteria);
 
             if (BaseAPIs.ErrorData.Any())
-                ErrorMessage = BaseAPIs.BuildErrorMessage();
+                ErrorMessage = BaseAPIs.ErrorData;
 
             return Page();
         }
