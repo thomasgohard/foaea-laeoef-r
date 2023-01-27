@@ -36,7 +36,8 @@ public class InterceptionModel : FoaeaPageModel
             InterceptionApplication = new InterceptionApplicationData
             {
                 Appl_EnfSrv_Cd = httpContextAccessor.HttpContext.Session.GetString(SessionValue.ENF_SERVICE),
-                Subm_SubmCd = submitter
+                Subm_SubmCd = submitter,
+                Appl_Dbtr_Addr_CtryCd = "CAN"
             };
 
             InterceptionApplication.HldbCnd.Add(new HoldbackConditionData());
@@ -73,7 +74,7 @@ public class InterceptionModel : FoaeaPageModel
 
     public JsonResult OnGetSelectProvinceForCountry(string countryCode)
     {
-        ValidProvinces = AllProvinces.Where(m => m.PrvCtryCd == countryCode).ToList();
+        ValidProvinces = AllProvinces.Where(m => m.PrvCtryCd == countryCode).OrderBy(m => m.PrvTxtE).ToList();
 
         return new JsonResult(ValidProvinces);
     }

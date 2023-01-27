@@ -13,7 +13,7 @@
             <details id="details-panel1" open="open">
                 <summary>Part 1</summary>
                 <p>
-                    <input type="hidden" asp-for="InterceptionApplication.Appl_EnfSrv_Cd" />
+                    <input type="hidden" id="Appl_EnfSrv_Cd" asp-for="InterceptionApplication.Appl_EnfSrv_Cd" />
                     <input type="hidden" asp-for="InterceptionApplication.Subm_SubmCd" />
                     Part 1: Application Identification
                     <div>
@@ -29,7 +29,7 @@
                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Source_RfrNr">
                     </div>
                     <div>
-                        <label>[*] 04 Garnishee summons issue date: (YYYY-MM-DD)</label>
+                        <label>* 04 Garnishee summons issue date: (YYYY-MM-DD)</label>
                         <input type="text" class="form-control multiColGroup"
                                asp-for="InterceptionApplication.Appl_Lgl_Dte" asp-format="{0:yyyy-MM-dd}">
                     </div>
@@ -44,11 +44,11 @@
                             <div class="container">
                                 <div class="col-lg-6 col-md-6">
                                     <div>
-                                        <label>[*] 05 Surname:</label>
+                                        <label>* 05 Surname:</label>
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_SurNme">
                                     </div>
                                     <div>
-                                        <label>[*] 06 Given Name:</label>
+                                        <label>* 06 Given Name:</label>
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_FrstNme">
                                     </div>
                                     <div>
@@ -56,12 +56,12 @@
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_MddleNme">
                                     </div>
                                     <div>
-                                        <label>[*] 08 Date of birth: (YYYY-MM-DD)</label>
+                                        <label>* 08 Date of birth: (YYYY-MM-DD)</label>
                                         <input type="text" class="form-control multiColGroup"
                                                asp-for="InterceptionApplication.Appl_Dbtr_Brth_Dte" asp-format="{0:yyyy-MM-dd}">
                                     </div>
                                     <div>
-                                        <label>[*] 09 Gender:</label><br \>
+                                        <label>* 09 Gender:</label><br \>
                                         @foreach (var gender in Model.Genders)
                                         {
                                             <input type="radio" asp-for="InterceptionApplication.Appl_Dbtr_Gendr_Cd" value="@gender.Gender_Cd" /> @gender.Description
@@ -85,7 +85,8 @@
                                     </div>
                                     <div>
                                         <label>13 Address:</label>
-                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln">
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln"><br />
+                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln1">
                                     </div>
                                     <div>
                                         <label>14 City:</label>
@@ -94,9 +95,16 @@
                                     <div>
                                         <label>14 Country:</label>
                                         <select asp-for="InterceptionApplication.Appl_Dbtr_Addr_CtryCd" id="Appl_Dbtr_Addr_CtryCd">
-                                            @foreach (var country in Model.Countries.OrderBy(m => m.Ctry_Txt_E))
+                                            @foreach (var country in Model.Countries.Where(m => m.ActvSt_Cd == "A").OrderBy(m => m.Ctry_Txt_E))
                                             {
-                                                <option value="@country.Ctry_Cd">@country.Ctry_Txt_E</option>
+                                                if (Model.InterceptionApplication.Appl_Dbtr_Addr_CtryCd == country.Ctry_Cd)
+                                                {
+                                                    <option value="@country.Ctry_Cd" selected>@country.Ctry_Txt_E</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@country.Ctry_Cd">@country.Ctry_Txt_E</option>
+                                                }
                                             }
                                         </select>
                                     </div>
@@ -106,8 +114,8 @@
                                     </div>
                                     <div>
                                         <label>16 Province:</label>
-                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_PrvCd"
-                                               id="Appl_Dbtr_Addr_PrvCd">
+                                        <select asp-for="InterceptionApplication.Appl_Dbtr_Addr_PrvCd" id="Appl_Dbtr_Addr_PrvCd">
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -116,11 +124,11 @@
                             <summary>Support Recipient</summary>
                             <p>
                                 <div>
-                                    <label>[*] 17 Surname:</label>
+                                    <label>* 17 Surname:</label>
                                     <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_SurNme">
                                 </div>
                                 <div>
-                                    <label>[*] 18 Given Name:</label>
+                                    <label>* 18 Given Name:</label>
                                     <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_FrstNme">
                                 </div>
                             </p>
@@ -194,21 +202,26 @@
     {
     <script>
         $(function () {
-            $("#Appl_Dbtr_Addr_CtryCd").on("change", function () {
-                alert("A!");
-                var countryCode = $(this).val();
+
+            function LoadProvinces() {
+                var countryCode = $("#Appl_Dbtr_Addr_CtryCd").val();
+                var enforcementProvince = $("#Appl_EnfSrv_Cd").val().substring(0,2);
+                alert(enforcementProvince);
                 $("#Appl_Dbtr_Addr_PrvCd").empty();
                 $.getJSON(`?handler=SelectProvinceForCountry&countryCode=${countryCode}`, (data) => {
                     $.each(data, function (i, item) {
-                        //console.log(data);
-                        //console.log(item);
-                        alert("B");
-                        alert(item);
-                        $("#Appl_Dbtr_Addr_PrvCd").append(`<option value="${item.PrvCd}">${item.PrvTxtE}</option>`);
+                        var selected = "";
+                        if (item.prvCd == enforcementProvince)
+                            selected = "selected";
+                        $("#Appl_Dbtr_Addr_PrvCd").append(`<option value="${item.prvCd}" ${selected}>${item.prvTxtE}</option>`);
                     });
                 });
-            });
-        });
+            }
 
+            $(document).on('change', '#Appl_Dbtr_Addr_CtryCd', LoadProvinces);
+
+            LoadProvinces();
+
+        });
     </script>
 }
