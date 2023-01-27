@@ -25,6 +25,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         //        Task<List<InterceptionApplicationData>> GetApplicationsForVariationAutoAcceptAsync(string enfService);
         Task AutoAcceptVariationsAsync(string enfService);
         Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication);
+        Task<List<PaymentPeriodData>> GetPaymentPeriods();
 
         Task<bool> ESD_CheckIfAlreadyLoaded(string fileName);
         Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived);

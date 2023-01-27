@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,6 +12,11 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class InterceptionManager : ApplicationManager
     {
+        public async Task<List<PaymentPeriodData>> GetPaymentPeriods()
+        {
+            return await DB.InterceptionTable.GetPaymentPeriodsAsync();
+        }
+
         private async Task SendDebtorLetterAsync()
         {
             // TODO: this checks will currently fail in the old code, but will work here... should it?

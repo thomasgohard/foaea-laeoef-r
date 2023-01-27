@@ -1,7 +1,5 @@
 ﻿@page
 @model InterceptionModel
-@{
-}
 
 <p>Interception</p>
 
@@ -131,6 +129,15 @@
                                     <label>* 18 Given Name:</label>
                                     <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_FrstNme">
                                 </div>
+                                <div>
+                                    <label>19 Other Given Name(s):</label>
+                                    <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Crdtr_MddleNme">
+                                </div>
+                                <div>
+                                    <label>20 Date of birth: (YYYY-MM-DD)</label>
+                                    <input type="text" class="form-control multiColGroup"
+                                           asp-for="InterceptionApplication.Appl_Crdtr_Brth_Dte" asp-format="{0:yyyy-MM-dd}">
+                                </div>
                             </p>
                         </details>
                     </div>
@@ -144,16 +151,31 @@
                         <div class="tabpanels">
                             <details id="details-panelSection1" open="open">
                                 <summary>Section 1</summary>
-                                <p>
-                                    <div>
-                                        <label>21 Lump sum amount $:</label>
-                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_LmpSum_Money">
+                                <div class="container">
+                                    <div class="col-md-6">
+                                        <div>
+                                            <label>21 Lump sum amount $:</label>
+                                            <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_LmpSum_Money">
+                                        </div>
+                                        <div>
+                                            <label>22 Periodic payment $:</label>
+                                            <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label>22 Periodic payment $:</label>
-                                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
+                                    <div class="col-md-6">
+                                        <div>
+                                            <label>23 Payment period code:</label>
+                                            <a href="javascript:void(0);" id="ClearPaymentPeriod" class="buttonLink">[Clear]</a>
+                                            <br />
+                                            @foreach (var period in Model.PaymentPeriods.Where(m => m.PymPr_Cd != "9").OrderBy(m => m.PymPr_Cd))
+                                            {
+                                                string periodDisplay = $" {period.PymPr_Cd} {period.PymPr_Txt_E}";
+                                                <input type="radio" asp-for="InterceptionApplication.IntFinH.PymPr_Cd" value="@period.PymPr_Cd"/>@periodDisplay
+                                                <br />
+                                            }
+                                        </div>
                                     </div>
-                                </p>
+                                </div>
                             </details>
                             <details id="details-panelSection2">
                                 <summary>Section 2</summary>
@@ -198,30 +220,6 @@
     </div>
 </form>
 
-@section Scripts
-    {
-    <script>
-        $(function () {
-
-            function LoadProvinces() {
-                var countryCode = $("#Appl_Dbtr_Addr_CtryCd").val();
-                var enforcementProvince = $("#Appl_EnfSrv_Cd").val().substring(0,2);
-                alert(enforcementProvince);
-                $("#Appl_Dbtr_Addr_PrvCd").empty();
-                $.getJSON(`?handler=SelectProvinceForCountry&countryCode=${countryCode}`, (data) => {
-                    $.each(data, function (i, item) {
-                        var selected = "";
-                        if (item.prvCd == enforcementProvince)
-                            selected = "selected";
-                        $("#Appl_Dbtr_Addr_PrvCd").append(`<option value="${item.prvCd}" ${selected}>${item.prvTxtE}</option>`);
-                    });
-                });
-            }
-
-            $(document).on('change', '#Appl_Dbtr_Addr_CtryCd', LoadProvinces);
-
-            LoadProvinces();
-
-        });
-    </script>
+@section Scripts {
+    <script src="~/js/Applications/Interception.js"></script>
 }

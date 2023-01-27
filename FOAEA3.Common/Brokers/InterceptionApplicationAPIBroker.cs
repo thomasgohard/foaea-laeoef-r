@@ -111,6 +111,12 @@ namespace FOAEA3.Common.Brokers
             return;
         }
 
+        public async Task<List<PaymentPeriodData>> GetPaymentPeriods()
+        {
+            string apiCall = "api/v1/paymentperiods";
+            return await ApiHelper.GetDataAsync<List<PaymentPeriodData>>(apiCall, token: Token);
+        }
+
         public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);

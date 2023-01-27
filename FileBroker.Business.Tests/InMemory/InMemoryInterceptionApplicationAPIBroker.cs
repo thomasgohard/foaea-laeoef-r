@@ -68,6 +68,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<List<PaymentPeriodData>> GetPaymentPeriods()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();
