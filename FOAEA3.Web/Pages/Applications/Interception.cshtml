@@ -161,6 +161,11 @@
                                             <label>22 Periodic payment $:</label>
                                             <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_PerPym_Money">
                                         </div>
+                                        <div>
+                                            <label>Next recalculation date:</label>
+                                            <select asp-for="InterceptionApplication.IntFinH.IntFinH_NextRecalcDate_Cd" id="IntFinH_NextRecalcDate_Cd">
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div>
@@ -170,8 +175,39 @@
                                             @foreach (var period in Model.PaymentPeriods.Where(m => m.PymPr_Cd != "9").OrderBy(m => m.PymPr_Cd))
                                             {
                                                 string periodDisplay = $" {period.PymPr_Cd} {period.PymPr_Txt_E}";
-                                                <input type="radio" asp-for="InterceptionApplication.IntFinH.PymPr_Cd" value="@period.PymPr_Cd"/>@periodDisplay
+                                                <input type="radio" id="PymPr_Cd" asp-for="InterceptionApplication.IntFinH.PymPr_Cd" value="@period.PymPr_Cd" />
+                                                @periodDisplay
                                                 <br />
+                                            }
+                                        </div>
+                                        <div>
+                                            <label>24 Are periodic payments cumulative?</label>
+                                            <a href="javascript:void(0);" id="ClearCumulative" class="buttonLink">[Clear]</a>
+                                            <br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="1" />1 No<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="2" />2 Yes<br />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div>
+                                            <label>25 Default Holdbacks</label>
+                                            <a href="javascript:void(0);" id="ClearCumulative" class="buttonLink">[Clear]</a>
+                                            <br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="A" />A No holbacks<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="B" />B Percentage 
+                                            <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbPrcnt">
+                                            %<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="C" />C Fixed amount 
+                                            <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money">
+                                            $<br />
+                                        </div>
+                                        <div>
+                                            <label>Fixed amount Period Code </label>
+                                            @foreach (var period in Model.PaymentPeriods.Where(m => m.PymPr_Cd != "9").OrderBy(m => m.PymPr_Cd))
+                                            {
+                                                string periodDisplay = $"{period.PymPr_Txt_E}";
+                                                <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Period" value="@period.PymPr_Cd" />
+                                                @periodDisplay
                                             }
                                         </div>
                                     </div>
