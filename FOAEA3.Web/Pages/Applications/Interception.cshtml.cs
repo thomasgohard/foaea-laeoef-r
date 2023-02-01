@@ -26,6 +26,9 @@ public class InterceptionModel : FoaeaPageModel
     [BindProperty]
     public InterceptionApplicationData InterceptionApplication { get; set; }
 
+    [BindProperty]
+    public HoldbackConditionData NewCondition { get; set; }
+
     public InterceptionModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
@@ -39,8 +42,6 @@ public class InterceptionModel : FoaeaPageModel
                 Subm_SubmCd = submitter,
                 Appl_Dbtr_Addr_CtryCd = "CAN"
             };
-
-            InterceptionApplication.HldbCnd.Add(new HoldbackConditionData());
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
             EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
@@ -83,6 +84,20 @@ public class InterceptionModel : FoaeaPageModel
         return Page();
     }
 
+    public void OnPostAddEntry()
+    {
+        InterceptionApplication.HldbCnd.Add(new HoldbackConditionData()
+        {
+            Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd,
+            Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd,
+            HldbCnd_MxmPerChq_Money = NewCondition.HldbCnd_MxmPerChq_Money,
+            HldbCnd_SrcHldbAmn_Money = NewCondition.HldbCnd_SrcHldbAmn_Money,
+            HldbCnd_SrcHldbPrcnt = NewCondition.HldbCnd_SrcHldbPrcnt,
+            HldbCtg_Cd = NewCondition.HldbCtg_Cd,
+            EnfSrv_Cd = NewCondition.EnfSrv_Cd
+        });
+    }
+
     private List<MessageData> GetValidationErrors()
     {
         var errorMessages = new List<MessageData>();
@@ -99,23 +114,23 @@ public class InterceptionModel : FoaeaPageModel
     private void LoadReferenceData()
     {
         var apiLifeStatesBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-        LifeStates =  apiLifeStatesBroker.GetApplicationLifeStatesAsync().Result;
+        LifeStates = apiLifeStatesBroker.GetApplicationLifeStatesAsync().Result;
         if (apiLifeStatesBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiLifeStatesBroker.ApiHelper.ErrorData);
 
         var apiGenderBroker = new GendersAPIBroker(BaseAPIs);
-        Genders =  apiGenderBroker.GetGendersAsync().Result;
+        Genders = apiGenderBroker.GetGendersAsync().Result;
         if (apiGenderBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiGenderBroker.ApiHelper.ErrorData);
 
         var apiCountryBroker = new CountriesAPIBroker(BaseAPIs);
-        Countries = apiCountryBroker.GetCountriesAsync().Result ;
+        Countries = apiCountryBroker.GetCountriesAsync().Result;
         if (apiCountryBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiCountryBroker.ApiHelper.ErrorData);
 
         var apiProvinceBroker = new ProvincesAPIBroker(BaseAPIs);
-        AllProvinces =  apiProvinceBroker.GetProvincesAsync().Result;
+        AllProvinces = apiProvinceBroker.GetProvincesAsync().Result;
         if (apiProvinceBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiProvinceBroker.ApiHelper.ErrorData);
 
         var apiInterceptioBroker = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        PaymentPeriods =  apiInterceptioBroker.GetPaymentPeriods().Result;
+        PaymentPeriods = apiInterceptioBroker.GetPaymentPeriods().Result;
         if (apiInterceptioBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiInterceptioBroker.ApiHelper.ErrorData);
     }
 

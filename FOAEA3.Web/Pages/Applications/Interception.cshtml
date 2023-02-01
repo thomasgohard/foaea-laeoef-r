@@ -1,5 +1,8 @@
 ﻿@page
 @model InterceptionModel
+@{
+    int activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
+}
 
 <p>Interception</p>
 
@@ -188,16 +191,16 @@
                                             <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="2" />2 Yes<br />
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-9">
                                         <div>
                                             <label>25 Default Holdbacks</label>
                                             <a href="javascript:void(0);" id="ClearCumulative" class="buttonLink">[Clear]</a>
                                             <br />
                                             <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="A" />A No holbacks<br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="B" />B Percentage 
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="B" />B Percentage
                                             <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbPrcnt">
                                             %<br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="C" />C Fixed amount 
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="C" />C Fixed amount
                                             <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money">
                                             $<br />
                                         </div>
@@ -216,13 +219,55 @@
                             <details id="details-panelSection2">
                                 <summary>Section 2</summary>
                                 <p>
-                                    <div>
-                                        <label>Source department</label>
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="CP01" />CPP
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="EI01" />Employment Insurance
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="OA01" />Old Age Security
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="RC01" />Revenue Canada
-                                        <input type="radio" asp-for="InterceptionApplication.HldbCnd[0].EnfSrv_Cd" value="TR01" />Training Benefits
+                                    <h2>Garnishment Options</h2>
+                                    <div class="col-md-12">
+                                        <label>26 Specific holdbacks per source of funds</label>
+                                        <p><strong>Fill in A or B</strong> if you wish exemptions from garnishment to differ from default above, <strong>or C</strong> if you wish to have a set amount garnished per transaction.</p>
+                                        <p><strong>For A and B</strong>, indicate the amount or percentage you want exempted from garnishment.</p>
+                                        <p><strong>For C</strong>, indicate the specific amount to be garnished</p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div>
+                                            <label>Source department</label>
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="CP01" />CPP
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="EI01" />Employment Insurance
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="OA01" />Old Age Security
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="RC01" />Revenue Canada
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="TR01" />Training Benefits
+                                        </div>
+                                        <div>
+                                            <input type="radio" asp-for="NewCondition.HldbCtg_Cd" value="A" />A Percentage (per transaction)
+                                            <input type="text" class="form-control multiColGroup" asp-for="NewCondition.HldbCnd_SrcHldbPrcnt">
+                                            %<br />
+                                            <input type="radio" asp-for="NewCondition.HldbCtg_Cd" value="B" />B Fixed amount (per payment period)
+                                            <input type="text" class="form-control multiColGroup" asp-for="NewCondition.HldbCnd_SrcHldbAmn_Money">
+                                            $<br />
+                                            <input type="radio" asp-for="NewCondition.HldbCtg_Cd" value="C" />C Amount to garnish per transaction
+                                            <input type="text" class="form-control multiColGroup" asp-for="NewCondition.HldbCnd_MxmPerChq_Money">
+                                            $<br />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="submit" class="btn" value="Add Entry" asp-page-handler="AddEntry" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <table>
+                                            <tr>
+                                                <td>Percentage</td>
+                                                <td>Fixed Amount</td>
+                                                <td>Amount to garnish per transaction</td>
+                                                <td>Source Department</td>
+                                            </tr>
+                                            @for (int i = 0; i < Model.InterceptionApplication.HldbCnd.Count; i++)
+                                            {
+                                                <tr>
+                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbPrcnt" /></td>
+                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbAmn_Money" /></td>
+                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_MxmPerChq_Money" /></td>
+                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].EnfSrv_Cd" /></td>
+                                                </tr>
+                                            }
+                                        </table>
                                     </div>
                                 </p>
                             </details>
