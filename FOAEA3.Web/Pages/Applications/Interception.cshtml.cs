@@ -6,6 +6,7 @@ using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,7 +41,9 @@ public class InterceptionModel : FoaeaPageModel
             {
                 Appl_EnfSrv_Cd = httpContextAccessor.HttpContext.Session.GetString(SessionValue.ENF_SERVICE),
                 Subm_SubmCd = submitter,
-                Appl_Dbtr_Addr_CtryCd = "CAN"
+                Appl_Dbtr_Addr_CtryCd = "CAN",
+                Subm_Recpt_SubmCd = submitter,
+                Medium_Cd = "ONL"                
             };
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
@@ -64,6 +67,19 @@ public class InterceptionModel : FoaeaPageModel
 
     public async Task<IActionResult> OnPostSubmitNewApplication()
     {
+        if (InterceptionApplication.IntFinH.IntFinH_NextRecalcDate_Cd == 0)
+            InterceptionApplication.IntFinH.IntFinH_NextRecalcDate_Cd = null;
+
+        if (InterceptionApplication.IntFinH.HldbCtg_Cd == "0")
+            InterceptionApplication.IntFinH.HldbTyp_Cd = null;
+        else if (InterceptionApplication.IntFinH.HldbCtg_Cd == "1")
+            InterceptionApplication.IntFinH.HldbTyp_Cd = "T";
+        else // "2"
+            InterceptionApplication.IntFinH.HldbTyp_Cd = "P";
+
+        if (InterceptionApplication.Appl_Dbtr_Brth_Dte == DateTime.MinValue)
+            InterceptionApplication.Appl_Dbtr_Brth_Dte = null;
+
         if (!ModelState.IsValid)
         {
             ErrorMessage = GetValidationErrors();

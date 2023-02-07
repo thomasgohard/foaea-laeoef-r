@@ -376,8 +376,7 @@ namespace FOAEA3.Common.Helpers
                             }
                             catch (Exception e)
                             {
-                                // no content or invalid content so ignore?
-                                content = e.Message;
+                                // content could not be converted, so just return as is
                             }
 
                             string message = $"API return code: {callResult.StatusCode} for call [{method} {root + api}] Content: [{content}]";

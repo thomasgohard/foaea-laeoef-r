@@ -237,6 +237,8 @@ namespace FOAEA3.Business.Areas.Application
             // More than one of these can occur for the same triggering of Event 50772 (really just 2 and 3).
 
             string reasonText = string.Empty;
+            if (postalCode is null)
+                postalCode = string.Empty;
 
             if (postalCode == "-")
             {

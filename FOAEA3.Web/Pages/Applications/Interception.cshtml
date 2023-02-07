@@ -16,6 +16,10 @@
                 <p>
                     <input type="hidden" id="Appl_EnfSrv_Cd" asp-for="InterceptionApplication.Appl_EnfSrv_Cd" />
                     <input type="hidden" asp-for="InterceptionApplication.Subm_SubmCd" />
+                    <input type="hidden" asp-for="InterceptionApplication.Subm_Recpt_SubmCd" />
+                    <input type="hidden" asp-for="InterceptionApplication.Medium_Cd" />
+                    <input type="hidden" asp-for="InterceptionApplication.Appl_Affdvt_DocTypCd" />
+
                     Part 1: Application Identification
                     <div>
                         <label>01 Court of provincial enforcement service name:</label>
@@ -85,16 +89,16 @@
                                         <input type="radio" asp-for="InterceptionApplication.Appl_Dbtr_LngCd" value="F" /> Français<br />
                                     </div>
                                     <div>
-                                        <label>13 Address:</label>
+                                        <label>* 13 Address:</label>
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln"><br />
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_Ln1">
                                     </div>
                                     <div>
-                                        <label>14 City:</label>
+                                        <label>* 14 City:</label>
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_CityNme">
                                     </div>
                                     <div>
-                                        <label>14 Country:</label>
+                                        <label>* 14 Country:</label>
                                         <select asp-for="InterceptionApplication.Appl_Dbtr_Addr_CtryCd" id="Appl_Dbtr_Addr_CtryCd">
                                             @foreach (var country in Model.Countries.Where(m => m.ActvSt_Cd == "A").OrderBy(m => m.Ctry_Txt_E))
                                             {
@@ -110,11 +114,11 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label>15 Postal Code:</label>
+                                        <label>* 15 Postal Code:</label>
                                         <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_Dbtr_Addr_PCd">
                                     </div>
                                     <div>
-                                        <label>16 Province:</label>
+                                        <label>* 16 Province:</label>
                                         <select asp-for="InterceptionApplication.Appl_Dbtr_Addr_PrvCd" id="Appl_Dbtr_Addr_PrvCd">
                                         </select>
                                     </div>
@@ -187,8 +191,8 @@
                                             <label>24 Are periodic payments cumulative?</label>
                                             <a href="javascript:void(0);" id="ClearCumulative" class="buttonLink">[Clear]</a>
                                             <br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="1" />1 No<br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="2" />2 Yes<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="0" />1 No<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.IntFinH_CmlPrPym_Ind" value="1" />2 Yes<br />
                                         </div>
                                     </div>
                                     <div class="col-md-9">
@@ -196,11 +200,11 @@
                                             <label>25 Default Holdbacks</label>
                                             <a href="javascript:void(0);" id="ClearCumulative" class="buttonLink">[Clear]</a>
                                             <br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="A" />A No holbacks<br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="B" />B Percentage
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbCtg_Cd" value="0" />A No holbacks<br />
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbCtg_Cd" value="1" />B Percentage
                                             <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbPrcnt">
                                             %<br />
-                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbTyp_Cd" value="C" />C Fixed amount
+                                            <input type="radio" asp-for="InterceptionApplication.IntFinH.HldbCtg_Cd" value="2" />C Fixed amount
                                             <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.IntFinH.IntFinH_DefHldbAmn_Money">
                                             $<br />
                                         </div>
@@ -229,11 +233,11 @@
                                     <div class="col-md-9">
                                         <div>
                                             <label>Source department</label>
-                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="CP01" />CPP
-                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="EI01" />Employment Insurance
-                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="OA01" />Old Age Security
-                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="RC01" />Revenue Canada
-                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="TR01" />Training Benefits
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="CP00" />CPP
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="UI00" />Employment Insurance
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="OA00" />Old Age Security
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="RC00" />Revenue Canada
+                                            <input type="radio" asp-for="NewCondition.EnfSrv_Cd" value="TR00" />Training Benefits
                                         </div>
                                         <div>
                                             <input type="radio" asp-for="NewCondition.HldbCtg_Cd" value="A" />A Percentage (per transaction)
@@ -250,25 +254,36 @@
                                     <div class="col-md-3">
                                         <input type="submit" class="btn" value="Add Entry" asp-page-handler="AddEntry" />
                                     </div>
-                                    <div class="col-md-12">
-                                        <table>
-                                            <tr>
-                                                <td>Percentage</td>
-                                                <td>Fixed Amount</td>
-                                                <td>Amount to garnish per transaction</td>
-                                                <td>Source Department</td>
-                                            </tr>
-                                            @for (int i = 0; i < Model.InterceptionApplication.HldbCnd.Count; i++)
-                                            {
+                                    @if (Model.InterceptionApplication.HldbCnd.Any())
+                                    {
+                                        <div class="col-md-12">
+                                            <table>
                                                 <tr>
-                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbPrcnt" /></td>
-                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbAmn_Money" /></td>
-                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_MxmPerChq_Money" /></td>
-                                                    <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].EnfSrv_Cd" /></td>
+                                                    <td><strong>Percentage</strong></td>
+                                                    <td><strong>Fixed Amount</strong></td>
+                                                    <td><strong>Amount to garnish per transaction</strong></td>
+                                                    <td><strong>Source Department</strong></td>
                                                 </tr>
-                                            }
-                                        </table>
-                                    </div>
+                                                @for (int i = 0; i < Model.InterceptionApplication.HldbCnd.Count; i++)
+                                                {
+                                                    <tr>
+                                                        <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbPrcnt" /></td>
+                                                        <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_SrcHldbAmn_Money" /></td>
+                                                        <td><input type="text" asp-for="InterceptionApplication.HldbCnd[i].HldbCnd_MxmPerChq_Money" /></td>
+                                                        <td>
+                                                            <select asp-for="InterceptionApplication.HldbCnd[i].EnfSrv_Cd">
+                                                                <option value="CP00">CPP</option>
+                                                                <option value="UI00">Employment Insurance</option>
+                                                                <option value="OA00">Old Age Security</option>
+                                                                <option value="RC00">Revenue Canada</option>
+                                                                <option value="TR00">Training Benefits</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    }
                                 </p>
                             </details>
                         </div>

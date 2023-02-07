@@ -27,6 +27,7 @@
         $("#IntFinH_NextRecalcDate_Cd").empty();
         switch (periodCode) {
             case "A":
+                $("#IntFinH_NextRecalcDate_Cd").append(`<option value="0"></option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="1">Sunday</option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="2">Monday</option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="3">Tuesday</option>`);
@@ -36,6 +37,7 @@
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="7">Saturday</option>`);
                 break;
             case "B":
+                $("#IntFinH_NextRecalcDate_Cd").append(`<option value="0"></option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="1">First available Sunday</option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="2">First available Monday</option>`);
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="3">First available Tuesday</option>`);
@@ -52,6 +54,7 @@
                 $("#IntFinH_NextRecalcDate_Cd").append(`<option value="14">Second available Saturday</option>`);
                 break;
             case "C":
+                $("#IntFinH_NextRecalcDate_Cd").append(`<option value="0"></option>`);
                 for (let i = 1; i <= 31; i++) {
                     $("#IntFinH_NextRecalcDate_Cd").append(`<option value="${i}">${i}</option>`);
                 }

@@ -41,7 +41,7 @@
     "Key": "%FILEBROKER_TOKEN_KEY%",
     "Issuer": "%FILEBROKER_TOKEN_ISSUER%",
     "Audience": "%FILEBROKER_TOKEN_AUDIENCE%",
-    "ExpireMinutes": 2,
-    "RefreshTokenExpireMinutes": 20
+    "ExpireMinutes": 20,
+    "RefreshTokenExpireMinutes": 60
   }
 }

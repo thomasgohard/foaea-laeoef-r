@@ -31,6 +31,34 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication = interceptionApplication;
         }
 
+        public bool ValidFinancialTermsMandatoryData()
+        {
+            var intFinH = InterceptionApplication.IntFinH;
+
+            if (intFinH is null) return ReturnError("Missing financial terms");
+            if (string.IsNullOrEmpty(intFinH.HldbCtg_Cd)) return ReturnError("Missing HldbCtg_Cd in default financial terms");
+
+            if ((intFinH.IntFinH_PerPym_Money.HasValue) && (intFinH.IntFinH_CmlPrPym_Ind is null))
+                return ReturnError("Missing IntFinH_CmlPrPym_Ind in default financial terms");
+
+            if ((InterceptionApplication.HldbCnd is not null) && (InterceptionApplication.HldbCnd.Any()))
+            {
+                foreach (var sourceSpecific in InterceptionApplication.HldbCnd)
+                {
+                    if (string.IsNullOrEmpty(sourceSpecific.EnfSrv_Cd)) ReturnError("Missing EnfSrv_Cd in source specific financial terms");
+                    if (string.IsNullOrEmpty(sourceSpecific.HldbCtg_Cd)) return ReturnError("Missing HldbCtg_Cd in source specific financial terms");
+                }
+            }
+
+            return true;
+        }
+
+        private bool ReturnError(string message)
+        {
+            InterceptionApplication.Messages.AddError(message);
+            return false;
+        }
+
         public async Task<bool> ValidVariationDefaultHoldbacksAsync()
         {
             bool isValid = true;

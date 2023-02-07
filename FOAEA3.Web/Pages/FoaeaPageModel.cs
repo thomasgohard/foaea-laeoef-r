@@ -68,8 +68,8 @@ public class FoaeaPageModel : PageModel
 
             var result = await apiBroker.RefreshTokenAsync(currentToken, refreshToken);
 
-            HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
-            HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
+            ContextAccessor.HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
+            ContextAccessor.HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
 
             return result.Token;
         }

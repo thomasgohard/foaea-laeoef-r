@@ -125,14 +125,10 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            if (InterceptionApplication.IntFinH is null)
-            {
-                InterceptionApplication.Messages.AddError("Missing financial terms");
+            if (!InterceptionValidation.ValidFinancialTermsMandatoryData())
                 return false;
-            }
 
             bool success = await base.CreateApplicationAsync();
-
             if (success)
             {
                 InterceptionApplication.IntFinH.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
@@ -140,11 +136,20 @@ namespace FOAEA3.Business.Areas.Application
                 InterceptionApplication.IntFinH.ActvSt_Cd = "P";
                 InterceptionApplication.IntFinH.IntFinH_VarIss_Dte = null;
 
+                var finTermsDate = DateTime.Now;
+                if (InterceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue)
+                    InterceptionApplication.IntFinH.IntFinH_Dte = finTermsDate;
+                else
+                    finTermsDate = InterceptionApplication.IntFinH.IntFinH_Dte;
+
                 foreach (var sourceSpecificHoldback in InterceptionApplication.HldbCnd)
                 {
                     sourceSpecificHoldback.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
                     sourceSpecificHoldback.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                     sourceSpecificHoldback.ActvSt_Cd = "P";
+
+                    if (sourceSpecificHoldback.IntFinH_Dte == DateTime.MinValue)
+                        sourceSpecificHoldback.IntFinH_Dte = finTermsDate;
                 }
 
                 if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.HasValue &&
@@ -613,7 +618,7 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.InterceptionTable.IsSinBlockedAsync(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
         }
 
-        public async Task  FTBatchNotification_CheckFTTransactionsAdded()
+        public async Task FTBatchNotification_CheckFTTransactionsAdded()
         {
             await DB.InterceptionTable.FTBatchNotification_CheckFTTransactionsAddedAsync();
         }
