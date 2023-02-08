@@ -4,8 +4,8 @@
 
 @{
     bool isLoggedIn = false;
-    string currentToken = Accessor?.HttpContext?.Session.GetString(SessionValue.TOKEN);
-    if (!string.IsNullOrEmpty(currentToken))
+    string currentSubmitter = Accessor?.HttpContext?.Session.GetString(SessionValue.SUBMITTER);
+    if (!string.IsNullOrEmpty(currentSubmitter))
     {
         isLoggedIn = true;
     }

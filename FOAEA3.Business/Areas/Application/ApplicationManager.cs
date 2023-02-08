@@ -359,6 +359,13 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0)
+        {
+            var applicationDB = DB.ApplicationTable;
+            var data = await applicationDB.GetApplicationRecentActivityForSubmitter(submCd, days);
+            return data;
+        }
+
         public virtual Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
             throw new NotImplementedException("ProcessBringForwards has not been implemented!");

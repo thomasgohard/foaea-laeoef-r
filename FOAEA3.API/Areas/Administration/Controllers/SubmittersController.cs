@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Administration;
+using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
@@ -65,6 +66,15 @@ public class SubmittersController : FoaeaControllerBase
         }
 
         return declarant;
+    }
+    
+    [HttpGet("{submCd}/RecentActivity")]
+    public async Task<ActionResult<List<ApplicationModificationActivitySummaryData>>> GetRecentActivity([FromServices] IRepositories db, 
+                                                                                                        [FromRoute] string submCd, 
+                                                                                                        [FromQuery] int days = 0)
+    {
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        return Ok(await applicationManager.GetApplicationRecentActivityForSubmitter(submCd, days));
     }
 
     [HttpGet("commissioners/{enfOffLocCode}")]

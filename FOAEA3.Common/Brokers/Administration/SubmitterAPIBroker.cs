@@ -20,5 +20,12 @@ namespace FOAEA3.Common.Brokers.Administration
             string apiCall = $"api/v1/Submitters/{submitterCode}";
             return await ApiHelper.GetDataAsync<SubmitterData>(apiCall, token: Token);
         }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetRecentActivity(string submitterCode, int days = 0)
+        {
+            string apiCall = $"api/v1/Submitters/{submitterCode}/RecentActivity?days={days}";
+            return await ApiHelper.GetDataAsync<List<ApplicationModificationActivitySummaryData>>(apiCall, token: Token);
+        }
+
     }
 }
