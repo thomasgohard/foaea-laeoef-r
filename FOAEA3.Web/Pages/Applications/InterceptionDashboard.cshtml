@@ -1,7 +1,9 @@
 ﻿@page
 @using FOAEA3.Model
+@using FOAEA3.Model.Enums
 @using FOAEA3.Web.Helpers
 @using Microsoft.AspNetCore.Http
+
 
 @model InterceptionDashboardModel
 
@@ -60,30 +62,30 @@
 
                             <div id="mySearch_ReceiptDateRangeFrom" class="form-group multiColGroup mySearchControl">
                                 <label for="item11my" class="text-left multiColLabelLong">Receipt Date - From</label>
-                                <input type="text" class="form-control multiColControl" id="item11my" asp-for="MySearchCriteria.ReceiptDateFrom">
+                                <input type="date" class="form-control multiColControl" id="item11my" asp-for="MySearchCriteria.ReceiptDateFrom">
                             </div>
                             <div id="mySearch_ReceiptDateRangeTo" class="form-group multiColGroup mySearchControl">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item12my" class="text-left multiColLabelLong">Receipt Date - To</label>
-                                <input type="text" class="form-control multiColControl" id="item12my" asp-for="MySearchCriteria.ReceiptDateTo">
+                                <input type="date" class="form-control multiColControl" id="item12my" asp-for="MySearchCriteria.ReceiptDateTo">
                             </div>
                             <div id="mySearch_ExpiryDateRangeFrom" class="form-group multiColGroup mySearchControl">
                                 <label for="item13my" class="text-left multiColLabelLong">Expiry Date - From</label>
-                                <input type="text" class="form-control multiColControl" id="item13my" asp-for="MySearchCriteria.ExpiryDateFrom">
+                                <input type="date" class="form-control multiColControl" id="item13my" asp-for="MySearchCriteria.ExpiryDateFrom">
                             </div>
                             <div id="mySearch_ExpiryDateRangeTo" class="form-group multiColGroup mySearchControl">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item14my" class="text-left multiColLabelLong">Expiry Date - To</label>
-                                <input type="text" class="form-control multiColControl" id="item14my" asp-for="MySearchCriteria.ExpiryDateTo">
+                                <input type="date" class="form-control multiColControl" id="item14my" asp-for="MySearchCriteria.ExpiryDateTo">
                             </div>
                             <div id="mySearch_DateOfBirthRangeFrom" class="form-group multiColGroup mySearchControl">
                                 <label for="item15my" class="text-left multiColLabelLong">Date of Birth - From</label>
-                                <input type="text" class="form-control multiColControl" id="item15my" asp-for="MySearchCriteria.DateOfBirthFrom">
+                                <input type="date" class="form-control multiColControl" id="item15my" asp-for="MySearchCriteria.DateOfBirthFrom">
                             </div>
                             <div id="mySearch_DateOfBirthRangeTo" class="form-group multiColGroup mySearchControl">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item16my" class="text-left multiColLabelLong">Date of Birth - To</label>
-                                <input type="text" class="form-control multiColControl" id="item16my" asp-for="MySearchCriteria.DateOfBirthTo">
+                                <input type="date" class="form-control multiColControl" id="item16my" asp-for="MySearchCriteria.DateOfBirthTo">
                             </div>
 
                             <div><input type="submit" value="Search" asp-page-handler="MySearch" /></div>
@@ -177,32 +179,32 @@
                             <div class="form-group">
                                 <input id="chkReceiptDateRange" type="checkbox" class="multiColCheck" aria-label="...">
                                 <label for="item11" class="text-left multiColLabelLong">Receipt Date - From</label>
-                                <input type="text" class="form-control multiColControlShort" id="item11" asp-for="SearchCriteria.ReceiptDateFrom">
+                                <input type="date" class="form-control multiColControlShort" id="item11" asp-for="SearchCriteria.ReceiptDateFrom">
                             </div>
                             <div class="form-group">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item12" class="text-left multiColLabelLong">Receipt Date - To</label>
-                                <input type="text" class="form-control multiColControlShort" id="item12" asp-for="SearchCriteria.ReceiptDateTo">
+                                <input type="date" class="form-control multiColControlShort" id="item12" asp-for="SearchCriteria.ReceiptDateTo">
                             </div>
                             <div class="form-group">
                                 <input id="chkExpiryDateRange" type="checkbox" class="multiColCheck" aria-label="...">
                                 <label for="item13" class="text-left multiColLabelLong">Expiry Date - From</label>
-                                <input type="text" class="form-control multiColControlShort" id="item13" asp-for="SearchCriteria.ExpiryDateFrom">
+                                <input type="date" class="form-control multiColControlShort" id="item13" asp-for="SearchCriteria.ExpiryDateFrom">
                             </div>
                             <div class="form-group">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item14" class="text-left multiColLabelLong">Expiry Date - To</label>
-                                <input type="text" class="form-control multiColControlShort" id="item14" asp-for="SearchCriteria.ExpiryDateTo">
+                                <input type="date" class="form-control multiColControlShort" id="item14" asp-for="SearchCriteria.ExpiryDateTo">
                             </div>
                             <div class="form-group">
                                 <input id="chkDateOfBirthRange" type="checkbox" class="multiColCheck" aria-label="...">
                                 <label for="item15" class="text-left multiColLabelLong">Date of Birth - From</label>
-                                <input type="text" class="form-control multiColControlShort" id="item15" asp-for="SearchCriteria.DateOfBirthFrom">
+                                <input type="date" class="form-control multiColControlShort" id="item15" asp-for="SearchCriteria.DateOfBirthFrom">
                             </div>
                             <div class="form-group">
                                 <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
                                 <label for="item16" class="text-left multiColLabelLong">Date of Birth - To</label>
-                                <input type="text" class="form-control multiColControlShort" id="item16" asp-for="SearchCriteria.DateOfBirthTo">
+                                <input type="date" class="form-control multiColControlShort" id="item16" asp-for="SearchCriteria.DateOfBirthTo">
                             </div>
                         </div>
                     </div>
@@ -215,13 +217,31 @@
                 </details>
             </div>
         </div>
-        <br />
+        @if (Model.SearchResults == null)
+        {
+            <div class="col-md-4">
+                <p>Submitted Today</p>
+                <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
+            </div>
+            <div class="col-md-4">
+                <p>SIN Pending All</p>
+                <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
+            </div>
+            <div class="col-md-4">
+                <p>SIN Pending Last 7 days</p>
+                <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
+            </div>
+        }
+    </form>
+    <br />
+    <form method="post" asp-page-handler="MenuSelect">
         @if (Model.SearchResults != null)
         {
             <div class="row">
                 <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
                     <thead>
                         <tr>
+                            <th style="white-space:nowrap;">Menu</th>
                             <th style="white-space:nowrap;">Category</th>
                             <th style="white-space:nowrap;">Date<br />Received</th>
                             <th style="white-space:nowrap;">Submitter</th>
@@ -239,11 +259,27 @@
                         @{
                             if (Model.LifeStates is not null)
                             {
+                                int i = 0;
                                 foreach (var result in Model.SearchResults)
                                 {
                                     var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
-
+                                    var appKey = result.Appl_EnfSrv_Cd.Trim() + "-" + result.Appl_CtrlCd.Trim();
+                                    Model.SelectedMenuOption.Add(appKey);
                                     <tr class="gradeX">
+                                        <td>
+                                            <select asp-for="SelectedMenuOption[i]" onchange="this.form.submit();">
+                                                <option value="@appKey @MenuActionChoice.None">Menu</option>
+                                                <option value="@appKey @MenuActionChoice.Notes">Notes</option>
+                                                <option value="@appKey @MenuActionChoice.ViewEvents">View Events</option>
+                                                <option value="@appKey @MenuActionChoice.View">View</option>
+                                                <option value="@appKey @MenuActionChoice.Edit">Edit</option>
+                                                <option value="@appKey @MenuActionChoice.Suspend">Suspend</option>
+                                                <option value="@appKey @MenuActionChoice.Transfer">Transfer</option>
+                                                <option value="@appKey @MenuActionChoice.Cancel">Cancel</option>
+                                                <option value="@appKey @MenuActionChoice.LinkL01">Link L01</option>
+                                                <option value="@appKey @MenuActionChoice.LinkT02">Link T01</option>
+                                            </select>
+                                        </td>
                                         <td>@result.AppCtgy_Cd</td>
                                         <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
                                         <td>@result.Subm_SubmCd</td>
@@ -256,32 +292,15 @@
                                         <td>@result.Appl_JusticeNr</td>
                                         <td style="white-space:nowrap;">@applListState?.Description</td>
                                     </tr>
+                                    i++;
                                 }
                             }
                         }
                     </tbody>
                 </table>
             </div>
-
-        }
-        else
-        {
-            <div class="col-md-4">
-                <p>Submitted Today</p>
-                <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
-            </div>
-            <div class="col-md-4">
-                <p>SIN Pending All</p>
-                <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
-            </div>
-            <div class="col-md-4">
-                <p>SIN Pending Last 7 days</p>
-                <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
-            </div>
-
         }
     </form>
-
 </div>
 
 @section Scripts {

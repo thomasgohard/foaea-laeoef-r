@@ -1,6 +1,8 @@
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Brokers.Administration;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +11,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FOAEA3.Model.Enums;
 
 namespace FOAEA3.Web.Pages.Applications;
 
 public class InterceptionDashboardModel : FoaeaPageModel
 {
+    private struct MenuAction
+    {
+        public string Appl_EnfSrv_Cd { get; set; }
+        public string Appl_CtrlCd { get; set; }
+        public MenuActionChoice Action { get; set; }
+    }
+
     public List<ApplicationLifeStateData> LifeStates { get; set; }
     public List<ApplicationSearchResultData> SearchResults { get; set; }
     public int SubmittedToday { get; set; }
@@ -26,6 +34,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
     [BindProperty]
     public ApplicationSearchCriteriaData MySearchCriteria { get; set; }
+
+    [BindProperty]
+    public List<string> SelectedMenuOption { get; set; } = new List<string>();
 
     public async Task OnGet()
     {
@@ -40,7 +51,50 @@ public class InterceptionDashboardModel : FoaeaPageModel
                                                              m.Appl_Create_Dte.Date == DateTime.Now.Date).Count();
 
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
-        SinPendingsAll = changesForSubmitterAll.Count();
+        SinPendingsAll = changesForSubmitterAll.Count;
+    }
+
+    public void OnPostMenuSelect()
+    {
+        string itemSelected = SelectedMenuOption.Where(m => !m.EndsWith("None")).FirstOrDefault();
+        if (itemSelected is not null)
+        {
+            var actionInfo = ExtractInfo(itemSelected);
+            switch (actionInfo.Action)
+            {
+                case MenuActionChoice.Notes:
+                    break;
+                case MenuActionChoice.ViewEvents:
+                    break;
+                case MenuActionChoice.View:
+                    break;
+                case MenuActionChoice.Edit:
+                    break;
+                case MenuActionChoice.Suspend:
+                    break;
+                case MenuActionChoice.Transfer:
+                    break;
+                case MenuActionChoice.Cancel:
+                    break;
+                case MenuActionChoice.LinkL01:
+                    break;
+                case MenuActionChoice.LinkT02:
+                    break;
+            }
+        }
+    }
+
+    private static MenuAction ExtractInfo(string value)
+    {
+        string[] values = value.Split(' ');
+        var applKey = new ApplKey(values[0]);
+
+        return new MenuAction
+        {
+            Appl_EnfSrv_Cd = applKey.EnfSrv,
+            Appl_CtrlCd = applKey.CtrlCd,
+            Action = (MenuActionChoice) Enum.Parse(typeof(MenuActionChoice), values[1])
+        };
     }
 
     public async Task OnPostSearchSubmittedToday()
@@ -117,7 +171,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
             });
         }
     }
-       
+
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
