@@ -211,8 +211,18 @@ namespace FOAEA3.Data.DB
                     { "Days", days}
                 };
 
-            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("GetSubmitterRecentActivity", parameters, FillModificationHistory);
-     }
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetRecentActivityForSubmitter", parameters, FillModificationHistory);
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Subm_SubmCd",  submCd},
+                    { "AppLiSt_Cd", (int) state}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetAtStateForSubmitter", parameters, FillModificationHistory);
+        }
 
         private void FillModificationHistory(IDBHelperReader rdr, ApplicationModificationActivitySummaryData data)
         {

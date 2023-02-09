@@ -266,12 +266,15 @@
         }
         else
         {
-            <div>
+            <div class="col-md-4">
                 <p>Submitted Today</p>
                 <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
             </div>
-
-            <div>
+            <div class="col-md-4">
+                <p>SIN Pending All</p>
+                <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
+            </div>
+            <div class="col-md-4">
                 <p>SIN Pending Last 7 days</p>
                 <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
             </div>

@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 
@@ -24,6 +25,12 @@ namespace FOAEA3.Common.Brokers.Administration
         public async Task<List<ApplicationModificationActivitySummaryData>> GetRecentActivity(string submitterCode, int days = 0)
         {
             string apiCall = $"api/v1/Submitters/{submitterCode}/RecentActivity?days={days}";
+            return await ApiHelper.GetDataAsync<List<ApplicationModificationActivitySummaryData>>(apiCall, token: Token);
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetAllAtState(string submitterCode, ApplicationState state)
+        {
+            string apiCall = $"api/v1/Submitters/{submitterCode}/ApplicationsAtState/{(int) state}";
             return await ApiHelper.GetDataAsync<List<ApplicationModificationActivitySummaryData>>(apiCall, token: Token);
         }
 

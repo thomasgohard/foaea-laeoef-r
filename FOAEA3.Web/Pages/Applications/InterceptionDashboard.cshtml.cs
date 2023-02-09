@@ -19,6 +19,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public List<ApplicationSearchResultData> SearchResults { get; set; }
     public int SubmittedToday { get; set; }
     public int SinPendingsLast7days { get; set; }
+    public int SinPendingsAll { get; set; }
 
     [BindProperty]
     public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -33,11 +34,13 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
         var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 0);
         var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
+        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
 
         SubmittedToday = changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter &&
                                                              m.Appl_Create_Dte.Date == DateTime.Now.Date).Count();
 
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
+        SinPendingsAll = changesForSubmitterAll.Count();
     }
 
     public async Task OnPostSearchSubmittedToday()
@@ -48,6 +51,11 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task OnPostSearchSinPendingsLast7days()
     {
         await BuildSearchResult(await GetSinPendingsLast7days());
+    }
+
+    public async Task OnPostSearchSinPendingsAll()
+    {
+        await BuildSearchResult(await GetSinPendingsAll());
     }
 
     private async Task<List<ApplicationModificationActivitySummaryData>> GetCreatedToday()
@@ -67,6 +75,15 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
         var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
         return changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetSinPendingsAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
+        return changesForSubmitterAll.ToList();
     }
 
     private async Task BuildSearchResult(List<ApplicationModificationActivitySummaryData> modifiedFiles)

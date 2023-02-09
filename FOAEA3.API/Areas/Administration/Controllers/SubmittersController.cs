@@ -77,6 +77,15 @@ public class SubmittersController : FoaeaControllerBase
         return Ok(await applicationManager.GetApplicationRecentActivityForSubmitter(submCd, days));
     }
 
+    [HttpGet("{submCd}/ApplicationsAtState/{state}")]
+    public async Task<ActionResult<List<ApplicationModificationActivitySummaryData>>> GetSinNotConfirmed([FromServices] IRepositories db, 
+                                                                                                         [FromRoute] string submCd,
+                                                                                                         [FromRoute] int state)
+    {
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        return Ok(await applicationManager.GetApplicationAtStateForSubmitter(submCd, (ApplicationState) state));
+    }
+
     [HttpGet("commissioners/{enfOffLocCode}")]
     public async Task<ActionResult<List<CommissionerData>>> GetCommissioners([FromServices] IRepositories repositories,
                                                                  [FromRoute] string enfOffLocCode = null)
