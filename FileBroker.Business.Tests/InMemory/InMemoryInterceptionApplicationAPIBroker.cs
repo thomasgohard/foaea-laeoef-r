@@ -73,6 +73,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<SummonsSummaryData> GetSummonsSummaryForApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<InterceptionApplicationData> SuspendInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             throw new NotImplementedException();

@@ -205,6 +205,11 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
+        public async Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        {
+            return await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(appl_EnfSrv_Cd, appl_CtrlCd, debtorId);
+        }
+
         public async Task<bool> VaryApplicationAsync()
         {
             if (!IsValidCategory("I01"))

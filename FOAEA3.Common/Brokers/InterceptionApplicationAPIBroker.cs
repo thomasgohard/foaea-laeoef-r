@@ -35,6 +35,13 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetDataAsync<InterceptionApplicationData>(apiCall, token: Token);
         }
 
+        public async Task<SummonsSummaryData> GetSummonsSummaryForApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        {
+            string key = ApplKey.MakeKey(dat_Appl_EnfSrvCd, dat_Appl_CtrlCd);
+            string apiCall = $"api/v1/summonsSummaries/{key}";
+            return await ApiHelper.GetDataAsync<SummonsSummaryData>(apiCall, token: Token);
+        }
+
         public async Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string apiCall = "api/v1/Interceptions";

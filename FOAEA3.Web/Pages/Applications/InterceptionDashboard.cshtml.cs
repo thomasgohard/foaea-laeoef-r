@@ -31,15 +31,76 @@ public class InterceptionDashboardModel : FoaeaPageModel
         string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
 
         var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
-        var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days:0);
+        var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 0);
         var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
 
-        SubmittedToday = changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter && 
+        SubmittedToday = changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter &&
                                                              m.Appl_Create_Dte.Date == DateTime.Now.Date).Count();
 
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
     }
 
+    public async Task OnPostSearchSubmittedToday()
+    {
+        await BuildSearchResult(await GetCreatedToday());
+    }
+
+    public async Task OnPostSearchSinPendingsLast7days()
+    {
+        await BuildSearchResult(await GetSinPendingsLast7days());
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetCreatedToday()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 0);
+        return changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter &&
+                                                   m.Appl_Create_Dte.Date == DateTime.Now.Date).ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetSinPendingsLast7days()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
+        return changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).ToList();
+    }
+
+    private async Task BuildSearchResult(List<ApplicationModificationActivitySummaryData> modifiedFiles)
+    {
+        var apiApplication = new ApplicationAPIBroker(BaseAPIs);
+        var apiInterception = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+
+        var activeStatusesBroker = new ActiveStatusesAPIBroker(BaseAPIs);
+        var activeStatuses = activeStatusesBroker.GetActiveStatusesAsync().Result;
+
+        SearchResults = new List<ApplicationSearchResultData>();
+        foreach (var sinPendingAppl in modifiedFiles)
+        {
+            var thisAppl = await apiApplication.GetApplicationAsync(sinPendingAppl.Appl_EnfSrv_Cd, sinPendingAppl.Appl_CtrlCd);
+            var summonsSummary = await apiInterception.GetSummonsSummaryForApplication(sinPendingAppl.Appl_EnfSrv_Cd, sinPendingAppl.Appl_CtrlCd);
+
+            SearchResults.Add(new ApplicationSearchResultData
+            {
+                AppCtgy_Cd = thisAppl.AppCtgy_Cd,
+                Appl_EnfSrv_Cd = thisAppl.Appl_EnfSrv_Cd,
+                Subm_SubmCd = thisAppl.Subm_SubmCd,
+                Appl_CtrlCd = thisAppl.Appl_CtrlCd,
+                Subm_Recpt_SubmCd = thisAppl.Subm_Recpt_SubmCd,
+                Appl_Rcptfrm_Dte = thisAppl.Appl_Rcptfrm_Dte,
+                Appl_Expiry_Dte = summonsSummary?.ActualEnd_Dte,
+                Appl_Dbtr_SurNme = thisAppl.Appl_Dbtr_SurNme,
+                Appl_Source_RfrNr = thisAppl.Appl_Source_RfrNr,
+                Appl_JusticeNr = thisAppl.Appl_JusticeNr,
+                ActvSt_Cd = activeStatuses.Where(m => m.ActvSt_Cd == thisAppl.ActvSt_Cd).FirstOrDefault()?.ActvSt_Txt_E,
+                AppLiSt_Cd = thisAppl.AppLiSt_Cd
+            });
+        }
+    }
+       
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {

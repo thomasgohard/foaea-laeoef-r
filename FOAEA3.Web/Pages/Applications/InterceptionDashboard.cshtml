@@ -215,69 +215,69 @@
                 </details>
             </div>
         </div>
-    </form>
-    <br />
-    @if (Model.SearchResults != null)
-    {
-        <div class="row">
-            <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
-                <thead>
-                    <tr>
-                        <th style="white-space:nowrap;">Category</th>
-                        <th style="white-space:nowrap;">Date<br />Received</th>
-                        <th style="white-space:nowrap;">Submitter</th>
-                        <th style="white-space:nowrap;">Recipient</th>
-                        <th style="white-space:nowrap;">Service</th>
-                        <th style="white-space:nowrap;">Control<br />Code</th>
-                        <th style="white-space:nowrap;">Support Payor<br />Surname</th>
-                        <th style="white-space:nowrap;">Source Ref #</th>
-                        <th style="white-space:nowrap;">Expiry<br />Date</th>
-                        <th style="white-space:nowrap;">Justice #</th>
-                        <th style="white-space:nowrap;">State</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{
-                        if (Model.LifeStates is not null)
-                        {
-                            foreach (var result in Model.SearchResults)
+        <br />
+        @if (Model.SearchResults != null)
+        {
+            <div class="row">
+                <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
+                    <thead>
+                        <tr>
+                            <th style="white-space:nowrap;">Category</th>
+                            <th style="white-space:nowrap;">Date<br />Received</th>
+                            <th style="white-space:nowrap;">Submitter</th>
+                            <th style="white-space:nowrap;">Recipient</th>
+                            <th style="white-space:nowrap;">Service</th>
+                            <th style="white-space:nowrap;">Control<br />Code</th>
+                            <th style="white-space:nowrap;">Support Payor<br />Surname</th>
+                            <th style="white-space:nowrap;">Source Ref #</th>
+                            <th style="white-space:nowrap;">Expiry<br />Date</th>
+                            <th style="white-space:nowrap;">Justice #</th>
+                            <th style="white-space:nowrap;">State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (Model.LifeStates is not null)
                             {
-                                var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
+                                foreach (var result in Model.SearchResults)
+                                {
+                                    var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
 
-                                <tr class="gradeX">
-                                    <td>@result.AppCtgy_Cd</td>
-                                    <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
-                                    <td>@result.Subm_SubmCd</td>
-                                    <td>@result.Subm_Recpt_SubmCd</td>
-                                    <td>@result.Appl_EnfSrv_Cd</td>
-                                    <td>@result.Appl_CtrlCd</td>
-                                    <td>@result.Appl_Dbtr_SurNme</td>
-                                    <td>@result.Appl_Source_RfrNr</td>
-                                    <td>@result.Appl_Expiry_Dte?.ToString("yyyy/MM/dd")</td>
-                                    <td>@result.Appl_JusticeNr</td>
-                                    <td style="white-space:nowrap;">@applListState?.Description</td>
-                                </tr>
+                                    <tr class="gradeX">
+                                        <td>@result.AppCtgy_Cd</td>
+                                        <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
+                                        <td>@result.Subm_SubmCd</td>
+                                        <td>@result.Subm_Recpt_SubmCd</td>
+                                        <td>@result.Appl_EnfSrv_Cd</td>
+                                        <td>@result.Appl_CtrlCd</td>
+                                        <td>@result.Appl_Dbtr_SurNme</td>
+                                        <td>@result.Appl_Source_RfrNr</td>
+                                        <td>@result.Appl_Expiry_Dte?.ToString("yyyy/MM/dd")</td>
+                                        <td>@result.Appl_JusticeNr</td>
+                                        <td style="white-space:nowrap;">@applListState?.Description</td>
+                                    </tr>
+                                }
                             }
                         }
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 
-    }
-    else
-    {
-        <div>
-            <p>Submitted Today</p>
-            <p><label>@Model.SubmittedToday</label></p>
-        </div>
+        }
+        else
+        {
+            <div>
+                <p>Submitted Today</p>
+                <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
+            </div>
 
-        <div>
-            <p>SIN Pending Last 7 days</p>
-            <p><label>@Model.SinPendingsLast7days</label></p>
-        </div>
+            <div>
+                <p>SIN Pending Last 7 days</p>
+                <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
+            </div>
 
-    }
+        }
+    </form>
 
 </div>
 
