@@ -1,11 +1,27 @@
-﻿using FOAEA3.Model.Enums;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
+using FOAEA3.Web.Models;
+using System;
 using System.Collections.Generic;
 
 namespace FOAEA3.Web.Helpers
 {
     public class ActionHelper
     {
+        public static MenuAction ExtractInfo(string value)
+        {
+            string[] values = value.Split(' ');
+            var applKey = new ApplKey(values[0]);
+
+            return new MenuAction
+            {
+                Appl_EnfSrv_Cd = applKey.EnfSrv,
+                Appl_CtrlCd = applKey.CtrlCd,
+                Action = (MenuActionChoice)Enum.Parse(typeof(MenuActionChoice), values[1])
+            };
+        }
+
         public static List<MenuActionChoice> GetValidActions(string submitter, string category, ApplicationState state)
         {
             var validActions = new List<MenuActionChoice>

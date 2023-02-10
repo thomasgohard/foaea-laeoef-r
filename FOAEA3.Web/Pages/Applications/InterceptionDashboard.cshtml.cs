@@ -4,6 +4,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
+using FOAEA3.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -16,13 +17,6 @@ namespace FOAEA3.Web.Pages.Applications;
 
 public class InterceptionDashboardModel : FoaeaPageModel
 {
-    private struct MenuAction
-    {
-        public string Appl_EnfSrv_Cd { get; set; }
-        public string Appl_CtrlCd { get; set; }
-        public MenuActionChoice Action { get; set; }
-    }
-
     public List<ApplicationLifeStateData> LifeStates { get; set; }
     public List<ApplicationSearchResultData> SearchResults { get; set; }
     public int SubmittedToday { get; set; }
@@ -37,6 +31,18 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
     [BindProperty]
     public List<string> SelectedMenuOption { get; set; } = new List<string>();
+
+    public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
+                                                                                                base(httpContextAccessor, apiConfig.Value)
+    {
+        var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
+        LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
+
+        SearchCriteria = new ApplicationSearchCriteriaData
+        {
+            Category = "I01" // default
+        };
+    }
 
     public async Task OnGet()
     {
@@ -54,12 +60,12 @@ public class InterceptionDashboardModel : FoaeaPageModel
         SinPendingsAll = changesForSubmitterAll.Count;
     }
 
-    public void OnPostMenuSelect()
+    public IActionResult OnPostMenuSelect()
     {
         string itemSelected = SelectedMenuOption.Where(m => !m.EndsWith(MenuActionChoice.Menu.ToString())).FirstOrDefault();
         if (itemSelected is not null)
         {
-            var actionInfo = ExtractInfo(itemSelected);
+            var actionInfo = ActionHelper.ExtractInfo(itemSelected);
             switch (actionInfo.Action)
             {
                 case MenuActionChoice.Notes:
@@ -76,25 +82,16 @@ public class InterceptionDashboardModel : FoaeaPageModel
                     break;
                 case MenuActionChoice.Cancel:
                     break;
-                case MenuActionChoice.LinkL01:
-                    break;
                 case MenuActionChoice.LinkT01:
+                    break;
+                case MenuActionChoice.LinkI01:
+                    break;
+                case MenuActionChoice.LinkL01:
                     break;
             }
         }
-    }
 
-    private static MenuAction ExtractInfo(string value)
-    {
-        string[] values = value.Split(' ');
-        var applKey = new ApplKey(values[0]);
-
-        return new MenuAction
-        {
-            Appl_EnfSrv_Cd = applKey.EnfSrv,
-            Appl_CtrlCd = applKey.CtrlCd,
-            Action = (MenuActionChoice) Enum.Parse(typeof(MenuActionChoice), values[1])
-        };
+        return RedirectToPage();
     }
 
     public async Task OnPostSearchSubmittedToday()
@@ -110,6 +107,58 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task OnPostSearchSinPendingsAll()
     {
         await BuildSearchResult(await GetSinPendingsAll());
+    }
+        
+    public async Task<IActionResult> OnPostAdvancedSearch()
+    {
+        if (!ModelState.IsValid)
+        {
+            SearchResults = await GetSearchResults(SearchCriteria);
+
+            if (BaseAPIs.ErrorData.Any())
+                ErrorMessage = BaseAPIs.ErrorData;
+
+            return Page();
+        }
+
+        return RedirectToPage("./Index");
+    }
+
+    public async Task<IActionResult> OnPostMySearch()
+    {
+        if (!ModelState.IsValid)
+        {
+            SearchResults = await GetSearchResults(MySearchCriteria);
+
+            if (BaseAPIs.ErrorData.Any())
+                ErrorMessage = BaseAPIs.ErrorData;
+
+            return Page();
+        }
+
+        return RedirectToPage("./Index");
+    }
+
+    private async Task<List<ApplicationSearchResultData>> GetSearchResults(ApplicationSearchCriteriaData searchCriteria)
+    {
+        string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
+
+        var quickSearch = new QuickSearchData
+        {
+            DebtorFirstName = searchCriteria.FirstName,
+            DebtorSurname = searchCriteria.LastName,
+            SIN = searchCriteria.SIN,
+            State = searchCriteria.State,
+            Status = searchCriteria.Status,
+            Category = searchCriteria.Category,
+            ControlCode = searchCriteria.ControlCode,
+            EnforcementService = enfService,
+            ReferenceNumber = searchCriteria.EnfSourceRefNumber,
+            JusticeNumber = searchCriteria.JusticeNumber
+        };
+
+        var searchApi = new ApplicationSearchesAPIBroker(BaseAPIs);
+        return await searchApi.SearchAsync(quickSearch);
     }
 
     private async Task<List<ApplicationModificationActivitySummaryData>> GetCreatedToday()
@@ -170,70 +219,6 @@ public class InterceptionDashboardModel : FoaeaPageModel
                 AppLiSt_Cd = thisAppl.AppLiSt_Cd
             });
         }
-    }
-
-    public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
-                                                                                                base(httpContextAccessor, apiConfig.Value)
-    {
-        var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-        LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
-
-        SearchCriteria = new ApplicationSearchCriteriaData
-        {
-            Category = "I01" // default
-        };
-    }
-
-    public async Task<IActionResult> OnPostAdvancedSearch()
-    {
-        if (!ModelState.IsValid)
-        {
-            SearchResults = await GetSearchResults(SearchCriteria);
-
-            if (BaseAPIs.ErrorData.Any())
-                ErrorMessage = BaseAPIs.ErrorData;
-
-            return Page();
-        }
-
-        return RedirectToPage("./Index");
-    }
-
-    public async Task<IActionResult> OnPostMySearch()
-    {
-        if (!ModelState.IsValid)
-        {
-            SearchResults = await GetSearchResults(MySearchCriteria);
-
-            if (BaseAPIs.ErrorData.Any())
-                ErrorMessage = BaseAPIs.ErrorData;
-
-            return Page();
-        }
-
-        return RedirectToPage("./Index");
-    }
-
-    private async Task<List<ApplicationSearchResultData>> GetSearchResults(ApplicationSearchCriteriaData searchCriteria)
-    {
-        string enfService = HttpContext.Session.GetString(SessionValue.ENF_SERVICE);
-
-        var quickSearch = new QuickSearchData
-        {
-            DebtorFirstName = searchCriteria.FirstName,
-            DebtorSurname = searchCriteria.LastName,
-            SIN = searchCriteria.SIN,
-            State = searchCriteria.State,
-            Status = searchCriteria.Status,
-            Category = searchCriteria.Category,
-            ControlCode = searchCriteria.ControlCode,
-            EnforcementService = enfService,
-            ReferenceNumber = searchCriteria.EnfSourceRefNumber,
-            JusticeNumber = searchCriteria.JusticeNumber
-        };
-
-        var searchApi = new ApplicationSearchesAPIBroker(BaseAPIs);
-        return await searchApi.SearchAsync(quickSearch);
     }
 
 }

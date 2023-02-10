@@ -97,7 +97,7 @@ public class InterceptionModel : FoaeaPageModel
         if (!InterceptionApplication.HldbCnd.Any())
             InterceptionApplication.HldbCnd.Add(new HoldbackConditionData());
 
-        return Page();
+        return RedirectToPagePermanent("InterceptionDashboard");
     }
 
     public void OnPostAddEntry()
