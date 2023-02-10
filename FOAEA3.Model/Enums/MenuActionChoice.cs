@@ -2,15 +2,21 @@
 {
     public enum MenuActionChoice
     {
-        None,
+        Menu,
         Notes,
         ViewEvents,
+        Approve,
+        Reject,
         View,
         Edit,
         Suspend,
         Transfer,
         Cancel,
-        LinkL01,
-        LinkT02
+        Reverse,
+        ViewQCissues,
+        ViewQChistory,
+        LinkT01,
+        LinkI01,
+        LinkL01
     }
 }

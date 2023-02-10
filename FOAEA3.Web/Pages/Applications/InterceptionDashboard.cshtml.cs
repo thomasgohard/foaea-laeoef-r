@@ -56,7 +56,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
     public void OnPostMenuSelect()
     {
-        string itemSelected = SelectedMenuOption.Where(m => !m.EndsWith("None")).FirstOrDefault();
+        string itemSelected = SelectedMenuOption.Where(m => !m.EndsWith(MenuActionChoice.Menu.ToString())).FirstOrDefault();
         if (itemSelected is not null)
         {
             var actionInfo = ExtractInfo(itemSelected);
@@ -78,7 +78,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
                     break;
                 case MenuActionChoice.LinkL01:
                     break;
-                case MenuActionChoice.LinkT02:
+                case MenuActionChoice.LinkT01:
                     break;
             }
         }

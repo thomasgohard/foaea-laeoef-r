@@ -264,20 +264,16 @@
                                 {
                                     var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
                                     var appKey = result.Appl_EnfSrv_Cd.Trim() + "-" + result.Appl_CtrlCd.Trim();
+                                    var submitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+                                    var validActions = ActionHelper.GetValidActions(submitter, result.AppCtgy_Cd, result.AppLiSt_Cd);
+
                                     Model.SelectedMenuOption.Add(appKey);
                                     <tr class="gradeX">
                                         <td>
                                             <select asp-for="SelectedMenuOption[i]" onchange="this.form.submit();">
-                                                <option value="@appKey @MenuActionChoice.None">Menu</option>
-                                                <option value="@appKey @MenuActionChoice.Notes">Notes</option>
-                                                <option value="@appKey @MenuActionChoice.ViewEvents">View Events</option>
-                                                <option value="@appKey @MenuActionChoice.View">View</option>
-                                                <option value="@appKey @MenuActionChoice.Edit">Edit</option>
-                                                <option value="@appKey @MenuActionChoice.Suspend">Suspend</option>
-                                                <option value="@appKey @MenuActionChoice.Transfer">Transfer</option>
-                                                <option value="@appKey @MenuActionChoice.Cancel">Cancel</option>
-                                                <option value="@appKey @MenuActionChoice.LinkL01">Link L01</option>
-                                                <option value="@appKey @MenuActionChoice.LinkT02">Link T01</option>
+                                            @foreach(var thisAction in validActions) {
+                                                <option value="@appKey @thisAction">@thisAction</option>
+                                            }
                                             </select>
                                         </td>
                                         <td>@result.AppCtgy_Cd</td>
