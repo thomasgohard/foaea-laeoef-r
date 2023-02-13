@@ -1,10 +1,10 @@
 ﻿@page
-@model InterceptionModel
+@model InterceptionNewModel
 @{
     int activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
 }
 
-<p>Interception</p>
+<p>Interception (Create)</p>
 
 @await Html.PartialAsync("~/Pages/Shared/_MessagesPartial.cshtml", Model)
 

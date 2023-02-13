@@ -32,6 +32,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
     [BindProperty]
     public List<string> SelectedMenuOption { get; set; } = new List<string>();
 
+    [BindProperty]
+    public string SuspendKey { get; set; }
+
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
@@ -108,7 +111,12 @@ public class InterceptionDashboardModel : FoaeaPageModel
     {
         await BuildSearchResult(await GetSinPendingsAll());
     }
-        
+
+    public IActionResult OnPostSuspendApplication()
+    {
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostAdvancedSearch()
     {
         if (!ModelState.IsValid)
@@ -121,7 +129,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
             return Page();
         }
 
-        return RedirectToPage("./Index");
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostMySearch()
@@ -136,7 +144,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
             return Page();
         }
 
-        return RedirectToPage("./Index");
+        return RedirectToPage();
     }
 
     private async Task<List<ApplicationSearchResultData>> GetSearchResults(ApplicationSearchCriteriaData searchCriteria)

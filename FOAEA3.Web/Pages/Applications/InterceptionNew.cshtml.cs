@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications;
 
-public class InterceptionModel : FoaeaPageModel
+public class InterceptionNewModel : FoaeaPageModel
 {
     public string EnfServiceDescription { get; set; }
     public List<GenderData> Genders { get; set; }
@@ -30,7 +30,7 @@ public class InterceptionModel : FoaeaPageModel
     [BindProperty]
     public HoldbackConditionData NewCondition { get; set; }
 
-    public InterceptionModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
+    public InterceptionNewModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
         if ((httpContextAccessor is not null) && (httpContextAccessor.HttpContext is not null))

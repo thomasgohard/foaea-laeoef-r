@@ -6,6 +6,10 @@ $(document).on('wb-ready.wb', function () {
     SetupMySearch();
     SetupAdvancedSearch();
 
+    var enfSrv = "";
+    var ctrlCd = "";
+    var action = "";
+
     $('input[type="checkbox"]').click(function () {
 
         var chkId = $(this).attr("id");
@@ -37,6 +41,35 @@ $(document).on('wb-ready.wb', function () {
     });
 
 });
+
+function ExecuteMenuOption(item)
+{
+    var itemValue = $(item).find(":selected").val();    // e.g. 'ON01-E483 Edit'
+     
+    const values = itemValue.split(" ");
+    const applKey = values[0].split("-");
+    enfSrv = applKey[0];
+    ctrlCd = applKey[1];
+    action = values[1];
+
+    switch (action) {
+        case "Suspend":
+            $("#suspendKey").val(values[0]);
+            $("#suspendKeyLabel").html(values[0]);            
+            $("#suspendDialog").trigger("open.wb-overlay");
+            break;
+        case "Transfer":
+            $("#transferDialog").trigger("open.wb-overlay");
+            break;
+        case "Cancel":
+            $("#cancelDialog").trigger("open.wb-overlay");
+            break;
+        default:
+            document.menuForm.submit();
+            break;
+    }
+    
+}
 
 function SetupMySearch() {
 

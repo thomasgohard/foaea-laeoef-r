@@ -234,7 +234,7 @@
         }
     </form>
     <br />
-    <form method="post" asp-page-handler="MenuSelect">
+    <form name="menuForm" method="post" asp-page-handler="MenuSelect">
         @if (Model.SearchResults != null)
         {
             <div class="row">
@@ -270,10 +270,11 @@
                                     Model.SelectedMenuOption.Add(appKey);
                                     <tr class="gradeX">
                                         <td>
-                                            <select asp-for="SelectedMenuOption[i]" onchange="this.form.submit();">
-                                            @foreach(var thisAction in validActions) {
-                                                <option value="@appKey @thisAction">@thisAction</option>
-                                            }
+                                            <select asp-for="SelectedMenuOption[i]" onchange="ExecuteMenuOption(this);">
+                                                @foreach (var thisAction in validActions)
+                                                {
+                                                    <option value="@appKey @thisAction">@thisAction</option>
+                                                }
                                             </select>
                                         </td>
                                         <td>@result.AppCtgy_Cd</td>
@@ -296,7 +297,38 @@
                 </table>
             </div>
         }
+
+        <section id="suspendDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+            <header class="modal-header">
+                <h2 class="modal-title">Suspend Application</h2>
+            </header>
+            <div class="modal-body">
+                <input id="suspendKey" type="hidden" asp-for="SuspendKey" />
+                <label id="suspendKeyLabel"></label>
+                <input type="submit" class="btn" asp-page-handler="SuspendApplication" />
+            </div>
+        </section>
+
+        <section id="transferDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+            <header class="modal-header">
+                <h2 class="modal-title">Transfer Application</h2>
+            </header>
+            <div class="modal-body">
+                ...
+            </div>
+        </section>
+
+        <section id="cancelDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+            <header class="modal-header">
+                <h2 class="modal-title">Cancel Application</h2>
+            </header>
+            <div class="modal-body">
+                ...
+            </div>
+        </section>
+
     </form>
+
 </div>
 
 @section Scripts {
