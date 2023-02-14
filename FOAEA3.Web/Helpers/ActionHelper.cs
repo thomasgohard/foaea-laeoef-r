@@ -48,7 +48,6 @@ namespace FOAEA3.Web.Helpers
                     validActions.Add(MenuActionChoice.ViewEvents);
                     validActions.Add(MenuActionChoice.View);
                     validActions.Add(MenuActionChoice.Edit);
-                    validActions.Add(MenuActionChoice.Suspend);
                     validActions.Add(MenuActionChoice.Transfer);
                     validActions.Add(MenuActionChoice.Cancel);
                     if (category != "T01") validActions.Add(MenuActionChoice.LinkT01);
@@ -61,7 +60,6 @@ namespace FOAEA3.Web.Helpers
                     validActions.Add(MenuActionChoice.ViewEvents);
                     validActions.Add(MenuActionChoice.View);
                     validActions.Add(MenuActionChoice.Edit);
-                    validActions.Add(MenuActionChoice.Suspend);
                     validActions.Add(MenuActionChoice.Transfer);
                     validActions.Add(MenuActionChoice.Cancel);
                     if (category != "T01") validActions.Add(MenuActionChoice.LinkT01);
@@ -77,7 +75,6 @@ namespace FOAEA3.Web.Helpers
                     validActions.Add(MenuActionChoice.ViewEvents);
                     validActions.Add(MenuActionChoice.View);
                     validActions.Add(MenuActionChoice.Edit);
-                    validActions.Add(MenuActionChoice.Suspend);
                     validActions.Add(MenuActionChoice.Transfer);
                     validActions.Add(MenuActionChoice.Cancel);
                     if (category != "T01") validActions.Add(MenuActionChoice.LinkT01);
@@ -90,7 +87,6 @@ namespace FOAEA3.Web.Helpers
                     validActions.Add(MenuActionChoice.ViewEvents);
                     validActions.Add(MenuActionChoice.View);
                     validActions.Add(MenuActionChoice.Edit);
-                    validActions.Add(MenuActionChoice.Suspend);
                     validActions.Add(MenuActionChoice.Transfer);
                     validActions.Add(MenuActionChoice.Cancel);
                     if (category != "T01") validActions.Add(MenuActionChoice.LinkT01);

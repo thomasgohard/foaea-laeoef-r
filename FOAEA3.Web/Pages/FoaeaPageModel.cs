@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -16,7 +17,9 @@ public class FoaeaPageModel : PageModel
     protected readonly ApiConfig ApiRoots;
     protected readonly APIBrokerHelper BaseAPIs;
     protected readonly APIBrokerHelper InterceptionAPIs;
-    private IHttpContextAccessor ContextAccessor;
+    private readonly IHttpContextAccessor ContextAccessor;
+
+    public FoaEventDataDictionary FoaEvents { get; set; }
 
     public List<MessageData> ErrorMessage { get; set; } = new List<MessageData>();
     public List<MessageData> WarningMessage { get; set; } = new List<MessageData>();
@@ -38,6 +41,11 @@ public class FoaeaPageModel : PageModel
             InterceptionAPIs = new APIBrokerHelper(ApiRoots.FoaeaInterceptionRootAPI, submitter, userName,
                                        getToken: GetToken, getRefreshedToken: GetRefreshedToken);
 
+            if (!string.IsNullOrEmpty(submitter))
+            {
+                var apiFoaEventsBroker = new FoaEventsAPIBroker(BaseAPIs);
+                FoaEvents = apiFoaEventsBroker.GetFoaEventsAsync().Result;
+            }
         }
     }
 
@@ -87,5 +95,28 @@ public class FoaeaPageModel : PageModel
 
         if (messages.ContainsMessagesOfType(MessageType.Information))
             InfoMessage = messages.GetMessagesForType(MessageType.Information);
+    }
+
+    public string GetEventDescription(MessageData info)
+    {
+        string result = info.Description;
+
+        if (info.Code != EventCode.UNDEFINED)
+        {
+            var foaEvent = FoaEvents[info.Code];
+            if (foaEvent is not null)
+            {
+                string description = foaEvent.Description;
+                if (!string.IsNullOrEmpty(info.Description))
+                    description += $" ({info.Description})";
+
+                result = description;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(info.Field))
+            result += $" [{info.Field}]";
+
+        return result;
     }
 }

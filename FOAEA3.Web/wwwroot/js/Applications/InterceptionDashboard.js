@@ -6,10 +6,6 @@ $(document).on('wb-ready.wb', function () {
     SetupMySearch();
     SetupAdvancedSearch();
 
-    var enfSrv = "";
-    var ctrlCd = "";
-    var action = "";
-
     $('input[type="checkbox"]').click(function () {
 
         var chkId = $(this).attr("id");
@@ -48,14 +44,15 @@ function ExecuteMenuOption(item)
      
     const values = itemValue.split(" ");
     const applKey = values[0].split("-");
-    enfSrv = applKey[0];
-    ctrlCd = applKey[1];
-    action = values[1];
+    var enfSrv = applKey[0].trim();
+    var ctrlCd = applKey[1].trim();
+    var action = values[1];
 
     switch (action) {
         case "Suspend":
-            $("#suspendKey").val(values[0]);
-            $("#suspendKeyLabel").html(values[0]);            
+            $("#suspendEnfSrv").val(enfSrv);
+            $("#suspendCntrlCd").val(ctrlCd);
+            $("#suspendKeyLabel").html(enfSrv + "-" + ctrlCd);
             $("#suspendDialog").trigger("open.wb-overlay");
             break;
         case "Transfer":

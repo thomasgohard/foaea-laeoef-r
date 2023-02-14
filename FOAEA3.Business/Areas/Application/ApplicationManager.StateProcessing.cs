@@ -1,9 +1,8 @@
-﻿using FOAEA3.Resources.Helpers;
-using FOAEA3.Data.Base;
+﻿using FOAEA3.Data.Base;
 using FOAEA3.Model.Enums;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Threading.Tasks;
-using System.Numerics;
 
 namespace FOAEA3.Business.Areas.Application
 {
@@ -14,6 +13,7 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE,
                                   $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C",
                                   updateSubm: DB.UpdateSubmitter);
+            Application.Messages.AddError(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE);
         }
 
         public virtual async Task Process_00_InitialState()

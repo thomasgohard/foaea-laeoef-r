@@ -1,6 +1,5 @@
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Brokers.Administration;
-using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
@@ -33,7 +32,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public List<string> SelectedMenuOption { get; set; } = new List<string>();
 
     [BindProperty]
-    public string SuspendKey { get; set; }
+    public SuspendData SuspendData { get; set; } = new SuspendData();
 
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
@@ -112,8 +111,19 @@ public class InterceptionDashboardModel : FoaeaPageModel
         await BuildSearchResult(await GetSinPendingsAll());
     }
 
-    public IActionResult OnPostSuspendApplication()
+    public async Task<IActionResult> OnPostSuspendApplication()
     {
+        var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+        interception = await interceptionApi.SuspendInterceptionApplicationAsync(interception);
+        // to do: also store Suspend reason description...
+
+        if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
+        {
+            SetDisplayMessages(interception.Messages);
+            return RedirectToPage();
+        }
+
         return RedirectToPage();
     }
 
