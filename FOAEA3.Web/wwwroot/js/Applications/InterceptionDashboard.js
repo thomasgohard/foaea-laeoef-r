@@ -36,7 +36,21 @@ $(document).on('wb-ready.wb', function () {
         SetupMySearch();
     });
 
+    $(document)
+        .on('change', '#office', LoadSubmitters)
+
 });
+
+function LoadSubmitters() {
+    var service = $("#transferEnfSrv").val();
+    var office = $("#office").val();
+    $("#transferSubmitters").empty();
+    $.getJSON(`?handler=SelectSubmitterForOffice&service=${service}&office=${office}`, (data) => {
+        $.each(data, function (i, item) {
+            $("#transferSubmitters").append(`<option value="${item}">${item}</option>`);
+        });
+    });
+}
 
 function ExecuteMenuOption(item)
 {
@@ -56,9 +70,16 @@ function ExecuteMenuOption(item)
             $("#suspendDialog").trigger("open.wb-overlay");
             break;
         case "Transfer":
+            $("#transferEnfSrv").val(enfSrv);
+            $("#transferCntrlCd").val(ctrlCd);
+            $("#transferKeyLabel").html(enfSrv + "-" + ctrlCd);
+            LoadSubmitters();
             $("#transferDialog").trigger("open.wb-overlay");
             break;
         case "Cancel":
+            $("#cancelEnfSrv").val(enfSrv);
+            $("#cancelCntrlCd").val(ctrlCd);
+            $("#cancelKeyLabel").html(enfSrv + "-" + ctrlCd);
             $("#cancelDialog").trigger("open.wb-overlay");
             break;
         default:

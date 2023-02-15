@@ -53,6 +53,16 @@ public class SubmittersController : FoaeaControllerBase
 
     }
 
+    [HttpGet("Office/{office}")]
+    public async Task<ActionResult<List<string>>> GetSubmitterCodesForOffice([FromQuery] string service, [FromRoute] string office, 
+                                                                             [FromServices] IRepositories db)
+    {
+        var submitterManager = new SubmitterManager(db);
+        var submitterCodes = await submitterManager.GetSubmitterCodesForOffice(service, office);
+
+        return Ok(submitterCodes);
+    }
+
     [HttpGet("{submCd}/Declarant")]
     public async Task<ActionResult<string>> GetDeclarant([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {

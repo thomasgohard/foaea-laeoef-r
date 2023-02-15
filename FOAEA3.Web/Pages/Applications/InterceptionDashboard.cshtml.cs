@@ -18,6 +18,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
 {
     public List<ApplicationLifeStateData> LifeStates { get; set; }
     public List<ApplicationSearchResultData> SearchResults { get; set; }
+    public List<EnfOffData> EnfOffices { get; set; }
+    public List<string> ValidSubmitterCodes { get; set; }
+
     public int SubmittedToday { get; set; }
     public int SinPendingsLast7days { get; set; }
     public int SinPendingsAll { get; set; }
@@ -32,21 +35,54 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public List<string> SelectedMenuOption { get; set; } = new List<string>();
 
     [BindProperty]
-    public SuspendData SuspendData { get; set; } = new SuspendData();
+    public ActionReasonData SuspendData { get; set; } = new ActionReasonData();
+    public ActionReasonData CancelData { get; set; } = new ActionReasonData();
+    public TransferData TransferData { get; set; } = new TransferData();
 
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                                 base(httpContextAccessor, apiConfig.Value)
     {
-        var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-        LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
-
-        SearchCriteria = new ApplicationSearchCriteriaData
+        if (LifeStates is null)
         {
-            Category = "I01" // default
-        };
+            var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
+            LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
+        }
+
+        if (EnfOffices is null)
+        {
+            var apiSubmitters = new SubmitterAPIBroker(BaseAPIs);
+            var submitterInfo = apiSubmitters.GetSubmitterAsync(CurrentSubmitter).Result;
+            var apiEnfOffices = new EnfOfficesAPIBroker(BaseAPIs);
+            EnfOffices = apiEnfOffices.GetEnfOfficesForEnfServiceAsync(submitterInfo.EnfSrv_Cd).Result;
+            EnfOffices = EnfOffices.OrderBy(m => m.EnfSrv_Nme).ToList();
+        }
+
+        if (SearchCriteria is null)
+        {
+            SearchCriteria = new ApplicationSearchCriteriaData
+            {
+                Category = "I01" // default
+            };
+        }
+    }
+
+    public async Task<JsonResult> OnGetSelectSubmitterForOffice(string service, string office)
+    {
+        var apiSubmitters = new SubmitterAPIBroker(BaseAPIs);
+
+        var submitters = await apiSubmitters.GetSubmitterCodesForOffice(service, office);
+        submitters.Sort();
+        ValidSubmitterCodes = submitters;
+
+        return new JsonResult(ValidSubmitterCodes);
     }
 
     public async Task OnGet()
+    {
+        await RefreshPanels();
+    }
+
+    private async Task RefreshPanels()
     {
         string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
 
@@ -121,7 +157,43 @@ public class InterceptionDashboardModel : FoaeaPageModel
         if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
         {
             SetDisplayMessages(interception.Messages);
-            return RedirectToPage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostCancelApplication()
+    {
+        var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+        interception = await interceptionApi.CancelInterceptionApplicationAsync(interception);
+        // to do: also store Cancel reason description...
+
+        if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
+        {
+            SetDisplayMessages(interception.Messages);
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostTransferApplication()
+    {
+        var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+
+        if (!string.IsNullOrEmpty(TransferData.NewIssuingSubmitter))
+            TransferData.NewIssuingSubmitter = TransferData.NewRecipientSubmitter;
+
+        interception = await interceptionApi.TransferInterceptionApplicationAsync(interception, TransferData.NewRecipientSubmitter,
+                                                                                  TransferData.NewIssuingSubmitter);
+
+        if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
+        {
+            SetDisplayMessages(interception.Messages);
+            return Page();
         }
 
         return RedirectToPage();

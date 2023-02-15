@@ -314,25 +314,56 @@
                 </select>
                 <div><strong>Other</strong><textarea asp-for="SuspendData.ReasonDescription"></textarea></div>
 
-                <input type="submit" class="btn" asp-page-handler="SuspendApplication" value="Suspend" />
+                <input type="submit" class="btn" asp-page-handler="SuspendApplication" value="Confirm" />
             </div>
         </section>
 
         <section id="transferDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
             <header class="modal-header">
-                <h2 class="modal-title">Transfer Application</h2>
+                <h2 class="modal-title">Transfer Application - <span id="transferKeyLabel"></span></h2>
             </header>
             <div class="modal-body">
-                ...
+                <input id="transferEnfSrv" type="hidden" asp-for="TransferData.Appl_EnfSrv_Cd" />
+                <input id="transferCntrlCd" type="hidden" asp-for="TransferData.Appl_CtrlCd" />
+
+                <label>Select Office</label><select id="office" asp-for="TransferData.Office">
+                    @foreach (var enfOffice in Model.EnfOffices)
+                    {
+                        <option value="@enfOffice.EnfOff_City_LocCd">@enfOffice.EnfOff_Nme</option>
+                    }
+                </select>
+                <br />
+                <label>Select Recipient</label><select id="transferSubmitters" asp-for="TransferData.NewRecipientSubmitter">
+                </select>
+
+                <br />
+                <br />
+                <div>Transfer Linked Applications</div><br />
+                <input type="checkbox" value="T01" /> T01<br />
+                <input type="checkbox" value="L01" /> L01<br />
+                <br />
+
+                <input type="submit" class="btn" asp-page-handler="TransferApplication" value="Confirm" />
             </div>
         </section>
 
         <section id="cancelDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
             <header class="modal-header">
-                <h2 class="modal-title">Cancel Application</h2>
+                <h2 class="modal-title">Cancel Application - <span id="cancelKeyLabel"></span></h2>
             </header>
             <div class="modal-body">
-                ...
+                <input id="cancelEnfSrv" type="hidden" asp-for="CancelData.Appl_EnfSrv_Cd" />
+                <input id="cancelCntrlCd" type="hidden" asp-for="CancelData.Appl_CtrlCd" />
+
+                <select asp-for="CancelData.ReasonCode">
+                    <option value=""></option>
+                    <option value="R1">Reason 1</option>
+                    <option value="R2">Reason 2</option>
+                    <option value="R3">Reason 3</option>
+                </select>
+                <div><strong>Other</strong><textarea asp-for="CancelData.ReasonDescription"></textarea></div>
+
+                <input type="submit" class="btn" asp-page-handler="CancelApplication" value="Confirm" />
             </div>
         </section>
 

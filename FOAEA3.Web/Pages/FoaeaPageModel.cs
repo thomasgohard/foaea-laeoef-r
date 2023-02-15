@@ -14,6 +14,7 @@ namespace FOAEA3.Web.Pages;
 
 public class FoaeaPageModel : PageModel
 {
+    public string CurrentSubmitter;
     protected readonly ApiConfig ApiRoots;
     protected readonly APIBrokerHelper BaseAPIs;
     protected readonly APIBrokerHelper InterceptionAPIs;
@@ -31,17 +32,17 @@ public class FoaeaPageModel : PageModel
 
         if ((httpContextAccessor is not null) && (httpContextAccessor.HttpContext is not null))
         {
-            string submitter = httpContextAccessor.HttpContext.Session.GetString(SessionValue.SUBMITTER);
+            CurrentSubmitter = httpContextAccessor.HttpContext.Session.GetString(SessionValue.SUBMITTER);
             string userName = httpContextAccessor.HttpContext.Session.GetString(SessionValue.USER_NAME);
 
             ContextAccessor = httpContextAccessor;
 
-            BaseAPIs = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName,
+            BaseAPIs = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, CurrentSubmitter, userName,
                                        getToken: GetToken, getRefreshedToken: GetRefreshedToken);
-            InterceptionAPIs = new APIBrokerHelper(ApiRoots.FoaeaInterceptionRootAPI, submitter, userName,
+            InterceptionAPIs = new APIBrokerHelper(ApiRoots.FoaeaInterceptionRootAPI, CurrentSubmitter, userName,
                                        getToken: GetToken, getRefreshedToken: GetRefreshedToken);
 
-            if (!string.IsNullOrEmpty(submitter))
+            if (!string.IsNullOrEmpty(CurrentSubmitter))
             {
                 var apiFoaEventsBroker = new FoaEventsAPIBroker(BaseAPIs);
                 FoaEvents = apiFoaEventsBroker.GetFoaEventsAsync().Result;

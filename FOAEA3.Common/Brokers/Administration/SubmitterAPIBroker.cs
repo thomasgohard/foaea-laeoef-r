@@ -30,8 +30,14 @@ namespace FOAEA3.Common.Brokers.Administration
 
         public async Task<List<ApplicationModificationActivitySummaryData>> GetAllAtState(string submitterCode, ApplicationState state)
         {
-            string apiCall = $"api/v1/Submitters/{submitterCode}/ApplicationsAtState/{(int) state}";
+            string apiCall = $"api/v1/Submitters/{submitterCode}/ApplicationsAtState/{(int)state}";
             return await ApiHelper.GetDataAsync<List<ApplicationModificationActivitySummaryData>>(apiCall, token: Token);
+        }
+
+        public async Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
+        {
+            string apiCall = $"api/v1/Submitters/office/{office}?service={service}";
+            return await ApiHelper.GetDataAsync<List<string>>(apiCall, token: Token);
         }
 
     }

@@ -13,7 +13,7 @@ namespace FOAEA3.Model.Interfaces.Repository
                                          string enfOffCode = null, string enfServCode = null,
                                          string submFName = null, string submMName = null,
                                          string prov = null);
-
+        Task<List<string>> GetSubmitterCodesForOffice(string service, string office);
         Task<string> GetMaxSubmitterCodeAsync(string submCodePart);
 
         Task CreateSubmitterAsync(SubmitterData newSubmitter);
