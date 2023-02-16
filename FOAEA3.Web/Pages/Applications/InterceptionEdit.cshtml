@@ -1,4 +1,18 @@
 ﻿@page
 @model FOAEA3.Web.Pages.Applications.InterceptionEditModel
 @{
+    int activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
+    ViewData["IsCreate"] = "N";
+}
+
+<p>Interception (Edit)</p>
+
+@await Html.PartialAsync("~/Pages/Shared/_MessagesPartial.cshtml", Model)
+
+<form method="post" class="form-inline">
+    @await Html.PartialAsync("~/Pages/Applications/_InterceptionData.cshtml", Model, ViewData)
+</form>
+
+@section Scripts {
+        <script src="~/js/Applications/InterceptionNew.js"></script>
 }
