@@ -36,7 +36,11 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
     [BindProperty]
     public ActionReasonData SuspendData { get; set; } = new ActionReasonData();
+    
+    [BindProperty]
     public ActionReasonData CancelData { get; set; } = new ActionReasonData();
+    
+    [BindProperty]
     public TransferData TransferData { get; set; } = new TransferData();
 
     public InterceptionDashboardModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
@@ -166,7 +170,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task<IActionResult> OnPostCancelApplication()
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+        var interception = await interceptionApi.GetApplicationAsync(CancelData.Appl_EnfSrv_Cd, CancelData.Appl_CtrlCd);
         interception = await interceptionApi.CancelInterceptionApplicationAsync(interception);
         // to do: also store Cancel reason description...
 
@@ -182,9 +186,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task<IActionResult> OnPostTransferApplication()
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+        var interception = await interceptionApi.GetApplicationAsync(TransferData.Appl_EnfSrv_Cd, TransferData.Appl_CtrlCd);
 
-        if (!string.IsNullOrEmpty(TransferData.NewIssuingSubmitter))
+        if (string.IsNullOrEmpty(TransferData.NewIssuingSubmitter))
             TransferData.NewIssuingSubmitter = TransferData.NewRecipientSubmitter;
 
         interception = await interceptionApi.TransferInterceptionApplicationAsync(interception, TransferData.NewRecipientSubmitter,

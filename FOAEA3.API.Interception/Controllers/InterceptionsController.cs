@@ -134,7 +134,7 @@ public class InterceptionsController : FoaeaControllerBase
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositories_finance, config);
-
+        await appManager.SetCurrentUserAsync(User);
         await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
 
         return Ok(application);

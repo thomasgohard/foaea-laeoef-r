@@ -342,10 +342,9 @@ namespace FOAEA3.Business.Areas.Application
             await DB.CaseManagementTable.CreateCaseManagementAsync(caseManagementData);
 
             EventManager.AddEvent(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
-
             Application.Messages.AddInformation(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
-            await UpdateApplicationAsync();
+            await UpdateApplicationNoValidationAsync();
 
         }
 
