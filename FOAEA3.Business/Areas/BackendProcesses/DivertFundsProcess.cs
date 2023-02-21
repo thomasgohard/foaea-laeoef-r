@@ -37,12 +37,12 @@ namespace FOAEA3.Business.BackendProcesses
 
         private async Task ExecDivertFundsAsync(DataList<ControlBatchData> controlBatchList)
         {
-            bool _flagErrorInDFBatch = false;
+            //bool _flagErrorInDFBatch = false;
             var prodAudit = DB.ProductionAuditTable;
 
             foreach (var rowDAFABatch in controlBatchList.Items)
             {
-                _flagErrorInDFBatch = false;
+              //  _flagErrorInDFBatch = false;
                 string _DFBatchID = await GetDFBatchIDAsync(rowDAFABatch);
 
                 await prodAudit.InsertAsync("Divert Funds", $"Divert Funds Batch Created - {_DFBatchID} Time: {DateTime.Now}", "O");
@@ -60,13 +60,13 @@ namespace FOAEA3.Business.BackendProcesses
                         var _debtorId = rowTransaction.Dbtr_Id;
                         if (rowTransaction.SummFAFR_OrigFA_IndDesc == "FR")
                         {
-                            await ProcessFRBatchesAsync(rowTransaction.SummFAFR_Id);
+                            ProcessFRBatchesAsync(); //rowTransaction.SummFAFR_Id);
                         }
 
                     }
-                    catch (Exception e)
+                    catch 
                     {
-                        _flagErrorInDFBatch = true;
+                      //  _flagErrorInDFBatch = true;
                         // InsertNightlyProcessTransactionError(rowTransaction.SummFaFr_Id, _summFAFRId, _DFBatchID, DateTime.Now(), _methodName, ex.ToString())
                     }
                 }
@@ -86,9 +86,8 @@ namespace FOAEA3.Business.BackendProcesses
                         }
 
                     }
-                    catch (Exception e)
-                    {
-                        _flagErrorInDFBatch = true;
+                    catch {
+                       // _flagErrorInDFBatch = true;
                         // InsertNightlyProcessTransactionError(rowTransaction.SummFaFr_Id, _summFAFRId, _DFBatchID, DateTime.Now(), _methodName, ex.ToString())
                     }
                 }
@@ -211,13 +210,13 @@ namespace FOAEA3.Business.BackendProcesses
              */
         }
 
-        private async Task ProcessFRBatchesAsync(int summFAFR_Id)
+        private static void ProcessFRBatchesAsync() //int summFAFR_Id)
         {
-            var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
+            //var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
             //var summFAFR_DB = DBfinance.SummFAFRRepository;
             //var summDF_DB = DBfinance.SummDFRepository;
 
-            var summFAFR_DE = await summFAFR_DE_DB.GetSummFaFrDeAsync(summFAFR_Id);
+            //var summFAFR_DE = await summFAFR_DE_DB.GetSummFaFrDeAsync(summFAFR_Id);
             //var summFAFR_List = await summFAFR_DB.GetSummFaFrListAsync(summFAFR_DE_List.Items);
             //var summDF_List = new DataList<SummDF_Data>();
 
@@ -294,12 +293,9 @@ namespace FOAEA3.Business.BackendProcesses
                 PendTtlAmt_Money = 0M
             };
 
-            string returnCode;
             string batchID;
-            string reasonCode;
-            string reasonText;
 
-            (returnCode, batchID, reasonCode, reasonText) = await controlBatchDB.CreateXFControlBatchAsync(values);
+            (_, batchID, _, _) = await controlBatchDB.CreateXFControlBatchAsync(values);
 
             return batchID;
 

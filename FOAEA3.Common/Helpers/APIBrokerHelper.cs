@@ -374,7 +374,7 @@ namespace FOAEA3.Common.Helpers
                                 content = await callResult.Content.ReadAsStringAsync();
                                 result = JsonConvert.DeserializeObject<T>(content);
                             }
-                            catch (Exception e)
+                            catch 
                             {
                                 // content could not be converted, so just return as is
                             }
