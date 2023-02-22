@@ -117,13 +117,8 @@ public class InterceptionDashboardModel : FoaeaPageModel
                 case MenuActionChoice.View:
                     break;
                 case MenuActionChoice.Edit:
-                    break;
-                case MenuActionChoice.Suspend:
-                    break;
-                case MenuActionChoice.Transfer:
-                    break;
-                case MenuActionChoice.Cancel:
-                    break;
+                    string applKey = $"{actionInfo.Appl_EnfSrv_Cd}-{actionInfo.Appl_CtrlCd}";
+                    return Redirect($"InterceptionEdit/{applKey}");
                 case MenuActionChoice.LinkT01:
                     break;
                 case MenuActionChoice.LinkI01:

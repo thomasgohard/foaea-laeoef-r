@@ -1,8 +1,15 @@
-﻿@page
+﻿@page "{id}"
+
+@using FOAEA3.Web.Helpers
+
 @model FOAEA3.Web.Pages.Applications.InterceptionEditModel
 @{
-    int activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
-    ViewData["IsCreate"] = "N";
+    int activeHldbCnd = 0;
+    if (Model.InterceptionApplication != null)
+    {
+        activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
+    }
+    ViewData[PageModeValue.PAGE_MODE] = PageModeValue.EDIT;
 }
 
 <p>Interception (Edit)</p>

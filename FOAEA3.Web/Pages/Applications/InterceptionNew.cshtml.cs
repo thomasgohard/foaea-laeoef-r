@@ -1,13 +1,11 @@
 using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Model;
-using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,7 +27,7 @@ public class InterceptionNewModel : InterceptionFoaeaPageModel
                 Subm_SubmCd = submitter,
                 Appl_Dbtr_Addr_CtryCd = "CAN",
                 Subm_Recpt_SubmCd = submitter,
-                Medium_Cd = "ONL"                
+                Medium_Cd = "ONL"
             };
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
@@ -38,7 +36,7 @@ public class InterceptionNewModel : InterceptionFoaeaPageModel
             LoadReferenceData();
         }
     }
-    
+
     public async Task<IActionResult> OnPostSubmitNewApplication()
     {
         if (InterceptionApplication.IntFinH.IntFinH_NextRecalcDate_Cd == 0)

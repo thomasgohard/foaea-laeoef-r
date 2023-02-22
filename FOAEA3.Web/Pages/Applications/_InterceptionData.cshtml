@@ -1,7 +1,8 @@
-﻿@model FOAEA3.Web.Pages.Applications.InterceptionFoaeaPageModel
+﻿@using FOAEA3.Web.Helpers
+
+@model FOAEA3.Web.Pages.Applications.InterceptionFoaeaPageModel
 @{
-    var isCreateData = ViewData["IsCreate"];
-    bool isCreate = isCreateData?.Equals("Y") ?? false;
+    string pageMode = ViewData[PageModeValue.PAGE_MODE] as string;    
 }
 
 <div class="wb-tabs">
@@ -305,11 +306,11 @@
             <p>
                 Submit to FOAEA
                 <div>
-                    @if (isCreate)
+                    @if (pageMode == PageModeValue.CREATE)
                     {
                         <input type="submit" class="btn btn-primary" value="Submit to FOAEA" asp-page-handler="SubmitNewApplication" />
                     }
-                    else
+                    else if (pageMode == PageModeValue.EDIT)
                     {
                         <input type="submit" class="btn btn-primary" value="Submit to FOAEA" asp-page-handler="SubmitEditApplication" />
                     }

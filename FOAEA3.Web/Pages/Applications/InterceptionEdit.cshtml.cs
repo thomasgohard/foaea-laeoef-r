@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using FOAEA3.Common.Brokers.Administration;
 using FOAEA3.Web.Helpers;
+using FOAEA3.Common.Helpers;
 
 namespace FOAEA3.Web.Pages.Applications
 {
@@ -27,7 +28,7 @@ namespace FOAEA3.Web.Pages.Applications
                     Appl_Dbtr_Addr_CtryCd = "CAN",
                     Subm_Recpt_SubmCd = submitter,
                     Medium_Cd = "ONL"
-                };
+                };                
 
                 var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
                 EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
@@ -36,9 +37,15 @@ namespace FOAEA3.Web.Pages.Applications
             }
         }
 
-        public void OnGet()
+        public async Task OnGet([FromRoute] ApplKey id)
         {
-            // load selected application
+            var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+            var application = await interceptionApi.GetApplicationAsync(id.EnfSrv, id.CtrlCd);
+            if ((application != null) && (application.Appl_EnfSrv_Cd.Trim() == id.EnfSrv) &&
+                                         (application.Appl_CtrlCd.Trim() == id.CtrlCd))
+            {
+                InterceptionApplication = application;
+            }
         }
 
         public async Task<IActionResult> OnPostSubmitEditApplication()
@@ -75,7 +82,6 @@ namespace FOAEA3.Web.Pages.Applications
 
             return RedirectToPagePermanent("InterceptionDashboard");
         }
-
 
     }
 }

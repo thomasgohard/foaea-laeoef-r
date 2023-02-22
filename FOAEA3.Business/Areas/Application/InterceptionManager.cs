@@ -99,14 +99,18 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.HldbCnd = null;
             if (isSuccess && loadFinancials)
             {
-                var finTerms = await DB.InterceptionTable.GetInterceptionFinancialTermsAsync(enfService, controlCode);
+                string activeState = "A";
+                if (InterceptionApplication.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3)
+                    activeState = "P";
+                var finTerms = await DB.InterceptionTable.GetInterceptionFinancialTermsAsync(enfService, controlCode, activeState);
                 InterceptionApplication.IntFinH = finTerms;
 
                 if (finTerms != null)
                 {
                     var holdbackConditions = await DB.InterceptionTable.GetHoldbackConditionsAsync(enfService, controlCode,
-                                                                                                       finTerms.IntFinH_Dte);
-
+                                                                                                   finTerms.IntFinH_Dte, activeState);
+                    if (holdbackConditions == null)
+                        holdbackConditions = new List<HoldbackConditionData>();
                     InterceptionApplication.HldbCnd = holdbackConditions;
                 }
             }

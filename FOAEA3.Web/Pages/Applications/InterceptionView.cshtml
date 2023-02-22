@@ -1,11 +1,11 @@
-﻿@page
+﻿@page "{id}"
 
 @using FOAEA3.Web.Helpers
 
-@model InterceptionNewModel
+@model FOAEA3.Web.Pages.Applications.InterceptionViewModel
 @{
     int activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
-    ViewData[PageModeValue.PAGE_MODE] = PageModeValue.CREATE;
+    ViewData[PageModeValue.PAGE_MODE] = PageModeValue.VIEW;
 }
 
 <p>Interception (Create)</p>
@@ -17,5 +17,5 @@
 </form>
 
 @section Scripts {
-    <script src="~/js/Applications/InterceptionNew.js"></script>
+    <script src="~/js/Applications/InterceptionView.js"></script>
 }
