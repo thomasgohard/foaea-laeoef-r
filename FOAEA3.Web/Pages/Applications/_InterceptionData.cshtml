@@ -2,7 +2,7 @@
 
 @model FOAEA3.Web.Pages.Applications.InterceptionFoaeaPageModel
 @{
-    string pageMode = ViewData[PageModeValue.PAGE_MODE] as string;    
+    string pageMode = ViewData[PageModeValue.PAGE_MODE] as string;
 }
 
 <div class="wb-tabs">
@@ -23,7 +23,15 @@
                 </div>
                 <div>
                     <label>02 Application Reference Code No:</label>
-                    <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_CtrlCd">
+                    @if (pageMode == PageModeValue.CREATE)
+                    {
+                        <input type="text" class="form-control multiColGroup" asp-for="InterceptionApplication.Appl_CtrlCd">
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="InterceptionApplication.Appl_CtrlCd">
+                        <label>@Model.InterceptionApplication.Appl_CtrlCd</label>
+                    }
                 </div>
                 <div>
                     <label>03 Court or provincial enforcement service reference no:</label>

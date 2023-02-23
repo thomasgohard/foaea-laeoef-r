@@ -1,8 +1,12 @@
+using FOAEA3.Common.Brokers;
 using FOAEA3.Common.Brokers.Administration;
+using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Web.Pages.Applications
 {
@@ -28,6 +32,17 @@ namespace FOAEA3.Web.Pages.Applications
                 EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
 
                 LoadReferenceData();
+            }
+        }
+
+        public async Task OnGet([FromRoute] ApplKey id)
+        {
+            var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
+            var application = await interceptionApi.GetApplicationAsync(id.EnfSrv, id.CtrlCd);
+            if ((application != null) && (application.Appl_EnfSrv_Cd.Trim() == id.EnfSrv) &&
+                                         (application.Appl_CtrlCd.Trim() == id.CtrlCd))
+            {
+                InterceptionApplication = application;
             }
         }
     }

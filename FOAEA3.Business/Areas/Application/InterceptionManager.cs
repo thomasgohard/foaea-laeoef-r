@@ -6,6 +6,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -187,10 +188,18 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
+            if (await FinancialTermsHaveBeenModified())
+            {
+                await VaryApplicationAsync();
+                if (!await FinancialTermsAreHigher())
+                {
+                    await AcceptVariationAsync();
+                }
+            }
+
             await base.UpdateApplicationAsync();
         }
-
-
+               
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {
             await base.UpdateApplicationNoValidationAsync();

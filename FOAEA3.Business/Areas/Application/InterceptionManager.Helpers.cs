@@ -550,5 +550,85 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
+        private async Task<bool> FinancialTermsHaveBeenModified()
+        {
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var currentApp = currentAppManager.InterceptionApplication;
+            var newApp = InterceptionApplication;
+
+            // compare intFinH
+            if (!currentApp.IntFinH.Equals(newApp.IntFinH))
+                return true;
+
+            // compare holdbackCnd
+            if (currentApp.HldbCnd.Count != newApp.HldbCnd.Count)
+                return true;
+
+            foreach (var holdbackCondition in currentApp.HldbCnd)
+            {
+                var newCondition = newApp.HldbCnd.Where(m => m.Appl_EnfSrv_Cd == holdbackCondition.Appl_EnfSrv_Cd &&
+                                                             m.Appl_CtrlCd == holdbackCondition.Appl_CtrlCd &&
+                                                             m.IntFinH_Dte == holdbackCondition.IntFinH_Dte &&
+                                                             m.EnfSrv_Cd == holdbackCondition.EnfSrv_Cd).FirstOrDefault();
+                if ((newCondition == null) || (!newCondition.Equals(holdbackCondition)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> FinancialTermsAreHigher()
+        {
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var currentApp = currentAppManager.InterceptionApplication;
+            var newApp = InterceptionApplication;
+
+            decimal currentPeriodicYearlyTotal = CalculateYearlyTotal(currentApp.IntFinH.PymPr_Cd, currentApp.IntFinH.IntFinH_PerPym_Money);
+            decimal newPeriodicYearlyTotal = CalculateYearlyTotal(newApp.IntFinH.PymPr_Cd, newApp.IntFinH.IntFinH_PerPym_Money);
+
+            if ((currentApp.IntFinH.IntFinH_LmpSum_Money > newApp.IntFinH.IntFinH_LmpSum_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbAmn_Money < newApp.IntFinH.IntFinH_DefHldbAmn_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbPrcnt < newApp.IntFinH.IntFinH_DefHldbPrcnt) ||
+                (currentApp.IntFinH.IntFinH_CmlPrPym_Ind < newApp.IntFinH.IntFinH_CmlPrPym_Ind) ||
+                (currentPeriodicYearlyTotal > newPeriodicYearlyTotal)) 
+            {
+                return true;
+            }
+
+            /* TODO:
+                -Any Source Specific Amount Garnisheed Per Transaction (including removing an Amount Garnisheed pee Transaction when there was one previously)
+                -Any Source Specific Fixed Amount (decrease = increase)
+                -Any Source Specific Percentage (decrease = increase)
+                -Any addition of a Source Specific Holdback condition which creates a situation where more funds can be garnisheed from that source VS previously
+                -Any removal of a Source Specific Holdback condition which creates a situation where more funds can be garnisheed from that source VS previously
+            */
+
+            return false;
+        }
+
+        private static decimal CalculateYearlyTotal(string periodicCode, decimal? periodicAmount)
+        {
+            decimal result = 0M;
+
+            if (periodicAmount is not null)
+            {
+                result = periodicCode switch
+                {
+                    "A" => 52 * periodicAmount.Value,
+                    "B" => 26 * periodicAmount.Value,
+                    "C" => 12 * periodicAmount.Value,
+                    "D" => 4 * periodicAmount.Value,
+                    "E" => 2 * periodicAmount.Value,
+                    "F" => 1 * periodicAmount.Value,
+                    "G" => 24 * periodicAmount.Value,
+                    _ => 0M
+                };
+            }
+
+            return result;
+        }
+
     }
 }
