@@ -15,7 +15,7 @@ namespace FOAEA3.Model
         public short HldbCnd_LiStCd { get; set; }
         public string ActvSt_Cd { get; set; }
 
-        public override bool Equals(object obj)
+        public bool ValuesEqual(object obj)
         {
             if (obj is not HoldbackConditionData newHoldback)
                 return false;
@@ -36,16 +36,5 @@ namespace FOAEA3.Model
             else
                 return false;
         }
-
-        public override int GetHashCode()
-        {
-            var hashCode1 = HashCode.Combine(Appl_EnfSrv_Cd, Appl_CtrlCd, IntFinH_Dte, EnfSrv_Cd, HldbCnd_MxmPerChq_Money,
-                                             HldbCnd_SrcHldbAmn_Money, HldbCnd_SrcHldbPrcnt, HldbCnd_LiStCd);
-            var hashCode2 = HashCode.Combine(HldbCtg_Cd, ActvSt_Cd);
-
-            return HashCode.Combine(hashCode1, hashCode2); // does this make any sense?
-        }
-
     }
-
 }

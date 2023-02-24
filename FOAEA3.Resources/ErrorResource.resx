@@ -204,6 +204,9 @@
   <data name="INVALID_USERNAME_OR_PASSWORD" xml:space="preserve">
     <value>Invalid username or password</value>
   </data>
+  <data name="INVALID_VARIATIONS_ISSUE_DATE" xml:space="preserve">
+    <value>Invalid Variations issue Date</value>
+  </data>
   <data name="MAX_CONTROL_CODE_LENGTH" xml:space="preserve">
     <value>The maximum length of the control code is 6</value>
   </data>

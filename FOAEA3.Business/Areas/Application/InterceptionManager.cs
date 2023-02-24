@@ -6,6 +6,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
@@ -188,18 +189,20 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
+            bool success = true;
             if (await FinancialTermsHaveBeenModified())
             {
-                await VaryApplicationAsync();
-                if (!await FinancialTermsAreHigher())
+                success = await VaryApplicationAsync();
+                if (success && (!await FinancialTermsAreHigher()))
                 {
                     await AcceptVariationAsync();
                 }
             }
 
-            await base.UpdateApplicationAsync();
+            if (success)
+                await base.UpdateApplicationAsync();
         }
-               
+
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {
             await base.UpdateApplicationNoValidationAsync();
@@ -235,6 +238,9 @@ namespace FOAEA3.Business.Areas.Application
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
+            // Variation issue date is actually stored in Appl_Lgl_Dte so this also has to be kept
+            var variationIssueDate = InterceptionApplication.Appl_Lgl_Dte;
+
             // for FTP, also keep changes to address, phone # and ref code:
             var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
             var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
@@ -259,6 +265,8 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
+            InterceptionApplication.Appl_Lgl_Dte = variationIssueDate;
+
             if (InterceptionApplication.Medium_Cd == "FTP")
             {
                 InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
@@ -270,6 +278,13 @@ namespace FOAEA3.Business.Areas.Application
                 InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
                 InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
                 InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+            }
+
+            if (variationIssueDate < DateTime.Now.Date.AddDays(-30))
+            {
+                InterceptionApplication.Messages.AddError(ErrorResource.INVALID_VARIATIONS_ISSUE_DATE);
+
+                return false;
             }
 
             var summSmry = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd)).FirstOrDefault();
@@ -287,7 +302,6 @@ namespace FOAEA3.Business.Areas.Application
 
                 return false;
             }
-
 
             var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config)
             {

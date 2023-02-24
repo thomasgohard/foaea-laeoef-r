@@ -26,7 +26,7 @@ namespace FOAEA3.Model
         public string ActvSt_Cd { get; set; }
         public string IntFinH_DefHldbAmn_Period { get; set; }
 
-        public override bool Equals(object obj)
+        public bool ValuesEqual(object obj)
         {
             if (obj is not InterceptionFinancialHoldbackData newTerms)
                 return false;
@@ -57,17 +57,6 @@ namespace FOAEA3.Model
             }
             else
                 return false;
-        }
-
-        public override int GetHashCode()
-        {
-            var hashCode1 = HashCode.Combine(Appl_EnfSrv_Cd, Appl_CtrlCd, IntFinH_Dte, IntFinH_RcvtAffdvt_Dte, IntFinH_Affdvt_SubmCd,
-                                             PymPr_Cd, IntFinH_NextRecalcDate_Cd, HldbTyp_Cd);
-            var hashCode2 = HashCode.Combine(IntFinH_DefHldbAmn_Money, IntFinH_DefHldbPrcnt, HldbCtg_Cd, IntFinH_CmlPrPym_Ind,
-                                             IntFinH_MxmTtl_Money, IntFinH_PerPym_Money, IntFinH_LmpSum_Money, IntFinH_TtlAmn_Money);
-            var hashCode3 = HashCode.Combine(IntFinH_VarIss_Dte, IntFinH_CreateUsr, IntFinH_LiStCd, ActvSt_Cd, IntFinH_DefHldbAmn_Period);
-
-            return HashCode.Combine(hashCode1, hashCode2, hashCode3); // does this make any sense?
         }
     }
 }

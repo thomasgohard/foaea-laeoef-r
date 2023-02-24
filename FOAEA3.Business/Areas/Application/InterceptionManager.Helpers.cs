@@ -558,7 +558,7 @@ namespace FOAEA3.Business.Areas.Application
             var newApp = InterceptionApplication;
 
             // compare intFinH
-            if (!currentApp.IntFinH.Equals(newApp.IntFinH))
+            if (!currentApp.IntFinH.ValuesEqual(newApp.IntFinH))
                 return true;
 
             // compare holdbackCnd
@@ -571,7 +571,7 @@ namespace FOAEA3.Business.Areas.Application
                                                              m.Appl_CtrlCd == holdbackCondition.Appl_CtrlCd &&
                                                              m.IntFinH_Dte == holdbackCondition.IntFinH_Dte &&
                                                              m.EnfSrv_Cd == holdbackCondition.EnfSrv_Cd).FirstOrDefault();
-                if ((newCondition == null) || (!newCondition.Equals(holdbackCondition)))
+                if ((newCondition == null) || (!newCondition.ValuesEqual(holdbackCondition)))
                     return true;
             }
 
@@ -588,22 +588,36 @@ namespace FOAEA3.Business.Areas.Application
             decimal currentPeriodicYearlyTotal = CalculateYearlyTotal(currentApp.IntFinH.PymPr_Cd, currentApp.IntFinH.IntFinH_PerPym_Money);
             decimal newPeriodicYearlyTotal = CalculateYearlyTotal(newApp.IntFinH.PymPr_Cd, newApp.IntFinH.IntFinH_PerPym_Money);
 
-            if ((currentApp.IntFinH.IntFinH_LmpSum_Money > newApp.IntFinH.IntFinH_LmpSum_Money) ||
-                (currentApp.IntFinH.IntFinH_DefHldbAmn_Money < newApp.IntFinH.IntFinH_DefHldbAmn_Money) ||
-                (currentApp.IntFinH.IntFinH_DefHldbPrcnt < newApp.IntFinH.IntFinH_DefHldbPrcnt) ||
-                (currentApp.IntFinH.IntFinH_CmlPrPym_Ind < newApp.IntFinH.IntFinH_CmlPrPym_Ind) ||
-                (currentPeriodicYearlyTotal > newPeriodicYearlyTotal)) 
+            if ((currentApp.IntFinH.IntFinH_LmpSum_Money < newApp.IntFinH.IntFinH_LmpSum_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbAmn_Money > newApp.IntFinH.IntFinH_DefHldbAmn_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbPrcnt > newApp.IntFinH.IntFinH_DefHldbPrcnt) ||
+                (currentApp.IntFinH.IntFinH_CmlPrPym_Ind > newApp.IntFinH.IntFinH_CmlPrPym_Ind) ||
+                (currentPeriodicYearlyTotal < newPeriodicYearlyTotal))
             {
                 return true;
             }
 
-            /* TODO:
-                -Any Source Specific Amount Garnisheed Per Transaction (including removing an Amount Garnisheed pee Transaction when there was one previously)
-                -Any Source Specific Fixed Amount (decrease = increase)
-                -Any Source Specific Percentage (decrease = increase)
-                -Any addition of a Source Specific Holdback condition which creates a situation where more funds can be garnisheed from that source VS previously
-                -Any removal of a Source Specific Holdback condition which creates a situation where more funds can be garnisheed from that source VS previously
-            */
+            if (currentApp.HldbCnd.Count == newApp.HldbCnd.Count)
+            {
+                foreach (var currentHoldback in currentApp.HldbCnd)
+                {
+                    if (currentHoldback is not null)
+                    {
+                        var newHoldback = newApp.HldbCnd.Where(m => m.EnfSrv_Cd == currentHoldback.EnfSrv_Cd).FirstOrDefault();
+                        if (newHoldback is null)
+                            return true;
+                        else
+                        {
+                            if ((currentHoldback.HldbCnd_MxmPerChq_Money < newHoldback.HldbCnd_MxmPerChq_Money) ||
+                                (currentHoldback.HldbCnd_SrcHldbAmn_Money > newHoldback.HldbCnd_SrcHldbAmn_Money) ||
+                                (currentHoldback.HldbCnd_SrcHldbPrcnt > newHoldback.HldbCnd_SrcHldbPrcnt))
+                                return true;
+                        }
+                    }
+                }
+            }
+            else
+                return true;
 
             return false;
         }
