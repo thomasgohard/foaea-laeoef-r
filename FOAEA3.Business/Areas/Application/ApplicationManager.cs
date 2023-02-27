@@ -19,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class ApplicationManager
     {
-        private readonly ApplicationData Application;
+        public readonly ApplicationData Application;
 
         public IRepositories DB { get; }
         public ApplicationEventManager EventManager { get; }
@@ -133,11 +133,14 @@ namespace FOAEA3.Business.Areas.Application
 
             if ((data != null) && (CurrentUser is not null))
             {
-
                 if (CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
                 {
                     Application.Merge(data);
                     return true;
+                }
+                else
+                {
+                    Application.Messages.AddError("Access denied!");
                 }
             }
 
@@ -477,6 +480,20 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             return result;
+        }
+
+        public async Task ApplySINconfirmation()
+        {
+            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
+
+            var sinManager = new ApplicationSINManager(Application, this);
+            await sinManager.UpdateSINChangeHistoryAsync();
+
+            foreach (var eventItem in EventManager.Events)
+                eventItem.Subm_Update_SubmCd = "SYSTEM";
+
+            await UpdateApplicationNoValidationAsync();
+
         }
 
         private static string BuildCommentsChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)

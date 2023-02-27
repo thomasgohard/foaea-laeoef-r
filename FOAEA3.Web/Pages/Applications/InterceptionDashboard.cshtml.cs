@@ -108,6 +108,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
         if (itemSelected is not null)
         {
             var actionInfo = ActionHelper.ExtractInfo(itemSelected);
+
+            string applKey = $"{actionInfo.Appl_EnfSrv_Cd}-{actionInfo.Appl_CtrlCd}";
+
             switch (actionInfo.Action)
             {
                 case MenuActionChoice.Notes:
@@ -117,7 +120,6 @@ public class InterceptionDashboardModel : FoaeaPageModel
                 case MenuActionChoice.View:
                     break;
                 case MenuActionChoice.Edit:
-                    string applKey = $"{actionInfo.Appl_EnfSrv_Cd}-{actionInfo.Appl_CtrlCd}";
                     return Redirect($"InterceptionEdit/{applKey}");
                 case MenuActionChoice.LinkT01:
                     break;

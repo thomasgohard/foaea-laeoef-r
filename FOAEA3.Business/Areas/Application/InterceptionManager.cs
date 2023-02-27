@@ -232,17 +232,15 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
 
             // only keep changes that are allowed:
-            //   comment and financial terms
+            //   comment, variation issue date and financial terms
 
-            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
-            // Variation issue date is actually stored in Appl_Lgl_Dte so this also has to be kept
-            var variationIssueDate = InterceptionApplication.Appl_Lgl_Dte;
-
-            // for FTP, also keep changes to address, phone # and ref code:
             var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var variationIssueDate = InterceptionApplication.Appl_Lgl_Dte;
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+
             var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
             var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
             var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
@@ -261,29 +259,26 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
+            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
             InterceptionApplication.Appl_Lgl_Dte = variationIssueDate;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
 
             if (InterceptionApplication.Medium_Cd == "FTP")
-            {
                 InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
 
-                InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
-                InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
-                InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
-                InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
-                InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
-                InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
-                InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
-            }
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
 
             if (variationIssueDate < DateTime.Now.Date.AddDays(-30))
             {
                 InterceptionApplication.Messages.AddError(ErrorResource.INVALID_VARIATIONS_ISSUE_DATE);
-
                 return false;
             }
 
@@ -314,7 +309,6 @@ namespace FOAEA3.Business.Areas.Application
             {
                 InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
                 await EventManager.SaveEventsAsync();
-
                 return false;
             }
 
@@ -352,7 +346,8 @@ namespace FOAEA3.Business.Areas.Application
 
                 await EventManager.SaveEventsAsync();
 
-                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") 
+                    InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 return true;
             }
@@ -361,15 +356,18 @@ namespace FOAEA3.Business.Areas.Application
                 switch (InterceptionApplication.AppLiSt_Cd)
                 {
                     case ApplicationState.INVALID_VARIATION_SOURCE_91:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
                         break;
 
                     case ApplicationState.INVALID_VARIATION_FINTERMS_92:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
                         break;
 
                     default:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
                         break;
                 }
 

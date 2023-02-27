@@ -471,20 +471,6 @@ namespace FOAEA3.Business.Areas.Application
             return await EventDetailManager.GetActiveTracingEventDetailsAsync(enfSrv_Cd, cycle);
         }
 
-        public async Task ApplySINconfirmation()
-        {
-            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
-
-            var sinManager = new ApplicationSINManager(TracingApplication, this);
-            await sinManager.UpdateSINChangeHistoryAsync();
-
-            foreach (var eventItem in EventManager.Events)
-                eventItem.Subm_Update_SubmCd = "SYSTEM";
-
-            await UpdateApplicationNoValidationAsync();
-
-        }
-
         public async Task ApplySINfailedAsync()
         {
             await SetNewStateTo(ApplicationState.SIN_NOT_CONFIRMED_5);
