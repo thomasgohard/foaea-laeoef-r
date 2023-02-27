@@ -12,13 +12,6 @@ namespace FOAEA3.Web.Pages.Applications
     public class InterceptionFoaeaPageModel : FoaeaPageModel
     {
         public string EnfServiceDescription { get; set; }
-        public List<GenderData> Genders { get; set; }
-        public List<CountryData> Countries { get; set; }
-        public List<ApplicationLifeStateData> LifeStates { get; set; }
-        public List<ProvinceData> ValidProvinces { get; set; }
-        public List<PaymentPeriodData> PaymentPeriods { get; set; }
-
-        public List<ProvinceData> AllProvinces { get; set; }
 
         [BindProperty]
         public HoldbackConditionData NewCondition { get; set; }
@@ -64,30 +57,7 @@ namespace FOAEA3.Web.Pages.Applications
                 HldbCtg_Cd = NewCondition.HldbCtg_Cd,
                 EnfSrv_Cd = NewCondition.EnfSrv_Cd
             });
-        }
-
-        protected void LoadReferenceData()
-        {
-            var apiLifeStatesBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-            LifeStates = apiLifeStatesBroker.GetApplicationLifeStatesAsync().Result;
-            if (apiLifeStatesBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiLifeStatesBroker.ApiHelper.ErrorData);
-
-            var apiGenderBroker = new GendersAPIBroker(BaseAPIs);
-            Genders = apiGenderBroker.GetGendersAsync().Result;
-            if (apiGenderBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiGenderBroker.ApiHelper.ErrorData);
-
-            var apiCountryBroker = new CountriesAPIBroker(BaseAPIs);
-            Countries = apiCountryBroker.GetCountriesAsync().Result;
-            if (apiCountryBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiCountryBroker.ApiHelper.ErrorData);
-
-            var apiProvinceBroker = new ProvincesAPIBroker(BaseAPIs);
-            AllProvinces = apiProvinceBroker.GetProvincesAsync().Result;
-            if (apiProvinceBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiProvinceBroker.ApiHelper.ErrorData);
-
-            var apiInterceptioBroker = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-            PaymentPeriods = apiInterceptioBroker.GetPaymentPeriods().Result;
-            if (apiInterceptioBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiInterceptioBroker.ApiHelper.ErrorData);
-        }
+        }        
 
     }
 }

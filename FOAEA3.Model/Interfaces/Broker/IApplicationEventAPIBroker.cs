@@ -8,6 +8,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
+        Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd);
         Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName);
         Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName);
         Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync();

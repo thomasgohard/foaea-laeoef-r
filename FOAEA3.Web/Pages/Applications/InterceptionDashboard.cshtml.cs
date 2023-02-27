@@ -116,9 +116,9 @@ public class InterceptionDashboardModel : FoaeaPageModel
                 case MenuActionChoice.Notes:
                     break;
                 case MenuActionChoice.ViewEvents:
-                    break;
+                    return Redirect($"ViewEvents/{applKey}");
                 case MenuActionChoice.View:
-                    break;
+                    return Redirect($"InterceptionView/{applKey}");
                 case MenuActionChoice.Edit:
                     return Redirect($"InterceptionEdit/{applKey}");
                 case MenuActionChoice.LinkT01:
