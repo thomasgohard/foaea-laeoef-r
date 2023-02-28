@@ -16,7 +16,6 @@ namespace FOAEA3.Web.Pages.Applications;
 
 public class InterceptionDashboardModel : FoaeaPageModel
 {
-    public List<ApplicationLifeStateData> LifeStates { get; set; }
     public List<ApplicationSearchResultData> SearchResults { get; set; }
     public List<EnfOffData> EnfOffices { get; set; }
     public List<string> ValidSubmitterCodes { get; set; }
@@ -24,6 +23,11 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public int SubmittedToday { get; set; }
     public int SinPendingsLast7days { get; set; }
     public int SinPendingsAll { get; set; }
+    public int SinNotConfirmedAll { get; set; }
+    public int ApprovedAll { get; set; }
+    public int CancelledAll { get; set; }
+    public int RejectedAll { get; set; }
+    public int ReversedAll { get; set; }
 
     [BindProperty]
     public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -93,13 +97,23 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
         var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 0);
         var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
-        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
+        var sinPendingsForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
+        var sinNotConfirmedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_NOT_CONFIRMED_5);
+        var applApprovedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_ACCEPTED_10);
+        var applCancelledForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.MANUALLY_TERMINATED_14);
+        var applRejectedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_REJECTED_9);
 
         SubmittedToday = changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter &&
                                                              m.Appl_Create_Dte.Date == DateTime.Now.Date).Count();
 
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
-        SinPendingsAll = changesForSubmitterAll.Count;
+        SinPendingsAll = sinPendingsForSubmitterAll.Count;
+
+        SinNotConfirmedAll = sinNotConfirmedForSubmitterAll.Count;
+        ApprovedAll = applApprovedForSubmitterAll.Count;
+        CancelledAll = applCancelledForSubmitterAll.Count;
+        RejectedAll = applRejectedForSubmitterAll.Count;
+        ReversedAll = 0; // how to find this?
     }
 
     public IActionResult OnPostMenuSelect()
@@ -146,6 +160,21 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task OnPostSearchSinPendingsAll()
     {
         await BuildSearchResult(await GetSinPendingsAll());
+    }
+
+    public async Task OnPostSearchApprovedAll()
+    {
+        await BuildSearchResult(await GetApprovedAll());
+    }
+
+    public async Task OnPostSearchCancelledAll()
+    {
+        await BuildSearchResult(await GetCancelledAll());
+    }
+
+     public async Task OnPostSearchRejectedAll()
+    {
+        await BuildSearchResult(await GetRejectedAll());
     }
 
     public async Task<IActionResult> OnPostSuspendApplication()
@@ -277,6 +306,33 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
 
         var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
+        return changesForSubmitterAll.ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetApprovedAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_ACCEPTED_10);
+        return changesForSubmitterAll.ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetCancelledAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.MANUALLY_TERMINATED_14);
+        return changesForSubmitterAll.ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetRejectedAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_REJECTED_9);
         return changesForSubmitterAll.ToList();
     }
 

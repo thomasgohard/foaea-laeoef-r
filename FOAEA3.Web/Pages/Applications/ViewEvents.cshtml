@@ -29,7 +29,7 @@
                 if (Model.LifeStates is not null)
                 {
                     int i = 0;
-                    foreach (var result in Model.ApplicationEvents)
+                    foreach (var result in Model.ApplicationEvents.OrderBy(m => m.Event_Id))
                     {
                         var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
                         string lifeStateDesc = $"{(int) result.AppLiSt_Cd} - {applListState?.Description}";

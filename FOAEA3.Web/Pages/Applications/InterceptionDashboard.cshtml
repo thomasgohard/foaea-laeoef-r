@@ -19,194 +19,10 @@
         <div class="wb-tabs">
             <div class="tabpanels">
                 <details id="details-panel1">
-                    <summary>My Search</summary>
-                    <div class="row">
-                        <div class="col-md-4 p-0">
-                            <div id="mySearch_LastName" class="form-group multiColGroup mySearchControl">
-                                <label for="item1my" class="text-left multiColLabel">Last Name</label>
-                                <input type="text" class="form-control multiColControl" id="item1my" asp-for="MySearchCriteria.LastName">
-                            </div>
-                            <div id="mySearch_MiddleName" class="form-group multiColGroup mySearchControl">
-                                <label for="item2my" class="text-left multiColLabel">Middle Name</label>
-                                <input type="text" class="form-control multiColControl" id="item2my" asp-for="MySearchCriteria.MiddleName">
-                            </div>
-                            <div id="mySearch_FirstName" class="form-group multiColGroup mySearchControl">
-                                <label for="item3my" class="text-left multiColLabel">First Name</label>
-                                <input type="text" class="form-control multiColControl" id="item3my" asp-for="MySearchCriteria.FirstName">
-                            </div>
-                            <div id="mySearch_EnfRefSource" class="form-group multiColGroup mySearchControl">
-                                <label for="item4my" class="text-left multiColLabel">Enf Ref Src #</label>
-                                <input type="text" class="form-control multiColControl" id="item4my" asp-for="MySearchCriteria.EnfSourceRefNumber">
-                            </div>
-                            <div id="mySearch_State" class="form-group multiColGroup mySearchControl">
-                                <label for="item5my" class="text-left multiColLabel">State</label>
-                                <input type="text" class="form-control multiColControl" id="item5my" asp-for="MySearchCriteria.State">
-                            </div>
-                            <div id="mySearch_SIN" class="form-group multiColGroup mySearchControl">
-                                <label for="item6my" class="text-left multiColLabel">SIN</label>
-                                <input type="text" class="form-control multiColControl" id="item6my" asp-for="MySearchCriteria.SIN">
-                            </div>
-                            <div id="mySearch_ControlCode" class="form-group multiColGroup mySearchControl">
-                                <label for="item7my" class="text-left multiColLabel">Control Code</label>
-                                <input type="text" class="form-control multiColControl" id="item7my" asp-for="MySearchCriteria.ControlCode">
-                            </div>
-                            <div id="mySearch_JusticeNo" class="form-group multiColGroup mySearchControl">
-                                <label for="item8my" class="text-left multiColLabel">Justice #</label>
-                                <input type="text" class="form-control multiColControl" id="item8my" asp-for="MySearchCriteria.JusticeNumber">
-                            </div>
-                            <div id="mySearch_Status" class="form-group multiColGroup mySearchControl">
-                                <label for="item9my" class="text-left multiColLabel">Status</label>
-                                <input type="text" class="form-control multiColControl" id="item9my" asp-for="MySearchCriteria.Status">
-                            </div>
-
-                            <div id="mySearch_ReceiptDateRangeFrom" class="form-group multiColGroup mySearchControl">
-                                <label for="item11my" class="text-left multiColLabelLong">Receipt Date - From</label>
-                                <input type="date" class="form-control multiColControl" id="item11my" asp-for="MySearchCriteria.ReceiptDateFrom">
-                            </div>
-                            <div id="mySearch_ReceiptDateRangeTo" class="form-group multiColGroup mySearchControl">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item12my" class="text-left multiColLabelLong">Receipt Date - To</label>
-                                <input type="date" class="form-control multiColControl" id="item12my" asp-for="MySearchCriteria.ReceiptDateTo">
-                            </div>
-                            <div id="mySearch_ExpiryDateRangeFrom" class="form-group multiColGroup mySearchControl">
-                                <label for="item13my" class="text-left multiColLabelLong">Expiry Date - From</label>
-                                <input type="date" class="form-control multiColControl" id="item13my" asp-for="MySearchCriteria.ExpiryDateFrom">
-                            </div>
-                            <div id="mySearch_ExpiryDateRangeTo" class="form-group multiColGroup mySearchControl">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item14my" class="text-left multiColLabelLong">Expiry Date - To</label>
-                                <input type="date" class="form-control multiColControl" id="item14my" asp-for="MySearchCriteria.ExpiryDateTo">
-                            </div>
-                            <div id="mySearch_DateOfBirthRangeFrom" class="form-group multiColGroup mySearchControl">
-                                <label for="item15my" class="text-left multiColLabelLong">Date of Birth - From</label>
-                                <input type="date" class="form-control multiColControl" id="item15my" asp-for="MySearchCriteria.DateOfBirthFrom">
-                            </div>
-                            <div id="mySearch_DateOfBirthRangeTo" class="form-group multiColGroup mySearchControl">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item16my" class="text-left multiColLabelLong">Date of Birth - To</label>
-                                <input type="date" class="form-control multiColControl" id="item16my" asp-for="MySearchCriteria.DateOfBirthTo">
-                            </div>
-
-                            <div><input type="submit" value="Search" asp-page-handler="MySearch" /></div>
-                        </div>
-                    </div>
+                    @await Html.PartialAsync("~/Pages/Applications/_MySearch.cshtml", Model)
                 </details>
                 <details id="details-panel2">
-                    <summary>Advanced Search</summary>
-                    <div class="row">
-                        <div class="col-md-4 p-0">
-                            <div class="form-group multiColGroup">
-                                <input id="chkLastName" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item1" class="text-left multiColLabel">Last Name</label>
-                                <input type="text" class="form-control multiColControl" id="item1" asp-for="SearchCriteria.LastName">
-                            </div>
-                            <div class="form-group multiColGroup">
-                                <input id="chkMiddleName" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item2" class="text-left multiColLabel">Middle Name</label>
-                                <input type="text" class="form-control multiColControl" id="item2" asp-for="SearchCriteria.MiddleName">
-                            </div>
-                            <div class="form-group multiColGroup">
-                                <input id="chkFirstName" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item3" class="text-left multiColLabel">First Name</label>
-                                <input type="text" class="form-control multiColControl" id="item3" asp-for="SearchCriteria.FirstName">
-                            </div>
-                            <div class="form-group multiColGroup">
-                                <input id="chkEnfRefSource" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item4" class="text-left multiColLabel">Enf Ref Src #</label>
-                                <input type="text" class="form-control multiColControl" id="item4" asp-for="SearchCriteria.EnfSourceRefNumber">
-                            </div>
-                            <div class="form-group" style="padding-left: 3px !important; white-space:nowrap;">
-                                <input id="chkState" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item5" class="text-left multiColLabel">State</label>
-                                <select class="form-control multiColControl" asp-for="SearchCriteria.State">
-                                    @{
-                                        <option value="">All</option>
-                                        if (Model.LifeStates is not null)
-                                        {
-                                            foreach (var state in Model.LifeStates)
-                                            {
-                                                <option value="@state.AppLiSt_Cd">@state.Description</option>
-                                            }
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div><input type="submit" id="advancedSearch" value="Search" asp-page-handler="AdvancedSearch" /></div>
-                        </div>
-                        <div class="col-md-4 p-0">
-                            <div class="form-group">
-                                <input id="chkSIN" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item6" class="text-left multiColLabel">SIN</label>
-                                <input type="text" class="form-control multiColControlShort" id="item6" asp-for="SearchCriteria.SIN">
-                            </div>
-                            <div class="form-group">
-                                <input id="chkControlCode" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item7" class="text-left multiColLabel">Control Code</label>
-                                <input type="text" class="form-control multiColControlShort" id="item7" asp-for="SearchCriteria.ControlCode">
-                            </div>
-                            <div class="form-group">
-                                <input id="chkJusticeNo" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item8" class="text-left multiColLabel">Justice #</label>
-                                <input type="text" class="form-control multiColControlShort" id="item8" asp-for="SearchCriteria.JusticeNumber">
-                            </div>
-                            <div class="form-group">
-                                <input id="chkStatus" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item9" class="text-left multiColLabel">Status</label>
-                                <select class="form-control multiColControlShort" asp-for="SearchCriteria.Status">
-                                    <option value="">All</option>
-                                    <option value="A">Active</option>
-                                    <option value="C">Complete</option>
-                                    <option value="I">Inactive</option>
-                                    <option value="J">Rejected</option>
-                                    <option value="P">Processing</option>
-                                    <option value="X">Cancelled</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item10" class="text-left multiColLabel">Category</label>
-                                <select class="form-control multiColControlShort" asp-for="SearchCriteria.Category">
-                                    <option value="">All</option>
-                                    <option value="T01">Trace and Locate</option>
-                                    <option value="I01">Garnishment</option>
-                                    <option value="L01">Licence Denial</option>
-                                    <option value="L03">Licence Denial Termination</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4 p-0">
-                            <div class="form-group">
-                                <input id="chkReceiptDateRange" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item11" class="text-left multiColLabelLong">Receipt Date - From</label>
-                                <input type="date" class="form-control multiColControlShort" id="item11" asp-for="SearchCriteria.ReceiptDateFrom">
-                            </div>
-                            <div class="form-group">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item12" class="text-left multiColLabelLong">Receipt Date - To</label>
-                                <input type="date" class="form-control multiColControlShort" id="item12" asp-for="SearchCriteria.ReceiptDateTo">
-                            </div>
-                            <div class="form-group">
-                                <input id="chkExpiryDateRange" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item13" class="text-left multiColLabelLong">Expiry Date - From</label>
-                                <input type="date" class="form-control multiColControlShort" id="item13" asp-for="SearchCriteria.ExpiryDateFrom">
-                            </div>
-                            <div class="form-group">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item14" class="text-left multiColLabelLong">Expiry Date - To</label>
-                                <input type="date" class="form-control multiColControlShort" id="item14" asp-for="SearchCriteria.ExpiryDateTo">
-                            </div>
-                            <div class="form-group">
-                                <input id="chkDateOfBirthRange" type="checkbox" class="multiColCheck" aria-label="...">
-                                <label for="item15" class="text-left multiColLabelLong">Date of Birth - From</label>
-                                <input type="date" class="form-control multiColControlShort" id="item15" asp-for="SearchCriteria.DateOfBirthFrom">
-                            </div>
-                            <div class="form-group">
-                                <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
-                                <label for="item16" class="text-left multiColLabelLong">Date of Birth - To</label>
-                                <input type="date" class="form-control multiColControlShort" id="item16" asp-for="SearchCriteria.DateOfBirthTo">
-                            </div>
-                        </div>
-                    </div>
+                    @await Html.PartialAsync("~/Pages/Applications/_AdvancedSearch.cshtml", Model)
                 </details>
                 <details id="details-panel3">
                     <summary>Saved Searches</summary>
@@ -218,17 +34,41 @@
         </div>
         @if (Model.SearchResults == null)
         {
-            <div class="col-md-4">
-                <p>Submitted Today</p>
-                <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
+            <div class="row">
+                <div class="col-md-3">
+                    <p>Submitted Today</p>
+                    <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>SIN Pending All</p>
+                    <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>SIN Pending Last 7 days</p>
+                    <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Reversed</p>
+                    <p><input type="submit" class="btn" value="@Model.ReversedAll" asp-page-handler="SearchSinPendingsLast7days" /></p>
+                </div>
             </div>
-            <div class="col-md-4">
-                <p>SIN Pending All</p>
-                <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
-            </div>
-            <div class="col-md-4">
-                <p>SIN Pending Last 7 days</p>
-                <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
+            <div class="row">
+                <div class="col-md-3">
+                    <p>SIN Not Confirmed</p>
+                    <p><input type="submit" class="btn" value="@Model.SinNotConfirmedAll" asp-page-handler="SearchSinNotConfirmedAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Approved</p>
+                    <p><input type="submit" class="btn" value="@Model.ApprovedAll" asp-page-handler="SearchApprovedAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Cancelled</p>
+                    <p><input type="submit" class="btn" value="@Model.CancelledAll" asp-page-handler="SearchCancelledAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Rejected</p>
+                    <p><input type="submit" class="btn" value="@Model.RejectedAll" asp-page-handler="SearchRejectedAll" /></p>
+                </div>
             </div>
         }
     </form>
@@ -297,74 +137,11 @@
             </div>
         }
 
-        <section id="suspendDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
-            <header class="modal-header">
-                <h2 class="modal-title">Suspend Application - <span id="suspendKeyLabel"></span></h2>
-            </header>
-            <div class="modal-body">
-                <input id="suspendEnfSrv" type="hidden" asp-for="SuspendData.Appl_EnfSrv_Cd" />
-                <input id="suspendCntrlCd" type="hidden" asp-for="SuspendData.Appl_CtrlCd" />
+        @await Html.PartialAsync("~/Pages/Applications/_SuspendDialog.cshtml", Model)
 
-                <select asp-for="SuspendData.ReasonCode">
-                    <option value=""></option>
-                    <option value="R1">Reason 1</option>
-                    <option value="R2">Reason 2</option>
-                    <option value="R3">Reason 3</option>
-                </select>
-                <div><strong>Other</strong><textarea asp-for="SuspendData.ReasonDescription"></textarea></div>
+        @await Html.PartialAsync("~/Pages/Applications/_TransferDialog.cshtml", Model)
 
-                <input type="submit" class="btn" asp-page-handler="SuspendApplication" value="Confirm" />
-            </div>
-        </section>
-
-        <section id="transferDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
-            <header class="modal-header">
-                <h2 class="modal-title">Transfer Application - <span id="transferKeyLabel"></span></h2>
-            </header>
-            <div class="modal-body">
-                <input id="transferEnfSrv" type="hidden" asp-for="TransferData.Appl_EnfSrv_Cd" />
-                <input id="transferCntrlCd" type="hidden" asp-for="TransferData.Appl_CtrlCd" />
-
-                <label>Select Office</label><select id="office" asp-for="TransferData.Office">
-                    @foreach (var enfOffice in Model.EnfOffices)
-                    {
-                        <option value="@enfOffice.EnfOff_City_LocCd">@enfOffice.EnfOff_Nme</option>
-                    }
-                </select>
-                <br />
-                <label>Select Recipient</label><select id="transferSubmitters" asp-for="TransferData.NewRecipientSubmitter">
-                </select>
-
-                <br />
-                <br />
-                <div>Transfer Linked Applications</div><br />
-                <input type="checkbox" value="T01" /> T01<br />
-                <input type="checkbox" value="L01" /> L01<br />
-                <br />
-
-                <input type="submit" class="btn" asp-page-handler="TransferApplication" value="Confirm" />
-            </div>
-        </section>
-
-        <section id="cancelDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
-            <header class="modal-header">
-                <h2 class="modal-title">Cancel Application - <span id="cancelKeyLabel"></span></h2>
-            </header>
-            <div class="modal-body">
-                <input id="cancelEnfSrv" type="hidden" asp-for="CancelData.Appl_EnfSrv_Cd" />
-                <input id="cancelCntrlCd" type="hidden" asp-for="CancelData.Appl_CtrlCd" />
-
-                <select asp-for="CancelData.ReasonCode">
-                    <option value=""></option>
-                    <option value="R1">Reason 1</option>
-                    <option value="R2">Reason 2</option>
-                    <option value="R3">Reason 3</option>
-                </select>
-                <div><strong>Other</strong><textarea asp-for="CancelData.ReasonDescription"></textarea></div>
-
-                <input type="submit" class="btn" asp-page-handler="CancelApplication" value="Confirm" />
-            </div>
-        </section>
+        @await Html.PartialAsync("~/Pages/Applications/_CancelDialog.cshtml", Model)
 
     </form>
 

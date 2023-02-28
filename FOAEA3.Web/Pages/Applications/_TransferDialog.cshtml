@@ -1,0 +1,30 @@
+﻿@model FOAEA3.Web.Pages.Applications.InterceptionDashboardModel
+
+<section id="transferDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+    <header class="modal-header">
+        <h2 class="modal-title">Transfer Application - <span id="transferKeyLabel"></span></h2>
+    </header>
+    <div class="modal-body">
+        <input id="transferEnfSrv" type="hidden" asp-for="TransferData.Appl_EnfSrv_Cd" />
+        <input id="transferCntrlCd" type="hidden" asp-for="TransferData.Appl_CtrlCd" />
+
+        <label>Select Office</label><select id="office" asp-for="TransferData.Office">
+            @foreach (var enfOffice in Model.EnfOffices)
+            {
+                <option value="@enfOffice.EnfOff_City_LocCd">@enfOffice.EnfOff_Nme</option>
+            }
+        </select>
+        <br />
+        <label>Select Recipient</label><select id="transferSubmitters" asp-for="TransferData.NewRecipientSubmitter">
+        </select>
+
+        <br />
+        <br />
+        <div>Transfer Linked Applications</div><br />
+        <input type="checkbox" value="T01" /> T01<br />
+        <input type="checkbox" value="L01" /> L01<br />
+        <br />
+
+        <input type="submit" class="btn" asp-page-handler="TransferApplication" value="Confirm" />
+    </div>
+</section>

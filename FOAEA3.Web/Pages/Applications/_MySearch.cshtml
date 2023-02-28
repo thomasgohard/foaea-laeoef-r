@@ -1,0 +1,73 @@
+﻿@model FOAEA3.Web.Pages.Applications.InterceptionDashboardModel
+
+<summary>My Search</summary>
+<div class="row">
+    <div class="col-md-4 p-0">
+        <div id="mySearch_LastName" class="form-group multiColGroup mySearchControl">
+            <label for="item1my" class="text-left multiColLabel">Last Name</label>
+            <input type="text" class="form-control multiColControl" id="item1my" asp-for="MySearchCriteria.LastName">
+        </div>
+        <div id="mySearch_MiddleName" class="form-group multiColGroup mySearchControl">
+            <label for="item2my" class="text-left multiColLabel">Middle Name</label>
+            <input type="text" class="form-control multiColControl" id="item2my" asp-for="MySearchCriteria.MiddleName">
+        </div>
+        <div id="mySearch_FirstName" class="form-group multiColGroup mySearchControl">
+            <label for="item3my" class="text-left multiColLabel">First Name</label>
+            <input type="text" class="form-control multiColControl" id="item3my" asp-for="MySearchCriteria.FirstName">
+        </div>
+        <div id="mySearch_EnfRefSource" class="form-group multiColGroup mySearchControl">
+            <label for="item4my" class="text-left multiColLabel">Enf Ref Src #</label>
+            <input type="text" class="form-control multiColControl" id="item4my" asp-for="MySearchCriteria.EnfSourceRefNumber">
+        </div>
+        <div id="mySearch_State" class="form-group multiColGroup mySearchControl">
+            <label for="item5my" class="text-left multiColLabel">State</label>
+            <input type="text" class="form-control multiColControl" id="item5my" asp-for="MySearchCriteria.State">
+        </div>
+        <div id="mySearch_SIN" class="form-group multiColGroup mySearchControl">
+            <label for="item6my" class="text-left multiColLabel">SIN</label>
+            <input type="text" class="form-control multiColControl" id="item6my" asp-for="MySearchCriteria.SIN">
+        </div>
+        <div id="mySearch_ControlCode" class="form-group multiColGroup mySearchControl">
+            <label for="item7my" class="text-left multiColLabel">Control Code</label>
+            <input type="text" class="form-control multiColControl" id="item7my" asp-for="MySearchCriteria.ControlCode">
+        </div>
+        <div id="mySearch_JusticeNo" class="form-group multiColGroup mySearchControl">
+            <label for="item8my" class="text-left multiColLabel">Justice #</label>
+            <input type="text" class="form-control multiColControl" id="item8my" asp-for="MySearchCriteria.JusticeNumber">
+        </div>
+        <div id="mySearch_Status" class="form-group multiColGroup mySearchControl">
+            <label for="item9my" class="text-left multiColLabel">Status</label>
+            <input type="text" class="form-control multiColControl" id="item9my" asp-for="MySearchCriteria.Status">
+        </div>
+
+        <div id="mySearch_ReceiptDateRangeFrom" class="form-group multiColGroup mySearchControl">
+            <label for="item11my" class="text-left multiColLabelLong">Receipt Date - From</label>
+            <input type="date" class="form-control multiColControl" id="item11my" asp-for="MySearchCriteria.ReceiptDateFrom">
+        </div>
+        <div id="mySearch_ReceiptDateRangeTo" class="form-group multiColGroup mySearchControl">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item12my" class="text-left multiColLabelLong">Receipt Date - To</label>
+            <input type="date" class="form-control multiColControl" id="item12my" asp-for="MySearchCriteria.ReceiptDateTo">
+        </div>
+        <div id="mySearch_ExpiryDateRangeFrom" class="form-group multiColGroup mySearchControl">
+            <label for="item13my" class="text-left multiColLabelLong">Expiry Date - From</label>
+            <input type="date" class="form-control multiColControl" id="item13my" asp-for="MySearchCriteria.ExpiryDateFrom">
+        </div>
+        <div id="mySearch_ExpiryDateRangeTo" class="form-group multiColGroup mySearchControl">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item14my" class="text-left multiColLabelLong">Expiry Date - To</label>
+            <input type="date" class="form-control multiColControl" id="item14my" asp-for="MySearchCriteria.ExpiryDateTo">
+        </div>
+        <div id="mySearch_DateOfBirthRangeFrom" class="form-group multiColGroup mySearchControl">
+            <label for="item15my" class="text-left multiColLabelLong">Date of Birth - From</label>
+            <input type="date" class="form-control multiColControl" id="item15my" asp-for="MySearchCriteria.DateOfBirthFrom">
+        </div>
+        <div id="mySearch_DateOfBirthRangeTo" class="form-group multiColGroup mySearchControl">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item16my" class="text-left multiColLabelLong">Date of Birth - To</label>
+            <input type="date" class="form-control multiColControl" id="item16my" asp-for="MySearchCriteria.DateOfBirthTo">
+        </div>
+
+        <div><input type="submit" value="Search" asp-page-handler="MySearch" /></div>
+    </div>
+</div>

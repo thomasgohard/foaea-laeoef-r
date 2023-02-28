@@ -127,9 +127,16 @@
         </div>
     </footer>
 
-    <script src="~/wet-boew/js/jquery/2.2.4/jquery.js"></script>
-    <script src="~/wet-boew/js/wet-boew.js"></script>
-    <script src="~/js/site.js"></script>
+    <environment exclude="Production">
+        <script src="~/wet-boew/js/jquery/3.6.3/jquery.js"></script>
+        <script src="~/wet-boew/js/wet-boew.js"></script>
+        <script src="~/js/site.js"></script>
+    </environment>
+    <environment include="Production">
+        <script src="~/wet-boew/js/jquery/3.6.3/jquery.min.js"></script>
+        <script src="~/wet-boew/js/wet-boew.min.js"></script>
+        <script src="~/js/site.min.js"></script>
+    </environment>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

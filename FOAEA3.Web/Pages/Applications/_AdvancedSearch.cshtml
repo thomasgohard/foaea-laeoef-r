@@ -1,0 +1,117 @@
+﻿@model FOAEA3.Web.Pages.Applications.InterceptionDashboardModel
+
+<summary>Advanced Search</summary>
+<div class="row">
+    <div class="col-md-4 p-0">
+        <div class="form-group multiColGroup">
+            <input id="chkLastName" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item1" class="text-left multiColLabel">Last Name</label>
+            <input type="text" class="form-control multiColControl" id="item1" asp-for="SearchCriteria.LastName">
+        </div>
+        <div class="form-group multiColGroup">
+            <input id="chkMiddleName" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item2" class="text-left multiColLabel">Middle Name</label>
+            <input type="text" class="form-control multiColControl" id="item2" asp-for="SearchCriteria.MiddleName">
+        </div>
+        <div class="form-group multiColGroup">
+            <input id="chkFirstName" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item3" class="text-left multiColLabel">First Name</label>
+            <input type="text" class="form-control multiColControl" id="item3" asp-for="SearchCriteria.FirstName">
+        </div>
+        <div class="form-group multiColGroup">
+            <input id="chkEnfRefSource" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item4" class="text-left multiColLabel">Enf Ref Src #</label>
+            <input type="text" class="form-control multiColControl" id="item4" asp-for="SearchCriteria.EnfSourceRefNumber">
+        </div>
+        <div class="form-group" style="padding-left: 3px !important; white-space:nowrap;">
+            <input id="chkState" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item5" class="text-left multiColLabel">State</label>
+            <select class="form-control multiColControl" asp-for="SearchCriteria.State">
+                @{
+                    <option value="">All</option>
+                    if (Model.LifeStates is not null)
+                    {
+                        foreach (var state in Model.LifeStates)
+                        {
+                            <option value="@state.AppLiSt_Cd">@state.Description</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div><input type="submit" id="advancedSearch" value="Search" asp-page-handler="AdvancedSearch" /></div>
+    </div>
+    <div class="col-md-4 p-0">
+        <div class="form-group">
+            <input id="chkSIN" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item6" class="text-left multiColLabel">SIN</label>
+            <input type="text" class="form-control multiColControlShort" id="item6" asp-for="SearchCriteria.SIN">
+        </div>
+        <div class="form-group">
+            <input id="chkControlCode" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item7" class="text-left multiColLabel">Control Code</label>
+            <input type="text" class="form-control multiColControlShort" id="item7" asp-for="SearchCriteria.ControlCode">
+        </div>
+        <div class="form-group">
+            <input id="chkJusticeNo" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item8" class="text-left multiColLabel">Justice #</label>
+            <input type="text" class="form-control multiColControlShort" id="item8" asp-for="SearchCriteria.JusticeNumber">
+        </div>
+        <div class="form-group">
+            <input id="chkStatus" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item9" class="text-left multiColLabel">Status</label>
+            <select class="form-control multiColControlShort" asp-for="SearchCriteria.Status">
+                <option value="">All</option>
+                <option value="A">Active</option>
+                <option value="C">Complete</option>
+                <option value="I">Inactive</option>
+                <option value="J">Rejected</option>
+                <option value="P">Processing</option>
+                <option value="X">Cancelled</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item10" class="text-left multiColLabel">Category</label>
+            <select class="form-control multiColControlShort" asp-for="SearchCriteria.Category">
+                <option value="">All</option>
+                <option value="T01">Trace and Locate</option>
+                <option value="I01">Garnishment</option>
+                <option value="L01">Licence Denial</option>
+                <option value="L03">Licence Denial Termination</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 p-0">
+        <div class="form-group">
+            <input id="chkReceiptDateRange" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item11" class="text-left multiColLabelLong">Receipt Date - From</label>
+            <input type="date" class="form-control multiColControlShort" id="item11" asp-for="SearchCriteria.ReceiptDateFrom">
+        </div>
+        <div class="form-group">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item12" class="text-left multiColLabelLong">Receipt Date - To</label>
+            <input type="date" class="form-control multiColControlShort" id="item12" asp-for="SearchCriteria.ReceiptDateTo">
+        </div>
+        <div class="form-group">
+            <input id="chkExpiryDateRange" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item13" class="text-left multiColLabelLong">Expiry Date - From</label>
+            <input type="date" class="form-control multiColControlShort" id="item13" asp-for="SearchCriteria.ExpiryDateFrom">
+        </div>
+        <div class="form-group">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item14" class="text-left multiColLabelLong">Expiry Date - To</label>
+            <input type="date" class="form-control multiColControlShort" id="item14" asp-for="SearchCriteria.ExpiryDateTo">
+        </div>
+        <div class="form-group">
+            <input id="chkDateOfBirthRange" type="checkbox" class="multiColCheck" aria-label="...">
+            <label for="item15" class="text-left multiColLabelLong">Date of Birth - From</label>
+            <input type="date" class="form-control multiColControlShort" id="item15" asp-for="SearchCriteria.DateOfBirthFrom">
+        </div>
+        <div class="form-group">
+            <span class="multiColCheck">&nbsp;&nbsp;&nbsp;</span>
+            <label for="item16" class="text-left multiColLabelLong">Date of Birth - To</label>
+            <input type="date" class="form-control multiColControlShort" id="item16" asp-for="SearchCriteria.DateOfBirthTo">
+        </div>
+    </div>
+</div>

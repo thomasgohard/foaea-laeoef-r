@@ -1,0 +1,21 @@
+﻿@model FOAEA3.Web.Pages.Applications.InterceptionDashboardModel
+
+<section id="cancelDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+    <header class="modal-header">
+        <h2 class="modal-title">Cancel Application - <span id="cancelKeyLabel"></span></h2>
+    </header>
+    <div class="modal-body">
+        <input id="cancelEnfSrv" type="hidden" asp-for="CancelData.Appl_EnfSrv_Cd" />
+        <input id="cancelCntrlCd" type="hidden" asp-for="CancelData.Appl_CtrlCd" />
+
+        <select asp-for="CancelData.ReasonCode">
+            <option value=""></option>
+            <option value="R1">Reason 1</option>
+            <option value="R2">Reason 2</option>
+            <option value="R3">Reason 3</option>
+        </select>
+        <div><strong>Other</strong><textarea asp-for="CancelData.ReasonDescription"></textarea></div>
+
+        <input type="submit" class="btn" asp-page-handler="CancelApplication" value="Confirm" />
+    </div>
+</section>
