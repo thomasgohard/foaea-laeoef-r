@@ -19,10 +19,10 @@
         <div class="wb-tabs">
             <div class="tabpanels">
                 <details id="details-panel1">
-                    @await Html.PartialAsync("~/Pages/Applications/_MySearch.cshtml", Model)
+                    @await Html.PartialAsync("~/Pages/Applications/Dashboard/_MySearch.cshtml", Model)
                 </details>
                 <details id="details-panel2">
-                    @await Html.PartialAsync("~/Pages/Applications/_AdvancedSearch.cshtml", Model)
+                    @await Html.PartialAsync("~/Pages/Applications/Dashboard/_AdvancedSearch.cshtml", Model)
                 </details>
                 <details id="details-panel3">
                     <summary>Saved Searches</summary>
@@ -49,7 +49,7 @@
                 </div>
                 <div class="col-md-3">
                     <p>Reversed</p>
-                    <p><input type="submit" class="btn" value="@Model.ReversedAll" asp-page-handler="SearchSinPendingsLast7days" /></p>
+                    <p><input type="submit" class="btn" value="@Model.ReversedAll" asp-page-handler="SearchReverseAll" /></p>
                 </div>
             </div>
             <div class="row">
@@ -137,16 +137,16 @@
             </div>
         }
 
-        @await Html.PartialAsync("~/Pages/Applications/_SuspendDialog.cshtml", Model)
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_SuspendDialog.cshtml", Model)
 
-        @await Html.PartialAsync("~/Pages/Applications/_TransferDialog.cshtml", Model)
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_TransferDialog.cshtml", Model)
 
-        @await Html.PartialAsync("~/Pages/Applications/_CancelDialog.cshtml", Model)
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_CancelDialog.cshtml", Model)
 
     </form>
 
 </div>
 
 @section Scripts {
-    <script src="~/js/Applications/InterceptionDashboard.js"></script>
+    <script src="~/js/Applications/Dashboard.js"></script>
 }

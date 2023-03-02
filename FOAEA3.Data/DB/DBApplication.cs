@@ -224,6 +224,16 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetAtStateForSubmitter", parameters, FillModificationHistory);
         }
 
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Subm_SubmCd",  submCd},
+                    { "Event_Reas_Cd", eventReasonCode}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetWithEventForSubmitter", parameters, FillModificationHistory);
+        }
+
         private void FillModificationHistory(IDBHelperReader rdr, ApplicationModificationActivitySummaryData data)
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;

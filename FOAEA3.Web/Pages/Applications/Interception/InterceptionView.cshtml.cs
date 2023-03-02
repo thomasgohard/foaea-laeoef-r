@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Web.Pages.Applications
+namespace FOAEA3.Web.Pages.Applications.Interception
 {
     public class InterceptionViewModel : InterceptionFoaeaPageModel
     {

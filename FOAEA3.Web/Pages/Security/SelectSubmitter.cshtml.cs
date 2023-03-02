@@ -55,7 +55,7 @@ public class SelectSubmitterModel : FoaeaPageModel
             HttpContext.Session.SetString(SessionValue.SUBMITTER, Submitter);
             HttpContext.Session.SetString(SessionValue.ENF_SERVICE, submitter.EnfSrv_Cd);
 
-            return RedirectToPage("/Applications/InterceptionDashboard");
+            return RedirectPermanent(PageRoute.INTERCEPTION_DASHBOARD);
         }
     }
 }

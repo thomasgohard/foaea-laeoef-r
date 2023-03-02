@@ -12,6 +12,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<SubmitterData> GetSubmitterAsync(string submitterCode);
         Task<List<ApplicationModificationActivitySummaryData>> GetRecentActivity(string submitterCode, int days = 0);
         Task<List<ApplicationModificationActivitySummaryData>> GetAllAtState(string submitterCode, ApplicationState state);
+        Task<List<ApplicationModificationActivitySummaryData>> GetAllWithEvent(string submitterCode, EventCode eventReasonCode);
         Task<List<string>> GetSubmitterCodesForOffice(string service, string office);
     }
 }

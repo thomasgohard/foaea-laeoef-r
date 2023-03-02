@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Web.Pages.Applications;
+namespace FOAEA3.Web.Pages.Applications.Dashboard;
 
 public class InterceptionDashboardModel : FoaeaPageModel
 {
@@ -97,23 +97,30 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
         var changesForSubmitterToday = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 0);
         var changesForSubmitterLast7days = await apiSubmitterBroker.GetRecentActivity(currentSubmitter, days: 7);
+
         var sinPendingsForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_CONFIRMATION_PENDING_3);
         var sinNotConfirmedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_NOT_CONFIRMED_5);
-        var applApprovedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_ACCEPTED_10);
         var applCancelledForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.MANUALLY_TERMINATED_14);
         var applRejectedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_REJECTED_9);
+
+        var applApprovedForSubmitterAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C50780_APPLICATION_ACCEPTED);
+
+        var applAcceptedReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51106_APPLICATION_ACCEPTED_REVERSED);
+        var applCancelReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51108_CANCELLATION_REVERSED);
+        var applRejectionReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51107_REJECTION_REVERSED);
+        var applVariationReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51109_VARIATION_ACCEPTED_IN_ERROR_ACCEPTANCE_REVERSED);
 
         SubmittedToday = changesForSubmitterToday.Where(m => m.Appl_Create_Usr == currentSubmitter &&
                                                              m.Appl_Create_Dte.Date == DateTime.Now.Date).Count();
 
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
         SinPendingsAll = sinPendingsForSubmitterAll.Count;
-
         SinNotConfirmedAll = sinNotConfirmedForSubmitterAll.Count;
         ApprovedAll = applApprovedForSubmitterAll.Count;
         CancelledAll = applCancelledForSubmitterAll.Count;
         RejectedAll = applRejectedForSubmitterAll.Count;
-        ReversedAll = 0; // how to find this?
+        ReversedAll = applAcceptedReversalAll.Count + applCancelReversalAll.Count + applRejectionReversalAll.Count + 
+                      applVariationReversalAll.Count;
     }
 
     public IActionResult OnPostMenuSelect()
@@ -129,16 +136,22 @@ public class InterceptionDashboardModel : FoaeaPageModel
             {
                 case MenuActionChoice.Notes:
                     break;
+
                 case MenuActionChoice.ViewEvents:
-                    return Redirect($"ViewEvents/{applKey}");
+                    return Redirect(string.Format(PageRoute.VIEW_EVENTS, applKey));
+
                 case MenuActionChoice.View:
-                    return Redirect($"InterceptionView/{applKey}");
+                    return Redirect(string.Format(PageRoute.INTERCEPTION_VIEW, applKey));
+
                 case MenuActionChoice.Edit:
-                    return Redirect($"InterceptionEdit/{applKey}");
+                    return Redirect(string.Format(PageRoute.INTERCEPTION_EDIT, applKey));
+
                 case MenuActionChoice.LinkT01:
                     break;
+
                 case MenuActionChoice.LinkI01:
                     break;
+
                 case MenuActionChoice.LinkL01:
                     break;
             }
@@ -175,6 +188,25 @@ public class InterceptionDashboardModel : FoaeaPageModel
      public async Task OnPostSearchRejectedAll()
     {
         await BuildSearchResult(await GetRejectedAll());
+    }
+    
+    public async Task OnPostSearchReverseAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var applAcceptedReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51106_APPLICATION_ACCEPTED_REVERSED);
+        var applCancelReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51108_CANCELLATION_REVERSED);
+        var applRejectionReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51107_REJECTION_REVERSED);
+        var applVariationReversalAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C51109_VARIATION_ACCEPTED_IN_ERROR_ACCEPTANCE_REVERSED);
+
+        var allReversal = applAcceptedReversalAll;
+        allReversal.AddRange(applCancelReversalAll);
+        allReversal.AddRange(applRejectionReversalAll);
+        allReversal.AddRange(applVariationReversalAll);
+
+        await BuildSearchResult(allReversal);
     }
 
     public async Task<IActionResult> OnPostSuspendApplication()

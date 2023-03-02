@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Web.Pages.Applications;
+namespace FOAEA3.Web.Pages.Applications.Interception;
 
 public class InterceptionNewModel : InterceptionFoaeaPageModel
 {
@@ -69,7 +69,7 @@ public class InterceptionNewModel : InterceptionFoaeaPageModel
         if (!InterceptionApplication.HldbCnd.Any())
             InterceptionApplication.HldbCnd.Add(new HoldbackConditionData());
 
-        return RedirectToPagePermanent("InterceptionDashboard");
+        return RedirectPermanent(PageRoute.INTERCEPTION_DASHBOARD);
     }
 
 }
