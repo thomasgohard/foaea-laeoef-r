@@ -1,12 +1,14 @@
 ﻿@page "{id}"
 
+@using FOAEA3.Web.Helpers
+
 @model FOAEA3.Web.Pages.Applications.ViewEventsModel
 @{
 }
 
 <p>View Events</p>
 
-@await Html.PartialAsync("~/Pages/Shared/_MessagesPartial.cshtml", Model)
+@await Html.PartialAsync(PageRoute.MESSAGES, Model)
 
 <div class="row">
     <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">

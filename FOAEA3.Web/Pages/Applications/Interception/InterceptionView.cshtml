@@ -8,12 +8,12 @@
     ViewData[PageModeValue.PAGE_MODE] = PageModeValue.VIEW;
 }
 
-<p>Interception (Create)</p>
+<p>Interception (View)</p>
 
-@await Html.PartialAsync("~/Pages/Shared/_MessagesPartial.cshtml", Model)
+@await Html.PartialAsync(PageRoute.MESSAGES, Model)
 
 <form method="post" class="form-inline">
-    @await Html.PartialAsync("~/Pages/Applications/_InterceptionData.cshtml", Model, ViewData)
+    @await Html.PartialAsync(PageRoute.INTERCEPTION_DATA, Model, ViewData)
 </form>
 
 @section Scripts {
