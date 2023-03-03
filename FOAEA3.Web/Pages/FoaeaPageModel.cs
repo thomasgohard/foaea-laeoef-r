@@ -5,6 +5,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Web.Helpers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +128,18 @@ public class FoaeaPageModel : PageModel
             result += $" [{info.Field}]";
 
         return result;
+    }
+
+    public IActionResult OnPostLogout()
+    {
+        HttpContext.Session.SetString(SessionValue.TOKEN, string.Empty);
+        HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, string.Empty);
+
+        HttpContext.Session.SetString(SessionValue.USER_NAME, string.Empty);
+        HttpContext.Session.SetString(SessionValue.SUBMITTER, string.Empty);
+        HttpContext.Session.SetString(SessionValue.ENF_SERVICE, string.Empty);
+
+        return RedirectPermanent(PageRoute.LOGIN);       
     }
 
     protected void LoadReferenceData()

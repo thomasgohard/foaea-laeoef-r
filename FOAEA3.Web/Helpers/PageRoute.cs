@@ -8,5 +8,7 @@
         public const string INTERCEPTION_NEW = "~/Applications/Interception/InterceptionNew";
 
         public const string VIEW_EVENTS = "~/Applications/ViewEvents/{0}";
+
+        public const string LOGIN = "~/Security/Login";
     }
 }

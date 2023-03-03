@@ -28,6 +28,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public int CancelledAll { get; set; }
     public int RejectedAll { get; set; }
     public int ReversedAll { get; set; }
+    public int SubmittedVariationsAll { get; set; }
 
     [BindProperty]
     public ApplicationSearchCriteriaData SearchCriteria { get; set; }
@@ -102,6 +103,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var sinNotConfirmedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.SIN_NOT_CONFIRMED_5);
         var applCancelledForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.MANUALLY_TERMINATED_14);
         var applRejectedForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_REJECTED_9);
+        var applSubmittedVariationsAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
 
         var applApprovedForSubmitterAll = await apiSubmitterBroker.GetAllWithEvent(currentSubmitter, EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -116,6 +118,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
         SinPendingsLast7days = changesForSubmitterLast7days.Where(m => m.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3).Count();
         SinPendingsAll = sinPendingsForSubmitterAll.Count;
         SinNotConfirmedAll = sinNotConfirmedForSubmitterAll.Count;
+        SubmittedVariationsAll = applSubmittedVariationsAll.Count;
         ApprovedAll = applApprovedForSubmitterAll.Count;
         CancelledAll = applCancelledForSubmitterAll.Count;
         RejectedAll = applRejectedForSubmitterAll.Count;
@@ -185,9 +188,14 @@ public class InterceptionDashboardModel : FoaeaPageModel
         await BuildSearchResult(await GetCancelledAll());
     }
 
-     public async Task OnPostSearchRejectedAll()
+    public async Task OnPostSearchRejectedAll()
     {
         await BuildSearchResult(await GetRejectedAll());
+    }
+    
+    public async Task OnPostSearchSubmittedVariationsAll()
+    {
+        await BuildSearchResult(await GetSubmittedVariationsAll());
     }
     
     public async Task OnPostSearchReverseAll()
@@ -366,6 +374,15 @@ public class InterceptionDashboardModel : FoaeaPageModel
 
         var changesForSubmitterAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.APPLICATION_REJECTED_9);
         return changesForSubmitterAll.ToList();
+    }
+
+    private async Task<List<ApplicationModificationActivitySummaryData>> GetSubmittedVariationsAll()
+    {
+        string currentSubmitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+        var apiSubmitterBroker = new SubmitterAPIBroker(BaseAPIs);
+
+        var changesSubmittedVariationsAll = await apiSubmitterBroker.GetAllAtState(currentSubmitter, ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19);
+        return changesSubmittedVariationsAll.ToList();
     }
 
     private async Task BuildSearchResult(List<ApplicationModificationActivitySummaryData> modifiedFiles)

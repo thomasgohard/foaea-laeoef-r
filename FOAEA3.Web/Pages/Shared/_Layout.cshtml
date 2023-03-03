@@ -41,9 +41,11 @@
                         </li>
                         @if (isLoggedIn)
                         {
-                        <li class="list-inline">
-                                <span>Logout</span>
-                        </li>
+                            <li class="list-inline">
+                                <span>
+                                    <form method="post"><input type="submit" value="Logout" asp-page-handler="Logout" /></form>
+                                </span>
+                            </li>
                         }
                     </ul>
                 </div>

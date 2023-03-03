@@ -70,6 +70,12 @@
                     <p><input type="submit" class="btn" value="@Model.RejectedAll" asp-page-handler="SearchRejectedAll" /></p>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <p>Submitted Variations</p>
+                    <p><input type="submit" class="btn" value="@Model.SubmittedVariationsAll" asp-page-handler="SearchSubmittedVariationsAll" /></p>
+                </div>
+            </div>
         }
     </form>
     <br />
@@ -148,5 +154,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/Applications/Dashboard.js"></script>
+    <script src="~/js/Applications/InterceptionDashboard.js"></script>
 }
