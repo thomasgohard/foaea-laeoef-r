@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
+using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
@@ -25,6 +26,50 @@ public class IncomingFederalTracingManager
         DB = repositories;
 
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
+    }
+
+    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingData, string flatFileName)
+    {
+        var result = new MessageDataList();
+
+        var fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+
+        //await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+
+       // bool isValid = true;
+
+        var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingData, out string error);
+        var tracingFile = tracingFileData.CRATraceIn;
+
+        return new List<string>();
+    }
+
+    private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)
+    {
+        error = string.Empty;
+
+        FedTracingFinancialFileBase result;
+        try
+        {
+            result = JsonConvert.DeserializeObject<FedTracingFinancialFileBase>(sourceTracingData);
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                var single = JsonConvert.DeserializeObject<FedTracingFinancialFileBase>(sourceTracingData);
+
+                result = new FedTracingFinancialFileBase();
+            }
+            catch (Exception ee)
+            {
+                error = ee.Message;
+                result = new FedTracingFinancialFileBase();
+            }
+        }
+
+        return result;
     }
 
     public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)

@@ -14,7 +14,37 @@ namespace FileBroker.Business.Tests.InMemory
 
         public MessageDataList Messages => throw new NotImplementedException();
 
+        public Task<int> CreateTraceResponseFinancial(TraceFinancialResponseData data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> CreateTraceResponseFinancialDetail(TraceFinancialResponseDetailData data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> CreateTraceResponseFinancialDetailValue(TraceFinancialResponseDetailValueData data)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DataList<TraceFinancialResponseDetailValueData>> GetTraceResponseFinancialDetailValues(int traceResponseFinancialDetailId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
         {
             throw new NotImplementedException();
         }
@@ -30,6 +60,11 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public Task MarkResponsesAsViewedAsync(string enfService)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateTraceResponseFinancial(TraceFinancialResponseData data)
         {
             throw new NotImplementedException();
         }

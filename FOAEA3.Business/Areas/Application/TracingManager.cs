@@ -461,6 +461,39 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.TraceResponseTable.GetTraceResponseForApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
         }
 
+        public async Task<DataList<TraceFinancialResponseData>> GetTraceFinancialResultsAsync()
+        {
+            var data = await DB.TraceResponseTable.GetTraceResponseFinancialsForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            await GetFinancialDetails(data);
+
+            return data;
+        }
+
+        private async Task GetFinancialDetails(DataList<TraceFinancialResponseData> data)
+        {
+            foreach (var finData in data.Items)
+            {
+                var details = await DB.TraceResponseTable.GetTraceResponseFinancialDetails(finData.TrcRspFin_Id);
+                data.Messages.AddRange(details.Messages);
+
+                await GetFinancialDetailValues(details, data);
+
+                finData.TraceFinancialDetails = details.Items;                
+            }
+        }
+
+        private async Task GetFinancialDetailValues(DataList<TraceFinancialResponseDetailData> details, DataList<TraceFinancialResponseData> data)
+        {
+            foreach (var detail in details.Items)
+            {
+                var values = await DB.TraceResponseTable.GetTraceResponseFinancialDetailValues(detail.TrcRspFin_Dtl_Id);
+                data.Messages.AddRange(values.Messages);
+
+                detail.TraceDetailValues = values.Items;
+            }
+        }
+
         public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEventsAsync(string enfSrv_Cd, string cycle)
         {
             return await EventManager.GetRequestedTRCINTracingEventsAsync(enfSrv_Cd, cycle);

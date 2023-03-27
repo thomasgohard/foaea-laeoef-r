@@ -36,7 +36,7 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    await federalFileManager.ProcessNewFileAsync(newFile);
+                    await federalFileManager.ProcessNewFileAsync(newFile, errors);
                     if (federalFileManager.Errors.Any())
                         foreach (var error in federalFileManager.Errors)
                             await db.ErrorTrackingTable.MessageBrokerErrorAsync("TRCIN", newFile, new Exception(error), displayExceptionError: true);

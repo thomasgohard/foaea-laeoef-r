@@ -37,6 +37,110 @@ namespace FOAEA3.Data.DB
             await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
         }
 
+        public async Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"EnfSrv_Cd", applEnfSrvCd },
+                    {"CtrlCd", applCtrlCd }
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseData>("TrcRspFin_SelectForAppl", parameters, FillTraceFinancialResultDataFromReader);
+
+            return new DataList<TraceFinancialResponseData>(data, MainDB.LastError);
+        }
+
+        public async Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"TrcRspFin_Id", traceResponseFinancialId}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseDetailData>("TrcRspFin_Dtl_SelectForTrcRspFin", parameters, FillTraceFinancialDetailResultDataFromReader);
+
+            return new DataList<TraceFinancialResponseDetailData>(data, MainDB.LastError);
+        }
+
+        public async Task<DataList<TraceFinancialResponseDetailValueData>> GetTraceResponseFinancialDetailValues(int traceResponseFinancialDetailId)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"TrcRspFin_Dtl_Id", traceResponseFinancialDetailId}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseDetailValueData>("TrcRspFin_Dtl_Value_SelectForTrcRspFin_Dtl", parameters, FillTraceFinancialDetailValueResultDataFromReader);
+
+            return new DataList<TraceFinancialResponseDetailValueData>(data, MainDB.LastError);
+        }
+
+        public async Task<int> CreateTraceResponseFinancial(TraceFinancialResponseData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Appl_EnfSrv_Cd",  data.Appl_EnfSrv_Cd},
+                    { "Appl_CtrlCd",  data.Appl_CtrlCd},
+                    { "EnfSrv_Cd",  data.EnfSrv_Cd},
+                    { "TrcRsp_Rcpt_Dte",  data.TrcRsp_Rcpt_Dte},
+                    { "TrcRsp_SeqNr",  data.TrcRsp_SeqNr},
+                    { "TrcSt_Cd",  data.TrcSt_Cd},
+                    { "TrcRsp_Trace_CyclNr",  data.TrcRsp_Trace_CyclNr},
+                    { "ActvSt_Cd",  data.ActvSt_Cd},
+                    { "Prcs_RecType",  data.Prcs_RecType},                   
+                    { "SIN",  data.Sin},
+                    { "SIN_XRef",  data.SinXref}
+                };
+
+            if (data.TrcRsp_RcptViewed_Dte is not null)
+                parameters.Add("TrcRsp_RcptViewed_Dte", data.TrcRsp_RcptViewed_Dte);
+
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");            
+        }
+
+        public async Task<int> CreateTraceResponseFinancialDetail(TraceFinancialResponseDetailData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "TrcRspFin_Id",  data.TrcRspFin_Id},
+                    { "FiscalYear",  data.FiscalYear},
+                    { "TaxForm",  data.TaxForm}
+                };
+
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Dtl_Insert", parameters, "TrcRspFin_Dtl_Id");
+        }
+
+        public async Task<int> CreateTraceResponseFinancialDetailValue(TraceFinancialResponseDetailValueData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "TrcRspFin_Dtl_Id",  data.TrcRspFin_Dtl_Id},
+                    { "FieldName",  data.FieldName},
+                    { "FieldValue",  data.FieldValue}
+                };
+
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Dtl_Value_Insert", parameters, "TrcRspFin_Dtl_Value_Id");
+        }
+
+        public async Task UpdateTraceResponseFinancial(TraceFinancialResponseData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "TrcRspFin_Id",  data.TrcRspFin_Id},
+                    { "Appl_EnfSrv_Cd",  data.Appl_EnfSrv_Cd},
+                    { "Appl_CtrlCd",  data.Appl_CtrlCd},
+                    { "EnfSrv_Cd",  data.EnfSrv_Cd},
+                    { "TrcRsp_Rcpt_Dte",  data.TrcRsp_Rcpt_Dte},
+                    { "TrcRsp_SeqNr",  data.TrcRsp_SeqNr},
+                    { "TrcSt_Cd",  data.TrcSt_Cd},
+                    { "TrcRsp_Trace_CyclNr",  data.TrcRsp_Trace_CyclNr},
+                    { "ActvSt_Cd",  data.ActvSt_Cd},
+                    { "Prcs_RecType",  data.Prcs_RecType},
+                    { "SIN",  data.Sin},
+                    { "SIN_XRef",  data.SinXref}
+                };
+
+            if (data.TrcRsp_RcptViewed_Dte is not null)
+                parameters.Add("TrcRsp_RcptViewed_Dte", data.TrcRsp_RcptViewed_Dte);
+
+            await MainDB.ExecProcAsync("TrcRspFin_Update", parameters);
+        }
+
         public async Task MarkResponsesAsViewedAsync(string enfService)
         {
             var parameters = new Dictionary<string, object>
@@ -45,7 +149,6 @@ namespace FOAEA3.Data.DB
             };
 
             await MainDB.ExecProcAsync("TrcAPPTraceUpdate", parameters);
-
         }
 
         public async Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
@@ -91,6 +194,39 @@ namespace FOAEA3.Data.DB
             data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
             data.Address = rdr["Address"] as string;
             data.Originator = rdr["originator"] as string;
+        }
+
+        private void FillTraceFinancialResultDataFromReader(IDBHelperReader rdr, TraceFinancialResponseData data)
+        {
+            data.TrcRspFin_Id = (int)rdr["TrcRspFin_Id"];
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.EnfSrv_Cd = rdr["EnfSrv_Cd"] as string;
+            data.TrcRsp_Rcpt_Dte = (DateTime)rdr["TrcRsp_Rcpt_Dte"];
+            data.TrcRsp_SeqNr = (int)rdr["TrcRsp_SeqNr"];
+            data.TrcSt_Cd = rdr["TrcSt_Cd"] as string;
+            data.TrcRsp_Trace_CyclNr = (short)rdr["TrcRsp_Trace_CyclNr"];
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Prcs_RecType = rdr["Prcs_RecType"] as int?; // can be null 
+            data.TrcRsp_RcptViewed_Dte = rdr["TrcRsp_RcptViewed_Dte"] as DateTime?; // can be null 
+            data.Sin = rdr["SIN"] as string;
+            data.SinXref = rdr["SIN_XRef"] as string; // can be null 
+        }
+
+        private void FillTraceFinancialDetailResultDataFromReader(IDBHelperReader rdr, TraceFinancialResponseDetailData data)
+        {
+            data.TrcRspFin_Dtl_Id = (int)rdr["TrcRspFin_Dtl_Id"];
+            data.TrcRspFin_Id = (int)rdr["TrcRspFin_Id"];
+            data.FiscalYear = (short) rdr["FiscalYear"];
+            data.TaxForm = rdr["TaxForm"] as string;
+        }
+
+        private void FillTraceFinancialDetailValueResultDataFromReader(IDBHelperReader rdr, TraceFinancialResponseDetailValueData data)
+        {
+            data.TrcRspFin_Dtl_Value_Id = (int)rdr["TrcRspFin_Dtl_Value_Id"];
+            data.TrcRspFin_Dtl_Id = (int)rdr["TrcRspFin_Dtl_Id"];
+            data.FieldName = rdr["FieldName"] as string;
+            data.FieldValue = rdr["FieldValue"] as string;
         }
 
     }

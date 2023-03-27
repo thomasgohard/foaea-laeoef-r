@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 		<Folder Include="Pages\Applications\LicenceDenial\" />
+		<Folder Include="Pages\Administration\" />
 		<Folder Include="wwwroot\lib\" />
 	</ItemGroup>
 

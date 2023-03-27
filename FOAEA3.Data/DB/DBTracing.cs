@@ -21,17 +21,31 @@ namespace FOAEA3.Data.DB
 
         public async Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-
             var parameters = new Dictionary<string, object>
                     {
                         {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd},
                         {"Appl_CtrlCd", appl_CtrlCd }
                     };
 
-            List<TracingApplicationData> data = await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader);
+            TracingApplicationData traceData = (await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader))
+                                                .FirstOrDefault();
 
-            return data.FirstOrDefault(); // returns null if no data found
+            TracingApplicationData financialData = (await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TraceFin_SelectForAppl", parameters, FillDataFromReader))
+                                                .FirstOrDefault();
 
+            if ((traceData is not null) && (financialData is not null))
+            {
+                traceData.EntityType = financialData.EntityType;
+                traceData.TraceFin_Id = financialData.TraceFin_Id;
+
+                var detailsParameters = new Dictionary<string, object> {
+                    { "TraceFin_Id", traceData.TraceFin_Id }
+                };
+
+                traceData.Financials = await MainDB.GetDataFromStoredProcAsync<TraceFinancialDetailData>("TraceFin_Dtl_Select", detailsParameters, FillFinancialDetailDataFromReader);
+            }
+
+            return traceData;
         }
 
         public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
@@ -42,8 +56,7 @@ namespace FOAEA3.Data.DB
                 {"cycle", cycle}
             };
 
-            return await MainDB.GetDataFromStoredProcAsync<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters,
-                                                                        FillTraceCycleQuantityDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters, FillTraceCycleQuantityDataFromReader);
         }
 
         public async Task CreateTracingDataAsync(TracingApplicationData data)
@@ -240,17 +253,31 @@ namespace FOAEA3.Data.DB
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
-            data.Trace_Child_Text = rdr["Trace_Child_Text"] as string; // can be null 
-            data.Trace_Breach_Text = rdr["Trace_Breach_Text"] as string; // can be null 
-            data.Trace_ReasGround_Text = rdr["Trace_ReasGround_Text"] as string; // can be null 
-            data.FamPro_Cd = rdr["FamPro_Cd"] as string;
-            data.Statute_Cd = rdr["Statute_Cd"] as string; // can be null 
             data.Trace_Cycl_Qty = (int)rdr["Trace_Cycl_Qty"];
             data.Trace_LstCyclStr_Dte = (DateTime)rdr["Trace_LstCyclStr_Dte"];
             data.Trace_LstCyclCmp_Dte = rdr["Trace_LstCyclCmp_Dte"] as DateTime?; // can be null 
             data.Trace_LiSt_Cd = (short)rdr["Trace_LiSt_Cd"];
-            data.InfoBank_Cd = rdr["InfoBank_Cd"] as string; // can be null 
+
+            if (rdr.ColumnExists("Trace_Child_Text")) data.Trace_Child_Text = rdr["Trace_Child_Text"] as string; // can be null 
+            if (rdr.ColumnExists("Trace_Breach_Text")) data.Trace_Breach_Text = rdr["Trace_Breach_Text"] as string; // can be null 
+            if (rdr.ColumnExists("Trace_ReasGround_Text")) data.Trace_ReasGround_Text = rdr["Trace_ReasGround_Text"] as string; // can be null 
+            if (rdr.ColumnExists("FamPro_Cd")) data.FamPro_Cd = rdr["FamPro_Cd"] as string;
+            if (rdr.ColumnExists("Statute_Cd")) data.Statute_Cd = rdr["Statute_Cd"] as string; // can be null 
+            if (rdr.ColumnExists("InfoBank_Cd")) data.InfoBank_Cd = rdr["InfoBank_Cd"] as string; // can be null 
+
+            if (rdr.ColumnExists("TraceFin_Id")) data.TraceFin_Id = (int)rdr["TraceFin_Id"];
+            if (rdr.ColumnExists("EntityType")) data.EntityType = rdr["EntityType"] as string;
+            if (rdr.ColumnExists("RequestedSIN")) data.RequestedSIN = (bool) rdr["RequestedSIN"];
         }
+
+        private void FillFinancialDetailDataFromReader(IDBHelperReader rdr, TraceFinancialDetailData data)
+        {
+            data.TraceFin_Dtl_Id = (int)rdr["TraceFin_Dtl_Id"];
+            data.TraceFin_Id = (int)rdr["TraceFin_Id"];
+            data.FiscalYear = (short)rdr["FiscalYear"];
+            data.TaxForm = rdr["TaxForm"] as string;
+        }
+
 
     }
 }
