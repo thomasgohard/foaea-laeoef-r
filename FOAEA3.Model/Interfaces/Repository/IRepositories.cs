@@ -18,6 +18,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         ISubmitterRepository SubmitterTable { get; }
         IEnfOffRepository EnfOffTable { get; }
         IEnfSrvRepository EnfSrvTable { get; }
+        IEnfSrcRepository EnfSrcTable { get; }
         IProvinceRepository ProvinceTable { get; }
         IInterceptionRepository InterceptionTable { get; }
         ISubjectRepository SubjectTable { get; }

@@ -32,12 +32,32 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<ApplicationData>> GetApplicationsForAutomationAsync(string appl_EnfSrv_Cd, string medium_Cd, ApplicationState appLiSt_Cd, string appCtgy_Cd, string actvSt_Cd)
         {
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> GetApplLocalConfirmedSINExistsAsync(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ConfirmedSinData>> GetConfirmedSinByDebtorId(string debtorId, bool isActiveOnly)
         {
             throw new NotImplementedException();
         }

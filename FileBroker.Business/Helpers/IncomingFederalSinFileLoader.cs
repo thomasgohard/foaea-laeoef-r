@@ -27,15 +27,15 @@ public class IncomingFederalSinFileLoader
                 switch (recType)
                 {
                     case "01":
-                        FlatFileSpecHelper.ExtractRecTypeSingle<FedSin_RecType01>(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
                         break;
 
                     case "02":
-                        FlatFileSpecHelper.ExtractRecTypeMultiple<FedSin_RecType02>(fileData.SININ02, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.SININ02, flatFileLine, specs, recType, ref error);
                         break;
 
                     case "99":
-                        FlatFileSpecHelper.ExtractRecTypeSingle<FedSin_RecType99>(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
                         break;
                 }
             }

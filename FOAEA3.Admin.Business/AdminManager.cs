@@ -55,10 +55,21 @@ namespace FOAEA3.Admin.Business
                 switch (applManager.GetCategory())
                 {
                     case "I01":
+                        var interceptionManager = new InterceptionManager(DB, null, config);
+                        await interceptionManager.SetCurrentUserAsync(user);
+                        await interceptionManager.LoadApplicationAsync(enfService, controlCode);
+                        interceptionManager.InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
+                        interceptionManager.InterceptionApplication.Appl_SIN_Cnfrmd_Ind = 1;
+                        interceptionManager.InterceptionApplication.Appl_LastUpdate_Usr = "SYSTEM";
+                        interceptionManager.InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+                        await interceptionManager.ApplySINconfirmation();
+
                         break;
 
                     case "T01":
                         var tracingManager = new TracingManager(DB, config);
+                        await tracingManager.SetCurrentUserAsync(user);
                         await tracingManager.LoadApplicationAsync(enfService, controlCode);
                         tracingManager.TracingApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         tracingManager.TracingApplication.Appl_SIN_Cnfrmd_Ind = 1;
@@ -70,9 +81,19 @@ namespace FOAEA3.Admin.Business
                         break;
 
                     case "L01":
+                        var licenceDenialManager = new LicenceDenialManager(DB, config);
+                        await licenceDenialManager.SetCurrentUserAsync(user);
+                        await licenceDenialManager.LoadApplicationAsync(enfService, controlCode);
+                        licenceDenialManager.LicenceDenialApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
+                        licenceDenialManager.LicenceDenialApplication.Appl_SIN_Cnfrmd_Ind = 1;
+                        licenceDenialManager.LicenceDenialApplication.Appl_LastUpdate_Usr = "SYSTEM";
+                        licenceDenialManager.LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
+                        await licenceDenialManager.ApplySINconfirmation();
                         break;
 
                     case "L03":
+                        // no sin confirmation for L03s
                         break;
                 }
             }

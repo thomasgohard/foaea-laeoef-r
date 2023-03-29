@@ -19,7 +19,7 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class ApplicationManager
     {
-        private readonly ApplicationData Application;
+        public readonly ApplicationData Application;
 
         public IRepositories DB { get; }
         public ApplicationEventManager EventManager { get; }
@@ -133,11 +133,14 @@ namespace FOAEA3.Business.Areas.Application
 
             if ((data != null) && (CurrentUser is not null))
             {
-
                 if (CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
                 {
                     Application.Merge(data);
                     return true;
+                }
+                else
+                {
+                    Application.Messages.AddError("Access denied!");
                 }
             }
 
@@ -342,10 +345,9 @@ namespace FOAEA3.Business.Areas.Application
             await DB.CaseManagementTable.CreateCaseManagementAsync(caseManagementData);
 
             EventManager.AddEvent(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
-
             Application.Messages.AddInformation(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
-            await UpdateApplicationAsync();
+            await UpdateApplicationNoValidationAsync();
 
         }
 
@@ -356,6 +358,27 @@ namespace FOAEA3.Business.Areas.Application
         {
             var applicationDB = DB.ApplicationTable;
             var data = await applicationDB.GetStatsProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
+            return data;
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0)
+        {
+            var applicationDB = DB.ApplicationTable;
+            var data = await applicationDB.GetApplicationRecentActivityForSubmitter(submCd, days);
+            return data;
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state)
+        {
+            var applicationDB = DB.ApplicationTable;
+            var data = await applicationDB.GetApplicationAtStateForSubmitter(submCd, state);
+            return data;
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
+        {
+            var applicationDB = DB.ApplicationTable;
+            var data = await applicationDB.GetApplicationWithEventForSubmitter(submCd, eventReasonCode);
             return data;
         }
 
@@ -464,6 +487,20 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             return result;
+        }
+
+        public async Task ApplySINconfirmation()
+        {
+            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
+
+            var sinManager = new ApplicationSINManager(Application, this);
+            await sinManager.UpdateSINChangeHistoryAsync();
+
+            foreach (var eventItem in EventManager.Events)
+                eventItem.Subm_Update_SubmCd = "SYSTEM";
+
+            await UpdateApplicationNoValidationAsync();
+
         }
 
         private static string BuildCommentsChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)

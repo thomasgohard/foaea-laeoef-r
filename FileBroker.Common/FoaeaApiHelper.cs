@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common.Brokers;
+using FOAEA3.Common.Brokers.Financials;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 
@@ -9,13 +10,13 @@ namespace FileBroker.Common
         public static APIBrokerList SetupFoaeaAPIs(ApiConfig apiRootData)
         {
             string token = "";
-            var apiApplHelper = new APIBrokerHelper(apiRootData.FoaeaApplicationRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
-                                                    currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
-            var applicationApplicationAPIs = new ApplicationAPIBroker(apiApplHelper, token);
-            var applicationEventsAPIs = new ApplicationEventAPIBroker(apiApplHelper, token);
-            var productionAuditAPIs = new ProductionAuditAPIBroker(apiApplHelper, token);
-            var loginAPIs = new LoginsAPIBroker(apiApplHelper, token);
-            var sinsAPIs = new SinAPIBroker(apiApplHelper, token);
+            var apiFoaeaHelper = new APIBrokerHelper(apiRootData.FoaeaRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
+                                                     currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
+            var applicationAPIs = new ApplicationAPIBroker(apiFoaeaHelper, token);
+            var applicationEventsAPIs = new ApplicationEventAPIBroker(apiFoaeaHelper, token);
+            var productionAuditAPIs = new ProductionAuditAPIBroker(apiFoaeaHelper, token);
+            var loginAPIs = new LoginsAPIBroker(apiFoaeaHelper, token);
+            var sinsAPIs = new SinAPIBroker(apiFoaeaHelper, token);
 
             var apiTracingHelper = new APIBrokerHelper(apiRootData.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                        currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
@@ -26,6 +27,9 @@ namespace FileBroker.Common
             var apiInterceptionHelper = new APIBrokerHelper(apiRootData.FoaeaInterceptionRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                                 currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
             var interceptionApplicationAPIs = new InterceptionApplicationAPIBroker(apiInterceptionHelper, token);
+            var financialAPIs = new FinancialAPIBroker(apiInterceptionHelper, token);
+            var controlBatchAPIs = new ControlBatchAPIBroker(apiInterceptionHelper, token);
+            var transactionAPIs = new TransactionAPIBroker(apiInterceptionHelper, token);
 
             var apiLicenceDenialHelper = new APIBrokerHelper(apiRootData.FoaeaLicenceDenialRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                              currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
@@ -36,11 +40,14 @@ namespace FileBroker.Common
 
             var foaeaApis = new APIBrokerList
             {
-                Applications = applicationApplicationAPIs,
+                Applications = applicationAPIs,
                 ApplicationEvents = applicationEventsAPIs,
                 ProductionAudits = productionAuditAPIs,
                 Accounts = loginAPIs,
                 Sins = sinsAPIs,
+                Financials = financialAPIs,
+                ControlBatches = controlBatchAPIs,
+                Transactions = transactionAPIs,
 
                 TracingApplications = tracingApplicationAPIs,
                 TracingResponses = tracingResponsesAPIs,

@@ -1,0 +1,64 @@
+﻿@page "{id}"
+
+@using FOAEA3.Web.Helpers
+
+@model FOAEA3.Web.Pages.Applications.ViewEventsModel
+@{
+}
+
+<p>View Events</p>
+
+@await Html.PartialAsync(PageRoute.MESSAGES, Model)
+
+<div class="row">
+    <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
+        <thead>
+            <tr>
+                <th style="white-space:nowrap;">Category</th>
+                <th style="white-space:nowrap;">Submitter</th>
+                <th style="white-space:nowrap;">Ctrl Code</th>
+                <th style="white-space:nowrap;">Appl_EnfSrv_Cd</th>
+                <th style="white-space:nowrap;">Recipient</th>
+                <th style="white-space:nowrap;">Date/Time</th>
+                <th style="white-space:nowrap;">Reason Code</th>
+                <th style="white-space:nowrap;">Reason Text</th>
+                <th style="white-space:nowrap;">AppLiSt_Cd</th>
+                <th style="white-space:nowrap;">Update Submitter</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.LifeStates is not null)
+                {
+                    int i = 0;
+                    foreach (var result in Model.ApplicationEvents.OrderBy(m => m.Event_Id))
+                    {
+                        var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
+                        string lifeStateDesc = $"{(int) result.AppLiSt_Cd} - {applListState?.Description}";
+                        int reasonCode = (int) (result.Event_Reas_Cd ?? 0);
+                        var thisReason = result.Event_Reas_Cd ?? FOAEA3.Model.Enums.EventCode.UNDEFINED;
+                        string reasonDesc = Model.EventCodes[thisReason].Description;
+                        if(!string.IsNullOrEmpty(result.Event_Reas_Text?.Trim()))
+                        {
+                            reasonDesc += $" ({result.Event_Reas_Text.Trim()})";
+                        }
+
+                        <tr class="gradeX">
+                            <td>@result.AppCtgy_Cd</td>
+                            <td>@result.Subm_SubmCd</td>
+                            <td>@result.Appl_CtrlCd</td>
+                            <td>@result.Appl_EnfSrv_Cd</td>
+                            <td>@result.Subm_Recpt_SubmCd</td>
+                            <td>@result.Event_TimeStamp</td>
+                            <td>@reasonCode</td>
+                            <td>@reasonDesc</td>
+                            <td>@lifeStateDesc</td>
+                            <td>@result.Subm_Update_SubmCd</td>
+                        </tr>
+                        i++;
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

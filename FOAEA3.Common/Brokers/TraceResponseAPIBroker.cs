@@ -21,6 +21,13 @@ namespace FOAEA3.Common.Brokers
                                                                                     responseData, token: Token);
         }
 
+        public async Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData)
+        {
+            string apiCall = "api/v1/traceFinancialResponses";
+            _ = await ApiHelper.PostDataAsync<TraceFinancialResponseData, TraceFinancialResponseData>(apiCall,
+                                                                                         traceFinancialResultData, token: Token);
+        }
+
         public async Task MarkTraceResultsAsViewedAsync(string enfService)
         {
             await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);

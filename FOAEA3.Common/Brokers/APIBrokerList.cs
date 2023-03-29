@@ -1,5 +1,4 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model.Interfaces.Broker;
+﻿using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -17,11 +16,14 @@ namespace FOAEA3.Common.Brokers
         public ILicenceDenialTerminationApplicationAPIBroker LicenceDenialTerminationApplications { get; set; }
         public ILicenceDenialResponseAPIBroker LicenceDenialResponses { get; set; }
 
-
         public IApplicationEventAPIBroker ApplicationEvents { get; set; }
         public IApplicationAPIBroker Applications { get; set; }
 
         public ISinAPIBroker Sins { get; set; }
+
+        public IFinancialAPIBroker Financials { get; set; }
+        public IControlBatchAPIBroker ControlBatches { get; set; }
+        public ITransactionAPIBroker Transactions { get; set; }
 
         public IProductionAuditAPIBroker ProductionAudits { get; set; }
     }

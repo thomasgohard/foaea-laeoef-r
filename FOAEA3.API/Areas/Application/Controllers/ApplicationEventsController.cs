@@ -33,8 +33,8 @@ public class ApplicationEventsController : FoaeaControllerBase
 
     [HttpGet("{id}")]
     public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] string id,
-                                                              [FromQuery] int? queue,
-                                                              [FromServices] IRepositories repositories)
+                                                                          [FromQuery] int? queue,
+                                                                          [FromServices] IRepositories repositories)
     {
         EventQueue eventQueue;
         if (queue.HasValue)

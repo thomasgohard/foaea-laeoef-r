@@ -322,6 +322,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Variations issue Date.
+        /// </summary>
+        public static string INVALID_VARIATIONS_ISSUE_DATE {
+            get {
+                return ResourceManager.GetString("INVALID_VARIATIONS_ISSUE_DATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The maximum length of the control code is 6.
         /// </summary>
         public static string MAX_CONTROL_CODE_LENGTH {

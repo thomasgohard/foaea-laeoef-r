@@ -296,7 +296,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromProcSingleValueAsync<string>("GetApplJusticeNr", parameters);
         }
 
-        public async Task<string> GetDebtorIDAsync(string first3Char)
+        public async Task<string> GetDebtorIdAsync(string first3Char)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -304,6 +304,29 @@ namespace FOAEA3.Data.DB
                 };
 
             return await MainDB.GetDataFromProcSingleValueAsync<string>("GetSummSmryDebtorID", parameters);
+        }
+
+        public async Task<bool> CheckDebtorIdExists(string debtorId)
+        {
+            if (string.IsNullOrEmpty(debtorId))
+                return false;
+
+            var parameters = new Dictionary<string, object> {
+                    { "chrDebtor_Id",  debtorId}
+                };
+
+            string result = await MainDB.GetDataFromProcSingleValueAsync<string>("CheckDebtorIdExists", parameters);
+            return string.Equals(debtorId, result, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public async Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrDbtr_Cnfrmd_SIN",  sin},
+                    { "chrAppctgy_Cd",  category}
+                };
+
+            return await MainDB.GetDataFromProcSingleValueAsync<string>("GetDebtorIdByCnfrmdSIN", parameters);
         }
 
         public async Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber)
@@ -372,9 +395,20 @@ namespace FOAEA3.Data.DB
                 {"ConfirmedSIN", confirmedSIN}
             };
 
-            var data = await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN", parameters, FillEISOOUTFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN",
+                                                                                      parameters, FillEISOOUTFromReader);
+        }
 
+        public async Task<DateTime> GetDateLastUIBatchLoaded()
+        {
+            var data = await MainDB.GetDataFromProcSingleValueAsync<DateTime>("MessageBrokerGetDateLastUIBatchLoaded", null);
             return data;
+        }
+
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("MessageBrokerGetEISOValidApplicationData",
+                                                                                      FillEISOOUTFromReader);
         }
 
         private void FillEISOOUTFromReader(IDBHelperReader rdr, ProcessEISOOUTHistoryData data)
@@ -385,10 +419,34 @@ namespace FOAEA3.Data.DB
             data.RQST_RFND_EID = rdr["RQST_RFND_EID"] as string;
             data.OUTPUT_DEST_CD = rdr["OUTPUT_DEST_CD"] as string;
             data.XREF_ACCT_NBR = rdr["XREF_ACCT_NBR"] as string;
-            data.FOA_DELETE_IND = rdr["FOA_DELETE_IND"] as string;
+            data.FOA_DELETE_IND = ((int)rdr["FOA_DELETE_IND"]).ToString();
             data.FOA_RECOUP_PRCNT = rdr["FOA_RECOUP_PRCNT"] as string;
             data.BLANK_AREA = rdr["BLANK_AREA"] as string;
             data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
+        }
+
+        public async Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "enfSvrCode", enfSrv}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<EIoutgoingFederalData>("MessageBrokerGetEIExchangeOutData", parameters, FillEIoutgoingData);
+            return data;
+        }
+
+        private void FillEIoutgoingData(IDBHelperReader rdr, EIoutgoingFederalData data)
+        {
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Appl_Dbtr_Cnfrmd_SIN"] as string;
+            data.Dbtr_Id = rdr["Dbtr_Id"] as string;
+            data.Appl_JusticeNrSfx = rdr["Appl_JusticeNrSfx"] as string;
+            data.Debt_Percentage = (int)rdr["Debt_Percentage"];
+            data.Arrears_Balance = (decimal)rdr["Arrears_Balance"];
+            data.FeeOwedTtl_Money = (decimal)rdr["FeeOwedTtl_Money"];
+            data.Debtor_Fixed_Amt = (decimal?)rdr["Debtor_Fixed_Amt"]; // can be null
+            data.Amount_Per_Payment = (decimal?)rdr["Amount_Per_Payment"]; // can be null
+            data.EnfOff_Fin_VndrCd = rdr["EnfOff_Fin_VndrCd"] as string;
+            data.Fixed_Amt_Flag = (int)rdr["Fixed_Amt_Flag"] == 1;
         }
 
         public async Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
@@ -404,7 +462,7 @@ namespace FOAEA3.Data.DB
                 { "NewESDexists", "B" },
                 { "ESDReceivedDate", "D" }
             };
-            
+
             var returnValues = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("IsNewESDReceived", parameters, returnParameters);
 
             return ((bool)returnValues["NewESDexists"], (DateTime)returnValues["ESDReceivedDate"]);

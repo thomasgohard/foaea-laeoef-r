@@ -7,6 +7,7 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Administration
@@ -15,32 +16,36 @@ namespace FOAEA3.Business.Areas.Administration
     {
         private readonly IRepositories DB;
 
-        internal SubmitterManager(IRepositories repositories)
+        public SubmitterManager(IRepositories repositories)
         {
             DB = repositories;
         }
 
-        internal async Task<SubmitterData> GetSubmitterAsync(string submCd)
+        public async Task<SubmitterData> GetSubmitterAsync(string submCd)
         {
             return (await DB.SubmitterTable.GetSubmitterAsync(submCode: submCd))
                         .FirstOrDefault();
         }
 
-        internal async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
+        public async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
         {
             return await DB.SubmitterTable.GetSignAuthorityForSubmitterAsync(submCd);
         }
 
-        internal async Task<List<SubmitterData>> GetSubmittersForProvinceAsync(string provCd, bool onlyActive)
+        public async Task<List<SubmitterData>> GetSubmittersForProvinceAsync(string provCd, bool onlyActive)
         {
             List<SubmitterData> submitterData = null;
             submitterData = await DB.SubmitterTable.GetSubmitterAsync(prov: provCd);
 
             return onlyActive ? submitterData.FindAll(m => m.ActvSt_Cd == "A") : submitterData;
-
         }
 
-        internal async Task<List<SubmitterData>> GetSubmittersForProvinceAndOfficeAsync(string provCd, string enfOff, string enfSrv, bool onlyActive)
+        public async Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
+        {
+            return await DB.SubmitterTable.GetSubmitterCodesForOffice(service, office);
+        }
+
+        public async Task<List<SubmitterData>> GetSubmittersForProvinceAndOfficeAsync(string provCd, string enfOff, string enfSrv, bool onlyActive)
         {
             List<SubmitterData> submitterData = null;
             submitterData = await DB.SubmitterTable.GetSubmitterAsync(prov: provCd, enfOffCode: enfOff, enfServCode: enfSrv);
@@ -48,7 +53,7 @@ namespace FOAEA3.Business.Areas.Administration
             return onlyActive ? submitterData.FindAll(m => m.ActvSt_Cd == "A") : submitterData;
         }
 
-        internal async Task<SubmitterData> CreateSubmitterAsync(SubmitterData submitterData, string suffixCode, bool readOnlyAccess)
+        public async Task<SubmitterData> CreateSubmitterAsync(SubmitterData submitterData, string suffixCode, bool readOnlyAccess)
         {
             if (submitterData.Subm_Create_Usr is null)
                 submitterData.Subm_Create_Usr = DB.CurrentSubmitter;
@@ -70,7 +75,7 @@ namespace FOAEA3.Business.Areas.Administration
             return submitterData;
         }
 
-        internal async Task<SubmitterData> UpdateSubmitterAsync(SubmitterData submitterData, bool readOnly)
+        public async Task<SubmitterData> UpdateSubmitterAsync(SubmitterData submitterData, bool readOnly)
         {
             submitterData.Subm_Class = CalculateSubm_Class(submitterData, readOnly);
 
@@ -84,12 +89,12 @@ namespace FOAEA3.Business.Areas.Administration
 
             return submitterData;
         }
-        internal async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
+        public async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
         {
             return await DB.SubmitterTable.UpdateSubmitterLastLoginAsync(submCd);
         }
 
-        internal async Task<List<CommissionerData>> GetCommissionersAsync(string enfOffLocCode, string currentSubmitter)
+        public async Task<List<CommissionerData>> GetCommissionersAsync(string enfOffLocCode, string currentSubmitter)
         {
             return await DB.SubmitterTable.GetCommissionersAsync(enfOffLocCode, currentSubmitter);
         }

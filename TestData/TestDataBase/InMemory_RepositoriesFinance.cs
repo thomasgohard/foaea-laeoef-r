@@ -1,6 +1,9 @@
 ﻿using DBHelper;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TestData.TestDB;
 
 namespace TestData.TestDataBase
@@ -40,5 +43,17 @@ namespace TestData.TestDataBase
         public IControlBatchRepository ControlBatchRepository => throw new NotImplementedException();
 
         public IGarnSummaryRepository GarnSummaryRepository => throw new NotImplementedException();
+
+        public IFinancialRepository FinancialRepository => throw new NotImplementedException();
+
+        public Task<SummFAFR_DE_Data> GetFaFrDe(string summFaFrDeId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<SummFAFR_DE_Data>> GetFaFrDeForBatch(string batchId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

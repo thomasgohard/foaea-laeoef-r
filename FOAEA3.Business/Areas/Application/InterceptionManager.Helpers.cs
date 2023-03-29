@@ -4,6 +4,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,6 +12,11 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class InterceptionManager : ApplicationManager
     {
+        public async Task<List<PaymentPeriodData>> GetPaymentPeriods()
+        {
+            return await DB.InterceptionTable.GetPaymentPeriodsAsync();
+        }
+
         private async Task SendDebtorLetterAsync()
         {
             // TODO: this checks will currently fail in the old code, but will work here... should it?
@@ -43,7 +49,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<string> GenerateDebtorIDAsync(string debtorLastName)
         {
-            return await DB.InterceptionTable.GetDebtorIDAsync(DebtorPrefix(debtorLastName)); ;
+            return await DB.InterceptionTable.GetDebtorIdAsync(DebtorPrefix(debtorLastName)); ;
         }
 
         private async Task<string> NextJusticeIDAsync(string justiceID)
@@ -542,6 +548,100 @@ namespace FOAEA3.Business.Areas.Application
 
             await DB.InterceptionTable.EISOHistoryDeleteBySINAsync(InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN, false);
 
+        }
+
+        private async Task<bool> FinancialTermsHaveBeenModified()
+        {
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var currentApp = currentAppManager.InterceptionApplication;
+            var newApp = InterceptionApplication;
+
+            // compare intFinH
+            if (!currentApp.IntFinH.ValuesEqual(newApp.IntFinH))
+                return true;
+
+            // compare holdbackCnd
+            if (currentApp.HldbCnd.Count != newApp.HldbCnd.Count)
+                return true;
+
+            foreach (var holdbackCondition in currentApp.HldbCnd)
+            {
+                var newCondition = newApp.HldbCnd.Where(m => m.Appl_EnfSrv_Cd == holdbackCondition.Appl_EnfSrv_Cd &&
+                                                             m.Appl_CtrlCd == holdbackCondition.Appl_CtrlCd &&
+                                                             m.IntFinH_Dte == holdbackCondition.IntFinH_Dte &&
+                                                             m.EnfSrv_Cd == holdbackCondition.EnfSrv_Cd).FirstOrDefault();
+                if ((newCondition == null) || (!newCondition.ValuesEqual(holdbackCondition)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> FinancialTermsAreHigher()
+        {
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var currentApp = currentAppManager.InterceptionApplication;
+            var newApp = InterceptionApplication;
+
+            decimal currentPeriodicYearlyTotal = CalculateYearlyTotal(currentApp.IntFinH.PymPr_Cd, currentApp.IntFinH.IntFinH_PerPym_Money);
+            decimal newPeriodicYearlyTotal = CalculateYearlyTotal(newApp.IntFinH.PymPr_Cd, newApp.IntFinH.IntFinH_PerPym_Money);
+
+            if ((currentApp.IntFinH.IntFinH_LmpSum_Money < newApp.IntFinH.IntFinH_LmpSum_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbAmn_Money > newApp.IntFinH.IntFinH_DefHldbAmn_Money) ||
+                (currentApp.IntFinH.IntFinH_DefHldbPrcnt > newApp.IntFinH.IntFinH_DefHldbPrcnt) ||
+                (currentApp.IntFinH.IntFinH_CmlPrPym_Ind > newApp.IntFinH.IntFinH_CmlPrPym_Ind) ||
+                (currentPeriodicYearlyTotal < newPeriodicYearlyTotal))
+            {
+                return true;
+            }
+
+            if (currentApp.HldbCnd.Count == newApp.HldbCnd.Count)
+            {
+                foreach (var currentHoldback in currentApp.HldbCnd)
+                {
+                    if (currentHoldback is not null)
+                    {
+                        var newHoldback = newApp.HldbCnd.Where(m => m.EnfSrv_Cd == currentHoldback.EnfSrv_Cd).FirstOrDefault();
+                        if (newHoldback is null)
+                            return true;
+                        else
+                        {
+                            if ((currentHoldback.HldbCnd_MxmPerChq_Money < newHoldback.HldbCnd_MxmPerChq_Money) ||
+                                (currentHoldback.HldbCnd_SrcHldbAmn_Money > newHoldback.HldbCnd_SrcHldbAmn_Money) ||
+                                (currentHoldback.HldbCnd_SrcHldbPrcnt > newHoldback.HldbCnd_SrcHldbPrcnt))
+                                return true;
+                        }
+                    }
+                }
+            }
+            else
+                return true;
+
+            return false;
+        }
+
+        private static decimal CalculateYearlyTotal(string periodicCode, decimal? periodicAmount)
+        {
+            decimal result = 0M;
+
+            if (periodicAmount is not null)
+            {
+                result = periodicCode switch
+                {
+                    "A" => 52 * periodicAmount.Value,
+                    "B" => 26 * periodicAmount.Value,
+                    "C" => 12 * periodicAmount.Value,
+                    "D" => 4 * periodicAmount.Value,
+                    "E" => 2 * periodicAmount.Value,
+                    "F" => 1 * periodicAmount.Value,
+                    "G" => 24 * periodicAmount.Value,
+                    _ => 0M
+                };
+            }
+
+            return result;
         }
 
     }

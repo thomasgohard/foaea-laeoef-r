@@ -38,6 +38,22 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<SubmitterData>("SubmGetSubm", parameters, FillSubmitterData);
 
         }
+                
+        public async Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "EnforcementOfficeCode",  office},
+                    { "EnforcementServiceCode",  service}
+                };
+
+            var data = await MainDB.GetRecordsFromStoredProcAsync<string>("SubmGetEnforcementOfficeSubmitters", parameters, FillCodesFromReader);
+            return data;
+        }
+
+        private void FillCodesFromReader(IDBHelperReader rdr, out string code)
+        {
+            code = rdr["SubmitterCode"] as string;
+        }
 
         public async Task<List<CommissionerData>> GetCommissionersAsync(string locationCode, string currentSubmitter)
         {

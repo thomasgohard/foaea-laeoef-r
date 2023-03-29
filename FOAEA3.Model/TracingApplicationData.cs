@@ -1,21 +1,30 @@
 ﻿using FOAEA3.Model.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace FOAEA3.Model
 {
     [Serializable]
     public class TracingApplicationData : ApplicationData
     {
+        public int Trace_Cycl_Qty { get; set; }
+        public DateTime Trace_LstCyclStr_Dte { get; set; }
+        public DateTime? Trace_LstCyclCmp_Dte { get; set; }
+        public short Trace_LiSt_Cd { get; set; }
+
+        // location trace
+        public string InfoBank_Cd { get; set; }
         public string Trace_Child_Text { get; set; }
         public string Trace_Breach_Text { get; set; }
         public string Trace_ReasGround_Text { get; set; }
         public string FamPro_Cd { get; set; }
         public string Statute_Cd { get; set; }
-        public int Trace_Cycl_Qty { get; set; }
-        public DateTime Trace_LstCyclStr_Dte { get; set; }
-        public DateTime? Trace_LstCyclCmp_Dte { get; set; }
-        public short Trace_LiSt_Cd { get; set; }
-        public string InfoBank_Cd { get; set; }
+
+        // financial trace
+        public int TraceFin_Id { get; set; }
+        public string EntityType { get; set; }
+        public bool RequestedSIN { get; set; }
+        public List<TraceFinancialDetailData> Financials { get; set; }
 
         public TracingApplicationData()
         {
@@ -28,6 +37,8 @@ namespace FOAEA3.Model
             Appl_Lgl_Dte = Appl_Create_Dte;
             Appl_Affdvt_DocTypCd = "T02";
             Appl_LastUpdate_Dte = Appl_Create_Dte;
+
+            Financials = new List<TraceFinancialDetailData>();
         }
 
         public void Merge(TracingApplicationData data)
@@ -42,6 +53,12 @@ namespace FOAEA3.Model
             Trace_LstCyclCmp_Dte = data.Trace_LstCyclCmp_Dte;
             Trace_LiSt_Cd = data.Trace_LiSt_Cd;
             InfoBank_Cd = data.InfoBank_Cd;
+
+            TraceFin_Id = data.TraceFin_Id;
+            EntityType = data.EntityType;
+            Financials.Clear();
+            foreach(var financial in Financials)
+                Financials.Add(financial);
         }
 
     }

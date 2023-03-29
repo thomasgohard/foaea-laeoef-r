@@ -1,6 +1,6 @@
-﻿using FOAEA3.Resources.Helpers;
-using FOAEA3.Data.Base;
+﻿using FOAEA3.Data.Base;
 using FOAEA3.Model.Enums;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Threading.Tasks;
 
@@ -11,8 +11,9 @@ namespace FOAEA3.Business.Areas.Application
         public void InvalidStateChange(ApplicationState oldState, ApplicationState newState)
         {
             EventManager.AddEvent(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE,
-                                  $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C", 
+                                  $"Inv. action {(int)oldState} -> {(int)newState}", activeState: "C",
                                   updateSubm: DB.UpdateSubmitter);
+            Application.Messages.AddError(EventCode.C50933_INVALID_OPERATION_FROM_THE_CURRENT_LIFE_STATE);
         }
 
         public virtual async Task Process_00_InitialState()
@@ -50,6 +51,13 @@ namespace FOAEA3.Business.Areas.Application
             string provinceCode = Application.Appl_Dbtr_Addr_PrvCd;
             string cityName = Application.Appl_Dbtr_Addr_CityNme;
             string countryCode = Application.Appl_Dbtr_Addr_CtryCd;
+
+            if (string.IsNullOrEmpty(postalCode) || string.IsNullOrEmpty(provinceCode) || string.IsNullOrEmpty(cityName) ||
+                string.IsNullOrEmpty(countryCode) || string.IsNullOrEmpty(Application.Appl_Dbtr_Addr_Ln))
+            {
+                newState = ApplicationState.INVALID_APPLICATION_1;
+                Application.Messages.AddError("Incomplete Debtor Address");
+            }
 
             (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
             if (!isValid)

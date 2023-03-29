@@ -74,6 +74,8 @@ namespace TestData.TestDataBase
 
         public ISecurityTokenRepository SecurityTokenTable { get; }
 
+        public IEnfSrcRepository EnfSrcTable => throw new System.NotImplementedException();
+
         public InMemory_Repositories()
         {
             MainDB = new InMemory_MainDB();

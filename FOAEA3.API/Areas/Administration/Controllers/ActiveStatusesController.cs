@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Constants;
@@ -20,9 +21,10 @@ public class ActiveStatusesController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
-    public async Task<ActionResult<DataList<ActiveStatusData>>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
+    public ActionResult<DataList<ActiveStatusData>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
     {
-        var data = await activeStatusRepository.GetActiveStatusAsync();
+        List<ActiveStatusData> items = ReferenceData.Instance().ActiveStatuses.Values.ToList();
+        var data = new DataList<ActiveStatusData>(items, string.Empty);
 
         return Ok(data);
     }

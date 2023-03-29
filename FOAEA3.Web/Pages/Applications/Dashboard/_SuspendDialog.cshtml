@@ -1,0 +1,21 @@
+﻿@model FOAEA3.Web.Pages.Applications.Dashboard.InterceptionDashboardModel
+
+<section id="suspendDialog" class="wb-overlay modal-content overlay-def wb-popup-mid">
+    <header class="modal-header">
+        <h2 class="modal-title">Suspend Application - <span id="suspendKeyLabel"></span></h2>
+    </header>
+    <div class="modal-body">
+        <input id="suspendEnfSrv" type="hidden" asp-for="SuspendData.Appl_EnfSrv_Cd" />
+        <input id="suspendCntrlCd" type="hidden" asp-for="SuspendData.Appl_CtrlCd" />
+
+        <select asp-for="SuspendData.ReasonCode">
+            <option value=""></option>
+            <option value="R1">Reason 1</option>
+            <option value="R2">Reason 2</option>
+            <option value="R3">Reason 3</option>
+        </select>
+        <div><strong>Other</strong><textarea asp-for="SuspendData.ReasonDescription"></textarea></div>
+
+        <input type="submit" class="btn" asp-page-handler="SuspendApplication" value="Confirm" />
+    </div>
+</section>

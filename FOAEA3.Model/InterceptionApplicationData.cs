@@ -14,6 +14,8 @@ namespace FOAEA3.Model
             Appl_Rcptfrm_Dte = Appl_Create_Dte.Date; // only date, no time
             Appl_Lgl_Dte = Appl_Create_Dte;
             Appl_LastUpdate_Dte = Appl_Create_Dte;
+            AppReas_Cd = "11";
+            Appl_Affdvt_DocTypCd = "IXX";
 
             IntFinH = new InterceptionFinancialHoldbackData();
             HldbCnd = new List<HoldbackConditionData>();

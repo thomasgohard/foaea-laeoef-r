@@ -1,0 +1,17 @@
+﻿@page
+@model FOAEA3.Web.Pages.Security.LoginModel
+@{
+}
+
+<br />
+<form method="post">
+    <div>
+        <label>User Name:</label><input type="text" asp-for="LoginData.UserName" />
+        <label>Password:</label><input type="password" asp-for="LoginData.Password" />
+    </div>
+    <br />
+    <div><input type="submit" id="btnLogin" value="Login" asp-page-handler="Login" /></div>
+</form>
+<br />
+<div id="Message">@Model.Message</div>
+<br />

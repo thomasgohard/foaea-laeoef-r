@@ -15,6 +15,7 @@ namespace FOAEA3.Data.Base
         private ISubmitterRepository submitterDB;
         private IEnfOffRepository enfOffDB;
         private IEnfSrvRepository enfSrvDB;
+        private IEnfSrcRepository enfSrcDB;
         private IProvinceRepository provinceDB;
         private ISubjectRepository subjectDB;
         private IInterceptionRepository interceptionDB;
@@ -169,6 +170,15 @@ namespace FOAEA3.Data.Base
             {
                 enfSrvDB ??= new DBEnfSrv(MainDB);
                 return enfSrvDB;
+            }
+        }
+
+        public IEnfSrcRepository EnfSrcTable
+        {
+            get
+            {
+                enfSrcDB ??= new DBEnfSrc(MainDB);
+                return enfSrcDB;
             }
         }
 

@@ -21,6 +21,7 @@ namespace FOAEA3.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
+            services.AddHttpContextAccessor();
 
             services.Configure<ApiConfig>(LocalConfiguration.GetSection("APIroot"));
 

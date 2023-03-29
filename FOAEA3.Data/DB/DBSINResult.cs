@@ -46,7 +46,7 @@ namespace FOAEA3.Data.DB
                 parameters.Add("SVR_SurNme_TolCd", resultData.SVR_SurNme_TolCd);
 
             if (resultData.SVR_MotherNme_TolCd.HasValue)
-                parameters.Add("SVR_MotherNme_TolCd", resultData.SVR_MotherNme_TolCd);
+                parameters.Add("SVR_ParentNme_TolCd", resultData.SVR_MotherNme_TolCd);
 
             if (resultData.SVR_Gendr_TolCd.HasValue)
                 parameters.Add("SVR_Gendr_TolCd", resultData.SVR_Gendr_TolCd);

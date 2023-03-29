@@ -164,11 +164,11 @@ namespace FOAEA3.Common
             ColourConsole.WriteEmbeddedColorLine($"Using Connection: [yellow]{mainDB.ConnectionString}[/yellow]");
         }
 
-        public static async Task AddReferenceDataFromDB(WebApplication app)
+        public static async Task AddReferenceDataFromDB(IServiceProvider services)
         {
             Console.WriteLine("Loading Reference Data");
 
-            using IServiceScope serviceScope = app.Services.CreateScope();
+            using IServiceScope serviceScope = services.CreateScope();
             var provider = serviceScope.ServiceProvider;
             var repositories = provider.GetRequiredService<IRepositories>();
 
@@ -231,7 +231,7 @@ namespace FOAEA3.Common
             Startup.ConfigureAPI(app, env, config, apiName);
 
             if (!Startup.UseInMemoryData(builder))
-                await Startup.AddReferenceDataFromDB(app);
+                await Startup.AddReferenceDataFromDB(app.Services);
 
             var api_url = localConfig["Urls"];
 

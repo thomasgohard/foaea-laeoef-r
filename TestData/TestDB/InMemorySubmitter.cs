@@ -79,6 +79,11 @@ namespace TestData.TestDB
             return Task.FromResult(result);
         }
 
+        public Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)
         {
             throw new NotImplementedException();

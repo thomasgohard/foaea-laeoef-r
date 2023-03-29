@@ -12,6 +12,11 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public Task<bool> CheckDebtorIdExists(string debtorId)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
         {
             throw new NotImplementedException();
@@ -92,12 +97,32 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<string> GetDebtorIDAsync(string first3Char)
+        public Task<DateTime> GetDateLastUIBatchLoaded()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GetDebtorIdAsync(string first3Char)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
         {
             throw new NotImplementedException();
         }
 
         public Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
         {
             throw new NotImplementedException();
         }

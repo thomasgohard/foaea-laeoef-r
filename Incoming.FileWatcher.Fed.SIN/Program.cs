@@ -1,11 +1,9 @@
 ﻿using DBHelper;
 using FileBroker.Business.Helpers;
 using FileBroker.Common;
-using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
 
-ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
+ColourConsole.WriteEmbeddedColorLine("Starting SIN Registry File Monitor");
 
 var config = new FileBrokerConfigurationHelper(args);
 
@@ -35,3 +33,4 @@ if (allNewFiles.Count > 0)
 }
 else
     ColourConsole.WriteEmbeddedColorLine("[yellow]No new files found.[/yellow]");
+

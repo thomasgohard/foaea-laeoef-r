@@ -1,10 +1,13 @@
 ﻿using DBHelper;
 using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
+using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,14 +101,18 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.HldbCnd = null;
             if (isSuccess && loadFinancials)
             {
-                var finTerms = await DB.InterceptionTable.GetInterceptionFinancialTermsAsync(enfService, controlCode);
+                string activeState = "A";
+                if (InterceptionApplication.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3)
+                    activeState = "P";
+                var finTerms = await DB.InterceptionTable.GetInterceptionFinancialTermsAsync(enfService, controlCode, activeState);
                 InterceptionApplication.IntFinH = finTerms;
 
                 if (finTerms != null)
                 {
                     var holdbackConditions = await DB.InterceptionTable.GetHoldbackConditionsAsync(enfService, controlCode,
-                                                                                                       finTerms.IntFinH_Dte);
-
+                                                                                                   finTerms.IntFinH_Dte, activeState);
+                    if (holdbackConditions == null)
+                        holdbackConditions = new List<HoldbackConditionData>();
                     InterceptionApplication.HldbCnd = holdbackConditions;
                 }
             }
@@ -124,14 +131,10 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("I01"))
                 return false;
 
-            if (InterceptionApplication.IntFinH is null)
-            {
-                InterceptionApplication.Messages.AddError("Missing financial terms");
+            if (!InterceptionValidation.ValidFinancialTermsMandatoryData())
                 return false;
-            }
 
             bool success = await base.CreateApplicationAsync();
-
             if (success)
             {
                 InterceptionApplication.IntFinH.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
@@ -139,11 +142,20 @@ namespace FOAEA3.Business.Areas.Application
                 InterceptionApplication.IntFinH.ActvSt_Cd = "P";
                 InterceptionApplication.IntFinH.IntFinH_VarIss_Dte = null;
 
+                var finTermsDate = DateTime.Now;
+                if (InterceptionApplication.IntFinH.IntFinH_Dte == DateTime.MinValue)
+                    InterceptionApplication.IntFinH.IntFinH_Dte = finTermsDate;
+                else
+                    finTermsDate = InterceptionApplication.IntFinH.IntFinH_Dte;
+
                 foreach (var sourceSpecificHoldback in InterceptionApplication.HldbCnd)
                 {
                     sourceSpecificHoldback.Appl_EnfSrv_Cd = InterceptionApplication.Appl_EnfSrv_Cd;
                     sourceSpecificHoldback.Appl_CtrlCd = InterceptionApplication.Appl_CtrlCd;
                     sourceSpecificHoldback.ActvSt_Cd = "P";
+
+                    if (sourceSpecificHoldback.IntFinH_Dte == DateTime.MinValue)
+                        sourceSpecificHoldback.IntFinH_Dte = finTermsDate;
                 }
 
                 if (InterceptionApplication.IntFinH.IntFinH_PerPym_Money.HasValue &&
@@ -177,9 +189,19 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = DB.UpdateSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            await base.UpdateApplicationAsync();
-        }
+            bool success = true;
+            if (await FinancialTermsHaveBeenModified())
+            {
+                success = await VaryApplicationAsync();
+                if (success && (!await FinancialTermsAreHigher()))
+                {
+                    await AcceptVariationAsync();
+                }
+            }
 
+            if (success)
+                await base.UpdateApplicationAsync();
+        }
 
         public async Task UpdateApplicationNoValidationNoFinTermsAsync()
         {
@@ -199,20 +221,26 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
+        public async Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        {
+            return await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(appl_EnfSrv_Cd, appl_CtrlCd, debtorId);
+        }
+
         public async Task<bool> VaryApplicationAsync()
         {
             if (!IsValidCategory("I01"))
                 return false;
 
             // only keep changes that are allowed:
-            //   comment and financial terms
+            //   comment, variation issue date and financial terms
 
-            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
             var newIntFinH = InterceptionApplication.IntFinH;
             var newHldbCnd = InterceptionApplication.HldbCnd;
 
-            // for FTP, also keep changes to address, phone # and ref code:
             var newAppl_Source_RfrNr = InterceptionApplication.Appl_Source_RfrNr;
+            var variationIssueDate = InterceptionApplication.Appl_Lgl_Dte;
+            string appl_CommSubm_Text = InterceptionApplication.Appl_CommSubm_Text;
+
             var newAppl_Dbtr_Addr_Ln = InterceptionApplication.Appl_Dbtr_Addr_Ln;
             var newAppl_Dbtr_Addr_Ln1 = InterceptionApplication.Appl_Dbtr_Addr_Ln1;
             var newAppl_Dbtr_Addr_CityNme = InterceptionApplication.Appl_Dbtr_Addr_CityNme;
@@ -231,21 +259,27 @@ namespace FOAEA3.Business.Areas.Application
             InterceptionApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             InterceptionApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
             InterceptionApplication.IntFinH = newIntFinH;
             InterceptionApplication.HldbCnd = newHldbCnd;
 
+            InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
+            InterceptionApplication.Appl_Lgl_Dte = variationIssueDate;
+            InterceptionApplication.Appl_CommSubm_Text = appl_CommSubm_Text ?? InterceptionApplication.Appl_CommSubm_Text;
+
             if (InterceptionApplication.Medium_Cd == "FTP")
-            {
                 InterceptionApplication.Appl_LastUpdate_Usr = "FO2SSS";
 
-                InterceptionApplication.Appl_Source_RfrNr = newAppl_Source_RfrNr;
-                InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
-                InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
-                InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
-                InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
-                InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
-                InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln = newAppl_Dbtr_Addr_Ln;
+            InterceptionApplication.Appl_Dbtr_Addr_Ln1 = newAppl_Dbtr_Addr_Ln1;
+            InterceptionApplication.Appl_Dbtr_Addr_CityNme = newAppl_Dbtr_Addr_CityNme;
+            InterceptionApplication.Appl_Dbtr_Addr_PrvCd = newAppl_Dbtr_Addr_PrvCd;
+            InterceptionApplication.Appl_Dbtr_Addr_CtryCd = newAppl_Dbtr_Addr_CtryCd;
+            InterceptionApplication.Appl_Dbtr_Addr_PCd = newAppl_Dbtr_Addr_PCd;
+
+            if (variationIssueDate < DateTime.Now.Date.AddDays(-30))
+            {
+                InterceptionApplication.Messages.AddError(ErrorResource.INVALID_VARIATIONS_ISSUE_DATE);
+                return false;
             }
 
             var summSmry = (await DBfinance.SummonsSummaryRepository.GetSummonsSummaryAsync(Appl_EnfSrv_Cd, Appl_CtrlCd)).FirstOrDefault();
@@ -264,7 +298,6 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-
             var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config)
             {
                 CurrentUser = this.CurrentUser
@@ -276,7 +309,6 @@ namespace FOAEA3.Business.Areas.Application
             {
                 InvalidStateChange(currentInterceptionManager.InterceptionApplication.AppLiSt_Cd, ApplicationState.FINANCIAL_TERMS_VARIED_17);
                 await EventManager.SaveEventsAsync();
-
                 return false;
             }
 
@@ -314,7 +346,8 @@ namespace FOAEA3.Business.Areas.Application
 
                 await EventManager.SaveEventsAsync();
 
-                if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (InterceptionApplication.Medium_Cd != "FTP") 
+                    InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 return true;
             }
@@ -323,15 +356,18 @@ namespace FOAEA3.Business.Areas.Application
                 switch (InterceptionApplication.AppLiSt_Cd)
                 {
                     case ApplicationState.INVALID_VARIATION_SOURCE_91:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
                         break;
 
                     case ApplicationState.INVALID_VARIATION_FINTERMS_92:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
                         break;
 
                     default:
-                        if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
+                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                            InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
                         break;
                 }
 
@@ -612,7 +648,7 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.InterceptionTable.IsSinBlockedAsync(InterceptionApplication.Appl_Dbtr_Entrd_SIN);
         }
 
-        public async Task  FTBatchNotification_CheckFTTransactionsAdded()
+        public async Task FTBatchNotification_CheckFTTransactionsAdded()
         {
             await DB.InterceptionTable.FTBatchNotification_CheckFTTransactionsAddedAsync();
         }
@@ -777,6 +813,16 @@ namespace FOAEA3.Business.Areas.Application
             if (InterceptionApplication.Medium_Cd != "FTP") InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
             return true;
+        }
+
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await DB.InterceptionTable.GetEISOvalidApplications();
+        }
+
+        public async Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
+        {
+            return await DB.InterceptionTable.GetEIoutgoingData(enfSrv);
         }
 
         public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)

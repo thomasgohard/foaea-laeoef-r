@@ -1,0 +1,38 @@
+﻿@model FOAEA3.Web.Pages.FoaeaPageModel
+
+@using FOAEA3.Model.Enums
+
+@{
+}
+
+@if ((Model.ErrorMessage != null) && (Model.ErrorMessage.Any()))
+{
+    <div id="errorMessage" class="alert alert-danger">
+        <div>Error(s):</div>
+        @foreach (var error in Model.ErrorMessage)
+        {
+            <div>@Model.GetEventDescription(error)</div>
+        }
+    </div>
+}
+@if ((Model.WarningMessage != null) && (Model.WarningMessage.Any()))
+{
+    <div id="warningMessage" class="alert alert-warning">
+        <div>Warning(s):</div>
+        @foreach (var warning in Model.WarningMessage)
+        {
+            <div>@Model.GetEventDescription(warning)</div>
+        }
+    </div>
+}
+@if ((Model.InfoMessage != null) && (Model.InfoMessage.Any()))
+{
+    <div id="infoMessage" class="alert alert-info">
+        <div>Information:</div>
+        @foreach (var info in Model.InfoMessage)
+        {
+            <div>@Model.GetEventDescription(info)</div>
+        }
+    </div>
+}
+

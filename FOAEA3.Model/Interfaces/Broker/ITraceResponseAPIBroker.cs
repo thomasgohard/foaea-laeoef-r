@@ -9,6 +9,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         string Token { get; set; }
 
         Task InsertBulkDataAsync(List<TraceResponseData> responseData);
+        Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData);
         Task MarkTraceResultsAsViewedAsync(string enfService);
     }
 }

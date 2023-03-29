@@ -10,7 +10,7 @@ namespace FOAEA3.Common.Brokers
         public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
-        public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)
+        public InterceptionApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token = null)
         {
             ApiHelper = apiHelper;
             Token = token;
@@ -35,11 +35,27 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetDataAsync<InterceptionApplicationData>(apiCall, token: Token);
         }
 
+        public async Task<SummonsSummaryData> GetSummonsSummaryForApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        {
+            string key = ApplKey.MakeKey(dat_Appl_EnfSrvCd, dat_Appl_CtrlCd);
+            string apiCall = $"api/v1/summonsSummaries/{key}";
+            return await ApiHelper.GetDataAsync<SummonsSummaryData>(apiCall, token: Token);
+        }
+
         public async Task<InterceptionApplicationData> CreateInterceptionApplicationAsync(InterceptionApplicationData interceptionApplication)
         {
             string apiCall = "api/v1/Interceptions";
             var data = await ApiHelper.PostDataAsync<InterceptionApplicationData, InterceptionApplicationData>(apiCall,
                                                                                                interceptionApplication, token: Token);
+            
+            if (ApiHelper.ErrorData.Any() && !data.Messages.Any())
+            {
+                foreach(var error in ApiHelper.ErrorData)
+                    data.Messages.Add(error);
+            }
+
+            // IMessageList
+
             return data;
         }
 
@@ -102,6 +118,12 @@ namespace FOAEA3.Common.Brokers
             return;
         }
 
+        public async Task<List<PaymentPeriodData>> GetPaymentPeriods()
+        {
+            string apiCall = "api/v1/paymentperiods";
+            return await ApiHelper.GetDataAsync<List<PaymentPeriodData>>(apiCall, token: Token);
+        }
+
         public async Task<InterceptionApplicationData> AcceptVariationAsync(InterceptionApplicationData interceptionApplication)
         {
             string key = ApplKey.MakeKey(interceptionApplication.Appl_EnfSrv_Cd, interceptionApplication.Appl_CtrlCd);
@@ -142,5 +164,16 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            string apiCall = $"api/v1/EISOrequests/CRA";
+            return await ApiHelper.GetDataAsync<List<ProcessEISOOUTHistoryData>>(apiCall, token: Token);
+        }
+
+        public async Task<List<EIoutgoingFederalData>> GetEIexchangeOutData(string enfSrv)
+        {
+            string apiCall = $"api/v1/EISOrequests/EI?enfSrv={enfSrv}";
+            return await ApiHelper.GetDataAsync<List<EIoutgoingFederalData>>(apiCall, token: Token);
+        }
     }
 }

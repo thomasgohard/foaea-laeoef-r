@@ -18,13 +18,13 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task MessageBrokerErrorAsync(string errorType, string errorSubject, Exception e, bool displayExceptionError,
+        public async Task MessageBrokerErrorAsync(string errorType, string errorSubject, Exception exceptionData, bool displayExceptionError,
                                        DataRow row = null)
         {
             var rowValues = new StringBuilder();
             if (row != null)
             {
-                foreach(DataColumn column in row.Table.Columns)
+                foreach (DataColumn column in row.Table.Columns)
                 {
                     if (column.ColumnName.ToLower() == "sin")
                         rowValues.AppendLine($"{column.ColumnName}: (SIN not displayed)");
@@ -38,10 +38,21 @@ namespace FileBroker.Data.DB
 
             var parameters = new Dictionary<string, object>
             {
-                {"errorMessage", displayExceptionError ? e.Message : string.Empty },
-                {"errorStack", displayExceptionError ? e.StackTrace : string.Empty },
+                {"errorMessage", displayExceptionError ? exceptionData.Message : string.Empty },
+                {"errorStack", displayExceptionError ? exceptionData.StackTrace : string.Empty },
                 {"errorRow", rowValues.ToString() },
                 {"errorType", errorType },
+                {"errorSubject", errorSubject }
+            };
+
+            await MainDB.ExecProcAsync("MessageBrokerError", parameters);
+        }
+
+        public async Task MessageBrokerErrorAsync(string errorSubject, string errorMessage)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"errorMessage", errorMessage },
                 {"errorSubject", errorSubject }
             };
 

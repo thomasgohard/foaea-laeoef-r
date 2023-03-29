@@ -10,9 +10,11 @@
   <ItemGroup>
     <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
+    <ProjectReference Include="..\Outgoing.FileCreator.Fed.Interception\Outgoing.FileCreator.Fed.Interception.csproj" />
     <ProjectReference Include="..\Outgoing.FileCreator.Fed.LicenceDenial\Outgoing.FileCreator.Fed.LicenceDenial.csproj" />
     <ProjectReference Include="..\Outgoing.FileCreator.Fed.SIN\Outgoing.FileCreator.Fed.SIN.csproj" />
     <ProjectReference Include="..\Outgoing.FileCreator.Fed.Tracing\Outgoing.FileCreator.Fed.Tracing.csproj" />
+    <ProjectReference Include="..\Outgoing.FileCreator.IFMS\Outgoing.FileCreator.IFMS.csproj" />
     <ProjectReference Include="..\Outgoing.FileCreator.MEP\Outgoing.FileCreator.MEP.csproj" />
   </ItemGroup>
 

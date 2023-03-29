@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using System.Web;
@@ -10,7 +11,7 @@ namespace FOAEA3.Common.Brokers
         public IAPIBrokerHelper ApiHelper { get; }
         public string Token { get; set; }
 
-        public ApplicationEventAPIBroker(IAPIBrokerHelper apiHelper, string token)
+        public ApplicationEventAPIBroker(IAPIBrokerHelper apiHelper, string token = null)
         {
             ApiHelper = apiHelper;
             Token = token;
@@ -32,6 +33,13 @@ namespace FOAEA3.Common.Brokers
         {
             string apiCall = $"api/v1/applicationEvents/GetLatestSinEventDataSummary";
             return await ApiHelper.GetDataAsync<List<SinInboundToApplData>>(apiCall, token: Token);
+        }
+
+        public async Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
+        {
+            string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
+            string apiCall = $"api/v1/applicationEvents/{key}";
+            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall, token: Token);
         }
 
         public async Task SaveEventAsync(ApplicationEventData eventData)

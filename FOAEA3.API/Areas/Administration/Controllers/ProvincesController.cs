@@ -1,5 +1,7 @@
 ﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
+using FOAEA3.Model.Base;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +21,12 @@ public class ProvincesController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
-    public async Task<ActionResult<List<ProvinceData>>> GetProvinces([FromServices] IRepositories repositories)
+    public ActionResult<List<ProvinceData>> GetProvinces()
     {
-        return Ok(await repositories.ProvinceTable.GetProvincesAsync());
+        List<ProvinceData> items = ReferenceData.Instance().Provinces.Values.ToList();
+        var data = new DataList<ProvinceData>(items, string.Empty);
+
+        return Ok(data);
     }
 
 }

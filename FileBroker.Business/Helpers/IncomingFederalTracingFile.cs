@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Xml.Linq;
 
 namespace FileBroker.Business.Helpers
 {
@@ -29,8 +30,12 @@ namespace FileBroker.Business.Helpers
 
             foreach (var fileInfo in files)
             {
-                int cycle = FileHelper.GetCycleFromFilename(fileInfo.Name);
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove cycle
+                string fileName = fileInfo.Name;
+                if (fileName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
+                    fileName = fileName[..^4];
+
+                int cycle = FileHelper.GetCycleFromFilename(fileName);
+                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
@@ -38,13 +43,12 @@ namespace FileBroker.Business.Helpers
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath)
+        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors)
         {
             string fileNameNoPath = Path.GetFileName(fullPath);
 
             if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. EI3STSIT.000022)
             {                                        //                                                    ↑ 
-
                 string flatFile;
                 using (var streamReader = new StreamReader(fullPath, Encoding.UTF8))
                 {
@@ -53,11 +57,21 @@ namespace FileBroker.Business.Helpers
 
                 var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
 
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fullPath);
+                var fileFullName = fullPath;
+                if (fileFullName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
+                    fileFullName = fileFullName[..^4];
+                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileFullName);
+
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
-                    await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
+                    if (!fileTableData.IsXML)
+                        await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
+                    else
+                    {
+                        string jsonText = FileHelper.ConvertXmlToJson(flatFile, errors);
+                        await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName);
+                    }
                     return true;
                 }
                 else

@@ -11,6 +11,15 @@ namespace FOAEA3.Model.Interfaces.Repository
 
         Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false);
         Task InsertBulkDataAsync(List<TraceResponseData> responseData);
+
+        Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);
+        Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId);
+        Task<DataList<TraceFinancialResponseDetailValueData>> GetTraceResponseFinancialDetailValues(int traceResponseFinancialDetailId);
+        Task<int> CreateTraceFinancialResponse(TraceFinancialResponseData data);
+        Task<int> CreateTraceFinancialResponseDetail(TraceFinancialResponseDetailData data);
+        Task<int> CreateTraceFinancialResponseDetailValue(TraceFinancialResponseDetailValueData data);
+        Task UpdateTraceResponseFinancial(TraceFinancialResponseData data);
+
         Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd);
         Task MarkResponsesAsViewedAsync(string enfService);
     }

@@ -35,7 +35,6 @@ namespace FOAEA3.Data.DB
                 case EventQueue.EventLicence:
                 case EventQueue.EventSYS:
                 case EventQueue.EventTrace_ESDC:
-                case EventQueue.EventCR_PADR:
                     // TODO: add other events associated to application?
                     break;
 

@@ -1,8 +1,22 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@using FOAEA3.Web.Helpers
+@inject IHttpContextAccessor Accessor
+
+@{
+    bool isLoggedIn = false;
+    string currentSubmitter = Accessor?.HttpContext?.Session.GetString(SessionValue.SUBMITTER);
+    if (!string.IsNullOrEmpty(currentSubmitter))
+    {
+        isLoggedIn = true;
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="PRAGMA" content="NO-CACHE">
     <title>@ViewData["Title"] - FOAEA3.Web</title>
     <link rel="stylesheet" href="~/theme-wet-boew/css/theme.css" />
     <link rel="stylesheet" href="~/css/site.css" />
@@ -25,9 +39,14 @@
                             <span>Français</span>
                             <abbr title="Français">FR</abbr>
                         </li>
-                        <li class="list-inline">
-                            <span>Logout</span>
-                        </li>
+                        @if (isLoggedIn)
+                        {
+                            <li class="list-inline">
+                                <span>
+                                    <form method="post"><input type="submit" value="Logout" asp-page-handler="Logout" /></form>
+                                </span>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -37,22 +56,25 @@
     <main role="main" class="container">
         <div class="row">
             <div class="col-md-1">
-                <div>Dashboard</div>
-                <br />
-                <ul class="nav nav-pills nav-stacked">
-                    <li><a asp-page="/Applications/InterceptionDashboard"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span><span class="menuDesc"> Interception</span></a></li>
-                    <li><a asp-page="/Applications/Interception"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
-                    <li><hr /></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-search" aria-hidden="true"></span><span class="menuDesc"> Trace and Locate</span></a></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
-                    <li><hr /></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="menuDesc"> Licence Denial</span></a></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span><span class="menuDesc"> Termination</span></a></li>
-                    <li><hr /></li>
-                    <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span><span class="menuDesc"> Help</span></a></li>
-                    <li><a asp-page="/Test/Test1"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span><span class="menuDesc"> Test</span></a></li>
-                </ul>
+                @if (isLoggedIn)
+                {
+                    <div>Dashboard</div>
+                    <br />
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a asp-page="@PageRoute.INTERCEPTION_DASHBOARD"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span><span class="menuDesc"> Interception</span></a></li>
+                        <li><a asp-page="@PageRoute.INTERCEPTION_NEW"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
+                        <li><hr /></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-search" aria-hidden="true"></span><span class="menuDesc"> Trace and Locate</span></a></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
+                        <li><hr /></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="menuDesc"> Licence Denial</span></a></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="menuDesc"> New Application</span></a></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span><span class="menuDesc"> Termination</span></a></li>
+                        <li><hr /></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span><span class="menuDesc"> Help</span></a></li>
+                        <li><a asp-page="/Test/Test1"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span><span class="menuDesc"> Test</span></a></li>
+                    </ul>
+                }
             </div>
             <div class="col-md-11">
                 <div>Protected-B</div>
@@ -107,9 +129,16 @@
         </div>
     </footer>
 
-    <script src="~/wet-boew/js/jquery/2.2.4/jquery.js"></script>
-    <script src="~/wet-boew/js/wet-boew.js"></script>
-    <script src="~/js/site.js"></script>
+    <environment exclude="Production">
+        <script src="~/wet-boew/js/jquery/3.6.3/jquery.js"></script>
+        <script src="~/wet-boew/js/wet-boew.js"></script>
+        <script src="~/js/site.js"></script>
+    </environment>
+    <environment include="Production">
+        <script src="~/wet-boew/js/jquery/3.6.3/jquery.min.js"></script>
+        <script src="~/wet-boew/js/wet-boew.min.js"></script>
+        <script src="~/js/site.min.js"></script>
+    </environment>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

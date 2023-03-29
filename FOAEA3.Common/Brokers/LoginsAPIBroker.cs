@@ -12,7 +12,7 @@ namespace FOAEA3.Common.Brokers
         public const string SYSTEM_SUBJECT = "System_Support";
         public const string SYSTEM_SUBMITTER = "MSGBRO";
 
-        public LoginsAPIBroker(IAPIBrokerHelper apiHelper, string currentToken)
+        public LoginsAPIBroker(IAPIBrokerHelper apiHelper, string currentToken = null)
         {
             ApiHelper = apiHelper;
             Token = currentToken;
@@ -28,6 +28,34 @@ namespace FOAEA3.Common.Brokers
         {
             string apiCall = $"api/v1/logins/DB";
             return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+        }
+
+        public async Task<TokenData> SubjectLoginAsync(FoaeaLoginData loginData)
+        {
+            string apiCall = "api/v1/logins/SubjectLogin";
+            var data = await ApiHelper.PostDataAsync<TokenData, FoaeaLoginData>(apiCall, loginData);
+            return data;
+        }
+
+        public async Task<List<string>> GetAvailableSubmittersAsync()
+        {
+            string apiCall = $"api/v1/logins/Submitters";
+            var data = await ApiHelper.GetDataAsync<List<string>>(apiCall, token: Token);
+            return data;
+        }
+
+        public async Task<TokenData> SelectSubmitterAsync(string submitter)
+        {
+            string apiCall = $"api/v1/logins/SelectSubmitter?submitter={submitter}";
+            var data = await ApiHelper.PutDataAsync<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
+            return data;
+        }
+
+         public async Task<TokenData> AcceptTerms()
+        {
+            string apiCall = $"api/v1/logins/AcceptTerms";
+            var data = await ApiHelper.PutDataAsync<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
+            return data;
         }
 
         public async Task<TokenData> LoginAsync(FoaeaLoginData loginData)

@@ -204,6 +204,48 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<string>("GetApplSequenceNo", parameters);
         }
 
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Subm_SubmCd",  submCd},
+                    { "Days", days}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetRecentActivityForSubmitter", parameters, FillModificationHistory);
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Subm_SubmCd",  submCd},
+                    { "AppLiSt_Cd", (int) state}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetAtStateForSubmitter", parameters, FillModificationHistory);
+        }
+
+        public async Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Subm_SubmCd",  submCd},
+                    { "Event_Reas_Cd", eventReasonCode}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationModificationActivitySummaryData>("Appl_GetWithEventForSubmitter", parameters, FillModificationHistory);
+        }
+
+        private void FillModificationHistory(IDBHelperReader rdr, ApplicationModificationActivitySummaryData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.AppCtgy_Cd = rdr["AppCtgy_Cd"] as string;
+            data.Appl_Create_Dte = (DateTime)rdr["Appl_Create_Dte"]; // can be null 
+            data.Appl_Create_Usr = rdr["Appl_Create_Usr"] as string; // can be null 
+            data.Appl_LastUpdate_Dte = rdr["Appl_LastUpdate_Dte"] as DateTime?; // can be null 
+            data.Appl_LastUpdate_Usr = rdr["Appl_LastUpdate_Usr"] as string; // can be null 
+            data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
+        }
+
         public async Task UpdateSubmitterDefaultControlCodeAsync(string subm_SubmCd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
@@ -251,6 +293,23 @@ namespace FOAEA3.Data.DB
 
             return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<bool>("ApplGetConfirmedSINSameEnforcementOffice", parameters, "sameEnforcementOffice");
 
+        }
+
+        public async Task<List<ConfirmedSinData>> GetConfirmedSinByDebtorId(string debtorId, bool isActiveOnly)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrDebtor_Id", debtorId},
+                    { "bitActvst_cd", isActiveOnly}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ConfirmedSinData>("GetCnfrmdSINByDebtorID", parameters, FillConfirmedSinForDebtor);
+        }
+
+        private void FillConfirmedSinForDebtor(IDBHelperReader rdr, ConfirmedSinData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.SVR_SIN = rdr["SVR_SIN"] as string;
         }
 
         public async Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)

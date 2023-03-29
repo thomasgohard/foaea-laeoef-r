@@ -1,0 +1,16 @@
+﻿@page
+@model FOAEA3.Web.Pages.Security.TermsOfReferenceModel
+@{
+}
+<br />
+<form method="post">
+    <div>
+        Terms of Reference<br />
+        These are the terms...
+    </div>
+    <br />
+    <div><input type="submit" id="btnAccept" value="Accept" asp-page-handler="Accept" /></div>
+</form>
+<br />
+<div id="Message">@Model.Message</div>
+<br />

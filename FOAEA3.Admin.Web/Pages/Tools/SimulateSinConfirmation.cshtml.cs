@@ -8,51 +8,50 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Admin.Web.Pages.Tools
+namespace FOAEA3.Admin.Web.Pages.Tools;
+
+public class SimulateSinConfirmationModel : PageModel
 {
-    public class SimulateSinConfirmationModel : PageModel
+    [BindProperty]
+    public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
+
+    private readonly IRepositories DB;
+    private readonly IFoaeaConfigurationHelper Config;
+
+    public SimulateSinConfirmationModel(IRepositories repositories)
     {
-        [BindProperty]
-        public SimulateSinConfirmationData SimulateSinConfirmation { get; set; }
+        Config = new FoaeaConfigurationHelper();
+        DB = repositories;
+    }
 
-        private readonly IRepositories DB;
-        private readonly IFoaeaConfigurationHelper Config;
+    public void OnGet()
+    {
+    }
 
-        public SimulateSinConfirmationModel(IRepositories repositories)
+    public async Task OnPost()
+    {
+
+        if (ModelState.IsValid)
         {
-            Config = new FoaeaConfigurationHelper();
-            DB = repositories;
-        }
+            var adminManager = new AdminManager(DB, Config);
 
-        public void OnGet()
-        {
-        }
-
-        public async Task OnPost()
-        {
-
-            if (ModelState.IsValid)
+            try
             {
-                var adminManager = new AdminManager(DB, Config);
+                var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService,
+                                                                         SimulateSinConfirmation.ControlCode,
+                                                                         SimulateSinConfirmation.Sin, User);
 
-                try
-                {
-                    var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService,
-                                                                            SimulateSinConfirmation.ControlCode,
-                                                                            SimulateSinConfirmation.Sin, User);
-
-                    if (success)
-                        ViewData["Message"] = $"{SimulateSinConfirmation.EnfService}-{SimulateSinConfirmation.ControlCode}: SIN has been confirmed.";
-                    else
-                        ViewData["Error"] = "Error: " + adminManager.LastError;
-                }
-                catch (Exception e)
-                {
-                    ViewData["Error"] = "Error: " + e.Message;
-                }
-
+                if (success)
+                    ViewData["Message"] = $"{SimulateSinConfirmation.EnfService}-{SimulateSinConfirmation.ControlCode}: SIN has been confirmed.";
+                else
+                    ViewData["Error"] = "Error: " + adminManager.LastError;
+            }
+            catch (Exception e)
+            {
+                ViewData["Error"] = "Error: " + e.Message;
             }
 
         }
+
     }
 }

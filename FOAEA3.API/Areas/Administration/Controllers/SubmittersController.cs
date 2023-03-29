@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Administration;
+using FOAEA3.Business.Areas.Application;
 using FOAEA3.Common;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
@@ -52,6 +53,16 @@ public class SubmittersController : FoaeaControllerBase
 
     }
 
+    [HttpGet("Office/{office}")]
+    public async Task<ActionResult<List<string>>> GetSubmitterCodesForOffice([FromQuery] string service, [FromRoute] string office, 
+                                                                             [FromServices] IRepositories db)
+    {
+        var submitterManager = new SubmitterManager(db);
+        var submitterCodes = await submitterManager.GetSubmitterCodesForOffice(service, office);
+
+        return Ok(submitterCodes);
+    }
+
     [HttpGet("{submCd}/Declarant")]
     public async Task<ActionResult<string>> GetDeclarant([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
@@ -65,6 +76,33 @@ public class SubmittersController : FoaeaControllerBase
         }
 
         return declarant;
+    }
+    
+    [HttpGet("{submCd}/RecentActivity")]
+    public async Task<ActionResult<List<ApplicationModificationActivitySummaryData>>> GetRecentActivity([FromServices] IRepositories db, 
+                                                                                                        [FromRoute] string submCd, 
+                                                                                                        [FromQuery] int days = 0)
+    {
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        return Ok(await applicationManager.GetApplicationRecentActivityForSubmitter(submCd, days));
+    }
+
+    [HttpGet("{submCd}/ApplicationsAtState/{state}")]
+    public async Task<ActionResult<List<ApplicationModificationActivitySummaryData>>> GetApplAtState([FromServices] IRepositories db, 
+                                                                                                     [FromRoute] string submCd,
+                                                                                                     [FromRoute] int state)
+    {
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        return Ok(await applicationManager.GetApplicationAtStateForSubmitter(submCd, (ApplicationState) state));
+    }
+
+    [HttpGet("{submCd}/ApplicationsWithEvent/{eventReasonCode}")]
+    public async Task<ActionResult<List<ApplicationModificationActivitySummaryData>>> GetApplWithEvent([FromServices] IRepositories db,
+                                                                                                       [FromRoute] string submCd,
+                                                                                                       [FromRoute] int eventReasonCode)
+    {
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        return Ok(await applicationManager.GetApplicationWithEventForSubmitter(submCd, eventReasonCode));
     }
 
     [HttpGet("commissioners/{enfOffLocCode}")]
