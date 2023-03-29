@@ -28,21 +28,127 @@ public class IncomingFederalTracingManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingData, string flatFileName)
+    public async Task<MessageDataList> ProcessXmlFileAsync(string sourceTracingData, string flatFileName)
     {
         var result = new MessageDataList();
 
+        short cycle = (short)FileHelper.GetCycleFromFilename(flatFileName);
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
         //await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
-       // bool isValid = true;
+        // bool isValid = true;
 
         var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingData, out string error);
         var tracingFile = tracingFileData.CRATraceIn;
 
-        return new List<string>();
+        bool isValid = true;
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            //isValid = false;
+            result.AddSystemError(error);
+        }
+        else
+        {
+            ValidateXmlHeader(tracingFile.Header, flatFileName, ref result, ref isValid);
+            ValidateXmlFooter(tracingFile, ref result, ref isValid);
+
+            if (isValid)
+            {
+                await FoaeaAccess.SystemLoginAsync();
+                try
+                {
+                    foreach (var response in tracingFile.TraceResponse)
+                    {
+                        var traceFinancialResultData = ConvertToFoaea(response, cycle);
+                        await SendTraceFinancialResultToFoaea(traceFinancialResultData);
+                    }
+                }
+                finally
+                {
+                    await FoaeaAccess.SystemLogoutAsync();
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private async Task SendTraceFinancialResultToFoaea(TraceFinancialResponseData traceFinancialResultData)
+    {
+        await APIs.TracingResponses.AddTraceFinancialResponseData(traceFinancialResultData);
+    }
+
+    private static TraceFinancialResponseData ConvertToFoaea(FedTracingFinancial_TraceResponse traceResponse, short cycle)
+    {
+        var result = new TraceFinancialResponseData
+        {
+            Appl_EnfSrv_Cd = traceResponse.Appl_EnfSrvCd,
+            Appl_CtrlCd = traceResponse.Appl_CtrlCd,
+            EnfSrv_Cd = "RC01",
+            TrcRsp_Rcpt_Dte = DateTime.Now,
+            TrcRsp_SeqNr = 0,
+            TrcRsp_Trace_CyclNr = cycle,
+            ActvSt_Cd = "A",
+            Sin = traceResponse.SIN,
+            SinXref = traceResponse.SIN_XRef,
+            TrcSt_Cd = traceResponse.ResponseCode
+        };
+
+        if (traceResponse.Tax_Response.Tax_Data is not null)
+        {
+            result.TraceFinancialDetails = new List<TraceFinancialResponseDetailData>();
+
+            foreach (var taxData in traceResponse.Tax_Response.Tax_Data)
+            {
+                var details = new TraceFinancialResponseDetailData
+                {
+                    TaxForm = taxData.Form
+                };
+                if (short.TryParse(taxData.Year, out short fiscalYear))
+                    details.FiscalYear = fiscalYear;
+
+                if (taxData.Field is not null)
+                {
+                    details.TraceDetailValues = new List<TraceFinancialResponseDetailValueData>();
+
+                    foreach (var valueData in taxData.Field)
+                    {
+                        var detailValue = new TraceFinancialResponseDetailValueData
+                        {
+                            FieldName = valueData.Name,
+                            FieldValue = valueData.Value
+                        };
+                        details.TraceDetailValues.Add(detailValue);
+                    }
+                }
+
+                result.TraceFinancialDetails.Add(details);
+            }
+        }
+
+        return result;
+    }
+
+    private static void ValidateXmlHeader(FedTracingFinancial_Header header, string flatFileName, ref MessageDataList result, ref bool isValid)
+    {
+        int cycle = FileHelper.GetCycleFromFilename(flatFileName);
+        if (header.Cycle != cycle)
+        {
+            result.AddError($"Cycle in file [{header.Cycle}] does not match cycle of file [{cycle}]");
+            isValid = false;
+        }
+    }
+
+    private static void ValidateXmlFooter(FedTracingFinancial_CRATraceIn tracingFile, ref MessageDataList result, ref bool isValid)
+    {
+        if (tracingFile.TraceResponse.Count != tracingFile.Footer.ResponseCount)
+        {
+            result.AddError("Invalid ResponseCount in footer section");
+            isValid = false;
+        }
     }
 
     private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)
@@ -56,17 +162,8 @@ public class IncomingFederalTracingManager
         }
         catch (Exception e)
         {
-            try
-            {
-                var single = JsonConvert.DeserializeObject<FedTracingFinancialFileBase>(sourceTracingData);
-
-                result = new FedTracingFinancialFileBase();
-            }
-            catch (Exception ee)
-            {
-                error = ee.Message;
-                result = new FedTracingFinancialFileBase();
-            }
+            error = e.Message;
+            result = new FedTracingFinancialFileBase();
         }
 
         return result;

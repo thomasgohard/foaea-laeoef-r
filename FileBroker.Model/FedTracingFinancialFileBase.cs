@@ -1,5 +1,4 @@
-﻿using FOAEA3.Model.Enums;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -9,16 +8,22 @@ namespace FileBroker.Model
     public struct FedTracingFinancial_Header
     {
         public int Cycle;
+
         public DateTime FileDate;
     }
 
     public struct FedTracingFinancial_TraceResponse
     {
         public string Appl_EnfSrvCd;
+
         public string Appl_CtrlCd;
+
         public string SIN;
+
         public string SIN_XRef;
+
         public string ResponseCode;
+
         [DataMember(IsRequired = false)]
         public FedTracingFinancial_TaxResponse Tax_Response;
     }
@@ -34,8 +39,10 @@ namespace FileBroker.Model
     {
         [JsonProperty("@year")]
         public string Year;
+
         [JsonProperty("@form")]
         public string Form;
+
         [DataMember(IsRequired = false)]
         [JsonConverter(typeof(SingleOrArrayConverter<FedTracingFinancial_Field>))]
         public List<FedTracingFinancial_Field> Field;
@@ -45,6 +52,7 @@ namespace FileBroker.Model
     {
         [JsonProperty("@name")]
         public string Name;
+
         [JsonProperty("#text")]
         public string Value;
     }
@@ -57,9 +65,11 @@ namespace FileBroker.Model
     public struct FedTracingFinancial_CRATraceIn
     {
         public FedTracingFinancial_Header Header;
+
         [DataMember(IsRequired = false)]
         [JsonConverter(typeof(SingleOrArrayConverter<FedTracingFinancial_TraceResponse>))]
         public List<FedTracingFinancial_TraceResponse> TraceResponse;
+
         public FedTracingFinancial_Footer Footer;
     }
 

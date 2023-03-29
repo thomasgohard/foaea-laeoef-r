@@ -520,6 +520,25 @@ namespace FOAEA3.Business.Areas.Application
             await responsesDB.InsertBulkDataAsync(responseData);
         }
 
+        public async Task CreateFinancialResponseDataAsync(TraceFinancialResponseData responseData)
+        {
+            var id = await DB.TraceResponseTable.CreateTraceFinancialResponse(responseData);
+            if (responseData.TraceFinancialDetails is not null)
+                foreach(var detail in responseData.TraceFinancialDetails)
+                {
+                    detail.TrcRspFin_Id = id;
+                    var detailId = await DB.TraceResponseTable.CreateTraceFinancialResponseDetail(detail);
+                    if (detail.TraceDetailValues is not null)
+                    {
+                        foreach(var value in detail.TraceDetailValues)
+                        {
+                            value.TrcRspFin_Dtl_Id = detailId;
+                            _ = await DB.TraceResponseTable.CreateTraceFinancialResponseDetailValue(value);
+                        }
+                    }
+                }
+        }
+
         public async Task MarkResponsesAsViewedAsync(string enfService)
         {
             var responsesDB = DB.TraceResponseTable;

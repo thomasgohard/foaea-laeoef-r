@@ -14,17 +14,17 @@ namespace FileBroker.Business.Tests.InMemory
 
         public MessageDataList Messages => throw new NotImplementedException();
 
-        public Task<int> CreateTraceResponseFinancial(TraceFinancialResponseData data)
+        public Task<int> CreateTraceFinancialResponse(TraceFinancialResponseData data)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> CreateTraceResponseFinancialDetail(TraceFinancialResponseDetailData data)
+        public Task<int> CreateTraceFinancialResponseDetail(TraceFinancialResponseDetailData data)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> CreateTraceResponseFinancialDetailValue(TraceFinancialResponseDetailValueData data)
+        public Task<int> CreateTraceFinancialResponseDetailValue(TraceFinancialResponseDetailValueData data)
         {
             throw new NotImplementedException();
         }

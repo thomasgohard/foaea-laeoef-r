@@ -74,7 +74,7 @@ namespace FOAEA3.Data.DB
             return new DataList<TraceFinancialResponseDetailValueData>(data, MainDB.LastError);
         }
 
-        public async Task<int> CreateTraceResponseFinancial(TraceFinancialResponseData data)
+        public async Task<int> CreateTraceFinancialResponse(TraceFinancialResponseData data)
         {
             var parameters = new Dictionary<string, object> {
                     { "Appl_EnfSrv_Cd",  data.Appl_EnfSrv_Cd},
@@ -96,7 +96,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");            
         }
 
-        public async Task<int> CreateTraceResponseFinancialDetail(TraceFinancialResponseDetailData data)
+        public async Task<int> CreateTraceFinancialResponseDetail(TraceFinancialResponseDetailData data)
         {
             var parameters = new Dictionary<string, object> {
                     { "TrcRspFin_Id",  data.TrcRspFin_Id},
@@ -107,7 +107,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Dtl_Insert", parameters, "TrcRspFin_Dtl_Id");
         }
 
-        public async Task<int> CreateTraceResponseFinancialDetailValue(TraceFinancialResponseDetailValueData data)
+        public async Task<int> CreateTraceFinancialResponseDetailValue(TraceFinancialResponseDetailValueData data)
         {
             var parameters = new Dictionary<string, object> {
                     { "TrcRspFin_Dtl_Id",  data.TrcRspFin_Dtl_Id},

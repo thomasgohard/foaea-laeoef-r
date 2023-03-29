@@ -456,13 +456,13 @@ namespace DBHelper
 
                     if (retParameter.Value is not null)
                         LastReturnValue = (int)retParameter.Value;
+
+                    result = (Tdata)outParameter.Value;
                 }
                 catch (Exception e)
                 {
                     LastException = new Exception(procName, e);
                 }
-
-                result = (Tdata)outParameter.Value;
             }
 
             return result;
