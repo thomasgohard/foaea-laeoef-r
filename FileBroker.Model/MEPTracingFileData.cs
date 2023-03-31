@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace FileBroker.Model
 {
@@ -57,6 +59,22 @@ namespace FileBroker.Model
         public string dat_Statute_Cd;
     }
 
+    public struct MEPTracing_RecType22
+    {
+        public string RecType;
+        public string dat_Subm_SubmCd;
+        public string dat_Appl_CtrlCd;
+        [DataMember(IsRequired = false)]
+        public string dat_Trace_Dbtr_PhoneNumber;
+        [DataMember(IsRequired = false)]
+        public string dat_Trace_Dbtr_EmailAddress;
+        public string dat_Trace_Declaration;
+        public string dat_Purpose;
+        public string dat_Tracing_Info;
+        public string dat_SIN_Information;
+        public string dat_Financial_Information;
+    }
+
     public struct MEPTracing_RecType99
     {
         public string RecType;
@@ -66,34 +84,25 @@ namespace FileBroker.Model
     public struct MEPTracing_TracingDataSet
     {
         public MEPTracing_RecType01 TRCAPPIN01;
+
+        [DataMember(IsRequired = false)]
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPTracing_RecType20>))]
         public List<MEPTracing_RecType20> TRCAPPIN20;
+
+        [DataMember(IsRequired = false)]
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPTracing_RecType21>))]
         public List<MEPTracing_RecType21> TRCAPPIN21;
+
+        [DataMember(IsRequired = false)]
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPTracing_RecType22>))]
+        public List<MEPTracing_RecType22> TRCAPPIN22;
+
         public MEPTracing_RecType99 TRCAPPIN99;
     }
-
-    public struct MEPTracing_TracingDataSetSingle
-    {
-        public MEPTracing_RecType01 TRCAPPIN01;
-        public MEPTracing_RecType20 TRCAPPIN20;
-        public MEPTracing_RecType21 TRCAPPIN21;
-        public MEPTracing_RecType99 TRCAPPIN99;
-    }
-
 
     public class MEPTracingFileData
     {
         public MEPTracing_TracingDataSet NewDataSet;
-
-        public MEPTracingFileData()
-        {
-            NewDataSet.TRCAPPIN20 = new List<MEPTracing_RecType20>();
-            NewDataSet.TRCAPPIN21 = new List<MEPTracing_RecType21>();
-        }
-    }
-
-    public class MEPTracingFileDataSingle
-    {
-        public MEPTracing_TracingDataSetSingle NewDataSet;
     }
 
 }

@@ -42,6 +42,41 @@ namespace FOAEA3.Resources.Helpers
             return result;
         }
 
+        public static short? ConvertToShortOrNull(this string value)
+        {
+            if (short.TryParse(value, out short result))
+                return result;
+            else
+                return null;
+        }
+
+        public static short ConvertToShort(this string value)
+        {
+            if (short.TryParse(value, out short result))
+                return result;
+            else
+                return 0;
+        }
+
+        public static int? ConvertToIntOrNull(this string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            if (int.TryParse(value, out int result))
+                return result;
+            else
+                return null;
+        }
+
+        public static decimal? ConvertToDecimalOrNull(this string value)
+        {
+            if (decimal.TryParse(value, out decimal result))
+                return result / 100M;
+            else
+                return null;
+        }
+
         public static string AppendToPath(this string basePath, string additionalPath, bool isFileName = false)
         {
             string result = basePath;

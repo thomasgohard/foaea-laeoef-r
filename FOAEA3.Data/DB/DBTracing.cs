@@ -27,22 +27,25 @@ namespace FOAEA3.Data.DB
                         {"Appl_CtrlCd", appl_CtrlCd }
                     };
 
-            TracingApplicationData traceData = (await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader))
+            var traceData = (await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TrcApplDtlGetTrc", parameters, FillDataFromReader))
                                                 .FirstOrDefault();
 
-            TracingApplicationData financialData = (await MainDB.GetDataFromStoredProcAsync<TracingApplicationData>("TraceFin_SelectForAppl", parameters, FillDataFromReader))
-                                                .FirstOrDefault();
+            var financialData = await MainDB.GetDataFromStoredProcAsync<TraceFinancialData>("TraceFin_SelectForAppl", parameters, FillTraceFinDataFromReader);
 
             if ((traceData is not null) && (financialData is not null))
             {
-                traceData.EntityType = financialData.EntityType;
-                traceData.TraceFin_Id = financialData.TraceFin_Id;
+                foreach(var finData in financialData)
+                {
+                    var detailsParameters = new Dictionary<string, object> {
+                        { "TraceFin_Id", finData.TraceFin_Id }
+                    };
 
-                var detailsParameters = new Dictionary<string, object> {
-                    { "TraceFin_Id", traceData.TraceFin_Id }
-                };
+                    var detailsData = await MainDB.GetDataFromStoredProcAsync<TraceFinancialDetailData>("TraceFin_Dtl_Select", detailsParameters, FillFinancialDetailDataFromReader);
+                    var taxForms = detailsData.Select(d => d.TaxForm).ToList();
 
-                traceData.Financials = await MainDB.GetDataFromStoredProcAsync<TraceFinancialDetailData>("TraceFin_Dtl_Select", detailsParameters, FillFinancialDetailDataFromReader);
+                    traceData.YearsAndTaxForms.Add(finData.FiscalYear, taxForms);
+                }
+
             }
 
             return traceData;
@@ -265,19 +268,28 @@ namespace FOAEA3.Data.DB
             if (rdr.ColumnExists("Statute_Cd")) data.Statute_Cd = rdr["Statute_Cd"] as string; // can be null 
             if (rdr.ColumnExists("InfoBank_Cd")) data.InfoBank_Cd = rdr["InfoBank_Cd"] as string; // can be null 
 
-            if (rdr.ColumnExists("TraceFin_Id")) data.TraceFin_Id = (int)rdr["TraceFin_Id"];
-            if (rdr.ColumnExists("EntityType")) data.EntityType = rdr["EntityType"] as string;
-            if (rdr.ColumnExists("RequestedSIN")) data.RequestedSIN = (bool) rdr["RequestedSIN"];
+            if (rdr.ColumnExists("Phone_Number")) data.PhoneNumber = rdr["Phone_Number"] as string; // can be null 
+            if (rdr.ColumnExists("Email_Address")) data.EmailAddress = rdr["Email_Address"] as string; // can be null 
+            if (rdr.ColumnExists("Declaration_Ind")) data.DeclarationIndicator = (bool) rdr["Declaration_Ind"]; 
+
+            if (rdr.ColumnExists("Purpose")) data.Purpose = (short) rdr["Purpose"];
+            if (rdr.ColumnExists("Tracing_Information")) data.Purpose = (short) rdr["Tracing_Information"];
+            if (rdr.ColumnExists("Sin_Information")) data.IncludeSinInformation = (bool) rdr["Sin_Information"];
+            if (rdr.ColumnExists("Financial_Information")) data.IncludeFinancialInformation = (bool) rdr["Financial_Information"];
+        }
+
+        private void FillTraceFinDataFromReader(IDBHelperReader rdr, TraceFinancialData data)
+        {
+            data.TraceFin_Id = (int)rdr["TraceFin_Id"];
+            data.FiscalYear = (short)rdr["FiscalYear"];
         }
 
         private void FillFinancialDetailDataFromReader(IDBHelperReader rdr, TraceFinancialDetailData data)
         {
             data.TraceFin_Dtl_Id = (int)rdr["TraceFin_Dtl_Id"];
             data.TraceFin_Id = (int)rdr["TraceFin_Id"];
-            data.FiscalYear = (short)rdr["FiscalYear"];
             data.TaxForm = rdr["TaxForm"] as string;
         }
-
 
     }
 }

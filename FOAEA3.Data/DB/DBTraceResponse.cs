@@ -157,7 +157,7 @@ namespace FOAEA3.Data.DB
             {
                 { "Appl_EnfSrv_Cd", applEnfSrvCd },
                 { "Appl_CtrlCd", applCtrlCd },
-                { "enfSrvCode", enfSrvCd.Substring(0,2) }
+                { "enfSrvCode", enfSrvCd[..2] }
             };
 
             await MainDB.ExecProcAsync("DeleteCanceledApplTrcRspData", parameters);

@@ -87,12 +87,7 @@ namespace FileBroker.Business.Helpers
             errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
 
             if (errors.Any())
-            {
-                errors = JsonHelper.Validate<MEPTracingFileDataSingle>(sourceTracingJsonData, out unknownTags);
-
-                if (errors.Any())
-                    return;
-            }
+                return;
 
             var tracingManager = new IncomingProvincialTracingManager(DB, FoaeaApis, fileName, Config);
 

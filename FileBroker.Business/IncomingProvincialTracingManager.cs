@@ -122,10 +122,11 @@ public class IncomingProvincialTracingManager
                         if (isValidRequest)
                         {
                             var traceData = tracingFile.TRCAPPIN21.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                            var traceFinData = tracingFile.TRCAPPIN22.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
                             var tracingMessage = new MessageData<TracingApplicationData>
                             {
-                                Application = GetTracingApplicationDataFromRequest(data, traceData),
+                                Application = GetTracingApplicationDataFromRequest(data, traceData, traceFinData),
                                 MaintenanceAction = data.Maintenance_ActionCd,
                                 MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
                                 NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
@@ -303,31 +304,18 @@ public class IncomingProvincialTracingManager
         {
             result = JsonConvert.DeserializeObject<MEPTracingFileData>(sourceTracingData);
         }
-        catch
+        catch (Exception e)
         {
-            try
-            {
-                var single = JsonConvert.DeserializeObject<MEPTracingFileDataSingle>(sourceTracingData);
-                if (single is null)
-                    throw new NullReferenceException("json conversion failed for MEPTracingFileDataSingle");
-
-                result = new MEPTracingFileData();
-                result.NewDataSet.TRCAPPIN01 = single.NewDataSet.TRCAPPIN01;
-                result.NewDataSet.TRCAPPIN20.Add(single.NewDataSet.TRCAPPIN20);
-                result.NewDataSet.TRCAPPIN21.Add(single.NewDataSet.TRCAPPIN21);
-                result.NewDataSet.TRCAPPIN99 = single.NewDataSet.TRCAPPIN99;
-            }
-            catch (Exception ee)
-            {
-                error = ee.Message;
-                result = new MEPTracingFileData();
-            }
+            error = e.Message;
+            result = new MEPTracingFileData();
         }
 
         return result;
     }
 
-    private static TracingApplicationData GetTracingApplicationDataFromRequest(MEPTracing_RecType20 baseData, MEPTracing_RecType21 tracingData)
+    private static TracingApplicationData GetTracingApplicationDataFromRequest(MEPTracing_RecType20 baseData,
+                                                                               MEPTracing_RecType21 tracingData,
+                                                                               MEPTracing_RecType22 tracingFinData)
     {
         var tracingApplication = new TracingApplicationData
         {
@@ -355,6 +343,8 @@ public class IncomingProvincialTracingManager
             AppLiSt_Cd = (ApplicationState)int.Parse(baseData.dat_Appl_LiSt_Cd),
             Appl_SIN_Cnfrmd_Ind = 0,
             ActvSt_Cd = "A",
+
+            // tracing data
             Appl_Crdtr_SurNme = tracingData.dat_Appl_Crdtr_SurNme,
             Appl_Crdtr_FrstNme = tracingData.dat_Appl_Crdtr_FrstNme,
             Appl_Crdtr_MddleNme = tracingData.dat_Appl_Crdtr_MddleNme,
@@ -366,6 +356,17 @@ public class IncomingProvincialTracingManager
             Trace_LstCyclCmp_Dte = DateTime.Now,
             Trace_LiSt_Cd = 0,
             InfoBank_Cd = tracingData.dat_InfoBank_Cd,
+
+            // new fields
+            Purpose = tracingFinData.dat_Purpose.ConvertToShortOrNull(),
+            TraceInformation = tracingFinData.dat_Tracing_Info.ConvertToShort(),
+            PhoneNumber = tracingFinData.dat_Trace_Dbtr_PhoneNumber,
+            EmailAddress = tracingFinData.dat_Trace_Dbtr_EmailAddress,
+            Declaration = tracingFinData.dat_Trace_Declaration,
+            IncludeSinInformation = (!string.Equals(tracingFinData.dat_SIN_Information, "N", StringComparison.InvariantCultureIgnoreCase)),
+
+            // financial data
+            IncludeFinancialInformation = (!string.Equals(tracingFinData.dat_Financial_Information, "N", StringComparison.InvariantCultureIgnoreCase))
         };
 
         return tracingApplication;
