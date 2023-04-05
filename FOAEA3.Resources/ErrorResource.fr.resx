@@ -249,6 +249,9 @@
   <data name="MISSING_MEDIUM_CODE" xml:space="preserve">
     <value>Le support choisi pour la réception des réponses doit être spécifié.</value>
   </data>
+  <data name="MISSING_PURPOSE" xml:space="preserve">
+    <value>L'objectif doit être spécifié.</value>
+  </data>
   <data name="MISSING_RECIPIENT_SUBMITTER" xml:space="preserve">
     <value>Le code du requérant autorisé au  transfert du fichier électronique doit être spécifié.</value>
   </data>

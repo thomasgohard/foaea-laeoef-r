@@ -72,6 +72,12 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
+            if (!IsValidDeclaration())
+                return false;
+
+            TracingApplication.DeclarationIndicator = true;
+
+            IsAddressMandatory = false;
             bool success = await base.CreateApplicationAsync();
 
             if (!success)
@@ -80,7 +86,7 @@ namespace FOAEA3.Business.Areas.Application
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.T01);
             }
 
-            // TODO: check and write Tracing specific info, if any were included
+            await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
 
             return success;
 
@@ -88,41 +94,51 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            // TODO: check and update Tracing specific info, if any were included
-            if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
+            IsAddressMandatory = false;
+
+            if (Validation.IsPre_C78())
             {
-                // affidavit data has been passed -- need to either create it or update it
-                if (!await AffidavitExistsAsync())
+                if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
-                    await ValidateAndProcessNewAffidavitAsync();
+                    // affidavit data has been passed -- need to either create it or update it
+                    if (!await AffidavitExistsAsync())
+                    {
+                        await ValidateAndProcessNewAffidavitAsync();
 
-                    // ignore all changes other than Creditor
+                        // ignore all changes other than Creditor
 
-                    string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
-                    string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
-                    string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
+                        string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
+                        string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
+                        string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
 
-                    await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                        await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
-                    TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
-                    TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
-                    TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
+                        TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
+                        TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
+                        TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
 
-                    MakeUpperCase();
+                        MakeUpperCase();
 
-                    await base.UpdateApplicationNoValidationAsync();
+                        await base.UpdateApplicationNoValidationAsync();
+                    }
+                    else
+                    {
+                        await DB.TracingTable.UpdateTracingDataAsync(TracingApplication);
+
+                        MakeUpperCase();
+
+                        await base.UpdateApplicationAsync();
+                    }
                 }
-                else
-                {
-                    await DB.TracingTable.UpdateTracingDataAsync(TracingApplication);
-
-                    MakeUpperCase();
-
-                    await base.UpdateApplicationAsync();
-                }
-
             }
+            else
+            {
+                await DB.TracingTable.UpdateTracingDataAsync(TracingApplication);
 
+                MakeUpperCase();
+
+                await base.UpdateApplicationAsync();
+            }
         }
 
         public async Task<bool> ReinstateApplicationAsync(string enfService, string controlCode, string lastUpdateUser,
@@ -228,22 +244,6 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Messages.AddInformation(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
         }
 
-        public async Task FullyServiceApplicationAsync(string enfSrvCode)
-        {
-            if (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
-            {
-                var traceResponseDB = DB.TraceResponseTable;
-                await traceResponseDB.DeleteCancelledApplicationTraceResponseDataAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-            }
-            else
-            {
-                await SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
-
-                MakeUpperCase();
-                await UpdateApplicationAsync();
-            }
-        }
-
         public async Task PartiallyServiceApplicationAsync(string enfSrvCode)
         {
             if (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
@@ -295,7 +295,7 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED);
 
             EventManager.AddEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: traceDate);
-            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveTimestamp: bfDate);
+            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
 
             await Validation.AddDuplicateCreditorWarningEventsAsync();
 
@@ -443,7 +443,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             EventManager.AddEvent(eventReasonCode);
-            EventManager.AddBFEvent(EventCode.C50520_INVALID_STATUS_CODE, effectiveTimestamp: nextBFdate);
+            EventManager.AddBFEvent(EventCode.C50520_INVALID_STATUS_CODE, effectiveDateTime: nextBFdate);
         }
 
         public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
@@ -567,6 +567,20 @@ namespace FOAEA3.Business.Areas.Application
             var tracingDB = DB.TracingTable;
             var data = await tracingDB.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
             return data;
+        }
+
+        private bool IsValidDeclaration()
+        {
+            string declaration = TracingApplication.Declaration?.Trim();
+            if (declaration is not null &&
+                (declaration.Equals(Config.TracingDeclaration.English, StringComparison.InvariantCultureIgnoreCase) ||
+                 declaration.Equals(Config.TracingDeclaration.French, StringComparison.InvariantCultureIgnoreCase)))
+                return true;
+            else
+            {
+                TracingApplication.Messages.AddError("Invalid or missing declaration.");
+                return false;
+            }
         }
     }
 

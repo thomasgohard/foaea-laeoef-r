@@ -34,12 +34,20 @@ namespace FOAEA3.Resources.Helpers
             return regex.Replace(value, " ");
         }
 
-        public static int ConvertStringToInteger(this string valueFromLine)
+        public static int ConvertToInteger(this string valueFromLine)
         {
             if (!int.TryParse(valueFromLine, out int result))
                 result = 0;
 
             return result;
+        }
+
+        public static bool ConvertToBool(this string valueFromLine)
+        {
+            if (valueFromLine == "1")
+                return true;
+            else
+                return false;
         }
 
         public static short? ConvertToShortOrNull(this string value)

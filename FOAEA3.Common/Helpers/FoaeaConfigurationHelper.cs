@@ -11,10 +11,13 @@ namespace FOAEA3.Common.Helpers
         public RecipientsConfig Recipients { get; }
         public TokenConfig Tokens { get; }
         public DeclarationData LicenceDenialDeclaration { get; }
+        public DeclarationData TracingDeclaration { get; }
         public List<string> ProductionServers { get; }
         public List<string> AutoSwear { get; }
         public List<string> AutoAccept { get; }
         public List<string> ESDsites { get; }
+
+        public DateTime TracingC78CutOff { get; }
 
         public FoaeaConfigurationHelper(string[] args = null)
         {
@@ -34,11 +37,19 @@ namespace FOAEA3.Common.Helpers
 
             Recipients = configuration.GetSection("RecipientsConfig").Get<RecipientsConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
-            LicenceDenialDeclaration = configuration.GetSection("Declaration:LicenceDenial").Get<DeclarationData>();
             AutoSwear = configuration.GetSection("AutoSwear").Get<List<string>>();
             AutoAccept = configuration.GetSection("AutoAccept").Get<List<string>>();
             ESDsites = configuration.GetSection("ESDsites").Get<List<string>>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
+
+            LicenceDenialDeclaration = configuration.GetSection("Declaration:LicenceDenial").Get<DeclarationData>();
+            TracingDeclaration = configuration.GetSection("Declaration:Tracing").Get<DeclarationData>();
+
+            var tracingCutOffValue = configuration["TracingC78CutOff"];
+            if (tracingCutOffValue != null)
+                TracingC78CutOff = tracingCutOffValue.ConvertToDateTimeIgnoringTimeZone() ?? DateTime.Now;
+            else
+                TracingC78CutOff = DateTime.Now;
         }
     }
 }

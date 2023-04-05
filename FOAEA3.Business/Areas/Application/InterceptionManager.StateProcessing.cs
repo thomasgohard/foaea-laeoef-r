@@ -308,7 +308,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_19_AwaitingDocumentsForVariation();
 
-            EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, effectiveTimestamp: DateTime.Now.AddDays(5));
+            EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION, effectiveDateTime: DateTime.Now.AddDays(5));
         }
 
         protected override async Task Process_35_ApplicationSuspended()

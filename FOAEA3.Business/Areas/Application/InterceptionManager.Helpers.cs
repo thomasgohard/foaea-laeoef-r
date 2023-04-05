@@ -25,7 +25,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (events.Count == 0)
                 EventManager.AddBFEvent(EventCode.C54005_CREATE_A_DEBTOR_LETTER_EVENT_IN_EVNTDBTR,
-                    effectiveTimestamp: DateTime.Now, appState: ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                    effectiveDateTime: DateTime.Now, appState: ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
         }
 

@@ -63,15 +63,17 @@ namespace FOAEA3.Business.Areas.Application
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
-            EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED, queue: EventQueue.EventTrace);
+            EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED);
 
-            EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED, queue: EventQueue.EventSubm, appState: ApplicationState.APPLICATION_ACCEPTED_10);
+            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED, 
+                                      appState: ApplicationState.APPLICATION_ACCEPTED_10);
 
-            EventManager.AddEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, queue: EventQueue.EventSubm,
-                                  appState: ApplicationState.APPLICATION_REINSTATED_11);
+            EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, 
+                                      appState: ApplicationState.APPLICATION_REINSTATED_11);
 
-            EventManager.AddEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, queue: EventQueue.EventBF,
-                                  appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: DateTime.Now.AddMonths(3));
+            EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
+                                    appState: ApplicationState.APPLICATION_REINSTATED_11, 
+                                    effectiveDateTime: DateTime.Now.AddMonths(3));
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -82,7 +84,6 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override async Task Process_11_ApplicationReinstated()
         {
-
             if (TracingApplication.Appl_RecvAffdvt_Dte is null)
             {
                 await AddSystemErrorAsync(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
@@ -90,13 +91,11 @@ namespace FOAEA3.Business.Areas.Application
                 return;
             }
 
-            DateTime quarterDate; // = DateTimeHelper.AddQuarter(ReinstateEffectiveDate, 1);
-            int eventTraceCount = await EventManager.GetTraceEventCountAsync(
-                                                    Appl_EnfSrv_Cd,
-                                                    Appl_CtrlCd,
-                                                    TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1),
-                                                    BFEventReasonCode,
-                                                    BFEvent_Id);
+            DateTime quarterDate;
+            int eventTraceCount = await EventManager.GetTraceEventCountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd,
+                                                                             TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1),
+                                                                             BFEventReasonCode,
+                                                                             BFEvent_Id);
 
             switch (eventTraceCount)
             {
@@ -136,8 +135,8 @@ namespace FOAEA3.Business.Areas.Application
                     {
                         TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
                         EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
-                                                      appState: ApplicationState.APPLICATION_REINSTATED_11,
-                                                      effectiveTimestamp: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
+                                                appState: ApplicationState.APPLICATION_REINSTATED_11,
+                                                effectiveDateTime: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
                     }
                     else
                     {
@@ -154,8 +153,8 @@ namespace FOAEA3.Business.Areas.Application
                         {
                             TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
                             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
-                                                          appState: ApplicationState.APPLICATION_REINSTATED_11,
-                                                          effectiveTimestamp: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
+                                                    appState: ApplicationState.APPLICATION_REINSTATED_11,
+                                                    effectiveDateTime: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
                         }
                         else
                             await SetNewStateTo(ApplicationState.EXPIRED_15);
@@ -179,23 +178,6 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(EventCode.C50821_FIRST_TRACE_RESULT_RECEIVED);
         }
 
-        protected override async Task Process_13_FullyServiced()
-        {
-            EventManager.AddEvent(EventCode.C50823_LAST_TRACE_RESULT);
-
-            var events = await EventManager.GetEventBFAsync(TracingApplication.Subm_SubmCd, TracingApplication.Appl_CtrlCd,
-                                                 EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
-
-            bool isValidAffidavitDate = TracingApplication.Appl_RecvAffdvt_Dte.HasValue &&
-                                        (DateTime.Now > TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1));
-
-            if (events.Any() || isValidAffidavitDate)
-                await SetNewStateTo(ApplicationState.EXPIRED_15);
-            else
-                await base.Process_13_FullyServiced();
-
-        }
-
         protected override async Task Process_14_ManuallyTerminated()
         {
             await base.Process_14_ManuallyTerminated();
@@ -203,5 +185,10 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.DeleteBFEvent(TracingApplication.Subm_SubmCd, TracingApplication.Appl_CtrlCd);
         }
 
+        protected override async Task Process_15_Expired()
+        {
+            await base.Process_15_Expired();
+            EventManager.AddEvent(EventCode.C50823_LAST_TRACE_RESULT);
+        }
     }
 }

@@ -27,6 +27,24 @@ namespace FOAEA3.Business.Areas.Application
             return await EventDB.GetApplicationEventsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd, queue);
         }
 
+        public void AddSubmEvent(EventCode eventCode, string eventReasonText = null, 
+                     ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
+                     string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
+                     string activeState = "A", string updateSubm = null)
+        {
+            AddEvent(eventCode, eventReasonText, EventQueue.EventSubm, appState, effectiveDateTime, recipientSubm, submCd, 
+                     enfSrv, controlCode, activeState, updateSubm);
+        }
+
+        public void AddTraceEvent(EventCode eventCode, string eventReasonText = null,
+                     ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
+                     string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
+                     string activeState = "A", string updateSubm = null)
+        {
+            AddEvent(eventCode, eventReasonText, EventQueue.EventTrace, appState, effectiveDateTime, recipientSubm, submCd,
+                     enfSrv, controlCode, activeState, updateSubm);
+        }
+
         public void AddEvent(EventCode eventCode, string eventReasonText = null, EventQueue queue = EventQueue.EventSubm,
                              ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
                              string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
@@ -101,9 +119,10 @@ namespace FOAEA3.Business.Areas.Application
             return await EventDB.GetEventBFAsync(subm_SubmCd, appl_CtrlCd, eventCode, activeState);
         }
 
-        public void AddBFEvent(EventCode eventCode, string eventReasonText = null, ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveTimestamp = null)
+        public void AddBFEvent(EventCode eventCode, string eventReasonText = null, ApplicationState appState = ApplicationState.UNDEFINED, 
+                               DateTime? effectiveDateTime = null)
         {
-            AddEvent(eventCode, eventReasonText, queue: EventQueue.EventBF, appState: appState, effectiveDateTime: effectiveTimestamp);
+            AddEvent(eventCode, eventReasonText, queue: EventQueue.EventBF, appState: appState, effectiveDateTime: effectiveDateTime);
         }
 
         public void DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)

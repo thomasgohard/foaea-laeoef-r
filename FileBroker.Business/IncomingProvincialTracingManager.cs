@@ -10,7 +10,6 @@ public class IncomingProvincialTracingManager
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
     private IFileBrokerConfigurationHelper Config { get; }
-    private ProvincialAuditFileConfig AuditConfig { get; }
     private Dictionary<string, string> Translations { get; }
     private bool IsFrench { get; }
 
@@ -29,7 +28,7 @@ public class IncomingProvincialTracingManager
         Config = config;
 
         string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+        IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
         Translations = LoadTranslations();
 
@@ -70,7 +69,7 @@ public class IncomingProvincialTracingManager
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, AuditConfig, DB.MailService);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -121,8 +120,8 @@ public class IncomingProvincialTracingManager
 
                         if (isValidRequest)
                         {
-                            var traceData = tracingFile.TRCAPPIN21.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var traceFinData = tracingFile.TRCAPPIN22.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                            var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                            var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
                             var tracingMessage = new MessageData<TracingApplicationData>
                             {
@@ -186,7 +185,7 @@ public class IncomingProvincialTracingManager
                     }
 
                     int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", AuditConfig.AuditRecipients,
+                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                             errorCount, warningCount, successCount, unknownTags.Count, totalFilesCount);
                 }
                 finally
@@ -201,7 +200,7 @@ public class IncomingProvincialTracingManager
         {
             result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, AuditConfig.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
         }
 
         await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
@@ -314,8 +313,8 @@ public class IncomingProvincialTracingManager
     }
 
     private static TracingApplicationData GetTracingApplicationDataFromRequest(MEPTracing_RecType20 baseData,
-                                                                               MEPTracing_RecType21 tracingData,
-                                                                               MEPTracing_RecType22 tracingFinData)
+                                                                               MEPTracing_RecType21? tracingData,
+                                                                               MEPTracing_RecType22? tracingFinData)
     {
         var tracingApplication = new TracingApplicationData
         {
@@ -345,28 +344,28 @@ public class IncomingProvincialTracingManager
             ActvSt_Cd = "A",
 
             // tracing data
-            Appl_Crdtr_SurNme = tracingData.dat_Appl_Crdtr_SurNme,
-            Appl_Crdtr_FrstNme = tracingData.dat_Appl_Crdtr_FrstNme,
-            Appl_Crdtr_MddleNme = tracingData.dat_Appl_Crdtr_MddleNme,
-            Trace_Child_Text = tracingData.dat_Trace_Child_Text,
-            Trace_Breach_Text = tracingData.dat_Trace_Breach_Text,
-            Trace_ReasGround_Text = tracingData.dat_Trace_ReasGround_Text,
-            FamPro_Cd = tracingData.dat_FamPro_Cd,
-            Statute_Cd = tracingData.dat_Statute_Cd,
+            Appl_Crdtr_SurNme = tracingData?.dat_Appl_Crdtr_SurNme,
+            Appl_Crdtr_FrstNme = tracingData?.dat_Appl_Crdtr_FrstNme,
+            Appl_Crdtr_MddleNme = tracingData?.dat_Appl_Crdtr_MddleNme,
+            Trace_Child_Text = tracingData?.dat_Trace_Child_Text,
+            Trace_Breach_Text = tracingData?.dat_Trace_Breach_Text,
+            Trace_ReasGround_Text = tracingData?.dat_Trace_ReasGround_Text,
+            FamPro_Cd = tracingData?.dat_FamPro_Cd,
+            Statute_Cd = tracingData?.dat_Statute_Cd,
             Trace_LstCyclCmp_Dte = DateTime.Now,
             Trace_LiSt_Cd = 0,
-            InfoBank_Cd = tracingData.dat_InfoBank_Cd,
+            InfoBank_Cd = tracingData?.dat_InfoBank_Cd,
 
             // new fields
-            Purpose = tracingFinData.dat_Purpose.ConvertToShortOrNull(),
-            TraceInformation = tracingFinData.dat_Tracing_Info.ConvertToShort(),
-            PhoneNumber = tracingFinData.dat_Trace_Dbtr_PhoneNumber,
-            EmailAddress = tracingFinData.dat_Trace_Dbtr_EmailAddress,
-            Declaration = tracingFinData.dat_Trace_Declaration,
-            IncludeSinInformation = (!string.Equals(tracingFinData.dat_SIN_Information, "N", StringComparison.InvariantCultureIgnoreCase)),
+            Purpose = tracingFinData?.dat_Purpose.ConvertToShortOrNull(),
+            TraceInformation = tracingFinData?.dat_Tracing_Info.ConvertToShort() ?? 0,
+            PhoneNumber = tracingFinData?.dat_Trace_Dbtr_PhoneNumber,
+            EmailAddress = tracingFinData?.dat_Trace_Dbtr_EmailAddress,
+            Declaration = tracingFinData?.dat_Trace_Declaration,
+            IncludeSinInformation = tracingFinData?.dat_SIN_Information.ConvertToBool() ?? false,
 
             // financial data
-            IncludeFinancialInformation = (!string.Equals(tracingFinData.dat_Financial_Information, "N", StringComparison.InvariantCultureIgnoreCase))
+            IncludeFinancialInformation = tracingFinData?.dat_Financial_Information.ConvertToBool() ?? false
         };
 
         return tracingApplication;

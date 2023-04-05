@@ -52,21 +52,26 @@ namespace FOAEA3.Business.Areas.Application
             string cityName = Application.Appl_Dbtr_Addr_CityNme;
             string countryCode = Application.Appl_Dbtr_Addr_CtryCd;
 
-            if (string.IsNullOrEmpty(postalCode) || string.IsNullOrEmpty(provinceCode) || string.IsNullOrEmpty(cityName) ||
-                string.IsNullOrEmpty(countryCode) || string.IsNullOrEmpty(Application.Appl_Dbtr_Addr_Ln))
+            if (IsAddressMandatory &&
+                (string.IsNullOrEmpty(postalCode) || string.IsNullOrEmpty(provinceCode) || string.IsNullOrEmpty(cityName) ||
+                string.IsNullOrEmpty(countryCode) || string.IsNullOrEmpty(Application.Appl_Dbtr_Addr_Ln)))
             {
                 newState = ApplicationState.INVALID_APPLICATION_1;
                 Application.Messages.AddError("Incomplete Debtor Address");
             }
 
-            (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
-            if (!isValid)
+            if (!string.IsNullOrEmpty(postalCode) && !string.IsNullOrEmpty(provinceCode) && !string.IsNullOrEmpty(cityName) &&
+                !string.IsNullOrEmpty(countryCode))
             {
-                EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
-                if (Application.Medium_Cd != "FTP")
+                (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
+                if (!isValid)
                 {
-                    newState = ApplicationState.INVALID_APPLICATION_1;
-                    Application.Messages.AddError(ReferenceData.Instance().FoaEvents[EventCode.C50772_INVALID_POSTAL_CODE].Description);
+                    EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
+                    if (Application.Medium_Cd != "FTP")
+                    {
+                        newState = ApplicationState.INVALID_APPLICATION_1;
+                        Application.Messages.AddError(ReferenceData.Instance().FoaEvents[EventCode.C50772_INVALID_POSTAL_CODE].Description);
+                    }
                 }
             }
 
