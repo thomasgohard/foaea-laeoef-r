@@ -21,7 +21,7 @@ namespace FOAEA3.Model.Interfaces.Broker
                                                                  string newIssuingSubmitter);
         Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState,
                                                                            int lifeState, string enfServiceCode);
-        Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState,
+        Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState,
                                                                              string recipientCode);
     }
 }

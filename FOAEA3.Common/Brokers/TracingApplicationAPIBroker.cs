@@ -108,14 +108,14 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetDataAsync<List<TracingOutgoingFederalData>>(apiCall, token: Token);
         }
 
-        public async Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords,
                                                                                   string activeState,
                                                                                   string recipientCode)
         {
             string baseCall = "api/v1/OutgoingProvincialTracingResults";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&recipientCode={recipientCode}&isXML=true";
-            return await ApiHelper.GetDataAsync<List<TracingOutgoingProvincialData>>(apiCall, token: Token);
+            return await ApiHelper.GetDataAsync<TracingOutgoingProvincialData>(apiCall, token: Token);
         }
 
     }

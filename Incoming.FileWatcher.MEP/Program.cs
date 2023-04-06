@@ -93,12 +93,15 @@ internal class Program
 
                         var errors = new List<string>();
 
-                        await provincialFileManager.ProcessWaitingFile(newFile, errors);
+                        errors = await provincialFileManager.ProcessWaitingFile(newFile, errors);
 
                         if (errors.Any())
                         {
                             foreach (var error in errors)
+                            {
                                 await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", newFile, new Exception(error), displayExceptionError: true);
+                                WriteEmbeddedColorLine($"[red]Error[/red]: [yellow]{error}[/yellow]");
+                            }
                             finishedForProvince = true;
                         }
                     }

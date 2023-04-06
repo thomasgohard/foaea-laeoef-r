@@ -871,7 +871,7 @@ namespace FOAEA3.Business.Areas.Application
                                     DateTime dateForNextBF = DateTime.Now.AddDays(5);
                                     EventManager.AddEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION);
                                     EventManager.AddBFEvent(EventCode.C50896_AWAITING_DOCUMENTS_FOR_VARIATION,
-                                                            effectiveTimestamp: dateForNextBF);
+                                                            effectiveDateTime: dateForNextBF);
                                 }
                             }
                             break;

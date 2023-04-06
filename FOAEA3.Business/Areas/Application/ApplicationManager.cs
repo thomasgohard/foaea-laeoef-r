@@ -25,6 +25,7 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventManager EventManager { get; }
         public ApplicationEventDetailManager EventDetailManager { get; }
 
+        protected bool IsAddressMandatory { get; set; }
         protected ApplicationValidation Validation { get; }
         protected IFoaeaConfigurationHelper Config { get; }
 

@@ -20,7 +20,7 @@ public class OutgoingProvincialTracingResultsController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("")]
-    public async Task<ActionResult<List<TracingOutgoingProvincialData>>> GetProvincialOutgoingData(
+    public async Task<ActionResult<TracingOutgoingProvincialData>> GetProvincialOutgoingData(
                                                             [FromQuery] int maxRecords,
                                                             [FromQuery] string activeState,
                                                             [FromQuery] string recipientCode,

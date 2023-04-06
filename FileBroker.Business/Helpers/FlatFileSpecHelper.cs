@@ -53,7 +53,7 @@ public static class FlatFileSpecHelper
                     fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine.ConvertJulianDateStringToDateTime(ref error));
 
                 else if (specItem.PrcsType_Cd.ToLower().Trim() == "integer")
-                    fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine.ConvertStringToInteger());
+                    fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine.ConvertToInteger());
 
                 else
                     fieldInfo.SetValueDirect(__makeref(newRecType), valueFromFlatFileLine);

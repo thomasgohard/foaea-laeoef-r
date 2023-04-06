@@ -107,9 +107,9 @@ public class TracingsController : FoaeaControllerBase
                 await tracingManager.PartiallyServiceApplicationAsync(enforcementServiceCode);
                 break;
 
-            case "fullyserviceapplication":
-                await tracingManager.FullyServiceApplicationAsync(enforcementServiceCode);
-                break;
+            //case "fullyserviceapplication":
+            //    await tracingManager.FullyServiceApplicationAsync(enforcementServiceCode);
+            //    break;
 
             default:
                 application.Messages.AddSystemError($"Unknown command: {command}");

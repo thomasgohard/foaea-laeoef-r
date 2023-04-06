@@ -20,11 +20,18 @@ namespace FOAEA3.Model
         public string FamPro_Cd { get; set; }
         public string Statute_Cd { get; set; }
 
+        // new fields
+        public string PhoneNumber { get; set; }
+        public string EmailAddress { get; set; }
+        public bool DeclarationIndicator { get; set; }
+        public string Declaration { get; set; }
+        public short? Purpose { get; set; }
+        public short TraceInformation { get; set; }
+        public bool IncludeSinInformation { get; set; }
+
         // financial trace
-        public int TraceFin_Id { get; set; }
-        public string EntityType { get; set; }
-        public bool RequestedSIN { get; set; }
-        public List<TraceFinancialDetailData> Financials { get; set; }
+        public bool IncludeFinancialInformation { get; set; }
+        public Dictionary<short, List<string>> YearsAndTaxForms { get; set; }
 
         public TracingApplicationData()
         {
@@ -38,7 +45,7 @@ namespace FOAEA3.Model
             Appl_Affdvt_DocTypCd = "T02";
             Appl_LastUpdate_Dte = Appl_Create_Dte;
 
-            Financials = new List<TraceFinancialDetailData>();
+            YearsAndTaxForms = new Dictionary<short, List<string>>();
         }
 
         public void Merge(TracingApplicationData data)
@@ -48,17 +55,25 @@ namespace FOAEA3.Model
             Trace_ReasGround_Text = data.Trace_ReasGround_Text;
             FamPro_Cd = data.FamPro_Cd;
             Statute_Cd = data.Statute_Cd;
+            InfoBank_Cd = data.InfoBank_Cd;
+
             Trace_Cycl_Qty = data.Trace_Cycl_Qty;
             Trace_LstCyclStr_Dte = data.Trace_LstCyclStr_Dte;
             Trace_LstCyclCmp_Dte = data.Trace_LstCyclCmp_Dte;
             Trace_LiSt_Cd = data.Trace_LiSt_Cd;
-            InfoBank_Cd = data.InfoBank_Cd;
 
-            TraceFin_Id = data.TraceFin_Id;
-            EntityType = data.EntityType;
-            Financials.Clear();
-            foreach(var financial in Financials)
-                Financials.Add(financial);
+            PhoneNumber = data.PhoneNumber;
+            EmailAddress = data.EmailAddress;
+            DeclarationIndicator = data.DeclarationIndicator;
+
+            Purpose = data.Purpose;
+            TraceInformation = data.TraceInformation;
+            IncludeSinInformation = data.IncludeSinInformation;
+            IncludeFinancialInformation = data.IncludeFinancialInformation;
+            
+            YearsAndTaxForms.Clear();
+            foreach(var financial in YearsAndTaxForms)
+                YearsAndTaxForms.Add(financial.Key, financial.Value);
         }
 
     }

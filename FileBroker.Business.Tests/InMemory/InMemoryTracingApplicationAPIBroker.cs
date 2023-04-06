@@ -40,7 +40,7 @@ namespace FileBroker.Business.Tests.InMemory
             throw new System.NotImplementedException();
         }
 
-        public Task<List<TracingOutgoingProvincialData>> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
+        public Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
         {
             throw new System.NotImplementedException();
         }

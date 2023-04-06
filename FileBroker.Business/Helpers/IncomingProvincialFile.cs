@@ -21,10 +21,10 @@ namespace FileBroker.Business.Helpers
             Config = config;
         }
 
-        public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors)
+        public async Task<List<string>> ProcessWaitingFile(string fullPath, List<string> errors)
         {
             if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
-                await ProcessIncomingXmlFile(fullPath, errors);
+                errors = await ProcessIncomingXmlFile(fullPath, errors);
 
             else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
                 await ProcessIncomingESDfile(fullPath, errors);
@@ -32,10 +32,10 @@ namespace FileBroker.Business.Helpers
             else
                 errors.Add($"Unknown file type: {Path.GetExtension(fullPath)?.ToUpper()} for file {fullPath}");
 
-            return errors.Any();
+            return errors;
         }
 
-        public async Task ProcessIncomingXmlFile(string fullPath, List<string> errors)
+        public async Task<List<string>> ProcessIncomingXmlFile(string fullPath, List<string> errors)
         {
             string fileNameNoExtension = Path.GetFileNameWithoutExtension(fullPath);
             string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
@@ -43,7 +43,7 @@ namespace FileBroker.Business.Helpers
             if (fileNameNoCycle.Length != 8)
             {
                 errors.Add($"Invalid MEP incoming file: {fileNameNoCycle}");
-                return;
+                return errors;
             }
 
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
@@ -52,13 +52,13 @@ namespace FileBroker.Business.Helpers
                 string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
                 if (errors.Any())
-                    return;
+                    return errors;
 
                 char fileType = fileNameNoCycle[7];
                 switch (fileType)
                 {
                     case 'T':
-                        await ProcessIncomingTracing(jsonText, fileNameNoExtension, errors);
+                        errors = await ProcessIncomingTracing(jsonText, fileNameNoExtension, errors);
                         break;
 
                     case 'I':
@@ -80,19 +80,15 @@ namespace FileBroker.Business.Helpers
             else
                 errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoExtension?.ToUpper()[6]}'. Is this an incoming file?");
 
+            return errors;
         }
 
-        private async Task ProcessIncomingTracing(string sourceTracingJsonData, string fileName, List<string> errors)
+        private async Task<List<string>> ProcessIncomingTracing(string sourceTracingJsonData, string fileName, List<string> errors)
         {
             errors = JsonHelper.Validate<MEPTracingFileData>(sourceTracingJsonData, out List<UnknownTag> unknownTags);
 
             if (errors.Any())
-            {
-                errors = JsonHelper.Validate<MEPTracingFileDataSingle>(sourceTracingJsonData, out unknownTags);
-
-                if (errors.Any())
-                    return;
-            }
+                return errors;
 
             var tracingManager = new IncomingProvincialTracingManager(DB, FoaeaApis, fileName, Config);
 
@@ -108,6 +104,8 @@ namespace FileBroker.Business.Helpers
             }
             else
                 errors.Add("File was already loading?");
+
+            return errors;
         }
 
         public async Task ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)

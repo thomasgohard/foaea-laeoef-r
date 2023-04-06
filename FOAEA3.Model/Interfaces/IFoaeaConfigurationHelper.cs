@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FOAEA3.Model.Interfaces
 {
@@ -7,10 +8,12 @@ namespace FOAEA3.Model.Interfaces
         string FoaeaConnection { get; }
         RecipientsConfig Recipients { get; }
         TokenConfig Tokens { get; }
-        DeclarationData LicenceDenialDeclaration { get; }
         List<string> ProductionServers { get; }
         public List<string> AutoSwear { get; }
         public List<string> AutoAccept { get; }
         List<string> ESDsites { get; }
+        DeclarationData LicenceDenialDeclaration { get; }
+        DeclarationData TracingDeclaration { get; }
+        public DateTime TracingC78CutOff { get; }
     }
 }

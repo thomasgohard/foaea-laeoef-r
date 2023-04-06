@@ -28,7 +28,7 @@ public class IncomingFederalTracingManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<MessageDataList> ProcessXmlFileAsync(string sourceTracingData, string flatFileName)
+    public async Task<MessageDataList> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
     {
         var result = new MessageDataList();
 
@@ -40,7 +40,7 @@ public class IncomingFederalTracingManager
 
         // bool isValid = true;
 
-        var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingData, out string error);
+        var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingDataAsJson, out string error);
         var tracingFile = tracingFileData.CRATraceIn;
 
         bool isValid = true;
@@ -87,7 +87,7 @@ public class IncomingFederalTracingManager
         {
             Appl_EnfSrv_Cd = traceResponse.Appl_EnfSrvCd,
             Appl_CtrlCd = traceResponse.Appl_CtrlCd,
-            EnfSrv_Cd = "RC01",
+            EnfSrv_Cd = "RC02",
             TrcRsp_Rcpt_Dte = DateTime.Now,
             TrcRsp_SeqNr = 0,
             TrcRsp_Trace_CyclNr = cycle,

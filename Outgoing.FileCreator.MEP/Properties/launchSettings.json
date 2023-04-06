@@ -6,6 +6,10 @@
     "Outgoing.FileCreator.MEP STATS_ONLY": {
       "commandName": "Project",
       "commandLineArgs": "STATS_ONLY"
+    },
+    "Outgoing.FileCreator.MEP TRACE_ONLY": {
+      "commandName": "Project",
+      "commandLineArgs": "TRACE_ONLY"
     }
   }
 }

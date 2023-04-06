@@ -249,6 +249,9 @@
   <data name="MISSING_MEDIUM_CODE" xml:space="preserve">
     <value>The medium code must be specified</value>
   </data>
+  <data name="MISSING_PURPOSE" xml:space="preserve">
+    <value>The purpose must be specified</value>
+  </data>
   <data name="MISSING_RECIPIENT_SUBMITTER" xml:space="preserve">
     <value>The recipient submitter must be specified</value>
   </data>

@@ -21,7 +21,7 @@ namespace FOAEA3.Model.Interfaces.Repository
                                                                 string activeState,
                                                                 ApplicationState lifeState,
                                                                 string enfServiceCode);
-        Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
+        Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                       string activeState,
                                                                       string recipientCode,
                                                                       bool isXML = true);

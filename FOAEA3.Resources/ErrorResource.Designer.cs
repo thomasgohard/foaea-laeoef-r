@@ -457,6 +457,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The purpose must be specified.
+        /// </summary>
+        public static string MISSING_PURPOSE {
+            get {
+                return ResourceManager.GetString("MISSING_PURPOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The recipient submitter must be specified.
         /// </summary>
         public static string MISSING_RECIPIENT_SUBMITTER {
