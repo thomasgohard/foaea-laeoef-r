@@ -1,4 +1,6 @@
 ﻿using FileBroker.Common.Helpers;
+using Microsoft.Exchange.WebServices.Data;
+using NJsonSchema.Infrastructure;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -49,7 +51,18 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                                          processCodes.EnfSrv_Cd);
 
                 var eventIds = new List<int>();
-                string fileContent = GenerateOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
+                string fileContent = string.Empty;
+
+                if (processCodes.EnfSrv_Cd != "RC02")
+                {
+                    // tracing requests
+                    fileContent = GenerateTraceOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
+                }
+                else
+                {
+                    // financial requests
+                    (fileContent, eventIds) = await GenerateFinancialOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, eventIds);
+                }
 
                 await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
@@ -97,7 +110,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         return data;
     }
 
-    private static string GenerateOutputFileContentFromData(List<TracingOutgoingFederalData> data,
+    private static string GenerateTraceOutputFileContentFromData(List<TracingOutgoingFederalData> data,
                                                             string newCycle, string enfSrvCode, ref List<int> eventIds)
     {
         var result = new StringBuilder();
@@ -135,4 +148,89 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         return $"99{rowCount:000000}";
     }
 
+    private async Task<(string, List<int>)> GenerateFinancialOutputFileContentFromData(List<TracingOutgoingFederalData> data,
+                                                                     string newCycle, string enfSrvCode, List<int> eventIds)
+    {
+        var result = new StringBuilder();
+
+        result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
+        result.AppendLine("<CRATraceOut>");
+
+        result.AppendLine(GenerateFinHeaderLine(newCycle));
+        foreach (var item in data)
+        {
+            var appl = await APIs.TracingApplications.GetApplicationAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+
+            result.AppendLine(GenerateFinDetailLine(item, appl));
+            eventIds.Add(item.Event_dtl_Id);
+        }
+        result.AppendLine(GenerateFinFooterLine(data.Count));
+
+        return (result.ToString(), eventIds);
+    }
+
+    private static string GenerateFinHeaderLine(string newCycle)
+    {
+        string xmlCreationDateTime = DateTime.Now.ToString("o");
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Header>");
+        output.AppendLine($"  <Cycle>{newCycle}</Cycle>");
+        output.AppendLine($"  <FileDate>{xmlCreationDateTime}</FileDate>");
+        output.Append($"</Header>");
+
+        return output.ToString();
+    }
+
+    private string GenerateFinDetailLine(TracingOutgoingFederalData item, TracingApplicationData appl)
+    {
+        string xmlDebtorBirthDate = appl.Appl_Dbtr_Brth_Dte?.ToString("o");
+
+        string entity = "01";
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Trace_Request>");
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", entity));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_SurNme", appl.Appl_Dbtr_SurNme));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_FrstNme", appl.Appl_Dbtr_FrstNme));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_Brth_Dte", xmlDebtorBirthDate));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_Cnfrmd_SIN", appl.Appl_Dbtr_Cnfrmd_SIN));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_EnfSrvCd", appl.Appl_EnfSrv_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_CtrlCd", appl.Appl_CtrlCd));
+
+        if (entity == "01")
+        {
+            if (appl.YearsAndTaxForms is not null)
+            {
+                foreach (var taxYear in appl.YearsAndTaxForms)
+                {
+                    short year = taxYear.Key;
+                    var taxForms = taxYear.Value;
+                    output.AppendLine($"      </Tax_Data>");
+                    output.AppendLine($"          <Tax_Year>'{year}'</Tax_Year>");
+                    foreach (var form in taxForms)
+                        output.AppendLine($"         <Tax_Form>'{form}'</Tax_Form>");
+                    output.AppendLine($"      </Tax_Data>");
+                }
+            }
+        }
+        else
+        {
+            output.AppendLine($"      <Tax_Data />");
+        }
+
+        output.Append($"</Trace_Request>");
+
+        return output.ToString();
+    }
+
+    private static string GenerateFinFooterLine(int count)
+    {
+        var output = new StringBuilder();
+        output.AppendLine($"<Footer>");
+        output.AppendLine($"  <RequestCount>{count:000000}</RequestCount>");
+        output.Append($"</Footer>");
+
+        return output.ToString();
+    }
 }

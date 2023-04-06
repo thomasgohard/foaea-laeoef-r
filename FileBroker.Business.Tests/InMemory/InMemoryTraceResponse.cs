@@ -34,6 +34,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<DataList<TraceFinancialResponseData>> GetActiveTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId)
         {
             throw new NotImplementedException();

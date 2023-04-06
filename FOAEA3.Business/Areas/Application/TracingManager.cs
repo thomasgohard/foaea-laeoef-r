@@ -287,7 +287,6 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task SetTracingForReinstateAsync(DateTime traceDate, DateTime bfDate, EventCode eventReasonCode)
         {
-
             TracingApplication.AppLiSt_Cd = ApplicationState.APPLICATION_ACCEPTED_10;
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -298,12 +297,10 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
 
             await Validation.AddDuplicateCreditorWarningEventsAsync();
-
         }
 
         private async Task ValidateAndProcessNewAffidavitAsync()
         {
-
             if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalUser())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = null;
@@ -320,7 +317,6 @@ namespace FOAEA3.Business.Areas.Application
                     await Process_04_SinConfirmed();
                 }
             }
-
         }
 
         public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
@@ -559,7 +555,7 @@ namespace FOAEA3.Business.Areas.Application
             return await tracingDB.GetFederalOutgoingDataAsync(maxRecords, activeState, lifeState, enfServiceCode);
         }
 
-        public async Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)

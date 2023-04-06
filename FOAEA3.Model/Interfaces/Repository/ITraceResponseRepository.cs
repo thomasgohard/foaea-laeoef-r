@@ -13,6 +13,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task InsertBulkDataAsync(List<TraceResponseData> responseData);
 
         Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);
+        Task<DataList<TraceFinancialResponseData>> GetActiveTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);
+
         Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId);
         Task<DataList<TraceFinancialResponseDetailValueData>> GetTraceResponseFinancialDetailValues(int traceResponseFinancialDetailId);
         Task<int> CreateTraceFinancialResponse(TraceFinancialResponseData data);

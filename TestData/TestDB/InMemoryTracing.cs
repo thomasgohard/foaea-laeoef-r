@@ -33,7 +33,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        public Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
         {
             throw new NotImplementedException();
         }

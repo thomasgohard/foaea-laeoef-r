@@ -79,7 +79,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
     }
 
-    private async Task<List<TracingOutgoingProvincialData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
+    private async Task<TracingOutgoingProvincialData> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                                 string recipientCode)
     {
         var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
@@ -91,22 +91,33 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
     }
 
 
-    private static string GenerateOutputFileContentFromData(List<TracingOutgoingProvincialData> data,
+    private static string GenerateOutputFileContentFromData(TracingOutgoingProvincialData data,
                                                             string newCycle)
     {
         var result = new StringBuilder();
 
         result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
-        result.AppendLine("<ProvincialOutboundXMLFileTraceResults80>");
+        result.AppendLine("<ProvincialOutboundXMLFileTraceResults>");
 
         result.AppendLine(GenerateHeaderLine(newCycle));
 
-        foreach (var item in data)
-            result.AppendLine(GenerateDetailLine(item));
+        int totalCount = 0;
+        if (data.TracingData is not null)
+        {
+            totalCount += data.TracingData.Count;
+            foreach (var item in data.TracingData)
+                result.AppendLine(GenerateDetailLine80(item));
+        }
+        if (data.FinancialData is not null)
+        {
+            totalCount += data.FinancialData.Count;
+            foreach (var item in data.FinancialData)
+                result.AppendLine(GenerateDetailLine81(item));
+        }
 
-        result.AppendLine(GenerateFooterLine(data.Count));
+        result.AppendLine(GenerateFooterLine(totalCount));
 
-        result.Append("</ProvincialOutboundXMLFileTraceResults80>");
+        result.Append("</ProvincialOutboundXMLFileTraceResults>");
 
         return result.ToString();
     }
@@ -125,7 +136,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
         return output.ToString();
     }
 
-    private static string GenerateDetailLine(TracingOutgoingProvincialData item)
+    private static string GenerateDetailLine80(TracingOutgoingProvincialTracingData item)
     {
         string xmlReceiptDate = item.TrcRsp_Rcpt_Dte.ToString("o");
         string xmlLastUpdateDate = item.TrcRsp_Addr_LstUpdte.ToString("o");
@@ -141,7 +152,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Receipt_Date", xmlReceiptDate));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Sequence_Number", item.TrcRsp_SeqNr));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Status_Code", item.TrcSt_Cd));
-        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString())); // or item.Recordtype?
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString()));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Source_Service_Code", item.EnfSrv_Cd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Type_Code", item.AddrTyp_Cd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Employer_Name1", item.TrcRsp_EmplNme));
@@ -153,6 +164,43 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Country_Code", item.TrcRsp_Addr_CtryCd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Postal_Code", item.TrcRsp_Addr_PCd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Last_Update_Date ", xmlLastUpdateDate));
+        output.Append($"</Trace_Result>");
+
+        return output.ToString();
+    }
+
+    private static string GenerateDetailLine81(TracingOutgoingProvincialFinancialData item)
+    {
+        string xmlReceiptDate = item.TrcRsp_Rcpt_Dte.ToString("o");
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Trace_Result>");
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Record_Type_Code", "81"));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Enforcement_Service_Code", item.Appl_EnfSrv_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Issuing_Submitter_Code", item.Subm_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Control_Code", item.Appl_CtrlCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Source_Reference_Number", item.Appl_Source_RfrNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recipient_Submitter_Code", item.Subm_Recpt_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Receipt_Date", xmlReceiptDate));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Sequence_Number", item.TrcRsp_SeqNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Status_Code", item.TrcSt_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString()));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Source_Service_Code", item.EnfSrv_Cd));
+
+        if (item.TraceFinancialDetails is not null)
+        {
+            output.AppendLine("   <Tax_Response>");
+            foreach (var taxYear in item.TraceFinancialDetails)
+            {
+                short year = taxYear.FiscalYear;
+                string taxForm = taxYear.TaxForm;
+                output.AppendLine($"      <Tax_Data year='{year}' form='{taxForm}'>");
+                foreach (var taxValue in taxYear.TraceDetailValues)
+                    output.AppendLine($"         <field name='{taxValue.FieldName}'>{taxValue.FieldValue}</field>");
+                output.AppendLine($"      </Tax_Data>");
+            }
+            output.AppendLine("   </Tax_Response>");
+        }
         output.Append($"</Trace_Result>");
 
         return output.ToString();

@@ -33,17 +33,19 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
 
             // FOAEA users can bypass swearing and go directly to state 10 
-            if (TracingApplication.Subm_Recpt_SubmCd.IsInternalUser() &&
-                !String.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd) &&
-                TracingApplication.Appl_RecvAffdvt_Dte.HasValue)
+            if (Validation.IsPre_C78())
             {
-                await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                if (TracingApplication.Subm_Recpt_SubmCd.IsInternalUser() &&
+                    !String.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd) &&
+                    TracingApplication.Appl_RecvAffdvt_Dte.HasValue)
+                {
+                    await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                }
             }
         }
 
         protected override async Task Process_07_ValidAffidavitNotReceived()
         {
-
             if (String.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd) ||
                (!TracingApplication.Appl_RecvAffdvt_Dte.HasValue))
             {
@@ -54,7 +56,6 @@ namespace FOAEA3.Business.Areas.Application
             {
                 await Process_10_ApplicationAccepted();
             }
-
         }
 
         protected override async Task Process_10_ApplicationAccepted()
@@ -65,14 +66,14 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED);
 
-            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED, 
+            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED,
                                       appState: ApplicationState.APPLICATION_ACCEPTED_10);
 
-            EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, 
+            EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                       appState: ApplicationState.APPLICATION_REINSTATED_11);
 
             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
-                                    appState: ApplicationState.APPLICATION_REINSTATED_11, 
+                                    appState: ApplicationState.APPLICATION_REINSTATED_11,
                                     effectiveDateTime: DateTime.Now.AddMonths(3));
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);

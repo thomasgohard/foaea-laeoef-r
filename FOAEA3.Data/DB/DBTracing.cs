@@ -191,12 +191,11 @@ namespace FOAEA3.Data.DB
             );
         }
 
-        public async Task<List<TracingOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)
         {
-
             var parameters = new Dictionary<string, object>
             {
                 { "intRecMax", maxRecords },
@@ -205,10 +204,42 @@ namespace FOAEA3.Data.DB
                 { "isXML", isXML ? 1 : 0 }
             };
 
-            var data = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialData>("MessageBrokerGetTRCAPPOUTOutboundData",
-                                                                               parameters, FillTracingOutgoingProvincialData);
-            return data;
+            var tracingData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialTracingData>("MessageBrokerGetTRCAPPOUTOutboundData",
+                                                                                                            parameters, FillTracingOutgoingProvincialTracingData);
 
+            var financialData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialFinancialData>("TrcRspFin_SelectForOutboundData",
+                                                                                                            parameters, FillTracingOutgoingProvincialFinancialData);
+
+            if (financialData is not null)
+            {
+                var dbTraceResponse = new DBTraceResponse(MainDB);
+                foreach(var finData in financialData)
+                {
+                    var baseInfoList = await dbTraceResponse.GetActiveTraceResponseFinancialsForApplication(finData.Appl_EnfSrv_Cd, finData.Appl_CtrlCd);
+                    foreach(var baseInfo in baseInfoList.Items)
+                    {
+                        int responseId = baseInfo.TrcRspFin_Id;
+                        var detailsList = await dbTraceResponse.GetTraceResponseFinancialDetails(responseId);
+                        finData.TraceFinancialDetails = detailsList.Items;
+
+                        foreach(var details in finData.TraceFinancialDetails)
+                        {
+                            var values = await dbTraceResponse.GetTraceResponseFinancialDetailValues(details.TrcRspFin_Dtl_Id);
+                            details.TraceDetailValues = values.Items;
+                        }
+
+                    }
+
+                }
+            }
+
+            var data = new TracingOutgoingProvincialData
+            {
+                TracingData = tracingData,
+                FinancialData = financialData
+            };
+
+            return data;
         }
 
         private async Task CreateYearsAndTaxForms(TracingApplicationData data)
@@ -269,7 +300,7 @@ namespace FOAEA3.Data.DB
             }
         }
 
-        private void FillTracingOutgoingProvincialData(IDBHelperReader rdr, TracingOutgoingProvincialData data)
+        private void FillTracingOutgoingProvincialTracingData(IDBHelperReader rdr, TracingOutgoingProvincialTracingData data)
         {
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
             data.Recordtype = rdr["Recordtype"] as string;
@@ -302,6 +333,22 @@ namespace FOAEA3.Data.DB
                 default:
                     break;
             }
+        }
+
+        private void FillTracingOutgoingProvincialFinancialData(IDBHelperReader rdr, TracingOutgoingProvincialFinancialData data)
+        {
+            data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+            data.Recordtype = rdr["Recordtype"] as string;
+            data.Appl_EnfSrv_Cd = rdr["EnfSrv_Cd"] as string;
+            data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.Appl_Source_RfrNr = rdr["Appl_Source_RfrNr"] as string;
+            data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
+            data.TrcRsp_Rcpt_Dte = (DateTime)rdr["TrcRsp_Rcpt_Dte"];
+            data.TrcRsp_SeqNr = rdr["TrcRsp_SeqNr"] as string;
+            data.TrcSt_Cd = rdr["TrcSt_Cd"] as string;
+            data.Prcs_RecType = (int)rdr["Prcs_RecType"];
+            data.EnfSrv_Cd = "RC00";
         }
 
         private void FillTraceToApplDataFromReader(IDBHelperReader rdr, TraceToApplData data)

@@ -50,6 +50,19 @@ namespace FOAEA3.Data.DB
             return new DataList<TraceFinancialResponseData>(data, MainDB.LastError);
         }
 
+        public async Task<DataList<TraceFinancialResponseData>> GetActiveTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"EnfSrv_Cd", applEnfSrvCd },
+                    {"CtrlCd", applCtrlCd }
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseData>("TrcRspFin_ActiveSelectForAppl", parameters, FillTraceFinancialResultDataFromReader);
+
+            return new DataList<TraceFinancialResponseData>(data, MainDB.LastError);
+        }
+
         public async Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId)
         {
             var parameters = new Dictionary<string, object>

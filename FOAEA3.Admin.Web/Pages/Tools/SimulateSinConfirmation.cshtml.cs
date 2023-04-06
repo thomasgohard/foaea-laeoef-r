@@ -30,7 +30,6 @@ public class SimulateSinConfirmationModel : PageModel
 
     public async Task OnPost()
     {
-
         if (ModelState.IsValid)
         {
             var adminManager = new AdminManager(DB, Config);
@@ -50,8 +49,6 @@ public class SimulateSinConfirmationModel : PageModel
             {
                 ViewData["Error"] = "Error: " + e.Message;
             }
-
         }
-
     }
 }
