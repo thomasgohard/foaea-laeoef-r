@@ -16,10 +16,4 @@
 		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Update="appsettings.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
 </Project>
