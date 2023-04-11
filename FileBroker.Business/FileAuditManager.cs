@@ -30,6 +30,7 @@ public class FileAuditManager
 
         int fileNotLoadedCount = auditData.GroupBy(p => new { p.Appl_EnfSrv_Cd, p.Appl_CtrlCd })
                                           .Select(g => g.First())
+                                          .Where(g => !g.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
                                           .Count();
 
         var auditErrorsData = new List<FileAuditData>();
@@ -38,7 +39,7 @@ public class FileAuditManager
             LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
             auditFileContent.AppendLine($"Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application");
             foreach (var auditRow in auditData)
-                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS))
+                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
                     auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-30}\t{auditRow.Appl_CtrlCd,-16}\t" +
                                                 $"{auditRow.Appl_Source_RfrNr,-30}\t{auditRow.ApplicationMessage}");
                 else
@@ -75,7 +76,7 @@ public class FileAuditManager
         {
             auditFileContent.AppendLine($"Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message");
             foreach (var auditRow in auditData)
-                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS))
+                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
                     auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
                                             $"{auditRow.Appl_Source_RfrNr,-23}\t{auditRow.ApplicationMessage}");
                 else
