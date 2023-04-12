@@ -85,8 +85,8 @@ namespace FOAEA3.Business.Areas.Application
                 var failedSubmitterManager = new FailedSubmitAuditManager(DB, TracingApplication);
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.T01);
             }
-
-            await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
+            else
+                await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
 
             return success;
 
@@ -96,7 +96,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             IsAddressMandatory = false;
 
-            if (Validation.IsPre_C78())
+            if (!Validation.IsC78())
             {
                 if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
@@ -475,7 +475,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await GetFinancialDetailValues(details, data);
 
-                finData.TraceFinancialDetails = details.Items;                
+                finData.TraceFinancialDetails = details.Items;
             }
         }
 
@@ -520,13 +520,13 @@ namespace FOAEA3.Business.Areas.Application
         {
             var id = await DB.TraceResponseTable.CreateTraceFinancialResponse(responseData);
             if (responseData.TraceFinancialDetails is not null)
-                foreach(var detail in responseData.TraceFinancialDetails)
+                foreach (var detail in responseData.TraceFinancialDetails)
                 {
                     detail.TrcRspFin_Id = id;
                     var detailId = await DB.TraceResponseTable.CreateTraceFinancialResponseDetail(detail);
                     if (detail.TraceDetailValues is not null)
                     {
-                        foreach(var value in detail.TraceDetailValues)
+                        foreach (var value in detail.TraceDetailValues)
                         {
                             value.TrcRspFin_Dtl_Id = detailId;
                             _ = await DB.TraceResponseTable.CreateTraceFinancialResponseDetailValue(value);

@@ -182,11 +182,11 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         return output.ToString();
     }
 
-    private string GenerateFinDetailLine(TracingOutgoingFederalData item, TracingApplicationData appl)
+    private static string GenerateFinDetailLine(TracingOutgoingFederalData item, TracingApplicationData appl)
     {
         string xmlDebtorBirthDate = appl.Appl_Dbtr_Brth_Dte?.ToString("o");
 
-        string entity = "01";
+        string entity = "04"; // 04 for MEP, courts can be 01 or 02 -- not sure how to identify this
 
         var output = new StringBuilder();
         output.AppendLine($"<Trace_Request>");

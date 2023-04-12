@@ -138,6 +138,12 @@
   <data name="ASSUME_ROLE" xml:space="preserve">
     <value>Assume Role</value>
   </data>
+  <data name="AUDIT_HEADER_TITLES" xml:space="preserve">
+    <value>Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message</value>
+  </data>
+  <data name="AUDIT_SECTION" xml:space="preserve">
+    <value>Section</value>
+  </data>
   <data name="AUDIT_SUCCESS" xml:space="preserve">
     <value>Success</value>
   </data>
@@ -164,6 +170,9 @@
   </data>
   <data name="CONFIRMATION_CODE_LABEL" xml:space="preserve">
     <value>Confirmation Code</value>
+  </data>
+  <data name="CONTAINS_INVALID_TAG" xml:space="preserve">
+    <value>contains invalid tag</value>
   </data>
   <data name="CONTROL_CODE" xml:space="preserve">
     <value>Control Code</value>
@@ -237,6 +246,9 @@
   <data name="ENFORCEMENT_SERVICE" xml:space="preserve">
     <value>Enforcement Service</value>
   </data>
+  <data name="ERRORS_DETECTED" xml:space="preserve">
+    <value>Errors detected</value>
+  </data>
   <data name="ERROR_LABEL" xml:space="preserve">
     <value>Error</value>
   </data>
@@ -276,6 +288,9 @@
   <data name="LICENSE_DENIAL" xml:space="preserve">
     <value>License - Denial</value>
   </data>
+  <data name="LOADED_RECORDS" xml:space="preserve">
+    <value>Loaded records</value>
+  </data>
   <data name="LOGOUT" xml:space="preserve">
     <value>Logout</value>
   </data>
@@ -287,6 +302,9 @@
   </data>
   <data name="NOTICESENTTODEBTOR_DTE" xml:space="preserve">
     <value>Date notice sent to debtor</value>
+  </data>
+  <data name="NUMBER_OF_RECORDS" xml:space="preserve">
+    <value>Number of records</value>
   </data>
   <data name="NUMBER_PAYMENTS_IN_DEFAULT" xml:space="preserve">
     <value>Number of payments in default</value>
@@ -308,6 +326,12 @@
   </data>
   <data name="READ_ONLY" xml:space="preserve">
     <value>Read Only</value>
+  </data>
+  <data name="RECORDS_NOT_LOADED" xml:space="preserve">
+    <value>Records not loaded</value>
+  </data>
+  <data name="RECORDS_REMOVED_FROM_FILE" xml:space="preserve">
+    <value>Records removed from file</value>
   </data>
   <data name="RESET_EMAIL_SENT" xml:space="preserve">
     <value>Reset email sent to user</value>
@@ -378,6 +402,9 @@
   <data name="TERM_REQ_DATE" xml:space="preserve">
     <value>Termination date</value>
   </data>
+  <data name="TOTAL_XML_VALIDATION_WARNINGS" xml:space="preserve">
+    <value>Total XML validation warnings</value>
+  </data>
   <data name="TRACING" xml:space="preserve">
     <value>Tracing</value>
   </data>
@@ -398,5 +425,8 @@
   </data>
   <data name="WELCOME_GREETING" xml:space="preserve">
     <value>Welcome to the FOAEA national enforcement services.</value>
+  </data>
+  <data name="XML_VALIDATION_WARNINGS" xml:space="preserve">
+    <value>XML validation warnings</value>
   </data>
 </root>

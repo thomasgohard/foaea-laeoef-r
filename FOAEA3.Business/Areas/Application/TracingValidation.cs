@@ -25,7 +25,15 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool isSuccess = base.IsValidMandatoryData();
 
-            if (IsPre_C78())
+            if (IsC78())
+            {
+                if (TracingApplication.Purpose is null)
+                {
+                    isSuccess = false;
+                    TracingApplication.Messages.AddError(Resources.ErrorResource.MISSING_PURPOSE);
+                }
+            }
+            else
             {
                 if (!string.IsNullOrEmpty(TracingApplication.Medium_Cd) && (TracingApplication.Medium_Cd.ToUpper() == "FTP"))
                 {
@@ -33,14 +41,6 @@ namespace FOAEA3.Business.Areas.Application
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.Appl_Crdtr_SurNme, Resources.ErrorResource.MISSING_CREDITOR_SURNAME);
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.FamPro_Cd, Resources.ErrorResource.MISSING_FAMPRO);
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.Trace_Breach_Text, Resources.ErrorResource.MISSING_BREACH);
-                }
-            }
-            else
-            {
-                if (TracingApplication.Purpose is null)
-                {
-                    isSuccess = false;
-                    TracingApplication.Messages.AddError(Resources.ErrorResource.MISSING_PURPOSE);
                 }
             }
 

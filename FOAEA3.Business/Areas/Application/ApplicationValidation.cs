@@ -691,7 +691,7 @@ namespace FOAEA3.Business.Areas.Application
             return true;
         }
 
-        public bool IsPre_C78() => Application.Appl_Create_Dte < Config.TracingC78CutOff;
+        public bool IsC78() => Application.Appl_Create_Dte >= Config.TracingC78CutOff;
 
         private async Task PostalCodeValidationInBound()
         {
