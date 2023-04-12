@@ -38,6 +38,8 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         try
         {
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
+            if (processCodes.EnfSrv_Cd == "RC02")
+                newFilePath += ".XML";
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
@@ -102,8 +104,16 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
     private async Task<List<TracingOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
                                                            int appLiSt_Cd, string enfSrvCode)
     {
-        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
-        int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
+        int maxRecords = 0;
+        try
+        {
+            var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+            maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error getting rec_max value. Set to 0.");
+        }
 
         var data = await APIs.TracingApplications.GetOutgoingFederalTracingRequestsAsync(maxRecords, actvSt_Cd,
                                                                                          appLiSt_Cd, enfSrvCode);
@@ -216,7 +226,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         }
         else
         {
-            output.AppendLine($"      <Tax_Data />");
+            output.AppendLine($"   <Tax_Year />");
         }
 
         output.Append($"</Trace_Request>");
