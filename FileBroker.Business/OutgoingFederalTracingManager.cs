@@ -50,6 +50,12 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                          processCodes.EnfSrv_Cd);
 
+                if (!data.Any())
+                {
+                    errors.Add($"Warning: no data found for {fileBaseName}. File not generated.");
+                    return ("", errors);
+                }
+
                 var eventIds = new List<int>();
                 string fileContent = string.Empty;
 
