@@ -2,13 +2,11 @@
 using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
 using FOAEA3.Common.Models;
-using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,12 +37,6 @@ namespace FOAEA3.Business.Areas.Application
 
         private VariationDocumentAction VariationAction { get; set; }
 
-        //public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
-        //    this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
-        //{
-
-        //}
-
         public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
             this(new InterceptionApplicationData(), repositories, repositoriesFinance, config, user)
         {
@@ -57,7 +49,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             SetupInterception(interception, repositoriesFinance);
         }
-        
+
         public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, FoaeaUser user) :
             this(new InterceptionApplicationData(), repositories, repositoriesFinance, config, user)
         {
@@ -70,13 +62,6 @@ namespace FOAEA3.Business.Areas.Application
         {
             SetupInterception(interception, repositoriesFinance);
         }
-        
-        //public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
-        //                           IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
-        //    base(interception, repositories, config, new InterceptionValidation(interception, repositories, config, null))
-        //{
-        //    SetupInterception(interception, repositoriesFinance);
-        //}
 
         private void SetupInterception(InterceptionApplicationData interception, IRepositories_Finance repositoriesFinance)
         {
@@ -375,7 +360,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await EventManager.SaveEventsAsync();
 
-                if (InterceptionApplication.Medium_Cd != "FTP") 
+                if (InterceptionApplication.Medium_Cd != "FTP")
                     InterceptionApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
 
                 return true;
@@ -385,17 +370,17 @@ namespace FOAEA3.Business.Areas.Application
                 switch (InterceptionApplication.AppLiSt_Cd)
                 {
                     case ApplicationState.INVALID_VARIATION_SOURCE_91:
-                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                        if (InterceptionApplication.Medium_Cd != "FTP")
                             InterceptionApplication.Messages.AddError(EventCode.C55002_INVALID_FINANCIAL_TERMS);
                         break;
 
                     case ApplicationState.INVALID_VARIATION_FINTERMS_92:
-                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                        if (InterceptionApplication.Medium_Cd != "FTP")
                             InterceptionApplication.Messages.AddError(EventCode.C55001_INVALID_SOURCE_HOLDBACK);
                         break;
 
                     default:
-                        if (InterceptionApplication.Medium_Cd != "FTP") 
+                        if (InterceptionApplication.Medium_Cd != "FTP")
                             InterceptionApplication.Messages.AddError(EventCode.C55000_INVALID_VARIATION);
                         break;
                 }

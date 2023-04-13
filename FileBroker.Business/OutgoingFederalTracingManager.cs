@@ -1,6 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Exchange.WebServices.Data;
-using NJsonSchema.Infrastructure;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -19,9 +17,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
+    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
     {
-        errors = new List<string>();
+        var errors = new List<string>();
 
         bool fileCreated = false;
 
@@ -42,8 +40,8 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 newFilePath += ".XML";
             if (File.Exists(newFilePath))
             {
-                errors.Add("** Error: File Already Exists");
-                return "";
+                errors.Add($"** Error: File Already Exists ({newFilePath})");
+                return (newFilePath, errors);
             }
             await FoaeaAccess.SystemLoginAsync();
 
@@ -83,7 +81,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 await FoaeaAccess.SystemLogoutAsync();
             }
 
-            return newFilePath;
+            return (newFilePath, errors);
 
         }
         catch (Exception e)
@@ -96,7 +94,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                              "Error creating outbound file", e, displayExceptionError: true);
 
-            return string.Empty;
+            return (string.Empty, errors);
         }
 
     }

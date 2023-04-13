@@ -18,9 +18,9 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
+    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
     {
-        errors = new List<string>();
+        var errors = new List<string>();
 
         bool fileCreated = false;
 
@@ -40,7 +40,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
-                return "";
+                return ("", errors);
             }
 
             await FoaeaAccess.SystemLoginAsync();
@@ -70,7 +70,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
                 await FoaeaAccess.SystemLogoutAsync();
             }
 
-            return newFilePath;
+            return (newFilePath, errors);
 
         }
         catch (Exception e)
@@ -83,7 +83,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
             await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
-            return string.Empty;
+            return (string.Empty, errors);
         }
     }
 

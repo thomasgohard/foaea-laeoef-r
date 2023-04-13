@@ -16,12 +16,6 @@ namespace FOAEA3.Business.Areas.Application
     {
         public LicenceDenialApplicationData LicenceDenialTerminationApplication { get; private set; }
 
-        //public LicenceDenialTerminationManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
-        //    this(new LicenceDenialApplicationData(), repositories, config)
-        //{
-
-        //}
-
         public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
             base(licenceDenialTermination, repositories, config, user)
         {
@@ -45,12 +39,6 @@ namespace FOAEA3.Business.Areas.Application
         {
 
         }
-
-        //public LicenceDenialTerminationManager(LicenceDenialApplicationData licenceDenialTermination, IRepositories repositories, IFoaeaConfigurationHelper config) :
-        //    base(licenceDenialTermination, repositories, config)
-        //{
-        //    SetupLicenceDenialTermination(licenceDenialTermination);
-        //}
 
         private void SetupLicenceDenialTermination(LicenceDenialApplicationData licenceDenialTermination)
         {

@@ -45,17 +45,6 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        //public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
-        //    this(new TracingApplicationData(), repositories, config)
-        //{
-        //}
-
-        //public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config) :
-        //    base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
-        //{
-        //    SetupTracingManager(tracing);
-        //}
-
         private void SetupTracingManager(TracingApplicationData tracing)
         {
             TracingApplication = tracing;

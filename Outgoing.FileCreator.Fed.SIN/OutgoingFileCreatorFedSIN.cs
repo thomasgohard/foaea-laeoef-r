@@ -43,7 +43,7 @@ public static class OutgoingFileCreatorFedSIN
         foreach (var federalSinOutgoingSource in federalSinOutgoingSources)
         {
             var errors = new List<string>();
-            string filePath = await federalFileManager.CreateOutputFileAsync(federalSinOutgoingSource.Name, errors);
+            (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalSinOutgoingSource.Name);
 
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");

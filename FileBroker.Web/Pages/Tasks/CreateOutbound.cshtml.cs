@@ -106,7 +106,7 @@ namespace FileBroker.Web.Pages.Tasks
                             break;
                     }
 
-                    filePath = await outgoingFileManager.CreateOutputFileAsync(thisProcess.Name, errors);
+                    (filePath, errors) = await outgoingFileManager.CreateOutputFileAsync(thisProcess.Name);
                 }
                 else
                     errors.Add($"Unsupported category [{thisProcess.Category}] for file {fileName}");
