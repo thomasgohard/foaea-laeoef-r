@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common.Helpers;
+using System.Diagnostics.Eventing.Reader;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -52,8 +53,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
                 if (!data.Any())
                 {
-                    errors.Add($"Warning: no data found for {fileBaseName}. File not generated.");
-                    return ("", errors);
+                    return ("", errors); /// nothing to generate
                 }
 
                 var eventIds = new List<int>();
@@ -200,11 +200,17 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
     {
         string xmlDebtorBirthDate = appl.Appl_Dbtr_Brth_Dte?.ToString("o");
 
+        // TODO: handle court and other requests than MEPs
         string entity = "04"; // 04 for MEP, courts can be 01 or 02 -- not sure how to identify this
+
+        bool wantSinOnly = !appl.IncludeFinancialInformation && appl.IncludeSinInformation;
 
         var output = new StringBuilder();
         output.AppendLine($"<Trace_Request>");
-        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", entity));
+        if (wantSinOnly)
+            output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", "01")); // special case, send a 01 for entity but treat it like a MEP (04)
+        else
+            output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", entity));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_SurNme", appl.Appl_Dbtr_SurNme));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_FrstNme", appl.Appl_Dbtr_FrstNme));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Dbtr_Brth_Dte", xmlDebtorBirthDate));
