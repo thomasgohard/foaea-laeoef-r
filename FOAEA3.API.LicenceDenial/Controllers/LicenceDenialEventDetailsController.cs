@@ -25,7 +25,7 @@ public class LicenceDenialEventDetailsController : FoaeaControllerBase
                                                                              [FromQuery] string appl_CtrlCd,
                                                                              [FromServices] IRepositories repositories)
     {
-        var manager = new LicenceDenialManager(repositories, config);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         if (string.IsNullOrEmpty(enforcementServiceCode))
             return BadRequest("Missing enforcementServiceCode parameter");

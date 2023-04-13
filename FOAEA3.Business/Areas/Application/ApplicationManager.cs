@@ -19,17 +19,17 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal partial class ApplicationManager
     {
-        public readonly ApplicationData Application;
+        public ApplicationData Application { get; private set; }
 
-        public IRepositories DB { get; }
-        public ApplicationEventManager EventManager { get; }
-        public ApplicationEventDetailManager EventDetailManager { get; }
+        public IRepositories DB { get; private set; }
+        public ApplicationEventManager EventManager { get; private set; }
+        public ApplicationEventDetailManager EventDetailManager { get; private set; }
 
         protected bool IsAddressMandatory { get; set; }
-        protected ApplicationValidation Validation { get; }
-        protected IFoaeaConfigurationHelper Config { get; }
+        protected ApplicationValidation Validation { get; private set; }
+        protected IFoaeaConfigurationHelper Config { get; private set; }
 
-        protected ApplicationStateEngine StateEngine { get; }
+        protected ApplicationStateEngine StateEngine { get; private set; }
 
         protected string Appl_EnfSrv_Cd => Application.Appl_EnfSrv_Cd?.Trim();
 
@@ -43,7 +43,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 return _currentUser;
             }
-            set
+            private set
             {
                 _currentUser = value;
 
@@ -55,12 +55,32 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        public async Task SetCurrentUserAsync(ClaimsPrincipal user)
+        protected async Task SetCurrentUserAsync(ClaimsPrincipal user)
         {
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
         }
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
+                                  ClaimsPrincipal user, ApplicationValidation applicationValidation = null) :
+            this(applicationData, repositories, config, applicationValidation)
+        {
+            SetCurrentUserAsync(user).Wait();
+        }
+
+        public ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
+                          FoaeaUser user, ApplicationValidation applicationValidation = null) :
+            this(applicationData, repositories, config, applicationValidation)
+        {
+            CurrentUser = user;
+        }
+
+        private ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
+                                  ApplicationValidation applicationValidation = null)
+        {
+            SetupApplicationManager(applicationData, repositories, config, applicationValidation);
+        }
+
+        private void SetupApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
                                   ApplicationValidation applicationValidation = null)
         {
             this.Config = config;

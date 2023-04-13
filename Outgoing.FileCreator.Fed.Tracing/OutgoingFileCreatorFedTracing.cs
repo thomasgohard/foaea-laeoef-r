@@ -43,9 +43,14 @@ public static class OutgoingFileCreatorFedTracing
         foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
         {
             var errors = new List<string>();
-            string filePath = await federalFileManager.CreateOutputFileAsync(federalTraceOutgoingSource.Name, errors);
+            (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalTraceOutgoingSource.Name);
             if (errors.Count == 0)
-                ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+            {
+                if (!string.IsNullOrEmpty(filePath))
+                    ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
+                else
+                    ColourConsole.WriteEmbeddedColorLine($"Skipped [cyan]{federalTraceOutgoingSource.Name}[/cyan]. No data/events were found.");
+            }
             else
                 foreach (var error in errors)
                 {

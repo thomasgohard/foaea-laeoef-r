@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Business.Security;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -8,18 +9,42 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialManager : ApplicationManager
     {
-        public LicenceDenialApplicationData LicenceDenialApplication { get; }
+        public LicenceDenialApplicationData LicenceDenialApplication { get; private set; }
 
         private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
 
-        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config) :
-                                        base(licenceDenial, repositories, config)
+        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+           this(new LicenceDenialApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            base(licenceDenial, repositories, config, user)
+        {
+            SetupLicenceDenial(licenceDenial);
+        }
+
+        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+           this(new LicenceDenialApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            base(licenceDenial, repositories, config, user)
+        {
+            SetupLicenceDenial(licenceDenial);
+        }
+
+        private void SetupLicenceDenial(LicenceDenialApplicationData licenceDenial)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -40,11 +65,6 @@ namespace FOAEA3.Business.Areas.Application
             var licenceDenialDB = DB.LicenceDenialTable;
             var data = await licenceDenialDB.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
             return data;
-        }
-
-        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config) : this(new LicenceDenialApplicationData(), repositories, config)
-        {
-
         }
 
         public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
@@ -197,10 +217,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplicationAsync()
         {
-            var current = new LicenceDenialManager(DB, Config)
-            {
-                CurrentUser = this.CurrentUser
-            };
+            var current = new LicenceDenialManager(DB, Config, CurrentUser);
             await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             // keep these stored values

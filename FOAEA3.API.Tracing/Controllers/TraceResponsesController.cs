@@ -25,7 +25,7 @@ public class TraceResponsesController : FoaeaControllerBase
     public async Task<ActionResult<DataList<TraceResponseData>>> GetTraceResults([FromRoute] ApplKey id,
                                                                      [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await manager.GetTraceResultsAsync());
@@ -38,7 +38,7 @@ public class TraceResponsesController : FoaeaControllerBase
     {
         var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<TraceResponseData>>(Request);
 
-        var tracingManager = new TracingManager(repositories, config);
+        var tracingManager = new TracingManager(repositories, config, User);
 
         await tracingManager.CreateResponseDataAsync(responseData);
 
@@ -52,7 +52,7 @@ public class TraceResponsesController : FoaeaControllerBase
     public async Task<ActionResult<int>> MarkTraceResponsesAsViewed([FromServices] IRepositories repositories,
                                                                     [FromQuery] string enfService)
     {
-        var tracingManager = new TracingManager(repositories, config);
+        var tracingManager = new TracingManager(repositories, config, User);
 
         await tracingManager.MarkResponsesAsViewedAsync(enfService);
 

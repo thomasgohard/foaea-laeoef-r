@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -17,9 +16,9 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors)
+    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
     {
-        errors = new List<string>();
+        var errors = new List<string>();
 
         bool fileCreated = false;
 
@@ -35,7 +34,7 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
             if (File.Exists(newFilePath))
             {
                 errors.Add("** Error: File Already Exists");
-                return "";
+                return ("", errors);
             }
 
             await FoaeaAccess.SystemLoginAsync();
@@ -61,7 +60,7 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
                 await FoaeaAccess.SystemLogoutAsync();
             }
 
-            return newFilePath;
+            return (newFilePath, errors);
 
         }
         catch (Exception e)
@@ -71,10 +70,10 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 
             await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}", 
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
-            return string.Empty;
+            return (string.Empty, errors);
         }
 
     }

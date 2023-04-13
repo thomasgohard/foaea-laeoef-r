@@ -122,9 +122,6 @@ internal class Program
         var duration = end - start;
 
         WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
-
-        Console.ReadKey();
-
     }
 
     private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)

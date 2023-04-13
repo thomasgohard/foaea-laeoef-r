@@ -72,7 +72,7 @@ public static class OutgoingFileCreatorMEP
         foreach (var provincialOutgoingSource in provincialOutgoingSources)
         {
             var errors = new List<string>();
-            string filePath = await outgoingProvincialFileManager.CreateOutputFileAsync(provincialOutgoingSource.Name, errors);
+            (string filePath, errors) = await outgoingProvincialFileManager.CreateOutputFileAsync(provincialOutgoingSource.Name);
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
             else

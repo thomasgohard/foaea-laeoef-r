@@ -27,8 +27,7 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var manager = new LicenceDenialManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
@@ -49,8 +48,7 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var manager = new LicenceDenialManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
@@ -77,8 +75,7 @@ public class LicenceDenialsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var licenceDenialManager = new LicenceDenialManager(application, db, config);
-        await licenceDenialManager.SetCurrentUserAsync(User);
+        var licenceDenialManager = new LicenceDenialManager(application, db, config, User);
         var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
         if (submitter is not null)
         {
@@ -113,8 +110,7 @@ public class LicenceDenialsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
 
-        var licenceDenialManager = new LicenceDenialManager(application, repositories, config);
-        await licenceDenialManager.SetCurrentUserAsync(User);
+        var licenceDenialManager = new LicenceDenialManager(application, repositories, config, User);
         await licenceDenialManager.UpdateApplicationAsync();
 
         if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -137,8 +133,7 @@ public class LicenceDenialsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
 
-        var appManager = new LicenceDenialManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new LicenceDenialManager(application, repositories, config, User);
 
         await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
 
@@ -155,8 +150,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var application = new LicenceDenialApplicationData();
 
-        var appManager = new LicenceDenialManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new LicenceDenialManager(application, repositories, config, User);
 
         await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
@@ -177,8 +171,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var application = new LicenceDenialApplicationData();
 
-        var appManager = new LicenceDenialManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new LicenceDenialManager(application, repositories, config, User);
 
         if (await appManager.ProcessLicenceDenialResponseAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(application);
@@ -190,8 +183,7 @@ public class LicenceDenialsController : FoaeaControllerBase
     public async Task<ActionResult<List<TraceCycleQuantityData>>> GetLicenceDenialToApplData([FromQuery] string federalSource,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new LicenceDenialManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         var data = await manager.GetLicenceDenialToApplDataAsync(federalSource);
 

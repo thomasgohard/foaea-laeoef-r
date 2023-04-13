@@ -16,7 +16,7 @@ namespace FOAEA3.API.Tracing.Controllers
         public async Task<ActionResult<DataList<TraceFinancialResponseData>>> GetTraceFiancialResults([FromRoute] ApplKey id,
                                                                                     [FromServices] IRepositories repositories)
         {
-            var manager = new TracingManager(repositories, config);
+            var manager = new TracingManager(repositories, config, User);
 
             if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
                 return Ok(await manager.GetTraceFinancialResultsAsync());
@@ -29,7 +29,7 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TraceFinancialResponseData>(Request);
 
-            var tracingManager = new TracingManager(repositories, config);
+            var tracingManager = new TracingManager(repositories, config, User);
 
             await tracingManager.CreateFinancialResponseDataAsync(responseData);
 

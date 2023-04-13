@@ -27,7 +27,7 @@ public class OutgoingProvincialLicenceDenialResultsController : FoaeaControllerB
                                                             [FromQuery] bool isXML,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new LicenceDenialManager(repositories, config);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         var data = await manager.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
 

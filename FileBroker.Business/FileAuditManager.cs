@@ -30,83 +30,57 @@ public class FileAuditManager
 
         int fileNotLoadedCount = auditData.GroupBy(p => new { p.Appl_EnfSrv_Cd, p.Appl_CtrlCd })
                                           .Select(g => g.First())
+                                          .Where(g => !g.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
                                           .Count();
 
         var auditErrorsData = new List<FileAuditData>();
+
         if (isFrench)
-        {
             LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
-            auditFileContent.AppendLine($"Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application");
-            foreach (var auditRow in auditData)
-                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS))
+
+        auditFileContent.AppendLine(LanguageResource.AUDIT_HEADER_TITLES);
+        foreach (var auditRow in auditData)
+            if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (isFrench)
                     auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-30}\t{auditRow.Appl_CtrlCd,-16}\t" +
                                                 $"{auditRow.Appl_Source_RfrNr,-30}\t{auditRow.ApplicationMessage}");
                 else
-                    auditErrorsData.Add(auditRow);
+                    auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
+                                                $"{auditRow.Appl_Source_RfrNr,-23}\t{auditRow.ApplicationMessage}");
+            }
+            else
+                auditErrorsData.Add(auditRow);
 
-            if (auditErrorsData.Any())
-            {
-                auditFileContent.AppendLine($"");
-                auditFileContent.AppendLine($"Entrées enlevées du fichier: {fileName}");
-                foreach (var auditError in auditErrorsData)
+        if (auditErrorsData.Any())
+        {
+            auditFileContent.AppendLine($"");
+            auditFileContent.AppendLine($"{LanguageResource.RECORDS_REMOVED_FROM_FILE}: {fileName}");
+            foreach (var auditError in auditErrorsData)
+                if (isFrench)
                     auditFileContent.AppendLine($"{auditError.Appl_EnfSrv_Cd,-30}\t{auditError.Appl_CtrlCd,-16}\t" +
                                                 $"{auditError.Appl_Source_RfrNr,-30}\t{auditError.ApplicationMessage}");
-            }
-
-            if (unknownTags is not null && unknownTags.Any())
-            {
-                auditFileContent.AppendLine($"");
-                auditFileContent.AppendLine($"Codes XML invalides: {fileName}");
-                foreach (var unknownTag in unknownTags)
-                    auditFileContent.AppendLine($"La section '{unknownTag.Section}' inclues le code invalide '{unknownTag.Tag}'");
-                auditFileContent.AppendLine($"");
-            }
-
-            auditFileContent.AppendLine("");
-            auditFileContent.AppendLine($"Nombre d'enregistrements: {errorCount + warningCount + successCount}");
-            auditFileContent.AppendLine($"Enregistrements chargés: {successCount + warningCount}");
-            auditFileContent.AppendLine($"Enregistrements non chargés: {fileNotLoadedCount}");
-            auditFileContent.AppendLine($"Erreurs décelées: {errorCount}");
-            if (unknownTags is not null && unknownTags.Any())
-                auditFileContent.AppendLine($"Nombre total avec avertissements de validation XML: {unknownTags.Count}");
-
-        }
-        else
-        {
-            auditFileContent.AppendLine($"Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message");
-            foreach (var auditRow in auditData)
-                if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS))
-                    auditFileContent.AppendLine($"{auditRow.Appl_EnfSrv_Cd,-24}\t{auditRow.Appl_CtrlCd,-12}\t" +
-                                            $"{auditRow.Appl_Source_RfrNr,-23}\t{auditRow.ApplicationMessage}");
                 else
-                    auditErrorsData.Add(auditRow);
-
-            if (auditErrorsData.Any())
-            {
-                auditFileContent.AppendLine($"");
-                auditFileContent.AppendLine($"Records removed from file: {fileName}");
-                foreach (var auditError in auditErrorsData)
                     auditFileContent.AppendLine($"{auditError.Appl_EnfSrv_Cd,-24}\t{auditError.Appl_CtrlCd,-12}\t" +
                                                 $"{auditError.Appl_Source_RfrNr,-23}\t{auditError.ApplicationMessage}");
-            }
-
-            if (unknownTags is not null && unknownTags.Any())
-            {
-                auditFileContent.AppendLine($"");
-                auditFileContent.AppendLine($"XML validation warnings: {fileName}");
-                foreach (var unknownTag in unknownTags)
-                    auditFileContent.AppendLine($"Section '{unknownTag.Section}' contains invalid tag '{unknownTag.Tag}'");
-                auditFileContent.AppendLine($"");
-            }
-
-            auditFileContent.AppendLine("");
-            auditFileContent.AppendLine($"Number of records: {errorCount + warningCount + successCount}");
-            auditFileContent.AppendLine($"Loaded records: {successCount + warningCount}");
-            auditFileContent.AppendLine($"Records not loaded: {fileNotLoadedCount}");
-            auditFileContent.AppendLine($"Errors detected: {errorCount}");
-            if (unknownTags is not null && unknownTags.Any())
-                auditFileContent.AppendLine($"Total XML validation warnings: {unknownTags.Count}");
         }
+
+        if (unknownTags is not null && unknownTags.Any())
+        {
+            auditFileContent.AppendLine("");
+            auditFileContent.AppendLine($"{LanguageResource.XML_VALIDATION_WARNINGS}: {fileName}");
+            foreach (var unknownTag in unknownTags)
+                auditFileContent.AppendLine($"{LanguageResource.AUDIT_SECTION} '{unknownTag.Section}' {LanguageResource.CONTAINS_INVALID_TAG} '{unknownTag.Tag}'");
+            auditFileContent.AppendLine("");
+        }
+
+        auditFileContent.AppendLine("");
+        auditFileContent.AppendLine($"{LanguageResource.NUMBER_OF_RECORDS}: {errorCount + warningCount + successCount}");
+        auditFileContent.AppendLine($"{LanguageResource.LOADED_RECORDS}: {successCount + warningCount}");
+        auditFileContent.AppendLine($"{LanguageResource.RECORDS_NOT_LOADED}: {fileNotLoadedCount}");
+        auditFileContent.AppendLine($"{LanguageResource.ERRORS_DETECTED}: {errorCount}");
+        if (unknownTags is not null && unknownTags.Any())
+            auditFileContent.AppendLine($"{LanguageResource.TOTAL_XML_VALIDATION_WARNINGS}: {unknownTags.Count}");
 
         // save file to proper location
         string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
@@ -115,7 +89,7 @@ public class FileAuditManager
         return fileNotLoadedCount;
     }
 
-    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount, 
+    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount,
                                                   int successCount, int xmlWarningCount, int totalFilesCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();

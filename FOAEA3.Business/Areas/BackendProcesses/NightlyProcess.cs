@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.BackendProcesses
@@ -9,13 +10,15 @@ namespace FOAEA3.Business.BackendProcesses
         private readonly IRepositories DB;
         private readonly IRepositories_Finance DBfinance;
         private readonly IFoaeaConfigurationHelper Config;
+        private readonly ClaimsPrincipal User;
 
         public NightlyProcess(IRepositories repositories, IRepositories_Finance repositoriesFinance,
-                              IFoaeaConfigurationHelper config)
+                              IFoaeaConfigurationHelper config, ClaimsPrincipal user)
         {
             DB = repositories;
             DBfinance = repositoriesFinance;
             Config = config;
+            User = user;
         }
 
         public async Task RunAsync()
@@ -24,7 +27,7 @@ namespace FOAEA3.Business.BackendProcesses
 
             await prodAudit.InsertAsync("Nightly Process", "Nightly Process Started", "O");
 
-            var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config);
+            var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config, User);
             await completeI01process.RunAsync();
 
             var amountOwedProcess = new AmountOwedProcess(DB, DBfinance);

@@ -21,7 +21,7 @@ namespace FOAEA3.Common.Filters
                 var actionName = context.RouteData.Values["action"];
                 var controllerName = context.RouteData.Values["controller"];
 
-                string info = $"({verbMethod}) controller {controllerName} action {actionName}";
+                string info = $"({verbMethod,4}) controller {controllerName} action {actionName}";
                 log.Information(info);
 
                 string infoColour = $"([magenta]{verbMethod}[/magenta]) controller [cyan]{controllerName}[/cyan] action [cyan]{actionName}[/cyan]";

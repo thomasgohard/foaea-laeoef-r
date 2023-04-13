@@ -1,7 +1,11 @@
 ﻿using FOAEA3.Common.Models;
+using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security;
 using System.Security.Claims;
 
 namespace FOAEA3.Common.Helpers
@@ -54,6 +58,24 @@ namespace FOAEA3.Common.Helpers
 
                 return currentUser;
             }
+        }
+
+        public static ClaimsPrincipal CreateSystemAdminUser()
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "System"),
+                new Claim("Submitter", "MSGBRO"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            claims.Add(new Claim(ClaimTypes.Role, "AM"));
+            claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
+
+            var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            return principal;
         }
     }
 }

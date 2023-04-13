@@ -28,7 +28,7 @@ public class OutgoingFederalTracingRequestsController : FoaeaControllerBase
                                                             [FromQuery] string enfServiceCode,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState,
                                                   enfServiceCode);

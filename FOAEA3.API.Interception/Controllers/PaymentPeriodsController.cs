@@ -14,7 +14,7 @@ namespace FOAEA3.API.Interception.Controllers
         [HttpGet]
         public async Task<ActionResult<List<PaymentPeriodData>>> GetPeriodicPeriods([FromServices] IRepositories db, [FromServices] IRepositories_Finance dbFinance)
         {
-            var manager = new InterceptionManager(db, dbFinance, config);
+            var manager = new InterceptionManager(db, dbFinance, config, User);
             return Ok(await manager.GetPaymentPeriods());
         }
     }

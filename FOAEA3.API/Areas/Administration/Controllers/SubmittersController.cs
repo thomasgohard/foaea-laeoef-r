@@ -83,7 +83,7 @@ public class SubmittersController : FoaeaControllerBase
                                                                                                         [FromRoute] string submCd, 
                                                                                                         [FromQuery] int days = 0)
     {
-        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config, User);
         return Ok(await applicationManager.GetApplicationRecentActivityForSubmitter(submCd, days));
     }
 
@@ -92,7 +92,7 @@ public class SubmittersController : FoaeaControllerBase
                                                                                                      [FromRoute] string submCd,
                                                                                                      [FromRoute] int state)
     {
-        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config, User);
         return Ok(await applicationManager.GetApplicationAtStateForSubmitter(submCd, (ApplicationState) state));
     }
 
@@ -101,7 +101,7 @@ public class SubmittersController : FoaeaControllerBase
                                                                                                        [FromRoute] string submCd,
                                                                                                        [FromRoute] int eventReasonCode)
     {
-        var applicationManager = new ApplicationManager(new ApplicationData(), db, config);
+        var applicationManager = new ApplicationManager(new ApplicationData(), db, config, User);
         return Ok(await applicationManager.GetApplicationWithEventForSubmitter(submCd, eventReasonCode));
     }
 

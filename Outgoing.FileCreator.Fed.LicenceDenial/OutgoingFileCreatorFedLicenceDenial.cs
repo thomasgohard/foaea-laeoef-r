@@ -42,8 +42,7 @@ namespace Outgoing.FileCreator.Fed.LicenceDenial
             foreach (var federalLicenceDenialOutgoingSource in federalLicenceDenialOutgoingSources)
             {
                 var errors = new List<string>();
-                string filePath = await federalFileManager.CreateOutputFileAsync(federalLicenceDenialOutgoingSource.Name,
-                                                                                 errors);
+                (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalLicenceDenialOutgoingSource.Name);
                 if (errors.Count == 0)
                     ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
                 else

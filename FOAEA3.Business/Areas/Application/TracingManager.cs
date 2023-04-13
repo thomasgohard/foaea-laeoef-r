@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Business.Security;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
@@ -8,21 +9,44 @@ using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal partial class TracingManager : ApplicationManager
     {
-        public TracingApplicationData TracingApplication { get; }
+        public TracingApplicationData TracingApplication { get; private set; }
         private DateTime ReinstateEffectiveDate { get; set; }
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
 
-        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config) :
-            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config, null))
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            base(tracing, repositories, config, user, new TracingValidation(tracing, repositories, config, null))
+        {
+            SetupTracingManager(tracing);
+        }
+
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            base(tracing, repositories, config, user, new TracingValidation(tracing, repositories, config, null))
+        {
+            SetupTracingManager(tracing);
+        }
+
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            this(new TracingApplicationData(), repositories, config, user)
         {
 
+        }
+
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            this(new TracingApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        private void SetupTracingManager(TracingApplicationData tracing)
+        {
             TracingApplication = tracing;
 
             // add Tracing specific valid state changes
@@ -37,12 +61,6 @@ namespace FOAEA3.Business.Areas.Application
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
             //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
-
-        }
-
-        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config) :
-            this(new TracingApplicationData(), repositories, config)
-        {
         }
 
         public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
@@ -85,8 +103,8 @@ namespace FOAEA3.Business.Areas.Application
                 var failedSubmitterManager = new FailedSubmitAuditManager(DB, TracingApplication);
                 await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.T01);
             }
-
-            await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
+            else
+                await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
 
             return success;
 
@@ -96,7 +114,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             IsAddressMandatory = false;
 
-            if (Validation.IsPre_C78())
+            if (!Validation.IsC78())
             {
                 if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
@@ -475,7 +493,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await GetFinancialDetailValues(details, data);
 
-                finData.TraceFinancialDetails = details.Items;                
+                finData.TraceFinancialDetails = details.Items;
             }
         }
 
@@ -520,13 +538,13 @@ namespace FOAEA3.Business.Areas.Application
         {
             var id = await DB.TraceResponseTable.CreateTraceFinancialResponse(responseData);
             if (responseData.TraceFinancialDetails is not null)
-                foreach(var detail in responseData.TraceFinancialDetails)
+                foreach (var detail in responseData.TraceFinancialDetails)
                 {
                     detail.TrcRspFin_Id = id;
                     var detailId = await DB.TraceResponseTable.CreateTraceFinancialResponseDetail(detail);
                     if (detail.TraceDetailValues is not null)
                     {
-                        foreach(var value in detail.TraceDetailValues)
+                        foreach (var value in detail.TraceDetailValues)
                         {
                             value.TrcRspFin_Dtl_Id = detailId;
                             _ = await DB.TraceResponseTable.CreateTraceFinancialResponseDetailValue(value);

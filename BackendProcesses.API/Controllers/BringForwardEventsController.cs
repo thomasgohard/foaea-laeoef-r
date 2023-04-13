@@ -41,7 +41,7 @@ namespace BackendProcesses.API.Controllers
 
             var startTime = DateTime.Now;
 
-            var bringForwardProcess = new BringForwardEventProcess(repositories, repositoriesFinance, config);
+            var bringForwardProcess = new BringForwardEventProcess(repositories, repositoriesFinance, config, User);
             await bringForwardProcess.RunAsync();
 
             var endTime = DateTime.Now;

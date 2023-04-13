@@ -18,8 +18,7 @@ namespace FOAEA3.API.Interception.Controllers
         {
             var applKey = new ApplKey(key);
 
-            var manager = new InterceptionManager(repositories, repositoriesFinance, config);
-            await manager.SetCurrentUserAsync(User);
+            var manager = new InterceptionManager(repositories, repositoriesFinance, config, User);
 
             var data = (await manager.GetSummonsSummaryAsync(applKey.EnfSrv, applKey.CtrlCd)).FirstOrDefault();
 

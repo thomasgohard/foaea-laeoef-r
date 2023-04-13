@@ -25,7 +25,14 @@ namespace FileBroker.Data.DB
 
             string outputParamFieldName = "dvchOutput";
 
-            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<string>("MessageBrokerConfigGetProcessParamterValue", parameters, outputParamFieldName);
+            var outputParameter = new Dictionary<string, string>
+            {
+                {outputParamFieldName, "S100"}
+            };
+
+            var values = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("MessageBrokerConfigGetProcessParamterValue", parameters, outputParameter);
+
+            return values[outputParamFieldName] as string;
         }
 
         public async Task<ProcessCodeData> GetProcessCodesAsync(int processId)

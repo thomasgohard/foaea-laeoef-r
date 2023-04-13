@@ -5,6 +5,6 @@ namespace FileBroker.Model.Interfaces
 {
     public interface IOutgoingFileManager
     {
-        Task<string> CreateOutputFileAsync(string fileBaseName, List<string> errors);
+        Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName);
     }
 }
