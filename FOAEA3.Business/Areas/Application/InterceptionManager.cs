@@ -1,6 +1,7 @@
 ﻿using DBHelper;
 using FOAEA3.Business.BackendProcesses;
 using FOAEA3.Common.Helpers;
+using FOAEA3.Common.Models;
 using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -20,9 +22,9 @@ namespace FOAEA3.Business.Areas.Application
         private const string I01_AFFITDAVIT_DOCUMENT_CODE = "IXX";
         private const string AUTO_REJECT_EXPIRED_TIME_FOR_VARIATION = "BFEventsProcessing Case 50896";
 
-        public InterceptionApplicationData InterceptionApplication { get; }
-        private IRepositories_Finance DBfinance { get; }
-        private InterceptionValidation InterceptionValidation { get; }
+        public InterceptionApplicationData InterceptionApplication { get; private set; }
+        private IRepositories_Finance DBfinance { get; set; }
+        private InterceptionValidation InterceptionValidation { get; set; }
         public bool? AcceptedWithin30Days { get; set; } = null;
         public bool ESDReceived { get; set; } = true;
         public DateTime? GarnisheeSummonsReceiptDate { get; set; }
@@ -37,10 +39,46 @@ namespace FOAEA3.Business.Areas.Application
 
         private VariationDocumentAction VariationAction { get; set; }
 
+        //public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
+        //    this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
+        //{
+
+        //}
+
+        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            this(new InterceptionApplicationData(), repositories, repositoriesFinance, config, user)
+        {
+
+        }
+
         public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
-                                   IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
-                                  base(interception, repositories, config,
-                                      new InterceptionValidation(interception, repositories, config, null))
+                                   IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            base(interception, repositories, config, user, new InterceptionValidation(interception, repositories, config, null))
+        {
+            SetupInterception(interception, repositoriesFinance);
+        }
+        
+        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            this(new InterceptionApplicationData(), repositories, repositoriesFinance, config, user)
+        {
+
+        }
+
+        public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
+                                   IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            base(interception, repositories, config, user, new InterceptionValidation(interception, repositories, config, null))
+        {
+            SetupInterception(interception, repositoriesFinance);
+        }
+        
+        //public InterceptionManager(InterceptionApplicationData interception, IRepositories repositories,
+        //                           IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
+        //    base(interception, repositories, config, new InterceptionValidation(interception, repositories, config, null))
+        //{
+        //    SetupInterception(interception, repositoriesFinance);
+        //}
+
+        private void SetupInterception(InterceptionApplicationData interception, IRepositories_Finance repositoriesFinance)
         {
             InterceptionApplication = interception;
             InterceptionValidation = Validation as InterceptionValidation;
@@ -85,12 +123,6 @@ namespace FOAEA3.Business.Areas.Application
                             ApplicationState.PARTIALLY_SERVICED_12,
                             ApplicationState.AWAITING_DOCUMENTS_FOR_VARIATION_19
                         });
-        }
-
-        public InterceptionManager(IRepositories repositories, IRepositories_Finance repositoriesFinance, IFoaeaConfigurationHelper config) :
-            this(new InterceptionApplicationData(), repositories, repositoriesFinance, config)
-        {
-
         }
 
         public async Task<bool> LoadApplicationAsync(string enfService, string controlCode, bool loadFinancials)
@@ -298,10 +330,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config)
-            {
-                CurrentUser = this.CurrentUser
-            };
+            var currentInterceptionManager = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
             await currentInterceptionManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: true);
             var currentInterceptionApplication = currentInterceptionManager.InterceptionApplication;
 
@@ -385,10 +414,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task FullyServiceApplicationAsync()
         {
-            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, Config)
-            {
-                CurrentUser = this.CurrentUser
-            };
+            var applicationManagerCopy = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
 
             if (!await applicationManagerCopy.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, loadFinancials: false))
             {
@@ -669,7 +695,7 @@ namespace FOAEA3.Business.Areas.Application
 
             foreach (var appl in applAutomation)
             {
-                var thisManager = new InterceptionManager(appl, DB, DBfinance, Config);
+                var thisManager = new InterceptionManager(appl, DB, DBfinance, Config, CurrentUser);
                 await thisManager.AcceptVariationAsync();
             }
 

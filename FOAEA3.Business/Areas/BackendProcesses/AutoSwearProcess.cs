@@ -2,6 +2,7 @@
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.BackendProcesses
@@ -11,13 +12,15 @@ namespace FOAEA3.Business.Areas.BackendProcesses
         private readonly IFoaeaConfigurationHelper Config;
         private readonly IRepositories DB;
         private readonly IRepositories_Finance DBfinance;
+        private readonly ClaimsPrincipal User;
 
         public AutoSwearProcess(IRepositories repositories, IRepositories_Finance repositories_finance,
-                                        IFoaeaConfigurationHelper config)
+                                        IFoaeaConfigurationHelper config, ClaimsPrincipal user)
         {
             Config = config;
             DB = repositories;
             DBfinance = repositories_finance;
+            User = user;
         }
 
         public async Task RunAsync()
@@ -26,7 +29,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
 
             await prodAudit.InsertAsync("Auto Swear Process", "Auto Swear Process Started", "O");
 
-            var interceptionManager = new InterceptionManager(DB, DBfinance, Config);
+            var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
             foreach (string autoSwearEnfSrv in Config.AutoSwear)
             {
                 bool isESDsite = Config.ESDsites.Contains(autoSwearEnfSrv);
@@ -36,7 +39,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                 {
                     bool exGratia = false;
 
-                    var manager = new InterceptionManager(appl, DB, DBfinance, Config);
+                    var manager = new InterceptionManager(appl, DB, DBfinance, Config, User);
                     if (await manager.IsSinBlockedAsync() || await manager.IsRefNumberBlockedAsync())
                     {
                         exGratia = true;

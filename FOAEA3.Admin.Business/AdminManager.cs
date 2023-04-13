@@ -36,8 +36,7 @@ namespace FOAEA3.Admin.Business
             {
                 var applicationData = new ApplicationData();
 
-                var applManager = new ApplicationManager(applicationData, DB, config);
-                await applManager.SetCurrentUserAsync(user);
+                var applManager = new ApplicationManager(applicationData, DB, config, user);
 
                 if (!await applManager.LoadApplicationAsync(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
@@ -55,8 +54,7 @@ namespace FOAEA3.Admin.Business
                 switch (applManager.GetCategory())
                 {
                     case "I01":
-                        var interceptionManager = new InterceptionManager(DB, null, config);
-                        await interceptionManager.SetCurrentUserAsync(user);
+                        var interceptionManager = new InterceptionManager(DB, null, config, user);
                         await interceptionManager.LoadApplicationAsync(enfService, controlCode);
                         interceptionManager.InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         interceptionManager.InterceptionApplication.Appl_SIN_Cnfrmd_Ind = 1;
@@ -68,8 +66,7 @@ namespace FOAEA3.Admin.Business
                         break;
 
                     case "T01":
-                        var tracingManager = new TracingManager(DB, config);
-                        await tracingManager.SetCurrentUserAsync(user);
+                        var tracingManager = new TracingManager(DB, config, user);
                         await tracingManager.LoadApplicationAsync(enfService, controlCode);
                         tracingManager.TracingApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         tracingManager.TracingApplication.Appl_SIN_Cnfrmd_Ind = 1;
@@ -81,8 +78,7 @@ namespace FOAEA3.Admin.Business
                         break;
 
                     case "L01":
-                        var licenceDenialManager = new LicenceDenialManager(DB, config);
-                        await licenceDenialManager.SetCurrentUserAsync(user);
+                        var licenceDenialManager = new LicenceDenialManager(DB, config, user);
                         await licenceDenialManager.LoadApplicationAsync(enfService, controlCode);
                         licenceDenialManager.LicenceDenialApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         licenceDenialManager.LicenceDenialApplication.Appl_SIN_Cnfrmd_Ind = 1;

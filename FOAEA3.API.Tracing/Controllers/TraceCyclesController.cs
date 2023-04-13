@@ -25,7 +25,7 @@ public class TraceCyclesController : FoaeaControllerBase
                                                             [FromQuery] string fileCycle,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         var data = await manager.GetTraceCycleQuantityDataAsync(enforcementServiceCode, fileCycle);
 

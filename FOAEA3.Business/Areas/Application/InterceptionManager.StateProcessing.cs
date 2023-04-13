@@ -270,10 +270,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_17_FinancialTermsVaried();
 
-            var currentApplicationManager = new InterceptionManager(DB, DBfinance, Config)
-            {
-                CurrentUser = this.CurrentUser
-            };
+            var currentApplicationManager = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
             
             await currentApplicationManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
 

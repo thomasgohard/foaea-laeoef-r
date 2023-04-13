@@ -27,7 +27,7 @@ public class OutgoingProvincialTracingResultsController : FoaeaControllerBase
                                                             [FromQuery] bool isXML,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         var data = await manager.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
 

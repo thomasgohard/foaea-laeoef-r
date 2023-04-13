@@ -25,7 +25,7 @@ public class LicenceDenialResponsesController : FoaeaControllerBase
     {
         var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<LicenceDenialResponseData>>(Request);
 
-        var licenceDenialManager = new LicenceDenialManager(repositories, config);
+        var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
 
         await licenceDenialManager.CreateResponseDataAsync(responseData);
 
@@ -39,7 +39,7 @@ public class LicenceDenialResponsesController : FoaeaControllerBase
     public async Task<ActionResult<int>> MarkLicenceDenialResponsesAsViewed([FromServices] IRepositories repositories,
                                                                 [FromQuery] string enfService)
     {
-        var licenceDenialManager = new LicenceDenialManager(repositories, config);
+        var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
 
         await licenceDenialManager.MarkResponsesAsViewedAsync(enfService);
 

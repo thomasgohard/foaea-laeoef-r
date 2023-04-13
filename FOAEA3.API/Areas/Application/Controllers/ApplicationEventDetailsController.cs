@@ -71,8 +71,7 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(id);
 
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
         if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));

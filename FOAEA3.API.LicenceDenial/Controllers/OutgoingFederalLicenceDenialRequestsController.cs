@@ -28,7 +28,7 @@ public class OutgoingFederalLicenceDenialRequestsController : FoaeaControllerBas
                                                             [FromQuery] string enfServiceCode,
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new LicenceDenialManager(repositories, config);
+        var manager = new LicenceDenialManager(repositories, config, User);
 
         var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState,
                                                              enfServiceCode);

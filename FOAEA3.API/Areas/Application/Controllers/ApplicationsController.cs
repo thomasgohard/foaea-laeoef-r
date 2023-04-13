@@ -31,8 +31,7 @@ public class ApplicationsController : FoaeaControllerBase
                                 [FromServices] IRepositories repositories)
     {
         var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
-        await applManager.SetCurrentUserAsync(User);
+        var applManager = new ApplicationManager(appl, repositories, config, User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
@@ -61,9 +60,8 @@ public class ApplicationsController : FoaeaControllerBase
                                                                     [FromServices] IRepositories repositories)
     {
         var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
+        var applManager = new ApplicationManager(appl, repositories, config, User);
         var sinManager = new ApplicationSINManager(appl, applManager);
-        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsAsync());
@@ -76,9 +74,8 @@ public class ApplicationsController : FoaeaControllerBase
                                                                                 [FromServices] IRepositories repositories)
     {
         var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
+        var applManager = new ApplicationManager(appl, repositories, config, User);
         var sinManager = new ApplicationSINManager(appl, applManager);
-        await applManager.SetCurrentUserAsync(User);
 
         if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(await sinManager.GetSINResultsWithHistoryAsync());
@@ -95,27 +92,25 @@ public class ApplicationsController : FoaeaControllerBase
 
         var application = new ApplicationData();
 
-        var appManager = new ApplicationManager(application, repositories, config);
+        var appManager = new ApplicationManager(application, repositories, config, User);
         await appManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
-        await appManager.SetCurrentUserAsync(User);
 
         ApplicationSINManager sinManager;
 
         switch (application.AppCtgy_Cd)
         {
             case "T01":
-                var tracingManager = new TracingManager(repositories, config);
+                var tracingManager = new TracingManager(repositories, config, User);
                 await tracingManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(tracingManager.TracingApplication, tracingManager);
                 break;
             case "I01":
-                var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config);
-                await interceptionManager.SetCurrentUserAsync(User);
+                var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config, User);
                 await interceptionManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
             case "L01":
-                var licenceDenialManager = new LicenceDenialManager(repositories, config);
+                var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
                 await licenceDenialManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(licenceDenialManager.LicenceDenialApplication, licenceDenialManager);
                 break;
@@ -138,8 +133,7 @@ public class ApplicationsController : FoaeaControllerBase
                                                                [FromQuery] string recipientCode)
     {
         var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
-        await applManager.SetCurrentUserAsync(User);
+        var applManager = new ApplicationManager(appl, repositories, config, User);
 
         return await applManager.GetProvincialStatsOutgoingDataAsync(maxRecords, activeState, recipientCode);
     }

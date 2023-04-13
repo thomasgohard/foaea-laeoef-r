@@ -29,8 +29,7 @@ public class TracingsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var manager = new TracingManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new TracingManager(repositories, config, User);
 
         bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
@@ -53,8 +52,8 @@ public class TracingsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
             return UnprocessableEntity(error);
 
-        var tracingManager = new TracingManager(tracingData, db, config);
-        await tracingManager.SetCurrentUserAsync(User);
+        var tracingManager = new TracingManager(tracingData, db, config, User);
+
         var submitter = (await db.SubmitterTable.GetSubmitterAsync(tracingData.Subm_SubmCd)).FirstOrDefault();
         if (submitter is not null)
         {
@@ -93,8 +92,7 @@ public class TracingsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
 
-        var tracingManager = new TracingManager(application, repositories, config);
-        await tracingManager.SetCurrentUserAsync(User);
+        var tracingManager = new TracingManager(application, repositories, config, User);
 
         if (string.IsNullOrEmpty(command))
             command = "";
@@ -138,8 +136,7 @@ public class TracingsController : FoaeaControllerBase
         if (!APIHelper.ValidateApplication(application, applKey, out string error))
             return UnprocessableEntity(error);
 
-        var appManager = new TracingManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new TracingManager(application, repositories, config, User);
 
         await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
 
@@ -156,8 +153,7 @@ public class TracingsController : FoaeaControllerBase
 
         var application = new TracingApplicationData();
 
-        var appManager = new TracingManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new TracingManager(application, repositories, config, User);
 
         await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
@@ -175,8 +171,7 @@ public class TracingsController : FoaeaControllerBase
 
         var application = new TracingApplicationData();
 
-        var appManager = new TracingManager(application, repositories, config);
-        await appManager.SetCurrentUserAsync(User);
+        var appManager = new TracingManager(application, repositories, config, User);
 
         await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
@@ -189,8 +184,7 @@ public class TracingsController : FoaeaControllerBase
     public async Task<ActionResult<DataList<TracingApplicationData>>> GetApplicationsWaitingForAffidavit(
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new TracingManager(repositories, config, User);
 
         var data = await manager.GetApplicationsWaitingForAffidavitAsync();
 
@@ -201,8 +195,7 @@ public class TracingsController : FoaeaControllerBase
     public async Task<ActionResult<List<TraceCycleQuantityData>>> GetTraceToApplData(
                                                             [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new TracingManager(repositories, config, User);
 
         var data = await manager.GetTraceToApplDataAsync();
 

@@ -17,7 +17,7 @@ namespace FOAEA3.API.Interception.Controllers
         public async Task<ActionResult<List<ProcessEISOOUTHistoryData>>> GetEISOvalidApplications([FromServices] IRepositories db,
                                                                                                   [FromServices] IRepositories_Finance dbFinance)
         {
-            var manager = new InterceptionManager(db, dbFinance, config);
+            var manager = new InterceptionManager(db, dbFinance, config, User);
             return await manager.GetEISOvalidApplications();
         }
 
@@ -27,7 +27,7 @@ namespace FOAEA3.API.Interception.Controllers
                                                                                             [FromServices] IRepositories db,
                                                                                             [FromServices] IRepositories_Finance dbFinance)
         {
-            var manager = new InterceptionManager(db, dbFinance, config);
+            var manager = new InterceptionManager(db, dbFinance, config, User);
             return await manager.GetEIoutgoingData(enfSrv);
         }
 

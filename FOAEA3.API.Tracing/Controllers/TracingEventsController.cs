@@ -50,7 +50,7 @@ public class TracingEventsController : FoaeaControllerBase
                                                                              [FromQuery] string fileCycle,
                                                                              [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         if (string.IsNullOrEmpty(enforcementServiceCode))
             return BadRequest("Missing enforcementServiceCode parameter");
@@ -68,7 +68,7 @@ public class TracingEventsController : FoaeaControllerBase
                                                                                  [FromQuery] string fileCycle,
                                                                                  [FromServices] IRepositories repositories)
     {
-        var manager = new TracingManager(repositories, config);
+        var manager = new TracingManager(repositories, config, User);
 
         var result = await manager.GetActiveTracingEventDetailsAsync(enforcementServiceCode, fileCycle);
 
@@ -77,8 +77,7 @@ public class TracingEventsController : FoaeaControllerBase
 
     private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(ApplKey id, IRepositories repositories, EventQueue queue)
     {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
         if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(manager.EventManager.GetApplicationEventsForQueueAsync(queue));

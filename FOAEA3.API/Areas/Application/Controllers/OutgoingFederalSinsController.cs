@@ -30,9 +30,8 @@ public class OutgoingFederalSinsController : FoaeaControllerBase
                                                                     [FromServices] IRepositories repositories)
     {
         var appl = new ApplicationData();
-        var applManager = new ApplicationManager(appl, repositories, config);
+        var applManager = new ApplicationManager(appl, repositories, config, User);
         var manager = new ApplicationSINManager(appl, applManager);
-        await applManager.SetCurrentUserAsync(User);
 
         var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState, enfServiceCode);
 

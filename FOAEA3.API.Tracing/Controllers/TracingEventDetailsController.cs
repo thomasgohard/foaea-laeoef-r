@@ -70,8 +70,7 @@ public class TracingEventDetailsController : FoaeaControllerBase
     private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(ApplKey id,
                                                                 IRepositories repositories, EventQueue queue)
     {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config);
-        await manager.SetCurrentUserAsync(User);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
         if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
             return Ok(manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));

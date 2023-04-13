@@ -27,9 +27,8 @@ public class ApplicationFederalSinsController : FoaeaControllerBase
 
         var application = new ApplicationData();
 
-        var applManager = new ApplicationManager(application, repositories, config);
+        var applManager = new ApplicationManager(application, repositories, config, User);
         var sinManager = new ApplicationSINManager(application, applManager);
-        await applManager.SetCurrentUserAsync(User);
 
         await sinManager.CreateResultDataAsync(responseData);
 

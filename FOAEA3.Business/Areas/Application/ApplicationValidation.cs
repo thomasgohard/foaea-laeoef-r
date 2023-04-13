@@ -70,10 +70,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                var existingApp = new ApplicationManager(new ApplicationData(), DB, Config)
-                {
-                    CurrentUser = this.CurrentUser
-                };
+                var existingApp = new ApplicationManager(new ApplicationData(), DB, Config, CurrentUser);
 
                 if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {

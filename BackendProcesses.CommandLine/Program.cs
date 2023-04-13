@@ -71,52 +71,54 @@ namespace BackendProcesses.CommandLine
             else
                 option = args[0] ?? string.Empty;
 
+            var user = UserHelper.CreateSystemAdminUser();
+
             if ((option.ToUpper() != "X") && (ValidationHelper.IsValidInteger(option)))
             {
                 switch (option)
                 {
                     case "1":
-                        var nightlyProcess = new NightlyProcess(DB, DBfinance, Config);
+                        var nightlyProcess = new NightlyProcess(DB, DBfinance, Config, user);
                         await nightlyProcess.RunAsync();
                         break;
 
                     case "2":
-                        var bringForwardProcess = new BringForwardEventProcess(DB, DBfinance, Config);
+                        var bringForwardProcess = new BringForwardEventProcess(DB, DBfinance, Config, user);
                         await bringForwardProcess.RunAsync();
                         break;
 
                     case "3":
-                        var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config);
+                        var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config, user);
                         await completeI01process.RunAsync();
                         break;
 
                     case "4":
-                        var autoSwearProcess = new AutoSwearProcess(DB, DBfinance, Config);
+                        var autoSwearProcess = new AutoSwearProcess(DB, DBfinance, Config, user);
                         await autoSwearProcess.RunAsync();
                         break;
 
                     case "5":
-                        var autoAcceptProcess = new AutoAcceptProcess(DB, DBfinance, Config);
+                        var autoAcceptProcess = new AutoAcceptProcess(DB, DBfinance, Config, user);
                         await autoAcceptProcess.RunAsync("QC");
                         break;
 
                     case "6":
-                        var esdEventProcess = new ESDEventProcess(DB, DBfinance, Config);
+                        var esdEventProcess = new ESDEventProcess(DB, DBfinance, Config, user);
                         await esdEventProcess.RunAsync();
                         break;
 
                     case "7":
-                        var updateFixedAmountRecalcDate = new UpdateFixedAmountRecalcDate(DB, DBfinance, Config);
+                        var updateFixedAmountRecalcDate = new UpdateFixedAmountRecalcDate(DB, DBfinance, Config, user);
                         await updateFixedAmountRecalcDate.RunAsync();
                         break;
 
                     case "8":
-                        var createESDC_NETP_eventsProcess = new CreateESDC_NETP_eventsProcess(DB, Config);
+                        var createESDC_NETP_eventsProcess = new CreateESDC_NETP_eventsProcess(DB, Config, user);
                         await createESDC_NETP_eventsProcess.RunAsync();
                         break;
 
                     case "9":
-                        var ftBatchWithoutTransactionNotice = new FTBatchWithoutTransactionNoticeProcess(DB, DBfinance, Config);
+                        var ftBatchWithoutTransactionNotice = new FTBatchWithoutTransactionNoticeProcess(DB, DBfinance, Config, user);
                         await ftBatchWithoutTransactionNotice.RunAsync();
                         break;
 
@@ -126,7 +128,7 @@ namespace BackendProcesses.CommandLine
                         break;
 
                     case "11":
-                        var deleteReconciliationDataProcess = new DeleteReconciliationDataProcess(DB, DBfinance, Config);
+                        var deleteReconciliationDataProcess = new DeleteReconciliationDataProcess(DB, DBfinance, Config, user);
                         await deleteReconciliationDataProcess.RunAsync();
                         break;
 

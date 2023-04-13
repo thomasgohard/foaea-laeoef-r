@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.BackendProcesses
@@ -11,13 +12,15 @@ namespace FOAEA3.Business.BackendProcesses
         private readonly IRepositories DB;
         private readonly IRepositories_Finance DBfinance;
         private readonly IFoaeaConfigurationHelper Config;
+        private readonly ClaimsPrincipal User;
 
         public CompletedInterceptionsProcess(IRepositories repositories, IRepositories_Finance repositoriesFinance,
-                                             IFoaeaConfigurationHelper config)
+                                             IFoaeaConfigurationHelper config, ClaimsPrincipal user)
         {
             DB = repositories;
             DBfinance = repositoriesFinance;
             Config = config;
+            User = user;
         }
 
         public async Task RunAsync()
@@ -30,7 +33,7 @@ namespace FOAEA3.Business.BackendProcesses
 
             foreach (var appl in applTerminated)
             {
-                var manager = new InterceptionManager((InterceptionApplicationData)appl, DB, DBfinance, Config);
+                var manager = new InterceptionManager((InterceptionApplicationData)appl, DB, DBfinance, Config, User);
                 await manager.CompleteApplication();
             }
 

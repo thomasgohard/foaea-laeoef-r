@@ -4,6 +4,7 @@ using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.BackendProcesses
@@ -13,13 +14,15 @@ namespace FOAEA3.Business.Areas.BackendProcesses
         private readonly IFoaeaConfigurationHelper Config;
         private readonly IRepositories DB;
         private readonly IRepositories_Finance DBfinance;
+        private readonly ClaimsPrincipal User;
 
         public ESDEventProcess(IRepositories repositories, IRepositories_Finance repositories_finance,
-                               IFoaeaConfigurationHelper config)
+                               IFoaeaConfigurationHelper config, ClaimsPrincipal user)
         {
             DB = repositories;
             DBfinance = repositories_finance;
             Config = config;
+            User = user;
         }
 
         public async Task RunAsync()
@@ -41,7 +44,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
 
             foreach (var appl in applRejects)
             {
-                var manager = new InterceptionManager(DB, DBfinance, Config);
+                var manager = new InterceptionManager(DB, DBfinance, Config, User);
                 await manager.LoadApplicationAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
 
                 if (appl.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5))
@@ -106,7 +109,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                 }
                 else
                 {
-                    var manager = new InterceptionManager(DB, DBfinance, Config);
+                    var manager = new InterceptionManager(DB, DBfinance, Config, User);
                     await manager.LoadApplicationAsync(enfSrv, ctrlCd);
 
                     var dateDiff = DateTime.Now - newDate.Date;

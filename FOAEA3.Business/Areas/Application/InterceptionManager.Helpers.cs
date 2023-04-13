@@ -105,10 +105,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ProcessBringForwardNotificationAsync(string applEnfSrvCode, string applControlCode, EventCode eventBFNreasonCode)
         {
-            var bfApplicationManager = new InterceptionManager(DB, DBfinance, Config)
-            {
-                CurrentUser = this.CurrentUser
-            };
+            var bfApplicationManager = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
 
             await bfApplicationManager.LoadApplicationAsync(applEnfSrvCode, applControlCode);
             var bfApplication = bfApplicationManager.InterceptionApplication;
@@ -552,7 +549,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<bool> FinancialTermsHaveBeenModified()
         {
-            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
             await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
             var currentApp = currentAppManager.InterceptionApplication;
             var newApp = InterceptionApplication;
@@ -580,7 +577,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task<bool> FinancialTermsAreHigher()
         {
-            var currentAppManager = new InterceptionManager(DB, DBfinance, Config);
+            var currentAppManager = new InterceptionManager(DB, DBfinance, Config, CurrentUser);
             await currentAppManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
             var currentApp = currentAppManager.InterceptionApplication;
             var newApp = InterceptionApplication;
