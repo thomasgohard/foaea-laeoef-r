@@ -21,6 +21,7 @@ namespace FOAEA3.API.Controllers
     [Authorize()]
     public class LoginsController : FoaeaControllerBase
     {
+        [AllowAnonymous]
         [HttpGet("Version")]
         public ActionResult<string> GetVersion() => Ok("Logins API Version 1.0");
 
