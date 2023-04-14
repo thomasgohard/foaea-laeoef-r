@@ -15,6 +15,7 @@ namespace FOAEA3.API.Areas.Application.Controllers;
 [Route("api/v1/[controller]")]
 public class ApplicationsController : FoaeaControllerBase
 {    
+    [AllowAnonymous]
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Applications API Version 1.0");
 

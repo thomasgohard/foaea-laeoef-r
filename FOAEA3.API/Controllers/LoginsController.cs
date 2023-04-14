@@ -1,5 +1,4 @@
-﻿using DBHelper;
-using FOAEA3.API.Security;
+﻿using FOAEA3.API.Security;
 using FOAEA3.Business.Areas.Administration;
 using FOAEA3.Business.Security;
 using FOAEA3.Common;
@@ -95,8 +94,8 @@ namespace FOAEA3.API.Controllers
 
             var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
-                return StatusCode(500); 
-            
+                return StatusCode(500);
+
             await db.LoginTable.AcceptNewTermsOfReferernceAsync(subjectName);
 
             var principal = LoginHandler.AcceptTermsOfReference(subjectName, db);
@@ -155,8 +154,8 @@ namespace FOAEA3.API.Controllers
 
             var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
-                return StatusCode(500); 
-            
+                return StatusCode(500);
+
             var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
             var availableSubmitters = (from role in roles select role.RoleName).ToList();
 

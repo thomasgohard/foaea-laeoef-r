@@ -15,6 +15,7 @@ namespace FOAEA3.API.Tracing.Controllers;
 [Route("api/v1/[controller]")]
 public class TracingsController : FoaeaControllerBase
 {
+    [AllowAnonymous]
     [HttpGet("Version")]
     public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.0");
 
