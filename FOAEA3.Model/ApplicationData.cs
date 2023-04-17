@@ -5,10 +5,9 @@ using System.Diagnostics;
 
 namespace FOAEA3.Model
 {
-
     [DebuggerDisplay("{Appl_EnfSrv_Cd}-{Appl_CtrlCd} [{AppCtgy_Cd} at {AppLiSt_Cd}]")]
     [Serializable]
-    public class ApplicationData : IMessageList, IEventList
+    public class ApplicationData : IMessageList
     {
         public string Appl_EnfSrv_Cd { get; set; }
         public string Appl_CtrlCd { get; set; }
