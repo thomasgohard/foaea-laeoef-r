@@ -390,8 +390,8 @@ namespace FOAEA3.Data.DB
             if (rdr.ColumnExists("Email_Address")) data.EmailAddress = rdr["Email_Address"] as string; // can be null 
             if (rdr.ColumnExists("Declaration_Ind")) data.DeclarationIndicator = (bool)rdr["Declaration_Ind"];
 
-            if (rdr.ColumnExists("Purpose")) data.Purpose = (short)rdr["Purpose"];
-            if (rdr.ColumnExists("Tracing_Information")) data.Purpose = (short)rdr["Tracing_Information"];
+            if (rdr.ColumnExists("Purpose")) data.Purpose = (short?)rdr["Purpose"];
+            if (rdr.ColumnExists("Tracing_Information")) data.TraceInformation = (short)rdr["Tracing_Information"];
             if (rdr.ColumnExists("Sin_Information")) data.IncludeSinInformation = (bool)rdr["Sin_Information"];
             if (rdr.ColumnExists("Financial_Information")) data.IncludeFinancialInformation = (bool)rdr["Financial_Information"];
         }
