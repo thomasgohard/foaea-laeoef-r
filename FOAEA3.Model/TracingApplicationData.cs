@@ -25,7 +25,6 @@ namespace FOAEA3.Model
         public string EmailAddress { get; set; }
         public bool DeclarationIndicator { get; set; }
         public string Declaration { get; set; }
-        public short? Purpose { get; set; }
         public short TraceInformation { get; set; }
         public bool IncludeSinInformation { get; set; }
 
@@ -66,7 +65,6 @@ namespace FOAEA3.Model
             EmailAddress = data.EmailAddress;
             DeclarationIndicator = data.DeclarationIndicator;
 
-            Purpose = data.Purpose;
             TraceInformation = data.TraceInformation;
             IncludeSinInformation = data.IncludeSinInformation;
             IncludeFinancialInformation = data.IncludeFinancialInformation;

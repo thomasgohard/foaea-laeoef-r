@@ -60,7 +60,7 @@ namespace FOAEA3.Common.Brokers
 
         public async Task<TokenData> LoginAsync(FoaeaLoginData loginData)
         {
-            string apiCall = "api/v1/logins/testLogin";
+            string apiCall = "api/v1/logins/SingleStepLogin";
             var data = await ApiHelper.PostDataAsync<TokenData, FoaeaLoginData>(apiCall, loginData);
             return data;
         }

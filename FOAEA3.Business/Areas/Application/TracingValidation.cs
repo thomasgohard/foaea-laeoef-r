@@ -27,11 +27,11 @@ namespace FOAEA3.Business.Areas.Application
 
             if (IsC78())
             {
-                if (TracingApplication.Purpose is null)
-                {
-                    isSuccess = false;
-                    TracingApplication.Messages.AddError(Resources.ErrorResource.MISSING_PURPOSE);
-                }
+                //if (TracingApplication.AppReas_Cd)
+                //{
+                //    isSuccess = false;
+                //    TracingApplication.Messages.AddError(Resources.ErrorResource.MISSING_PURPOSE);
+                //}
             }
             else
             {

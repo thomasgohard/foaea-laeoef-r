@@ -357,7 +357,6 @@ public class IncomingProvincialTracingManager
             InfoBank_Cd = tracingData?.dat_InfoBank_Cd,
 
             // new fields
-            Purpose = tracingFinData?.dat_Purpose.ConvertToShortOrNull(),
             TraceInformation = tracingFinData?.dat_Tracing_Info.ConvertToShort() ?? 0,
             PhoneNumber = tracingFinData?.dat_Trace_Dbtr_PhoneNumber,
             EmailAddress = tracingFinData?.dat_Trace_Dbtr_EmailAddress,

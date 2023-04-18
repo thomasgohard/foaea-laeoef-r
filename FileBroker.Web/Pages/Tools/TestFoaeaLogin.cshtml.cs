@@ -20,7 +20,7 @@ namespace FileBroker.Web.Pages.Tools
                 Submitter = config["FOAEA:submitter"].ReplaceVariablesWithEnvironmentValues()
             };
 
-            string api = "https://localhost:12011/api/v1/logins/TestLogin";
+            string api = "https://localhost:12011/api/v1/logins/SingleStepLogin";
             var response = await client.PostAsJsonAsync(api, userLoginInfo);
 
             Message = await response.Content.ReadAsStringAsync();
