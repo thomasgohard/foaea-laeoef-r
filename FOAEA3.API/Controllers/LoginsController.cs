@@ -228,8 +228,8 @@ namespace FOAEA3.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("TestLogin")]
-        public async Task<ActionResult> TestLoginAction([FromBody] FoaeaLoginData loginData,
+        [HttpPost("SingleStepLogin")]
+        public async Task<ActionResult> SingleStepLoginAction([FromBody] FoaeaLoginData loginData,
                                                         [FromServices] IRepositories db)
         {
             var configHelper = new FoaeaConfigurationHelper();
@@ -239,7 +239,7 @@ namespace FOAEA3.API.Controllers
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            var principal = await TestLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
+            var principal = await SingleStepLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
                 string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();

@@ -170,7 +170,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task<bool> ApplicationExistsAsync()
         {
-            if (!String.IsNullOrEmpty(Appl_CtrlCd))
+            if (!String.IsNullOrEmpty(Appl_CtrlCd) && (Appl_CtrlCd != Application.Subm_SubmCd))
             {
                 return await DB.ApplicationTable.ApplicationExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
             }
@@ -207,7 +207,7 @@ namespace FOAEA3.Business.Areas.Application
             Application.Appl_Rcptfrm_Dte = DateTime.Now.Date;
 
             // generate control code if not entered
-            if (String.IsNullOrEmpty(Appl_CtrlCd))
+            if (String.IsNullOrEmpty(Appl_CtrlCd) || (Appl_CtrlCd == Application.Subm_SubmCd))
             {
                 Application.Appl_CtrlCd = await DB.ApplicationTable.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
@@ -244,7 +244,18 @@ namespace FOAEA3.Business.Areas.Application
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
-                    await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
+                    //await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
+
+                    //var submitterMessage = new SubmitterMessageData {
+                    //    Subm_SubmCd = DB.CurrentSubmitter,
+                    //    Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd,
+                    //    Appl_CtrlCd = Application.Appl_CtrlCd,
+                    //    AppLiSt_Cd = (short) Application.AppLiSt_Cd,
+                    //    Msg_Nr = (int) EventCode.C50620_VALID_APPLICATION,
+                    //    Owner_EnfSrv_Cd = Application.Appl_EnfSrv_Cd,
+                    //    Owner_SubmCd = Application.Subm_SubmCd
+                    //};
+                    //await DB.SubmitterTable.CreateSubmitterMessageAsync(submitterMessage);
                 }
 
             }

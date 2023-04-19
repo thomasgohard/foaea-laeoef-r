@@ -69,7 +69,6 @@ namespace FileBroker.Model
         [DataMember(IsRequired = false)]
         public string dat_Trace_Dbtr_EmailAddress;
         public string dat_Trace_Declaration;
-        public string dat_Purpose;
         public string dat_Tracing_Info;
         public string dat_SIN_Information;
         public string dat_Financial_Information;

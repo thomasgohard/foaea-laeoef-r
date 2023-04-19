@@ -45,8 +45,8 @@
     "Key": "%FILEBROKER_TOKEN_KEY%",
     "Issuer": "%FILEBROKER_TOKEN_ISSUER%",
     "Audience": "%FILEBROKER_TOKEN_AUDIENCE%",
-    "ExpireMinutes": 20,
-    "RefreshTokenExpireMinutes": 60
+    "ExpireMinutes": 480,
+    "RefreshTokenExpireMinutes": 600
   },
   "TracingC78CutOff": "2023-11-15T12:00:00"
 }

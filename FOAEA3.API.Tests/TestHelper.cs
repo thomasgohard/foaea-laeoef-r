@@ -50,7 +50,7 @@ namespace FOAEA3.API.Tests
             string keyData = JsonConvert.SerializeObject(userLoginInfo);
             var content = new StringContent(keyData, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("/api/v1/logins/TestLogin", content);
+            var response = await client.PostAsync("/api/v1/logins/SingleStepLogin", content);
             var responseContent = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

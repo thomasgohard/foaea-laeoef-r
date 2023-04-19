@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace FOAEA3.API.Security
 {
-    public class TestLogin
+    public class SingleStepLogin
     {
         public static async Task<ClaimsPrincipal> AutoLogin(string user, string password,
                                                                                 string submitter,
