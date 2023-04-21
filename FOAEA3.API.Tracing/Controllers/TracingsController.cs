@@ -24,9 +24,8 @@ public class TracingsController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{key}", Name = "GetTracing")]
-    public async Task<ActionResult<TracingApplicationData>> GetApplication(
-                                    [FromRoute] string key,
-                                    [FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> GetApplication([FromRoute] string key,
+                                                                           [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
@@ -80,11 +79,10 @@ public class TracingsController : FoaeaControllerBase
 
     [HttpPut("{key}")]
     [Produces("application/json")]
-    public async Task<ActionResult<TracingApplicationData>> UpdateApplication(
-                                                            [FromRoute] string key,
-                                                            [FromQuery] string command,
-                                                            [FromQuery] string enforcementServiceCode,
-                                                            [FromServices] IRepositories repositories)
+    public async Task<ActionResult<TracingApplicationData>> UpdateApplication([FromRoute] string key,
+                                                                              [FromQuery] string command,
+                                                                              [FromQuery] string enforcementServiceCode,
+                                                                              [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
@@ -126,9 +124,9 @@ public class TracingsController : FoaeaControllerBase
 
     [HttpPut("{key}/Transfer")]
     public async Task<ActionResult<TracingApplicationData>> Transfer([FromRoute] string key,
-                                                 [FromServices] IRepositories repositories,
-                                                 [FromQuery] string newRecipientSubmitter,
-                                                 [FromQuery] string newIssuingSubmitter)
+                                                                     [FromServices] IRepositories repositories,
+                                                                     [FromQuery] string newRecipientSubmitter,
+                                                                     [FromQuery] string newIssuingSubmitter)
     {
         var applKey = new ApplKey(key);
 
@@ -146,7 +144,7 @@ public class TracingsController : FoaeaControllerBase
 
     [HttpPut("{key}/SINbypass")]
     public async Task<ActionResult<TracingApplicationData>> SINbypass([FromRoute] string key,
-                                                          [FromServices] IRepositories repositories)
+                                                                      [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
@@ -166,7 +164,7 @@ public class TracingsController : FoaeaControllerBase
 
     [HttpPut("{key}/CertifyAffidavit")]
     public async Task<ActionResult<TracingApplicationData>> CertifyAffidavit([FromRoute] string key,
-                                                                 [FromServices] IRepositories repositories)
+                                                                             [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
 
@@ -181,9 +179,26 @@ public class TracingsController : FoaeaControllerBase
         return Ok(application);
     }
 
+    [HttpPut("{key}/RejectAffidavit")]
+    public async Task<ActionResult<TracingApplicationData>> RejectAffidavit([FromRoute] string key,
+                                                                            [FromServices] IRepositories repositories)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = new TracingApplicationData();
+
+        var appManager = new TracingManager(application, repositories, config, User);
+
+        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+
+        await appManager.RejectAffidavitAsync(repositories.CurrentSubmitter);
+
+        return Ok(application);
+    }
+
     [HttpGet("WaitingForAffidavits")]
     public async Task<ActionResult<DataList<TracingApplicationData>>> GetApplicationsWaitingForAffidavit(
-                                                            [FromServices] IRepositories repositories)
+                                                                                        [FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config, User);
 
@@ -193,8 +208,7 @@ public class TracingsController : FoaeaControllerBase
     }
 
     [HttpGet("TraceToApplication")]
-    public async Task<ActionResult<List<TraceCycleQuantityData>>> GetTraceToApplData(
-                                                            [FromServices] IRepositories repositories)
+    public async Task<ActionResult<List<TraceCycleQuantityData>>> GetTraceToApplData([FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config, User);
 

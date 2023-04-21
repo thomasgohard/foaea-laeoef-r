@@ -228,7 +228,7 @@ public class IncomingProvincialTracingManager
                     break;
 
                 case "14": // cancellation
-                    tracing = await APIs.TracingApplications.CloseTracingApplicationAsync(tracingMessageData.Application);
+                    tracing = await APIs.TracingApplications.CancelTracingApplicationAsync(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer

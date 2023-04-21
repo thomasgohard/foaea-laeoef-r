@@ -15,7 +15,7 @@ namespace FileBroker.Business.Tests.InMemory
 
         public string Token { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-        public Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();
         }
