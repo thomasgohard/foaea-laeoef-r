@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication);
+        Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication);
         Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData);
         Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd);
         Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd);

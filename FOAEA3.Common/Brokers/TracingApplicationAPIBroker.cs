@@ -77,7 +77,7 @@ namespace FOAEA3.Common.Brokers
             return data;
         }
 
-        public async Task<TracingApplicationData> CloseTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public async Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
             var data = await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>($"api/v1/tracings/{key}",

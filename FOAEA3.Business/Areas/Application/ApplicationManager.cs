@@ -243,28 +243,12 @@ namespace FOAEA3.Business.Areas.Application
                     // update messages for display in UI
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
-
-                    //await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Subm_SubmCd);
-
-                    //var submitterMessage = new SubmitterMessageData {
-                    //    Subm_SubmCd = DB.CurrentSubmitter,
-                    //    Appl_EnfSrv_Cd = Application.Appl_EnfSrv_Cd,
-                    //    Appl_CtrlCd = Application.Appl_CtrlCd,
-                    //    AppLiSt_Cd = (short) Application.AppLiSt_Cd,
-                    //    Msg_Nr = (int) EventCode.C50620_VALID_APPLICATION,
-                    //    Owner_EnfSrv_Cd = Application.Appl_EnfSrv_Cd,
-                    //    Owner_SubmCd = Application.Subm_SubmCd
-                    //};
-                    //await DB.SubmitterTable.CreateSubmitterMessageAsync(submitterMessage);
                 }
-
             }
             catch (Exception e)
             {
-
                 Application.Messages.AddError(e.Message);
                 isSuccess = false;
-
             }
 
             if ((!isSuccess) && (Validation.IsSystemGeneratedControlCode))
@@ -283,7 +267,6 @@ namespace FOAEA3.Business.Areas.Application
 
         public virtual async Task UpdateApplicationAsync()
         {
-
             if (!(await ApplicationExistsAsync()))
             {
                 Application.Messages.AddError(ErrorResource.CANT_UPDATE_APPLICATION_DOES_NOT_EXISTS);
@@ -313,7 +296,19 @@ namespace FOAEA3.Business.Areas.Application
                 TrimSpaces();
                 MakeUpperCase();
 
+                Application.Appl_LastUpdate_Dte = DateTime.Now;
+                Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
                 await Process_00_InitialState();
+            }
+            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) && (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
+            {
+                await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+                Application.Appl_LastUpdate_Dte = DateTime.Now;
+                Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
+                await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
             }
             else // regular update
             {
@@ -329,7 +324,6 @@ namespace FOAEA3.Business.Areas.Application
                                                                BuildCommentsChangeReasonText(Application, current.Application));
                 if (!string.IsNullOrEmpty(reasonText))
                     EventManager.AddEvent(EventCode.C51020_APPLICATION_UPDATED, reasonText);
-
             }
 
             if (Application.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -337,6 +331,9 @@ namespace FOAEA3.Business.Areas.Application
 
             try
             {
+                Application.Appl_LastUpdate_Dte = DateTime.Now;
+                Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
                 // save the application to the database
                 await DB.ApplicationTable.UpdateApplicationAsync(Application);
 
@@ -362,6 +359,7 @@ namespace FOAEA3.Business.Areas.Application
         {
 
             Application.Subm_SubmCd = applSelectedSubmitter;
+            Application.Appl_LastUpdate_Dte = DateTime.Now;
             Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
             if (Application.Medium_Cd == "ONL")
                 Application.Subm_Recpt_SubmCd = applSelectedRecipient;

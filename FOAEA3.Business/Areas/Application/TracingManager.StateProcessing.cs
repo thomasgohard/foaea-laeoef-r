@@ -187,7 +187,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_14_ManuallyTerminated();
 
-            EventManager.DeleteBFEvent(TracingApplication.Subm_SubmCd, TracingApplication.Appl_CtrlCd);
+            await EventManager.DeleteBFEvent(TracingApplication.Subm_SubmCd, TracingApplication.Appl_CtrlCd);
         }
 
         protected override async Task Process_15_Expired()

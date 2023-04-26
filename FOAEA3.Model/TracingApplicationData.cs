@@ -70,7 +70,7 @@ namespace FOAEA3.Model
             IncludeFinancialInformation = data.IncludeFinancialInformation;
             
             YearsAndTaxForms.Clear();
-            foreach(var financial in YearsAndTaxForms)
+            foreach(var financial in data.YearsAndTaxForms)
                 YearsAndTaxForms.Add(financial.Key, financial.Value);
         }
 

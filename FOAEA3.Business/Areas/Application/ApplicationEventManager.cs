@@ -66,7 +66,7 @@ namespace FOAEA3.Business.Areas.Application
                         eventEffectiveDateTime = DateTime.Now.AddDays(10);
                 }
             }
-
+            
             Events.Add(new ApplicationEventData
             {
                 Queue = queue,
@@ -125,9 +125,9 @@ namespace FOAEA3.Business.Areas.Application
             AddEvent(eventCode, eventReasonText, queue: EventQueue.EventBF, appState: appState, effectiveDateTime: effectiveDateTime);
         }
 
-        public void DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
+        public async Task DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
         {
-            EventDB.DeleteBFEventAsync(subm_SubmCd, appl_CtrlCd);
+            await EventDB.DeleteBFEventAsync(subm_SubmCd, appl_CtrlCd);
         }
 
         #endregion
