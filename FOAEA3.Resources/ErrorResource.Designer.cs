@@ -313,6 +313,42 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid purpose. Must be 1, 2 or 3..
+        /// </summary>
+        public static string INVALID_PURPOSE {
+            get {
+                return ResourceManager.GetString("INVALID_PURPOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot request financial information for purpose 1..
+        /// </summary>
+        public static string INVALID_REQUEST_FINANCIAL_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_REQUEST_FINANCIAL_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot request SIN information for purpose 1..
+        /// </summary>
+        public static string INVALID_REQUEST_SIN_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_REQUEST_SIN_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid tracing information requested. Cannot request employer address for purpose 3..
+        /// </summary>
+        public static string INVALID_TRACING_INFORMATION_TYPE {
+            get {
+                return ResourceManager.GetString("INVALID_TRACING_INFORMATION_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid username or password.
         /// </summary>
         public static string INVALID_USERNAME_OR_PASSWORD {
