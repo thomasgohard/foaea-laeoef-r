@@ -1,3 +1,5 @@
+using DBHelper;
+using FOAEA3.Admin.Web.Filter;
 using FOAEA3.Common.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,10 +22,16 @@ namespace FOAEA3.Admin.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            var config = new FoaeaConfigurationHelper();
+            var mainDB = new DBToolsAsync(config.FoaeaConnection);
+
+            services.AddRazorPages()
+                    .AddMvcOptions(options =>
+                    {
+                        options.Filters.Add(new RazorPageActionFilter(mainDB));
+                    });
             services.AddHttpContextAccessor();
 
-            var config = new FoaeaConfigurationHelper();
             LoggingHelper.SetupLogging(config.FoaeaConnection);
 
             Common.Startup.AddDBServices(services, config.FoaeaConnection);
