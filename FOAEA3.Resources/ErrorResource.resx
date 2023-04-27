@@ -201,6 +201,18 @@
   <data name="INVALID_PASSWORD" xml:space="preserve">
     <value>Invalid Password provided</value>
   </data>
+  <data name="INVALID_PURPOSE" xml:space="preserve">
+    <value>Invalid purpose. Must be 1, 2 or 3.</value>
+  </data>
+  <data name="INVALID_REQUEST_FINANCIAL_DATA" xml:space="preserve">
+    <value>Cannot request financial information for purpose 1.</value>
+  </data>
+  <data name="INVALID_REQUEST_SIN_DATA" xml:space="preserve">
+    <value>Cannot request SIN information for purpose 1.</value>
+  </data>
+  <data name="INVALID_TRACING_INFORMATION_TYPE" xml:space="preserve">
+    <value>Invalid tracing information requested. Cannot request employer address for purpose 3.</value>
+  </data>
   <data name="INVALID_USERNAME_OR_PASSWORD" xml:space="preserve">
     <value>Invalid username or password</value>
   </data>

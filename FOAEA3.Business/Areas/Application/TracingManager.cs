@@ -90,9 +90,6 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            if (!IsValidDeclaration())
-                return false;
-
             TracingApplication.DeclarationIndicator = true;
 
             IsAddressMandatory = false;
@@ -583,19 +580,6 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
-        private bool IsValidDeclaration()
-        {
-            string declaration = TracingApplication.Declaration?.Trim();
-            if (declaration is not null &&
-                (declaration.Equals(Config.TracingDeclaration.English, StringComparison.InvariantCultureIgnoreCase) ||
-                 declaration.Equals(Config.TracingDeclaration.French, StringComparison.InvariantCultureIgnoreCase)))
-                return true;
-            else
-            {
-                TracingApplication.Messages.AddError("Invalid or missing declaration.");
-                return false;
-            }
-        }
     }
 
 }
