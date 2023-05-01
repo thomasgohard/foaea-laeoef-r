@@ -399,9 +399,6 @@
   <data name="AUDIT_SUCCESS" xml:space="preserve">
     <value>Succès</value>
   </data>
-  <data name="AUDIT_HEADER_TITLES" xml:space="preserve">
-    <value>Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application</value>
-  </data>
   <data name="AUDIT_SECTION" xml:space="preserve">
     <value>La section</value>
   </data>

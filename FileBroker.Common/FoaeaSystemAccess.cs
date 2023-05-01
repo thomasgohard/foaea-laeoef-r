@@ -32,9 +32,12 @@ namespace FileBroker.Common.Helpers
             LoginData = foaeaLoginData;
         }
 
-        public async Task SystemLoginAsync()
+        public async Task<bool> SystemLoginAsync()
         {
             var tokenData = await APIs.Accounts.LoginAsync(LoginData);
+
+            if (tokenData.Token is null)
+                return false;
 
             CurrentToken = tokenData.Token;
             CurrentRefreshToken = tokenData.RefreshToken;
@@ -61,7 +64,9 @@ namespace FileBroker.Common.Helpers
 
             if (APIs.Sins is not null) APIs.Sins.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
 
-            if (APIs.ProductionAudits is not null) APIs.ProductionAudits.ApiHelper.GetRefreshedToken = RefreshTokenAsync;                        
+            if (APIs.ProductionAudits is not null) APIs.ProductionAudits.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+
+            return true;
         }
 
         public async Task SystemLogoutAsync()

@@ -90,7 +90,8 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            TracingApplication.DeclarationIndicator = true;
+            if (Validation.IsC78())
+                TracingApplication.DeclarationIndicator = true;
 
             IsAddressMandatory = false;
             bool success = await base.CreateApplicationAsync();

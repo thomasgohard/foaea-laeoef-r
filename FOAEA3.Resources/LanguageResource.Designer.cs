@@ -124,15 +124,6 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message.
-        /// </summary>
-        public static string AUDIT_HEADER_TITLES {
-            get {
-                return ResourceManager.GetString("AUDIT_HEADER_TITLES", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Section.
         /// </summary>
         public static string AUDIT_SECTION {
