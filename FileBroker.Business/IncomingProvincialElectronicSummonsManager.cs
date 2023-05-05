@@ -30,7 +30,7 @@ namespace FileBroker.Business
             Config = config;
 
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+            IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
             Translations = LoadTranslations();
 
@@ -73,7 +73,7 @@ namespace FileBroker.Business
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
             int errorCount = 0;
             int warningCount = 0;

@@ -7,6 +7,7 @@ namespace FileBroker.Model.Interfaces
     {
         ApiConfig ApiRootData { get; }
         ProvincialAuditFileConfig AuditConfig { get; }
+        ProvinceConfig ProvinceConfig { get; }
         string EmailRecipient { get; }
         string FileBrokerConnection { get; }
         FileBrokerLoginData FileBrokerLogin { get; }

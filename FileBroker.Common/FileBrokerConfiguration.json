@@ -16,7 +16,9 @@
   },
   "AuditConfig": {
     "AuditRecipients": "Flas-it-SO@justice.gc.ca",
-    "AuditRootPath": "C:\\Audit",
+    "AuditRootPath": "C:\\Audit"
+  },
+  "ProvinceConfig": {
     "AutoAcceptEnfSrvCodes": [ "AB01", "ON01", "QC01", "MB01" ],
     "AutoSwearEnfSrvCodes": [ "AB01", "BC01", "NS01", "ON01", "QC01", "NF01", "MB01" ],
     "ESDSiteListEnfSrvCodes": [ "AB01", "NS01", "ON01", "QC01", "NF01", "MB01" ],

@@ -10,12 +10,12 @@ public class FileAuditManager
     private ProvincialAuditFileConfig AuditConfiguration { get; }
     private List<string> FrenchProvinceCodes { get; }
 
-    public FileAuditManager(IFileAuditRepository fileAuditDB, ProvincialAuditFileConfig auditConfig, IMailServiceRepository mailService)
+    public FileAuditManager(IFileAuditRepository fileAuditDB, IFileBrokerConfigurationHelper config, IMailServiceRepository mailService)
     {
         FileAuditDB = fileAuditDB;
         MailService = mailService;
-        AuditConfiguration = auditConfig;
-        FrenchProvinceCodes = new(auditConfig.FrenchAuditProvinceCodes);
+        AuditConfiguration = config.AuditConfig;
+        FrenchProvinceCodes = new(config.ProvinceConfig.FrenchAuditProvinceCodes);
     }
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);

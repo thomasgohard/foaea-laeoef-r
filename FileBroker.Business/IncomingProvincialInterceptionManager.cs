@@ -30,7 +30,7 @@ namespace FileBroker.Business
             Config = config;
 
             string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+            IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
             Translations = LoadTranslations();
 
@@ -74,7 +74,7 @@ namespace FileBroker.Business
         {
             var result = new MessageDataList();
 
-            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
+            var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
             var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -233,7 +233,7 @@ namespace FileBroker.Business
                                                                            errorCount, warningCount, successCount, unknownTags.Count,
                                                                            totalFilesCount);
 
-                        if (Config.AuditConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
+                        if (Config.ProvinceConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
                             await AutoAcceptVariationsAsync(EnfSrv_Cd);
 
                     }

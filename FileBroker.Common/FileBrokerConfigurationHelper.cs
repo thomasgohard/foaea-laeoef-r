@@ -20,6 +20,7 @@ namespace FileBroker.Common
         public FoaeaLoginData FoaeaLogin { get; }
         public FileBrokerLoginData FileBrokerLogin { get; }
         public ProvincialAuditFileConfig AuditConfig { get; }
+        public ProvinceConfig ProvinceConfig { get; }
         public TokenConfig Tokens { get; }
 
         public List<string> ProductionServers { get; }
@@ -61,6 +62,7 @@ namespace FileBroker.Common
 
             ApiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
             AuditConfig = configuration.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
+            ProvinceConfig = configuration.GetSection("ProvinceConfig").Get<ProvinceConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
         }
