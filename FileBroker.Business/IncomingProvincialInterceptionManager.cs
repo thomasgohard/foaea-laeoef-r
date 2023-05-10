@@ -335,7 +335,7 @@ namespace FileBroker.Business
 
         private void ValidateHeader(MEPInterception_RecType01 interceptionFile, ref MessageDataList result, ref bool isValid)
         {
-            int cycle = FileHelper.GetCycleFromFilename(FileName);
+            int cycle = FileHelper.ExtractCycleFromFilename(FileName);
             if (int.Parse(interceptionFile.Cycle) != cycle)
             {
                 isValid = false;

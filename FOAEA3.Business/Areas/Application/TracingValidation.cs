@@ -36,6 +36,8 @@ namespace FOAEA3.Business.Areas.Application
                 isSuccess = isSuccess && IsValidRequestedTracingData();
                 isSuccess = isSuccess && IsValidRequestedSinData();
                 isSuccess = isSuccess && IsValidRequestedFinancialsData();
+                isSuccess = isSuccess && IsValidRequest();
+
             }
             else
             {
@@ -105,6 +107,18 @@ namespace FOAEA3.Business.Areas.Application
             if (IsC78() && (TracingApplication.AppReas_Cd != "1") && TracingApplication.IncludeFinancialInformation)
             {
                 TracingApplication.Messages.AddError(ErrorResource.INVALID_REQUEST_FINANCIAL_DATA);
+                return false;
+            }
+            else
+                return true;
+        }
+
+        private bool IsValidRequest()
+        {
+            if (IsC78() && !TracingApplication.IncludeFinancialInformation && !TracingApplication.IncludeSinInformation && 
+               (TracingApplication.TraceInformation == 0))
+            {
+                TracingApplication.Messages.AddError(ErrorResource.INVALID_MUST_REQUEST_DATA);
                 return false;
             }
             else

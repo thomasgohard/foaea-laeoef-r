@@ -34,6 +34,7 @@
     }
   },
   "emailRecipients": "flas-it-so@justice.gc.ca",
+  "opsRecipients": "flas-it-so@justice.gc.ca",
   "FILE_BROKER": {
     "userName": "%FILEBROKER_API_USERNAME%",
     "userPassword": "%FILEBROKER_API_USERPASSWORD%"
@@ -44,6 +45,7 @@
     "submitter": "%FILEBROKER_FOAEA_SUBMITTER%"
   },
   "FTProot": "C:\\FOAEA\\FTPRoot",
+  "FTPbackupRoot": "C:\\FOAEA_Backup\\FTProot",
   "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ],
   "Tokens": {
     "Key": "%FILEBROKER_TOKEN_KEY%",

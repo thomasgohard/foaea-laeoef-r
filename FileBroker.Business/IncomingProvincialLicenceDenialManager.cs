@@ -331,7 +331,7 @@ public class IncomingProvincialLicenceDenialManager
 
     private void ValidateHeader(MEPLicenceDenial_RecType01 licenceDenialFile, ref MessageDataList result, ref bool isValid)
     {
-        int cycle = FileHelper.GetCycleFromFilename(FileName);
+        int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(licenceDenialFile.Cycle) != cycle)
         {
             isValid = false;

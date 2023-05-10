@@ -198,6 +198,9 @@
   <data name="INVALID_LOGIN_EMAIL" xml:space="preserve">
     <value>Invalid Email associated with UserName</value>
   </data>
+  <data name="INVALID_MUST_REQUEST_DATA" xml:space="preserve">
+    <value>Error. Must request at least one of tracing, SIN, or financial data.</value>
+  </data>
   <data name="INVALID_PASSWORD" xml:space="preserve">
     <value>Invalid Password provided</value>
   </data>

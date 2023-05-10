@@ -27,7 +27,7 @@
 
             foreach (var fileInfo in files)
             {
-                int cycle = FileHelper.GetCycleFromFilename(fileInfo.Name);
+                int cycle = FileHelper.ExtractCycleFromFilename(fileInfo.Name);
                 var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);

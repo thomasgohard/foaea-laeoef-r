@@ -1,5 +1,5 @@
-﻿using System.Text;
-using System.Xml.Linq;
+﻿using FOAEA3.Model.Structs;
+using System.Text;
 
 namespace FileBroker.Business.Helpers
 {
@@ -34,7 +34,7 @@ namespace FileBroker.Business.Helpers
                 if (fileName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
                     fileName = fileName[..^4];
 
-                int cycle = FileHelper.GetCycleFromFilename(fileName);
+                int cycle = FileHelper.ExtractCycleFromFilename(fileName);
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 
@@ -65,6 +65,13 @@ namespace FileBroker.Business.Helpers
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
+                    var fInfo = new FileInfo(fullPath);
+                    if (await FileHelper.CheckForDuplicateFile(fInfo, DB.MailService, Config))
+                    {
+                        errors.Add("Duplicate file found!");
+                        return false;
+                    }
+
                     if (!fileTableData.IsXML)
                         await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
                     else
@@ -72,6 +79,16 @@ namespace FileBroker.Business.Helpers
                         string jsonText = FileHelper.ConvertXmlToJson(flatFile, errors);
                         await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName);
                     }
+
+                    if (!errors.Any())
+                    {
+                        string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
+
+                        if (!string.IsNullOrEmpty(errorDoingBackup))
+                            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                                                                                "Error creating backup of outbound file: " + errorDoingBackup);
+                    }
+
                     return true;
                 }
                 else

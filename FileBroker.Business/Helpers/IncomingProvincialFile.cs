@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common.Helpers;
+using FileBroker.Model;
 using FOAEA3.Model.Structs;
 
 namespace FileBroker.Business.Helpers
@@ -25,10 +26,6 @@ namespace FileBroker.Business.Helpers
         {
             if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
                 errors = await ProcessIncomingXmlFile(fullPath, errors);
-
-            else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
-                await ProcessIncomingESDfile(fullPath, errors);
-
             else
                 errors.Add($"Unknown file type: {Path.GetExtension(fullPath)?.ToUpper()} for file {fullPath}");
 
@@ -38,7 +35,7 @@ namespace FileBroker.Business.Helpers
         public async Task<List<string>> ProcessIncomingXmlFile(string fullPath, List<string> errors)
         {
             string fileNameNoExtension = Path.GetFileNameWithoutExtension(fullPath);
-            string fileNameNoCycle = FileHelper.RemoveCycleFromFilename(fileNameNoExtension).ToUpper();
+            string fileNameNoCycle = FileHelper.TrimCycleAndXmlExtension(fileNameNoExtension).ToUpper();
 
             if (fileNameNoCycle.Length != 8)
             {
@@ -47,12 +44,19 @@ namespace FileBroker.Business.Helpers
             }
 
             if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
-            {
+            {                                             //                                                    ^
                 string xmlData = File.ReadAllText(fullPath);
                 string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
                 if (errors.Any())
                     return errors;
+
+                var fInfo = new FileInfo(fullPath);
+                if (await FileHelper.CheckForDuplicateFile(fInfo, DB.MailService, Config))
+                {
+                    errors.Add("Duplicate file found!");
+                    return errors;
+                }
 
                 char fileType = fileNameNoCycle[7];
                 switch (fileType)
@@ -69,12 +73,17 @@ namespace FileBroker.Business.Helpers
                         await ProcessIncomingLicencing(jsonText, fileNameNoExtension, errors);
                         break;
 
-                    case 'W':
-                        // TODO: process swearing files? (this is disappearing and likely won't be needed anymore)
-                        break;
-
                     default:
                         break;
+                }
+
+                if (!errors.Any())
+                {
+                    string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
+
+                    if (!string.IsNullOrEmpty(errorDoingBackup))
+                        await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                                                                            "Error creating backup of outbound file: " + errorDoingBackup);
                 }
             }
             else
@@ -185,7 +194,7 @@ namespace FileBroker.Business.Helpers
             foreach (var fileInfo in files)
             {
                 var fileNameNoFileType = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove .XML
-                int cycle = FileHelper.GetCycleFromFilename(fileNameNoFileType);
+                int cycle = FileHelper.ExtractCycleFromFilename(fileNameNoFileType);
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoFileType); // remove cycle
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
 

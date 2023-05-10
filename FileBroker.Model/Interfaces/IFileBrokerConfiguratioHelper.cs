@@ -9,10 +9,12 @@ namespace FileBroker.Model.Interfaces
         ProvincialAuditFileConfig AuditConfig { get; }
         ProvinceConfig ProvinceConfig { get; }
         string EmailRecipient { get; }
+        string OpsRecipient { get; }
         string FileBrokerConnection { get; }
         FileBrokerLoginData FileBrokerLogin { get; }
         FoaeaLoginData FoaeaLogin { get; }
         string FTProot { get; }
+        string FTPbackupRoot { get; }
         List<string> ProductionServers { get; }
         string TermsAcceptedTextEnglish { get; }
         string TermsAcceptedTextFrench { get; }

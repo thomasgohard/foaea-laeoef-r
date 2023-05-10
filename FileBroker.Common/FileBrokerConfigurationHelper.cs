@@ -14,7 +14,9 @@ namespace FileBroker.Common
         public string TermsAcceptedTextEnglish { get; }
         public string TermsAcceptedTextFrench { get; }
         public string EmailRecipient { get; }
+        public string OpsRecipient { get; }
         public string FTProot { get; }
+        public string FTPbackupRoot { get; }
 
         public ApiConfig ApiRootData { get; }
         public FoaeaLoginData FoaeaLogin { get; }
@@ -58,7 +60,9 @@ namespace FileBroker.Common
             TermsAcceptedTextFrench = configuration["Declaration:TermsAccepted:French"];
 
             EmailRecipient = configuration["emailRecipients"];
+            OpsRecipient = configuration["opsRecipients"];
             FTProot = configuration["FTProot"];
+            FTPbackupRoot = configuration["FTPbackupRoot"];
 
             ApiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
             AuditConfig = configuration.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();

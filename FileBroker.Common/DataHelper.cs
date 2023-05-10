@@ -16,6 +16,7 @@ namespace FileBroker.Common
 
             services.AddScoped<IFlatFileSpecificationRepository>(m => ActivatorUtilities.CreateInstance<DBFlatFileSpecification>(m, fileBrokerDB));
             services.AddScoped<IFileTableRepository>(m => ActivatorUtilities.CreateInstance<DBFileTable>(m, fileBrokerDB));
+            services.AddScoped<ISettingsRepository>(m => ActivatorUtilities.CreateInstance<DBSettings>(m, fileBrokerDB));
             services.AddScoped<IFileAuditRepository>(m => ActivatorUtilities.CreateInstance<DBFileAudit>(m, fileBrokerDB));
             services.AddScoped<IRequestLogRepository>(m => ActivatorUtilities.CreateInstance<DBRequestLog>(m, fileBrokerDB));
             services.AddScoped<ITranslationRepository>(m => ActivatorUtilities.CreateInstance<DBTranslation>(m, fileBrokerDB));
@@ -37,6 +38,7 @@ namespace FileBroker.Common
             {
                 FlatFileSpecs = new DBFlatFileSpecification(fileBrokerDB),
                 FileTable = new DBFileTable(fileBrokerDB),
+                Settings = new DBSettings(fileBrokerDB),
                 FileAudit = new DBFileAudit(fileBrokerDB),
                 ProcessParameterTable = new DBProcessParameter(fileBrokerDB),
                 OutboundAuditTable = new DBOutboundAudit(fileBrokerDB),

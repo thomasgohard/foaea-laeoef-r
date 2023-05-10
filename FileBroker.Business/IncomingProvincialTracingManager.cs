@@ -259,7 +259,7 @@ public class IncomingProvincialTracingManager
 
     private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
     {
-        int cycle = FileHelper.GetCycleFromFilename(FileName);
+        int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(headerData.Cycle) != cycle)
         {
             isValid = false;

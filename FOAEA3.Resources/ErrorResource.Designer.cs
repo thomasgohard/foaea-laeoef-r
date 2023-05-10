@@ -304,6 +304,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error. Must request at least one of tracing, SIN, or financial data..
+        /// </summary>
+        public static string INVALID_MUST_REQUEST_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_MUST_REQUEST_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Password provided.
         /// </summary>
         public static string INVALID_PASSWORD {
