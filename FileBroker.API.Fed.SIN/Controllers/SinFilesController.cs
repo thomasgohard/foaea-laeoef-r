@@ -45,7 +45,7 @@ public class SinFilesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> ReceiveFile([FromQuery] string fileName, [FromServices] IFileTableRepository fileTable)
     {
-        return await FileHelper.ProcessIncomingFileAsync(fileName, fileTable, Request);
+        return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
     private static async Task<(string, string)> LoadLatestFederalSinFileAsync(IFileTableRepository fileTable)

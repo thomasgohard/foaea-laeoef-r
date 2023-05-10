@@ -14,12 +14,15 @@ namespace FileBroker.Common
         public string TermsAcceptedTextEnglish { get; }
         public string TermsAcceptedTextFrench { get; }
         public string EmailRecipient { get; }
+        public string OpsRecipient { get; }
         public string FTProot { get; }
+        public string FTPbackupRoot { get; }
 
         public ApiConfig ApiRootData { get; }
         public FoaeaLoginData FoaeaLogin { get; }
         public FileBrokerLoginData FileBrokerLogin { get; }
         public ProvincialAuditFileConfig AuditConfig { get; }
+        public ProvinceConfig ProvinceConfig { get; }
         public TokenConfig Tokens { get; }
 
         public List<string> ProductionServers { get; }
@@ -57,10 +60,13 @@ namespace FileBroker.Common
             TermsAcceptedTextFrench = configuration["Declaration:TermsAccepted:French"];
 
             EmailRecipient = configuration["emailRecipients"];
+            OpsRecipient = configuration["opsRecipients"];
             FTProot = configuration["FTProot"];
+            FTPbackupRoot = configuration["FTPbackupRoot"];
 
             ApiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
             AuditConfig = configuration.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
+            ProvinceConfig = configuration.GetSection("ProvinceConfig").Get<ProvinceConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
         }

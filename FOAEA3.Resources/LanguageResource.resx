@@ -138,9 +138,6 @@
   <data name="ASSUME_ROLE" xml:space="preserve">
     <value>Assume Role</value>
   </data>
-  <data name="AUDIT_HEADER_TITLES" xml:space="preserve">
-    <value>Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message</value>
-  </data>
   <data name="AUDIT_SECTION" xml:space="preserve">
     <value>Section</value>
   </data>

@@ -176,7 +176,7 @@ namespace FileBroker.Business
 
         private static void ValidateHeader(FedLicenceDenial_DataSet licenceDenialFile, string fileName, ref List<string> result)
         {
-            int cycle = FileHelper.GetCycleFromFilename(fileName);
+            int cycle = FileHelper.ExtractCycleFromFilename(fileName);
             if (int.Parse(licenceDenialFile.LICIN01.Cycle) != cycle)
                 result.Add($"Cycle in file [{licenceDenialFile.LICIN01.Cycle}] does not match cycle of file [{cycle}]");
         }

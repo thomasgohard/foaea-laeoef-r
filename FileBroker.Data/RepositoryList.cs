@@ -6,6 +6,7 @@ namespace FileBroker.Data
     {
         public IFlatFileSpecificationRepository FlatFileSpecs { get; set; }
         public IFileTableRepository FileTable { get; set; }
+        public ISettingsRepository Settings { get; set; }
         public IFileAuditRepository FileAudit { get; set; }
         public IProcessParameterRepository ProcessParameterTable { get; set; }
         public IOutboundAuditRepository OutboundAuditTable { get; set; }

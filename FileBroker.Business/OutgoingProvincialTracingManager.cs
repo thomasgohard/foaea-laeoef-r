@@ -8,12 +8,16 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 {
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
+    private IFileBrokerConfigurationHelper Config { get; }
+
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public OutgoingProvincialTracingManager(APIBrokerList apis, RepositoryList repositories, IFileBrokerConfigurationHelper config)
     {
         APIs = apis;
         DB = repositories;
+        Config = config;
+
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
@@ -48,6 +52,12 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
                 await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
+
+                string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
+
+                if (!string.IsNullOrEmpty(errorDoingBackup))
+                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {newFilePath}",
+                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
 
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");

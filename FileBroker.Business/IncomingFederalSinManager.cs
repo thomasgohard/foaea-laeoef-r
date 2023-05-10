@@ -321,7 +321,7 @@ public class IncomingFederalSinManager
 
     private static void ValidateHeader(FedSin_RecType01 dataFromFile, string flatFileName, ref List<string> errors)
     {
-        int cycle = FileHelper.GetCycleFromFilename(flatFileName);
+        int cycle = FileHelper.ExtractCycleFromFilename(flatFileName);
         if (dataFromFile.Cycle != cycle)
             errors.Add($"Cycle in file [{dataFromFile.Cycle}] does not match cycle of file [{cycle}]");
     }

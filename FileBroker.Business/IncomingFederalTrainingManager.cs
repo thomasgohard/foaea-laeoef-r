@@ -114,7 +114,7 @@ namespace FileBroker.Business
 
         private static void ValidateHeader(FedInterceptionTraining_RecType01 header, string flatFileName, int nextCycle, ref List<string> errors)
         {
-            int cycle = FileHelper.GetCycleFromFilename(flatFileName);
+            int cycle = FileHelper.ExtractCycleFromFilename(flatFileName);
             if (cycle != nextCycle)
             {
                 errors.Add($"Next expected cycle [{nextCycle}] does not match cycle of file [{cycle}]");

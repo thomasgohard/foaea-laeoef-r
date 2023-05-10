@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -28,7 +29,7 @@ public class IncomingProvincialTracingManager
         Config = config;
 
         string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+        IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
         Translations = LoadTranslations();
 
@@ -69,7 +70,7 @@ public class IncomingProvincialTracingManager
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -98,114 +99,122 @@ public class IncomingProvincialTracingManager
                 int warningCount = 0;
                 int successCount = 0;
 
-                await FoaeaAccess.SystemLoginAsync();
-                try
+                if (!await FoaeaAccess.SystemLoginAsync())
                 {
-
-                    foreach (var data in tracingFile.TRCAPPIN20)
+                    isValid = false;
+                    result.AddSystemError("Failed to login to FOAEA!");                   
+                }
+                else
+                    try
                     {
-                        bool isValidRequest = true;
-
-                        var fileAuditData = new FileAuditData
+                        foreach (var data in tracingFile.TRCAPPIN20)
                         {
-                            Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-                            Appl_CtrlCd = data.dat_Appl_CtrlCd,
-                            Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
-                            InboundFilename = FileName + ".XML"
-                        };
+                            bool isValidRequest = true;
 
-                        var requestError = new MessageDataList();
-
-                        ValidateActionCode(data, ref requestError, ref isValidRequest);
-
-                        if (isValidRequest)
-                        {
-                            var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-
-                            var tracingMessage = new MessageData<TracingApplicationData>
+                            var fileAuditData = new FileAuditData
                             {
-                                Application = GetTracingApplicationDataFromRequest(data, traceData, traceFinData),
-                                MaintenanceAction = data.Maintenance_ActionCd,
-                                MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
-                                NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                                NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
-                                NewUpdateSubmitter = data.dat_Update_SubmCd
+                                Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
+                                Appl_CtrlCd = data.dat_Appl_CtrlCd,
+                                Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
+                                InboundFilename = FileName + ".XML"
                             };
 
-                            var requestLogData = new RequestLogData
+                            var requestError = new MessageDataList();
+
+                            ValidateActionCode(data, ref requestError, ref isValidRequest);
+
+                            if (isValidRequest)
                             {
-                                MaintenanceAction = tracingMessage.MaintenanceAction,
-                                MaintenanceLifeState = tracingMessage.MaintenanceLifeState,
-                                Appl_EnfSrv_Cd = tracingMessage.Application.Appl_EnfSrv_Cd,
-                                Appl_CtrlCd = tracingMessage.Application.Appl_CtrlCd,
-                                LoadedDateTime = DateTime.Now
-                            };
+                                var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                                var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
 
-                            _ = await DB.RequestLogTable.AddAsync(requestLogData);
+                                var tracingMessage = new MessageData<TracingApplicationData>
+                                {
+                                    Application = GetTracingApplicationDataFromRequest(data, traceData, traceFinData),
+                                    MaintenanceAction = data.Maintenance_ActionCd,
+                                    MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
+                                    NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
+                                    NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
+                                    NewUpdateSubmitter = data.dat_Update_SubmCd
+                                };
 
-                            var messages = await ProcessApplicationRequestAsync(tracingMessage);
+                                var requestLogData = new RequestLogData
+                                {
+                                    MaintenanceAction = tracingMessage.MaintenanceAction,
+                                    MaintenanceLifeState = tracingMessage.MaintenanceLifeState,
+                                    Appl_EnfSrv_Cd = tracingMessage.Application.Appl_EnfSrv_Cd,
+                                    Appl_CtrlCd = tracingMessage.Application.Appl_CtrlCd,
+                                    LoadedDateTime = DateTime.Now
+                                };
 
-                            if (messages.ContainsMessagesOfType(MessageType.Error))
-                            {
-                                var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                _ = await DB.RequestLogTable.AddAsync(requestLogData);
 
-                                fileAuditData.ApplicationMessage = errors[0].Description;
-                                errorCount++;
-                            }
-                            else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                            {
-                                var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+                                var messages = await ProcessApplicationRequestAsync(tracingMessage);
 
-                                fileAuditData.ApplicationMessage = warnings[0].Description;
-                                warningCount++;
+                                if (messages.ContainsMessagesOfType(MessageType.Error))
+                                {
+                                    var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+
+                                    fileAuditData.ApplicationMessage = errors[0].Description;
+                                    errorCount++;
+                                }
+                                else if (messages.ContainsMessagesOfType(MessageType.Warning))
+                                {
+                                    var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+
+                                    fileAuditData.ApplicationMessage = warnings[0].Description;
+                                    warningCount++;
+                                }
+                                else
+                                {
+                                    if (includeInfoInMessages)
+                                    {
+                                        var infos = messages.FindAll(m => m.Severity == MessageType.Information);
+
+                                        result.AddRange(infos);
+                                    }
+
+                                    fileAuditData.ApplicationMessage = "Success";
+                                    successCount++;
+                                }
+
                             }
                             else
                             {
-                                if (includeInfoInMessages)
-                                {
-                                    var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-
-                                    result.AddRange(infos);
-                                }
-
-                                fileAuditData.ApplicationMessage = "Success";
-                                successCount++;
+                                fileAuditData.ApplicationMessage = requestError[0].Description;
+                                errorCount++;
                             }
 
-                        }
-                        else
-                        {
-                            fileAuditData.ApplicationMessage = requestError[0].Description;
-                            errorCount++;
+                            await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+
                         }
 
-                        await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
-
+                        int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                                                                errorCount, warningCount, successCount, unknownTags.Count, totalFilesCount);
                     }
-
-                    int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
-                                                            errorCount, warningCount, successCount, unknownTags.Count, totalFilesCount);
-                }
-                finally
-                {
-                    await FoaeaAccess.SystemLogoutAsync();
-                }
+                    finally
+                    {
+                        await FoaeaAccess.SystemLogoutAsync();
+                    }
             }
 
         }
 
         if (!isValid)
         {
-            result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
+            result.AddSystemError($"One of more error(s) occured trying to load file ({FileName}.XML)");
 
             await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
         }
 
-        await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
         await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
-        await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+
+        if (!result.ContainsMessagesOfType(MessageType.Error))
+        {
+            await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
+            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+        }
 
         return result;
     }
@@ -250,7 +259,7 @@ public class IncomingProvincialTracingManager
 
     private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
     {
-        int cycle = FileHelper.GetCycleFromFilename(FileName);
+        int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(headerData.Cycle) != cycle)
         {
             isValid = false;

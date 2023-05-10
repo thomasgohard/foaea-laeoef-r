@@ -68,10 +68,9 @@ namespace FOAEA3.Business.Areas.Application
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
-            EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED);
+            EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
 
-            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED,
-                                      appState: ApplicationState.APPLICATION_ACCEPTED_10);
+            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
 
             EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                       appState: ApplicationState.APPLICATION_REINSTATED_11);

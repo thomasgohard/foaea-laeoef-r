@@ -1,4 +1,5 @@
-﻿using FileBroker.Model;
+﻿using FileBroker.Data;
+using FileBroker.Model;
 using FileBroker.Model.Interfaces;
 using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,16 +19,19 @@ namespace FileBroker.Common
 {
     public static class FileHelper
     {
-        public static string RemoveCycleFromFilename(string fileName)
+        public static string TrimCycleAndXmlExtension(string fileName)
         {
+            if (fileName.ToUpper().EndsWith(".XML"))
+                fileName = Path.GetFileNameWithoutExtension(fileName);
+
             int lastPeriod = fileName.LastIndexOf('.');
             if (lastPeriod > 0)
-                return fileName.Substring(0, lastPeriod);
+                return fileName[..lastPeriod];
             else
                 return fileName;
         }
 
-        public static int GetCycleFromFilename(string fileName)
+        public static int ExtractCycleFromFilename(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return -1;
@@ -44,7 +49,7 @@ namespace FileBroker.Common
         public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, out int actualCycle)
         {
             expectedCycle = fileTableData.Cycle;
-            actualCycle = GetCycleFromFilename(fileName);
+            actualCycle = ExtractCycleFromFilename(fileName);
 
             return (actualCycle == expectedCycle);
         }
@@ -69,6 +74,89 @@ namespace FileBroker.Common
             }
         }
 
+        public static async Task<string> BackupFile(string fileName, RepositoryList db, IFileBrokerConfigurationHelper config)
+        {
+            try
+            {
+                string sourceFileName = fileName;
+                string sourceFileNoPath = Path.GetFileName(fileName);
+
+                if (fileName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
+                    fileName = Path.GetFileNameWithoutExtension(fileName);
+
+                string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
+
+                string backupRoot = config.FTPbackupRoot;
+                string ftpFolder = (await db.Settings.GetSettingsDataForFileNameAsync(fileNameNoCycle)).Paths;
+
+                string destinationFileName = backupRoot + ftpFolder + sourceFileNoPath;
+
+                if (!File.Exists(destinationFileName))
+                    File.Copy(sourceFileName, destinationFileName);
+                else
+                    return "Error: could not copy file since it already exists: " + destinationFileName;
+
+                return string.Empty;
+            }
+            catch (Exception e)
+            {
+                return "Error: " + e.Message;
+            }
+        }
+
+        public static async Task<bool> CheckForDuplicateFile(FileInfo fInfo, IMailServiceRepository mailService, 
+                                                             IFileBrokerConfigurationHelper config)
+        {
+            string fileName = fInfo.Name.ToUpper();
+            string folderName = fInfo.DirectoryName;
+
+            var dInfo = new DirectoryInfo(config.FTPbackupRoot + folderName);
+            FileInfo[] dupFileInfos;
+
+            if (fileName.Contains("02010131"))
+                dupFileInfos = dInfo.GetFiles(fileName, SearchOption.TopDirectoryOnly).Where(m => m.LastWriteTime > DateTime.Now.AddMonths(-16)).ToArray();
+            else if (fileName.Contains("RC3STSIT") || fileName.Contains("HR3SVSIS") ||
+                     fileName.Contains("OA3SIS") || fileName.Contains("DOJEEINB"))
+                dupFileInfos = dInfo.GetFiles(fileName, SearchOption.TopDirectoryOnly).Where(m => m.LastWriteTime > DateTime.Now.AddMonths(-2)).ToArray();
+            else
+                dupFileInfos = dInfo.GetFiles(fileName, SearchOption.TopDirectoryOnly).ToArray();
+
+            if (dupFileInfos.Any())
+            {
+                foreach (var dupFileInfo in dupFileInfos)
+                {
+                    if (FileEquals(fInfo.FullName, dupFileInfo.FullName))
+                    {
+                        string msgBody = $"Inbound file {fInfo.Name} is identical to file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
+                        await mailService.SendEmailAsync($"Duplicate file not loaded: {fInfo.Name}", config.OpsRecipient, msgBody);
+                    }
+                    else
+                    {
+                        string msgBody = $"Inbound file {fInfo.Name} is with the same cycle but different content from file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
+                        await mailService.SendEmailAsync($"Different file with the same cycle not loaded: {fInfo.Name}", config.OpsRecipient, msgBody);
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool FileEquals(string path1, string path2)
+        {
+            byte[] file1 = File.ReadAllBytes(path1);
+            byte[] file2 = File.ReadAllBytes(path2);
+
+            if (file1.Length != file2.Length)
+                return false;
+
+            for (int i = 0; i < file1.Length; i++)
+                if (file1[i] != file2[i])
+                    return false;
+
+            return true;
+        }
+
         private static string RemoveXMLartifacts(string xmlData)
         {
             string result = xmlData;
@@ -88,7 +176,8 @@ namespace FileBroker.Common
             return result;
         }
 
-        public static async Task<IActionResult> ProcessIncomingFileAsync(string fileName, IFileTableRepository fileTable, HttpRequest Request)
+        public static async Task<IActionResult> ExtractAndSaveRequestBodyToFile(string fileName, IFileTableRepository fileTable, 
+                                                                                HttpRequest Request)
         {
             string bodyContent;
             string fileNameNoExtension;

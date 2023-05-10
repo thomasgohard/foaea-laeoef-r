@@ -10,12 +10,12 @@ public class FileAuditManager
     private ProvincialAuditFileConfig AuditConfiguration { get; }
     private List<string> FrenchProvinceCodes { get; }
 
-    public FileAuditManager(IFileAuditRepository fileAuditDB, ProvincialAuditFileConfig auditConfig, IMailServiceRepository mailService)
+    public FileAuditManager(IFileAuditRepository fileAuditDB, IFileBrokerConfigurationHelper config, IMailServiceRepository mailService)
     {
         FileAuditDB = fileAuditDB;
         MailService = mailService;
-        AuditConfiguration = auditConfig;
-        FrenchProvinceCodes = new(auditConfig.FrenchAuditProvinceCodes);
+        AuditConfiguration = config.AuditConfig;
+        FrenchProvinceCodes = new(config.ProvinceConfig.FrenchAuditProvinceCodes);
     }
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
@@ -38,7 +38,11 @@ public class FileAuditManager
         if (isFrench)
             LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
 
-        auditFileContent.AppendLine(LanguageResource.AUDIT_HEADER_TITLES);
+        if (isFrench)
+            auditFileContent.AppendLine("Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application");
+        else
+            auditFileContent.AppendLine("Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message");
+
         foreach (var auditRow in auditData)
             if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
             {

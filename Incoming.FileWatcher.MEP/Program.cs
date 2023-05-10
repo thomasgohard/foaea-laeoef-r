@@ -147,16 +147,13 @@ internal class Program
                 case "TRCAPPIN":
                     fileBaseName.Tracing = provinceFileData.Name.Trim().ToUpper();
                     break;
-                case "INTAPPIN":
-                    fileBaseName.Interception = provinceFileData.Name.Trim().ToUpper();
-                    interceptionPath = provinceFileData.Path.ToUpper();
-                    break;
-                case "ESD":
-                    fileBaseName.ESD = provinceFileData.Name.Trim().ToUpper();
-                    break;
-                case "LICAPPIN":
-                    fileBaseName.Licencing = provinceFileData.Name.Trim().ToUpper();
-                    break;
+                //case "INTAPPIN":
+                //    fileBaseName.Interception = provinceFileData.Name.Trim().ToUpper();
+                //    interceptionPath = provinceFileData.Path.ToUpper();
+                //    break;
+                //case "LICAPPIN":
+                //    fileBaseName.Licencing = provinceFileData.Name.Trim().ToUpper();
+                //    break;
                 default:
                     // ignore all other categories
                     break;

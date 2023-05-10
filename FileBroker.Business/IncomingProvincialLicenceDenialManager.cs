@@ -28,7 +28,7 @@ public class IncomingProvincialLicenceDenialManager
         Config = config;
 
         string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = Config.AuditConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
+        IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
 
         Translations = LoadTranslations();
 
@@ -70,7 +70,7 @@ public class IncomingProvincialLicenceDenialManager
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config.AuditConfig, DB.MailService);
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
@@ -331,7 +331,7 @@ public class IncomingProvincialLicenceDenialManager
 
     private void ValidateHeader(MEPLicenceDenial_RecType01 licenceDenialFile, ref MessageDataList result, ref bool isValid)
     {
-        int cycle = FileHelper.GetCycleFromFilename(FileName);
+        int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(licenceDenialFile.Cycle) != cycle)
         {
             isValid = false;
