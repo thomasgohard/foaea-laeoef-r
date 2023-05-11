@@ -49,7 +49,7 @@ public class TracingsController : FoaeaControllerBase
     {
         var tracingData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(tracingData, applKey: null, out string error))
+        if (!APIHelper.ValidateRequest(tracingData, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var tracingManager = new TracingManager(tracingData, db, config, User);
@@ -88,7 +88,7 @@ public class TracingsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var tracingManager = new TracingManager(application, repositories, config, User);
@@ -103,12 +103,12 @@ public class TracingsController : FoaeaControllerBase
                 break;
 
             case "partiallyserviceapplication":
-                await tracingManager.PartiallyServiceApplicationAsync(enforcementServiceCode);
+                await tracingManager.PartiallyServiceApplicationAsync();
                 break;
 
-            //case "fullyserviceapplication":
-            //    await tracingManager.FullyServiceApplicationAsync(enforcementServiceCode);
-            //    break;
+            case "fullyserviceapplication":
+                await tracingManager.FullyServiceApplicationAsync();
+                break;
 
             default:
                 application.Messages.AddSystemError($"Unknown command: {command}");
@@ -132,7 +132,7 @@ public class TracingsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<TracingApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new TracingManager(application, repositories, config, User);

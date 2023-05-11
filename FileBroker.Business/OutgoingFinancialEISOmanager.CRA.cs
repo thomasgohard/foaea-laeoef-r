@@ -6,7 +6,7 @@ namespace FileBroker.Business
     {
         public async Task<string> CreateCRAfile(string fileBaseName, List<string> errors)
         {
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
             string newCycle = FormatCycleEISO(fileTableData.Cycle + 1);
             string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + "." + newCycle, isFileName: true);
@@ -17,7 +17,7 @@ namespace FileBroker.Business
                 return "";
             }
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
             try
             {
                 var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
@@ -27,7 +27,7 @@ namespace FileBroker.Business
                 string fileContent = GenerateCRAOutputFileContentFromData(data, newCycle);
                 await File.WriteAllTextAsync(newFilePath, fileContent);
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 string message = fileTableData.Category + " Outbound CRA EISO File created successfully.";
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
@@ -42,7 +42,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return newFilePath;

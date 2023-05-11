@@ -230,16 +230,15 @@ namespace FOAEA3.API.Controllers
         [AllowAnonymous]
         [HttpPost("SingleStepLogin")]
         public async Task<ActionResult> SingleStepLoginAction([FromBody] FoaeaLoginData loginData,
-                                                        [FromServices] IRepositories db)
+                                                              [FromServices] IRepositories db)
         {
             var configHelper = new FoaeaConfigurationHelper();
 
-            // WARNING: not for production use!
             var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            var principal = await SingleStepLogin.AutoLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
+            var principal = await SingleStepLogin.FoaeaLogin(loginData.UserName, loginData.Password, loginData.Submitter, db);
             if (principal is not null && principal.Identity is not null)
             {
                 string apiKey = tokenConfig.Key.ReplaceVariablesWithEnvironmentValues();
@@ -286,7 +285,6 @@ namespace FOAEA3.API.Controllers
         [HttpPost("TestVerify")]
         public ActionResult TestVerify()
         {
-            // WARNING: not for production use!
             var user = User.Identity;
             if (user is not null && user.IsAuthenticated)
             {
@@ -319,7 +317,6 @@ namespace FOAEA3.API.Controllers
         {
             var configHelper = new FoaeaConfigurationHelper();
 
-            // WARNING: not for production use!
             var tokenConfig = configHelper.Tokens;
             if (tokenConfig == null)
                 return StatusCode(500);
@@ -402,7 +399,6 @@ namespace FOAEA3.API.Controllers
         [HttpPost("TestLogout")]
         public async Task<ActionResult> TestLogout([FromServices] IRepositories db)
         {
-            // WARNING: not for production use!
             string oldToken = Request.Headers["Authorization"];
             if (string.IsNullOrEmpty(oldToken) || oldToken.Length < 8)
                 return BadRequest();

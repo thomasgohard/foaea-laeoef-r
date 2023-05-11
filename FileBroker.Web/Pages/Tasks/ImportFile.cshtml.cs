@@ -44,7 +44,7 @@ namespace FileBroker.Web.Pages.Tasks
                     fileName = Path.GetFileNameWithoutExtension(fileName); // remove XML extension first
                 var fileNameNoExt = Path.GetFileNameWithoutExtension(fileName); // remove cycle, if any
 
-                var incomingFileInfo = await FileTable.GetFileTableDataForFileNameAsync(fileNameNoExt);
+                var incomingFileInfo = await FileTable.GetFileTableDataForFileName(fileNameNoExt);
                 if (incomingFileInfo is null)
                 {
                     ErrorMessage = "Error: Could not identify type of file from FileTable";
@@ -85,7 +85,7 @@ namespace FileBroker.Web.Pages.Tasks
                     switch (incomingFileInfo.Category)
                     {
                         case "INTAPPIN": // MEP Interception
-                            var provincialFileHelper = new IncomingProvincialFile(db, foaeaApis, fileBaseName, Config);
+                            var provincialFileHelper = new IncomingProvincialFile(db, foaeaApis, Config);
                             await provincialFileHelper.ProcessIncomingInterception(fileContent, fileName, errors);                            
                             break;
 

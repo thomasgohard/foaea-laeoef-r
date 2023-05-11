@@ -25,7 +25,7 @@ namespace FileBroker.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<FileAuditData>("FileAuditSelect", parameters, FillAuditDataFromReader);
         }
 
-        public async Task InsertFileAuditDataAsync(FileAuditData data)
+        public async Task InsertFileAuditData(FileAuditData data)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -39,7 +39,7 @@ namespace FileBroker.Data.DB
             await MainDB.ExecProcAsync("FileAuditInsert", parameters);
         }
 
-        public async Task MarkFileAuditCompletedForFileAsync(string fileName)
+        public async Task MarkFileAuditCompletedForFile(string fileName)
         {
             var parameters = new Dictionary<string, object>
             {

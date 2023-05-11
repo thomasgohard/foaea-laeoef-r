@@ -9,9 +9,7 @@ namespace FOAEA3.API.Security
 {
     public class SingleStepLogin
     {
-        public static async Task<ClaimsPrincipal> AutoLogin(string user, string password,
-                                                                                string submitter,
-                                                                                IRepositories db)
+        public static async Task<ClaimsPrincipal> FoaeaLogin(string user, string password, string submitter, IRepositories db)
         {
             var subject = await db.SubjectTable.GetSubjectAsync(user);
 
@@ -28,7 +26,11 @@ namespace FOAEA3.API.Security
 
             var submitterData = (await db.SubmitterTable.GetSubmitterAsync(submitter)).FirstOrDefault();
 
-            if (submitterData is null || submitterData.ActvSt_Cd != "A")
+            // verify that submitter is valid for subject
+            var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(userName);
+            var availableSubmitters = (from role in roles select role.RoleName.ToLower()).ToList();
+
+            if (submitterData is null || submitterData.ActvSt_Cd != "A" || !availableSubmitters.Contains(submitterData.Subm_SubmCd.ToLower()))
                 return new ClaimsPrincipal();
 
             string userRole = submitterData.Subm_Class.ToUpper().Trim();
@@ -69,6 +71,5 @@ namespace FOAEA3.API.Security
             foreach (string role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
         }
-
     }
 }

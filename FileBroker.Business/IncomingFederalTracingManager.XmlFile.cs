@@ -10,11 +10,9 @@ public partial class IncomingFederalTracingManager
 
         short cycle = (short)FileHelper.ExtractCycleFromFilename(flatFileName);
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
-
-        // bool isValid = true;
+        await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
         var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingDataAsJson, out string error);
         var tracingFile = tracingFileData.CRATraceIn;
@@ -23,7 +21,6 @@ public partial class IncomingFederalTracingManager
 
         if (!string.IsNullOrEmpty(error))
         {
-            //isValid = false;
             result.AddSystemError(error);
         }
         else
@@ -33,14 +30,18 @@ public partial class IncomingFederalTracingManager
 
             if (isValid)
             {
-                await FoaeaAccess.SystemLoginAsync();
+                if (!await FoaeaAccess.SystemLogin())
+                {
+                    result.AddError("Failed to login to FOAEA!");
+                    return result;
+                }
                 try
                 {
                     await SendTraceFinancialResultToFoaea(tracingFile.TraceResponse, fileTableData.PrcId, "RC02", cycle, fileNameNoCycle);
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
             }
         }

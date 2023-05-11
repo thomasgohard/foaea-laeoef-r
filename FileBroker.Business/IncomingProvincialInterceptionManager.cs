@@ -77,7 +77,7 @@ namespace FileBroker.Business
             var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
             // check that it is the expected cycle
             if (!FileHelper.IsExpectedCycle(fileTableData, FileName, out int expectedCycle, out int actualCycle))
@@ -90,7 +90,7 @@ namespace FileBroker.Business
                 return result;
             }
 
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+            await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
             bool isValid = true;
 
@@ -114,7 +114,7 @@ namespace FileBroker.Business
                     int warningCount = 0;
                     int successCount = 0;
 
-                    await FoaeaAccess.SystemLoginAsync();
+                    await FoaeaAccess.SystemLogin();
 
                     try
                     {
@@ -224,12 +224,12 @@ namespace FileBroker.Business
                                 errorCount++;
                             }
 
-                            await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                            await DB.FileAudit.InsertFileAuditData(fileAuditData);
 
                         }
 
-                        int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                        int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                                            errorCount, warningCount, successCount, unknownTags.Count,
                                                                            totalFilesCount);
 
@@ -239,7 +239,7 @@ namespace FileBroker.Business
                     }
                     finally
                     {
-                        await FoaeaAccess.SystemLogoutAsync();
+                        await FoaeaAccess.SystemLogout();
                     }
 
                 }
@@ -250,12 +250,12 @@ namespace FileBroker.Business
             {
                 result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-                await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
+                await fileAuditManager.SendSystemErrorAuditEmail(FileName, Config.AuditConfig.AuditRecipients, result);
             }
 
-            await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+            await DB.FileAudit.MarkFileAuditCompletedForFile(FileName);
+            await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+            await DB.FileTable.SetNextCycleForFileType(fileTableData);
 
             return result;
         }

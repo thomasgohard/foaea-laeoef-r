@@ -7,7 +7,7 @@ namespace FileBroker.Business
     {
         public async Task<string> CreateEIfile(string fileBaseName, List<string> errors, bool skipChecks = false)
         {
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
             string newCycle = FormatCycleEISO(fileTableData.Cycle + 1);
             string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + "." + newCycle, isFileName: true);
@@ -18,7 +18,7 @@ namespace FileBroker.Business
                 return "";
             }
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
             try
             {
                 if (!skipChecks && (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday)))
@@ -32,7 +32,7 @@ namespace FileBroker.Business
                     }
                 }
 
-                var incomingEIdata = await DB.FileTable.GetFileTableDataForFileNameAsync("DOJEEINB");
+                var incomingEIdata = await DB.FileTable.GetFileTableDataForFileName("DOJEEINB");
                 var fileName = incomingEIdata.Name + "." + newCycle.ToString().PadLeft(3, '0');
                 var expectedIncomingEIfilePath = incomingEIdata.Path.AppendToPath(fileName, isFileName: true);
                 if (!skipChecks && File.Exists(expectedIncomingEIfilePath))
@@ -50,7 +50,7 @@ namespace FileBroker.Business
                     string fileContent = GenerateEIOutputFileContentFromData(data, newCycle);
                     await File.WriteAllTextAsync(newFilePath, fileContent);
 
-                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                     string message = fileTableData.Category + " Outbound EI EISO File created successfully.";
                     await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
@@ -65,7 +65,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return newFilePath;

@@ -20,7 +20,7 @@ public class FileAuditManager
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
 
-    public async Task<int> GenerateAuditFileAsync(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
+    public async Task<int> GenerateAuditFile(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
     {
         string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -93,7 +93,7 @@ public class FileAuditManager
         return fileNotLoadedCount;
     }
 
-    public async Task SendStandardAuditEmailAsync(string fileName, string recipients, int errorCount, int warningCount,
+    public async Task SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount,
                                                   int successCount, int xmlWarningCount, int totalFilesCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
@@ -130,7 +130,7 @@ public class FileAuditManager
 
     }
 
-    public async Task SendSystemErrorAuditEmailAsync(string fileName, string recipients, MessageDataList errors)
+    public async Task SendSystemErrorAuditEmail(string fileName, string recipients, MessageDataList errors)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);

@@ -1,7 +1,6 @@
 ﻿using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -179,6 +178,7 @@ namespace FOAEA3.Business.Areas.Application
         protected override async Task Process_12_PartiallyServiced()
         {
             await base.Process_12_PartiallyServiced();
+
             EventManager.AddEvent(EventCode.C50821_FIRST_TRACE_RESULT_RECEIVED);
         }
 
@@ -192,6 +192,7 @@ namespace FOAEA3.Business.Areas.Application
         protected override async Task Process_15_Expired()
         {
             await base.Process_15_Expired();
+
             EventManager.AddEvent(EventCode.C50823_LAST_TRACE_RESULT);
         }
     }

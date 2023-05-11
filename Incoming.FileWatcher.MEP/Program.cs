@@ -26,7 +26,7 @@ internal class Program
         await db.RequestLogTable.DeleteAllAsync();
 
         string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
-        var filesToProcess = await GetFileTableDataForArgsOrAllAsync(args, new DBFileTable(fileBrokerDB));
+        var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB));
 
         if (!filesToProcess.Any())
         {
@@ -34,7 +34,7 @@ internal class Program
             return;
         }
 
-        var provinces = GetSelectedProvinceCodes(filesToProcess);
+        var provinces = GetProvinceListForIncomingMEPfiles(filesToProcess);
 
         if ((string.IsNullOrEmpty(provinceCode) || !provinces.Contains(provinceCode)) && (provinceCode != "ALL"))
         {
@@ -53,10 +53,10 @@ internal class Program
         foreach (var itemProvince in provinces)
         {
             string provCode = itemProvince.ToUpper();
-            var searchPaths = GetFileSearchPaths(filesToProcess, out FileBaseName fileBaseName, provCode);
+            var searchFolders = GetFoldersToProcess(filesToProcess, provCode);
 
             var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, fileBaseName, config);
+            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, config);
 
             bool foundZero = true;
 
@@ -66,40 +66,40 @@ internal class Program
             bool finishedForProvince = false;
             while (!finishedForProvince)
             {
-                var allNewFiles = await provincialFileManager.GetWaitingFiles(searchPaths);
+                var allNewExpectedFiles = await provincialFileManager.GetNextExpectedIncomingFilesFoundInFolder(searchFolders);
 
-                if (allNewFiles.Any())
+                if (allNewExpectedFiles.Any())
                 {
                     foundZero = false;
-                    string moreThanOne = allNewFiles.Count > 1 ? "s" : "";
+                    string moreThanOne = allNewExpectedFiles.Count > 1 ? "s" : "";
 
-                    if (!AlreadyProcessed(allNewFiles.First()))
+                    if (!AlreadyProcessed(allNewExpectedFiles.First()))
                     {
-                        WriteEmbeddedColorLine($"Found [green]{allNewFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
-                        totalFilesFound += allNewFiles.Count;
+                        WriteEmbeddedColorLine($"Found [green]{allNewExpectedFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+                        totalFilesFound += allNewExpectedFiles.Count;
                     }
 
-                    foreach (var newFile in allNewFiles)
+                    foreach (var thisfile in allNewExpectedFiles)
                     {
-                        if (AlreadyProcessed(newFile))
+                        if (AlreadyProcessed(thisfile))
                         {
                             finishedForProvince = true;
                             break;
                         }
 
-                        processedFiles.Add(newFile);
+                        processedFiles.Add(thisfile);
 
-                        WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
+                        WriteEmbeddedColorLine($"Processing [green]{thisfile}[/green]...");
 
                         var errors = new List<string>();
 
-                        errors = await provincialFileManager.ProcessWaitingFile(newFile, errors);
+                        errors = await provincialFileManager.ProcessWaitingFile(thisfile, errors);
 
                         if (errors.Any())
                         {
                             foreach (var error in errors)
                             {
-                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", newFile, new Exception(error), displayExceptionError: true);
+                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", thisfile, new Exception(error), displayExceptionError: true);
                                 WriteEmbeddedColorLine($"[red]Error[/red]: [yellow]{error}[/yellow]");
                             }
                             finishedForProvince = true;
@@ -113,7 +113,6 @@ internal class Program
                         WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
                 }
             }
-
         }
 
         WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
@@ -131,33 +130,15 @@ internal class Program
                                                       new Exception(error), displayExceptionError: true);
     }
 
-    private static List<string> GetFileSearchPaths(List<FileTableData> filesToProcess, out FileBaseName fileBaseName, string provinceCode)
+    private static List<string> GetFoldersToProcess(List<FileTableData> filesToProcess, string provinceCode)
     {
         var searchPaths = new List<string>();
-        fileBaseName = new FileBaseName();
 
         var thisProvinceFilesData = filesToProcess.Where(f => f.Name[..2].ToUpper() == provinceCode);
         string interceptionPath = string.Empty;
         foreach (var provinceFileData in thisProvinceFilesData)
         {
             string category = provinceFileData.Category.ToUpper().Trim();
-
-            switch (category)
-            {
-                case "TRCAPPIN":
-                    fileBaseName.Tracing = provinceFileData.Name.Trim().ToUpper();
-                    break;
-                //case "INTAPPIN":
-                //    fileBaseName.Interception = provinceFileData.Name.Trim().ToUpper();
-                //    interceptionPath = provinceFileData.Path.ToUpper();
-                //    break;
-                //case "LICAPPIN":
-                //    fileBaseName.Licencing = provinceFileData.Name.Trim().ToUpper();
-                //    break;
-                default:
-                    // ignore all other categories
-                    break;
-            }
 
             string thisPath = provinceFileData.Path.ToUpper();
             if ((!searchPaths.Contains(thisPath)) && (category != "ESD"))
@@ -170,7 +151,7 @@ internal class Program
         return searchPaths;
     }
 
-    private static List<string> GetSelectedProvinceCodes(List<FileTableData> fileTableData)
+    private static List<string> GetProvinceListForIncomingMEPfiles(List<FileTableData> fileTableData)
     {
         return fileTableData.Where(f => f.Active.HasValue && f.Active.Value)
                             .GroupBy(f => f.Name[..2].ToUpper())
@@ -178,7 +159,7 @@ internal class Program
                             .ToList();
     }
 
-    private static async Task<List<FileTableData>> GetFileTableDataForArgsOrAllAsync(string[] args, DBFileTable fileTable)
+    private static async Task<List<FileTableData>> GetFileTableDataForIncomingMEPfiles(string[] args, DBFileTable fileTable)
     {
         var fileTableData = new List<FileTableData>();
 
@@ -217,7 +198,4 @@ internal class Program
 
         return fileTableData;
     }
-
 }
-
-

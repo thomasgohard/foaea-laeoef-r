@@ -1,5 +1,4 @@
-﻿using FOAEA3.Model.Structs;
-using System.Text;
+﻿using System.Text;
 
 namespace FileBroker.Business.Helpers
 {
@@ -21,7 +20,7 @@ namespace FileBroker.Business.Helpers
             Errors = new List<string>();
         }
 
-        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
+        public async Task GetNextExpectedIncomingFilesFoundInFolder(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IT.*");
@@ -36,73 +35,62 @@ namespace FileBroker.Business.Helpers
 
                 int cycle = FileHelper.ExtractCycleFromFilename(fileName);
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                    (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
                     newFiles.Add(fileInfo.FullName);
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath, List<string> errors)
+        public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors)
         {
-            string fileNameNoPath = Path.GetFileName(fullPath);
+            if (await FileHelper.CheckForDuplicateFile(fullPath, DB.MailService, Config))
+            {
+                errors.Add("Duplicate file found!");
+                return false;
+            }
 
-            if (fileNameNoPath?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. EI3STSIT.000022)
-            {                                        //                                                    ↑ 
-                string flatFile;
-                using (var streamReader = new StreamReader(fullPath, Encoding.UTF8))
-                {
-                    flatFile = streamReader.ReadToEnd();
-                }
+            string flatFile = File.ReadAllText(fullPath);
 
-                var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
+            var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
 
-                var fileFullName = fullPath;
-                if (fileFullName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
-                    fileFullName = fileFullName[..^4];
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileFullName);
+            var fileFullName = fullPath;
+            if (fileFullName.EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
+                fileFullName = Path.GetFileNameWithoutExtension(fileFullName);
+            var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileFullName);
 
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-                if (!fileTableData.IsLoading)
-                {
-                    var fInfo = new FileInfo(fullPath);
-                    if (await FileHelper.CheckForDuplicateFile(fInfo, DB.MailService, Config))
-                    {
-                        errors.Add("Duplicate file found!");
-                        return false;
-                    }
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+            if (!fileTableData.IsLoading)
+            {
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
-                    if (!fileTableData.IsXML)
-                        await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
-                    else
-                    {
-                        string jsonText = FileHelper.ConvertXmlToJson(flatFile, errors);
-                        await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName);
-                    }
-
-                    if (!errors.Any())
-                    {
-                        string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
-
-                        if (!string.IsNullOrEmpty(errorDoingBackup))
-                            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
-                                                                                "Error creating backup of outbound file: " + errorDoingBackup);
-                    }
-
-                    return true;
-                }
+                if (!fileTableData.IsXML)
+                    await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
                 else
                 {
-                    Errors.Add("File was already loading?");
-                    return false;
+                    string jsonText = FileHelper.ConvertXmlToJson(flatFile, errors);
+                    await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName);
                 }
 
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+
+                if (!errors.Any())
+                {
+                    string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
+
+                    if (!string.IsNullOrEmpty(errorDoingBackup))
+                        await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                                                                            "Error creating backup of outbound file: " + errorDoingBackup);
+                }
+
+                return true;
             }
             else
-                Errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoPath?.ToUpper()[6]}'. Is this an incoming file?");
-
-            return false;
+            {
+                Errors.Add("File was already loading?");
+                return false;
+            }
         }
-
     }
 }

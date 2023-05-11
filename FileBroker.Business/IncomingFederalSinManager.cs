@@ -41,7 +41,7 @@ public class IncomingFederalSinManager
             return errors;
         }
 
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+        await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
         try
         {
@@ -74,8 +74,8 @@ public class IncomingFederalSinManager
         finally
         {
             if (errors.Count == 0)
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
+            await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
         }
 
         return errors;
@@ -83,7 +83,7 @@ public class IncomingFederalSinManager
 
     private async Task SendSinResultsToFOAEAAsync(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
-        await FoaeaAccess.SystemLoginAsync();
+        await FoaeaAccess.SystemLogin();
         try
         {
             var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
@@ -100,7 +100,7 @@ public class IncomingFederalSinManager
         }
         finally
         {
-            await FoaeaAccess.SystemLogoutAsync();
+            await FoaeaAccess.SystemLogout();
         }
 
     }
@@ -316,7 +316,7 @@ public class IncomingFederalSinManager
     {
         string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
-        return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
     }
 
     private static void ValidateHeader(FedSin_RecType01 dataFromFile, string flatFileName, ref List<string> errors)

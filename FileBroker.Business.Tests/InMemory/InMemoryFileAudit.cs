@@ -20,14 +20,14 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.FromResult(FileAuditTable);
         }
 
-        public Task InsertFileAuditDataAsync(FileAuditData data)
+        public Task InsertFileAuditData(FileAuditData data)
         {
             FileAuditTable.Add(data);
 
             return Task.CompletedTask;
         }
 
-        public Task MarkFileAuditCompletedForFileAsync(string fileName)
+        public Task MarkFileAuditCompletedForFile(string fileName)
         {
             foreach (var auditItem in FileAuditTable)
                 if (auditItem.InboundFilename == fileName)

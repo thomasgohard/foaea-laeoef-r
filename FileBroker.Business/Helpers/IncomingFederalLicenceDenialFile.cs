@@ -30,7 +30,7 @@
                 int cycle = FileHelper.ExtractCycleFromFilename(fileInfo.Name);
                 var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                 if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
                     newFiles.Add(fileInfo.FullName);
@@ -52,7 +52,7 @@
                 var licenceDenialManager = new IncomingFederalLicenceDenialManager(FoaeaApis, DB, Config);
 
                 var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoPath);
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
                     await licenceDenialManager.ProcessJsonFileAsync(jsonText, fullPath);

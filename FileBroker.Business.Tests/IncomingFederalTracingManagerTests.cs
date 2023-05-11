@@ -25,7 +25,7 @@ namespace FileBroker.Business.Tests
             var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                             .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
-            var processId = (await fileTable.GetFileTableDataForFileNameAsync("EI3STSIT")).PrcId;
+            var processId = (await fileTable.GetFileTableDataForFileName("EI3STSIT")).PrcId;
             var fileLoader = new IncomingFederalTracingFileLoader(flatFileSpecs, processId);
 
             string fullPathFileName = @"TestDataFiles\EI3STSIT.000001";
@@ -64,7 +64,7 @@ namespace FileBroker.Business.Tests
             var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                             .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
-            var processId = (await fileTable.GetFileTableDataForFileNameAsync("RC3STSIT")).PrcId;
+            var processId = (await fileTable.GetFileTableDataForFileName("RC3STSIT")).PrcId;
             var fileLoader = new IncomingFederalTracingFileLoader(flatFileSpecs, processId);
 
             string fullPathFileName = @"TestDataFiles\RC3STSIT.001";
@@ -103,7 +103,7 @@ namespace FileBroker.Business.Tests
             var messageBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                         .ReplaceVariablesWithEnvironmentValues());
             var flatFileSpecs = new DBFlatFileSpecification(messageBrokerDB);
-            var processId = (await fileTable.GetFileTableDataForFileNameAsync("HR3STSIT")).PrcId;
+            var processId = (await fileTable.GetFileTableDataForFileName("HR3STSIT")).PrcId;
             var fileLoader = new IncomingFederalTracingFileLoader(flatFileSpecs, processId);
 
             string fullPathFileName = @"TestDataFiles\HR3STSIT.000001";

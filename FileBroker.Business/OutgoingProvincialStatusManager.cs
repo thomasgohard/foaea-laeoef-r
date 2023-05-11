@@ -22,7 +22,7 @@ namespace FileBroker.Business
 
             bool fileCreated = false;
 
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
             string newCycle = fileTableData.Cycle.ToString("000000");
 
@@ -37,7 +37,7 @@ namespace FileBroker.Business
                     return ("", errors);
                 }
 
-                await FoaeaAccess.SystemLoginAsync();
+                await FoaeaAccess.SystemLogin();
 
                 try
                 {
@@ -51,11 +51,11 @@ namespace FileBroker.Business
                     await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                              "Outbound File created successfully.");
 
-                    await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
 
                 return (newFilePath, errors);
