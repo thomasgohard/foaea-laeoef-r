@@ -106,9 +106,10 @@ namespace FileBroker.Common
             var fileInfo = new FileInfo(fullPath);
 
             string fileName = fileInfo.Name.ToUpper();
-            string folderName = fileInfo.DirectoryName;
+            string baseName = FileHelper.TrimCycleAndXmlExtension(fileName);
+            string folderName = fileInfo.DirectoryName.ExtractSubfolder();
 
-            var dInfo = new DirectoryInfo(config.FTPbackupRoot + folderName);
+            var dInfo = new DirectoryInfo(config.FTPbackupRoot.AppendToPath(folderName));
             FileInfo[] dupFileInfos;
 
             if (fileName.Contains("02010131"))

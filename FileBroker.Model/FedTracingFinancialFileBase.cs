@@ -20,6 +20,7 @@ namespace FileBroker.Model
 
         public string SIN;
 
+        [DataMember(IsRequired = false)]
         public string SIN_XRef;
 
         public string ResponseCode;

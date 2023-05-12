@@ -43,11 +43,11 @@ namespace FileBroker.Business.Helpers
             }
         }
 
-        public async Task<bool> ProcessWaitingFile(string fullPath, List<string> errors)
+        public async Task<bool> ProcessWaitingFile(string fullPath)
         {
             if (await FileHelper.CheckForDuplicateFile(fullPath, DB.MailService, Config))
             {
-                errors.Add("Duplicate file found!");
+                Errors.Add("Duplicate file found!");
                 return false;
             }
 
@@ -66,16 +66,16 @@ namespace FileBroker.Business.Helpers
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
                 if (!fileTableData.IsXML)
-                    await tracingManager.ProcessFlatFileAsync(flatFile, fullPath);
+                    Errors.AddRange(await tracingManager.ProcessFlatFileAsync(flatFile, fullPath));
                 else
                 {
-                    string jsonText = FileHelper.ConvertXmlToJson(flatFile, errors);
-                    await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName);
+                    string jsonText = FileHelper.ConvertXmlToJson(flatFile, Errors);
+                    Errors.AddRange(await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName));
                 }
 
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
 
-                if (!errors.Any())
+                if (!Errors.Any())
                 {
                     string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
 

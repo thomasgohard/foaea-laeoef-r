@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -38,12 +37,15 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
             if (File.Exists(newFilePath))
             {
-                errors.Add("** Error: File Already Exists");
-                return ("", errors);
+                errors.Add($"** Error: File Already Exists ({newFilePath})");
+                return (newFilePath, errors);
             }
 
-            await FoaeaAccess.SystemLogin();
-
+            if (!await FoaeaAccess.SystemLogin())
+            {
+                errors.Add("Failed to login to FOAEA!");
+                return (newFilePath, errors);
+            }
             try
             {
                 var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
@@ -86,7 +88,6 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
             return (string.Empty, errors);
         }
-
     }
 
     private async Task<TracingOutgoingProvincialData> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,

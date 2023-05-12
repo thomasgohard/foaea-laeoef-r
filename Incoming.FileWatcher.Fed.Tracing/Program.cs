@@ -5,7 +5,6 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Incoming.FileWatcher.Fed.Tracing;
@@ -52,8 +51,8 @@ class Program
 
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{thisFile}[/green]...");
-                    
-                    await federalFileManager.ProcessWaitingFile(thisFile, errors);
+
+                    await federalFileManager.ProcessWaitingFile(thisFile);
 
                     if (federalFileManager.Errors.Any())
                     {

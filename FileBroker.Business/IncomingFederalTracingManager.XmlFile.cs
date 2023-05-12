@@ -4,15 +4,13 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
-    public async Task<MessageDataList> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
+    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
     {
         var result = new MessageDataList();
 
         short cycle = (short)FileHelper.ExtractCycleFromFilename(flatFileName);
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
         var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
-
-        await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
         var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingDataAsJson, out string error);
         var tracingFile = tracingFileData.CRATraceIn;
@@ -33,7 +31,7 @@ public partial class IncomingFederalTracingManager
                 if (!await FoaeaAccess.SystemLogin())
                 {
                     result.AddError("Failed to login to FOAEA!");
-                    return result;
+                    return result.Select(m => m.Description).ToList();
                 }
                 try
                 {
@@ -46,7 +44,7 @@ public partial class IncomingFederalTracingManager
             }
         }
 
-        return result;
+        return result.Select(m => m.Description).ToList();
     }
 
     private static void ValidateXmlHeader(FedTracingFinancial_Header header, string flatFileName, ref MessageDataList result, ref bool isValid)
