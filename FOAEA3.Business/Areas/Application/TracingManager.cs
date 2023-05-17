@@ -466,6 +466,11 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.TraceResponseTable.GetTraceResponseForApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
         }
 
+        public async Task<List<CraFieldData>> GetCraFields()
+        {
+            return await DB.TraceResponseTable.GetCraFields();
+        }
+
         public async Task<DataList<TraceFinancialResponseData>> GetTraceFinancialResultsAsync()
         {
             var data = await DB.TraceResponseTable.GetTraceResponseFinancialsForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);

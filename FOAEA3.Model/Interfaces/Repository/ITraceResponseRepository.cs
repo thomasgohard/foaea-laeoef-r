@@ -10,6 +10,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         string UserId { get; set; }
 
         Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false);
+        Task<List<CraFieldData>> GetCraFields();
+
         Task InsertBulkDataAsync(List<TraceResponseData> responseData);
 
         Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);

@@ -32,6 +32,22 @@ namespace FOAEA3.Data.DB
             return new DataList<TraceResponseData>(data, MainDB.LastError);
         }
 
+        public async Task<List<CraFieldData>> GetCraFields()
+        {
+            return await MainDB.GetAllDataAsync<CraFieldData>("CraField", FillCraFieldFromReader);
+        }
+
+        private void FillCraFieldFromReader(IDBHelperReader rdr, CraFieldData data)
+        {
+            data.CRAField_Id = (int)rdr["CRAField_Id"];
+            data.CRAFormSchedule = rdr["CRAFormSchedule"] as string; // can be null 
+            data.CRAFieldCodeOld = rdr["CRAFieldCodeOld"] as string; // can be null 
+            data.CRAFieldCode = rdr["CRAFieldCode"] as string; // can be null 
+            data.CRAComment = rdr["CRAComment"] as string; // can be null 
+            data.CRAFieldName = rdr["CRAFieldName"] as string; // can be null 
+            data.CRAFieldDescription = rdr["CRAFieldDescription"] as string; // can be null 
+        }
+
         public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
             await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
@@ -41,8 +57,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrv_Cd", applEnfSrvCd },
-                    {"CtrlCd", applCtrlCd }
+                    {"Appl_EnfSrv_Cd", applEnfSrvCd },
+                    {"Appl_CtrlCd", applCtrlCd }
                 };
 
             var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseData>("TrcRspFin_SelectForAppl", parameters, FillTraceFinancialResultDataFromReader);
