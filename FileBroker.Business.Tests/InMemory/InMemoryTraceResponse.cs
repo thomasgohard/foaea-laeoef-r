@@ -39,6 +39,16 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<List<CraFieldData>> GetCraFields()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CraFormData>> GetCraForms()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<DataList<TraceFinancialResponseDetailData>> GetTraceResponseFinancialDetails(int traceResponseFinancialId)
         {
             throw new NotImplementedException();

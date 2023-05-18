@@ -90,9 +90,6 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            if (Validation.IsC78())
-                TracingApplication.DeclarationIndicator = true;
-
             IsAddressMandatory = false;
             bool success = await base.CreateApplicationAsync();
 
@@ -114,7 +111,16 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!Validation.IsC78())
             {
-                if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
+                var currentDataManager = new TracingManager(DB, Config, CurrentUser);
+                await currentDataManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+                if ((currentDataManager.TracingApplication.AppLiSt_Cd != TracingApplication.AppLiSt_Cd) &&
+                    (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
+                {
+                    MakeUpperCase();
+                    await base.UpdateApplicationAsync();
+                }
+                else if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
                     // affidavit data has been passed -- need to either create it or update it
                     if (!await AffidavitExistsAsync())
@@ -260,33 +266,20 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Messages.AddInformation(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
         }
 
-        public async Task PartiallyServiceApplicationAsync(string enfSrvCode)
+        public async Task PartiallyServiceApplicationAsync()
         {
-            if (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
-            {
-                var traceResponseDB = DB.TraceResponseTable;
-                await traceResponseDB.DeleteCancelledApplicationTraceResponseDataAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-            }
-            else
-            {
-                await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
-
-                MakeUpperCase();
-                await UpdateApplicationAsync();
-            }
-        }
-
-        public async Task TerminateApplicationAsync(string enfSrvCode)
-        {
-
-            var traceResponseDB = DB.TraceResponseTable;
-            await traceResponseDB.DeleteCancelledApplicationTraceResponseDataAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-
-            await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+            await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
             MakeUpperCase();
             await UpdateApplicationAsync();
+        }
 
+        public async Task FullyServiceApplicationAsync()
+        {
+            await SetNewStateTo(ApplicationState.EXPIRED_15);
+
+            MakeUpperCase();
+            await UpdateApplicationAsync();
         }
 
         public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
@@ -471,6 +464,16 @@ namespace FOAEA3.Business.Areas.Application
         public async Task<DataList<TraceResponseData>> GetTraceResultsAsync(bool checkCycle = false)
         {
             return await DB.TraceResponseTable.GetTraceResponseForApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
+        }
+
+        public async Task<List<CraFieldData>> GetCraFields()
+        {
+            return await DB.TraceResponseTable.GetCraFields();
+        }
+
+        public async Task<List<CraFormData>> GetCraForms()
+        {
+            return await DB.TraceResponseTable.GetCraForms();
         }
 
         public async Task<DataList<TraceFinancialResponseData>> GetTraceFinancialResultsAsync()

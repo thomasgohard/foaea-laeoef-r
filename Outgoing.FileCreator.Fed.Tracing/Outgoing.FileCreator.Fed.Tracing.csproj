@@ -8,6 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="FreeSpire.PDF" Version="8.6.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
 		<ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
 		<ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />

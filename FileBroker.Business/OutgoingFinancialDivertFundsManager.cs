@@ -20,7 +20,7 @@ namespace FileBroker.Business
 
         public async Task<string> CreateBlockFundsFile(string fileBaseName, List<string> errors)
         {
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
             string newCycle = BuildNewCycle(fileBaseName, fileTableData.Cycle);
 
@@ -32,7 +32,7 @@ namespace FileBroker.Business
                 return "";
             }
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
             try
             {
                 var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
@@ -67,7 +67,7 @@ namespace FileBroker.Business
                 if (fileTableData.Transform)
                     await TransformFile.Process(fileTableData, newFilePath);
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 string message = fileTableData.Category + $" Outbound {fileBaseName} file created successfully.";
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
@@ -90,7 +90,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return newFilePath;

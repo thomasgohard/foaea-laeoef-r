@@ -54,12 +54,12 @@ namespace FileBroker.Business
             if (errors.Any())
                 return errors;
 
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+            await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
             string fileCycle = Path.GetExtension(fileName)[1..];
             try
             {
-                await FoaeaAccess.SystemLoginAsync();
+                await FoaeaAccess.SystemLogin();
                 try
                 {
                     var licenceDenialResponses = ExtractLicenceDenialResponsesFromJson(jsonFileContent, ref errors);
@@ -84,12 +84,12 @@ namespace FileBroker.Business
                     {
                         await SendLicenceDenialResponsesToFOAEAAsync(licenceDenialFoaeaResponseData, fedSource, fileName, errors);
 
-                        await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                        await DB.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
                     }
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
 
             }
@@ -99,7 +99,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
             }
 
             return errors;
@@ -171,7 +171,7 @@ namespace FileBroker.Business
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
 
-            return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
         }
 
         private static void ValidateHeader(FedLicenceDenial_DataSet licenceDenialFile, string fileName, ref List<string> result)

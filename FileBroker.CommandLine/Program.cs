@@ -107,7 +107,7 @@ else
 static async Task<string> DisableFileProcess(string fileName, IDBToolsAsync mainDB)
 {
     var fileTable = new DBFileTable(mainDB);
-    var fileData = await fileTable.GetFileTableDataForFileNameAsync(fileName);
+    var fileData = await fileTable.GetFileTableDataForFileName(fileName);
     if ((fileData is not null) && (fileData.Active is true) && (fileData.Type.ToLower() == "in"))
     {
         await fileTable.DisableFileProcess(fileData.PrcId);
@@ -120,7 +120,7 @@ static async Task<string> DisableFileProcess(string fileName, IDBToolsAsync main
 static async Task<string> EnableFileProcess(string fileName, IDBToolsAsync mainDB)
 {
     var fileTable = new DBFileTable(mainDB);
-    var fileData = await fileTable.GetFileTableDataForFileNameAsync(fileName);
+    var fileData = await fileTable.GetFileTableDataForFileName(fileName);
     if ((fileData is not null) && (fileData.Active is true) && (fileData.Type.ToLower() == "in"))
     {
         await fileTable.EnableFileProcess(fileData.PrcId);

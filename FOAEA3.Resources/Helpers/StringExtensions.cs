@@ -93,13 +93,27 @@ namespace FOAEA3.Resources.Helpers
                 result = additionalPath;
             else
             {
-                if (!result.EndsWith(@"\"))
-                    result += @"\";
+                if (!result.EndsWith("\\"))
+                    result += "\\";
 
                 result += additionalPath;
-                if (!result.EndsWith(@"\") && !isFileName)
-                    result += @"\";
+                if (!result.EndsWith("\\") && !isFileName)
+                    result += "\\";
             }
+
+            return result;
+        }
+
+        public static string ExtractSubfolder(this string basePath)
+        {
+            string result = basePath;
+
+            if (result.EndsWith("\\"))
+                result = result.Substring(0, result.Length - 1);
+
+            int posLastBackslash = result.LastIndexOf('\\');
+            if (posLastBackslash > -1)
+                result = result[(posLastBackslash + 1)..];
 
             return result;
         }

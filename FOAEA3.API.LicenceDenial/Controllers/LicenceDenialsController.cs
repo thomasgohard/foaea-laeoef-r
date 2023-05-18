@@ -72,7 +72,7 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialManager(application, db, config, User);
@@ -107,7 +107,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialManager(application, repositories, config, User);
@@ -130,7 +130,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new LicenceDenialManager(application, repositories, config, User);
@@ -154,7 +154,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
 
-        if (!APIHelper.ValidateApplication(appManager.LicenceDenialApplication, applKey, out string error))
+        if (!APIHelper.ValidateRequest(appManager.LicenceDenialApplication, applKey, out string error))
             return UnprocessableEntity(error);
 
         var sinManager = new ApplicationSINManager(application, appManager);

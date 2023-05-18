@@ -4,17 +4,13 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
-    public async Task<MessageDataList> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
+    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
     {
         var result = new MessageDataList();
 
         short cycle = (short)FileHelper.ExtractCycleFromFilename(flatFileName);
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
-
-        // bool isValid = true;
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
         var tracingFileData = ExtractTracingFinancialDataFromJson(sourceTracingDataAsJson, out string error);
         var tracingFile = tracingFileData.CRATraceIn;
@@ -23,7 +19,6 @@ public partial class IncomingFederalTracingManager
 
         if (!string.IsNullOrEmpty(error))
         {
-            //isValid = false;
             result.AddSystemError(error);
         }
         else
@@ -33,19 +28,23 @@ public partial class IncomingFederalTracingManager
 
             if (isValid)
             {
-                await FoaeaAccess.SystemLoginAsync();
+                if (!await FoaeaAccess.SystemLogin())
+                {
+                    result.AddError("Failed to login to FOAEA!");
+                    return result.Select(m => m.Description).ToList();
+                }
                 try
                 {
                     await SendTraceFinancialResultToFoaea(tracingFile.TraceResponse, fileTableData.PrcId, "RC02", cycle, fileNameNoCycle);
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
             }
         }
 
-        return result;
+        return result.Select(m => m.Description).ToList();
     }
 
     private static void ValidateXmlHeader(FedTracingFinancial_Header header, string flatFileName, ref MessageDataList result, ref bool isValid)

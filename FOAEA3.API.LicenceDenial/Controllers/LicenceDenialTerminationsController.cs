@@ -47,7 +47,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
         var requestDate = DateTime.Now; // or should it be a different date?
 
-        if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, db, config, User);
@@ -79,7 +79,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialTerminationManager(application, repositories, config, User);
@@ -103,7 +103,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config, User);
@@ -122,7 +122,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, repositories, config, User);

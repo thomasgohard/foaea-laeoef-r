@@ -7,17 +7,15 @@ namespace FileBroker.Business.Helpers
     public class IncomingProvincialFile
     {
         private RepositoryList DB { get; }
-        private FileBaseName FileBaseName { get; }
         private APIBrokerList FoaeaApis { get; }
+        private FileBaseName FileBaseName { get; }
         private IFileBrokerConfigurationHelper Config { get; }
 
         public IncomingProvincialFile(RepositoryList db,
                                       APIBrokerList foaeaApis,
-                                      FileBaseName fileBaseName,
                                       IFileBrokerConfigurationHelper config)
         {
             DB = db;
-            FileBaseName = fileBaseName;
             FoaeaApis = foaeaApis;
             Config = config;
         }
@@ -26,6 +24,10 @@ namespace FileBroker.Business.Helpers
         {
             if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
                 errors = await ProcessIncomingXmlFile(fullPath, errors);
+
+            else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
+                await ProcessIncomingESDfile(fullPath, errors);
+
             else
                 errors.Add($"Unknown file type: {Path.GetExtension(fullPath)?.ToUpper()} for file {fullPath}");
 
@@ -34,60 +36,49 @@ namespace FileBroker.Business.Helpers
 
         public async Task<List<string>> ProcessIncomingXmlFile(string fullPath, List<string> errors)
         {
-            string fileNameNoExtension = Path.GetFileNameWithoutExtension(fullPath);
-            string fileNameNoCycle = FileHelper.TrimCycleAndXmlExtension(fileNameNoExtension).ToUpper();
+            string fileNameNoXmlExtension = Path.GetFileNameWithoutExtension(fullPath);
+            string fileNameNoCycle = FileHelper.TrimCycleAndXmlExtension(fileNameNoXmlExtension);
 
-            if (fileNameNoCycle.Length != 8)
+            if (await FileHelper.CheckForDuplicateFile(fullPath, DB.MailService, Config))
             {
-                errors.Add($"Invalid MEP incoming file: {fileNameNoCycle}");
+                errors.Add("Duplicate file found!");
                 return errors;
             }
 
-            if (fileNameNoExtension?.ToUpper()[6] == 'I') // incoming file have a I in 7th position (e.g. ON3D01IT.123456)
-            {                                             //                                                    ^
-                string xmlData = File.ReadAllText(fullPath);
-                string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
+            string xmlData = File.ReadAllText(fullPath);
+            string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
-                if (errors.Any())
-                    return errors;
+            if (errors.Any())
+                return errors;
 
-                var fInfo = new FileInfo(fullPath);
-                if (await FileHelper.CheckForDuplicateFile(fInfo, DB.MailService, Config))
-                {
-                    errors.Add("Duplicate file found!");
-                    return errors;
-                }
+            char fileType = fileNameNoCycle.ToUpper().Last();
+            switch (fileType)
+            {
+                case 'T':
+                    errors = await ProcessIncomingTracing(jsonText, fileNameNoXmlExtension, errors);
+                    break;
 
-                char fileType = fileNameNoCycle[7];
-                switch (fileType)
-                {
-                    case 'T':
-                        errors = await ProcessIncomingTracing(jsonText, fileNameNoExtension, errors);
-                        break;
+                case 'I':
+                    errors = await ProcessIncomingInterception(jsonText, fileNameNoXmlExtension, errors);
+                    break;
 
-                    case 'I':
-                        await ProcessIncomingInterception(jsonText, fileNameNoExtension, errors);
-                        break;
+                case 'L':
+                    errors = await ProcessIncomingLicencing(jsonText, fileNameNoXmlExtension, errors);
+                    break;
 
-                    case 'L':
-                        await ProcessIncomingLicencing(jsonText, fileNameNoExtension, errors);
-                        break;
-
-                    default:
-                        break;
-                }
-
-                if (!errors.Any())
-                {
-                    string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
-
-                    if (!string.IsNullOrEmpty(errorDoingBackup))
-                        await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
-                                                                            "Error creating backup of outbound file: " + errorDoingBackup);
-                }
+                default:
+                    errors.Add($"Unknown file type: {fileType}");
+                    break;
             }
-            else
-                errors.Add($"Error: expected 'I' in 7th position, but instead found '{fileNameNoExtension?.ToUpper()[6]}'. Is this an incoming file?");
+
+            if (!errors.Any())
+            {
+                string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
+
+                if (!string.IsNullOrEmpty(errorDoingBackup))
+                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
+            }
 
             return errors;
         }
@@ -102,11 +93,46 @@ namespace FileBroker.Business.Helpers
             var tracingManager = new IncomingProvincialTracingManager(DB, FoaeaApis, fileName, Config);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
             if (!fileTableData.IsLoading)
             {
-                var info = await tracingManager.ExtractAndProcessRequestsInFileAsync(sourceTracingJsonData, unknownTags);
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
+                var info = await tracingManager.ExtractAndProcessRequestsInFile(sourceTracingJsonData, unknownTags);
+
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+
+                if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
+                    foreach (var error in info.GetMessagesForType(MessageType.Error))
+                        errors.Add(error.Description);
+
+            }
+            else
+                errors.Add("File was already loading?");
+
+            return errors;
+        }
+
+        public async Task<List<string>> ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)
+        {
+            errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
+
+            if (errors.Any())
+            {
+                errors = JsonHelper.Validate<MEPInterceptionFileDataSingleSource>(sourceInterceptionJsonData, out unknownTags);
+
+                if (errors.Any())
+                    return errors;
+            }
+
+            var interceptionManager = new IncomingProvincialInterceptionManager(DB, FoaeaApis, fileName, Config);
+
+            var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+            if (!fileTableData.IsLoading)
+            {
+                var info = await interceptionManager.ExtractAndProcessRequestsInFileAsync(sourceInterceptionJsonData, unknownTags,
+                                                                                          includeInfoInMessages: true);
                 if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                     foreach (var error in info.GetMessagesForType(MessageType.Error))
                         errors.Add(error.Description);
@@ -117,36 +143,7 @@ namespace FileBroker.Business.Helpers
             return errors;
         }
 
-        public async Task ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)
-        {
-            errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
-
-            if (errors.Any())
-            {
-                errors = JsonHelper.Validate<MEPInterceptionFileDataSingleSource>(sourceInterceptionJsonData, out unknownTags);
-
-                if (errors.Any())
-                    return;
-            }
-
-            var interceptionManager = new IncomingProvincialInterceptionManager(DB, FoaeaApis, fileName, Config);
-
-            var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-            if (!fileTableData.IsLoading)
-            {
-                var info = await interceptionManager.ExtractAndProcessRequestsInFileAsync(sourceInterceptionJsonData, unknownTags,
-                                                                                          includeInfoInMessages: true);
-
-                if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
-                    foreach (var error in info.GetMessagesForType(MessageType.Error))
-                        errors.Add(error.Description);
-            }
-            else
-                errors.Add("File was already loading?");
-        }
-
-        private async Task ProcessIncomingLicencing(string sourceLicenceDenialJsonData, string fileName, List<string> errors)
+        private async Task<List<string>> ProcessIncomingLicencing(string sourceLicenceDenialJsonData, string fileName, List<string> errors)
         {
             errors = JsonHelper.Validate<MEPLicenceDenialFileData>(sourceLicenceDenialJsonData, out List<UnknownTag> unknownTags);
             if (errors.Any())
@@ -154,13 +151,13 @@ namespace FileBroker.Business.Helpers
                 errors = JsonHelper.Validate<MEPLicenceDenialFileDataSingle>(sourceLicenceDenialJsonData, out unknownTags);
 
                 if (errors.Any())
-                    return;
+                    return errors;
             }
 
             var licenceDenialManager = new IncomingProvincialLicenceDenialManager(DB, FoaeaApis, fileName, Config);
 
             var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
             if (!fileTableData.IsLoading)
             {
                 var info = await licenceDenialManager.ExtractAndProcessRequestsInFileAsync(sourceLicenceDenialJsonData, unknownTags);
@@ -171,6 +168,8 @@ namespace FileBroker.Business.Helpers
             }
             else
                 errors.Add("File was already loading?");
+
+            return errors;
         }
 
         private async Task ProcessIncomingESDfile(string fullPath, List<string> errors)
@@ -184,26 +183,34 @@ namespace FileBroker.Business.Helpers
                     errors.Add(error.Description);
         }
 
-        public async Task AddNewXmlFilesAsync(string rootPath, List<string> newFiles)
+        public async Task AddNewIncomingXMLfilesIfExpected(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = await Task.Run(() => { return directory.GetFiles("*.xml"); });
             var last31days = DateTime.Now.AddDays(-31);
             var files = allFiles.Where(f => f.LastWriteTime > last31days).OrderByDescending(f => f.LastWriteTime);
 
-            foreach (var fileInfo in files)
+            foreach (var thisFile in files)
             {
-                var fileNameNoFileType = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove .XML
-                int cycle = FileHelper.ExtractCycleFromFilename(fileNameNoFileType);
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoFileType); // remove cycle
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
-
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName);
+                if (await IsNextExpectedIncomingCycle(thisFile))
+                    newFiles.Add(thisFile.FullName);
             }
         }
 
-        public async Task AddNewESDfilesAsync(string rootPath, List<string> newFiles)
+        private async Task<bool> IsNextExpectedIncomingCycle(FileInfo thisFile)
+        {
+            int cycle = FileHelper.ExtractCycleFromFilename(thisFile.Name);
+            string baseFileName = FileHelper.TrimCycleAndXmlExtension(thisFile.Name);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseFileName);
+
+            if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                return true;
+            else
+                return false;
+        }
+
+        public async Task AddNewESDfiles(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
 
@@ -217,7 +224,7 @@ namespace FileBroker.Business.Helpers
                 {
                     var foaeaAccess = new FoaeaSystemAccess(FoaeaApis, Config.FoaeaLogin);
 
-                    await foaeaAccess.SystemLoginAsync();
+                    await foaeaAccess.SystemLogin();
                     try
                     {
                         foreach (var fileInfo in files)
@@ -232,21 +239,21 @@ namespace FileBroker.Business.Helpers
                     }
                     finally
                     {
-                        await foaeaAccess.SystemLogoutAsync();
+                        await foaeaAccess.SystemLogout();
                     }
                 }
             }
         }
 
-        public async Task<List<string>> GetWaitingFiles(List<string> searchPaths)
+        public async Task<List<string>> GetNextExpectedIncomingFilesFoundInFolder(List<string> searchPaths)
         {
             var allNewFiles = new List<string>();
 
             foreach (string searchPath in searchPaths)
                 if (!searchPath.Contains("ESD"))
-                    await AddNewXmlFilesAsync(searchPath, allNewFiles);
+                    await AddNewIncomingXMLfilesIfExpected(searchPath, allNewFiles);
                 else
-                    await AddNewESDfilesAsync(searchPath, allNewFiles);
+                    await AddNewESDfiles(searchPath, allNewFiles);
 
             return allNewFiles;
         }

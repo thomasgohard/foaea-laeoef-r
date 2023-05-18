@@ -32,7 +32,7 @@ namespace FileBroker.Business
                 return "";
             }
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
             try
             {
                 var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
@@ -61,7 +61,7 @@ namespace FileBroker.Business
                 await APIs.Financials.CloseCR_PADReventsAsync(batch.Batch_Id, processCodes.EnfSrv_Cd);
                 await APIs.ControlBatches.CloseControlBatch(batch.Batch_Id);
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 string message = fileTableData.Category + " Outbound IFMS File created successfully.";
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
@@ -76,7 +76,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return newFilePath;

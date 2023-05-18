@@ -32,7 +32,7 @@ namespace FileBroker.Common.Helpers
             LoginData = foaeaLoginData;
         }
 
-        public async Task<bool> SystemLoginAsync()
+        public async Task<bool> SystemLogin()
         {
             var tokenData = await APIs.Accounts.LoginAsync(LoginData);
 
@@ -69,7 +69,7 @@ namespace FileBroker.Common.Helpers
             return true;
         }
 
-        public async Task SystemLogoutAsync()
+        public async Task SystemLogout()
         {
             await APIs.Accounts.LogoutAsync(LoginData);
         }

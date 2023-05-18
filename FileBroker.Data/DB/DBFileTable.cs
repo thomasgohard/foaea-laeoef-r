@@ -17,7 +17,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
+        public async Task<FileTableData> GetFileTableDataForFileName(string fileNameNoExt)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
@@ -72,7 +72,7 @@ namespace FileBroker.Data.DB
             return fileTableData.AsParallel().Where(f => f.Active is true).ToList();
         }
 
-        public async Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
+        public async Task SetNextCycleForFileType(FileTableData fileData, int length = 6)
         {
 
             int newCycle = fileData.Cycle + 1;
@@ -100,7 +100,7 @@ namespace FileBroker.Data.DB
             return await MainDB.GetDataFromProcSingleValueAsync<bool>("MessageBrokerConfigIsFileLoading", parameters);
         }
 
-        public async Task SetIsFileLoadingValueAsync(int processId, bool newValue)
+        public async Task SetIsFileLoadingValue(int processId, bool newValue)
         {
             var parameters = new Dictionary<string, object>
             {

@@ -1,6 +1,5 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -11,11 +10,7 @@ public class IncomingProvincialTracingManager
     private APIBrokerList APIs { get; }
     private RepositoryList DB { get; }
     private IFileBrokerConfigurationHelper Config { get; }
-    private Dictionary<string, string> Translations { get; }
-    private bool IsFrench { get; }
-
     private IncomingProvincialHelper IncomingFileHelper { get; }
-
     private FoaeaSystemAccess FoaeaAccess { get; }
 
     public IncomingProvincialTracingManager(RepositoryList db,
@@ -28,60 +23,25 @@ public class IncomingProvincialTracingManager
         DB = db;
         Config = config;
 
-        string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
-
-        Translations = LoadTranslations();
-
         string provCode = FileName[..2].ToUpper();
         IncomingFileHelper = new IncomingProvincialHelper(Config, provCode);
 
         FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
-    private Dictionary<string, string> LoadTranslations()
-    {
-        var translations = new Dictionary<string, string>();
-
-        if (IsFrench)
-        {
-            var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
-            foreach (var translation in Translations)
-                translations.Add(translation.EnglishText, translation.FrenchText);
-
-            APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
-            LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
-        }
-
-        return translations;
-    }
-
-    private string Translate(string englishText)
-    {
-        if (IsFrench && Translations.ContainsKey(englishText))
-        {
-            return Translations[englishText];
-        }
-        else
-            return englishText;
-    }
-
-    public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+    public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
-        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
-
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+        var tracingFileData = ExtractTracingDataFromJson(sourceTracingData, out string error);
+        var tracingFile = tracingFileData.NewDataSet;
 
         bool isValid = true;
 
-        // convert data from json into object
-        var tracingFileData = ExtractTracingDataFromJson(sourceTracingData, out string error);
-        var tracingFile = tracingFileData.NewDataSet;
+        var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
         if (!string.IsNullOrEmpty(error))
         {
@@ -99,57 +59,47 @@ public class IncomingProvincialTracingManager
                 int warningCount = 0;
                 int successCount = 0;
 
-                if (!await FoaeaAccess.SystemLoginAsync())
+                if (!await FoaeaAccess.SystemLogin())
                 {
                     isValid = false;
-                    result.AddSystemError("Failed to login to FOAEA!");                   
+                    result.AddSystemError("Failed to login to FOAEA!");
                 }
                 else
+                {
                     try
                     {
-                        foreach (var data in tracingFile.TRCAPPIN20)
+                        foreach (var baseData in tracingFile.TRCAPPIN20)
                         {
-                            bool isValidRequest = true;
+                            bool isValidActionCode = true;
 
                             var fileAuditData = new FileAuditData
                             {
-                                Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-                                Appl_CtrlCd = data.dat_Appl_CtrlCd,
-                                Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
+                                Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
+                                Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+                                Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
                                 InboundFilename = FileName + ".XML"
                             };
 
                             var requestError = new MessageDataList();
 
-                            ValidateActionCode(data, ref requestError, ref isValidRequest);
+                            ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
 
-                            if (isValidRequest)
+                            if (isValidActionCode)
                             {
-                                var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                                var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                                var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+                                var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
 
                                 var tracingMessage = new MessageData<TracingApplicationData>
                                 {
-                                    Application = GetTracingApplicationDataFromRequest(data, traceData, traceFinData),
-                                    MaintenanceAction = data.Maintenance_ActionCd,
-                                    MaintenanceLifeState = data.dat_Appl_LiSt_Cd,
-                                    NewRecipientSubmitter = data.dat_New_Owner_RcptSubmCd,
-                                    NewIssuingSubmitter = data.dat_New_Owner_SubmCd,
-                                    NewUpdateSubmitter = data.dat_Update_SubmCd
+                                    Application = CombineMatchingTracingApplicationDataFromRequest(baseData, traceData, traceFinData),
+                                    MaintenanceAction = baseData.Maintenance_ActionCd,
+                                    MaintenanceLifeState = baseData.dat_Appl_LiSt_Cd,
+                                    NewRecipientSubmitter = baseData.dat_New_Owner_RcptSubmCd,
+                                    NewIssuingSubmitter = baseData.dat_New_Owner_SubmCd,
+                                    NewUpdateSubmitter = baseData.dat_Update_SubmCd
                                 };
 
-                                var requestLogData = new RequestLogData
-                                {
-                                    MaintenanceAction = tracingMessage.MaintenanceAction,
-                                    MaintenanceLifeState = tracingMessage.MaintenanceLifeState,
-                                    Appl_EnfSrv_Cd = tracingMessage.Application.Appl_EnfSrv_Cd,
-                                    Appl_CtrlCd = tracingMessage.Application.Appl_CtrlCd,
-                                    LoadedDateTime = DateTime.Now
-                                };
-
-                                _ = await DB.RequestLogTable.AddAsync(requestLogData);
-
-                                var messages = await ProcessApplicationRequestAsync(tracingMessage);
+                                var messages = await SendRequestToFoaea(tracingMessage);
 
                                 if (messages.ContainsMessagesOfType(MessageType.Error))
                                 {
@@ -185,18 +135,20 @@ public class IncomingProvincialTracingManager
                                 errorCount++;
                             }
 
-                            await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                            await DB.FileAudit.InsertFileAuditData(fileAuditData);
 
                         }
 
-                        int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                        await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
-                                                                errorCount, warningCount, successCount, unknownTags.Count, totalFilesCount);
+                        int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                                                                      errorCount, warningCount, successCount, unknownTags.Count,
+                                                                      totalFilesCount);
                     }
                     finally
                     {
-                        await FoaeaAccess.SystemLogoutAsync();
+                        await FoaeaAccess.SystemLogout();
                     }
+                }
             }
 
         }
@@ -205,21 +157,19 @@ public class IncomingProvincialTracingManager
         {
             result.AddSystemError($"One of more error(s) occured trying to load file ({FileName}.XML)");
 
-            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmail(FileName, Config.AuditConfig.AuditRecipients, result);
         }
-
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
 
         if (!result.ContainsMessagesOfType(MessageType.Error))
         {
-            await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+            await DB.FileAudit.MarkFileAuditCompletedForFile(FileName);
+            await DB.FileTable.SetNextCycleForFileType(fileTableData);
         }
 
         return result;
     }
 
-    public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<TracingApplicationData> tracingMessageData)
+    public async Task<MessageDataList> SendRequestToFoaea(MessageData<TracingApplicationData> tracingMessageData)
     {
         TracingApplicationData tracing;
 
@@ -237,6 +187,7 @@ public class IncomingProvincialTracingManager
                     break;
 
                 case "14": // cancellation
+                    tracingMessageData.Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
                     tracing = await APIs.TracingApplications.CancelTracingApplicationAsync(tracingMessageData.Application);
                     break;
 
@@ -270,7 +221,6 @@ public class IncomingProvincialTracingManager
             isValid = false;
             result.AddSystemError($"type 01 Terms Accepted invalid text: {headerData.TermsAccepted}");
         }
-
     }
 
     private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
@@ -321,9 +271,9 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
-    private static TracingApplicationData GetTracingApplicationDataFromRequest(MEPTracing_RecType20 baseData,
-                                                                               MEPTracing_RecType21? tracingData,
-                                                                               MEPTracing_RecType22? tracingFinData)
+    private static TracingApplicationData CombineMatchingTracingApplicationDataFromRequest(MEPTracing_RecType20 baseData,
+                                                                                           MEPTracing_RecType21? tracingData,
+                                                                                           MEPTracing_RecType22? tracingFinData)
     {
         var tracingApplication = new TracingApplicationData
         {

@@ -21,7 +21,7 @@ namespace FileBroker.Business.Tests.InMemory
             NextCycle = 1;
         }
 
-        public Task<FileTableData> GetFileTableDataForFileNameAsync(string fileNameNoExt)
+        public Task<FileTableData> GetFileTableDataForFileName(string fileNameNoExt)
         {
             var result = new FileTableData();
 
@@ -85,7 +85,7 @@ namespace FileBroker.Business.Tests.InMemory
             throw new System.NotImplementedException();
         }
 
-        public Task SetNextCycleForFileTypeAsync(FileTableData fileData, int length = 6)
+        public Task SetNextCycleForFileType(FileTableData fileData, int length = 6)
         {
             if (fileData.PrcId.In(2, 3, 23))
             {
@@ -102,7 +102,7 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.FromResult(FileLoading);
         }
 
-        public Task SetIsFileLoadingValueAsync(int processId, bool newValue)
+        public Task SetIsFileLoadingValue(int processId, bool newValue)
         {
             if (processId.In(2, 3, 23))
                 FileLoading = newValue;

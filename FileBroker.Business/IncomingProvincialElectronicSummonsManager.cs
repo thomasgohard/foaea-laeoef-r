@@ -79,7 +79,7 @@ namespace FileBroker.Business
             int warningCount = 0;
             int successCount = 0;
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
 
             try
             {
@@ -107,7 +107,7 @@ namespace FileBroker.Business
                 string baseName = string.Empty;
                 if (fileName.Length > 5)
                     baseName = fileName[0..5];
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(baseName);
+                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseName);
                 var fileInfo = new FileInfo(sourceFilePath);
 
                 var newESD = await APIs.InterceptionApplications.ESD_Create(fileTableData.PrcId, sourceFilePath, fileInfo.CreationTime);
@@ -199,18 +199,18 @@ namespace FileBroker.Business
                         IsCompleted = true
                     };
 
-                    await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+                    await DB.FileAudit.InsertFileAuditData(fileAuditData);
 
                 }
 
-                int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(fileName, null, errorCount, warningCount, successCount);
-                await fileAuditManager.SendStandardAuditEmailAsync(fileName, Config.AuditConfig.AuditRecipients,
+                int totalFilesCount = await fileAuditManager.GenerateAuditFile(fileName, null, errorCount, warningCount, successCount);
+                await fileAuditManager.SendStandardAuditEmail(fileName, Config.AuditConfig.AuditRecipients,
                                                                    errorCount, warningCount, successCount, 0, totalFilesCount);
 
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return result;

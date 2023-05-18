@@ -4,7 +4,7 @@ namespace FOAEA3.Common.Helpers;
 
 public static class APIHelper
 {
-    public static bool ValidateApplication(ApplicationData application, ApplKey applKey, out string error)
+    public static bool ValidateRequest(ApplicationData application, ApplKey applKey, out string error)
     {
         error = string.Empty;
 

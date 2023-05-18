@@ -24,7 +24,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
         bool fileCreated = false;
 
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
         string newCycle = (fileTableData.Cycle + 1).ToString("000000");
 
         try
@@ -38,7 +38,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
                 return ("", errors);
             }
 
-            await FoaeaAccess.SystemLoginAsync();
+            await FoaeaAccess.SystemLogin();
 
             try
             {
@@ -57,7 +57,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                  processCodes.EnfSrv_Cd,
@@ -65,7 +65,7 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
             return (newFilePath, errors);
 

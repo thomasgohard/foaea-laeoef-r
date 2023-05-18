@@ -62,10 +62,6 @@ namespace FileBroker.Common
                 var doc = new XmlDocument();
                 doc.LoadXml(xmlData);
                 return JsonConvert.SerializeXmlNode(doc);
-
-                //var doc = XDocument.Parse(xmlData);
-                //var json = JsonConvert.SerializeXNode(doc, Newtonsoft.Json.Formatting.Indented, omitRootObject: true);
-                //return json;
             }
             catch (Exception ex)
             {
@@ -104,13 +100,16 @@ namespace FileBroker.Common
             }
         }
 
-        public static async Task<bool> CheckForDuplicateFile(FileInfo fInfo, IMailServiceRepository mailService, 
+        public static async Task<bool> CheckForDuplicateFile(string fullPath, IMailServiceRepository mailService, 
                                                              IFileBrokerConfigurationHelper config)
         {
-            string fileName = fInfo.Name.ToUpper();
-            string folderName = fInfo.DirectoryName;
+            var fileInfo = new FileInfo(fullPath);
 
-            var dInfo = new DirectoryInfo(config.FTPbackupRoot + folderName);
+            string fileName = fileInfo.Name.ToUpper();
+            string baseName = FileHelper.TrimCycleAndXmlExtension(fileName);
+            string folderName = fileInfo.DirectoryName.ExtractSubfolder();
+
+            var dInfo = new DirectoryInfo(config.FTPbackupRoot.AppendToPath(folderName));
             FileInfo[] dupFileInfos;
 
             if (fileName.Contains("02010131"))
@@ -125,15 +124,15 @@ namespace FileBroker.Common
             {
                 foreach (var dupFileInfo in dupFileInfos)
                 {
-                    if (FileEquals(fInfo.FullName, dupFileInfo.FullName))
+                    if (FileEquals(fileInfo.FullName, dupFileInfo.FullName))
                     {
-                        string msgBody = $"Inbound file {fInfo.Name} is identical to file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Duplicate file not loaded: {fInfo.Name}", config.OpsRecipient, msgBody);
+                        string msgBody = $"Inbound file {fileInfo.Name} is identical to file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
+                        await mailService.SendEmailAsync($"Duplicate file not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                     else
                     {
-                        string msgBody = $"Inbound file {fInfo.Name} is with the same cycle but different content from file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Different file with the same cycle not loaded: {fInfo.Name}", config.OpsRecipient, msgBody);
+                        string msgBody = $"Inbound file {fileInfo.Name} is with the same cycle but different content from file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
+                        await mailService.SendEmailAsync($"Different file with the same cycle not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                 }
                 return true;
@@ -196,7 +195,7 @@ namespace FileBroker.Common
                     }
 
                     fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
-                    fileData = await fileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                    fileData = await fileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                     if ((fileData == null) || (string.IsNullOrEmpty(fileData.Path)))
                         return new BadRequestResult();
@@ -217,7 +216,7 @@ namespace FileBroker.Common
 
                     fileNameNoExtension = Path.GetFileNameWithoutExtension(fileName);
                     fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoExtension);
-                    fileData = await fileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                    fileData = await fileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                     if ((fileData == null) || (string.IsNullOrEmpty(fileData.Path)))
                         return new BadRequestResult();
@@ -237,7 +236,7 @@ namespace FileBroker.Common
 
                     fileNameNoExtension = Path.GetFileNameWithoutExtension(fileName);
                     fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoExtension);
-                    fileData = await fileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+                    fileData = await fileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
                     if ((fileData == null) || (string.IsNullOrEmpty(fileData.Path)))
                         return new BadRequestResult();

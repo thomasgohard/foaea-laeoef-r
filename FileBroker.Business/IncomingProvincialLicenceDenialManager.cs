@@ -73,9 +73,9 @@ public class IncomingProvincialLicenceDenialManager
         var fileAuditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
 
         var fileNameNoCycle = Path.GetFileNameWithoutExtension(FileName);
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+        await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
         bool isValid = true;
 
@@ -97,7 +97,7 @@ public class IncomingProvincialLicenceDenialManager
             {
                 var counts = new ResultTracking();
 
-                await FoaeaAccess.SystemLoginAsync();
+                await FoaeaAccess.SystemLogin();
                 try
                 {
                     if (licenceDenialFile.LICAPPIN30 is not null)
@@ -112,14 +112,14 @@ public class IncomingProvincialLicenceDenialManager
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: true);
 
-                    int totalFilesCount = await fileAuditManager.GenerateAuditFileAsync(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
-                    await fileAuditManager.SendStandardAuditEmailAsync(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                    int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
+                    await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                             counts.ErrorCount, counts.WarningCount, counts.SuccessCount, 
                                                             unknownTags.Count, totalFilesCount);
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
             }
 
@@ -129,12 +129,12 @@ public class IncomingProvincialLicenceDenialManager
         {
             result.AddSystemError($"One of more error(s) occured in file ({FileName}.XML)");
 
-            await fileAuditManager.SendSystemErrorAuditEmailAsync(FileName, Config.AuditConfig.AuditRecipients, result);
+            await fileAuditManager.SendSystemErrorAuditEmail(FileName, Config.AuditConfig.AuditRecipients, result);
         }
 
-        await DB.FileAudit.MarkFileAuditCompletedForFileAsync(FileName);
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
-        await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData);
+        await DB.FileAudit.MarkFileAuditCompletedForFile(FileName);
+        await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+        await DB.FileTable.SetNextCycleForFileType(fileTableData);
 
         return result;
     }
@@ -252,7 +252,7 @@ public class IncomingProvincialLicenceDenialManager
             counts.ErrorCount++;
         }
 
-        await DB.FileAudit.InsertFileAuditDataAsync(fileAuditData);
+        await DB.FileAudit.InsertFileAuditData(fileAuditData);
     }
 
     public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)

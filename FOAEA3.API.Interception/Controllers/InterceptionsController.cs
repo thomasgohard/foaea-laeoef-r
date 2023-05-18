@@ -66,7 +66,7 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey: null, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, db, dbFinance, config, User);
@@ -102,7 +102,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -126,7 +126,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositories_finance, config, User);
@@ -146,7 +146,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -169,7 +169,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -226,7 +226,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -247,7 +247,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -267,7 +267,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
@@ -288,7 +288,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
 
-        if (!APIHelper.ValidateApplication(application, applKey, out string error))
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);

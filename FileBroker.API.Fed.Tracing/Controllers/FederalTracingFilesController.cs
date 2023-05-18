@@ -49,7 +49,7 @@ public class FederalTracingFilesController : ControllerBase
     private static async Task<(string, string)> LoadLatestFederalTracingFileAsync(string fileName, IFileTableRepository fileTable,
                                                        int fileCycleLength)
     {
-        var fileTableData = await fileTable.GetFileTableDataForFileNameAsync(fileName);
+        var fileTableData = await fileTable.GetFileTableDataForFileName(fileName);
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle; // - 1;
         //if (lastFileCycle < 1)

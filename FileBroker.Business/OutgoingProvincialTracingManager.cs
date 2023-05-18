@@ -1,5 +1,4 @@
 ﻿using FileBroker.Common.Helpers;
-using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -27,7 +26,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
         bool fileCreated = false;
 
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
         string newCycle = fileTableData.Cycle.ToString("000000");
 
@@ -38,12 +37,15 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
             if (File.Exists(newFilePath))
             {
-                errors.Add("** Error: File Already Exists");
-                return ("", errors);
+                errors.Add($"** Error: File Already Exists ({newFilePath})");
+                return (newFilePath, errors);
             }
 
-            await FoaeaAccess.SystemLoginAsync();
-
+            if (!await FoaeaAccess.SystemLogin())
+            {
+                errors.Add("Failed to login to FOAEA!");
+                return (newFilePath, errors);
+            }
             try
             {
                 var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
@@ -62,13 +64,13 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 await APIs.TracingResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return (newFilePath, errors);
@@ -86,7 +88,6 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
             return (string.Empty, errors);
         }
-
     }
 
     private async Task<TracingOutgoingProvincialData> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,

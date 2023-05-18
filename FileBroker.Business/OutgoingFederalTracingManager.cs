@@ -26,7 +26,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         bool fileCreated = false;
 
-        var fileTableData = await DB.FileTable.GetFileTableDataForFileNameAsync(fileBaseName);
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
         var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
@@ -46,12 +46,15 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 errors.Add($"** Error: File Already Exists ({newFilePath})");
                 return (newFilePath, errors);
             }
-            await FoaeaAccess.SystemLoginAsync();
-
+            if (!await FoaeaAccess.SystemLogin())
+            {
+                errors.Add("Failed to login to FOAEA!");
+                return (newFilePath, errors);
+            }
             try
             {
                 var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                         processCodes.EnfSrv_Cd);
+                                                      processCodes.EnfSrv_Cd);
 
                 if (!data.Any())
                 {
@@ -84,7 +87,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                          "Outbound File created successfully.");
 
-                await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
                                                                             processCodes.EnfSrv_Cd,
@@ -92,7 +95,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
 
             return (newFilePath, errors);
@@ -208,8 +211,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
     {
         string xmlDebtorBirthDate = appl.Appl_Dbtr_Brth_Dte?.ToString("o");
 
-        // TODO: handle court and other requests than MEPs
         string entity = "04"; // 04 for MEP, courts can be 01 or 02 -- not sure how to identify this
+        if (appl.Subm_SubmCd[2] == 'C')
+            entity = "01"; // court
 
         bool wantSinOnly = !appl.IncludeFinancialInformation && appl.IncludeSinInformation;
 
@@ -235,9 +239,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                     short year = taxYear.Key;
                     var taxForms = taxYear.Value;
                     output.AppendLine($"      </Tax_Data>");
-                    output.AppendLine($"          <Tax_Year>'{year}'</Tax_Year>");
+                    output.AppendLine($"          <Tax_Year>{year}</Tax_Year>");
                     foreach (var form in taxForms)
-                        output.AppendLine($"         <Tax_Form>'{form}'</Tax_Form>");
+                        output.AppendLine($"         <Tax_Form>{form}</Tax_Form>");
                     output.AppendLine($"      </Tax_Data>");
                 }
             }

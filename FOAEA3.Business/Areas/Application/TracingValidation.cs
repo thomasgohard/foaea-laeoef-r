@@ -59,7 +59,10 @@ namespace FOAEA3.Business.Areas.Application
             if (declaration is not null &&
                 (declaration.Equals(Config.TracingDeclaration.English, StringComparison.InvariantCultureIgnoreCase) ||
                  declaration.Equals(Config.TracingDeclaration.French, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                TracingApplication.DeclarationIndicator = true;
                 return true;
+            }
             else
             {
                 TracingApplication.Messages.AddError("Invalid or missing declaration.");

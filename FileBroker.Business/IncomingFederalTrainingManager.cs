@@ -30,7 +30,7 @@ namespace FileBroker.Business
                 return errors;
             }
 
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
+            await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
             try
             {
                 var trainingFileData = new FedInterceptionTrainingBase();
@@ -51,7 +51,7 @@ namespace FileBroker.Business
                 if (errors.Any())
                     return errors;
 
-                await FoaeaAccess.SystemLoginAsync();
+                await FoaeaAccess.SystemLogin();
                 try
                 {
                     string batchName = GetBatchName(trainingFileData.TRIN01);
@@ -73,14 +73,14 @@ namespace FileBroker.Business
 
                             await DB.FundsAvailableIncomingTable.UpdateFundsAvailableIncomingTraining(incomingTrainingTable);
 
-                            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
+                            await DB.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
                         }
 
                     }
                 }
                 finally
                 {
-                    await FoaeaAccess.SystemLogoutAsync();
+                    await FoaeaAccess.SystemLogout();
                 }
 
             }
@@ -90,7 +90,7 @@ namespace FileBroker.Business
             }
             finally
             {
-                await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
             }
 
             return errors;
@@ -109,7 +109,7 @@ namespace FileBroker.Business
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
-            return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+            return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
         }
 
         private static void ValidateHeader(FedInterceptionTraining_RecType01 header, string flatFileName, int nextCycle, ref List<string> errors)

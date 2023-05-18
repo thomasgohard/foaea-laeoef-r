@@ -14,7 +14,7 @@ public partial class IncomingFederalTracingManager
     {
         var fileTableData = await GetFileTableDataAsync(flatFileName);
         var tracingFileData = new FedTracingFileBase();
-        (string enfSrvCd, EFederalSource fedSource) = ConfigureTracingFileData(tracingFileData, fileTableData.Name);
+        (string enfSrvCd, EFederalSource fedSource) = ConfigureTracingFileDataBasedOnSource(tracingFileData, fileTableData.Name);
 
         var errors = new List<string>();
 
@@ -26,8 +26,6 @@ public partial class IncomingFederalTracingManager
 
         if (errors.Any())
             return errors;
-
-        await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, true);
 
         string fileCycle = Path.GetExtension(flatFileName)[1..];
         try
@@ -44,10 +42,13 @@ public partial class IncomingFederalTracingManager
             if (errors.Any())
                 return errors;
 
-            await FoaeaAccess.SystemLoginAsync();
+            if (!await FoaeaAccess.SystemLogin())
+            {
+                errors.Add("Failed to login to FOAEA!");
+                return errors;
+            }
             try
             {
-
                 if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == EFederalSource.NETP))
                     await CloseNETPTraceEventsAsync();
                 else
@@ -64,9 +65,8 @@ public partial class IncomingFederalTracingManager
             }
             finally
             {
-                await FoaeaAccess.SystemLogoutAsync();
+                await FoaeaAccess.SystemLogout();
             }
-
         }
         catch (Exception e)
         {
@@ -74,8 +74,7 @@ public partial class IncomingFederalTracingManager
         }
         finally
         {
-            await DB.FileTable.SetNextCycleForFileTypeAsync(fileTableData, fileCycle.Length);
-            await DB.FileTable.SetIsFileLoadingValueAsync(fileTableData.PrcId, false);
+            await DB.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
         }
 
         return errors;
@@ -99,7 +98,7 @@ public partial class IncomingFederalTracingManager
         }
     }
 
-    private static (string enfSrvCd, EFederalSource fedSource) ConfigureTracingFileData(
+    private static (string enfSrvCd, EFederalSource fedSource) ConfigureTracingFileDataBasedOnSource(
                                                                        FedTracingFileBase fedTracingData,
                                                                        string fileTableName)
     {
@@ -182,7 +181,7 @@ public partial class IncomingFederalTracingManager
     {
         string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
-        return await DB.FileTable.GetFileTableDataForFileNameAsync(fileNameNoCycle);
+        return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
     }
 
     private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileDataAsync(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
@@ -192,7 +191,7 @@ public partial class IncomingFederalTracingManager
 
         return IncomingFederalTracingResponse.GenerateFromFileData(tracingFileData, enfSrvCd, cycles, ref errors);
     }
-    
+
     private async Task CloseNETPTraceEventsAsync()
     {
         await APIs.TracingEvents.CloseNETPTraceEventsAsync();
