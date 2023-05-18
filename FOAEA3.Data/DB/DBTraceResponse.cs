@@ -48,6 +48,22 @@ namespace FOAEA3.Data.DB
             data.CRAFieldDescription = rdr["CRAFieldDescription"] as string; // can be null 
         }
 
+        public async Task<List<CraFormData>> GetCraForms()
+        {
+            return await MainDB.GetAllDataAsync<CraFormData>("CraForm", FillCraFormFromReader);
+        }
+
+        private void FillCraFormFromReader(IDBHelperReader rdr, CraFormData data)
+        {
+            data.CRAForm_Id = (int)rdr["CRAForm_Id"];
+            data.CRAFormYear = (int)rdr["CRAFormYear"];
+            data.CRAFormDescription = rdr["CRAFormDescription"] as string;
+            data.CRAFormPDFName = rdr["CRAFormPDFName"] as string;
+            data.CRAFormSchedule = rdr["CRAFormSchedule"] as string;
+            data.CRAFormProvince = rdr["CRAFormProvince"] as string;
+            data.CRAFormLanguage = rdr["CRAFormLanguage"] as string; // can be null 
+        }
+
         public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
             await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
