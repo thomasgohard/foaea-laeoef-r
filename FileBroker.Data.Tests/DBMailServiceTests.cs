@@ -2,6 +2,7 @@ using DBHelper;
 using FileBroker.Data.DB;
 using FOAEA3.Resources.Helpers;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FileBroker.Data.Tests
@@ -10,23 +11,24 @@ namespace FileBroker.Data.Tests
     {
 
         [Fact]
-        public void SendEmailWithAttachmentTest1()
+        public async Task SendEmailWithAttachmentTest1()
         {
             // arrange
-            var fileBrokerDB = new DBTools("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
+            var fileBrokerDB = new DBToolsAsync("Server=%FOAEA_DB_SERVER%;Database=FoaeaMessageBroker;Integrated Security=SSPI;Trust Server Certificate=true;"
                                               .ReplaceVariablesWithEnvironmentValues());
             var mailService = new DBMailService(fileBrokerDB);
 
             string attachmentContent = "This is an attachment";
-            File.WriteAllText(@"C:\Work\MyFile.txt", attachmentContent);
+            await File.WriteAllTextAsync(@"C:\Work\MyFile.txt", attachmentContent);
 
             // act
-            string error = mailService.SendEmail(body: "This is the body", recipients: "dsarrazi@justice.gc.ca",
-                                                 subject: "This is the subject",
+            string error = await mailService.SendEmailAsync(body: "This is the body1", recipients: "dsarrazi@justice.gc.ca",
+                                                 subject: "This is the subject1",
                                                  attachmentPath: @"C:\Work\MyFile.txt");
 
             // assert
             Assert.Equal(string.Empty, error);
-        }
+        }        
+        
     }
 }

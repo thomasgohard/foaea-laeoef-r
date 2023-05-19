@@ -1,26 +1,26 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Security
 {
     internal class SubjectRoleManager
     {
+        private readonly IRepositories DB;
 
-        private readonly IRepositories Repositories;
 
-
-        internal SubjectRoleManager(IRepositories repositories)
+        public SubjectRoleManager(IRepositories repositories)
         {
-            Repositories = repositories;
+            DB = repositories;
         }
-        internal List<SubjectRoleData> GetSubjectRoles(string subjectName)
+        public async Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
         {
-            return Repositories.SubjectRoleRepository.GetSubjectRoles(subjectName);
+            return await DB.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
         }
-        internal List<string> GetAssumedRolesForSubject(string subjectName)
+        public async Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
         {
-            return Repositories.SubjectRoleRepository.GetAssumedRolesForSubject(subjectName);
+            return await DB.SubjectRoleTable.GetAssumedRolesForSubjectAsync(subjectName);
         }
     }
 }

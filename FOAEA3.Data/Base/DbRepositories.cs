@@ -1,6 +1,6 @@
 ﻿using DBHelper;
 using FOAEA3.Data.DB;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 
 namespace FOAEA3.Data.Base
 {
@@ -15,18 +15,20 @@ namespace FOAEA3.Data.Base
         private ISubmitterRepository submitterDB;
         private IEnfOffRepository enfOffDB;
         private IEnfSrvRepository enfSrvDB;
+        private IEnfSrcRepository enfSrcDB;
         private IProvinceRepository provinceDB;
         private ISubjectRepository subjectDB;
         private IInterceptionRepository interceptionDB;
         private ITracingRepository tracingDB;
+        private ITraceResponseRepository traceResponseDB;
         private ILicenceDenialRepository licenceDenialDB;
+        private ILicenceDenialResponseRepository licenceDenialResponseDB;
         private IAffidavitRepository affidavitDB;
         private ILoginRepository loginDB;
         private INotificationRepository notificationDB;
         private ISubmitterProfileRepository submitterProfileDB;
         private ISubjectRoleRepository subjectRoleDB;
         private ISINResultRepository sinResultDB;
-        private ITraceResponseRepository traceResponseDB;
         private IProductionAuditRepository productionAuditDB;
         private ISINChangeHistoryRepository sinChangeHistoryDB;
         private IFamilyProvisionRepository familyProvisionDB;
@@ -34,8 +36,9 @@ namespace FOAEA3.Data.Base
         private IAccessAuditRepository accessAuditDB;
         private IFailedSubmitAuditRepository failedSubmitAuditDB;
         private IPostalCodeRepository postalCodeDB;
+        private ISecurityTokenRepository securityTokenDB;
 
-        public IDBTools MainDB { get; }
+        public IDBToolsAsync MainDB { get; }
 
         //private string currentSubmitter = string.Empty;
 
@@ -45,294 +48,300 @@ namespace FOAEA3.Data.Base
             set => MainDB.Submitter = value;
         }
 
+        public string UpdateSubmitter
+        {
+            get => MainDB.UpdateSubmitter;
+            set => MainDB.UpdateSubmitter = value;
+        }
+
         public string CurrentUser
         {
             get => MainDB.UserId;
             set => MainDB.UserId = value;
         }
 
-        public DbRepositories(IDBTools mainDB)
+        public DbRepositories(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public ISINResultRepository SINResultRepository
+        public ISINResultRepository SINResultTable
         {
             get
             {
-                if (sinResultDB is null)
-                    sinResultDB = new DBSINResult(MainDB);
+                sinResultDB ??= new DBSINResult(MainDB);
                 return sinResultDB;
             }
         }
 
-        public ITraceResponseRepository TraceResponseRepository
+        public ITraceResponseRepository TraceResponseTable
         {
             get
             {
-                if (traceResponseDB is null)
-                    traceResponseDB = new DBTraceResponse(MainDB);
+                traceResponseDB ??= new DBTraceResponse(MainDB);
                 return traceResponseDB;
             }
         }
 
-        public IApplicationRepository ApplicationRepository
+        public ILicenceDenialResponseRepository LicenceDenialResponseTable
         {
             get
             {
-                if (applicationDB is null)
-                    applicationDB = new DBApplication(MainDB);
+                licenceDenialResponseDB ??= new DBLicenceDenialResponse(MainDB);
+                return licenceDenialResponseDB;
+            }
+        }
+
+        public IApplicationRepository ApplicationTable
+        {
+            get
+            {
+                applicationDB ??= new DBApplication(MainDB);
                 return applicationDB;
             }
         }
 
-        public IApplicationCommentsRepository ApplicationCommentsRepository
+        public IApplicationCommentsRepository ApplicationCommentsTable
         {
             get
             {
-                if (applicationCommentsDB is null)
-                    applicationCommentsDB = new DBApplicationComments(MainDB);
+                applicationCommentsDB ??= new DBApplicationComments(MainDB);
                 return applicationCommentsDB;
             }
         }
 
-        public IApplicationEventRepository ApplicationEventRepository
+        public IApplicationEventRepository ApplicationEventTable
         {
             get
             {
-                if (applicationEventDB is null)
-                    applicationEventDB = new DBApplicationEvent(MainDB);
+                applicationEventDB ??= new DBApplicationEvent(MainDB);
                 return applicationEventDB;
             }
         }
 
-        public IApplicationEventDetailRepository ApplicationEventDetailRepository
+        public IApplicationEventDetailRepository ApplicationEventDetailTable
         {
             get
             {
-                if (applicationEventDetailDB is null)
-                    applicationEventDetailDB = new DBApplicationEventDetail(MainDB);
+                applicationEventDetailDB ??= new DBApplicationEventDetail(MainDB);
                 return applicationEventDetailDB;
             }
         }
 
-        public ICaseManagementRepository CaseManagementRepository
+        public ICaseManagementRepository CaseManagementTable
         {
             get
             {
-                if (caseManagementDB is null)
-                    caseManagementDB = new DBCaseManagement(MainDB);
+                caseManagementDB ??= new DBCaseManagement(MainDB);
                 return caseManagementDB;
             }
         }
 
-        public IApplicationSearchRepository ApplicationSearchRepository
+        public IApplicationSearchRepository ApplicationSearchTable
         {
             get
             {
-                if (applicationSearchDB is null)
-                    applicationSearchDB = new DBApplicationSearch(MainDB);
+                applicationSearchDB ??= new DBApplicationSearch(MainDB);
                 return applicationSearchDB;
             }
         }
 
-        public ISubmitterRepository SubmitterRepository
+        public ISubmitterRepository SubmitterTable
         {
             get
             {
-                if (submitterDB is null)
-                    submitterDB = new DBSubmitter(MainDB);
+                submitterDB ??= new DBSubmitter(MainDB);
                 return submitterDB;
             }
         }
 
-        public IEnfOffRepository EnfOffRepository
+        public IEnfOffRepository EnfOffTable
         {
             get
             {
-                if (enfOffDB is null)
-                    enfOffDB = new DBEnfOff(MainDB);
+                enfOffDB ??= new DBEnfOff(MainDB);
                 return enfOffDB;
             }
         }
 
-        public IEnfSrvRepository EnfSrvRepository
+        public IEnfSrvRepository EnfSrvTable
         {
             get
             {
-                if (enfSrvDB is null)
-                    enfSrvDB = new DBEnfSrv(MainDB);
+                enfSrvDB ??= new DBEnfSrv(MainDB);
                 return enfSrvDB;
             }
         }
 
-        public IProvinceRepository ProvinceRepository
+        public IEnfSrcRepository EnfSrcTable
         {
             get
             {
-                if (provinceDB is null)
-                    provinceDB = new DBProvince(MainDB);
+                enfSrcDB ??= new DBEnfSrc(MainDB);
+                return enfSrcDB;
+            }
+        }
+
+        public IProvinceRepository ProvinceTable
+        {
+            get
+            {
+                provinceDB ??= new DBProvince(MainDB);
                 return provinceDB;
             }
         }
 
-        public ISubjectRepository SubjectRepository
+        public ISubjectRepository SubjectTable
         {
             get
             {
-                if (subjectDB is null)
-                    subjectDB = new DBSubject(MainDB);
+                subjectDB ??= new DBSubject(MainDB);
                 return subjectDB;
             }
         }
 
-        public IInterceptionRepository InterceptionRepository
+        public IInterceptionRepository InterceptionTable
         {
             get
             {
-                if (interceptionDB is null)
-                    interceptionDB = new DBInterception(MainDB);
+                interceptionDB ??= new DBInterception(MainDB);
                 return interceptionDB;
             }
         }
 
-        public ITracingRepository TracingRepository
+        public ITracingRepository TracingTable
         {
             get
             {
-                if (tracingDB is null)
-                    tracingDB = new DBTracing(MainDB);
+                tracingDB ??= new DBTracing(MainDB);
                 return tracingDB;
             }
         }
 
-        public ILicenceDenialRepository LicenceDenialRepository
+        public ILicenceDenialRepository LicenceDenialTable
         {
             get
             {
-                if (licenceDenialDB is null)
-                    licenceDenialDB = new DBLicenceDenial(MainDB);
+                licenceDenialDB ??= new DBLicenceDenial(MainDB);
                 return licenceDenialDB;
             }
         }
 
-        public IAffidavitRepository AffidavitRepository
+        public IAffidavitRepository AffidavitTable
         {
             get
             {
-                if (affidavitDB is null)
-                    affidavitDB = new DBAffidavit(MainDB);
+                affidavitDB ??= new DBAffidavit(MainDB);
                 return affidavitDB;
             }
         }
-        public ILoginRepository LoginRepository
+        public ILoginRepository LoginTable
         {
             get
             {
-                if (loginDB is null)
-                    loginDB = new DBLogin(MainDB);
+                loginDB ??= new DBLogin(MainDB);
                 return loginDB;
             }
         }
 
-        public INotificationRepository NotificationRepository
+        public INotificationRepository NotificationService
         {
             get
             {
-                if (notificationDB is null)
-                    notificationDB = new DBNotification(MainDB);
+                notificationDB ??= new DBNotification(MainDB);
                 return notificationDB;
             }
         }
 
-        public ISubmitterProfileRepository SubmitterProfileRepository
+        public ISubmitterProfileRepository SubmitterProfileTable
         {
             get
             {
-                if (submitterProfileDB is null)
-                    submitterProfileDB = new DBSubmitterProfile(MainDB);
+                submitterProfileDB ??= new DBSubmitterProfile(MainDB);
                 return submitterProfileDB;
             }
         }
 
-        public ISubjectRoleRepository SubjectRoleRepository
+        public ISubjectRoleRepository SubjectRoleTable
         {
             get
             {
-                if (subjectRoleDB is null)
-                    subjectRoleDB = new DBSubjectRole(MainDB);
+                subjectRoleDB ??= new DBSubjectRole(MainDB);
                 return subjectRoleDB;
             }
         }
 
-        public IProductionAuditRepository ProductionAuditRepository
+        public IProductionAuditRepository ProductionAuditTable
         {
             get
             {
-                if (productionAuditDB is null)
-                    productionAuditDB = new DBProductionAudit(MainDB);
+                productionAuditDB ??= new DBProductionAudit(MainDB);
                 return productionAuditDB;
             }
         }
 
-        public ISINChangeHistoryRepository SINChangeHistoryRepository
+        public ISINChangeHistoryRepository SINChangeHistoryTable
         {
             get
             {
-                if (sinChangeHistoryDB is null)
-                    sinChangeHistoryDB = new DBSINChangeHistory(MainDB);
+                sinChangeHistoryDB ??= new DBSINChangeHistory(MainDB);
                 return sinChangeHistoryDB;
             }
         }
 
-        public IFamilyProvisionRepository FamilyProvisionRepository
+        public IFamilyProvisionRepository FamilyProvisionTable
         {
             get
             {
-                if (familyProvisionDB is null)
-                    familyProvisionDB = new DBFamilyProvision(MainDB);
+                familyProvisionDB ??= new DBFamilyProvision(MainDB);
                 return familyProvisionDB;
             }
         }
 
-        public IInfoBankRepository InfoBankRepository
+        public IInfoBankRepository InfoBankTable
         {
             get
             {
-                if (infoBankDB is null)
-                    infoBankDB = new DBInfoBank(MainDB);
+                infoBankDB ??= new DBInfoBank(MainDB);
                 return infoBankDB;
             }
         }
 
-        public IAccessAuditRepository AccessAuditRepository
+        public IAccessAuditRepository AccessAuditTable
         {
             get
             {
-                if (accessAuditDB is null)
-                    accessAuditDB = new DBAccessAudit(MainDB);
+                accessAuditDB ??= new DBAccessAudit(MainDB);
                 return accessAuditDB;
             }
         }
 
-        public IFailedSubmitAuditRepository FailedSubmitAuditRepository
+        public IFailedSubmitAuditRepository FailedSubmitAuditTable
         {
             get
             {
-                if (failedSubmitAuditDB is null)
-                    failedSubmitAuditDB = new DBFailedSubmitAudit(MainDB);
+                failedSubmitAuditDB ??= new DBFailedSubmitAudit(MainDB);
                 return failedSubmitAuditDB;
             }
         }
 
-        public IPostalCodeRepository PostalCodeRepository
+        public IPostalCodeRepository PostalCodeTable
         {
             get
             {
-                if (postalCodeDB is null)
-                    postalCodeDB = new DBPostalCode(MainDB);
+                postalCodeDB ??= new DBPostalCode(MainDB);
                 return postalCodeDB;
             }
         }
+
+        public ISecurityTokenRepository SecurityTokenTable
+        {
+            get
+            {
+                securityTokenDB ??= new DBSecurityToken(MainDB);
+                return securityTokenDB;
+            }
+        }
+
     }
 }

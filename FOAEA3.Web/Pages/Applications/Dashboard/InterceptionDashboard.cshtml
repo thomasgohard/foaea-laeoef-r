@@ -1,0 +1,159 @@
+﻿@page
+
+@using FOAEA3.Model
+@using FOAEA3.Model.Enums
+@using FOAEA3.Web.Helpers
+@using Microsoft.AspNetCore.Http
+
+@model InterceptionDashboardModel
+
+<div>@HttpContext.Session.GetString(SessionValue.USER_NAME) (@HttpContext.Session.GetString(SessionValue.SUBMITTER))</div>
+<div class="text-center interception">
+
+    @await Html.PartialAsync(PageRoute.MESSAGES, Model)
+
+    <div class="row">
+        <div class="col-md-6 align-middle"><h3>Search</h3></div>
+        <div class="col-md-6 text-right align-middle"><br /><br /><span class="glyphicon glyphicon-check"></span> Select to add to My Search - 5 Max</div>
+    </div>
+    <form method="post" class="form-inline">
+        <div class="wb-tabs">
+            <div class="tabpanels">
+                <details id="details-panel1">
+                    @await Html.PartialAsync("~/Pages/Applications/Dashboard/_MySearch.cshtml", Model)
+                </details>
+                <details id="details-panel2">
+                    @await Html.PartialAsync("~/Pages/Applications/Dashboard/_AdvancedSearch.cshtml", Model)
+                </details>
+                <details id="details-panel3">
+                    <summary>Saved Searches</summary>
+                    <p>
+                        &nbsp;
+                    </p>
+                </details>
+            </div>
+        </div>
+        @if (Model.SearchResults == null)
+        {
+            <div class="row">
+                <div class="col-md-3">
+                    <p>Submitted Today</p>
+                    <p><input type="submit" class="btn" value="@Model.SubmittedToday" asp-page-handler="SearchSubmittedToday" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>SIN Pending All</p>
+                    <p><input type="submit" class="btn" value="@Model.SinPendingsAll" asp-page-handler="SearchSinPendingsAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>SIN Pending Last 7 days</p>
+                    <p><input type="submit" class="btn" value="@Model.SinPendingsLast7days" asp-page-handler="SearchSinPendingsLast7days" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Reversed</p>
+                    <p><input type="submit" class="btn" value="@Model.ReversedAll" asp-page-handler="SearchReverseAll" /></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <p>SIN Not Confirmed</p>
+                    <p><input type="submit" class="btn" value="@Model.SinNotConfirmedAll" asp-page-handler="SearchSinNotConfirmedAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Approved</p>
+                    <p><input type="submit" class="btn" value="@Model.ApprovedAll" asp-page-handler="SearchApprovedAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Cancelled</p>
+                    <p><input type="submit" class="btn" value="@Model.CancelledAll" asp-page-handler="SearchCancelledAll" /></p>
+                </div>
+                <div class="col-md-3">
+                    <p>Rejected</p>
+                    <p><input type="submit" class="btn" value="@Model.RejectedAll" asp-page-handler="SearchRejectedAll" /></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <p>Submitted Variations</p>
+                    <p><input type="submit" class="btn" value="@Model.SubmittedVariationsAll" asp-page-handler="SearchSubmittedVariationsAll" /></p>
+                </div>
+            </div>
+        }
+    </form>
+    <br />
+    <form name="menuForm" method="post" asp-page-handler="MenuSelect">
+        @if (Model.SearchResults != null)
+        {
+            <div class="row">
+                <table class="wb-tables table table-striped table-hover" style="font-size:xx-small !important">
+                    <thead>
+                        <tr>
+                            <th style="white-space:nowrap;">Menu</th>
+                            <th style="white-space:nowrap;">Category</th>
+                            <th style="white-space:nowrap;">Date<br />Received</th>
+                            <th style="white-space:nowrap;">Submitter</th>
+                            <th style="white-space:nowrap;">Recipient</th>
+                            <th style="white-space:nowrap;">Service</th>
+                            <th style="white-space:nowrap;">Control<br />Code</th>
+                            <th style="white-space:nowrap;">Support Payor<br />Surname</th>
+                            <th style="white-space:nowrap;">Source Ref #</th>
+                            <th style="white-space:nowrap;">Expiry<br />Date</th>
+                            <th style="white-space:nowrap;">Justice #</th>
+                            <th style="white-space:nowrap;">State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (Model.LifeStates is not null)
+                            {
+                                int i = 0;
+                                foreach (var result in Model.SearchResults)
+                                {
+                                    var applListState = Model.LifeStates.Find(m => m.AppLiSt_Cd == result.AppLiSt_Cd);
+                                    var appKey = result.Appl_EnfSrv_Cd.Trim() + "-" + result.Appl_CtrlCd.Trim();
+                                    var submitter = HttpContext.Session.GetString(SessionValue.SUBMITTER);
+                                    var validActions = ActionHelper.GetValidActions(submitter, result.AppCtgy_Cd, result.AppLiSt_Cd);
+
+                                    Model.SelectedMenuOption.Add(appKey);
+                                    <tr class="gradeX">
+                                        <td>
+                                            <select asp-for="SelectedMenuOption[i]" onchange="ExecuteMenuOption(this);">
+                                                @foreach (var thisAction in validActions)
+                                                {
+                                                    <option value="@appKey @thisAction">@thisAction</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>@result.AppCtgy_Cd</td>
+                                        <td>@result.Appl_Rcptfrm_Dte.ToString("yyyy/MM/dd")</td>
+                                        <td>@result.Subm_SubmCd</td>
+                                        <td>@result.Subm_Recpt_SubmCd</td>
+                                        <td>@result.Appl_EnfSrv_Cd</td>
+                                        <td>@result.Appl_CtrlCd</td>
+                                        <td>@result.Appl_Dbtr_SurNme</td>
+                                        <td>@result.Appl_Source_RfrNr</td>
+                                        <td>@result.Appl_Expiry_Dte?.ToString("yyyy/MM/dd")</td>
+                                        <td>@result.Appl_JusticeNr</td>
+                                        <td style="white-space:nowrap;">@applListState?.Description</td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_SuspendDialog.cshtml", Model)
+
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_TransferDialog.cshtml", Model)
+
+        @await Html.PartialAsync("~/Pages/Applications/Dashboard/_CancelDialog.cshtml", Model)
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/Applications/InterceptionDashboard.js"></script>
+}

@@ -1,16 +1,23 @@
-﻿using System;
+﻿using DBHelper;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace FileBroker.Model.Interfaces
 {
     public interface IFileTableRepository
     {
-        FileTableData GetFileTableDataForFileName(string fileNameNoExt);
-        List<FileTableData> GetFileTableDataForCategory(string category);
+        IDBToolsAsync MainDB { get; }
 
-        void SetNextCycleForFileType(FileTableData fileData, int length = 6);
-        bool IsFileLoading(int processId);
-        void SetIsFileLoadingValue(int processId, bool newValue);
+        Task<FileTableData> GetFileTableDataForFileName(string fileNameNoExt);
+        Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency);
+        Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category);
+        Task<List<FileTableData>> GetAllActiveAsync();
+
+        Task SetNextCycleForFileType(FileTableData fileData, int length = 6);
+        Task<bool> IsFileLoadingAsync(int processId);
+        Task SetIsFileLoadingValue(int processId, bool newValue);
+
+        Task DisableFileProcess(int processId);
+        Task EnableFileProcess(int processId);
     }
 }

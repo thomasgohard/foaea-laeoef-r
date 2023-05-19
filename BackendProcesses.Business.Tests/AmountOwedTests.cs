@@ -6,6 +6,8 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
 using FOAEA3.Resources.Helpers;
+using System.Threading.Tasks;
+using FOAEA3.Business.BackendProcesses;
 
 namespace BackendProcesses.Business.Tests
 {
@@ -54,7 +56,7 @@ namespace BackendProcesses.Business.Tests
         [InlineData(2, 13, "E")] // "E" => semi-annually
         [InlineData(2, 13, "F")] // "F" => annually
         //[InlineData(4, 13, "G")] // "G" => semi-monthly
-        public void VariousPeriod_NoDivertReceived_PeriodicOwed_Test(int periodCount, decimal periodicPaymentOwed, string periodicPaymentCode)
+        public async Task VariousPeriod_NoDivertReceived_PeriodicOwed_Test(int periodCount, decimal periodicPaymentOwed, string periodicPaymentCode)
         {
             // Arrange
             ResetTestData(periodCount, periodicPaymentOwed, periodicPaymentCode);
@@ -62,8 +64,8 @@ namespace BackendProcesses.Business.Tests
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: Initial Data", "ON01", "00002", periodicPaymentCode);
 
             // Act
-            backendProcess.Run();
-            var data = backendProcess.GetSummonsSummaryData("ON01", "00002");
+            await backendProcess.RunAsync();
+            var data = await backendProcess.GetSummonsSummaryDataAsync("ON01", "00002");
 
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: After Amount Owed Recalc", "ON01", "00002", periodicPaymentCode);
 
@@ -108,11 +110,11 @@ namespace BackendProcesses.Business.Tests
             logger.AppendLine("");
             logger.AppendLine("| Item | Value | Item | Value | Item | Value |");
             logger.AppendLine("| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |");
-            logger.AppendLine($"| Start Date | {s.Start_Dte.ToString(DateTimeHelper.YYYY_MM_DD)} | End Date | {s.End_Dte.ToString(DateTimeHelper.YYYY_MM_DD)} | | |");
+            logger.AppendLine($"| Start Date | {s.Start_Dte.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT)} | End Date | {s.End_Dte.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT)} | | |");
             logger.AppendLine($"| Lump Sum Diverted | {s.LmpSumDivertedTtl_Money} | Periodic Diverted | {s.PerPymDivertedTtl_Money} | Fees Diverted | {s.FeeDivertedTtl_Money} |");
             logger.AppendLine($"| Lump Sum Owed | {s.LmpSumOwedTtl_Money} | Periodic Owed | {s.PerPymOwedTtl_Money} | Fees Owed | {s.FeeOwedTtl_Money} |");
             logger.AppendLine($"| Total Amount | {s.Appl_TotalAmnt} |  |  |  |  |");
-            logger.AppendLine($"| Last Calc | {s.SummSmry_LastCalc_Dte?.ToString(DateTimeHelper.YYYY_MM_DD)} | Recalc Dte | {s.SummSmry_Recalc_Dte?.ToString(DateTimeHelper.YYYY_MM_DD)} | Vary Count | {s.SummSmry_Vary_Cnt} |");
+            logger.AppendLine($"| Last Calc | {s.SummSmry_LastCalc_Dte?.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT)} | Recalc Dte | {s.SummSmry_Recalc_Dte?.ToString(DateTimeExtensions.FOAEA_DATE_FORMAT)} | Vary Count | {s.SummSmry_Vary_Cnt} |");
 
             logger.AppendLine("");
             logger.AppendLine("<div style='page-break-after: always'></div>");

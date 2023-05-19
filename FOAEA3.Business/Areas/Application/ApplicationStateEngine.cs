@@ -1,33 +1,83 @@
 ﻿using FOAEA3.Model.Enums;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationStateEngine
     {
-        public Action Process_00_InitialState { get; set; }
-        public Action Process_01_InvalidApplication { get; set; }
-        public Action Process_02_AwaitingValidation { get; set; }
-        public Action Process_03_SinConfirmationPending { get; set; }
-        public Action Process_04_SinConfirmed { get; set; }
-        public Action Process_05_SinNotConfirmed { get; set; }
-        public Action Process_06_PendingAcceptanceSwearing { get; set; }
-        public Action Process_07_ValidAffidavitNotReceived { get; set; }
-        public Action Process_09_ApplicationRejected { get; set; }
-        public Action Process_10_ApplicationAccepted { get; set; }
-        public Action Process_11_ApplicationReinstated { get; set; }
-        public Action Process_12_PartiallyServiced { get; set; }
-        public Action Process_13_FullyServiced { get; set; }
-        public Action Process_14_ManuallyTerminated { get; set; }
-        public Action Process_15_Expired { get; set; }
-        public Action Process_17_FinancialTermsVaried { get; set; }
-        public Action Process_19_AwaitingDocumentsForVariation { get; set; }
-        public Action Process_35_ApplicationSuspended { get; set; }
-        public Action Process_91_InvalidVariationSource { get; set; }
-        public Action Process_92_InvalidVariationFinTerms { get; set; }
-        public Action Process_93_ValidFinancialVariation { get; set; }
-        public Action<ApplicationState, ApplicationState> InvalidStateChange { get; set; }
+        private readonly Func<Task> Process_00_InitialState ;
+        private readonly Func<Task> Process_01_InvalidApplication ;
+        private readonly Func<Task> Process_02_AwaitingValidation ;
+        private readonly Func<Task> Process_03_SinConfirmationPending ;
+        private readonly Func<Task> Process_04_SinConfirmed ;
+        private readonly Func<Task> Process_05_SinNotConfirmed ;
+        private readonly Func<Task> Process_06_PendingAcceptanceSwearing ;
+        private readonly Func<Task> Process_07_ValidAffidavitNotReceived ;
+        private readonly Func<Task> Process_09_ApplicationRejected ;
+        private readonly Func<Task> Process_10_ApplicationAccepted ;
+        private readonly Func<Task> Process_11_ApplicationReinstated ;
+        private readonly Func<Task> Process_12_PartiallyServiced ;
+        private readonly Func<Task> Process_13_FullyServiced ;
+        private readonly Func<Task> Process_14_ManuallyTerminated ;
+        private readonly Func<Task> Process_15_Expired ;
+        private readonly Func<Task> Process_17_FinancialTermsVaried ;
+        private readonly Func<Task> Process_19_AwaitingDocumentsForVariation ;
+        private readonly Func<Task> Process_35_ApplicationSuspended ;
+        private readonly Func<Task> Process_91_InvalidVariationSource ;
+        private readonly Func<Task> Process_92_InvalidVariationFinTerms ;
+        private readonly Func<Task> Process_93_ValidFinancialVariation ;
+        private readonly Action<ApplicationState, ApplicationState> InvalidStateChange ;
+
+        public ApplicationStateEngine(
+                Func<Task> process_00_InitialState,
+                Func<Task> process_01_InvalidApplication,
+                Func<Task> process_02_AwaitingValidation,
+                Func<Task> process_03_SinConfirmationPending,
+                Func<Task> process_04_SinConfirmed,
+                Func<Task> process_05_SinNotConfirmed,
+                Func<Task> process_06_PendingAcceptanceSwearing,
+                Func<Task> process_07_ValidAffidavitNotReceived,
+                Func<Task> process_09_ApplicationRejected,
+                Func<Task> process_10_ApplicationAccepted,
+                Func<Task> process_11_ApplicationReinstated,
+                Func<Task> process_12_PartiallyServiced,
+                Func<Task> process_13_FullyServiced,
+                Func<Task> process_14_ManuallyTerminated,
+                Func<Task> process_15_Expired,
+                Func<Task> process_17_FinancialTermsVaried,
+                Func<Task> process_19_AwaitingDocumentsForVariation,
+                Func<Task> process_35_ApplicationSuspended,
+                Func<Task> process_91_InvalidVariationSource,
+                Func<Task> process_92_InvalidVariationFinTerms,
+                Func<Task> process_93_ValidFinancialVariation,
+                Action<ApplicationState, ApplicationState> invalidStateChange
+            )
+        {
+            Process_00_InitialState = process_00_InitialState;
+            Process_01_InvalidApplication = process_01_InvalidApplication;
+            Process_02_AwaitingValidation = process_02_AwaitingValidation;
+            Process_03_SinConfirmationPending = process_03_SinConfirmationPending;
+            Process_04_SinConfirmed = process_04_SinConfirmed;
+            Process_05_SinNotConfirmed = process_05_SinNotConfirmed;
+            Process_06_PendingAcceptanceSwearing = process_06_PendingAcceptanceSwearing;
+            Process_07_ValidAffidavitNotReceived = process_07_ValidAffidavitNotReceived;
+            Process_09_ApplicationRejected = process_09_ApplicationRejected;
+            Process_10_ApplicationAccepted = process_10_ApplicationAccepted;
+            Process_11_ApplicationReinstated = process_11_ApplicationReinstated;
+            Process_12_PartiallyServiced = process_12_PartiallyServiced;
+            Process_13_FullyServiced = process_13_FullyServiced;
+            Process_14_ManuallyTerminated = process_14_ManuallyTerminated;
+            Process_15_Expired = process_15_Expired;
+            Process_17_FinancialTermsVaried = process_17_FinancialTermsVaried;
+            Process_19_AwaitingDocumentsForVariation = process_19_AwaitingDocumentsForVariation;
+            Process_35_ApplicationSuspended = process_35_ApplicationSuspended;
+            Process_91_InvalidVariationSource = process_91_InvalidVariationSource;
+            Process_92_InvalidVariationFinTerms = process_92_InvalidVariationFinTerms;
+            Process_93_ValidFinancialVariation = process_93_ValidFinancialVariation;
+            InvalidStateChange = invalidStateChange;
+        }
 
         public Dictionary<ApplicationState, List<ApplicationState>> ValidStateChange = new()
         {
@@ -113,7 +163,7 @@ namespace FOAEA3.Business.Areas.Application
             }
         };
 
-        private Dictionary<ApplicationState, Action> ApplicationStateAction =>
+        private Dictionary<ApplicationState, Func<Task>> ApplicationStateAction =>
                    new()
                    {
                        { ApplicationState.INITIAL_STATE_0, Process_00_InitialState },
@@ -147,12 +197,12 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
         }
 
-        public void SetNewStateTo(ApplicationState oldState, ApplicationState newState)
+        public async Task SetNewStateTo(ApplicationState oldState, ApplicationState newState)
         {
             if (IsValidStateChange(oldState, newState))
             {
-                Action stateAction = ApplicationStateAction[newState];
-                stateAction();
+                var stateAction = ApplicationStateAction[newState];
+                await stateAction();
             }
             else
                 InvalidStateChange(oldState, newState);

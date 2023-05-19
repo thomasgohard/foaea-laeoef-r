@@ -23,6 +23,7 @@ namespace FileBroker.Model
         public int EmpAddCnt;
         public int Type5AddCnt;
     }
+
     public struct FedTracing_RecTypeResidential
     {
         public int RecType;

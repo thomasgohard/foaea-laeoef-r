@@ -1,7 +1,7 @@
-﻿using FOAEA3.Model.Interfaces;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,9 +10,16 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public void Insert(string processName, string description, string audience, DateTime? completedDate = null)
+        public Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
         {
             InMemData.ProductionAuditData.Add($"{processName}({DateTime.Now}): {description}");
+
+            return Task.CompletedTask;
+        }
+
+        public Task InsertAsync(ProductionAuditData productionAuditData)
+        {
+            throw new NotImplementedException();
         }
     }
 }

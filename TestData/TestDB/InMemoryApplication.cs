@@ -1,8 +1,10 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Base;
+using FOAEA3.Model.Enums;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,73 +12,97 @@ namespace TestData.TestDB
     {
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
-
-        public bool ApplicationExists(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<bool> ApplicationExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public bool CreateApplication(ApplicationData application)
+        public Task<bool> CreateApplicationAsync(ApplicationData application)
         {
             throw new NotImplementedException();
         }
 
-        public string GenerateApplicationControlCode(string appl_EnfSrv_Cd)
+        public Task<string> GenerateApplicationControlCodeAsync(string appl_EnfSrv_Cd)
         {
             throw new NotImplementedException();
         }
 
-        public ApplicationData GetApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public bool GetApplLocalConfirmedSINExists(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "")
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state)
         {
             throw new NotImplementedException();
         }
 
-        public List<ApplicationConfirmedSINData> GetConfirmedSINOtherEnforcementOfficeExists(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0)
         {
             throw new NotImplementedException();
         }
 
-        public (string errorSameEnfOFf, string errorDiffEnfOff) GetConfirmedSINRecords(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public Task<List<ApplicationData>> GetApplicationsForAutomationAsync(string appl_EnfSrv_Cd, string medium_Cd, ApplicationState appLiSt_Cd, string appCtgy_Cd, string actvSt_Cd)
         {
             throw new NotImplementedException();
         }
 
-        public bool GetConfirmedSINSameEnforcementOfficeExists(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN, string categoryCode)
+        public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
         {
             throw new NotImplementedException();
         }
 
-        public List<ApplicationData> GetDailyApplCountBySIN(string appl_Dbtr_Entrd_SIN, string appl_EnfSrv_Cd, string appl_CtrlCd, string appCtgy_Cd, string appl_Source_RfrNr)
+        public Task<bool> GetApplLocalConfirmedSINExistsAsync(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate, string submCd, string ctrlCd, string debtorFirstName = "")
         {
             throw new NotImplementedException();
         }
 
-        public DataList<ApplicationData> GetRequestedSINApplDataForFile(string enfSrv_Cd, string fileName)
+        public Task<List<ConfirmedSinData>> GetConfirmedSinByDebtorId(string debtorId, bool isActiveOnly)
         {
             throw new NotImplementedException();
         }
 
-        public List<ApplicationData> GetSameCreditorForAppCtgy(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
+        public Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             throw new NotImplementedException();
         }
 
-        public bool IsFeeCumulativeForApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
-        {
-            return false;
-        }
-
-        public void UpdateApplication(ApplicationData application)
+        public Task<(string errorSameEnfOFf, string errorDiffEnfOff)> GetConfirmedSINRecordsAsync(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateSubmitterDefaultControlCode(string subm_SubmCd, string appl_CtrlCd)
+        public Task<bool> GetConfirmedSINSameEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN, string categoryCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ApplicationData>> GetDailyApplCountBySINAsync(string appl_Dbtr_Entrd_SIN, string appl_EnfSrv_Cd, string appl_CtrlCd, string appCtgy_Cd, string appl_Source_RfrNr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DataList<ApplicationData>> GetRequestedSINApplDataForFileAsync(string enfSrv_Cd, string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ApplicationData>> GetSameCreditorForAppCtgyAsync(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<StatsOutgoingProvincialData>> GetStatsProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateApplicationAsync(ApplicationData application)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateSubmitterDefaultControlCodeAsync(string subm_SubmCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }

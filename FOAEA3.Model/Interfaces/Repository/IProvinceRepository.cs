@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IProvinceRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        List<ProvinceData> GetProvinces();
+        Task<List<ProvinceData>> GetProvincesAsync();
     }
 }

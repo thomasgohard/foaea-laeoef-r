@@ -1,7 +1,8 @@
-﻿using FOAEA3.Model.Interfaces;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -10,7 +11,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public List<ProvinceData> GetProvinces()
+        public Task<List<ProvinceData>> GetProvincesAsync()
         {
             throw new NotImplementedException();
         }

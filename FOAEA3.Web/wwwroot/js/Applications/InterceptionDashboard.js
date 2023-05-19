@@ -36,7 +36,58 @@ $(document).on('wb-ready.wb', function () {
         SetupMySearch();
     });
 
+    $(document)
+        .on('change', '#office', LoadSubmitters)
+
 });
+
+function LoadSubmitters() {
+    var service = $("#transferEnfSrv").val();
+    var office = $("#office").val();
+    $("#transferSubmitters").empty();
+    $.getJSON(`?handler=SelectSubmitterForOffice&service=${service}&office=${office}`, (data) => {
+        $.each(data, function (i, item) {
+            $("#transferSubmitters").append(`<option value="${item}">${item}</option>`);
+        });
+    });
+}
+
+function ExecuteMenuOption(item)
+{
+    var itemValue = $(item).find(":selected").val();    // e.g. 'ON01-E483 Edit'
+     
+    const values = itemValue.split(" ");
+    const applKey = values[0].split("-");
+    var enfSrv = applKey[0].trim();
+    var ctrlCd = applKey[1].trim();
+    var action = values[1];
+
+    switch (action) {
+        case "Suspend":
+            $("#suspendEnfSrv").val(enfSrv);
+            $("#suspendCntrlCd").val(ctrlCd);
+            $("#suspendKeyLabel").html(enfSrv + "-" + ctrlCd);
+            $("#suspendDialog").trigger("open.wb-overlay");
+            break;
+        case "Transfer":
+            $("#transferEnfSrv").val(enfSrv);
+            $("#transferCntrlCd").val(ctrlCd);
+            $("#transferKeyLabel").html(enfSrv + "-" + ctrlCd);
+            LoadSubmitters();
+            $("#transferDialog").trigger("open.wb-overlay");
+            break;
+        case "Cancel":
+            $("#cancelEnfSrv").val(enfSrv);
+            $("#cancelCntrlCd").val(ctrlCd);
+            $("#cancelKeyLabel").html(enfSrv + "-" + ctrlCd);
+            $("#cancelDialog").trigger("open.wb-overlay");
+            break;
+        default:
+            document.menuForm.submit();
+            break;
+    }
+    
+}
 
 function SetupMySearch() {
 

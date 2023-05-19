@@ -1,29 +1,31 @@
 ﻿using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ITracingRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
-        TracingApplicationData GetTracingData(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        void CreateTracingData(TracingApplicationData data);
-        void UpdateTracingData(TracingApplicationData data);
-        List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle);
-        bool TracingDataExists(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        DataList<TracingApplicationData> GetApplicationsWaitingForAffidavit();
-        List<TraceToApplData> GetTraceToApplData();
-        List<TracingOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
+
+        Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task CreateTracingDataAsync(TracingApplicationData data);
+        Task UpdateTracingDataAsync(TracingApplicationData data);
+        Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle);
+        Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync();
+        Task<List<TraceToApplData>> GetTraceToApplDataAsync();
+        Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                 string activeState,
                                                                 ApplicationState lifeState,
                                                                 string enfServiceCode);
-        List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+        Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                       string activeState,
                                                                       string recipientCode,
                                                                       bool isXML = true);
+        Task CreateESDCEventTraceDataAsync();
     }
 
 }

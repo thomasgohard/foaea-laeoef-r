@@ -1,26 +1,25 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System.Collections.Generic;
-using System;
 using FOAEA3.Model.Base;
+using FOAEA3.Model.Interfaces.Repository;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBActiveStatus : DBbase, IActiveStatusRepository
+    internal class DBActiveStatus : DBbase, IActiveStatusRepository
     {
 
-        public MessageDataList Messages { get; set;  }
+        public MessageDataList Messages { get; set; }
 
-        public DBActiveStatus(IDBTools mainDB) : base(mainDB)
+        public DBActiveStatus(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public DataList<ActiveStatusData> GetActiveStatus()
+        public async Task<DataList<ActiveStatusData>> GetActiveStatusAsync()
         {
-            var data = MainDB.GetAllData<ActiveStatusData>("ActvSt", FillActiveStatusDataFromReader);
+            var data = await MainDB.GetAllDataAsync<ActiveStatusData>("ActvSt", FillActiveStatusDataFromReader);
 
             return new DataList<ActiveStatusData>(data, MainDB.LastError);
         }

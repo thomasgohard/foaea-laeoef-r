@@ -1,20 +1,21 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBEnfOff : DBbase, IEnfOffRepository
     {
-        public DBEnfOff(IDBTools mainDB) : base(mainDB)
+        public DBEnfOff(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<EnfOffData> GetEnfOff(string enfOffName = null, string enfOffCode = null, 
+        public async Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null,
             string province = null, string enfServCode = null)
         {
             var parameters = new Dictionary<string, object>();
@@ -39,7 +40,7 @@ namespace FOAEA3.Data.DB
             else
                 parameters["EnfSrv_Cd"] = DBNull.Value;
 
-            return MainDB.GetDataFromStoredProc<EnfOffData>("EnfOffGetEnforcementOffice", parameters, FillEnfOffDataFromReader);
+            return await MainDB.GetDataFromStoredProcAsync<EnfOffData>("EnfOffGetEnforcementOffice", parameters, FillEnfOffDataFromReader);
         }
 
         private void FillEnfOffDataFromReader(IDBHelperReader rdr, EnfOffData data)

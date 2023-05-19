@@ -1,19 +1,20 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBGarnSummary : DBbase, IGarnSummaryRepository
     {
-        public DBGarnSummary(IDBTools mainDB) : base(mainDB)
+        public DBGarnSummary(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<GarnSummaryData> GetGarnSummary(string appl_EnfSrv_Cd, string enfOfficeCode, int fiscalMonth, int fiscalYear)
+        public async Task<List<GarnSummaryData>> GetGarnSummaryAsync(string appl_EnfSrv_Cd, string enfOfficeCode, int fiscalMonth, int fiscalYear)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -23,23 +24,23 @@ namespace FOAEA3.Data.DB
                     {"FiscYear", fiscalYear}
                 };
 
-            var data = MainDB.GetDataFromStoredProc<GarnSummaryData>("GetGarnSmry", parameters, FillGarnSummaryDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<GarnSummaryData>("GetGarnSmry", parameters, FillGarnSummaryDataFromReader);
 
             return data;
         }
 
-        public void CreateGarnSummary(GarnSummaryData garnSummaryData)
+        public async Task CreateGarnSummaryAsync(GarnSummaryData garnSummaryData)
         {
             var parameters = SetGarnSummaryParameters(garnSummaryData);
 
-            MainDB.ExecProc("GarnSmry_Insert", parameters);
+            await MainDB.ExecProcAsync("GarnSmry_Insert", parameters);
         }
 
-        public void UpdateGarnSummary(GarnSummaryData garnSummaryData)
+        public async Task UpdateGarnSummaryAsync(GarnSummaryData garnSummaryData)
         {
             var parameters = SetGarnSummaryParameters(garnSummaryData);
 
-            MainDB.ExecProc("GarnSmry_Update", parameters);
+            await MainDB.ExecProcAsync("GarnSmry_Update", parameters);
         }
 
         private static Dictionary<string, object> SetGarnSummaryParameters(GarnSummaryData garnSummaryData)

@@ -1,17 +1,50 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using DBHelper;
+using FOAEA3.Business.Security;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal partial class LicenceDenialManager : ApplicationManager
     {
-        public LicenceDenialData LicenceDenialApplication { get; }
+        public LicenceDenialApplicationData LicenceDenialApplication { get; private set; }
 
-        public LicenceDenialManager(LicenceDenialData licenceDenial, IRepositories repositories, CustomConfig config) : base(licenceDenial, repositories, config)
+        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
+
+        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+           this(new LicenceDenialApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            base(licenceDenial, repositories, config, user)
+        {
+            SetupLicenceDenial(licenceDenial);
+        }
+
+        public LicenceDenialManager(IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+           this(new LicenceDenialApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        public LicenceDenialManager(LicenceDenialApplicationData licenceDenial, IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            base(licenceDenial, repositories, config, user)
+        {
+            SetupLicenceDenial(licenceDenial);
+        }
+
+        private void SetupLicenceDenial(LicenceDenialApplicationData licenceDenial)
         {
             LicenceDenialApplication = licenceDenial;
 
@@ -24,26 +57,26 @@ namespace FOAEA3.Business.Areas.Application
                             ApplicationState.MANUALLY_TERMINATED_14
                         });
 
-//            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
-        public LicenceDenialManager(IRepositories repositories, CustomConfig config) : this(new LicenceDenialData(), repositories, config)
+        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML)
         {
-
+            var licenceDenialDB = DB.LicenceDenialTable;
+            var data = await licenceDenialDB.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
+            return data;
         }
 
-        private bool AffidavitExists() => !String.IsNullOrEmpty(LicenceDenialApplication.Appl_Crdtr_FrstNme);
-
-        public override bool LoadApplication(string enfService, string controlCode)
+        public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
             // get data from Appl
-            bool isSuccess = base.LoadApplication(enfService, controlCode);
+            bool isSuccess = await base.LoadApplicationAsync(enfService, controlCode);
 
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
-                LicenceDenialData data = Repositories.LicenceDenialRepository.GetLicenceDenialData(enfService, controlCode);
+                var licenceDenialDB = DB.LicenceDenialTable;
+                var data = await licenceDenialDB.GetLicenceDenialDataAsync(enfService, appl_L01_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialApplication.Merge(data);
@@ -51,8 +84,218 @@ namespace FOAEA3.Business.Areas.Application
 
             return isSuccess;
         }
-                
-        public override void ProcessBringForwards(ApplicationEventData bfEvent)
+
+        public override async Task<bool> CreateApplicationAsync()
+        {
+            if (!IsValidCategory("L01"))
+                return false;
+
+            if (ValidateDeclaration())
+                LicenceDenialApplication.LicSusp_Declaration_Ind = true;
+            else
+                return false;
+
+            if (string.IsNullOrEmpty(LicenceDenialApplication.Appl_Dbtr_LngCd))
+                LicenceDenialApplication.Appl_Dbtr_LngCd = "E";
+
+            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+
+            if (success)
+                success = await base.CreateApplicationAsync();
+            else
+                success = false;
+
+            if (!success)
+            {
+                var failedSubmitterManager = new FailedSubmitAuditManager(DB, LicenceDenialApplication);
+                await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L01);
+
+                LicenceDenialApplication.LicSusp_LiStCd = 2;
+                await DB.LicenceDenialTable.CreateLicenceDenialDataAsync(LicenceDenialApplication);
+            }
+
+            return success;
+        }
+
+        protected override void TrimSpaces()
+        {
+            base.TrimSpaces();
+
+            LicenceDenialApplication.LicSusp_CourtNme = LicenceDenialApplication.LicSusp_CourtNme?.Trim();
+            LicenceDenialApplication.PymPr_Cd = LicenceDenialApplication.PymPr_Cd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplNme = LicenceDenialApplication.LicSusp_Dbtr_EmplNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme?.Trim();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.Trim();
+        }
+
+        public override void MakeUpperCase()
+        {
+            base.MakeUpperCase();
+
+            LicenceDenialApplication.LicSusp_CourtNme = LicenceDenialApplication.LicSusp_CourtNme?.ToUpper();
+            LicenceDenialApplication.PymPr_Cd = LicenceDenialApplication.PymPr_Cd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplNme = LicenceDenialApplication.LicSusp_Dbtr_EmplNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1 = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_Ln1?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CityNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PrvCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_CtryCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd = LicenceDenialApplication.LicSusp_Dbtr_EmplAddr_PCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd = LicenceDenialApplication.LicSusp_Dbtr_EyesColorCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd = LicenceDenialApplication.LicSusp_Dbtr_HeightUOMCd?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme = LicenceDenialApplication.LicSusp_Dbtr_Brth_CityNme?.ToUpper();
+            LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.ToUpper();
+        }
+
+        private async Task<bool> ValidateOrderOrProvisionInDefaultAsync()
+        {
+            bool result = true;
+
+            var app = LicenceDenialApplication;
+
+            if (!await IsValidPaymentPeriodAsync(app.PymPr_Cd))
+            {
+                app.Messages.AddError($"Invalid PymPr_Cd: {app.PymPr_Cd}");
+                result = false;
+            }
+
+            if ((app.LicSusp_NrOfPymntsInDefault is null || app.LicSusp_NrOfPymntsInDefault < 3) &&
+                (app.LicSusp_AmntOfArrears is null || app.LicSusp_AmntOfArrears < 3000M))
+            {
+                app.Messages.AddError("Number of payments less than 3 and amount of arrears < 3000.00");
+                result = false;
+            }
+
+            return result;
+        }
+
+        private async Task<bool> IsValidPaymentPeriodAsync(string paymentPeriodCode)
+        {
+            var paymentPeriods = await DB.InterceptionTable.GetPaymentPeriodsAsync();
+            return paymentPeriods.Any(m => (m.PymPr_Cd == paymentPeriodCode.ToUpper()) && (m.ActvSt_Cd == "A"));
+        }
+
+        private bool ValidateDeclaration()
+        {
+            string declaration = LicenceDenialApplication.LicSusp_Declaration?.Trim();
+            if (declaration is not null &&
+                (declaration.Equals(Config.LicenceDenialDeclaration.English, StringComparison.InvariantCultureIgnoreCase) ||
+                 declaration.Equals(Config.LicenceDenialDeclaration.French, StringComparison.InvariantCultureIgnoreCase)))
+                return true;
+            else
+            {
+                LicenceDenialApplication.Messages.AddError("Invalid or missing declaration.");
+                return false;
+            }
+        }
+
+        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync()
+        {
+            return await DB.LicenceDenialTable.GetLicenceSuspensionHistoryAsync(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
+        }
+
+        public async Task CancelApplicationAsync()
+        {
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
+            await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+
+            MakeUpperCase();
+            await UpdateApplicationNoValidationAsync();
+
+            await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialApplication);
+        }
+
+        public override async Task UpdateApplicationAsync()
+        {
+            var current = new LicenceDenialManager(DB, Config, CurrentUser);
+            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            // keep these stored values
+            LicenceDenialApplication.Appl_Create_Dte = current.LicenceDenialApplication.Appl_Create_Dte;
+            LicenceDenialApplication.Appl_Create_Usr = current.LicenceDenialApplication.Appl_Create_Usr;
+
+            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+
+            if (success)
+                await base.UpdateApplicationAsync();
+
+        }
+
+        public async Task<bool> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            if (!await LoadApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd))
+            {
+                LicenceDenialApplication.Messages.AddError(SystemMessage.APPLICATION_NOT_FOUND);
+                return false;
+            }
+
+            if (!IsValidCategory("L01"))
+                return false;
+
+            if (LicenceDenialApplication.AppLiSt_Cd.NotIn(ApplicationState.APPLICATION_ACCEPTED_10, ApplicationState.PARTIALLY_SERVICED_12))
+            {
+                LicenceDenialApplication.Messages.AddError("Invalid State for the current application.  Valid states allowed are 10 and 12.");
+                return false;
+            }
+
+            LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
+            LicenceDenialApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
+
+            await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
+            await UpdateApplicationNoValidationAsync();
+
+            await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialApplication);
+
+            await EventManager.SaveEventsAsync();
+
+            return true;
+        }
+
+        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return await EventManager.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+
+        public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetailsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+                                                                               string appl_CtrlCd)
+        {
+            return await EventDetailManager.GetRequestedLICINLicenceDenialEventDetailsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+        }
+
+        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
+                                                                      string activeState,
+                                                                      ApplicationState lifeState,
+                                                                      string enfServiceCode)
+        {
+            var licenceDenialDB = DB.LicenceDenialTable;
+            return await licenceDenialDB.GetFederalOutgoingDataAsync(maxRecords, activeState, lifeState, enfServiceCode);
+        }
+
+        public async Task CreateResponseDataAsync(List<LicenceDenialResponseData> responseData)
+        {
+            var responsesDB = DB.LicenceDenialResponseTable;
+            await responsesDB.InsertBulkDataAsync(responseData);
+        }
+
+        public async Task MarkResponsesAsViewedAsync(string enfService)
+        {
+            var responsesDB = DB.LicenceDenialResponseTable;
+            await responsesDB.MarkResponsesAsViewedAsync(enfService);
+        }
+
+        public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
 
@@ -69,11 +312,12 @@ namespace FOAEA3.Business.Areas.Application
                                               EventCode.C50600_INVALID_APPLICATION)))) &&
                 ((diff.Equals(TimeSpan.Zero)) || (Math.Abs(diff.TotalHours) > 24)))
             {
-                // TODO: make BF event inactive
-                /*
-                      .UpdateEvent("EvntBF", Event_Id, 14, "I")
-                      bCloseEvent = False
-                */
+                bfEvent.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
+                bfEvent.ActvSt_Cd = "I";
+
+                await EventManager.SaveEventAsync(bfEvent);
+
+                closeEvent = false;
             }
             else
             {
@@ -87,7 +331,7 @@ namespace FOAEA3.Business.Areas.Application
                             }
                             else
                             {
-                                var DaysElapsed = (DateTime.Now - LicenceDenialApplication.Appl_Lgl_Dte.Value).TotalDays;
+                                var DaysElapsed = (DateTime.Now - LicenceDenialApplication.Appl_Lgl_Dte).TotalDays;
                                 if (LicenceDenialApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5) &&
                                    (Math.Abs(DaysElapsed) > 40))
                                 {
@@ -144,11 +388,19 @@ namespace FOAEA3.Business.Areas.Application
 
             if (closeEvent)
             {
-                // .UpdateEvent("EvntBF", Event_Id, AppList_Cd, "C")
+                bfEvent.AppLiSt_Cd = LicenceDenialApplication.AppLiSt_Cd;
+                bfEvent.ActvSt_Cd = "C";
+
+                await EventManager.SaveEventAsync(bfEvent);
             }
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
         }
 
+        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string federalSource)
+        {
+            var licenceDenialDB = DB.LicenceDenialTable;
+            return await licenceDenialDB.GetLicenceDenialToApplDataAsync(federalSource);
+        }
     }
 }

@@ -1,22 +1,26 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
     public class ApplicationSearchesAPIBroker : IApplicationSearchesAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public ApplicationSearchesAPIBroker(IAPIBrokerHelper apiHelper)
+        public ApplicationSearchesAPIBroker(IAPIBrokerHelper apiHelper, string token = null)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
-        public List<ApplicationSearchResultData> Search(QuickSearchData searchCriteria)
+        public async Task<List<ApplicationSearchResultData>> SearchAsync(QuickSearchData searchCriteria)
         {
             string apiCall = $"api/v1/applicationSearches";
-            return ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria).Result;
+            var result = await ApiHelper.PostDataAsync<List<ApplicationSearchResultData>, QuickSearchData>(apiCall, searchCriteria, token: Token);
+
+            return result;
         }
     }
 }

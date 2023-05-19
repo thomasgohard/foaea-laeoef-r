@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IInfoBankRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        public List<InfoBankData> GetInfoBanks();
+        Task<List<InfoBankData>> GetInfoBanksAsync();
     }
 }

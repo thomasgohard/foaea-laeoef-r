@@ -1,19 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Label="Globals">
-    <SccProjectName>SAK</SccProjectName>
-    <SccProvider>SAK</SccProvider>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccLocalPath>SAK</SccLocalPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>warnings</Nullable>
+		<Version>1.0.0-alpha</Version>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
-    <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DBHelperCore\DBHelperCore.csproj" />
+		<ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
+		<ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+		<ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
+	</ItemGroup>
 
 </Project>

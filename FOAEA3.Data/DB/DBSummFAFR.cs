@@ -2,32 +2,33 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSummFAFR : DBbase, ISummFAFRRepository
     {
-        public DBSummFAFR(IDBTools mainDB) : base(mainDB)
+        public DBSummFAFR(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public DataList<SummFAFR_Data> GetSummFaFr(int summFAFR_Id)
+        public async Task<DataList<SummFAFR_Data>> GetSummFaFrAsync(int summFAFR_Id)
         {
             var parameters = new Dictionary<string, object>() {
                 { "CtrlSummFaFrId", summFAFR_Id }
             };
 
-            var data = MainDB.GetDataFromStoredProc<SummFAFR_Data>("", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SummFAFR_Data>("", parameters, FillDataFromReader);
 
             return new DataList<SummFAFR_Data>(data, MainDB.LastError);
 
         }
 
-        public DataList<SummFAFR_Data> GetSummFaFrList(List<SummFAFR_DE_Data> summFAFRs)
+        public async Task<DataList<SummFAFR_Data>> GetSummFaFrListAsync(List<SummFAFR_DE_Data> summFAFRs)
         {
             var firstFAFR = summFAFRs[0];
 
@@ -44,7 +45,7 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(firstFAFR.Batch_Id))
                 parameters.Add("CtrlFAFRBatchId", firstFAFR.Batch_Id);
 
-            var data = MainDB.GetDataFromStoredProc<SummFAFR_Data>("GetSummFaFrForDivertFunds", parameters, FillDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<SummFAFR_Data>("GetSummFaFrForDivertFunds", parameters, FillDataFromReader);
 
             return new DataList<SummFAFR_Data>(data, MainDB.LastError);
         }

@@ -1,22 +1,22 @@
 ﻿using DBHelper;
-
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSubmitter : DBbase, ISubmitterRepository
     {
-        public DBSubmitter(IDBTools mainDB) : base(mainDB)
+        public DBSubmitter(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<SubmitterData> GetSubmitter(string submCode = null,
+        public async Task<List<SubmitterData>> GetSubmitterAsync(string submCode = null,
                                                 string submName = null,
                                                 string enfOffCode = null,
                                                 string enfServCode = null,
@@ -35,14 +35,30 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(submFName)) { parameters["Subm_MddleNme"] = submMName; }
             if (!string.IsNullOrEmpty(prov)) { parameters["ProvCode"] = prov; }
 
-            return MainDB.GetDataFromStoredProc<SubmitterData>("SubmGetSubm", parameters, FillSubmitterData);
+            return await MainDB.GetDataFromStoredProcAsync<SubmitterData>("SubmGetSubm", parameters, FillSubmitterData);
 
         }
+                
+        public async Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "EnforcementOfficeCode",  office},
+                    { "EnforcementServiceCode",  service}
+                };
 
-        public List<CommissionerData> GetCommissioners(string locationCode, string currentSubmitter)
+            var data = await MainDB.GetRecordsFromStoredProcAsync<string>("SubmGetEnforcementOfficeSubmitters", parameters, FillCodesFromReader);
+            return data;
+        }
+
+        private void FillCodesFromReader(IDBHelperReader rdr, out string code)
+        {
+            code = rdr["SubmitterCode"] as string;
+        }
+
+        public async Task<List<CommissionerData>> GetCommissionersAsync(string locationCode, string currentSubmitter)
         {
 
-            var submittersForLocation = GetSubmitter(enfOffCode: locationCode);
+            var submittersForLocation = await GetSubmitterAsync(enfOffCode: locationCode);
             var commissioners = (from s in submittersForLocation
                                  where (s.Subm_LglSgnAuth_Ind && (s.Subm_SubmCd != currentSubmitter) && (s.ActvSt_Cd == "A"))
                                  select new CommissionerData
@@ -55,45 +71,45 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public string GetSignAuthorityForSubmitter(string submCd)
+        public async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "Subm_SubmCd", submCd }
             };
 
-            return MainDB.GetDataFromStoredProc<string>("GetSignAuthorityForSubmCd", parameters);
+            return await MainDB.GetDataFromStoredProcAsync<string>("GetSignAuthorityForSubmCd", parameters);
         }
 
-        public string GetMaxSubmitterCode(string submCodePart)
+        public async Task<string> GetMaxSubmitterCodeAsync(string submCodePart)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "submCodePart", submCodePart }
             };
 
-            return MainDB.GetDataFromStoredProc<string>("SubmGetMaxSubmitterCode", parameters);
+            return await MainDB.GetDataFromStoredProcAsync<string>("SubmGetMaxSubmitterCode", parameters);
         }
 
-        public void CreateSubmitter(SubmitterData newSubmitter)
+        public async Task CreateSubmitterAsync(SubmitterData newSubmitter)
         {
             var parameters = GetParametersForSubmitterData2(newSubmitter);
 
-            MainDB.ExecProc("SubmInsert", parameters);
+            await MainDB.ExecProcAsync("SubmInsert", parameters);
         }
 
 
 
-        public void UpdateSubmitter(SubmitterData newSubmitter)
+        public async Task UpdateSubmitterAsync(SubmitterData newSubmitter)
         {
             // if update, then call new CRUD proc "Subm_Update"
-            MainDB.UpdateData<SubmitterData, string>("Subm", newSubmitter, "Subm_SubmCd", newSubmitter.Subm_SubmCd, SetParametersForUpdateSubmitterData);
+            await MainDB.UpdateDataAsync<SubmitterData, string>("Subm", newSubmitter, "Subm_SubmCd", newSubmitter.Subm_SubmCd, SetParametersForUpdateSubmitterData);
 
             if (!String.IsNullOrEmpty(MainDB.LastError))
                 newSubmitter.Messages.AddSystemError("Database Error: " + MainDB.LastError);
 
         }
-        public DateTime UpdateSubmitterLastLogin(string submCd)
+        public async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
         {
             DateTime loginDate = DateTime.Now;
 
@@ -104,7 +120,7 @@ namespace FOAEA3.Data.DB
 
             };
 
-            MainDB.ExecProc("SubmUpdateLastLogin", parameters);
+            await MainDB.ExecProcAsync("SubmUpdateLastLogin", parameters);
 
             return loginDate;
         }
@@ -213,7 +229,8 @@ namespace FOAEA3.Data.DB
                 { "CourtUserIndicator", data.Subm_CourtUsr_Ind ? 1 : 0 },
                 { "Status", data.ActvSt_Cd },
                 { "SubmitterClass", data.Subm_Class },
-                { "SubmittedBy", data.Subm_Create_Usr }
+                { "SubmittedBy", data.Subm_Create_Usr },
+                { "ReceiveAuditIndicatior", data.Subm_Audit_File_Ind }
             };
 
             return parameters;
@@ -248,6 +265,7 @@ namespace FOAEA3.Data.DB
             data.Subm_LglSgnAuth_Ind = rdr["Subm_LglSgnAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_LglSgnAuth_Ind"]);
             data.Subm_EnfSrvAuth_Ind = rdr["Subm_EnfSrvAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfSrvAuth_Ind"]);
             data.Subm_EnfOffAuth_Ind = rdr["Subm_EnfOffAuth_Ind"] != null && ByteToBool((byte)rdr["Subm_EnfOffAuth_Ind"]);
+            data.Subm_Audit_File_Ind = (bool)rdr["Subm_Audit_File_Ind"];
             data.Subm_SysMgr_Ind = rdr["Subm_SysMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_SysMgr_Ind"]);
             data.Subm_AppMgr_Ind = rdr["Subm_AppMgr_Ind"] != null && ByteToBool((byte)rdr["Subm_AppMgr_Ind"]);
             data.Subm_Fin_Ind = rdr["Subm_Fin_Ind"] != null && ByteToBool((byte)rdr["Subm_Fin_Ind"]);
@@ -258,47 +276,39 @@ namespace FOAEA3.Data.DB
             data.Subm_LastUpdate_Usr = rdr["Subm_LastUpdate_Usr"] as string;
 
             // trim strings
-            data.Subm_SubmCd = data.Subm_SubmCd.Trim();
-            data.Subm_FrstNme = data.Subm_FrstNme.Trim();
+            data.Subm_SubmCd = data.Subm_SubmCd?.Trim();
+            data.Subm_FrstNme = data.Subm_FrstNme?.Trim();
             data.Subm_MddleNme = data.Subm_MddleNme?.Trim(); // can be null
-            data.Subm_SurNme = data.Subm_SurNme.Trim();
+            data.Subm_SurNme = data.Subm_SurNme?.Trim();
             data.Subm_Assg_Email = data.Subm_Assg_Email?.Trim(); // can be null
             data.Subm_IP_Addr = data.Subm_IP_Addr?.Trim(); // can be null
             data.Subm_Last_SeqNr = data.Subm_Last_SeqNr?.Trim(); // can be null
             data.Subm_Altrn_SubmCd = data.Subm_Altrn_SubmCd?.Trim(); // can be null
-            data.EnfSrv_Cd = data.EnfSrv_Cd.Trim();
-            data.EnfOff_City_LocCd = data.EnfOff_City_LocCd.Trim();
+            data.EnfSrv_Cd = data.EnfSrv_Cd?.Trim();
+            data.EnfOff_City_LocCd = data.EnfOff_City_LocCd?.Trim();
             data.Subm_Title = data.Subm_Title?.Trim(); // can be null
             data.Subm_SgnAuth_SubmCd = data.Subm_SgnAuth_SubmCd?.Trim(); // can be null
             data.Subm_Comments = data.Subm_Comments?.Trim(); // can be null
-            data.ActvSt_Cd = data.ActvSt_Cd.Trim();
+            data.ActvSt_Cd = data.ActvSt_Cd?.Trim();
             data.Subm_Class = data.Subm_Class?.Trim(); // can be null
-            data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr.Trim();
+            data.Subm_LastUpdate_Usr = data.Subm_LastUpdate_Usr?.Trim();
+
 
         }
 
         #region SubmitterMessage
 
-        public void SubmitterMessageDelete(string submitterID)
+        public async Task SubmitterMessageDeleteAsync(string submitterID)
         {
             var parameters = new Dictionary<string, object>
             {
                 { "SubmitterID", submitterID }
             };
 
-            MainDB.ExecProc("SubmMsgDeleteSubmMsg", parameters);
+            await MainDB.ExecProcAsync("SubmMsgDeleteSubmMsg", parameters);
         }
 
-
-        // exec SubmMsgInsert @Subm_SubmCd='ON2D68',
-        //                    @Appl_EnfSrv_Cd='ON01',
-        //                    @Appl_CtrlCd='E440',
-        //                    @AppLiSt_Cd=3,
-        //                    @Msg_Nr=50620,
-        //                    @Owner_EnfSrv_Cd='ON01',
-        //                    @Owner_SubmCd='ON2D68'
-
-        public void CreateSubmitterMessage(SubmitterMessageData submitterMessage)
+        public async Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -311,12 +321,12 @@ namespace FOAEA3.Data.DB
                 { "Owner_SubmCd", submitterMessage.Owner_SubmCd }
             };
 
-            MainDB.ExecProc("SubmMsgInsert", parameters);
+            await MainDB.ExecProcAsync("SubmMsgInsert", parameters);
         }
 
         // exec SubmMsgGetSubmMsg @UserID=N'ON2D68',@LanguageCode=1033
 
-        public List<SubmitterMessageData> GetSubmitterMessageForSubmitter(string submitterID, int languageCode)
+        public async Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -324,7 +334,7 @@ namespace FOAEA3.Data.DB
                 { "LanguageCode", languageCode }
             };
 
-            return MainDB.GetDataFromStoredProc<SubmitterMessageData>("SubmMsgGetSubmMsg", parameters, FillSubmitterMessageData);
+            return await MainDB.GetDataFromStoredProcAsync<SubmitterMessageData>("SubmMsgGetSubmMsg", parameters, FillSubmitterMessageData);
 
         }
 

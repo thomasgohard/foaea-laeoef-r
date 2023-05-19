@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface INotificationRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        void SendEmail(string subject, string recipient, string body, int isHTML = 1);
-        void SendHtmlEmail(string subject, string recipient, string body, string attachmentPath);
+        Task SendEmailAsync(string subject, string recipient, string body, int isHTML = 1);
+        Task SendHtmlEmailAsync(string subject, string recipient, string body, string attachmentPath);
     }
 }

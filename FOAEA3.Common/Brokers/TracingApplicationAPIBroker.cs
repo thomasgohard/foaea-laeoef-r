@@ -1,77 +1,103 @@
-﻿using FOAEA3.Model;
-using FOAEA3.Resources.Helpers;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
 
-    public class TracingApplicationAPIBroker : ITracingApplicationAPIBroker
+    public class TracingApplicationAPIBroker : ITracingApplicationAPIBroker, IVersionSupport
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public TracingApplicationAPIBroker(IAPIBrokerHelper apiHelper)
+        public TracingApplicationAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
-        public TracingApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public async Task<string> GetVersionAsync()
+        {
+            string apiCall = $"api/v1/tracings/Version";
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+        }
+
+        public async Task<string> GetConnectionAsync()
+        {
+            string apiCall = $"api/v1/tracings/DB";
+            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+        }
+
+        public async Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(dat_Appl_EnfSrvCd, dat_Appl_CtrlCd);
             string apiCall = $"api/v1/tracings/{key}";
-            return ApiHelper.GetDataAsync<TracingApplicationData>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<TracingApplicationData>(apiCall, token: Token);
         }
 
-        public List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle)
+        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/traceCycles?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return ApiHelper.GetDataAsync<List<TraceCycleQuantityData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<TraceCycleQuantityData>>(apiCall, token: Token);
         }
 
-        public List<TraceToApplData> GetTraceToApplData()
+        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
             string apiCall = $"api/v1/tracings/TraceToApplication";
-            return ApiHelper.GetDataAsync<List<TraceToApplData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<TraceToApplData>>(apiCall, token: Token);
         }
 
-        public TracingApplicationData FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public async Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/tracings/{key}?command=FullyServiceApplication&EnforcementServiceCode={enfSrvCd}";
-            return ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication).Result;
+            return await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 
-        public TracingApplicationData PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public async Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
             string apiCall = $"api/v1/tracings/{key}?command=PartiallyServiceApplication&EnforcementServiceCode={enfSrvCd}";
-            return ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication).Result;
+            return await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 
-        public TracingApplicationData CreateTracingApplication(TracingApplicationData tracingApplication)
+        public async Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
-            var data = ApiHelper.PostDataAsync<TracingApplicationData, TracingApplicationData>("api/v1/tracings",
-                                                                                               tracingApplication).Result;
+            var data = await ApiHelper.PostDataAsync<TracingApplicationData, TracingApplicationData>("api/v1/tracings",
+                                                                                               tracingApplication, token: Token);
             return data;
         }
 
-        public TracingApplicationData UpdateTracingApplication(TracingApplicationData tracingApplication)
-        {
-            string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
-            var data = ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>($"api/v1/tracings/{key}",
-                                                                                              tracingApplication).Result;
-            return data;
-        }
-
-        public TracingApplicationData CloseTracingApplication(TracingApplicationData tracingApplication)
+        public async Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
-            var data = ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>($"api/v1/tracings/{key}",
-                                                                                              tracingApplication).Result;
+            var data = await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>($"api/v1/tracings/{key}",
+                                                                                              tracingApplication, token: Token);
             return data;
         }
 
-        public List<TracingOutgoingFederalData> GetOutgoingFederalTracingRequests(int maxRecords,
+        public async Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication)
+        {
+            string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
+            var data = await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>($"api/v1/tracings/{key}",
+                                                                                              tracingApplication, token: Token);
+            return data;
+        }
+
+        public async Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication,
+                                                                 string newRecipientSubmitter,
+                                                                 string newIssuingSubmitter)
+        {
+            string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/tracings/{key}/transfer?newRecipientSubmitter={newRecipientSubmitter}" +
+                                                           $"&newIssuingSubmitter={newIssuingSubmitter}";
+            var data = await ApiHelper.PutDataAsync<TracingApplicationData, TracingApplicationData>(apiCall,
+                                                                                              tracingApplication, token: Token);
+            return data;
+        }
+
+        public async Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords,
                                                                                   string activeState,
                                                                                   int lifeState,
                                                                                   string enfServiceCode)
@@ -79,17 +105,17 @@ namespace FOAEA3.Common.Brokers
             string baseCall = "api/v1/OutgoingFederalTracingRequests";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&lifeState={lifeState}&enfServiceCode={enfServiceCode}";
-            return ApiHelper.GetDataAsync<List<TracingOutgoingFederalData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<List<TracingOutgoingFederalData>>(apiCall, token: Token);
         }
 
-        public List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords,
                                                                                   string activeState,
                                                                                   string recipientCode)
         {
             string baseCall = "api/v1/OutgoingProvincialTracingResults";
             string apiCall = $"{baseCall}?maxRecords={maxRecords}&activeState={activeState}" +
                                         $"&recipientCode={recipientCode}&isXML=true";
-            return ApiHelper.GetDataAsync<List<TracingOutgoingProvincialData>>(apiCall).Result;
+            return await ApiHelper.GetDataAsync<TracingOutgoingProvincialData>(apiCall, token: Token);
         }
 
     }

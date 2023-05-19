@@ -8,19 +8,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="3.1.0">
+    <PackageReference Include="coverlet.collector" Version="3.2.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -28,9 +28,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FileBroker.Business\FileBroker.Business.csproj" />
+    <ProjectReference Include="..\FileBroker.Common\FileBroker.Common.csproj" />
+    <ProjectReference Include="..\FileBroker.Data\FileBroker.Data.csproj" />
     <ProjectReference Include="..\FileBroker.Model\FileBroker.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Business\FOAEA3.Business.csproj" />
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
     <ProjectReference Include="..\FOAEA3.Data\FOAEA3.Data.csproj" />
+    <ProjectReference Include="..\FOAEA3.EmailTools\FOAEA3.EmailTools.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +44,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestDataFiles\HR3STSIT.000001">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestDataFiles\IncomingInterceptionTest3.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestDataFiles\IncomingInterceptionTest2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestDataFiles\IncomingInterceptionTest1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestDataFiles\ON3D01IT.000001.xml">

@@ -1,0 +1,24 @@
+﻿@page
+@model FOAEA3.Web.Pages.Security.SelectSubmitterModel
+@{
+}
+<br />
+<form method="post">
+    <div>
+        Submitter:
+        @if (Model.Submitters != null)
+        {
+            <select name="Submitter">
+                @foreach (string submitter in Model.Submitters)
+                {
+                    <option>@submitter</option>
+                }
+            </select>
+        }
+    </div>
+    <br />
+    <div><input type="submit" id="btnLogin" value="Select Submitter" asp-page-handler="SelectSubmitter" /></div>
+</form>
+<br />
+<div id="Message">@Model.Message</div>
+<br />

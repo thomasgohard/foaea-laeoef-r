@@ -1,16 +1,16 @@
 ﻿using DBHelper;
 using FOAEA3.Data.Base;
-using FOAEA3.Model.Exceptions;
-using FOAEA3.Model.Interfaces;
 using FOAEA3.Model;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using FOAEA3.Model.Enums;
+using FOAEA3.Model.Exceptions;
+using FOAEA3.Model.Interfaces.Repository;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
-    public class DBFoaMessage : DBbase, IFoaEventsRepository
+    internal class DBFoaMessage : DBbase, IFoaEventsRepository
     {
         public MessageDataList Messages { get; set; }
 
@@ -23,19 +23,19 @@ namespace FOAEA3.Data.DB
             public short? MsgLangId { get; set; }
         }
 
-        public DBFoaMessage(IDBTools mainDB) : base(mainDB)
+        public DBFoaMessage(IDBToolsAsync mainDB) : base(mainDB)
         {
             Messages = new MessageDataList();
         }
 
-        public FoaEventDataDictionary GetAllFoaMessages()
+        public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
         {
             var result = new FoaEventDataDictionary();
 
             string connStr = MainDB.ConnectionString;
             try
             {
-                var data = MainDB.GetAllData<FoaMessageData>("FoaMessages", FillFoaMessageDataFromReader);
+                var data = await MainDB.GetAllDataAsync<FoaMessageData>("FoaMessages", FillFoaMessageDataFromReader);
 
                 if (!string.IsNullOrEmpty(MainDB.LastError))
                     Messages.AddSystemError(MainDB.LastError);
@@ -54,7 +54,7 @@ namespace FOAEA3.Data.DB
 
                         var thisCode = (EventCode)eventData.Error;
 
-                        result.FoaEvents.Add(thisCode.ToString(), newEventData);
+                        result.FoaEvents.TryAdd(((int)thisCode).ToString(), newEventData);
                     }
 
                     if (eventData.MsgLangId == 1033)
@@ -67,7 +67,7 @@ namespace FOAEA3.Data.DB
             }
             catch (Exception e)
             {
-                if (Thread.CurrentPrincipal != null)
+                if ((Thread.CurrentPrincipal is not null) && (Thread.CurrentPrincipal.Identity is not null))
                     e.Data.Add("user", Thread.CurrentPrincipal.Identity.Name);
                 e.Data.Add("connection", connStr);
                 throw new ReferenceDataException("Could not load FoaMessages! ", e);

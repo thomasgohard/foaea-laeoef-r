@@ -22,7 +22,7 @@ namespace FOAEA3.Model
         public string Appl_Dbtr_FrstNme { get; set; }
         public string Appl_Dbtr_MddleNme { get; set; }
         public string Appl_Dbtr_SurNme { get; set; }
-        public string Appl_Dbtr_MotherMaiden_SurNme { get; set; }
+        public string Appl_Dbtr_Parent_SurNme { get; set; }
         public string Appl_Dbtr_Gendr_Cd { get; set; }
         public string Appl_Dbtr_Entrd_SIN { get; set; }
     }

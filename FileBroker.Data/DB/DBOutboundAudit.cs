@@ -2,23 +2,20 @@
 using FileBroker.Model.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FileBroker.Data.DB
 {
     public class DBOutboundAudit : IOutboundAuditRepository
     {
-        private IDBTools MainDB { get; }
+        private IDBToolsAsync MainDB { get; }
 
-        public DBOutboundAudit(IDBTools mainDB)
+        public DBOutboundAudit(IDBToolsAsync mainDB)
         {
             MainDB = mainDB;
         }
 
-        public void InsertIntoOutboundAudit(string fileName, DateTime fileDate, bool fileCreated, string message)
+        public async Task InsertIntoOutboundAuditAsync(string fileName, DateTime fileDate, bool fileCreated, string message)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -28,7 +25,7 @@ namespace FileBroker.Data.DB
                 {"message", message }
             };
 
-            MainDB.ExecProc("MessageBrokerInsertOutboundAudit", parameters);
+            await MainDB.ExecProcAsync("MessageBrokerInsertOutboundAudit", parameters);
         }
 
     }

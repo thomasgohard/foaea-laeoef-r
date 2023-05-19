@@ -1,24 +1,32 @@
-﻿using FOAEA3.Common.Helpers;
+﻿using FOAEA3.Common;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Http;
+using FOAEA3.Model.Base;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
-namespace FOAEA3.API.Areas.Administration.Controllers
+namespace FOAEA3.API.Areas.Administration.Controllers;
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class ProvincesController : FoaeaControllerBase
 {
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class ProvincesController : ControllerBase
+    [HttpGet("Version")]
+    public ActionResult<string> GetVersion() => Ok("Provinces API Version 1.0");
+
+    [HttpGet("DB")]
+    [Authorize(Roles = Roles.Admin)]
+    public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
+    [HttpGet]
+    public ActionResult<List<ProvinceData>> GetProvinces()
     {
-        [HttpGet]
-        public ActionResult<List<ProvinceData>> GetProvinces([FromServices] IRepositories repositories)
-        {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
+        List<ProvinceData> items = ReferenceData.Instance().Provinces.Values.ToList();
+        var data = new DataList<ProvinceData>(items, string.Empty);
 
-            return Ok(repositories.ProvinceRepository.GetProvinces());
-        }
-
+        return Ok(data);
     }
+
 }

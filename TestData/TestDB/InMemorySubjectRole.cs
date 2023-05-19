@@ -1,8 +1,8 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -15,11 +15,13 @@ namespace TestData.TestDB
         {
 
         }
-        public List<SubjectRoleData> GetSubjectRoles(string subjectName)
+
+        public Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
         {
             throw new NotImplementedException();
         }
-        public List<string> GetAssumedRolesForSubject(string subjectName)
+
+        public Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
         {
             throw new NotImplementedException();
         }

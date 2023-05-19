@@ -1,17 +1,21 @@
 ﻿using FOAEA3.Model.Base;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IControlBatchRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        public DataList<ControlBatchData> GetFADAReadyBatch(string EnfSrv_Source_Cd = "", string DAFABatchID = "");
-        public void CreateXFControlBatch(ControlBatchData values, out string returnCode, out string batchID, out string reasonCode, out string reasonText);
-
+        Task<DataList<ControlBatchData>> GetFADAReadyBatchAsync(string EnfSrv_Source_Cd = "", string DAFABatchID = "");
+        Task<List<BatchSimpleData>> GetReadyDivertFundsBatches(string enfSrv_Cd, string enfSrv_Loc_Cd);
+        Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values);
+        Task<ControlBatchData> GetControlBatchAsync(string batchId);
+        Task CloseControlBatchAsync(string batchId);
+        Task UpdateBatchAsync(ControlBatchData batch);
+        Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount);
+        Task<bool> GetPaymentIdIsSinIndicator(string batchId);
     }
 }

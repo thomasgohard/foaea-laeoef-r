@@ -2,22 +2,23 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Enums;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBInterception : DBbase, IInterceptionRepository
     {
 
-        public DBInterception(IDBTools mainDB) : base(mainDB)
+        public DBInterception(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }
 
-        public List<InterceptionApplicationData> FindMatchingActiveApplications(string appl_EnfSrv_Cd, string appl_CtrlCd,
+        public async Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd,
                                                                         string confirmedSIN, string creditorFirstName,
                                                                         string creditorSurname)
         {
@@ -31,12 +32,12 @@ namespace FOAEA3.Data.DB
                     {"Appl_Crdtr_SurNme", creditorSurname }
                 };
 
-            var data = MainDB.GetDataFromStoredProc<InterceptionApplicationData>("GetMatchingActiveApplications", parameters, DBApplication.FillApplicationDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<InterceptionApplicationData>("GetMatchingActiveApplications", parameters, DBApplication.FillApplicationDataFromReader);
 
             return data;
         }
 
-        public bool IsFeeCumulativeForApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> IsFeeCumulativeForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -44,25 +45,25 @@ namespace FOAEA3.Data.DB
                     {"CtrlCd", appl_CtrlCd }
                 };
 
-            int result = MainDB.GetDataFromStoredProc<int>("IsFeeCumulativeForApplication", parameters);
+            int result = await MainDB.GetDataFromStoredProcAsync<int>("IsFeeCumulativeForApplication", parameters);
 
             return (result == 1);
         }
 
-        public bool IsVariationIncrease(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrvCd", appl_EnfSrv_Cd},
-                    {"CtrlCd", appl_CtrlCd }
+                    {"appl_enfsrvcd", appl_EnfSrv_Cd},
+                    {"appl_ctrlcd", appl_CtrlCd }
                 };
 
-            int result = MainDB.GetDataFromStoredProc<int>("ApplVerifyVariationIncrease", parameters);
+            int result = await MainDB.GetDataFromStoredProcAsync<int>("ApplVerifyVariationIncrease", parameters);
 
             return (result == 1);
         }
 
-        public InterceptionFinancialHoldbackData GetInterceptionFinancialTerms(string appl_EnfSrv_Cd, string appl_CtrlCd,
+        public async Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTermsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd,
                                                                                string activeState = "A")
         {
             var parameters = new Dictionary<string, object>
@@ -72,21 +73,104 @@ namespace FOAEA3.Data.DB
                     {"ActvSt_Cd", activeState }
                 };
 
-            var data = MainDB.GetDataFromStoredProc<InterceptionFinancialHoldbackData>("GetIntFinHtoActivateDeactivate", parameters, FillIntFinHDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<InterceptionFinancialHoldbackData>("GetIntFinHtoActivateDeactivate", parameters, FillIntFinHDataFromReader);
 
             return data.SingleOrDefault();
         }
 
-        public void CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH)
+        public async Task<List<InterceptionFinancialHoldbackData>> GetAllInterceptionFinancialTermsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
 
+            var data = await MainDB.GetDataFromStoredProcAsync<InterceptionFinancialHoldbackData>("DefaultHoldbackGetHoldback", parameters, FillIntFinHDataFromReader);
+
+            return data;
         }
-        public void UpdateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH)
+
+        public async Task CreateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
         {
+            var parameters = SetIntFinHParameters(intFinH);
 
+            _ = await MainDB.ExecProcAsync("IntFinH_Insert", parameters);
         }
 
-        public List<HoldbackConditionData> GetHoldbackConditions(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime intFinH_Date, 
+        public async Task UpdateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
+        {
+            var parameters = SetIntFinHParameters(intFinH);
+
+            _ = await MainDB.ExecProcAsync("IntFinH_Update", parameters);
+        }
+
+        public async Task DeleteInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", intFinH.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", intFinH.Appl_CtrlCd},
+                {"IntFinH_Dte", intFinH.IntFinH_Dte}
+            };
+
+            _ = await MainDB.ExecProcAsync("IntFinH_Delete", parameters);
+        }
+
+        private static Dictionary<string, object> SetIntFinHParameters(InterceptionFinancialHoldbackData intFinH)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", intFinH.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", intFinH.Appl_CtrlCd},
+                {"IntFinH_Dte", intFinH.IntFinH_Dte},
+                {"HldbCtg_Cd", intFinH.HldbCtg_Cd},
+                {"IntFinH_LmpSum_Money", intFinH.IntFinH_LmpSum_Money},
+                {"IntFinH_TtlAmn_Money", intFinH.IntFinH_TtlAmn_Money},
+                {"IntFinH_LiStCd", intFinH.IntFinH_LiStCd},
+                {"ActvSt_Cd", intFinH.ActvSt_Cd}
+            };
+
+            if (intFinH.IntFinH_RcvtAffdvt_Dte.HasValue)
+                parameters.Add("IntFinH_RcvtAffdvt_Dte", intFinH.IntFinH_RcvtAffdvt_Dte.Value);
+
+            if (!string.IsNullOrEmpty(intFinH.IntFinH_Affdvt_SubmCd))
+                parameters.Add("IntFinH_Affdvt_SubmCd", intFinH.IntFinH_Affdvt_SubmCd);
+
+            if (!string.IsNullOrEmpty(intFinH.PymPr_Cd))
+                parameters.Add("PymPr_Cd", intFinH.PymPr_Cd);
+
+            if (!string.IsNullOrEmpty(intFinH.HldbTyp_Cd))
+                parameters.Add("HldbTyp_Cd", intFinH.HldbTyp_Cd);
+
+            if (intFinH.IntFinH_DefHldbAmn_Money.HasValue)
+                parameters.Add("IntFinH_DefHldbAmn_Money", intFinH.IntFinH_DefHldbAmn_Money.Value);
+
+            if (intFinH.IntFinH_DefHldbPrcnt.HasValue)
+                parameters.Add("IntFinH_DefHldbPrcnt", intFinH.IntFinH_DefHldbPrcnt.Value);
+
+            if (intFinH.IntFinH_CmlPrPym_Ind.HasValue)
+                parameters.Add("IntFinH_CmlPrPym_Ind", intFinH.IntFinH_CmlPrPym_Ind.Value);
+
+            if (intFinH.IntFinH_MxmTtl_Money.HasValue)
+                parameters.Add("IntFinH_MxmTtl_Money", intFinH.IntFinH_MxmTtl_Money.Value);
+
+            if (intFinH.IntFinH_PerPym_Money.HasValue)
+                parameters.Add("IntFinH_PerPym_Money", intFinH.IntFinH_PerPym_Money.Value);
+
+            if (intFinH.IntFinH_VarIss_Dte.HasValue)
+                parameters.Add("IntFinH_VarIss_Dte", intFinH.IntFinH_VarIss_Dte.Value);
+
+            if (!string.IsNullOrEmpty(intFinH.IntFinH_CreateUsr))
+                parameters.Add("IntFinH_CreateUsr", intFinH.IntFinH_CreateUsr);
+
+            if (!string.IsNullOrEmpty(intFinH.IntFinH_DefHldbAmn_Period))
+                parameters.Add("IntFinH_DefHldbAmn_Period", intFinH.IntFinH_DefHldbAmn_Period);
+
+            return parameters;
+        }
+
+        public async Task<List<HoldbackConditionData>> GetHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime intFinH_Date,
                                                                  string activeState = "A")
         {
             var parameters = new Dictionary<string, object>
@@ -96,39 +180,111 @@ namespace FOAEA3.Data.DB
                     {"IntFinH_Dte", intFinH_Date }
                 };
 
-            var data = MainDB.GetDataFromStoredProc<HoldbackConditionData>("GetHldbCndToActivateDeactivate", parameters, FillHldbCndDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<HoldbackConditionData>("GetHldbCndToActivateDeactivate", parameters, FillHldbCndDataFromReader);
 
             return data.Where(m => m.ActvSt_Cd == activeState).ToList();
         }
 
-        public void CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions)
+        public async Task<List<HoldbackConditionData>> GetAllHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
+            var parameters = new Dictionary<string, object>
+                {
+                    {"Appl_Enfsrv_Cd", appl_EnfSrv_Cd},
+                    {"Appl_CtrlCd", appl_CtrlCd }
+                };
 
+            var data = await MainDB.GetDataFromStoredProcAsync<HoldbackConditionData>("GetHldbCndForAppl", parameters, FillHldbCndDataFromReader);
+            return data;
         }
 
-        public void UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions)
+        public async Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
         {
-
+            foreach (var holdbackCondition in holdbackConditions)
+                await CreateHoldbackConditionAsync(holdbackCondition);
         }
 
-        public List<InterceptionApplicationData> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, string confirmedSIN,
-                                                                       string activeState)
+        private async Task CreateHoldbackConditionAsync(HoldbackConditionData holdbackCondition)
+        {
+            var parameters = SetHoldbackConditionParameters(holdbackCondition);
+
+            _ = await MainDB.ExecProcAsync("HldbCnd_Insert", parameters);
+        }
+
+        public async Task UpdateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
+        {
+            foreach (var holdbackCondition in holdbackConditions)
+                await UpdateHoldbackConditionAsync(holdbackCondition);
+        }
+
+        private async Task UpdateHoldbackConditionAsync(HoldbackConditionData holdbackCondition)
+        {
+            var parameters = SetHoldbackConditionParameters(holdbackCondition);
+
+            _ = await MainDB.ExecProcAsync("HldbCnd_Update", parameters);
+        }
+
+        public async Task DeleteHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions)
+        {
+            foreach (var holdbackCondition in holdbackConditions)
+                await DeleteHoldbackConditionAsync(holdbackCondition);
+        }
+
+        public async Task DeleteHoldbackConditionAsync(HoldbackConditionData holdbackCondition)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", holdbackCondition.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", holdbackCondition.Appl_CtrlCd},
+                {"IntFinH_Dte", holdbackCondition.IntFinH_Dte},
+                {"EnfSrv_Cd", holdbackCondition.EnfSrv_Cd}
+            };
+
+            _ = await MainDB.ExecProcAsync("HldbCnd_Delete", parameters);
+        }
+
+        private static Dictionary<string, object> SetHoldbackConditionParameters(HoldbackConditionData holdbackCondition)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", holdbackCondition.Appl_EnfSrv_Cd},
+                {"Appl_CtrlCd", holdbackCondition.Appl_CtrlCd},
+                {"IntFinH_Dte", holdbackCondition.IntFinH_Dte},
+                {"EnfSrv_Cd", holdbackCondition.EnfSrv_Cd},
+                {"HldbCtg_Cd", holdbackCondition.HldbCtg_Cd},
+                {"HldbCnd_LiStCd", holdbackCondition.HldbCnd_LiStCd},
+                {"ActvSt_Cd", holdbackCondition.ActvSt_Cd}
+            };
+
+            if (holdbackCondition.HldbCnd_MxmPerChq_Money.HasValue)
+                parameters.Add("HldbCnd_MxmPerChq_Money", holdbackCondition.HldbCnd_MxmPerChq_Money.Value);
+
+            if (holdbackCondition.HldbCnd_SrcHldbAmn_Money.HasValue)
+                parameters.Add("HldbCnd_SrcHldbAmn_Money", holdbackCondition.HldbCnd_SrcHldbAmn_Money.Value);
+
+            if (holdbackCondition.HldbCnd_SrcHldbPrcnt.HasValue)
+                parameters.Add("HldbCnd_SrcHldbPrcnt", holdbackCondition.HldbCnd_SrcHldbPrcnt.Value);
+
+            return parameters;
+        }
+
+        public async Task<List<InterceptionApplicationData>> GetSameCreditorForI01Async(string appl_CtrlCd, string submCd, string enteredSIN,
+                                                                       byte confirmedSIN, string activeState)
         {
             var parameters = new Dictionary<string, object>
             {
                 {"Appl_CtrlCd", appl_CtrlCd},
                 {"Subm_SubmCd", submCd},
-                {"Appl_Dbtr_Entrd_SIN", enteredSIN},
+                {"Appl_Dbtr_Entrd_SIN", enteredSIN ?? " "},
                 {"Appl_SIN_Cnfrmd_Ind", confirmedSIN},
                 {"ActvSt_Cd", activeState}
             };
 
-            var data = MainDB.GetDataFromStoredProc<InterceptionApplicationData>("GetSameCreditorForI01", parameters, DBApplication.FillApplicationDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<InterceptionApplicationData>("GetSameCreditorForI01", parameters, DBApplication.FillApplicationDataFromReader);
 
             return data;
         }
 
-        public string GetApplicationJusticeNumber(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<string> GetApplicationJusticeNumberAsync(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -137,38 +293,61 @@ namespace FOAEA3.Data.DB
                     {"Appl_Dbtr_Cnfrmd_SIN", confirmedSIN}
                 };
 
-            return MainDB.GetDataFromProcSingleValue<string>("GetApplJusticeNr", parameters);
+            return await MainDB.GetDataFromProcSingleValueAsync<string>("GetApplJusticeNr", parameters);
         }
 
-        public string GetDebtorID(string first3Char)
+        public async Task<string> GetDebtorIdAsync(string first3Char)
         {
             var parameters = new Dictionary<string, object>
                 {
                     {"First3Char", first3Char}
                 };
 
-            return MainDB.GetDataFromProcSingleValue<string>("GetSummSmryDebtorID", parameters);
+            return await MainDB.GetDataFromProcSingleValueAsync<string>("GetSummSmryDebtorID", parameters);
         }
 
-        public bool IsAlreadyUsedJusticeNumber(string justiceNumber)
+        public async Task<bool> CheckDebtorIdExists(string debtorId)
+        {
+            if (string.IsNullOrEmpty(debtorId))
+                return false;
+
+            var parameters = new Dictionary<string, object> {
+                    { "chrDebtor_Id",  debtorId}
+                };
+
+            string result = await MainDB.GetDataFromProcSingleValueAsync<string>("CheckDebtorIdExists", parameters);
+            return string.Equals(debtorId, result, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public async Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "chrDbtr_Cnfrmd_SIN",  sin},
+                    { "chrAppctgy_Cd",  category}
+                };
+
+            return await MainDB.GetDataFromProcSingleValueAsync<string>("GetDebtorIdByCnfrmdSIN", parameters);
+        }
+
+        public async Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber)
         {
             var parameters = new Dictionary<string, object>
             {
                 {"JusticeNr", justiceNumber}
             };
 
-            var data = MainDB.GetDataFromStoredProc<InterceptionApplicationData>("ApplGetApplByJusticeNR", parameters, DBApplication.FillApplicationDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<InterceptionApplicationData>("ApplGetApplByJusticeNR", parameters, DBApplication.FillApplicationDataFromReader);
 
             if (data.Count > 0)
             {
                 if (data[0].Appl_JusticeNr.Trim().ToUpper() == justiceNumber.Trim().ToUpper())
-                    return true;                
+                    return true;
             }
 
             return false;
         }
 
-        public DateTime GetGarnisheeSummonsReceiptDate(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD)
+        public async Task<DateTime> GetGarnisheeSummonsReceiptDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -177,10 +356,10 @@ namespace FOAEA3.Data.DB
                     {"isESD", isESD}
                 };
 
-            return MainDB.GetDataFromProcSingleValue<DateTime>("GetGarnisheeSummonsReceiptDate", parameters);
+            return await MainDB.GetDataFromProcSingleValueAsync<DateTime>("GetGarnisheeSummonsReceiptDate", parameters);
         }
 
-        public int GetTotalActiveSummons(string appl_EnfSrv_Cd, string enfOfficeCode)
+        public async Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -188,15 +367,15 @@ namespace FOAEA3.Data.DB
                     {"EnfOff_Cd", enfOfficeCode }
                 };
 
-            return MainDB.GetDataFromProcSingleValue<int>("GetTotalActiveSummons", parameters);
+            return await MainDB.GetDataFromProcSingleValueAsync<int>("GetTotalActiveSummons", parameters);
         }
-               
-        public string EISOHistoryDeleteBySIN(string confirmedSIN, bool removeSIN)
+
+        public async Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN)
         {
             var parameters = new Dictionary<string, object>
             {
-                {"@SIN", confirmedSIN},
-                {"@removeSIN", removeSIN }
+                {"SIN", confirmedSIN},
+                {"removeSIN", removeSIN }
             };
 
             var returnParameters = new Dictionary<string, string>
@@ -204,12 +383,159 @@ namespace FOAEA3.Data.DB
                 {"message", "S120"}
             };
 
-            var data = MainDB.GetDataFromStoredProcViaReturnParameters("MessageBrokerDeleteEISOOUTHistoryBySIN", parameters, returnParameters);
+            var data = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("MessageBrokerDeleteEISOOUTHistoryBySIN", parameters, returnParameters);
 
             return data["message"] as string;
         }
 
-        public void InsertESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ConfirmedSIN", confirmedSIN}
+            };
+
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("Prcs_EISOOUT_History_SelectForSIN",
+                                                                                      parameters, FillEISOOUTFromReader);
+        }
+
+        public async Task<DateTime> GetDateLastUIBatchLoaded()
+        {
+            var data = await MainDB.GetDataFromProcSingleValueAsync<DateTime>("MessageBrokerGetDateLastUIBatchLoaded", null);
+            return data;
+        }
+
+        public async Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ProcessEISOOUTHistoryData>("MessageBrokerGetEISOValidApplicationData",
+                                                                                      FillEISOOUTFromReader);
+        }
+
+        private void FillEISOOUTFromReader(IDBHelperReader rdr, ProcessEISOOUTHistoryData data)
+        {
+            data.TRANS_TYPE_CD = rdr["TRANS_TYPE_CD"] as string;
+            data.ACCT_NBR = rdr["ACCT_NBR"] as string;
+            data.TRANS_AMT = rdr["TRANS_AMT"] as string;
+            data.RQST_RFND_EID = rdr["RQST_RFND_EID"] as string;
+            data.OUTPUT_DEST_CD = rdr["OUTPUT_DEST_CD"] as string;
+            data.XREF_ACCT_NBR = rdr["XREF_ACCT_NBR"] as string;
+            data.FOA_DELETE_IND = ((int)rdr["FOA_DELETE_IND"]).ToString();
+            data.FOA_RECOUP_PRCNT = rdr["FOA_RECOUP_PRCNT"] as string;
+            data.BLANK_AREA = rdr["BLANK_AREA"] as string;
+            data.PAYMENT_RECEIVED = rdr["PAYMENT_RECEIVED"] as int?; // can be null 
+        }
+
+        public async Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "enfSvrCode", enfSrv}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<EIoutgoingFederalData>("MessageBrokerGetEIExchangeOutData", parameters, FillEIoutgoingData);
+            return data;
+        }
+
+        private void FillEIoutgoingData(IDBHelperReader rdr, EIoutgoingFederalData data)
+        {
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Appl_Dbtr_Cnfrmd_SIN"] as string;
+            data.Dbtr_Id = rdr["Dbtr_Id"] as string;
+            data.Appl_JusticeNrSfx = rdr["Appl_JusticeNrSfx"] as string;
+            data.Debt_Percentage = (int)rdr["Debt_Percentage"];
+            data.Arrears_Balance = (decimal)rdr["Arrears_Balance"];
+            data.FeeOwedTtl_Money = (decimal)rdr["FeeOwedTtl_Money"];
+            data.Debtor_Fixed_Amt = (decimal?)rdr["Debtor_Fixed_Amt"]; // can be null
+            data.Amount_Per_Payment = (decimal?)rdr["Amount_Per_Payment"]; // can be null
+            data.EnfOff_Fin_VndrCd = rdr["EnfOff_Fin_VndrCd"] as string;
+            data.Fixed_Amt_Flag = (int)rdr["Fixed_Amt_Flag"] == 1;
+        }
+
+        public async Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd },
+                { "AmendedESDRequired", originalESDrequired }
+            };
+            var returnParameters = new Dictionary<string, string>
+            {
+                { "NewESDexists", "B" },
+                { "ESDReceivedDate", "D" }
+            };
+
+            var returnValues = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("IsNewESDReceived", parameters, returnParameters);
+
+            return ((bool)returnValues["NewESDexists"], (DateTime)returnValues["ESDReceivedDate"]);
+        }
+
+        public async Task<List<ApplicationData>> GetApplicationsForRejectAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetI01ApplicationsForReject", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<List<ApplicationData>> GetTerminatedI01Async()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetTerminatedI01", DBApplication.FillApplicationDataFromReader);
+        }
+
+        public async Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                { "Appl_CtrlCd", appl_CtrlCd }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetAutoAcceptGarnisheeOverrideData", parameters, DBApplication.FillApplicationDataFromReader);
+
+            return data.FirstOrDefault();
+        }
+
+        public async Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "sin", appl_Dbtr_Entrd_SIN }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsSINBlocked", parameters);
+
+            return count > 0;
+        }
+        public async Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "refnr", appl_Source_RfrNr }
+            };
+            int count = await MainDB.GetDataFromStoredProcAsync<int>("ExGratiaIsRefNrBlocked", parameters);
+
+            return count > 0;
+        }
+
+        public async Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync()
+        {
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentRequiredData>("GetESDRequiredData", FillESDrequiredData);
+        }
+
+        private void FillESDrequiredData(IDBHelperReader rdr, ElectronicSummonsDocumentRequiredData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.ESDRequired = (ESDrequired)rdr["ESDRequired"];
+            data.ESDRequiredDate = (DateTime)rdr["ESDRequiredDate"];
+            if (rdr.ColumnExists("ESDReceivedDate"))
+                data.ESDReceivedDate = (DateTime?)rdr["ESDReceivedDate"];
+            if (rdr.ColumnExists("Subm_SubmCd"))
+                data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            if (rdr.ColumnExists("Subm_Recpt_SubmCd"))
+                data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
+            if (rdr.ColumnExists("AppLiSt_Cd"))
+                data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
+            if (rdr.ColumnExists("ActvSt_Cd"))
+                data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
+        }
+
+        public async Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired,
                                       DateTime? esdReceivedDate = null)
         {
             var parameters = new Dictionary<string, object>
@@ -222,11 +548,103 @@ namespace FOAEA3.Data.DB
             if (esdReceivedDate.HasValue)
                 parameters.Add("ESDReceivedDate", esdReceivedDate.Value);
 
-            MainDB.ExecProc("InsertESDRequired", parameters);
+            await MainDB.ExecProcAsync("InsertESDRequired", parameters);
 
         }
 
-        public void InsertBalanceSnapshot(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount, 
+        public async Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                {"Appl_CtrlCd", appl_CtrlCd },
+                {"bResetUpdate", resetUpdate }
+            };
+
+            if (esdReceivedDate.HasValue)
+                parameters.Add("dESDReceivedDate", esdReceivedDate.Value);
+            else
+                parameters.Add("dESDReceivedDate", null);
+
+            await MainDB.ExecProcAsync("UpdateESDRequired", parameters);
+
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"FileName", fileName }
+            };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentZipData>("ESDZIPs_FindByFileName", parameters, FillElectronicSummonsDocumentZipDataFromReader);
+
+            return data.SingleOrDefault();
+        }
+
+        public async Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"PrcID", processId },
+                {"ZipName", fileName },
+                {"DateReceived", dateReceived }
+            };
+
+            await MainDB.ExecProcAsync("ESDZipsInsert", parameters);
+
+            return new ElectronicSummonsDocumentZipData
+            {
+                ZipID = MainDB.LastReturnValue,
+                PrcID = processId,
+                ZipName = fileName,
+                DateReceived = dateReceived
+            };
+        }
+
+        public async Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"ZipID", newPDFentry.ZipID },
+                {"PDFName", newPDFentry.PDFName },
+                {"EnfSrv", newPDFentry.EnfSrv[..2] },
+                {"Ctrl", newPDFentry.Ctrl }
+            };
+
+            await MainDB.ExecProcAsync("ESDPDFsInsert", parameters);
+
+            newPDFentry.PDFid = MainDB.LastReturnValue;
+
+            return newPDFentry;
+        }
+
+        public async Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                {"EnfSrv", appl_EnfSrv_Cd },
+                {"Ctrl", appl_CtrlCd }
+            };
+
+            return await MainDB.GetDataFromStoredProcAsync<ElectronicSummonsDocumentData>("ESDFindDocuments", parameters, FillElectronicSummonsDocumentDataFromReader);
+        }
+
+        private void FillElectronicSummonsDocumentDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentData data)
+        {
+            data.ZipName = rdr["ZipName"] as string;
+            data.PdfName = rdr["PDFName"] as string;
+        }
+
+        private void FillElectronicSummonsDocumentZipDataFromReader(IDBHelperReader rdr, ElectronicSummonsDocumentZipData data)
+        {
+            data.ZipID = (int)rdr["ZipID"];
+            data.PrcID = (int)rdr["PrcID"];
+            data.ZipName = rdr["ZipName"] as string;
+            data.DateReceived = (DateTime)rdr["DateReceived"];
+        }
+
+        public async Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
                                           BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null)
         {
             var parameters = new Dictionary<string, object>
@@ -243,23 +661,33 @@ namespace FOAEA3.Data.DB
             if (intFinH_Date.HasValue)
                 parameters.Add("IntFinH_Dte", intFinH_Date.Value);
 
-            MainDB.ExecProc("InsertBalanceSnapshot", parameters);
+            await MainDB.ExecProcAsync("InsertBalanceSnapshot", parameters);
 
         }
 
-        public List<ExGratiaListData> GetExGratias()
+        public async Task<List<ExGratiaListData>> GetExGratiasAsync()
         {
-            return MainDB.GetAllData<ExGratiaListData>("GetExGratiaList", FillExGratiaListFromReader);
+            return await MainDB.GetAllDataAsync<ExGratiaListData>("ExGratiaList", FillExGratiaListFromReader);
         }
 
-        public List<PaymentPeriodData> GetPaymentPeriods()
+        public async Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync()
         {
-            return MainDB.GetAllData<PaymentPeriodData>("PymPr_Select", FillPaymentPeriodFromReader);
+            return await MainDB.GetAllDataAsync<PaymentPeriodData>("PymPr", FillPaymentPeriodFromReader);
         }
 
-        public List<HoldbackTypeData> GetHoldbackTypes()
+        public async Task<List<HoldbackTypeData>> GetHoldbackTypesAsync()
         {
-            return MainDB.GetAllData<HoldbackTypeData>("HldbTyp_Select", FillHolbackTypeFromReader);
+            return await MainDB.GetAllDataAsync<HoldbackTypeData>("HldbTyp", FillHolbackTypeFromReader);
+        }
+
+        public async Task MessageBrokerCRAReconciliationAsync()
+        {
+            await MainDB.ExecProcAsync("MessageBrokerCRAReconciliation");
+        }
+
+        public async Task FTBatchNotification_CheckFTTransactionsAddedAsync()
+        {
+            await MainDB.ExecProcAsync("FTBatchNotification_CheckFTTransactionsAdded");
         }
 
         private void FillIntFinHDataFromReader(IDBHelperReader rdr, InterceptionFinancialHoldbackData data)
@@ -329,7 +757,5 @@ namespace FOAEA3.Data.DB
             data.HldbTyp_Txt_F = rdr["HldbTyp_Txt_F"] as string; // can be null 
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
         }
-
-
     }
 }

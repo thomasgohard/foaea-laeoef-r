@@ -1,13 +1,12 @@
-﻿using FOAEA3.Model.Enums;
-using System.Collections.Generic;
+﻿using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IFoaEventsRepository : IMessageList
     {
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        FoaEventDataDictionary GetAllFoaMessages();
+        Task<FoaEventDataDictionary> GetAllFoaMessagesAsync();
     }
 }

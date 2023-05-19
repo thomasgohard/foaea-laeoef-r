@@ -1,11 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface IApplicationEventAPIBroker
     {
-        void SaveEvent(ApplicationEventData activeTraceEvent);
-        void SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail);
-        void UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds);
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
+        Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd);
+        Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName);
+        Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName);
+        Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync();
+        Task SaveEventAsync(ApplicationEventData eventData);
+        Task SaveEventDetailAsync(ApplicationEventDetailData activeTraceEventDetail);
+        Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds);
     }
 }

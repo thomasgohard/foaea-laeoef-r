@@ -396,4 +396,34 @@
   <data name="CONTROL_CODE" xml:space="preserve">
     <value>Code de controle</value>
   </data>
+  <data name="AUDIT_SUCCESS" xml:space="preserve">
+    <value>Succès</value>
+  </data>
+  <data name="AUDIT_SECTION" xml:space="preserve">
+    <value>La section</value>
+  </data>
+  <data name="CONTAINS_INVALID_TAG" xml:space="preserve">
+    <value>inclues le code invalide</value>
+  </data>
+  <data name="ERRORS_DETECTED" xml:space="preserve">
+    <value>Erreurs décelées</value>
+  </data>
+  <data name="LOADED_RECORDS" xml:space="preserve">
+    <value>Enregistrements chargés</value>
+  </data>
+  <data name="NUMBER_OF_RECORDS" xml:space="preserve">
+    <value>Nombre d'enregistrements</value>
+  </data>
+  <data name="RECORDS_NOT_LOADED" xml:space="preserve">
+    <value>Enregistrements non chargés</value>
+  </data>
+  <data name="RECORDS_REMOVED_FROM_FILE" xml:space="preserve">
+    <value>Entrées enlevées du fichier</value>
+  </data>
+  <data name="TOTAL_XML_VALIDATION_WARNINGS" xml:space="preserve">
+    <value>Nombre total avec avertissements de validation XML</value>
+  </data>
+  <data name="XML_VALIDATION_WARNINGS" xml:space="preserve">
+    <value>Codes XML invalides</value>
+  </data>
 </root>

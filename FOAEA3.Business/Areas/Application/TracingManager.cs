@@ -1,25 +1,52 @@
-﻿using FOAEA3.Resources.Helpers;
+﻿using DBHelper;
+using FOAEA3.Business.Security;
+using FOAEA3.Common.Models;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
-using FOAEA3.Business.Security;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal partial class TracingManager : ApplicationManager
     {
-        public TracingApplicationData TracingApplication { get; }
+        public TracingApplicationData TracingApplication { get; private set; }
         private DateTime ReinstateEffectiveDate { get; set; }
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
 
-        public TracingManager(TracingApplicationData tracing, IRepositories repositories, CustomConfig config) :
-            base(tracing, repositories, config, new TracingValidation(tracing, repositories, config))
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            base(tracing, repositories, config, user, new TracingValidation(tracing, repositories, config, null))
+        {
+            SetupTracingManager(tracing);
+        }
+
+        public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            base(tracing, repositories, config, user, new TracingValidation(tracing, repositories, config, null))
+        {
+            SetupTracingManager(tracing);
+        }
+
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
+            this(new TracingApplicationData(), repositories, config, user)
         {
 
+        }
+
+        public TracingManager(IRepositories repositories, IFoaeaConfigurationHelper config, FoaeaUser user) :
+            this(new TracingApplicationData(), repositories, config, user)
+        {
+
+        }
+
+        private void SetupTracingManager(TracingApplicationData tracing)
+        {
             TracingApplication = tracing;
 
             // add Tracing specific valid state changes
@@ -32,25 +59,19 @@ namespace FOAEA3.Business.Areas.Application
                                             });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
-//            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
-
         }
 
-        public TracingManager(IRepositories repositories, CustomConfig config) :
-            this(new TracingApplicationData(), repositories, config)
-        {
-        }
-
-        public override bool LoadApplication(string enfService, string controlCode)
+        public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
             // get data from Appl
-            bool isSuccess = base.LoadApplication(enfService, controlCode);
+            bool isSuccess = await base.LoadApplicationAsync(enfService, controlCode);
 
             if (isSuccess)
             {
                 // get additional data from Trace table, if available
-                TracingApplicationData data = Repositories.TracingRepository.GetTracingData(enfService, controlCode);
+                TracingApplicationData data = await DB.TracingTable.GetTracingDataAsync(enfService, controlCode);
 
                 if (data != null)
                     TracingApplication.Merge(data);
@@ -64,92 +85,104 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public override bool CreateApplication()
+        public override async Task<bool> CreateApplicationAsync()
         {
-
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                TracingApplication.Messages.AddError($"Invalid category type ({TracingApplication.AppCtgy_Cd}) for tracing.");
+            if (!IsValidCategory("T01"))
                 return false;
-            }
 
-            bool success = base.CreateApplication();
+            IsAddressMandatory = false;
+            bool success = await base.CreateApplicationAsync();
 
             if (!success)
             {
-                var failedSubmitterManager = new FailedSubmitAuditManager(Repositories, TracingApplication);
-                failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.T01);
+                var failedSubmitterManager = new FailedSubmitAuditManager(DB, TracingApplication);
+                await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.T01);
             }
-
-            // TODO: check and write Tracing specific info, if any were included
+            else
+                await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
 
             return success;
 
         }
 
-        public override void UpdateApplication()
+        public override async Task UpdateApplicationAsync()
         {
-            // TODO: check and update Tracing specific info, if any were included
-            if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
+            IsAddressMandatory = false;
+
+            if (!Validation.IsC78())
             {
-                // affidavit data has been passed -- need to either create it or update it
-                if (!AffidavitExists())
+                var currentDataManager = new TracingManager(DB, Config, CurrentUser);
+                await currentDataManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+                if ((currentDataManager.TracingApplication.AppLiSt_Cd != TracingApplication.AppLiSt_Cd) &&
+                    (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
                 {
-                    ValidateAndProcessNewAffidavit();
-
-                    // ignore all changes other than Creditor
-
-                    string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
-                    string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
-                    string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
-
-                    LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
-
-                    TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
-                    TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
-                    TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
-
                     MakeUpperCase();
-
-                    base.UpdateApplicationNoValidation();
+                    await base.UpdateApplicationAsync();
                 }
-                else
+                else if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
-                    Repositories.TracingRepository.UpdateTracingData(TracingApplication);
+                    // affidavit data has been passed -- need to either create it or update it
+                    if (!await AffidavitExistsAsync())
+                    {
+                        await ValidateAndProcessNewAffidavitAsync();
 
-                    MakeUpperCase();
+                        // ignore all changes other than Creditor
 
-                    base.UpdateApplication();
+                        string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
+                        string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
+                        string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
+
+                        await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+                        TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
+                        TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
+                        TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
+
+                        MakeUpperCase();
+
+                        await base.UpdateApplicationNoValidationAsync();
+                    }
+                    else
+                    {
+                        await DB.TracingTable.UpdateTracingDataAsync(TracingApplication);
+
+                        MakeUpperCase();
+
+                        await base.UpdateApplicationAsync();
+                    }
                 }
-
             }
+            else
+            {
+                await DB.TracingTable.UpdateTracingDataAsync(TracingApplication);
 
+                MakeUpperCase();
+
+                await base.UpdateApplicationAsync();
+            }
         }
 
-        public bool ReinstateApplication(string enfService, string controlCode, string lastUpdateUser,
+        public async Task<bool> ReinstateApplicationAsync(string enfService, string controlCode, string lastUpdateUser,
                                          DateTime eventEffectiveDate, EventCode bfEventCode, int bfEventId)
         {
             ReinstateEffectiveDate = eventEffectiveDate;
             BFEventReasonCode = bfEventCode;
             BFEvent_Id = bfEventId;
 
-            LoadApplication(enfService, controlCode);
-
-            //TracingApplication.Events.Clear();
+            await LoadApplicationAsync(enfService, controlCode);
 
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                throw new Exception("Wrong Application Category Code!"); // todo -- fix how errors are passed to frontend
-            }
+            if (!IsValidCategory("T01"))
+                return false;
 
             TracingApplication.Appl_Reactv_Dte = ReinstateEffectiveDate;
 
             int traceCycle = TracingApplication.Trace_Cycl_Qty;
 
-            SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
+            await SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
 
             TracingApplication.Trace_Cycl_Qty = traceCycle + 1;
             TracingApplication.Trace_LiSt_Cd = 80;
@@ -157,33 +190,31 @@ namespace FOAEA3.Business.Areas.Application
 
             MakeUpperCase();
 
-            UpdateApplication();
+            await UpdateApplicationAsync();
 
             return true;
         }
 
-        public bool RejectApplication(string enfService, string controlCode, string lastUpdateUser)
+        public async Task<bool> RejectApplicationAsync(string enfService, string controlCode, string lastUpdateUser)
         {
             bool result = true;
 
-            LoadApplication(enfService, controlCode);
+            await LoadApplicationAsync(enfService, controlCode);
 
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
 
-            if (TracingApplication.AppCtgy_Cd != "T01")
-            {
-                throw new Exception("Wrong Application Category Code!"); // todo -- fix how errors are passed to frontend
-            }
+            if (!IsValidCategory("T01"))
+                return false;
 
-            SetNewStateTo(ApplicationState.APPLICATION_REJECTED_9);
+            await SetNewStateTo(ApplicationState.APPLICATION_REJECTED_9);
 
-            UpdateApplication();
+            await UpdateApplicationAsync();
 
             return result;
         }
 
-        public bool CertifyAffidavit(string lastUpdateUser)
+        public async Task<bool> CertifyAffidavitAsync(string lastUpdateUser)
         {
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
@@ -194,19 +225,20 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!UserHelper.IsInternalUser(lastUpdateUser))
+            if (!lastUpdateUser.IsInternalUser())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = lastUpdateUser;
                 TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
 
-                SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
                 MakeUpperCase();
-                UpdateApplicationNoValidation();
+                await UpdateApplicationNoValidationAsync();
 
-                EventManager.SaveEvents();
+                await EventManager.SaveEventsAsync();
 
-                TracingApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
+                if (TracingApplication.Medium_Cd != "FTP")
+                    TracingApplication.Messages.AddInformation(EventCode.C50620_VALID_APPLICATION);
             }
             else
             {
@@ -217,83 +249,53 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public void RejectAffidavit(string lastUpdateUser)
+        public async Task RejectAffidavitAsync(string lastUpdateUser)
         {
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
 
-            SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
             MakeUpperCase();
-            UpdateApplicationNoValidation();
+            await UpdateApplicationNoValidationAsync();
 
             EventManager.AddEvent(EventCode.C51019_REJECTED_AFFIDAVIT);
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
 
             TracingApplication.Messages.AddInformation(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
         }
 
-        public void FullyServiceApplication(string enfSrvCode)
+        public async Task PartiallyServiceApplicationAsync()
         {
-            if (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
-            {
-                var traceResponseDB = Repositories.TraceResponseRepository;
-                traceResponseDB.DeleteCancelledApplicationTraceResponseData(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-            }
-            else
-            {
-                SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
-
-                MakeUpperCase();
-                UpdateApplication();
-            }
-        }
-
-        public void PartiallyServiceApplication(string enfSrvCode)
-        {
-            if (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
-            {
-                var traceResponseDB = Repositories.TraceResponseRepository;
-                traceResponseDB.DeleteCancelledApplicationTraceResponseData(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-            }
-            else
-            {
-                SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
-
-                MakeUpperCase();
-                UpdateApplication();
-            }
-        }
-
-        public void TerminateApplication(string enfSrvCode)
-        {
-
-            var traceResponseDB = Repositories.TraceResponseRepository;
-            traceResponseDB.DeleteCancelledApplicationTraceResponseData(Appl_EnfSrv_Cd, Appl_CtrlCd, enfSrvCode);
-
-            SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
+            await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
             MakeUpperCase();
-            UpdateApplication();
-
+            await UpdateApplicationAsync();
         }
 
-        public List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle)
+        public async Task FullyServiceApplicationAsync()
         {
-            var tracingDB = Repositories.TracingRepository;
-            return tracingDB.GetTraceCycleQuantityData(enfSrv_Cd, cycle);
+            await SetNewStateTo(ApplicationState.EXPIRED_15);
+
+            MakeUpperCase();
+            await UpdateApplicationAsync();
         }
 
-        public List<TraceToApplData> GetTraceToApplData()
+        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
         {
-            var tracingDB = Repositories.TracingRepository;
-            return tracingDB.GetTraceToApplData();
+            var tracingDB = DB.TracingTable;
+            return await tracingDB.GetTraceCycleQuantityDataAsync(enfSrv_Cd, cycle);
         }
 
-        private void SetTracingForReinstate(DateTime traceDate, DateTime bfDate, EventCode eventReasonCode)
+        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
         {
+            var tracingDB = DB.TracingTable;
+            return await tracingDB.GetTraceToApplDataAsync();
+        }
 
+        private async Task SetTracingForReinstateAsync(DateTime traceDate, DateTime bfDate, EventCode eventReasonCode)
+        {
             TracingApplication.AppLiSt_Cd = ApplicationState.APPLICATION_ACCEPTED_10;
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -301,16 +303,14 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED);
 
             EventManager.AddEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: traceDate);
-            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveTimestamp: bfDate);
+            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
 
-            Validation.AddDuplicateCreditorWarningEvents();
-
+            await Validation.AddDuplicateCreditorWarningEventsAsync();
         }
 
-        private void ValidateAndProcessNewAffidavit()
+        private async Task ValidateAndProcessNewAffidavitAsync()
         {
-
-            if (!UserHelper.IsInternalUser(TracingApplication.Appl_LastUpdate_Usr))
+            if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalUser())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = null;
             }
@@ -319,17 +319,16 @@ namespace FOAEA3.Business.Areas.Application
                                                  ApplicationState.SIN_NOT_CONFIRMED_5, ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7))
             {
                 TracingApplication.Trace_LiSt_Cd = 80;
-                Repositories.TracingRepository.CreateTracingData(TracingApplication);
+                await DB.TracingTable.CreateTracingDataAsync(TracingApplication);
 
                 if (TracingApplication.AppLiSt_Cd == ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7)
                 {
-                    Process_04_SinConfirmed();
+                    await Process_04_SinConfirmed();
                 }
             }
-
         }
 
-        public override void ProcessBringForwards(ApplicationEventData bfEvent)
+        public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
 
@@ -344,7 +343,7 @@ namespace FOAEA3.Business.Areas.Application
                                               EventCode.C50600_INVALID_APPLICATION)))) &&
                 ((diff.Equals(TimeSpan.Zero)) || (Math.Abs(diff.TotalHours) > 24)))
             {
-                EventManager.SaveEvent(bfEvent, ApplicationState.MANUALLY_TERMINATED_14, "I");
+                await EventManager.SaveEventAsync(bfEvent, ApplicationState.MANUALLY_TERMINATED_14, "I");
                 closeEvent = false;
             }
             else
@@ -358,17 +357,17 @@ namespace FOAEA3.Business.Areas.Application
                         case EventCode.C50528_BF_10_DAYS_FROM_RECEIPT_OF_APPLICATION:
                             if (currentLifeState < ApplicationState.APPLICATION_REJECTED_9)
                             {
-                                var DaysElapsed = Math.Abs((DateTime.Now - TracingApplication.Appl_Lgl_Dte.Value).TotalDays);
+                                var DaysElapsed = Math.Abs((DateTime.Now - TracingApplication.Appl_Lgl_Dte).TotalDays);
 
                                 if (currentLifeState.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5) &&
                                    (DaysElapsed > 40))
                                 {
-                                    RejectApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, Repositories.CurrentSubmitter);
+                                    await RejectApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter);
                                     EventManager.AddEvent(EventCode.C50760_APPLICATION_REJECTED_AS_CONDITIONS_NOT_MET_IN_TIMEFRAME);
                                 }
                                 else if (DaysElapsed > 90)
                                 {
-                                    RejectApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, Repositories.CurrentSubmitter);
+                                    await RejectApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter);
                                     EventManager.AddEvent(EventCode.C50760_APPLICATION_REJECTED_AS_CONDITIONS_NOT_MET_IN_TIMEFRAME);
                                 }
                                 else
@@ -381,9 +380,9 @@ namespace FOAEA3.Business.Areas.Application
                         case EventCode.C50804_SCHEDULED_TO_BE_REINSTATED:
                             if (currentLifeState == ApplicationState.APPLICATION_REINSTATED_11)
                             {
-                                ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, Repositories.CurrentSubmitter,
+                                await ReinstateApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
-                                SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
+                                await SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
                             }
                             break;
 
@@ -391,9 +390,9 @@ namespace FOAEA3.Business.Areas.Application
                             if (currentLifeState.In(ApplicationState.PARTIALLY_SERVICED_12, ApplicationState.EXPIRED_15))
                             {
                                 // TODO: if it is at state 15, how can it re-instate?
-                                ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, Repositories.CurrentSubmitter,
+                                await ReinstateApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
-                                SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
+                                await SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
                             }
                             break;
 
@@ -411,10 +410,10 @@ namespace FOAEA3.Business.Areas.Application
 
             if (closeEvent)
             {
-                EventManager.SaveEvent(bfEvent, TracingApplication.AppLiSt_Cd, "C");
+                await EventManager.SaveEventAsync(bfEvent, TracingApplication.AppLiSt_Cd, "C");
             }
 
-            EventManager.SaveEvents();
+            await EventManager.SaveEventsAsync();
         }
 
         private void AddNewBFevent()
@@ -449,88 +448,142 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             EventManager.AddEvent(eventReasonCode);
-            EventManager.AddBFEvent(EventCode.C50520_INVALID_STATUS_CODE, effectiveTimestamp: nextBFdate);
+            EventManager.AddBFEvent(EventCode.C50520_INVALID_STATUS_CODE, effectiveDateTime: nextBFdate);
         }
 
-        public DataList<TracingApplicationData> GetApplicationsWaitingForAffidavit()
+        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
         {
-            return Repositories.TracingRepository.GetApplicationsWaitingForAffidavit();
+            return await DB.TracingTable.GetApplicationsWaitingForAffidavitAsync();
         }
 
-        private bool AffidavitExists()
+        private async Task<bool> AffidavitExistsAsync()
         {
-            return Repositories.TracingRepository.TracingDataExists(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            return await DB.TracingTable.TracingDataExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
         }
 
-        public DataList<TraceResponseData> GetTraceResults(bool checkCycle = false)
+        public async Task<DataList<TraceResponseData>> GetTraceResultsAsync(bool checkCycle = false)
         {
-            return Repositories.TraceResponseRepository.GetTraceResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
+            return await DB.TraceResponseTable.GetTraceResponseForApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd, checkCycle);
         }
 
-        public List<ApplicationEventData> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
+        public async Task<List<CraFieldData>> GetCraFields()
         {
-            return EventManager.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
+            return await DB.TraceResponseTable.GetCraFields();
         }
 
-        public List<ApplicationEventDetailData> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
+        public async Task<List<CraFormData>> GetCraForms()
         {
-            return EventDetailManager.GetActiveTracingEventDetails(enfSrv_Cd, cycle);
+            return await DB.TraceResponseTable.GetCraForms();
         }
 
-        public void ApplySINconfirmation()
+        public async Task<DataList<TraceFinancialResponseData>> GetTraceFinancialResultsAsync()
         {
-            SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
+            var data = await DB.TraceResponseTable.GetTraceResponseFinancialsForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
-            var sinManager = new ApplicationSINManager(TracingApplication, this);
-            sinManager.UpdateSINChangeHistory();
+            await GetFinancialDetails(data);
+
+            return data;
+        }
+
+        private async Task GetFinancialDetails(DataList<TraceFinancialResponseData> data)
+        {
+            foreach (var finData in data.Items)
+            {
+                var details = await DB.TraceResponseTable.GetTraceResponseFinancialDetails(finData.TrcRspFin_Id);
+                data.Messages.AddRange(details.Messages);
+
+                await GetFinancialDetailValues(details, data);
+
+                finData.TraceFinancialDetails = details.Items;
+            }
+        }
+
+        private async Task GetFinancialDetailValues(DataList<TraceFinancialResponseDetailData> details, DataList<TraceFinancialResponseData> data)
+        {
+            foreach (var detail in details.Items)
+            {
+                var values = await DB.TraceResponseTable.GetTraceResponseFinancialDetailValues(detail.TrcRspFin_Dtl_Id);
+                data.Messages.AddRange(values.Messages);
+
+                detail.TraceDetailValues = values.Items;
+            }
+        }
+
+        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEventsAsync(string enfSrv_Cd, string cycle)
+        {
+            return await EventManager.GetRequestedTRCINTracingEventsAsync(enfSrv_Cd, cycle);
+        }
+
+        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrv_Cd, string cycle)
+        {
+            return await EventDetailManager.GetActiveTracingEventDetailsAsync(enfSrv_Cd, cycle);
+        }
+
+        public async Task ApplySINfailedAsync()
+        {
+            await SetNewStateTo(ApplicationState.SIN_NOT_CONFIRMED_5);
 
             foreach (var eventItem in EventManager.Events)
                 eventItem.Subm_Update_SubmCd = "SYSTEM";
 
-            UpdateApplicationNoValidation();
-
+            await UpdateApplicationNoValidationAsync();
         }
 
-        public void ApplySINfailed()
+        public async Task CreateResponseDataAsync(List<TraceResponseData> responseData)
         {
-            SetNewStateTo(ApplicationState.SIN_NOT_CONFIRMED_5);
-
-            foreach (var eventItem in EventManager.Events)
-                eventItem.Subm_Update_SubmCd = "SYSTEM";
-
-            UpdateApplicationNoValidation();
+            var responsesDB = DB.TraceResponseTable;
+            await responsesDB.InsertBulkDataAsync(responseData);
         }
 
-        public void CreateResponseData(List<TraceResponseData> responseData)
+        public async Task CreateFinancialResponseDataAsync(TraceFinancialResponseData responseData)
         {
-            var responsesDB = Repositories.TraceResponseRepository;
-            responsesDB.InsertBulkData(responseData);
+            var id = await DB.TraceResponseTable.CreateTraceFinancialResponse(responseData);
+            if (responseData.TraceFinancialDetails is not null)
+                foreach (var detail in responseData.TraceFinancialDetails)
+                {
+                    detail.TrcRspFin_Id = id;
+                    var detailId = await DB.TraceResponseTable.CreateTraceFinancialResponseDetail(detail);
+                    if (detail.TraceDetailValues is not null)
+                    {
+                        foreach (var value in detail.TraceDetailValues)
+                        {
+                            value.TrcRspFin_Dtl_Id = detailId;
+                            _ = await DB.TraceResponseTable.CreateTraceFinancialResponseDetailValue(value);
+                        }
+                    }
+                }
         }
 
-        public void MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewedAsync(string enfService)
         {
-            var responsesDB = Repositories.TraceResponseRepository;
-            responsesDB.MarkResponsesAsViewed(enfService);
+            var responsesDB = DB.TraceResponseTable;
+            await responsesDB.MarkResponsesAsViewedAsync(enfService);
         }
 
-        public List<TracingOutgoingFederalData> GetFederalOutgoingData(int maxRecords,
+        public async Task CreateNETPeventsAsync()
+        {
+            await DB.TracingTable.CreateESDCEventTraceDataAsync();
+        }
+
+        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
         {
-            var tracingDB = Repositories.TracingRepository;
-            return tracingDB.GetFederalOutgoingData(maxRecords, activeState, lifeState, enfServiceCode);
+            var tracingDB = DB.TracingTable;
+            return await tracingDB.GetFederalOutgoingDataAsync(maxRecords, activeState, lifeState, enfServiceCode);
         }
 
-        public List<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)
         {
-            var tracingDB = Repositories.TracingRepository;
-            var data = tracingDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
+            var tracingDB = DB.TracingTable;
+            var data = await tracingDB.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
             return data;
         }
+
     }
 
 }

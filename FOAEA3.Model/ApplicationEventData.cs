@@ -1,10 +1,10 @@
 ﻿using FOAEA3.Model.Enums;
-using FOAEA3.Resources.Helpers;
 using System;
-using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace FOAEA3.Model
 {
+    [DebuggerDisplay("{Event_Id}: {Appl_EnfSrv_Cd}-{Appl_CtrlCd} [{Queue}]: {ActvSt_Cd}")]
     public class ApplicationEventData
     {
         public EventQueue Queue { get; set; }
@@ -25,7 +25,6 @@ namespace FOAEA3.Model
 
         public string Subm_Update_SubmCd { get; set; }
 
-        [DisplayFormat(DataFormatString = DateTimeHelper.YYYY_MM_DD_HH_MM_SS)]
         public DateTime Event_TimeStamp { get; set; }
 
         public DateTime? Event_Compl_Dte { get; set; }

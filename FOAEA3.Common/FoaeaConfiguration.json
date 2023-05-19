@@ -1,0 +1,52 @@
+{
+  "ConnectionStrings": {
+    "FOAEAMain": "Server=%FOAEA_DB_SERVER%;Database=FoaeaDBStg2Prod;Integrated Security=SSPI;Trust Server Certificate=true;"
+  },
+  "Declaration": {
+    "LicenceDenial": {
+      "English": "I declare that the information given in this application is true and is for the purpose of applying for licence denial in accordance with the Family Orders and Agreements Enforcement Assistance Act",
+      "French": "J’atteste que les renseignements donnés dans la présente demande sont vrais et sont fournis aux fins de la demande de refus d’autorisation en conformité avec la Loi d’aide à l’exécution des ordonnances et des ententes familiales"
+    },
+    "Tracing": {
+      "English": "I declare that the information in this application is correct and that the information was provided for the purpose of applying for the release of information under the Family Orders and Agreements Enforcement Assistance Act.",
+      "French": "J’atteste que les renseignements donnés dans la présente demande sont vrais et sont fournis aux fins de la demande de communication de renseignements en conformité avec la Loi d’aide à l’exécution des ordonnances et des ententes familiales."
+    }
+  },
+  "AutoSwear": [
+    "AB01",
+    "BC01",
+    "NS01",
+    "ON01",
+    "QC01",
+    "NF01",
+    "MB01"
+  ],
+  "AutoAccept": [
+    "AB01",
+    "ON01",
+    "MB01",
+    "QC01"
+  ],
+  "ESDsites": [
+    "AB01",
+    "MB01",
+    "NF01",
+    "ON01",
+    "QC01",
+    "NS01"
+  ],
+  "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ],
+  "RecipientsConfig": {
+    "EmailRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "SystemErrorRecipients": "Flas-it-SO@justice.gc.ca"
+  },
+  "Tokens": {
+    "Key": "%FILEBROKER_TOKEN_KEY%",
+    "Issuer": "%FILEBROKER_TOKEN_ISSUER%",
+    "Audience": "%FILEBROKER_TOKEN_AUDIENCE%",
+    "ExpireMinutes": 480,
+    "RefreshTokenExpireMinutes": 600
+  },
+  "TracingC78CutOff": "2023-11-15T12:00:00"
+}

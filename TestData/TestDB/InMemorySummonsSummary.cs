@@ -1,8 +1,9 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TestData.TestDB
 {
@@ -11,30 +12,35 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get; set; }
 
-        public void CreateSummonsSummary(SummonsSummaryData summSmryData)
+        public Task CreateSummonsSummaryAsync(SummonsSummaryData summSmryData)
         {
             throw new NotImplementedException();
         }
 
-        public List<SummonsSummaryData> GetAmountOwedRecords()
+        public Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync()
         {
-            return InMemData.SummSmryTestData.FindAll(m => m.SummSmry_Recalc_Dte <= DateTime.Now.Date);
+            return Task.FromResult(InMemData.SummSmryTestData.FindAll(m => m.SummSmry_Recalc_Dte <= DateTime.Now.Date));
         }
 
-        public decimal GetFeesOwedTotal(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
+        public Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
-            return 38.0M;  // these are the annual fees since 1999-03-01
+            return Task.FromResult(38.0M);  // these are the annual fees since 1999-03-01});
         }
 
-        public List<SummonsSummaryData> GetSummonsSummary(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        public Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
         {
             if (!string.IsNullOrEmpty(appl_CtrlCd))
-                return InMemData.SummSmryTestData.FindAll(m => m.Appl_CtrlCd == appl_CtrlCd);
+                return Task.FromResult(InMemData.SummSmryTestData.FindAll(m => m.Appl_CtrlCd == appl_CtrlCd));
             else
-                return InMemData.SummSmryTestData;
+                return Task.FromResult(InMemData.SummSmryTestData);
         }
 
-        public void UpdateSummonsSummary(SummonsSummaryData summSmryData)
+        public Task UpdateSummonsSummaryAsync(SummonsSummaryData summSmryData)
         {
             var currentSummSmry = InMemData.SummSmryTestData.FindAll(m => (m.Appl_CtrlCd == summSmryData.Appl_CtrlCd) && (m.Appl_EnfSrv_Cd == summSmryData.Appl_EnfSrv_Cd)).FirstOrDefault();
 
@@ -60,6 +66,8 @@ namespace TestData.TestDB
             currentSummSmry.SummSmry_LastCalc_Dte = summSmryData.SummSmry_LastCalc_Dte;
             currentSummSmry.SummSmry_Recalc_Dte = summSmryData.SummSmry_Recalc_Dte;
             currentSummSmry.SummSmry_Vary_Cnt = summSmryData.SummSmry_Vary_Cnt;
+
+            return Task.CompletedTask;
         }
     }
 }

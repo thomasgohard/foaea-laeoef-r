@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FOAEA3.Common\FOAEA3.Common.csproj" />
     <ProjectReference Include="..\FOAEA3.Model\FOAEA3.Model.csproj" />
+    <ProjectReference Include="..\FOAEA3.Resources\FOAEA3.Resources.csproj" />
   </ItemGroup>
 
 </Project>

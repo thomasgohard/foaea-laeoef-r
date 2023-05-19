@@ -1,0 +1,35 @@
+﻿@page
+@model FileBroker.Web.Pages.Tools.APIinfoModel
+@{
+}
+
+<table class="provisional gc-table table small" id="apiTable">
+    <caption>FOAEA 3 and File Broker APIs</caption>
+    <thead>
+        <tr>
+            <th>Core API</th>
+            <th>Swagger (OpenAPI)</th>
+            <th>Version</th>
+            <th>Connection</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var apiData in Model.ApiData)
+        {
+            string apiRoot = apiData.Value.ApiRoot + "swagger";
+            <tr>
+                <td>@apiData.Key</td>
+                <td><a href="@apiRoot" target="_blank">@apiRoot</a></td>
+                @if (apiData.Value.IsError)
+                {
+                    <td class="text-danger nowrap" nowrap>@apiData.Value.ApiVersion</td>
+                }
+                else
+                {
+                    <td class="text-info nowrap">@apiData.Value.ApiVersion</td>
+                }
+                <td class="nowrap">@apiData.Value.ConnectionString</td>
+            </tr>
+        }
+    </tbody>
+</table>

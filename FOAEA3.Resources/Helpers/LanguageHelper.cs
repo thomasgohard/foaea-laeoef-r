@@ -22,6 +22,11 @@ namespace FOAEA3.Resources.Helpers
             else
                 Thread.CurrentThread.CurrentUICulture = new CultureInfo(ENGLISH_LANGUAGE);
         }
+
+        public static string GetLanguage()
+        {
+            return Thread.CurrentThread.CurrentUICulture.Name;
+        }
     }
 
 }

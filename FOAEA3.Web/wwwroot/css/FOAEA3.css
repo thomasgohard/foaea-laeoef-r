@@ -22,6 +22,26 @@
     background-color: #F7AC08;
 }
 
+.buttonLink:link {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.buttonLink:visited {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.buttonLink:hover {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.buttonLink:active {
+    cursor: pointer;
+    text-decoration: none;
+}
+
 .menuDesc {
     display: none;
 }

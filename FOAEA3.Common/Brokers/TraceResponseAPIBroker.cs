@@ -1,27 +1,36 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Collections.Generic;
+using FOAEA3.Model.Interfaces.Broker;
 
 namespace FOAEA3.Common.Brokers
 {
     public class TraceResponseAPIBroker : ITraceResponseAPIBroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
+        public string Token { get; set; }
 
-        public TraceResponseAPIBroker(IAPIBrokerHelper apiHelper)
+        public TraceResponseAPIBroker(IAPIBrokerHelper apiHelper, string token)
         {
             ApiHelper = apiHelper;
+            Token = token;
         }
 
-        public void InsertBulkData(List<TraceResponseData> responseData)
+        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
         {
-            _ = ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
-                                                                                    responseData).Result;
+            _ = await ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
+                                                                                    responseData, token: Token);
         }
 
-        public void MarkTraceResultsAsViewed(string enfService)
+        public async Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData)
         {
-            ApiHelper.SendCommand("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService);
+            string apiCall = "api/v1/traceFinancialResponses";
+            _ = await ApiHelper.PostDataAsync<TraceFinancialResponseData, TraceFinancialResponseData>(apiCall,
+                                                                                         traceFinancialResultData, token: Token);
+        }
+
+        public async Task MarkTraceResultsAsViewedAsync(string enfService)
+        {
+            await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
         }
     }
 }

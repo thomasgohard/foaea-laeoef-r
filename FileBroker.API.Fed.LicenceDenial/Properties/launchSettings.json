@@ -1,0 +1,10 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "IIS Express": {
+      "commandName": "Project",
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:14013"
+    }
+  }
+}

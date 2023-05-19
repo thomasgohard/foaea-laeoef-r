@@ -2,16 +2,14 @@
 using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
-using FOAEA3.Model.Interfaces;
+using FOAEA3.Model.Interfaces.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FOAEA3.Data.DB
 {
     internal class DBSummDF : DBbase, ISummDFRepository
     {
-        internal DBSummDF(IDBTools mainDB) : base(mainDB)
+        internal DBSummDF(IDBToolsAsync mainDB) : base(mainDB)
         {
 
         }

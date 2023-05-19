@@ -1,20 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface ITracingApplicationAPIBroker
     {
-        TracingApplicationData CloseTracingApplication(TracingApplicationData tracingApplication);
-        TracingApplicationData CreateTracingApplication(TracingApplicationData tracingData);
-        TracingApplicationData FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd);
-        TracingApplicationData PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd);
-        TracingApplicationData GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
-        List<TraceCycleQuantityData> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle);
-        List<TraceToApplData> GetTraceToApplData();
-        TracingApplicationData UpdateTracingApplication(TracingApplicationData tracingApplication);
-        List<TracingOutgoingFederalData> GetOutgoingFederalTracingRequests(int maxRecords, string activeState,
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
+        Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication);
+        Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData);
+        Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd);
+        Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd);
+        Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
+        Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle);
+        Task<List<TraceToApplData>> GetTraceToApplDataAsync();
+        Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication);
+        Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication,
+                                                                 string newRecipientSubmitter,
+                                                                 string newIssuingSubmitter);
+        Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState,
                                                                            int lifeState, string enfServiceCode);
-        List<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords, string activeState,
+        Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState,
                                                                              string recipientCode);
     }
 }

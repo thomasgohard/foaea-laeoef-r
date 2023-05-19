@@ -1,15 +1,12 @@
 using DBHelper;
 using FOAEA3.Admin.Web.Filter;
-using FOAEA3.Data.Base;
-using FOAEA3.Data.DB;
-using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
+using FOAEA3.Common.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace FOAEA3.Admin.Web
 {
@@ -17,40 +14,42 @@ namespace FOAEA3.Admin.Web
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            LocalConfiguration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration LocalConfiguration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var mainDB = new DBTools(Configuration.GetConnectionString("FOAEAMain").ReplaceVariablesWithEnvironmentValues());
+            var config = new FoaeaConfigurationHelper();
+            var mainDB = new DBToolsAsync(config.FoaeaConnection);
 
             services.AddRazorPages()
                     .AddMvcOptions(options =>
                     {
-                        options.Filters.Add(new RazorPageActionFilter(Configuration, mainDB));
+                        options.Filters.Add(new RazorPageActionFilter(mainDB));
                     });
+            services.AddHttpContextAccessor();
 
-            services.AddScoped<IDBTools>(m => ActivatorUtilities.CreateInstance<DBTools>(m, mainDB)); // used to display the database name at top of page
-            services.AddScoped<IRepositories>(m => ActivatorUtilities.CreateInstance<DbRepositories>(m, mainDB));
-            services.AddScoped<IRepositories_Finance>(m => ActivatorUtilities.CreateInstance<DbRepositories_Finance>(m, mainDB)); // to access database procs for finance tables
-            services.AddScoped<IFoaEventsRepository>(m => ActivatorUtilities.CreateInstance<DBFoaMessage>(m, mainDB));
-            services.AddScoped<IActiveStatusRepository>(m => ActivatorUtilities.CreateInstance<DBActiveStatus>(m, mainDB));
-            services.AddScoped<IGenderRepository>(m => ActivatorUtilities.CreateInstance<DBGender>(m, mainDB));
-            services.AddScoped<IApplicationCommentsRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationComments>(m, mainDB));
-            services.AddScoped<IApplicationLifeStateRepository>(m => ActivatorUtilities.CreateInstance<DBApplicationLifeState>(m, mainDB));
+            LoggingHelper.SetupLogging(config.FoaeaConnection);
 
-            services.Configure<ApiConfig>(Configuration.GetSection("APIroot"));
-           // services.AddScoped<ApiConfig>(m => ActivatorUtilities.CreateInstance<ApiConfig>(m));
+            Common.Startup.AddDBServices(services, config.FoaeaConnection);
 
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(15);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IRepositories repositories)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (!env.IsEnvironment("Production"))
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -63,6 +62,10 @@ namespace FOAEA3.Admin.Web
 
             app.UseRouting();
 
+            app.UseSession();
+
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -70,11 +73,7 @@ namespace FOAEA3.Admin.Web
                 endpoints.MapRazorPages();
             });
 
-            ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
-            ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
-            ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
-            ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
+            Common.Startup.AddReferenceDataFromDB(app.ApplicationServices).Wait();
         }
     }
 }

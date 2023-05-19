@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Broker
 {
     public interface ISinAPIBroker
     {
-        List<SINOutgoingFederalData> GetOutgoingFederalSins(int maxRecords, string activeState, int lifeState, string enfServiceCode);
+        IAPIBrokerHelper ApiHelper { get; }
+        string Token { get; set; }
+
+        Task InsertBulkDataAsync(List<SINResultData> resultData);
+        Task<List<SINOutgoingFederalData>> GetOutgoingFederalSinsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode);
     }
 }

@@ -1,0 +1,49 @@
+﻿namespace FileBroker.Business.Helpers;
+
+public class IncomingFederalSinFileLoader
+{
+    private IFlatFileSpecificationRepository FlatFileSpecs { get; }
+    private int ProcessId { get; }
+
+    public IncomingFederalSinFileLoader(IFlatFileSpecificationRepository flatFileSpecs, int processId)
+    {
+        FlatFileSpecs = flatFileSpecs;
+        ProcessId = processId;
+    }
+
+    public async Task FillSinFileDataFromFlatFileAsync(FedSinFileBase fileData, string flatFile, List<string> errors)
+    {
+        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync(ProcessId);
+
+        // extract data into object
+        var flatFileLines = flatFile.Split("\n");
+        foreach (var flatFileLine in flatFileLines)
+        {
+            string error = string.Empty;
+
+            if (flatFileLine.Trim().Length > 2)
+            {
+                string recType = flatFileLine[..2];
+                switch (recType)
+                {
+                    case "01":
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
+                        break;
+
+                    case "02":
+                        FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.SININ02, flatFileLine, specs, recType, ref error);
+                        break;
+
+                    case "99":
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
+                        break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(error))
+                errors.Add(error);
+
+        }
+
+    }
+}

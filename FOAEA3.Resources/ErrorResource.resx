@@ -123,6 +123,9 @@
   <data name="CANT_CREATE_APPLICATION_ALREADY_EXISTS" xml:space="preserve">
     <value>Application already exists! Cannot be created.</value>
   </data>
+  <data name="CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED" xml:space="preserve">
+    <value>Unauthorized</value>
+  </data>
   <data name="CANT_SET_VALUE_ONCE_SET" xml:space="preserve">
     <value>Can't set once a value has already been set.</value>
   </data>
@@ -186,17 +189,38 @@
   <data name="INVALID_DEBTOR_SURNAME" xml:space="preserve">
     <value>Invalid Debtor Surname</value>
   </data>
+  <data name="INVALID_FREQUENCY_PAYMENT_CODE" xml:space="preserve">
+    <value>Invalid Frequency Payment Code (&lt;dat_PymPr_Cd&gt;)</value>
+  </data>
   <data name="INVALID_LOGIN" xml:space="preserve">
     <value>Invalid Username provided</value>
   </data>
   <data name="INVALID_LOGIN_EMAIL" xml:space="preserve">
     <value>Invalid Email associated with UserName</value>
   </data>
+  <data name="INVALID_MUST_REQUEST_DATA" xml:space="preserve">
+    <value>Error. Must request at least one of tracing, SIN, or financial data.</value>
+  </data>
   <data name="INVALID_PASSWORD" xml:space="preserve">
     <value>Invalid Password provided</value>
   </data>
+  <data name="INVALID_PURPOSE" xml:space="preserve">
+    <value>Invalid purpose. Must be 1, 2 or 3.</value>
+  </data>
+  <data name="INVALID_REQUEST_FINANCIAL_DATA" xml:space="preserve">
+    <value>Cannot request financial information for purpose 1.</value>
+  </data>
+  <data name="INVALID_REQUEST_SIN_DATA" xml:space="preserve">
+    <value>Cannot request SIN information for purpose 1.</value>
+  </data>
+  <data name="INVALID_TRACING_INFORMATION_TYPE" xml:space="preserve">
+    <value>Invalid tracing information requested. Cannot request employer address for purpose 3.</value>
+  </data>
   <data name="INVALID_USERNAME_OR_PASSWORD" xml:space="preserve">
     <value>Invalid username or password</value>
+  </data>
+  <data name="INVALID_VARIATIONS_ISSUE_DATE" xml:space="preserve">
+    <value>Invalid Variations issue Date</value>
   </data>
   <data name="MAX_CONTROL_CODE_LENGTH" xml:space="preserve">
     <value>The maximum length of the control code is 6</value>
@@ -240,14 +264,26 @@
   <data name="MISSING_MEDIUM_CODE" xml:space="preserve">
     <value>The medium code must be specified</value>
   </data>
+  <data name="MISSING_PURPOSE" xml:space="preserve">
+    <value>The purpose must be specified</value>
+  </data>
   <data name="MISSING_RECIPIENT_SUBMITTER" xml:space="preserve">
     <value>The recipient submitter must be specified</value>
   </data>
   <data name="MISSING_SUBMITTER" xml:space="preserve">
     <value>The submitter must be specified</value>
   </data>
+  <data name="PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE" xml:space="preserve">
+    <value>Periodic Amount (&lt;dat_IntFinH_Perpym_Money&gt;) provided with no frequency payment code (&lt;dat_PymPr_Cd&gt;)</value>
+  </data>
+  <data name="PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR" xml:space="preserve">
+    <value>Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was submitted with an amount &gt; 0. Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) does not exist or is invalid</value>
+  </data>
   <data name="REQUIRED_ALPHANUMERIC_CONTROL_CODE" xml:space="preserve">
     <value>The value specified for the reference code must be alphanumeric</value>
+  </data>
+  <data name="SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING" xml:space="preserve">
+    <value>Success. Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was not submitted. All data for Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;), Frequency Payment Code (&lt;PymPr_Cd&gt;) and Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) has been removed</value>
   </data>
   <data name="WARNING_NO_DUTIES" xml:space="preserve">
     <value>No duties were selected</value>

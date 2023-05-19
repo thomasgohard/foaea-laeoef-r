@@ -1,23 +1,26 @@
-﻿using FOAEA3.Common.Helpers;
+﻿using FOAEA3.Common;
 using FOAEA3.Model;
-using FOAEA3.Model.Interfaces;
-using Microsoft.AspNetCore.Http;
+using FOAEA3.Model.Constants;
+using FOAEA3.Model.Interfaces.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
-namespace FOAEA3.API.Areas.Administration.Controllers
+namespace FOAEA3.API.Areas.Administration.Controllers;
+
+[Route("api/v1/[controller]")]
+[ApiController]
+public class InfoBanksController : FoaeaControllerBase
 {
-    [Route("api/v1/[controller]")]
-    [ApiController]
-    public class InfoBanksController : ControllerBase
-    {
-        [HttpGet]
-        public ActionResult<List<InfoBankData>> GetInfoBanks([FromServices] IRepositories repositories)
-        {
-            APIHelper.ApplyRequestHeaders(repositories, Request.Headers);
-            APIHelper.PrepareResponseHeaders(Response.Headers);
+    [HttpGet("Version")]
+    public ActionResult<string> GetVersion() => Ok("InfoBanks API Version 1.0");
 
-            return Ok(repositories.InfoBankRepository.GetInfoBanks());
-        }
+    [HttpGet("DB")]
+    [Authorize(Roles = Roles.Admin)]
+    public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
+
+    [HttpGet]
+    public async Task<ActionResult<List<InfoBankData>>> GetInfoBanks([FromServices] IRepositories repositories)
+    {
+        return Ok(await repositories.InfoBankTable.GetInfoBanksAsync());
     }
 }

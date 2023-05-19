@@ -1,0 +1,25 @@
+﻿@page "{id}"
+
+@using FOAEA3.Web.Helpers
+
+@model InterceptionEditModel
+@{
+    int activeHldbCnd = 0;
+    if (Model.InterceptionApplication != null)
+    {
+        activeHldbCnd = Model.InterceptionApplication.HldbCnd.Count - 1;
+    }
+    ViewData[PageModeValue.PAGE_MODE] = PageModeValue.EDIT;
+}
+
+<p>Interception (Edit)</p>
+
+@await Html.PartialAsync(PageRoute.MESSAGES, Model)
+
+<form method="post" class="form-inline">
+    @await Html.PartialAsync(PageRoute.INTERCEPTION_DATA, Model, ViewData)
+</form>
+
+@section Scripts {
+    <script type="module" src="~/js/Applications/InterceptionEdit.js"></script>
+}

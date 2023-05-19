@@ -1,9 +1,8 @@
-﻿using System;
+﻿using FOAEA3.Model.Exceptions;
+using FOAEA3.Resources.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using FOAEA3.Model.Exceptions;
-using FOAEA3.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
 
 namespace FOAEA3.Model
 {
@@ -20,7 +19,7 @@ namespace FOAEA3.Model
 
         public int CompareTo([AllowNull] GenderData other)
         {
-            Dictionary<string, int> sortOrder = new Dictionary<string, int>
+            var sortOrder = new Dictionary<string, int>
                 {
                     { "M", 1}, // male
                     { "F", 2}, // female
@@ -33,8 +32,8 @@ namespace FOAEA3.Model
             if (!sortOrder.ContainsKey(Gender_Cd))
                 throw new GenderException($"Invalid gender code: {Gender_Cd}");
 
-            if (!sortOrder.ContainsKey(other.Gender_Cd))
-                throw new GenderException($"Invalid gender code: {other.Gender_Cd}");
+            if ((other is null) || (!sortOrder.ContainsKey(other.Gender_Cd)))
+                throw new GenderException($"Invalid gender code: {other?.Gender_Cd}");
 
             if (Gender_Cd == other.Gender_Cd)
                 result = 0;
@@ -54,7 +53,7 @@ namespace FOAEA3.Model
             }
             return this.CompareTo(other) == 0;
         }
-        
+
         public static bool operator ==(GenderData left, GenderData right)
         {
             if (left is null)

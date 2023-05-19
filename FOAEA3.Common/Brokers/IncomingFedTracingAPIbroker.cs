@@ -1,24 +1,27 @@
 ﻿using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Net.Http;
 
 namespace FOAEA3.Common.Brokers
 {
     public class IncomingFedTracingAPIbroker
     {
-        private IAPIBrokerHelper ApiHelper { get; }
+        public IAPIBrokerHelper ApiHelper { get; }
         private ApiConfig ApiFilesConfig { get; }
+        public string Token { get; set; }
 
-        public IncomingFedTracingAPIbroker(IAPIBrokerHelper apiHelper, ApiConfig apiConfig)
+        public IncomingFedTracingAPIbroker(IAPIBrokerHelper apiHelper, ApiConfig apiConfig, string token)
         {
             ApiHelper = apiHelper;
             ApiFilesConfig = apiConfig;
+            Token = token;
         }
 
-        public HttpResponseMessage ProcessFlatFile(string fileNameNoPath, string flatFile)
+        public async Task<HttpResponseMessage> ProcessFlatFileAsync(string fileNameNoPath, string flatFile)
         {
             string apiCall = $"api/v1/FederalTracingFiles?fileName={fileNameNoPath}";
-            return ApiHelper.PostFlatFile(apiCall, flatFile, rootAPI: ApiFilesConfig.IncomingFederalTracingRootAPI);
+            return await ApiHelper.PostFlatFileAsync(apiCall, flatFile,
+                                                     rootAPI: ApiFilesConfig.FileBrokerFederalTracingRootAPI,
+                                                     token: Token);
         }
     }
 }

@@ -1,16 +1,21 @@
 ﻿using FOAEA3.Model.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ISummFAFR_DERepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        public DataList<SummFAFR_DE_Data> GetSummFaFrDe(int summFAFR_Id);
-        public DataList<SummFAFR_DE_Data> GetSummFaFrDeReadyBatches(string enfSrv_Src_Cd, string DAFABatchId);
+        Task<SummFAFR_DE_Data> GetSummFaFrDeAsync(int summFAFR_Id);
+        Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDeReadyBatchesAsync(string enfSrv_Src_Cd, string DAFABatchId);
+        Task<int> CountDuplicateFundsAvailable(string debtorId, string enfsrv_src_cd, string enfsrv_loc_cd,
+                                               string paymentId, DateTime payableDate, int summFaFrId = 0);
+        Task<int> CountDuplicateFundsReversal(string debtorId, string enfsrv_src_cd, string enfsrv_loc_cd,
+                                              string paymentId, DateTime payableDate, int summFaFrId = 0);
+        Task<SummFAFR_DE_Data> CreateFaFrDeAsync(SummFAFR_DE_Data data);
     }
 }

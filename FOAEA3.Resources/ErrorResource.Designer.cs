@@ -19,7 +19,7 @@ namespace FOAEA3.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ErrorResource {
@@ -75,6 +75,15 @@ namespace FOAEA3.Resources {
         public static string CANT_CREATE_APPLICATION_ALREADY_EXISTS {
             get {
                 return ResourceManager.GetString("CANT_CREATE_APPLICATION_ALREADY_EXISTS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unauthorized.
+        /// </summary>
+        public static string CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED {
+            get {
+                return ResourceManager.GetString("CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED", resourceCulture);
             }
         }
         
@@ -268,6 +277,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Frequency Payment Code (&lt;dat_PymPr_Cd&gt;).
+        /// </summary>
+        public static string INVALID_FREQUENCY_PAYMENT_CODE {
+            get {
+                return ResourceManager.GetString("INVALID_FREQUENCY_PAYMENT_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Username provided.
         /// </summary>
         public static string INVALID_LOGIN {
@@ -286,6 +304,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error. Must request at least one of tracing, SIN, or financial data..
+        /// </summary>
+        public static string INVALID_MUST_REQUEST_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_MUST_REQUEST_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Password provided.
         /// </summary>
         public static string INVALID_PASSWORD {
@@ -295,11 +322,56 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid purpose. Must be 1, 2 or 3..
+        /// </summary>
+        public static string INVALID_PURPOSE {
+            get {
+                return ResourceManager.GetString("INVALID_PURPOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot request financial information for purpose 1..
+        /// </summary>
+        public static string INVALID_REQUEST_FINANCIAL_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_REQUEST_FINANCIAL_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot request SIN information for purpose 1..
+        /// </summary>
+        public static string INVALID_REQUEST_SIN_DATA {
+            get {
+                return ResourceManager.GetString("INVALID_REQUEST_SIN_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid tracing information requested. Cannot request employer address for purpose 3..
+        /// </summary>
+        public static string INVALID_TRACING_INFORMATION_TYPE {
+            get {
+                return ResourceManager.GetString("INVALID_TRACING_INFORMATION_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid username or password.
         /// </summary>
         public static string INVALID_USERNAME_OR_PASSWORD {
             get {
                 return ResourceManager.GetString("INVALID_USERNAME_OR_PASSWORD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Variations issue Date.
+        /// </summary>
+        public static string INVALID_VARIATIONS_ISSUE_DATE {
+            get {
+                return ResourceManager.GetString("INVALID_VARIATIONS_ISSUE_DATE", resourceCulture);
             }
         }
         
@@ -430,6 +502,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The purpose must be specified.
+        /// </summary>
+        public static string MISSING_PURPOSE {
+            get {
+                return ResourceManager.GetString("MISSING_PURPOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The recipient submitter must be specified.
         /// </summary>
         public static string MISSING_RECIPIENT_SUBMITTER {
@@ -448,11 +529,38 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Periodic Amount (&lt;dat_IntFinH_Perpym_Money&gt;) provided with no frequency payment code (&lt;dat_PymPr_Cd&gt;).
+        /// </summary>
+        public static string PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE {
+            get {
+                return ResourceManager.GetString("PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was submitted with an amount &gt; 0. Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) does not exist or is invalid.
+        /// </summary>
+        public static string PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR {
+            get {
+                return ResourceManager.GetString("PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value specified for the reference code must be alphanumeric.
         /// </summary>
         public static string REQUIRED_ALPHANUMERIC_CONTROL_CODE {
             get {
                 return ResourceManager.GetString("REQUIRED_ALPHANUMERIC_CONTROL_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success. Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;) was not submitted. All data for Periodic Payment Amount (&lt;dat_IntFinH_Perpym_Money&gt;), Frequency Payment Code (&lt;PymPr_Cd&gt;) and Cumulative Payment Indicator (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) has been removed.
+        /// </summary>
+        public static string SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING {
+            get {
+                return ResourceManager.GetString("SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING", resourceCulture);
             }
         }
         

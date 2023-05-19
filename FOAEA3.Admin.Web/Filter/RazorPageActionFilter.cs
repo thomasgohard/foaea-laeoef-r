@@ -1,7 +1,6 @@
 ﻿using DBHelper;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 
@@ -9,12 +8,10 @@ namespace FOAEA3.Admin.Web.Filter
 {
     public class RazorPageActionFilter : IAsyncPageFilter
     {
-        private readonly IConfiguration _config;
-        private readonly IDBTools _mainDB;
+        private readonly IDBToolsAsync _mainDB;
 
-        public RazorPageActionFilter(IConfiguration config, IDBTools mainDB)
+        public RazorPageActionFilter(IDBToolsAsync mainDB)
         {
-            _config = config;
             _mainDB = mainDB;
         }
 

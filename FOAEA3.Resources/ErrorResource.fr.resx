@@ -123,6 +123,9 @@
   <data name="CANT_CREATE_APPLICATION_ALREADY_EXISTS" xml:space="preserve">
     <value>Application existe déjà! Ne peux créer.</value>
   </data>
+  <data name="CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED" xml:space="preserve">
+    <value>Non-autorisé</value>
+  </data>
   <data name="CANT_SET_VALUE_ONCE_SET" xml:space="preserve">
     <value>Ne peux ré-assigner une valeur une fois assignée.</value>
   </data>
@@ -186,17 +189,38 @@
   <data name="INVALID_DEBTOR_SURNAME" xml:space="preserve">
     <value>Nom du débiteur invalide</value>
   </data>
+  <data name="INVALID_FREQUENCY_PAYMENT_CODE" xml:space="preserve">
+    <value>Valeur du code de la période de versement (&lt;dat_PymPr_Cd&gt;) invalide</value>
+  </data>
   <data name="INVALID_LOGIN" xml:space="preserve">
     <value>Nom d'utilisateur fourni non valide.</value>
   </data>
   <data name="INVALID_LOGIN_EMAIL" xml:space="preserve">
     <value>Courriel associé au utilisateur non valide.</value>
   </data>
+  <data name="INVALID_MUST_REQUEST_DATA" xml:space="preserve">
+    <value>Error. Must request at least one of tracing, SIN, or financial data.</value>
+  </data>
   <data name="INVALID_PASSWORD" xml:space="preserve">
     <value>Mot de passe fourni non valide.</value>
   </data>
+  <data name="INVALID_PURPOSE" xml:space="preserve">
+    <value>Invalid purpose. Must be 1, 2 or 3.</value>
+  </data>
+  <data name="INVALID_REQUEST_FINANCIAL_DATA" xml:space="preserve">
+    <value>Cannot request financial information for purpose 1.</value>
+  </data>
+  <data name="INVALID_REQUEST_SIN_DATA" xml:space="preserve">
+    <value>Cannot request SIN information for purpose 1.</value>
+  </data>
+  <data name="INVALID_TRACING_INFORMATION_TYPE" xml:space="preserve">
+    <value>Invalid tracing information requested. Cannot request employer address for purpose 3.</value>
+  </data>
   <data name="INVALID_USERNAME_OR_PASSWORD" xml:space="preserve">
     <value>Invalid username or password</value>
+  </data>
+  <data name="INVALID_VARIATIONS_ISSUE_DATE" xml:space="preserve">
+    <value>Champ invalide 'Date de la variation'</value>
   </data>
   <data name="MAX_CONTROL_CODE_LENGTH" xml:space="preserve">
     <value>Le code de contrôle doit avoir une longueur maximale de 6 caractères.</value>
@@ -240,14 +264,26 @@
   <data name="MISSING_MEDIUM_CODE" xml:space="preserve">
     <value>Le support choisi pour la réception des réponses doit être spécifié.</value>
   </data>
+  <data name="MISSING_PURPOSE" xml:space="preserve">
+    <value>L'objectif doit être spécifié.</value>
+  </data>
   <data name="MISSING_RECIPIENT_SUBMITTER" xml:space="preserve">
     <value>Le code du requérant autorisé au  transfert du fichier électronique doit être spécifié.</value>
   </data>
   <data name="MISSING_SUBMITTER" xml:space="preserve">
     <value>Le code de requérant de l’émetteur de la demande doit être spécifié.</value>
   </data>
+  <data name="PERIODIC_AMOUNT_MISSING_FREQUENCY_CODE" xml:space="preserve">
+    <value>Montant périodique  (&lt;dat_IntFinH_Perpym_Money&gt;) fourni sans code de fréquence de paiement</value>
+  </data>
+  <data name="PERIODIC_PAYMENT_AMOUNT_IS_0_MISSING_CUMULATIVE_PAYMENT_INDICATOR" xml:space="preserve">
+    <value>Montant du paiement périodique(&lt;dat_IntFinH_Perpym_Money&gt;) a été soumis avec une valeur &gt; 0. L'indicateur de paiement cumulatif (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) n'existe pas ou est invalide.</value>
+  </data>
   <data name="REQUIRED_ALPHANUMERIC_CONTROL_CODE" xml:space="preserve">
     <value>La valeur dans le code de contrôle doit être alphanumérique.</value>
+  </data>
+  <data name="SUCCESS_PERIODIC_PAYMENT_AMOUNT_MISSING" xml:space="preserve">
+    <value>Succès. Le montant du paiement périodique (&lt;dat_IntFinH_Perpym_Money&gt;) n'a pas été soumis. Toutes les données pour le montant du paiementt périodique (&lt;dat_IntFinH_Perpym_Money&gt;), le code de fréquence de paiement (&lt;dat_PymPr_Cd&gt;) et l'indicateur de paiement cumulatif (&lt;dat_IntFinH_CmlPrPym_Ind&gt;) ont été enlevées.</value>
   </data>
   <data name="WARNING_NO_DUTIES" xml:space="preserve">
     <value>Aucune tâche n'a été choisie</value>

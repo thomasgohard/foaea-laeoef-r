@@ -1,176 +1,231 @@
-﻿using FileBroker.Data;
-using FileBroker.Model;
-using FOAEA3.Common.Brokers;
-using FOAEA3.Model;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using FileBroker.Common.Helpers;
 using System.Text;
 
-namespace FileBroker.Business
+namespace FileBroker.Business;
+
+public class OutgoingProvincialTracingManager : IOutgoingFileManager
 {
-    public class OutgoingProvincialTracingManager
+    private APIBrokerList APIs { get; }
+    private RepositoryList DB { get; }
+    private IFileBrokerConfigurationHelper Config { get; }
+
+    private FoaeaSystemAccess FoaeaAccess { get; }
+
+    public OutgoingProvincialTracingManager(APIBrokerList apis, RepositoryList repositories, IFileBrokerConfigurationHelper config)
     {
-        private APIBrokerList APIs { get; }
-        private RepositoryList Repositories { get; }
+        APIs = apis;
+        DB = repositories;
+        Config = config;
 
-        public OutgoingProvincialTracingManager(APIBrokerList apiBrokers, RepositoryList repositories)
+        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
+    }
+
+    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+    {
+        var errors = new List<string>();
+
+        bool fileCreated = false;
+
+        var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
+
+        string newCycle = fileTableData.Cycle.ToString("000000");
+
+        try
         {
-            APIs = apiBrokers;
-            Repositories = repositories;
-        }
+            var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
 
-        public string CreateOutputFile(string fileBaseName, out List<string> errors)
-        {
-            errors = new List<string>();
+            string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
+            if (File.Exists(newFilePath))
+            {
+                errors.Add($"** Error: File Already Exists ({newFilePath})");
+                return (newFilePath, errors);
+            }
 
-            string newFilePath = string.Empty;
-            bool fileCreated = false;
-
-            var fileTableData = Repositories.FileTable.GetFileTableDataForFileName(fileBaseName);
-
+            if (!await FoaeaAccess.SystemLogin())
+            {
+                errors.Add("Failed to login to FOAEA!");
+                return (newFilePath, errors);
+            }
             try
             {
-                var processCodes = Repositories.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
-
-                string newCycle = fileTableData.Cycle.ToString("000000");
-
-                newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
-                if (File.Exists(newFilePath))
-                {
-                    errors.Add("** Error: File Already Exists");
-                    return "";
-                }
-
-                var data = GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                File.WriteAllText(newFilePath, fileContent);
+                await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
-                Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated,
+                string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
+
+                if (!string.IsNullOrEmpty(errorDoingBackup))
+                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {newFilePath}",
+                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
+
+                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");
 
-                Repositories.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                APIs.TraceResponseAPIBroker.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
-
-                return newFilePath;
-
+                await APIs.TracingResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
             }
-            catch (Exception e)
+            finally
             {
-                string error = "Error Creating Outbound Data File: " + e.Message;
-                errors.Add(error);
-
-                Repositories.OutboundAuditDB.InsertIntoOutboundAudit(newFilePath, DateTime.Now, fileCreated, error);
-
-                Repositories.ErrorTrackingDB.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}", "Error creating outbound file", e, true);
-
-                return string.Empty;
+                await FoaeaAccess.SystemLogout();
             }
 
-        }
+            return (newFilePath, errors);
 
-        private List<TracingOutgoingProvincialData> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,
-                                                                    string recipientCode)
+        }
+        catch (Exception e)
         {
-            var recMax = Repositories.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
-            int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
+            string error = "Error Creating Outbound Data File: " + e.Message;
+            errors.Add(error);
 
-            var data = APIs.TracingApplicationAPIBroker.GetOutgoingProvincialTracingData(maxRecords, actvSt_Cd,
-                                                                                         recipientCode);
-            return data;
+            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+
+            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
+                                                                       "Error creating outbound file", e, displayExceptionError: true);
+
+            return (string.Empty, errors);
         }
-
-
-        private static string GenerateOutputFileContentFromData(List<TracingOutgoingProvincialData> data,
-                                                                string newCycle)
-        {
-            var result = new StringBuilder();
-
-            result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
-            result.AppendLine("<ProvincialOutboundXMLFileTraceResults80>");
-
-            result.AppendLine(GenerateHeaderLine(newCycle));
-
-            foreach (var item in data)
-                result.AppendLine(GenerateDetailLine(item));
-
-            result.AppendLine(GenerateFooterLine(data.Count));
-
-            result.Append("</ProvincialOutboundXMLFileTraceResults80>");
-
-            return result.ToString();
-        }
-
-        private static string GenerateHeaderLine(string newCycle)
-        {
-            string xmlCreationDateTime = DateTime.Now.ToString("o");
-
-            var output = new StringBuilder();
-            output.AppendLine($"<Header>");
-            output.AppendLine($"  <Record_Type>01</Record_Type>");
-            output.AppendLine($"  <Cycle_Number>{newCycle}</Cycle_Number>");
-            output.AppendLine($"  <File_Creation_Date>{xmlCreationDateTime}</File_Creation_Date>");
-            output.Append($"</Header>");
-
-            return output.ToString();
-        }
-
-        private static string GenerateDetailLine(TracingOutgoingProvincialData item)
-        {
-            string xmlReceiptDate = item.TrcRsp_Rcpt_Dte.ToString("o");
-            string xmlLastUpdateDate = item.TrcRsp_Addr_LstUpdte.ToString("o");
-
-            var output = new StringBuilder();
-            output.AppendLine($"<Trace_Result>");
-            output.AppendLine(GenerateXMLTagWithValue("Record_Type_Code", "80"));
-            output.AppendLine(GenerateXMLTagWithValue("Enforcement_Service_Code", item.Appl_EnfSrv_Cd));
-            output.AppendLine(GenerateXMLTagWithValue("Issuing_Submitter_Code", item.Subm_SubmCd));
-            output.AppendLine(GenerateXMLTagWithValue("Appl_Control_Code", item.Appl_CtrlCd));
-            output.AppendLine(GenerateXMLTagWithValue("Source_Reference_Number", item.Appl_Source_RfrNr));
-            output.AppendLine(GenerateXMLTagWithValue("Recipient_Submitter_Code", item.Subm_Recpt_SubmCd));
-            output.AppendLine(GenerateXMLTagWithValue("Receipt_Date", xmlReceiptDate));
-            output.AppendLine(GenerateXMLTagWithValue("Sequence_Number", item.TrcRsp_SeqNr));
-            output.AppendLine(GenerateXMLTagWithValue("Trace_Status_Code", item.TrcSt_Cd));
-            output.AppendLine(GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString())); // or item.Recordtype?
-            output.AppendLine(GenerateXMLTagWithValue("Trace_Source_Service_Code", item.EnfSrv_Cd));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Type_Code", item.AddrTyp_Cd));
-            output.AppendLine(GenerateXMLTagWithValue("Employer_Name1", item.TrcRsp_EmplNme));
-            output.AppendLine(GenerateXMLTagWithValue("Employer_Name2", item.TrcRsp_EmplNme1));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Line1", item.TrcRsp_Addr_Ln));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Line2", item.TrcRsp_Addr_Ln1));
-            output.AppendLine(GenerateXMLTagWithValue("Address_City", item.TrcRsp_Addr_CityNme));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Province_Code", item.TrcRsp_Addr_PrvCd));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Country_Code", item.TrcRsp_Addr_CtryCd));
-            output.AppendLine(GenerateXMLTagWithValue("Address_Postal_Code", item.TrcRsp_Addr_PCd));
-            output.AppendLine(GenerateXMLTagWithValue("Last_Update_Date ", xmlLastUpdateDate));
-            output.Append($"</Trace_Result>");
-
-            return output.ToString();
-        }
-
-        private static string GenerateFooterLine(int rowCount)
-        {
-            var output = new StringBuilder();
-            output.AppendLine($"<Trailer>");
-            output.AppendLine($"  <Record_Type>99</Record_Type>");
-            output.AppendLine($"  <Detail_Record_Count>{rowCount:000000}</Detail_Record_Count>");
-            output.Append($"</Trailer>");
-
-            return output.ToString();
-        }
-
-        private static string GenerateXMLTagWithValue(string tagName, string value)
-        {
-            string trimmedValue = value?.Trim();
-            if (string.IsNullOrEmpty(trimmedValue))
-                return $"   <{tagName} />";
-            else
-                return $"   <{tagName}>{trimmedValue}</{tagName}>";
-        }
-
     }
+
+    private async Task<TracingOutgoingProvincialData> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
+                                                                string recipientCode)
+    {
+        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+        int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
+
+        var data = await APIs.TracingApplications.GetOutgoingProvincialTracingDataAsync(maxRecords, actvSt_Cd,
+                                                                                     recipientCode);
+        return data;
+    }
+
+
+    private static string GenerateOutputFileContentFromData(TracingOutgoingProvincialData data,
+                                                            string newCycle)
+    {
+        var result = new StringBuilder();
+
+        result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
+        result.AppendLine("<ProvincialOutboundXMLFileTraceResults>");
+
+        result.AppendLine(GenerateHeaderLine(newCycle));
+
+        int totalCount = 0;
+        if (data.TracingData is not null)
+        {
+            totalCount += data.TracingData.Count;
+            foreach (var item in data.TracingData)
+                result.AppendLine(GenerateDetailLine80(item));
+        }
+        if (data.FinancialData is not null)
+        {
+            totalCount += data.FinancialData.Count;
+            foreach (var item in data.FinancialData)
+                result.AppendLine(GenerateDetailLine81(item));
+        }
+
+        result.AppendLine(GenerateFooterLine(totalCount));
+
+        result.Append("</ProvincialOutboundXMLFileTraceResults>");
+
+        return result.ToString();
+    }
+
+    private static string GenerateHeaderLine(string newCycle)
+    {
+        string xmlCreationDateTime = DateTime.Now.ToString("o");
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Header>");
+        output.AppendLine($"  <Record_Type>01</Record_Type>");
+        output.AppendLine($"  <Cycle_Number>{newCycle}</Cycle_Number>");
+        output.AppendLine($"  <File_Creation_Date>{xmlCreationDateTime}</File_Creation_Date>");
+        output.Append($"</Header>");
+
+        return output.ToString();
+    }
+
+    private static string GenerateDetailLine80(TracingOutgoingProvincialTracingData item)
+    {
+        string xmlReceiptDate = item.TrcRsp_Rcpt_Dte.ToString("o");
+        string xmlLastUpdateDate = item.TrcRsp_Addr_LstUpdte.ToString("o");
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Trace_Result>");
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Record_Type_Code", "80"));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Enforcement_Service_Code", item.Appl_EnfSrv_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Issuing_Submitter_Code", item.Subm_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Control_Code", item.Appl_CtrlCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Source_Reference_Number", item.Appl_Source_RfrNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recipient_Submitter_Code", item.Subm_Recpt_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Receipt_Date", xmlReceiptDate));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Sequence_Number", item.TrcRsp_SeqNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Status_Code", item.TrcSt_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString()));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Source_Service_Code", item.EnfSrv_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Type_Code", item.AddrTyp_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Employer_Name1", item.TrcRsp_EmplNme));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Employer_Name2", item.TrcRsp_EmplNme1));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Line1", item.TrcRsp_Addr_Ln));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Line2", item.TrcRsp_Addr_Ln1));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_City", item.TrcRsp_Addr_CityNme));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Province_Code", item.TrcRsp_Addr_PrvCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Country_Code", item.TrcRsp_Addr_CtryCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Postal_Code", item.TrcRsp_Addr_PCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Last_Update_Date ", xmlLastUpdateDate));
+        output.Append($"</Trace_Result>");
+
+        return output.ToString();
+    }
+
+    private static string GenerateDetailLine81(TracingOutgoingProvincialFinancialData item)
+    {
+        string xmlReceiptDate = item.TrcRsp_Rcpt_Dte.ToString("o");
+
+        var output = new StringBuilder();
+        output.AppendLine($"<Trace_Result>");
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Record_Type_Code", "81"));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Enforcement_Service_Code", item.Appl_EnfSrv_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Issuing_Submitter_Code", item.Subm_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Appl_Control_Code", item.Appl_CtrlCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Source_Reference_Number", item.Appl_Source_RfrNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Recipient_Submitter_Code", item.Subm_Recpt_SubmCd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Receipt_Date", xmlReceiptDate));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Sequence_Number", item.TrcRsp_SeqNr));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Status_Code", item.TrcSt_Cd));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Result_Code", item.Prcs_RecType.ToString()));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Trace_Source_Service_Code", item.EnfSrv_Cd));
+
+        if (item.TraceFinancialDetails is not null)
+        {
+            output.AppendLine("   <Tax_Response>");
+            foreach (var taxYear in item.TraceFinancialDetails)
+            {
+                short year = taxYear.FiscalYear;
+                string taxForm = taxYear.TaxForm;
+                output.AppendLine($"      <Tax_Data year='{year}' form='{taxForm}'>");
+                foreach (var taxValue in taxYear.TraceDetailValues)
+                    output.AppendLine($"         <field name='{taxValue.FieldName}'>{taxValue.FieldValue}</field>");
+                output.AppendLine($"      </Tax_Data>");
+            }
+            output.AppendLine("   </Tax_Response>");
+        }
+        output.Append($"</Trace_Result>");
+
+        return output.ToString();
+    }
+
+    private static string GenerateFooterLine(int rowCount)
+    {
+        var output = new StringBuilder();
+        output.AppendLine($"<Trailer>");
+        output.AppendLine($"  <Record_Type>99</Record_Type>");
+        output.AppendLine($"  <Detail_Record_Count>{rowCount:000000}</Detail_Record_Count>");
+        output.Append($"</Trailer>");
+
+        return output.ToString();
+    }
+
 }

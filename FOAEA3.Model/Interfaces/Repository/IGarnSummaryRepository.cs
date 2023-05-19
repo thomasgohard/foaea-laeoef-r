@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FOAEA3.Model.Interfaces
+namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IGarnSummaryRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        List<GarnSummaryData> GetGarnSummary(string appl_EnfSrv_Cd, string enfOfficeCd, int fiscalMonth, int fiscalYear);
-        void CreateGarnSummary(GarnSummaryData garnSummaryData);
-        void UpdateGarnSummary(GarnSummaryData garnSummaryData);
+        Task<List<GarnSummaryData>> GetGarnSummaryAsync(string appl_EnfSrv_Cd, string enfOfficeCd, int fiscalMonth, int fiscalYear);
+        Task CreateGarnSummaryAsync(GarnSummaryData garnSummaryData);
+        Task UpdateGarnSummaryAsync(GarnSummaryData garnSummaryData);
     }
 }
