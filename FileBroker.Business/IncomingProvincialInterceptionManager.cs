@@ -1,5 +1,6 @@
 ﻿using DBHelper;
 using FileBroker.Common.Helpers;
+using FileBroker.Model;
 using FOAEA3.Resources;
 using Newtonsoft.Json;
 
@@ -158,62 +159,23 @@ namespace FileBroker.Business
                                 };
                                 errorCount += thisErrorCount;
 
-                                var requestLogData = new RequestLogData
-                                {
-                                    MaintenanceAction = interceptionMessage.MaintenanceAction,
-                                    MaintenanceLifeState = interceptionMessage.MaintenanceLifeState,
-                                    Appl_EnfSrv_Cd = interceptionMessage.Application.Appl_EnfSrv_Cd,
-                                    Appl_CtrlCd = interceptionMessage.Application.Appl_CtrlCd,
-                                    LoadedDateTime = DateTime.Now
-                                };
-
-                                _ = await DB.RequestLogTable.AddAsync(requestLogData);
-
                                 if (isValidData)
                                 {
-                                    var loadInboundDB = DB.LoadInboundAuditTable;
+                                    var inboundHistoryTable = DB.LoadInboundAuditTable;
                                     var appl = interceptionMessage.Application;
                                     var fileName = FileName + ".XML";
 
-                                    if (!await loadInboundDB.AlreadyExistsAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
-                                                                                fileName))
+                                    if (!await inboundHistoryTable.RowExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr,
+                                                                             fileName))
                                     {
+                                        await inboundHistoryTable.AddRow(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
-                                        await loadInboundDB.AddNewAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+                                        var messages = await SendDataToFoaea(interceptionMessage);
 
-                                        var messages = await SendDataToFoaeaAsync(interceptionMessage);
+                                        ProcessMessages(messages, fileAuditData, includeInfoInMessages, result,
+                                                        ref errorCount, ref warningCount, ref successCount);
 
-                                        if (messages.ContainsMessagesOfType(MessageType.Error))
-                                        {
-                                            var errors = messages.FindAll(m => m.Severity == MessageType.Error);
-                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
-                                            errorCount++;
-                                        }
-                                        else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                        {
-                                            var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-                                            fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
-                                            warningCount++;
-                                        }
-                                        else
-                                        {
-                                            if (includeInfoInMessages)
-                                            {
-                                                var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-                                                if (infos.Any())
-                                                {
-                                                    fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
-                                                    result.AddRange(infos);
-                                                }
-                                            }
-
-                                            if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
-                                                fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
-                                            successCount++;
-                                        }
-
-                                        await loadInboundDB.MarkAsCompletedAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
-
+                                        await inboundHistoryTable.MarkRowAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
                                     }
                                 }
 
@@ -260,6 +222,42 @@ namespace FileBroker.Business
             return result;
         }
 
+        private void ProcessMessages(MessageDataList messages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+                                     MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
+        {
+            
+
+            if (messages.ContainsMessagesOfType(MessageType.Error))
+            {
+                var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                fileAuditData.ApplicationMessage = BuildDescriptionForMessage(errors.First());
+                errorCount++;
+            }
+            else if (messages.ContainsMessagesOfType(MessageType.Warning))
+            {
+                var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
+                fileAuditData.ApplicationMessage = BuildDescriptionForMessage(warnings.First());
+                warningCount++;
+            }
+            else
+            {
+                if (includeInfoInMessages)
+                {
+                    var infos = messages.FindAll(m => m.Severity == MessageType.Information);
+                    if (infos.Any())
+                    {
+                        fileAuditData.ApplicationMessage = BuildDescriptionForMessage(infos.First());
+                        result.AddRange(infos);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(fileAuditData.ApplicationMessage))
+                    fileAuditData.ApplicationMessage = LanguageResource.AUDIT_SUCCESS;
+                successCount++;
+            }
+                       
+        }
+
         public async Task AutoAcceptVariationsAsync(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
@@ -272,16 +270,16 @@ namespace FileBroker.Business
             await prodAudit.InsertAsync(processName, "Ended", "O");
         }
 
-        public async Task<MessageDataList> SendDataToFoaeaAsync(MessageData<InterceptionApplicationData> interceptionMessageData)
+        public async Task<MessageDataList> SendDataToFoaea(MessageData<InterceptionApplicationData> interceptionMessageData)
         {
-            InterceptionApplicationData interception;
-            var existingMessages = interceptionMessageData.Application.Messages;
+            var interception = interceptionMessageData.Application;
+            var existingMessages = interception.Messages;
 
             APIs.InterceptionApplications.ApiHelper.CurrentSubmitter = interceptionMessageData.NewUpdateSubmitter;
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
-                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interceptionMessageData.Application);
+                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interception);
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
             {
@@ -289,25 +287,25 @@ namespace FileBroker.Business
                 {
                     case "00": // change
                     case "0":
-                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interception);
                         break;
 
                     case "14": // cancellation
-                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interception);
                         break;
 
                     case "17": // variation
-                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interception);
                         break;
 
                     case "29": // transfer
-                        interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interceptionMessageData.Application,
+                        interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interception,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
                                                                                                      interceptionMessageData.NewIssuingSubmitter);
                         break;
 
                     case "35": // suspend
-                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interceptionMessageData.Application);
+                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interception);
                         break;
 
                     default:
