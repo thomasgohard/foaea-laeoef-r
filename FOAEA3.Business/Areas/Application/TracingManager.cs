@@ -17,6 +17,7 @@ namespace FOAEA3.Business.Areas.Application
     internal partial class TracingManager : ApplicationManager
     {
         public TracingApplicationData TracingApplication { get; private set; }
+        public TracingValidation TracingValidation { get; private set; }
         private DateTime ReinstateEffectiveDate { get; set; }
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
@@ -59,14 +60,19 @@ namespace FOAEA3.Business.Areas.Application
                                             });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
-            //            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+            StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+
+            if (Validation is TracingValidation)
+                TracingValidation = (Validation as TracingValidation);
         }
 
         public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
         {
             // get data from Appl
             bool isSuccess = await base.LoadApplicationAsync(enfService, controlCode);
+
+            await TracingValidation.SetC78();
 
             if (isSuccess)
             {
@@ -90,6 +96,8 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
+            await TracingValidation.SetC78();
+
             IsAddressMandatory = false;
             bool success = await base.CreateApplicationAsync();
 
@@ -109,7 +117,9 @@ namespace FOAEA3.Business.Areas.Application
         {
             IsAddressMandatory = false;
 
-            if (!Validation.IsC78())
+            await TracingValidation.SetC78();
+
+            if (!TracingValidation.IsC78())
             {
                 var currentDataManager = new TracingManager(DB, Config, CurrentUser);
                 await currentDataManager.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);

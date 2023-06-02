@@ -85,49 +85,24 @@ public class IncomingProvincialTracingManager
                             ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
 
                             if (isValidActionCode)
-                            {
-                                var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
-                                var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+                            {                                
+                                var tracingRequest = SetupRequestFromFileData(baseData, tracingFile);
 
-                                var tracingMessage = new MessageData<TracingApplicationData>
+                                var loadInboundAuditTable = DB.LoadInboundAuditTable;
+                                var appl = tracingRequest.Application;
+                                var fileName = FileName + ".XML";
+
+                                if (!await loadInboundAuditTable.RowExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName))
                                 {
-                                    Application = CombineMatchingTracingApplicationDataFromRequest(baseData, traceData, traceFinData),
-                                    MaintenanceAction = baseData.Maintenance_ActionCd,
-                                    MaintenanceLifeState = baseData.dat_Appl_LiSt_Cd,
-                                    NewRecipientSubmitter = baseData.dat_New_Owner_RcptSubmCd,
-                                    NewIssuingSubmitter = baseData.dat_New_Owner_SubmCd,
-                                    NewUpdateSubmitter = baseData.dat_Update_SubmCd
-                                };
+                                    await loadInboundAuditTable.AddRow(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
-                                var messages = await SendRequestToFoaea(tracingMessage);
+                                    var foaeaMessages = await SendRequestToFoaea(tracingRequest);
 
-                                if (messages.ContainsMessagesOfType(MessageType.Error))
-                                {
-                                    var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                    ProcessMessages(foaeaMessages, fileAuditData, includeInfoInMessages, result,
+                                                    ref errorCount, ref warningCount, ref successCount);
 
-                                    fileAuditData.ApplicationMessage = errors[0].Description;
-                                    errorCount++;
-                                }
-                                else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                {
-                                    var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-
-                                    fileAuditData.ApplicationMessage = warnings[0].Description;
-                                    warningCount++;
-                                }
-                                else
-                                {
-                                    if (includeInfoInMessages)
-                                    {
-                                        var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-
-                                        result.AddRange(infos);
-                                    }
-
-                                    fileAuditData.ApplicationMessage = "Success";
-                                    successCount++;
-                                }
-
+                                    await loadInboundAuditTable.MarkRowAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
+                                }   
                             }
                             else
                             {
@@ -136,7 +111,6 @@ public class IncomingProvincialTracingManager
                             }
 
                             await DB.FileAudit.InsertFileAuditData(fileAuditData);
-
                         }
 
                         int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
@@ -150,7 +124,6 @@ public class IncomingProvincialTracingManager
                     }
                 }
             }
-
         }
 
         if (!isValid)
@@ -167,6 +140,54 @@ public class IncomingProvincialTracingManager
         }
 
         return result;
+    }
+
+    private MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
+    {
+        var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+        var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+
+        var tracingRequest = new MessageData<TracingApplicationData>
+        {
+            Application = CombineMatchingTracingApplicationDataFromRequest(baseData, traceData, traceFinData),
+            MaintenanceAction = baseData.Maintenance_ActionCd,
+            MaintenanceLifeState = baseData.dat_Appl_LiSt_Cd,
+            NewRecipientSubmitter = baseData.dat_New_Owner_RcptSubmCd,
+            NewIssuingSubmitter = baseData.dat_New_Owner_SubmCd,
+            NewUpdateSubmitter = baseData.dat_Update_SubmCd
+        };
+
+        return tracingRequest;
+    }
+    private void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+                                 MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
+    {
+        if (foaeaMessages.ContainsMessagesOfType(MessageType.Error))
+        {
+            var errors = foaeaMessages.FindAll(m => m.Severity == MessageType.Error);
+
+            fileAuditData.ApplicationMessage = errors[0].Description;
+            errorCount++;
+        }
+        else if (foaeaMessages.ContainsMessagesOfType(MessageType.Warning))
+        {
+            var warnings = foaeaMessages.FindAll(m => m.Severity == MessageType.Warning);
+
+            fileAuditData.ApplicationMessage = warnings[0].Description;
+            warningCount++;
+        }
+        else
+        {
+            if (includeInfoInMessages)
+            {
+                var infos = foaeaMessages.FindAll(m => m.Severity == MessageType.Information);
+
+                result.AddRange(infos);
+            }
+
+            fileAuditData.ApplicationMessage = "Success";
+            successCount++;
+        }
     }
 
     public async Task<MessageDataList> SendRequestToFoaea(MessageData<TracingApplicationData> tracingMessageData)

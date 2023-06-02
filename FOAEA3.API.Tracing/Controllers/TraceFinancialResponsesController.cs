@@ -28,9 +28,8 @@ namespace FOAEA3.API.Tracing.Controllers
         }
 
         [HttpGet("{id}/pdf")]
-        [AllowAnonymous]
         public async Task<ActionResult> GetCRAform([FromRoute] ApplKey id, [FromServices] IRepositories repositories,
-                                                 [FromQuery] short year, [FromQuery] string form, [FromQuery] short cycle)
+                                                   [FromQuery] short year, [FromQuery] string form, [FromQuery] short cycle)
         {
             var manager = new TracingManager(repositories, config, User);
 
@@ -41,8 +40,7 @@ namespace FOAEA3.API.Tracing.Controllers
                 var finValues = finDetails?.Where(m => m.FiscalYear == year && m.TaxForm == form)?.FirstOrDefault()?.TraceDetailValues;
 
                 if (finValues is not null)
-                {
-                    
+                {                    
                     var craFields = await manager.GetCraFields();
                     var craForms = await manager.GetCraForms();
 

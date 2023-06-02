@@ -6,23 +6,58 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal class TracingValidation : ApplicationValidation
     {
         private TracingApplicationData TracingApplication { get; }
-        public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager, IRepositories repositories,
-                                 IFoaeaConfigurationHelper config, FoaeaUser user) :
-                                    base(tracingApplication, eventManager, repositories, config, user)
+
+        private bool HasSignedC78 { get; set; }
+        private DateTime? C78EffectiveDateTime { get; set; }
+
+        public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager,
+                                 IRepositories db, IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                    base(tracingApplication, eventManager, db, config, user)
         {
             TracingApplication = tracingApplication;
+            _ = SetC78();
         }
 
         public TracingValidation(TracingApplicationData tracingApplication, IRepositories repositories,
                                  IFoaeaConfigurationHelper config, FoaeaUser user) : base(tracingApplication, repositories, config, user)
         {
             TracingApplication = tracingApplication;
+            _ = SetC78();
+        }
+
+        public async Task SetC78()
+        {
+            if ((TracingApplication is null) || string.IsNullOrEmpty(TracingApplication.Appl_EnfSrv_Cd))
+            {
+                HasSignedC78 = false;
+                return;
+            }
+
+            string enfSrv = TracingApplication.Appl_EnfSrv_Cd.Trim();
+            var enfSrvData = (await DB.EnfSrvTable.GetEnfServiceAsync(enforcementServiceCode: enfSrv)).FirstOrDefault();
+            if (enfSrvData is not null)
+            {
+                HasSignedC78 = enfSrvData.HasSignedC78;
+                C78EffectiveDateTime = enfSrvData.C78EffectiveDateTime;
+            }
+            else
+                HasSignedC78 = false;
+        }
+
+        public bool IsC78()
+        {
+            if (HasSignedC78)
+                return TracingApplication.Appl_Create_Dte >= C78EffectiveDateTime;
+            else
+                return false;
         }
 
         public override bool IsValidMandatoryData()

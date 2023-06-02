@@ -45,7 +45,8 @@ namespace FOAEA3.Data.DB
             data.CRAFieldCode = rdr["CRAFieldCode"] as string; // can be null 
             data.CRAComment = rdr["CRAComment"] as string; // can be null 
             data.CRAFieldName = rdr["CRAFieldName"] as string; // can be null 
-            data.CRAFieldDescription = rdr["CRAFieldDescription"] as string; // can be null 
+            data.CRAFieldDescriptionEnglish = rdr["CRAFieldDescriptionEnglish"] as string; // can be null 
+            data.CRAFieldDescriptionFrench = rdr["CRAFieldDescriptionFrench"] as string; // can be null 
         }
 
         public async Task<List<CraFormData>> GetCraForms()

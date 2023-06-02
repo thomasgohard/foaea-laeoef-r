@@ -8,6 +8,7 @@
         public string CRAFieldCode { get; set; }
         public string CRAComment { get; set; }
         public string CRAFieldName { get; set; }
-        public string CRAFieldDescription { get; set; }
+        public string CRAFieldDescriptionEnglish { get; set; }
+        public string CRAFieldDescriptionFrench { get; set; }
     }
 }

@@ -6,6 +6,5 @@
     "EmailRecipients": "dsarrazi@justice.gc.ca",
     "ExGratiaRecipients": "dsarrazi@justice.gc.ca",
     "SystemErrorRecipients": "dsarrazi@justice.gc.ca"
-  },
-  "TracingC78CutOff": "2023-04-01T00:00:00"
+  }
 }
