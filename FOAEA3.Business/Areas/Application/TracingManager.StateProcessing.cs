@@ -11,7 +11,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_04_SinConfirmed();
 
-            if (Validation.IsC78() || await AffidavitExistsAsync())
+            if (TracingValidation.IsC78() || await AffidavitExistsAsync())
                 await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
             else
                 await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
@@ -23,7 +23,7 @@ namespace FOAEA3.Business.Areas.Application
 
             await Validation.AddDuplicateSINWarningEventsAsync();
 
-            if (Validation.IsC78())
+            if (TracingValidation.IsC78())
             {
                 await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
             }

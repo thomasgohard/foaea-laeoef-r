@@ -14,6 +14,5 @@ namespace FOAEA3.Model.Interfaces
         List<string> ESDsites { get; }
         DeclarationData LicenceDenialDeclaration { get; }
         DeclarationData TracingDeclaration { get; }
-        public DateTime TracingC78CutOff { get; }
     }
 }
