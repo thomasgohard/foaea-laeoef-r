@@ -21,6 +21,6 @@ public class InfoBanksController : FoaeaControllerBase
     [HttpGet]
     public async Task<ActionResult<List<InfoBankData>>> GetInfoBanks([FromServices] IRepositories repositories)
     {
-        return Ok(await repositories.InfoBankTable.GetInfoBanksAsync());
+        return Ok(await repositories.InfoBankTable.GetInfoBanks());
     }
 }

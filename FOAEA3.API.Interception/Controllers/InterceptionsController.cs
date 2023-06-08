@@ -34,7 +34,7 @@ public class InterceptionsController : FoaeaControllerBase
 
         var manager = new InterceptionManager(repositories, repositoriesFinance, config, User);
 
-        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.InterceptionApplication.AppCtgy_Cd == "I01")
@@ -54,7 +54,7 @@ public class InterceptionsController : FoaeaControllerBase
                                                          [FromQuery] string enfService)
     {
         var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config, User);
-        await interceptionManager.AutoAcceptVariationsAsync(enfService);
+        await interceptionManager.AutoAcceptVariations(enfService);
 
         return Ok();
     }
@@ -64,20 +64,20 @@ public class InterceptionsController : FoaeaControllerBase
     public async Task<ActionResult<InterceptionApplicationData>> CreateApplication([FromServices] IRepositories db,
                                                                                    [FromServices] IRepositories_Finance dbFinance)
     {
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, db, dbFinance, config, User);
-        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        var submitter = (await db.SubmitterTable.GetSubmitter(application.Subm_SubmCd)).FirstOrDefault();
         if (submitter is not null)
         {
             interceptionManager.CurrentUser.Submitter = submitter;
             db.CurrentSubmitter = submitter.Subm_SubmCd;
         }
 
-        bool isCreated = await interceptionManager.CreateApplicationAsync();
+        bool isCreated = await interceptionManager.CreateApplication();
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -100,13 +100,13 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
-        await interceptionManager.UpdateApplicationAsync();
+        await interceptionManager.UpdateApplication();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -124,13 +124,13 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositories_finance, config, User);
-        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
+        await appManager.TransferApplication(newIssuingSubmitter, newRecipientSubmitter);
 
         return Ok(application);
     }
@@ -144,7 +144,7 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -167,13 +167,13 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var interceptionManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
-        await interceptionManager.SuspendApplicationAsync();
+        await interceptionManager.SuspendApplication();
 
         if (!interceptionManager.InterceptionApplication.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -185,7 +185,7 @@ public class InterceptionsController : FoaeaControllerBase
     [HttpPut("ValidateFinancialCoreValues")]
     public async Task<ActionResult<ApplicationData>> ValidateFinancialCoreValues([FromServices] IRepositories repositories)
     {
-        var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var appl = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
         var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
         var interceptionValidation = new InterceptionValidation(appl, repositories, config, currentUser);
 
@@ -204,15 +204,15 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINBypassData>(Request);
+        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
 
         var application = new InterceptionApplicationData();
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
-        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
 
         var sinManager = new ApplicationSINManager(application, appManager);
-        await sinManager.SINconfirmationBypassAsync(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+        await sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
         return Ok(application);
     }
@@ -224,14 +224,14 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
 
-        if (await appManager.VaryApplicationAsync())
+        if (await appManager.VaryApplication())
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -245,14 +245,14 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
 
-        if (await appManager.AcceptInterceptionAsync(supportingDocsReceiptDate))
+        if (await appManager.AcceptInterception(supportingDocsReceiptDate))
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -265,14 +265,14 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
 
-        if (await appManager.AcceptVariationAsync())
+        if (await appManager.AcceptVariation())
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -286,14 +286,14 @@ public class InterceptionsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
 
-        if (await appManager.RejectVariationAsync(applicationRejectReasons))
+        if (await appManager.RejectVariation(applicationRejectReasons))
             return Ok(application);
         else
             return UnprocessableEntity(application);

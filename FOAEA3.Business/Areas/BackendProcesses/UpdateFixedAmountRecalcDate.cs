@@ -23,19 +23,19 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Update Fixed Amount Date", "Update Fixed Amount Recalc Date Started", "O");
+            await prodAudit.Insert("Update Fixed Amount Date", "Update Fixed Amount Recalc Date Started", "O");
 
             var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
             var summSmryApplications = await interceptionManager.GetFixedAmountRecalcDateRecords();
 
             var amountOwedProcess = new AmountOwedProcess(DB, DBfinance);
-            await amountOwedProcess.RunAsync(summSmryApplications);
+            await amountOwedProcess.Run(summSmryApplications);
 
-            await prodAudit.InsertAsync("Update Fixed Amount Date", "Update Fixed Amount Recalc Date Completed", "O");
+            await prodAudit.Insert("Update Fixed Amount Date", "Update Fixed Amount Recalc Date Completed", "O");
         }
     }
 }

@@ -33,7 +33,7 @@ public class OutgoingFederalSinsController : FoaeaControllerBase
         var applManager = new ApplicationManager(appl, repositories, config, User);
         var manager = new ApplicationSINManager(appl, applManager);
 
-        var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState, enfServiceCode);
+        var data = await manager.GetFederalOutgoingData(maxRecords, activeState, (ApplicationState)lifeState, enfServiceCode);
 
         return Ok(data);
     }

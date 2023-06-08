@@ -24,7 +24,7 @@ public class SubmitterProfilesController : FoaeaControllerBase
     public async Task<ActionResult<SubmitterProfileData>> GetSubmitterProfile([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterProfileManager = new SubmitterProfileManager(repositories);
-        var submitter = await submitterProfileManager.GetSubmitterProfileAsync(submCd);
+        var submitter = await submitterProfileManager.GetSubmitterProfile(submCd);
 
         if (submitter != null)
         {

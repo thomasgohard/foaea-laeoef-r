@@ -66,11 +66,11 @@ namespace FileBroker.Business.Helpers
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
                 if (!fileTableData.IsXML)
-                    Errors.AddRange(await tracingManager.ProcessFlatFileAsync(flatFile, fullPath));
+                    Errors.AddRange(await tracingManager.ProcessFlatFile(flatFile, fullPath));
                 else
                 {
                     string jsonText = FileHelper.ConvertXmlToJson(flatFile, Errors);
-                    Errors.AddRange(await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName));
+                    Errors.AddRange(await tracingManager.ProcessXmlFile(jsonText, fileFullName));
                 }
 
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
@@ -80,7 +80,7 @@ namespace FileBroker.Business.Helpers
                     string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
 
                     if (!string.IsNullOrEmpty(errorDoingBackup))
-                        await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                        await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fullPath}",
                                                                             "Error creating backup of outbound file: " + errorDoingBackup);
                 }
 

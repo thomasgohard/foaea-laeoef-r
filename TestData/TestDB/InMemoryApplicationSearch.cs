@@ -12,7 +12,7 @@ namespace TestData.TestDB
         public string UserId { get; set; }
         public string LastError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
+        public Task<(List<ApplicationSearchResultData>, int)> QuickSearch(QuickSearchData searchData, int page = 1, int perPage = 1000, string orderBy = "A.Appl_EnfSrv_Cd, A.Appl_CtrlCd")
         {
             throw new NotImplementedException();
         }

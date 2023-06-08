@@ -16,10 +16,10 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task<HttpResponseMessage> ProcessFlatFileAsync(string fileNameNoPath, string flatFile)
+        public async Task<HttpResponseMessage> ProcessFlatFile(string fileNameNoPath, string flatFile)
         {
             string apiCall = $"api/v1/FederalTracingFiles?fileName={fileNameNoPath}";
-            return await ApiHelper.PostFlatFileAsync(apiCall, flatFile,
+            return await ApiHelper.PostFlatFile(apiCall, flatFile,
                                                      rootAPI: ApiFilesConfig.FileBrokerFederalTracingRootAPI,
                                                      token: Token);
         }

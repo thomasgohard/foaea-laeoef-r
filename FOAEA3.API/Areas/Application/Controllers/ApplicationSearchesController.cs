@@ -30,7 +30,7 @@ public class ApplicationSearchesController : ControllerBase
             var searchManager = new ApplicationSearchManager(repositories);
             List<ApplicationSearchResultData> result;
             int totalCount;
-            (result, totalCount) = await searchManager.SearchAsync(quickSearchCriteria, page, perPage, orderBy);
+            (result, totalCount) = await searchManager.Search(quickSearchCriteria, page, perPage, orderBy);
 
             Response.Headers.Add("Page", page.ToString());
             Response.Headers.Add("PerPage", perPage.ToString());

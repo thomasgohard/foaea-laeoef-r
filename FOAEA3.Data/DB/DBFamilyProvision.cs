@@ -13,7 +13,7 @@ namespace FOAEA3.Data.DB
         {
         }
 
-        public async Task<List<FamilyProvisionData>> GetFamilyProvisionsAsync()
+        public async Task<List<FamilyProvisionData>> GetFamilyProvisions()
         {
             return await MainDB.GetAllDataAsync<FamilyProvisionData>("FamPro", FillDataFromReader);
         }

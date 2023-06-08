@@ -8,8 +8,8 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<List<ApplicationEventData>> GetRequestedLICINEventsAsync(string enfSrvCd, string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<List<ApplicationEventDetailData>> GetRequestedLICINEventDetailsAsync(string enfSrvCd, string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<List<ApplicationEventData>> GetRequestedLICINEvents(string enfSrvCd, string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<List<ApplicationEventDetailData>> GetRequestedLICINEventDetails(string enfSrvCd, string appl_EnfSrv_Cd, string appl_CtrlCd);
 
     }
 }

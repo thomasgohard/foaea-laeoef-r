@@ -27,12 +27,12 @@ public class SinFilesController : ControllerBase
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet]
-    public async Task<IActionResult> GetFileAsync([FromServices] IFileTableRepository fileTable)
+    public async Task<IActionResult> GetFile([FromServices] IFileTableRepository fileTable)
     {
         string fileContent;
         string lastFileName;
 
-        (fileContent, lastFileName) = await LoadLatestFederalSinFileAsync(fileTable);
+        (fileContent, lastFileName) = await LoadLatestFederalSinFile(fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -48,10 +48,10 @@ public class SinFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestFederalSinFileAsync(IFileTableRepository fileTable)
+    private static async Task<(string, string)> LoadLatestFederalSinFile(IFileTableRepository fileTable)
     {
         string lastFileName;
-        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("SINOUT"))
+        var fileTableData = (await fileTable.GetFileTableDataForCategory("SINOUT"))
                                  .FirstOrDefault(m => m.Active.HasValue && m.Active.Value);
 
         if (fileTableData is null)

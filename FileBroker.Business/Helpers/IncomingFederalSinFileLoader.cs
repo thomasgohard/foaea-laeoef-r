@@ -11,9 +11,9 @@ public class IncomingFederalSinFileLoader
         ProcessId = processId;
     }
 
-    public async Task FillSinFileDataFromFlatFileAsync(FedSinFileBase fileData, string flatFile, List<string> errors)
+    public async Task FillSinFileDataFromFlatFile(FedSinFileBase fileData, string flatFile, List<string> errors)
     {
-        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync(ProcessId);
+        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFile(ProcessId);
 
         // extract data into object
         var flatFileLines = flatFile.Split("\n");

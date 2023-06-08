@@ -10,22 +10,18 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task CreateTracingDataAsync(TracingApplicationData data);
-        Task UpdateTracingDataAsync(TracingApplicationData data);
-        Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle);
-        Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync();
-        Task<List<TraceToApplData>> GetTraceToApplDataAsync();
-        Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
-                                                                string activeState,
-                                                                ApplicationState lifeState,
-                                                                string enfServiceCode);
-        Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
-                                                                      string activeState,
-                                                                      string recipientCode,
-                                                                      bool isXML = true);
-        Task CreateESDCEventTraceDataAsync();
+        Task<TracingApplicationData> GetTracingData(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task CreateTracingData(TracingApplicationData data);
+        Task UpdateTracingData(TracingApplicationData data);
+        Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle);
+        Task<bool> TracingDataExists(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavit();
+        Task<List<TraceToApplData>> GetTraceToApplData();
+        Task<List<TracingOutgoingFederalData>> GetFederalOutgoingData(int maxRecords, string activeState,
+                                                                      ApplicationState lifeState, string enfServiceCode);
+        Task<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords, string activeState,
+                                                                      string recipientCode, bool isXML = true);
+        Task CreateESDCEventTraceData();
     }
 
 }

@@ -21,17 +21,17 @@ namespace FOAEA3.Model.Interfaces
         public ConcurrentDictionary<string, DocumentTypeData> DocumentTypes { get; }
         public List<ApplicationCommentsData> ApplicationComments { get; }
 
-        public Task LoadActiveStatusesAsync(IActiveStatusRepository activeStatusRepository);
-        public Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository);
-        public Task LoadFoaEventsAsync(IFoaEventsRepository foaMessageRepository);
-        public Task LoadGendersAsync(IGenderRepository genderRepository);
-        public Task LoadProvincesAsync(IProvinceRepository provinceRepository);
-        public Task LoadMediumsAsync(IMediumRepository mediumRepository);
-        public Task LoadLanguagesAsync(ILanguageRepository languageRepository);
-        public Task LoadApplicationCategoriesAsync(IApplicationCategoryRepository applicationCategoryRepository);
-        public Task LoadApplicationReasonsAsync(IApplicationReasonRepository applicationReasonRepository);
-        public Task LoadCountriesAsync(ICountryRepository countryRepository);
-        public Task LoadDocumentTypesAsync(IDocumentTypeRepository documentTypeRepository);
-        public Task LoadApplicationCommentsAsync(IApplicationCommentsRepository applicationCommentsRepository);
+        public Task LoadActiveStatuses(IActiveStatusRepository activeStatusRepository);
+        public Task LoadApplicationLifeStates(IApplicationLifeStateRepository applicationLifeStateRepository);
+        public Task LoadFoaEvents(IFoaEventsRepository foaMessageRepository);
+        public Task LoadGenders(IGenderRepository genderRepository);
+        public Task LoadProvinces(IProvinceRepository provinceRepository);
+        public Task LoadMediums(IMediumRepository mediumRepository);
+        public Task LoadLanguages(ILanguageRepository languageRepository);
+        public Task LoadApplicationCategories(IApplicationCategoryRepository applicationCategoryRepository);
+        public Task LoadApplicationReasons(IApplicationReasonRepository applicationReasonRepository);
+        public Task LoadCountries(ICountryRepository countryRepository);
+        public Task LoadDocumentTypes(IDocumentTypeRepository documentTypeRepository);
+        public Task LoadApplicationComments(IApplicationCommentsRepository applicationCommentsRepository);
     }
 }

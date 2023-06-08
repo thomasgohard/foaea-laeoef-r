@@ -18,17 +18,17 @@ namespace FOAEA3.Business.Security
             Errors = new List<string>();
         }
 
-        public async Task<int> AddAuditHeaderAsync(AccessAuditPage page)
+        public async Task<int> AddAuditHeader(AccessAuditPage page)
         {
             string subject_submitter = $"{DB.CurrentUser} ({DB.CurrentSubmitter})";
 
-            return await DB.AccessAuditTable.SaveDataPageInfoAsync(page, subject_submitter);
+            return await DB.AccessAuditTable.SaveDataPageInfo(page, subject_submitter);
         }
 
-        public async Task AddAuditElementAsync(int headerId, AccessAuditElement elementType, string elementValue)
+        public async Task AddAuditElement(int headerId, AccessAuditElement elementType, string elementValue)
         {
             var accessAuditElements = new Dictionary<AccessAuditElement, AccessAuditElementTypeData>();
-            var allElementTypes = await DB.AccessAuditTable.GetAllElementAccessTypeAsync();
+            var allElementTypes = await DB.AccessAuditTable.GetAllElementAccessType();
 
             foreach (var thisElementType in allElementTypes)
             {
@@ -39,13 +39,13 @@ namespace FOAEA3.Business.Security
             }
 
             string elementName = accessAuditElements[elementType].ElementName;
-            await DB.AccessAuditTable.SaveDataValueAsync(headerId, elementName, elementValue);
+            await DB.AccessAuditTable.SaveDataValue(headerId, elementName, elementValue);
         }
 
-        public async Task AddAuditElementsAsync(int headerId, Dictionary<AccessAuditElement, string> elements)
+        public async Task AddAuditElements(int headerId, Dictionary<AccessAuditElement, string> elements)
         {
             foreach (var (elementType, elementValue) in elements)
-                await AddAuditElementAsync(headerId, elementType, elementValue);
+                await AddAuditElement(headerId, elementType, elementValue);
         }
 
     }

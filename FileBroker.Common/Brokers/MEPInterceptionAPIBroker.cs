@@ -16,22 +16,22 @@ namespace FileBroker.Common.Brokers
             Token = token;
         }
 
-        public async Task<string> GetVersionAsync()
+        public async Task<string> GetVersion()
         {
             string apiCall = $"api/v1/InterceptionFiles/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync()
+        public async Task<string> GetConnection()
         {
             string apiCall = $"api/v1/InterceptionFiles/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetLatestProvincialFileAsync(string partnerId)
+        public async Task<string> GetLatestProvincialFile(string partnerId)
         {
             string apiCall = $"api/v1/InterceptionFiles?partnerId={partnerId}";
-            return await ApiHelper.GetStringAsync(apiCall, token: Token);
+            return await ApiHelper.GetString(apiCall, token: Token);
         }
 
     }

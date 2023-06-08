@@ -8,6 +8,6 @@ namespace FileBroker.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<string> GetLatestProvincialFileAsync(string partnerId);
+        Task<string> GetLatestProvincialFile(string partnerId);
     }
 }

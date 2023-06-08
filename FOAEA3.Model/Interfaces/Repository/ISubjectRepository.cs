@@ -9,8 +9,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd);
-        Task<SubjectData> GetSubjectAsync(string subjectName);
-        Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode);
+        Task<List<SubjectData>> GetSubjectsForSubmitter(string submCd);
+        Task<SubjectData> GetSubject(string subjectName);
+        Task<SubjectData> GetSubjectByConfirmationCode(string confirmationCode);
     }
 }

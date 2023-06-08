@@ -21,12 +21,12 @@ public class SubjectRolesController : FoaeaControllerBase
     [HttpGet]
     public async Task<ActionResult<List<SubjectRoleData>>> GetSubjectRoles([FromServices] IRepositories repositories, [FromQuery] string subjectName)
     {
-        return Ok(await repositories.SubjectRoleTable.GetSubjectRolesAsync(subjectName));
+        return Ok(await repositories.SubjectRoleTable.GetSubjectRoles(subjectName));
     }
 
     [HttpGet("{subjectName}")]
     public async Task<ActionResult<List<string>>> GetAssumedRolesForSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        return Ok(await repositories.SubjectRoleTable.GetAssumedRolesForSubjectAsync(subjectName));
+        return Ok(await repositories.SubjectRoleTable.GetAssumedRolesForSubject(subjectName));
     }
 }

@@ -18,7 +18,7 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages { get; set; }
 
-        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -65,7 +65,7 @@ namespace FOAEA3.Data.DB
             data.CRAFormLanguage = rdr["CRAFormLanguage"] as string; // can be null 
         }
 
-        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
+        public async Task InsertBulkData(List<TraceResponseData> responseData)
         {
             await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
         }
@@ -187,7 +187,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("TrcRspFin_Update", parameters);
         }
 
-        public async Task MarkResponsesAsViewedAsync(string enfService)
+        public async Task MarkResponsesAsViewed(string enfService)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -197,7 +197,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("TrcAPPTraceUpdate", parameters);
         }
 
-        public async Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        public async Task DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
         {
             var parameters = new Dictionary<string, object>
             {

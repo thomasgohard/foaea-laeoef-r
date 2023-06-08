@@ -23,7 +23,7 @@ namespace FileBroker.Business
         {
             var errors = new List<string>();
 
-            var fileTableData = await GetFileTableDataAsync(flatFileName);
+            var fileTableData = await GetFileTableData(flatFileName);
             if (!fileTableData.Active.HasValue || !fileTableData.Active.Value)
             {
                 errors.Add($"[{fileTableData.Name}] is not active.");
@@ -36,7 +36,7 @@ namespace FileBroker.Business
                 var trainingFileData = new FedInterceptionTrainingBase();
 
                 var fileLoader = new IncomingFederalTrainingFileLoader(DB.FlatFileSpecs, fileTableData.PrcId);
-                await fileLoader.FillFederalTrainingFileDataFromFlatFileAsync(trainingFileData, flatFileContent, errors);
+                await fileLoader.FillFederalTrainingFileDataFromFlatFile(trainingFileData, flatFileContent, errors);
 
                 if (errors.Any())
                     return errors;
@@ -105,7 +105,7 @@ namespace FileBroker.Business
                 return header.Cycle;
         }
 
-        private async Task<FileTableData> GetFileTableDataAsync(string flatFileName)
+        private async Task<FileTableData> GetFileTableData(string flatFileName)
         {
             string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
@@ -289,7 +289,7 @@ namespace FileBroker.Business
             }
             catch (Exception e)
             {
-                await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"Error Sending Transactions. Batch Cancelled",
+                await DB.ErrorTrackingTable.MessageBrokerError($"Error Sending Transactions. Batch Cancelled",
                                                                     $"Error processing  {flatFileName}", e, displayExceptionError: true);
                 return false;
             }

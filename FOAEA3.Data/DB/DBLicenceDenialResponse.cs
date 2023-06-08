@@ -18,7 +18,7 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages => throw new NotImplementedException();
 
-        public async Task<LicenceDenialResponseData> GetLastResponseDataAsync(string applEnfSrvCd, string applCtrlCd)
+        public async Task<LicenceDenialResponseData> GetLastResponseData(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -31,12 +31,12 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData)
+        public async Task InsertBulkData(List<LicenceDenialResponseData> responseData)
         {
             await MainDB.BulkUpdateAsync<LicenceDenialResponseData>(responseData, "LicRsp");
         }
 
-        public async Task MarkResponsesAsViewedAsync(string enfService)
+        public async Task MarkResponsesAsViewed(string enfService)
         {
             var parameters = new Dictionary<string, object>
             {

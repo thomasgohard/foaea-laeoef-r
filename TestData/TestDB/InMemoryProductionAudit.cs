@@ -10,14 +10,14 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
+        public Task Insert(string processName, string description, string audience, DateTime? completedDate = null)
         {
             InMemData.ProductionAuditData.Add($"{processName}({DateTime.Now}): {description}");
 
             return Task.CompletedTask;
         }
 
-        public Task InsertAsync(ProductionAuditData productionAuditData)
+        public Task Insert(ProductionAuditData productionAuditData)
         {
             throw new NotImplementedException();
         }

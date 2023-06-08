@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> IsLoginExpiredAsync(string subjectName)
+        public async Task<bool> IsLoginExpired(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -43,7 +43,7 @@ namespace FOAEA3.Data.DB
             }
         }
 
-        public async Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword)
+        public async Task<bool> CheckPreviousPasswords(int subjectId, string newPassword)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -73,7 +73,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> GetAllowedAccessAsync(string username)
+        public async Task<bool> GetAllowedAccess(string username)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -95,7 +95,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
+        public async Task SetPassword(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
         {
 
             var parameters = new Dictionary<string, object>
@@ -112,7 +112,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> VerifyConfirmationCodeAsync(string confirmationCode)
+        public async Task<bool> VerifyConfirmationCode(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -123,7 +123,7 @@ namespace FOAEA3.Data.DB
             return (result == 1);
         }
 
-        public async Task<bool> VerifyPasswordResetFlagSetAsync(string subjectName)
+        public async Task<bool> VerifyPasswordResetFlagSet(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -134,7 +134,7 @@ namespace FOAEA3.Data.DB
             return (result == 1);
         }
 
-        public async Task<bool> VerifyPasswordResetAsync(string subjectName)
+        public async Task<bool> VerifyPasswordReset(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -145,7 +145,7 @@ namespace FOAEA3.Data.DB
             return (result == 1);
         }
 
-        public async Task PostConfirmationCodeAsync(int subjectId, string confirmationCode)
+        public async Task PostConfirmationCode(int subjectId, string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -156,7 +156,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("PasswordResetPostConfirmationCode", parameters);
         }
 
-        public async Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial)
+        public async Task PostPassword(string confirmationCode, string password, string salt, string initial)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -168,7 +168,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("PasswordResetPostPassword", parameters);
         }
 
-        public async Task PostConfirmationReceivedAsync(string confirmationCode)
+        public async Task PostConfirmationReceived(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -177,7 +177,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("PasswordResetPostConfirmationReceived", parameters);
         }
 
-        public async Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode)
+        public async Task<string> GetEmailByConfirmationCode(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -188,7 +188,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task ProcessResetAsync(string confirmationCode)
+        public async Task ProcessReset(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -197,7 +197,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("PasswordResetProcessReset", parameters);
         }
 
-        public async Task<bool> VerifyPasswordSentAsync(string subjectName)
+        public async Task<bool> VerifyPasswordSent(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -208,7 +208,7 @@ namespace FOAEA3.Data.DB
             return (result == 1);
         }
 
-        public async Task AcceptNewTermsOfReferernceAsync(string subjectName)
+        public async Task AcceptNewTermsOfReferernce(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {

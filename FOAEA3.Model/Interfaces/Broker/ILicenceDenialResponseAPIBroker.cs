@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData);
-        Task MarkTraceResultsAsViewedAsync(string enfService);
+        Task InsertBulkData(List<LicenceDenialResponseData> responseData);
+        Task MarkTraceResultsAsViewed(string enfService);
     }
 }

@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<SummFAFR_DE_Data> GetSummFaFrDeAsync(int summFAFR_Id)
+        public async Task<SummFAFR_DE_Data> GetSummFaFrDe(int summFAFR_Id)
         {
             var parameters = new Dictionary<string, object>() {
                 { "CtrlSummFaFrId", summFAFR_Id }
@@ -28,7 +28,7 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDeReadyBatchesAsync(string enfSrv_Src_Cd, string DAFABatchId)
+        public async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDeReadyBatches(string enfSrv_Src_Cd, string DAFABatchId)
         {
             var parameters = new Dictionary<string, object>() {
                 { "chrEnfSrv_Src_Cd", enfSrv_Src_Cd },
@@ -79,7 +79,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromProcSingleValueAsync<int>("CountDuplicateFR", parameters);
         }
 
-        public async Task<SummFAFR_DE_Data> CreateFaFrDeAsync(SummFAFR_DE_Data data)
+        public async Task<SummFAFR_DE_Data> CreateFaFrDe(SummFAFR_DE_Data data)
         {
             var parameters = new Dictionary<string, object> {
                 {"Appl_EnfSrv_Cd", data.Appl_EnfSrv_Cd },

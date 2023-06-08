@@ -16,10 +16,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<List<ApplicationReasonData>> GetApplicationReasonsAsync()
+        public async Task<List<ApplicationReasonData>> GetApplicationReasons()
         {
             string apiCall = $"api/v1/ApplicationReasons";
-            var result = await ApiHelper.GetDataAsync<DataList<ApplicationReasonData>>(apiCall, token: Token);
+            var result = await ApiHelper.GetData<DataList<ApplicationReasonData>>(apiCall, token: Token);
             return result.Items;
         }
     }

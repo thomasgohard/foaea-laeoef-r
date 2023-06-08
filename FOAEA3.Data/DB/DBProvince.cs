@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
         {
 
         }
-        public async Task<List<ProvinceData>> GetProvincesAsync()
+        public async Task<List<ProvinceData>> GetProvinces()
         {
             var data = await MainDB.GetAllDataAsync<ProvinceData>("Prv", FillProvinceDataFromReader);
 

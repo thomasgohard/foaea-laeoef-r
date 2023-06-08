@@ -15,57 +15,57 @@ namespace FileBroker.Business.Tests.InMemory
 
         public string Token { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-        public Task<TracingApplicationData> CancelTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> CancelTracingApplication(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> CreateTracingApplicationAsync(TracingApplicationData tracingData)
+        public Task<TracingApplicationData> CreateTracingApplication(TracingApplicationData tracingData)
         {
             return Task.FromResult(tracingData);
         }
 
-        public Task<TracingApplicationData> FullyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> GetApplicationAsync(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
+        public Task<TracingApplicationData> GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequestsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode)
+        public Task<List<TracingOutgoingFederalData>> GetOutgoingFederalTracingRequests(int maxRecords, string activeState, int lifeState, string enfServiceCode)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingDataAsync(int maxRecords, string activeState, string recipientCode)
+        public Task<TracingOutgoingProvincialData> GetOutgoingProvincialTracingData(int maxRecords, string activeState, string recipientCode)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrvCd, string fileCycle)
+        public Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<List<TraceToApplData>> GetTraceToApplDataAsync()
+        public Task<List<TraceToApplData>> GetTraceToApplData()
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> PartiallyServiceApplicationAsync(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> TransferTracingApplicationAsync(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
+        public Task<TracingApplicationData> TransferTracingApplication(TracingApplicationData tracingApplication, string newRecipientSubmitter, string newIssuingSubmitter)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> UpdateTracingApplicationAsync(TracingApplicationData tracingApplication)
+        public Task<TracingApplicationData> UpdateTracingApplication(TracingApplicationData tracingApplication)
         {
             throw new System.NotImplementedException();
         }

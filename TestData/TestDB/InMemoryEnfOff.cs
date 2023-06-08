@@ -10,7 +10,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null)
+        public Task<List<EnfOffData>> GetEnfOff(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null)
         {
             var data = new List<EnfOffData>
                 {

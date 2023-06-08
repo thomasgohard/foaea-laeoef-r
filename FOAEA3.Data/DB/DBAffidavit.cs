@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<AffidavitData> GetAffidavitDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<AffidavitData> GetAffidavitData(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {

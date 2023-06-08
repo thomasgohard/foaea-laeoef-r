@@ -27,7 +27,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
     {
         var manager = new LicenceDenialTerminationManager(repositories, config, User);
 
-        bool success = await manager.LoadApplicationAsync(key.EnfSrv, key.CtrlCd);
+        bool success = await manager.LoadApplication(key.EnfSrv, key.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialTerminationApplication.AppCtgy_Cd == "L03")
@@ -44,21 +44,21 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
     public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories db,
                                                                         [FromQuery] string controlCodeForL01)
     {
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
         var requestDate = DateTime.Now; // or should it be a different date?
 
         if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialTerminationManager = new LicenceDenialTerminationManager(application, db, config, User);
-        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        var submitter = (await db.SubmitterTable.GetSubmitter(application.Subm_SubmCd)).FirstOrDefault();
         if (submitter is not null)
         {
             licenceDenialTerminationManager.CurrentUser.Submitter = submitter;
             db.CurrentSubmitter = submitter.Subm_SubmCd;
         }
 
-        bool isCreated = await licenceDenialTerminationManager.CreateApplicationAsync(controlCodeForL01, requestDate);
+        bool isCreated = await licenceDenialTerminationManager.CreateApplication(controlCodeForL01, requestDate);
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -77,14 +77,14 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialTerminationManager(application, repositories, config, User);
 
-        await licenceDenialManager.UpdateApplicationAsync();
+        await licenceDenialManager.UpdateApplication();
 
         if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -101,14 +101,14 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config, User);
 
-        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
+        await appManager.TransferApplication(newIssuingSubmitter, newRecipientSubmitter);
 
         return Ok(application);
     }
@@ -120,7 +120,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
@@ -145,7 +145,7 @@ public class LicenceDenialTerminationsController : FoaeaControllerBase
 
         var appManager = new LicenceDenialTerminationManager(application, repositories, config, User);
 
-        if (await appManager.ProcessLicenceDenialTerminationResponseAsync(key.EnfSrv, key.CtrlCd))
+        if (await appManager.ProcessLicenceDenialTerminationResponse(key.EnfSrv, key.CtrlCd))
             return Ok(application);
         else
             return UnprocessableEntity(application);

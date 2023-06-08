@@ -17,14 +17,14 @@ namespace FOAEA3.Business.Areas.Financials
             DBfinance = repositoriesFinance;
         }
 
-        public async Task<List<CR_PADReventData>> GetActiveCR_PADReventsAsync(string enfSrv)
+        public async Task<List<CR_PADReventData>> GetActiveCR_PADRevents(string enfSrv)
         {
-            return await DBfinance.FinancialRepository.GetActiveCR_PADReventsAsync(enfSrv);
+            return await DBfinance.FinancialRepository.GetActiveCR_PADRevents(enfSrv);
         }
 
-        public async Task CloseCR_PADReventsAsync(string batchId, string enfSrv)
+        public async Task CloseCR_PADRevents(string batchId, string enfSrv)
         {
-            await DBfinance.FinancialRepository.CloseCR_PADReventsAsync(batchId, enfSrv);
+            await DBfinance.FinancialRepository.CloseCR_PADRevents(batchId, enfSrv);
         }
 
         public async Task<List<BlockFundData>> GetBlockFundsData(string enfSrv)
@@ -37,9 +37,9 @@ namespace FOAEA3.Business.Areas.Financials
             return await DBfinance.FinancialRepository.GetDivertFundsData(enfSrv, batchId);
         }
 
-        public async Task<List<IFMSdata>> GetIFMSdataAsync(string batchId)
+        public async Task<List<IFMSdata>> GetIFMSdata(string batchId)
         {
-            return await DBfinance.FinancialRepository.GetIFMSdataAsync(batchId);
+            return await DBfinance.FinancialRepository.GetIFMSdata(batchId);
         }
     
     }

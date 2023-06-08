@@ -16,10 +16,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<List<CountryData>> GetCountriesAsync()
+        public async Task<List<CountryData>> GetCountries()
         {
             string apiCall = $"api/v1/Countries";
-            var result = await ApiHelper.GetDataAsync<DataList<CountryData>>(apiCall, token: Token);
+            var result = await ApiHelper.GetData<DataList<CountryData>>(apiCall, token: Token);
             return result.Items;
         }
     }

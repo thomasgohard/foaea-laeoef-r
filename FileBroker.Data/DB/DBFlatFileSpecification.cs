@@ -17,7 +17,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<List<FlatFileSpecificationData>> GetFlatFileSpecificationsForFileAsync(int processId)
+        public async Task<List<FlatFileSpecificationData>> GetFlatFileSpecificationsForFile(int processId)
         {
             var parameters = new Dictionary<string, object>
             {

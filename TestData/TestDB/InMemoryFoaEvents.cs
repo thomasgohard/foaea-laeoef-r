@@ -22,7 +22,7 @@ namespace TestData.TestDB
 
         public MessageDataList Messages { get; set; }
 
-        public Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
+        public Task<FoaEventDataDictionary> GetAllFoaMessages()
         {
             var result = new FoaEventDataDictionary();
 

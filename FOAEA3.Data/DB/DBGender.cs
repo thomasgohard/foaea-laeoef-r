@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<GenderData>> GetGendersAsync()
+        public async Task<DataList<GenderData>> GetGenders()
         {
             var data = await MainDB.GetAllDataAsync<GenderData>("Gendr", FillGenderDataFromReader);
 

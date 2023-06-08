@@ -54,7 +54,7 @@ public class FoaeaPageModel : PageModel
             if (!string.IsNullOrEmpty(CurrentSubmitter))
             {
                 var apiFoaEventsBroker = new FoaEventsAPIBroker(BaseAPIs);
-                FoaEvents = apiFoaEventsBroker.GetFoaEventsAsync().Result;
+                FoaEvents = apiFoaEventsBroker.GetFoaEvents().Result;
             }
         }
     }
@@ -84,7 +84,7 @@ public class FoaeaPageModel : PageModel
             var apiHelper = new APIBrokerHelper(ApiRoots.FoaeaRootAPI, submitter, userName);
             var apiBroker = new LoginsAPIBroker(apiHelper, currentToken);
 
-            var result = await apiBroker.RefreshTokenAsync(currentToken, refreshToken);
+            var result = await apiBroker.RefreshToken(currentToken, refreshToken);
 
             ContextAccessor.HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
             ContextAccessor.HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);
@@ -145,19 +145,19 @@ public class FoaeaPageModel : PageModel
     protected void LoadReferenceData()
     {
         var apiLifeStatesBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-        LifeStates = apiLifeStatesBroker.GetApplicationLifeStatesAsync().Result;
+        LifeStates = apiLifeStatesBroker.GetApplicationLifeStates().Result;
         if (apiLifeStatesBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiLifeStatesBroker.ApiHelper.ErrorData);
 
         var apiGenderBroker = new GendersAPIBroker(BaseAPIs);
-        Genders = apiGenderBroker.GetGendersAsync().Result;
+        Genders = apiGenderBroker.GetGenders().Result;
         if (apiGenderBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiGenderBroker.ApiHelper.ErrorData);
 
         var apiCountryBroker = new CountriesAPIBroker(BaseAPIs);
-        Countries = apiCountryBroker.GetCountriesAsync().Result;
+        Countries = apiCountryBroker.GetCountries().Result;
         if (apiCountryBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiCountryBroker.ApiHelper.ErrorData);
 
         var apiProvinceBroker = new ProvincesAPIBroker(BaseAPIs);
-        AllProvinces = apiProvinceBroker.GetProvincesAsync().Result;
+        AllProvinces = apiProvinceBroker.GetProvinces().Result;
         if (apiProvinceBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiProvinceBroker.ApiHelper.ErrorData);
 
         var apiInterceptioBroker = new InterceptionApplicationAPIBroker(InterceptionAPIs);
@@ -165,7 +165,7 @@ public class FoaeaPageModel : PageModel
         if (apiInterceptioBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiInterceptioBroker.ApiHelper.ErrorData);
 
         var apiReasonBroker = new FoaEventsAPIBroker(BaseAPIs);
-        EventCodes = apiReasonBroker.GetFoaEventsAsync().Result;
+        EventCodes = apiReasonBroker.GetFoaEvents().Result;
         if (apiReasonBroker.ApiHelper.ErrorData.Any()) ErrorMessage.AddRange(apiReasonBroker.ApiHelper.ErrorData);
     }
 }

@@ -21,8 +21,8 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             var manager = new TracingManager(repositories, config, User);
 
-            if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-                return Ok(await manager.GetTraceFinancialResultsAsync());
+            if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+                return Ok(await manager.GetTraceFinancialResults());
             else
                 return NotFound();
         }
@@ -33,9 +33,9 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             var manager = new TracingManager(repositories, config, User);
 
-            if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
+            if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
             {
-                var finResults = (await manager.GetTraceFinancialResultsAsync()).Items;
+                var finResults = (await manager.GetTraceFinancialResults()).Items;
                 var finDetails = finResults?.Where(m => m.TrcRsp_Trace_CyclNr == cycle)?.FirstOrDefault()?.TraceFinancialDetails;
                 var finValues = finDetails?.Where(m => m.FiscalYear == year && m.TaxForm == form)?.FirstOrDefault()?.TraceDetailValues;
 
@@ -64,9 +64,18 @@ namespace FOAEA3.API.Tracing.Controllers
                         var thisCraField = craFields.Where(m => m.CRAFieldName == fieldName).FirstOrDefault();
                         if (thisCraField is not null)
                         {
-                            string thisLineNumber = thisCraField.CRAFieldCode;
+                            string thisLineNumber;
+                            
+                            if (year >= 2019)
+                                thisLineNumber = thisCraField.CRAFieldCode;
+                            else
+                                thisLineNumber = thisCraField.CRAFieldCodeOld;
+
                             if (!string.IsNullOrEmpty(thisLineNumber))
-                                values.Add(thisLineNumber, fieldValue);
+                            {
+                                if (!values.ContainsKey(thisLineNumber))
+                                    values.Add(thisLineNumber, fieldValue);
+                            }
                         }                        
                     }
 
@@ -84,11 +93,11 @@ namespace FOAEA3.API.Tracing.Controllers
         [HttpPost]
         public async Task<ActionResult<int>> CreateTraceFinancialResponses([FromServices] IRepositories repositories)
         {
-            var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TraceFinancialResponseData>(Request);
+            var responseData = await APIBrokerHelper.GetDataFromRequestBody<TraceFinancialResponseData>(Request);
 
             var tracingManager = new TracingManager(repositories, config, User);
 
-            await tracingManager.CreateFinancialResponseDataAsync(responseData);
+            await tracingManager.CreateFinancialResponseData(responseData);
 
             var rootPath = "https://" + HttpContext.Request.Host.ToString();
 

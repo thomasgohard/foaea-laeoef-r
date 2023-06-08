@@ -18,7 +18,7 @@ namespace FOAEA3.Common.Brokers.Financials
         public async Task<TransactionResult> InsertFaFrDe(string transactionType, SummFAFR_DE_Data newTransaction)
         {
             string apiCall = $"api/v1/SummFaFrDe?TransactionType={transactionType}";
-            return await ApiHelper.PostDataAsync<TransactionResult, SummFAFR_DE_Data>(apiCall, newTransaction, token: Token);
+            return await ApiHelper.PostData<TransactionResult, SummFAFR_DE_Data>(apiCall, newTransaction, token: Token);
         }
     }
 }

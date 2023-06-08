@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
         {
         }
 
-        public async Task<List<CR_PADReventData>> GetActiveCR_PADReventsAsync(string enfSrv)
+        public async Task<List<CR_PADReventData>> GetActiveCR_PADRevents(string enfSrv)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -25,7 +25,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<CR_PADReventData>("MessageBrokerFinancialPADRBatchExists", parameters, FillCR_PADReventsFromReader);
         }
 
-        public async Task CloseCR_PADReventsAsync(string batchId, string enfSrv)
+        public async Task CloseCR_PADRevents(string batchId, string enfSrv)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -98,7 +98,7 @@ namespace FOAEA3.Data.DB
             if (rdr.ColumnExists("Appl_Dbtr_Brth_Dte")) data.Appl_Dbtr_Brth_Dte = (DateTime) rdr["Appl_Dbtr_Brth_Dte"];
         }
 
-        public async Task<List<IFMSdata>> GetIFMSdataAsync(string batchId)
+        public async Task<List<IFMSdata>> GetIFMSdata(string batchId)
         {
             var parameters = new Dictionary<string, object>
                 {

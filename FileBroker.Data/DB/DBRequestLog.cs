@@ -16,7 +16,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<int> AddAsync(RequestLogData requestLogData)
+        public async Task<int> Add(RequestLogData requestLogData)
         {
             return await MainDB.CreateDataAsync<RequestLogData, int>("RequestLog", requestLogData, "RequestLogId", SetParametersForData, default);
         }
@@ -30,12 +30,12 @@ namespace FileBroker.Data.DB
             parameters.Add("LoadedDateTime", data.LoadedDateTime);
         }
 
-        public async Task<List<RequestLogData>> GetAllAsync()
+        public async Task<List<RequestLogData>> GetAll()
         {
             return await MainDB.GetAllDataAsync<RequestLogData>("RequestLog", FillRequestLogDataFromReader);
         }
 
-        public async Task DeleteAllAsync()
+        public async Task DeleteAll()
         {
             await MainDB.ExecProcAsync("RequestLog_DeleteAll");
         }

@@ -10,11 +10,11 @@ namespace FileBroker.Model.Interfaces
 
         Task<FileTableData> GetFileTableDataForFileName(string fileNameNoExt);
         Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency);
-        Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category);
-        Task<List<FileTableData>> GetAllActiveAsync();
+        Task<List<FileTableData>> GetFileTableDataForCategory(string category);
+        Task<List<FileTableData>> GetAllActive();
 
         Task SetNextCycleForFileType(FileTableData fileData, int length = 6);
-        Task<bool> IsFileLoadingAsync(int processId);
+        Task<bool> IsFileLoading(int processId);
         Task SetIsFileLoadingValue(int processId, bool newValue);
 
         Task DisableFileProcess(int processId);

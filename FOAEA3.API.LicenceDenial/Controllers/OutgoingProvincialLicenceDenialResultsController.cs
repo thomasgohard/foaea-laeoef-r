@@ -29,7 +29,7 @@ public class OutgoingProvincialLicenceDenialResultsController : FoaeaControllerB
     {
         var manager = new LicenceDenialManager(repositories, config, User);
 
-        var data = await manager.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
+        var data = await manager.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
 
         return Ok(data);
     }

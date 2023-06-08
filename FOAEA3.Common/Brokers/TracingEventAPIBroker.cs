@@ -15,21 +15,21 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task CloseNETPTraceEventsAsync()
+        public async Task CloseNETPTraceEvents()
         {
-            await ApiHelper.SendCommandAsync($"api/v1/tracingEvents/CloseNETPTraceEvents", token: Token);
+            await ApiHelper.SendCommand($"api/v1/tracingEvents/CloseNETPTraceEvents", token: Token);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrvCd, string fileCycle)
+        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/Details/Active?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<List<ApplicationEventDetailData>>(apiCall, token: Token);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINEventsAsync(string enfSrvCd, string fileCycle)
+        public async Task<List<ApplicationEventData>> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/RequestedTRCIN?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<List<ApplicationEventData>>(apiCall, token: Token);
         }
     }
 }

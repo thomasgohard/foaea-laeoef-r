@@ -23,7 +23,7 @@ public class EnfServicesController : FoaeaControllerBase
     public async Task<ActionResult<EnfSrvData>> GetEnforcementService([FromRoute] string enfServiceCode, [FromServices] IRepositories repositories)
     {
         var enfSrvManager = new EnforcementServiceManager(repositories);
-        EnfSrvData enfSrvData = await enfSrvManager.GetEnforcementServiceAsync(enfServiceCode);
+        EnfSrvData enfSrvData = await enfSrvManager.GetEnforcementService(enfServiceCode);
 
         if (enfSrvData != null)
             return Ok(enfSrvData);
@@ -36,6 +36,6 @@ public class EnfServicesController : FoaeaControllerBase
                                                            [FromQuery] string enforcementServiceCode = null, [FromQuery] string enforcementServiceName = null,
                                                            [FromQuery] string enforcementServiceProvince = null, [FromQuery] string enforcementServiceCategory = null)
     {
-        return Ok(await repositories.EnfSrvTable.GetEnfServiceAsync(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
+        return Ok(await repositories.EnfSrvTable.GetEnfService(enforcementServiceCode, enforcementServiceName, enforcementServiceProvince, enforcementServiceCategory));
     }
 }

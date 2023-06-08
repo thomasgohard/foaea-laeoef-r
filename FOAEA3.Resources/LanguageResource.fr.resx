@@ -426,4 +426,13 @@
   <data name="XML_VALIDATION_WARNINGS" xml:space="preserve">
     <value>Codes XML invalides</value>
   </data>
+  <data name="APP_MESSAGE" xml:space="preserve">
+    <value>Message de l'application</value>
+  </data>
+  <data name="ENFORCEMENT_SERVICE_CODE" xml:space="preserve">
+    <value>Code de l'autorité provinciale</value>
+  </data>
+  <data name="SOURCE_REF_NUMBER" xml:space="preserve">
+    <value>Numero réf du ministère payeur</value>
+  </data>
 </root>

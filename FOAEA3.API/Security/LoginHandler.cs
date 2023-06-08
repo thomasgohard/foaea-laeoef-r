@@ -11,7 +11,7 @@ namespace FOAEA3.API.Security
     {
         public static async Task<ClaimsPrincipal> LoginSubject(string user, string password, IRepositories db)
         {
-            var subject = await db.SubjectTable.GetSubjectAsync(user);
+            var subject = await db.SubjectTable.GetSubject(user);
 
             if (subject is null || subject.IsAccountLocked is true)
                 return new ClaimsPrincipal();
@@ -54,7 +54,7 @@ namespace FOAEA3.API.Security
 
         public static async Task<ClaimsPrincipal> SelectSubmitter(string userName, string submitter, IRepositories db)
         {            
-            var submitterData = (await db.SubmitterTable.GetSubmitterAsync(submitter)).FirstOrDefault();
+            var submitterData = (await db.SubmitterTable.GetSubmitter(submitter)).FirstOrDefault();
 
             if (submitterData is null || submitterData.ActvSt_Cd != "A")
                 return new ClaimsPrincipal();

@@ -31,7 +31,7 @@ public class InterceptionNewModel : InterceptionFoaeaPageModel
             };
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
-            EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
+            EnfServiceDescription = submitterProfileApi.GetSubmitterProfile(submitter).Result.EnfSrv_Nme;
 
             LoadReferenceData();
         }
@@ -60,7 +60,7 @@ public class InterceptionNewModel : InterceptionFoaeaPageModel
         }
 
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var newApplication = await interceptionApi.CreateInterceptionApplicationAsync(InterceptionApplication);
+        var newApplication = await interceptionApi.CreateInterceptionApplication(InterceptionApplication);
 
         SetDisplayMessages(newApplication.Messages);
 

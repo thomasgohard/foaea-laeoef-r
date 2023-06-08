@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<(decimal, decimal)> UpdateGarnPeriodAsync(string applEnfSrvCd, string applCtrlCd, decimal finTrmLumpSumAmt, decimal finTrmPerPymAmt, DateTime calcStartDate,
+        Task<(decimal, decimal)> UpdateGarnPeriod(string applEnfSrvCd, string applCtrlCd, decimal finTrmLumpSumAmt, decimal finTrmPerPymAmt, DateTime calcStartDate,
                                      decimal lumpDivertedTtl, decimal prdPymtDivertedTtl);
 
     }

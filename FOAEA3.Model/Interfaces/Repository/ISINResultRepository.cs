@@ -10,11 +10,11 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<DataList<SINResultData>> GetSINResultsAsync(string applEnfSrvCd, string applCtrlCd);
-        Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistoryAsync(string applEnfSrvCd, string applCtrlCd);
-        Task<List<SINOutgoingFederalData>> GetFederalSINOutgoingDataAsync(int maxRecords, string activeState, ApplicationState lifeState,
-                                                               string enfServiceCode);
-        Task CreateSINResultsAsync(SINResultData resultData);
-        Task InsertBulkDataAsync(List<SINResultData> responseData);
+        Task<DataList<SINResultData>> GetSINResults(string applEnfSrvCd, string applCtrlCd);
+        Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistory(string applEnfSrvCd, string applCtrlCd);
+        Task<List<SINOutgoingFederalData>> GetFederalSINOutgoingData(int maxRecords, string activeState, ApplicationState lifeState,
+                                                                     string enfServiceCode);
+        Task CreateSINResults(SINResultData resultData);
+        Task InsertBulkData(List<SINResultData> responseData);
     }
 }

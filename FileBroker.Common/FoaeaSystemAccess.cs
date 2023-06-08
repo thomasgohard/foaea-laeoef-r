@@ -34,7 +34,7 @@ namespace FileBroker.Common.Helpers
 
         public async Task<bool> SystemLogin()
         {
-            var tokenData = await APIs.Accounts.LoginAsync(LoginData);
+            var tokenData = await APIs.Accounts.Login(LoginData);
 
             if (tokenData.Token is null)
                 return false;
@@ -44,34 +44,34 @@ namespace FileBroker.Common.Helpers
 
             SetTokenForAPIs();
 
-            if (APIs.Accounts is not null) APIs.Accounts.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.TracingApplications is not null) APIs.TracingApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.TracingEvents is not null) APIs.TracingEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.TracingResponses is not null) APIs.TracingResponses.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.Financials is not null) APIs.Financials.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.ControlBatches is not null) APIs.ControlBatches.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.Transactions is not null) APIs.Transactions.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.Accounts is not null) APIs.Accounts.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.TracingApplications is not null) APIs.TracingApplications.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.TracingEvents is not null) APIs.TracingEvents.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.TracingResponses is not null) APIs.TracingResponses.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.Financials is not null) APIs.Financials.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.ControlBatches is not null) APIs.ControlBatches.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.Transactions is not null) APIs.Transactions.ApiHelper.GetRefreshedToken = RefreshToken;
 
-            if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.InterceptionApplications is not null) APIs.InterceptionApplications.ApiHelper.GetRefreshedToken = RefreshToken;
 
-            if (APIs.LicenceDenialEvents is not null) APIs.LicenceDenialEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.LicenceDenialApplications is not null) APIs.LicenceDenialApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.LicenceDenialTerminationApplications is not null) APIs.LicenceDenialTerminationApplications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.LicenceDenialResponses is not null) APIs.LicenceDenialResponses.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.LicenceDenialEvents is not null) APIs.LicenceDenialEvents.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.LicenceDenialApplications is not null) APIs.LicenceDenialApplications.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.LicenceDenialTerminationApplications is not null) APIs.LicenceDenialTerminationApplications.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.LicenceDenialResponses is not null) APIs.LicenceDenialResponses.ApiHelper.GetRefreshedToken = RefreshToken;
 
-            if (APIs.ApplicationEvents is not null) APIs.ApplicationEvents.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
-            if (APIs.Applications is not null) APIs.Applications.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.ApplicationEvents is not null) APIs.ApplicationEvents.ApiHelper.GetRefreshedToken = RefreshToken;
+            if (APIs.Applications is not null) APIs.Applications.ApiHelper.GetRefreshedToken = RefreshToken;
 
-            if (APIs.Sins is not null) APIs.Sins.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.Sins is not null) APIs.Sins.ApiHelper.GetRefreshedToken = RefreshToken;
 
-            if (APIs.ProductionAudits is not null) APIs.ProductionAudits.ApiHelper.GetRefreshedToken = RefreshTokenAsync;
+            if (APIs.ProductionAudits is not null) APIs.ProductionAudits.ApiHelper.GetRefreshedToken = RefreshToken;
 
             return true;
         }
 
         public async Task SystemLogout()
         {
-            await APIs.Accounts.LogoutAsync(LoginData);
+            await APIs.Accounts.Logout(LoginData);
         }
 
         private void SetTokenForAPIs()
@@ -99,9 +99,9 @@ namespace FileBroker.Common.Helpers
             if (APIs.ProductionAudits is not null) APIs.ProductionAudits.Token = CurrentToken;
         }
 
-        private async Task<string> RefreshTokenAsync()
+        private async Task<string> RefreshToken()
         {
-            var result = await APIs.Accounts.RefreshTokenAsync(CurrentToken, CurrentRefreshToken);
+            var result = await APIs.Accounts.RefreshToken(CurrentToken, CurrentRefreshToken);
 
             CurrentToken = result.Token;
             CurrentRefreshToken = result.RefreshToken;

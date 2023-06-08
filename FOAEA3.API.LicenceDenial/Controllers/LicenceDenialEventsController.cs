@@ -36,7 +36,7 @@ public class LicenceDenialEventsController : FoaeaControllerBase
         if (string.IsNullOrEmpty(appl_CtrlCd))
             return BadRequest("Missing appl_CtrlCd parameter");
 
-        var result = await manager.GetRequestedLICINLicenceDenialEventsAsync(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
+        var result = await manager.GetRequestedLICINLicenceDenialEvents(enforcementServiceCode, appl_EnfSrv_Cd, appl_CtrlCd);
         return Ok(result);
 
     }

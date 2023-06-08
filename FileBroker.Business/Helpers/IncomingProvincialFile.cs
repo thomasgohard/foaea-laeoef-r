@@ -76,7 +76,7 @@ namespace FileBroker.Business.Helpers
                 string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
 
                 if (!string.IsNullOrEmpty(errorDoingBackup))
-                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
+                    await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fullPath}",
                                                                         "Error creating backup of outbound file: " + errorDoingBackup);
             }
 
@@ -131,7 +131,7 @@ namespace FileBroker.Business.Helpers
             var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
             if (!fileTableData.IsLoading)
             {
-                var info = await interceptionManager.ExtractAndProcessRequestsInFileAsync(sourceInterceptionJsonData, unknownTags,
+                var info = await interceptionManager.ExtractAndProcessRequestsInFile(sourceInterceptionJsonData, unknownTags,
                                                                                           includeInfoInMessages: true);
                 if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                     foreach (var error in info.GetMessagesForType(MessageType.Error))
@@ -160,7 +160,7 @@ namespace FileBroker.Business.Helpers
             var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
             if (!fileTableData.IsLoading)
             {
-                var info = await licenceDenialManager.ExtractAndProcessRequestsInFileAsync(sourceLicenceDenialJsonData, unknownTags);
+                var info = await licenceDenialManager.ExtractAndProcessRequestsInFile(sourceLicenceDenialJsonData, unknownTags);
 
                 if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                     foreach (var error in info.GetMessagesForType(MessageType.Error))
@@ -176,7 +176,7 @@ namespace FileBroker.Business.Helpers
         {
             var electronicSummonsManager = new IncomingProvincialElectronicSummonsManager(DB, FoaeaApis, fullPath, Config);
 
-            var info = await electronicSummonsManager.ExtractAndProcessRequestsInFileAsync(fullPath);
+            var info = await electronicSummonsManager.ExtractAndProcessRequestsInFile(fullPath);
 
             if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
                 foreach (var error in info.GetMessagesForType(MessageType.Error))

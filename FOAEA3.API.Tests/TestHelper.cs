@@ -45,7 +45,7 @@ namespace FOAEA3.API.Tests
             };
         }
 
-        public static async Task<TokenData> LoginToFoaeaAsync(FoaeaLoginData userLoginInfo, HttpClient client)
+        public static async Task<TokenData> LoginToFoaea(FoaeaLoginData userLoginInfo, HttpClient client)
         {
             string keyData = JsonConvert.SerializeObject(userLoginInfo);
             var content = new StringContent(keyData, Encoding.UTF8, "application/json");

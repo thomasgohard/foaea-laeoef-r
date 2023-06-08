@@ -26,7 +26,7 @@ public class InterceptionFilesController : ControllerBase
     {
         string fileContent;
         string lastFileName;
-        (fileContent, lastFileName) = await LoadLatestProvincialInterceptionFileAsync(partnerId, fileTable);
+        (fileContent, lastFileName) = await LoadLatestProvincialInterceptionFile(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -43,9 +43,9 @@ public class InterceptionFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestProvincialInterceptionFileAsync(string partnerId, IFileTableRepository fileTable)
+    private static async Task<(string, string)> LoadLatestProvincialInterceptionFile(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("INTAPPOUT"))
+        var fileTableData = (await fileTable.GetFileTableDataForCategory("INTAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 

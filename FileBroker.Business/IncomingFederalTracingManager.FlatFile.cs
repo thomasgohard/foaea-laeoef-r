@@ -10,9 +10,9 @@ public partial class IncomingFederalTracingManager
         NETP
     }
 
-    public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
+    public async Task<List<string>> ProcessFlatFile(string flatFileContent, string flatFileName)
     {
-        var fileTableData = await GetFileTableDataAsync(flatFileName);
+        var fileTableData = await GetFileTableData(flatFileName);
         var tracingFileData = new FedTracingFileBase();
         (string enfSrvCd, EFederalSource fedSource) = ConfigureTracingFileDataBasedOnSource(tracingFileData, fileTableData.Name);
 
@@ -31,7 +31,7 @@ public partial class IncomingFederalTracingManager
         try
         {
             var fileLoader = new IncomingFederalTracingFileLoader(DB.FlatFileSpecs, fileTableData.PrcId);
-            await fileLoader.FillTracingFileDataFromFlatFileAsync(tracingFileData, flatFileContent, errors);
+            await fileLoader.FillTracingFileDataFromFlatFile(tracingFileData, flatFileContent, errors);
 
             if (errors.Any())
                 return errors;
@@ -50,10 +50,10 @@ public partial class IncomingFederalTracingManager
             try
             {
                 if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == EFederalSource.NETP))
-                    await CloseNETPTraceEventsAsync();
+                    await CloseNETPTraceEvents();
                 else
                 {
-                    var tracingResponses = await ExtractTracingResponsesFromFileDataAsync(tracingFileData, enfSrvCd, fileCycle, errors);
+                    var tracingResponses = await ExtractTracingResponsesFromFileData(tracingFileData, enfSrvCd, fileCycle, errors);
 
                     if (errors.Any())
                         return errors;
@@ -139,36 +139,36 @@ public partial class IncomingFederalTracingManager
     {
         try
         {
-            string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameterAsync(processId, "evnt_cutoff");
+            string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameter(processId, "evnt_cutoff");
             int cutOffDays = int.Parse(cutOffDaysValue);
 
-            var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle);
-            var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetailsAsync(enfSrvCd, fileCycle);
+            var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+            var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
             if (fedSource == EFederalSource.NETP)
             {
                 foreach (var item in fileTracingSummary)
                 {
-                    await MarkTraceEventsAsProcessedAsync(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, newState: 2,
+                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, newState: 2,
                                                           activeTraceEvents, activeTraceEventDetails);
                 }
-                await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
-                await SendTRACEDataToTrcRspAsync(tracingResponses);
-                await CloseNETPTraceEventsAsync();
+                await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+                await SendTRACEDataToTrcRsp(tracingResponses);
+                await CloseNETPTraceEvents();
             }
             else
             {
                 foreach (var item in fileTracingSummary)
                 {
-                    var appl = await APIs.TracingApplications.GetApplicationAsync(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
+                    var appl = await APIs.TracingApplications.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
 
-                    await MarkTraceEventsAsProcessedAsync(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
+                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
                                                           activeTraceEvents, activeTraceEventDetails);
                 }
-                await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
-                await SendTRACEDataToTrcRspAsync(tracingResponses);
-                await UpdateTracingApplicationsAsync(enfSrvCd, fileCycle);
-                await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
+                await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+                await SendTRACEDataToTrcRsp(tracingResponses);
+                await UpdateTracingApplications(enfSrvCd, fileCycle);
+                await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
             }
         }
         catch (Exception e)
@@ -177,29 +177,29 @@ public partial class IncomingFederalTracingManager
         }
     }
 
-    private async Task<FileTableData> GetFileTableDataAsync(string flatFileName)
+    private async Task<FileTableData> GetFileTableData(string flatFileName)
     {
         string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
 
         return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
     }
 
-    private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileDataAsync(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
+    private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileData(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
                                                                         List<string> errors)
     {
-        var cycles = await APIs.TracingApplications.GetTraceCycleQuantityDataAsync(enfSrvCd, fileCycle);
+        var cycles = await APIs.TracingApplications.GetTraceCycleQuantityData(enfSrvCd, fileCycle);
 
         return IncomingFederalTracingResponse.GenerateFromFileData(tracingFileData, enfSrvCd, cycles, ref errors);
     }
 
-    private async Task CloseNETPTraceEventsAsync()
+    private async Task CloseNETPTraceEvents()
     {
-        await APIs.TracingEvents.CloseNETPTraceEventsAsync();
+        await APIs.TracingEvents.CloseNETPTraceEvents();
     }
 
-    private async Task SendTRACEDataToTrcRspAsync(List<TraceResponseData> responseData)
+    private async Task SendTRACEDataToTrcRsp(List<TraceResponseData> responseData)
     {
-        await APIs.TracingResponses.InsertBulkDataAsync(responseData);
+        await APIs.TracingResponses.InsertBulkData(responseData);
     }
 
 }

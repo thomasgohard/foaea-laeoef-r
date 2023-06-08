@@ -62,7 +62,7 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C50512_CANNOT_PREASSIGN_OR_CHANGE_A_JUSTICE_NUMBER);
         }
 
-        public virtual async Task ValidateControlCodeAsync()
+        public virtual async Task ValidateControlCode()
         {
             bool isValid;
             bool isUpdate = false;
@@ -72,7 +72,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 var existingApp = new ApplicationManager(new ApplicationData(), DB, Config, CurrentUser);
 
-                if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
+                if (await existingApp.LoadApplication(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
                     // update
                     isUpdate = true;
@@ -224,8 +224,8 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName,
-                                                                         string countryCode)
+        public virtual async Task<(bool, string)> IsValidPostalCode(string postalCode, string provinceCode, string cityName,
+                                                                    string countryCode)
         {
             // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
             // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
@@ -261,7 +261,7 @@ namespace FOAEA3.Business.Areas.Application
                 string validProvCode;
                 PostalCodeFlag validFlags;
 
-                (isValid, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCodeAsync(postalCode.Replace(" ", ""), provinceCode, cityName);
+                (isValid, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName);
 
                 if (!isValid)
                 {
@@ -347,7 +347,7 @@ namespace FOAEA3.Business.Areas.Application
             return ReferenceData.Instance().Genders.ContainsKey(Application.Appl_Dbtr_Gendr_Cd);
         }
 
-        public async Task<bool> IsSINLocallyConfirmedAsync()
+        public async Task<bool> IsSINLocallyConfirmed()
         {
             bool isConfirmed = false;
 
@@ -355,9 +355,9 @@ namespace FOAEA3.Business.Areas.Application
             bool doesLocalSINExists;
 
             if (Application.AppCtgy_Cd == "I01")
-                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExists(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
             else
-                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExists(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
 
             if (!isTempSIN && doesLocalSINExists)
             {
@@ -370,13 +370,13 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task<bool> IsSameDayApplicationAsync()
+        public async Task<bool> IsSameDayApplication()
         {
             bool isSameDayApplication = false;
 
             if (!String.IsNullOrEmpty(Application.Appl_Dbtr_Entrd_SIN))
             {
-                var applications = await DB.ApplicationTable.GetDailyApplCountBySINAsync(
+                var applications = await DB.ApplicationTable.GetDailyApplCountBySIN(
                                                                             Application.Appl_Dbtr_Entrd_SIN,
                                                                             Application.Appl_EnfSrv_Cd,
                                                                             Application.Appl_CtrlCd,
@@ -390,18 +390,18 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task AddDuplicateSINWarningEventsAsync()
+        public async Task AddDuplicateSINWarningEvents()
         {
-            (string errorSameEnfOFf, string errorDiffEnfOff) = await DB.ApplicationTable.GetConfirmedSINRecordsAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+            (string errorSameEnfOFf, string errorDiffEnfOff) = await DB.ApplicationTable.GetConfirmedSINRecords(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
             if (!String.IsNullOrEmpty(errorSameEnfOFf) &&
-                (await DB.ApplicationTable.GetConfirmedSINSameEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
+                (await DB.ApplicationTable.GetConfirmedSINSameEnforcementOfficeExists(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
             {
                 EventManager.AddEvent(EventCode.C50931_MORE_THAN_ONE_ACTIVE_APPL_FOR_THIS_DEBTOR_WITHIN_YOUR_JURISDIC, errorSameEnfOFf);
             }
 
             if (!String.IsNullOrEmpty(errorDiffEnfOff))
             {
-                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await DB.ApplicationTable.GetConfirmedSINOtherEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await DB.ApplicationTable.GetConfirmedSINOtherEnforcementOfficeExists(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
@@ -427,10 +427,10 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        public async Task AddDuplicateCreditorWarningEventsAsync()
+        public async Task AddDuplicateCreditorWarningEvents()
         {
 
-            var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgyAsync(Application.Appl_CtrlCd, Application.Subm_SubmCd,
+            var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgy(Application.Appl_CtrlCd, Application.Subm_SubmCd,
                                                                                      Application.Appl_Dbtr_Entrd_SIN,
                                                                                      Application.Appl_SIN_Cnfrmd_Ind,
                                                                                      Application.ActvSt_Cd,
@@ -650,7 +650,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var enfServices = await DB.EnfSrvTable.GetEnfServiceAsync();
+            var enfServices = await DB.EnfSrvTable.GetEnfService();
             if (enfServices != null)
             {
                 var service = enfServices.FirstOrDefault(m => m.EnfSrv_Cd.Trim() == Application.Appl_EnfSrv_Cd.Trim());
@@ -739,7 +739,7 @@ namespace FOAEA3.Business.Areas.Application
                 var postalCodeDB = DB.PostalCodeTable;
                 string validProvCode;
                 PostalCodeFlag validFlags;
-                (_, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCodeAsync(debtorPostalCode, debtorProvince ?? "", debtorCity);
+                (_, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity);
 
                 if (!string.IsNullOrEmpty(validProvCode))
                 {

@@ -42,7 +42,7 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             string enfSrv = TracingApplication.Appl_EnfSrv_Cd.Trim();
-            var enfSrvData = (await DB.EnfSrvTable.GetEnfServiceAsync(enforcementServiceCode: enfSrv)).FirstOrDefault();
+            var enfSrvData = (await DB.EnfSrvTable.GetEnfService(enforcementServiceCode: enfSrv)).FirstOrDefault();
             if (enfSrvData is not null)
             {
                 HasSignedC78 = enfSrvData.HasSignedC78;

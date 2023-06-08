@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<(decimal, decimal)> UpdateGarnPeriodAsync(string applEnfSrvCd,
+        public async Task<(decimal, decimal)> UpdateGarnPeriod(string applEnfSrvCd,
                                                                     string applCtrlCd,
                                                                     decimal finTrmLumpSumAmt,
                                                                     decimal finTrmPerPymAmt,
@@ -24,10 +24,10 @@ namespace FOAEA3.Data.DB
                                                                     decimal prdPymtDivertedTtl)
         {
 
-            (prdPymtDivertedTtl, lumpDivertedTtl) = await GetDivertedTotalsForVaryAcceptAsync(applEnfSrvCd, applCtrlCd, calcStartDate, prdPymtDivertedTtl, lumpDivertedTtl);
+            (prdPymtDivertedTtl, lumpDivertedTtl) = await GetDivertedTotalsForVaryAccept(applEnfSrvCd, applCtrlCd, calcStartDate, prdPymtDivertedTtl, lumpDivertedTtl);
 
-            await InsertGarnPeriodVaryAsync(applEnfSrvCd, applCtrlCd);
-            await DeleteGarnPeriodAsync(applEnfSrvCd, applCtrlCd);
+            await InsertGarnPeriodVary(applEnfSrvCd, applCtrlCd);
+            await DeleteGarnPeriod(applEnfSrvCd, applCtrlCd);
 
             if (finTrmLumpSumAmt < lumpDivertedTtl)
             {
@@ -59,7 +59,7 @@ namespace FOAEA3.Data.DB
                         distPymtDivAmt = 0;
                     }
 
-                    await InsertGarnPeriodAsync(applEnfSrvCd, applCtrlCd, 0, loopIndex, perAmt);
+                    await InsertGarnPeriod(applEnfSrvCd, applCtrlCd, 0, loopIndex, perAmt);
 
                     loopIndex += 1;
                 }
@@ -70,7 +70,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        private async Task InsertGarnPeriodAsync(string applEnfSrvCd, string applCtrlCd, int summFAFRId, int periodcnt, decimal garnAmt)
+        private async Task InsertGarnPeriod(string applEnfSrvCd, string applCtrlCd, int summFAFRId, int periodcnt, decimal garnAmt)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -84,7 +84,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("GarnPeriodInsert", parameters);
         }
 
-        private async Task DeleteGarnPeriodAsync(string applEnfSrvCd, string applCtrlCd)
+        private async Task DeleteGarnPeriod(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -95,7 +95,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("GarnPeriodDeleteForAppl", parameters);
         }
 
-        private async Task InsertGarnPeriodVaryAsync(string applEnfSrvCd, string applCtrlCd)
+        private async Task InsertGarnPeriodVary(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -112,7 +112,7 @@ namespace FOAEA3.Data.DB
             public decimal LumpDivertedTtl { get; set; }
         }
 
-        private async Task<(decimal, decimal)> GetDivertedTotalsForVaryAcceptAsync(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate,
+        private async Task<(decimal, decimal)> GetDivertedTotalsForVaryAccept(string applEnfSrvCd, string applCtrlCd, DateTime calcStartDate,
                                                           decimal prdPymtDivertedTtl, decimal lumpDivertedTtl)
         {
             var parameters = new Dictionary<string, object>

@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task CreateCaseManagementAsync(CaseManagementData caseManagementData)
+        public async Task CreateCaseManagement(CaseManagementData caseManagementData)
         {
             var parameters = new Dictionary<string, object>
             {

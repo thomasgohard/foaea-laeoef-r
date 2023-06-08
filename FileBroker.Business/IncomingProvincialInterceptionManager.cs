@@ -49,7 +49,7 @@ namespace FileBroker.Business
 
             if (IsFrench)
             {
-                var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
+                var Translations = DB.TranslationTable.GetTranslations().Result;
                 foreach (var translation in Translations)
                     translations.Add(translation.EnglishText, translation.FrenchText);
 
@@ -70,8 +70,8 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceInterceptionData, List<UnknownTag> unknownTags,
-                                                                                bool includeInfoInMessages = false)
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceInterceptionData, List<UnknownTag> unknownTags,
+                                                                           bool includeInfoInMessages = false)
         {
             var result = new MessageDataList();
 
@@ -144,7 +144,7 @@ namespace FileBroker.Business
                                 int thisErrorCount = 0;
                                 bool isValidData = true;
                                 InterceptionApplicationData thisApplication;
-                                (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequestAsync(
+                                (thisApplication, thisErrorCount, isValidData) = await GetAndValidateAppDataFromRequest(
                                                                                             data, interceptionData,
                                                                                             financialData, sourceSpecificData,
                                                                                             fileAuditData);
@@ -196,7 +196,7 @@ namespace FileBroker.Business
                                                                            totalFilesCount);
 
                         if (Config.ProvinceConfig.AutoAcceptEnfSrvCodes.Contains(EnfSrv_Cd))
-                            await AutoAcceptVariationsAsync(EnfSrv_Cd);
+                            await AutoAcceptVariations(EnfSrv_Cd);
 
                     }
                     finally
@@ -222,8 +222,8 @@ namespace FileBroker.Business
             return result;
         }
 
-        private void ProcessMessages(MessageDataList messages, FileAuditData fileAuditData, bool includeInfoInMessages, 
-                                     MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
+        private static void ProcessMessages(MessageDataList messages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+                                            MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
         {
             
 
@@ -258,16 +258,16 @@ namespace FileBroker.Business
                        
         }
 
-        public async Task AutoAcceptVariationsAsync(string enfService)
+        public async Task AutoAcceptVariations(string enfService)
         {
             var prodAudit = APIs.ProductionAudits;
 
             string processName = $"Process Auto Accept Variation {enfService}";
-            await prodAudit.InsertAsync(processName, "Auto accept variation", "O");
+            await prodAudit.Insert(processName, "Auto accept variation", "O");
 
-            await APIs.InterceptionApplications.AutoAcceptVariationsAsync(enfService);
+            await APIs.InterceptionApplications.AutoAcceptVariations(enfService);
 
-            await prodAudit.InsertAsync(processName, "Ended", "O");
+            await prodAudit.Insert(processName, "Ended", "O");
         }
 
         public async Task<MessageDataList> SendDataToFoaea(MessageData<InterceptionApplicationData> interceptionMessageData)
@@ -279,7 +279,7 @@ namespace FileBroker.Business
 
             if (interceptionMessageData.MaintenanceAction == "A")
             {
-                interception = await APIs.InterceptionApplications.CreateInterceptionApplicationAsync(interception);
+                interception = await APIs.InterceptionApplications.CreateInterceptionApplication(interception);
             }
             else // if (interceptionMessageData.MaintenanceAction == "C")
             {
@@ -287,25 +287,25 @@ namespace FileBroker.Business
                 {
                     case "00": // change
                     case "0":
-                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplicationAsync(interception);
+                        interception = await APIs.InterceptionApplications.UpdateInterceptionApplication(interception);
                         break;
 
                     case "14": // cancellation
-                        interception = await APIs.InterceptionApplications.CancelInterceptionApplicationAsync(interception);
+                        interception = await APIs.InterceptionApplications.CancelInterceptionApplication(interception);
                         break;
 
                     case "17": // variation
-                        interception = await APIs.InterceptionApplications.VaryInterceptionApplicationAsync(interception);
+                        interception = await APIs.InterceptionApplications.VaryInterceptionApplication(interception);
                         break;
 
                     case "29": // transfer
-                        interception = await APIs.InterceptionApplications.TransferInterceptionApplicationAsync(interception,
+                        interception = await APIs.InterceptionApplications.TransferInterceptionApplication(interception,
                                                                                                      interceptionMessageData.NewRecipientSubmitter,
                                                                                                      interceptionMessageData.NewIssuingSubmitter);
                         break;
 
                     case "35": // suspend
-                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplicationAsync(interception);
+                        interception = await APIs.InterceptionApplications.SuspendInterceptionApplication(interception);
                         break;
 
                     default:
@@ -412,7 +412,7 @@ namespace FileBroker.Business
             return result;
         }
 
-        public async Task<(InterceptionApplicationData, int errorCount, bool isValidData)> GetAndValidateAppDataFromRequestAsync(MEPInterception_RecType10 baseData,
+        public async Task<(InterceptionApplicationData, int errorCount, bool isValidData)> GetAndValidateAppDataFromRequest(MEPInterception_RecType10 baseData,
                                                                               MEPInterception_RecType11 interceptionData,
                                                                               MEPInterception_RecType12 financialData,
                                                                               List<MEPInterception_RecType13> sourceSpecificData,
@@ -431,19 +431,19 @@ namespace FileBroker.Business
 
             var interceptionApplication = ExtractInterceptionBaseData(baseData, interceptionData, now);
 
-            isValidData = await IsValidApplAsync(interceptionApplication, fileAuditData);
+            isValidData = await IsValidAppl(interceptionApplication, fileAuditData);
             if ((interceptionApplication is not null) && isValidData && !isCancelOrSuspend)
             {
                 ExtractDefaultFinancialData(isVariation, financialData, ref isValidData, now, interceptionApplication);
 
-                isValidData = await IsValidFinancialInformationAsync(interceptionApplication, fileAuditData);
+                isValidData = await IsValidFinancialInformation(interceptionApplication, fileAuditData);
                 if (isValidData)
                 {
                     foreach (var sourceSpecific in sourceSpecificData)
                     {
                         bool isSourceSpecificDataValid;
                         HoldbackConditionData newSourceSpecificData;
-                        (newSourceSpecificData, isSourceSpecificDataValid) = await ExtractAndValidateSourceSpecificDataAsync(sourceSpecific, fileAuditData,
+                        (newSourceSpecificData, isSourceSpecificDataValid) = await ExtractAndValidateSourceSpecificData(sourceSpecific, fileAuditData,
                                                                                                                              interceptionApplication);
                         if (!isSourceSpecificDataValid)
                             isValidData = false;
@@ -464,7 +464,7 @@ namespace FileBroker.Business
             return (interceptionApplication, errorCount, isValidData);
         }
 
-        private async Task<bool> IsValidApplAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
+        private async Task<bool> IsValidAppl(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
             var fieldErrors = new Dictionary<string, string>
             {
@@ -480,7 +480,7 @@ namespace FileBroker.Business
                 {"AppCtgy_Cd", "Invalid Application Category Code (<dat_Appl_AppCtgy_Cd>) value"}
             };
 
-            var validatedApplication = await APIs.Applications.ValidateCoreValuesAsync(interceptionApplication);
+            var validatedApplication = await APIs.Applications.ValidateCoreValues(interceptionApplication);
             if (validatedApplication.Appl_Dbtr_Addr_PrvCd is not null)
                 interceptionApplication.Appl_Dbtr_Addr_PrvCd = validatedApplication.Appl_Dbtr_Addr_PrvCd; // might have been updated via validation!
 
@@ -512,9 +512,9 @@ namespace FileBroker.Business
 
         }
 
-        private async Task<bool> IsValidFinancialInformationAsync(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
+        private async Task<bool> IsValidFinancialInformation(InterceptionApplicationData interceptionApplication, FileAuditData fileAuditData)
         {
-            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValuesAsync(interceptionApplication);
+            var validatedApplication = await APIs.InterceptionApplications.ValidateFinancialCoreValues(interceptionApplication);
             interceptionApplication.IntFinH = validatedApplication.IntFinH; // might have been updated via validation!
             interceptionApplication.Messages.AddRange(validatedApplication.Messages);
 
@@ -622,7 +622,7 @@ namespace FileBroker.Business
             return isValidData;
         }
 
-        private async Task<(HoldbackConditionData, bool)> ExtractAndValidateSourceSpecificDataAsync(MEPInterception_RecType13 sourceSpecific,
+        private async Task<(HoldbackConditionData, bool)> ExtractAndValidateSourceSpecificData(MEPInterception_RecType13 sourceSpecific,
                                                                                            FileAuditData fileAuditData,
                                                                                            InterceptionApplicationData interceptionApplication)
         {
@@ -660,7 +660,7 @@ namespace FileBroker.Business
 
             if ((newHoldback.HldbCnd_MxmPerChq_Money is not null) && (newHoldback.HldbCnd_SrcHldbAmn_Money is not null))
             {
-                await DB.ErrorTrackingTable.MessageBrokerErrorAsync("Source Specific holdback amount in both fixed and per transaction",
+                await DB.ErrorTrackingTable.MessageBrokerError("Source Specific holdback amount in both fixed and per transaction",
                                                                            $"{interceptionApplication.Appl_EnfSrv_Cd.Trim()} {interceptionApplication.Appl_CtrlCd.Trim()}" +
                                                                            $" Source: {newHoldback.EnfSrv_Cd}" +
                                                                            $" Per Transaction: ${newHoldback.HldbCnd_MxmPerChq_Money}" +

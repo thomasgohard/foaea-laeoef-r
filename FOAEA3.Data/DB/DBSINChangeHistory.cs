@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> CreateSINChangeHistoryAsync(SINChangeHistoryData data)
+        public async Task<bool> CreateSINChangeHistory(SINChangeHistoryData data)
         {
             var parameters = new Dictionary<string, object>
             {

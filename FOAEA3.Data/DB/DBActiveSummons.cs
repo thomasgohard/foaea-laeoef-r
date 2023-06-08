@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<ActiveSummonsCoreData> GetActiveSummonsCoreAsync(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<ActiveSummonsCoreData> GetActiveSummonsCore(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -31,7 +31,7 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task<ActiveSummonsData> GetActiveSummonsDataAsync(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
+        public async Task<ActiveSummonsData> GetActiveSummonsData(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -50,7 +50,7 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task<DateTime> GetLegalDateAsync(string appl_CtrlCd, string appl_EnfSrv_Cd)
+        public async Task<DateTime> GetLegalDate(string appl_CtrlCd, string appl_EnfSrv_Cd)
         {
             var parameters = new Dictionary<string, object>
                 {

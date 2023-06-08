@@ -35,9 +35,9 @@ public class OutgoingFinancialBlockFundsManager
         await FoaeaAccess.SystemLogin();
         try
         {
-            var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+            var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-            var blockFundsData = await APIs.Financials.GetBlockFundsAsync(processCodes.EnfSrv_Cd);
+            var blockFundsData = await APIs.Financials.GetBlockFunds(processCodes.EnfSrv_Cd);
 
             if ((blockFundsData is null) || (blockFundsData.Count == 0))
             {
@@ -54,13 +54,13 @@ public class OutgoingFinancialBlockFundsManager
             await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
             string message = fileTableData.Category + $" Outbound {fileBaseName} file created successfully.";
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                      fileCreated: true, message);
 
         }
         catch (Exception e)
         {
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                      fileCreated: true, e.Message);
         }
         finally

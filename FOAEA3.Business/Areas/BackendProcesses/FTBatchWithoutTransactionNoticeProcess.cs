@@ -22,17 +22,17 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("FT Batch Without Transaction Notice Process", $"FT Batch Without Transaction Notice Process Started", "O");
+            await prodAudit.Insert("FT Batch Without Transaction Notice Process", $"FT Batch Without Transaction Notice Process Started", "O");
 
             var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
 
             await interceptionManager.FTBatchNotification_CheckFTTransactionsAdded();
 
-            await prodAudit.InsertAsync("FT Batch Without Transaction Notice Process", $"FT Batch Without Transaction Notice Process Completed", "O");
+            await prodAudit.Insert("FT Batch Without Transaction Notice Process", $"FT Batch Without Transaction Notice Process Completed", "O");
         }
     }
 }

@@ -27,8 +27,8 @@ namespace Incoming.FileWatcher.Fed.Tracing
             var federalFileManager = new IncomingFederalLicenceDenialFile(db, foaeaApis, config);
 
             var allNewFiles = new List<string>();
-            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
-            await federalFileManager.AddNewFilesAsync(config.FTProot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
+            await federalFileManager.AddNewFiles(config.FTProot + @"\Tc3sls", allNewFiles); // Transport Canada Licence Denial
+            await federalFileManager.AddNewFiles(config.FTProot + @"\Pa3sls", allNewFiles); // Passport Canada Licence Denial
 
             if (allNewFiles.Count > 0)
             {
@@ -37,10 +37,10 @@ namespace Incoming.FileWatcher.Fed.Tracing
                 {
                     var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{newFile}[/green]...");
-                    await federalFileManager.ProcessNewFileAsync(newFile);
+                    await federalFileManager.ProcessNewFile(newFile);
                     if (federalFileManager.Errors.Any())
                         foreach (var error in errors)
-                            await db.ErrorTrackingTable.MessageBrokerErrorAsync("LICIN", newFile, new Exception(error), displayExceptionError: true);
+                            await db.ErrorTrackingTable.MessageBrokerError("LICIN", newFile, new Exception(error), displayExceptionError: true);
                 }
             }
             else

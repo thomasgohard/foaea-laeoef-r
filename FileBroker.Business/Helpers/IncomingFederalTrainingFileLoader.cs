@@ -11,10 +11,10 @@
             ProcessId = processId;
         }
 
-        public async Task FillFederalTrainingFileDataFromFlatFileAsync(FedInterceptionTrainingBase fileData, string flatFile,
+        public async Task FillFederalTrainingFileDataFromFlatFile(FedInterceptionTrainingBase fileData, string flatFile,
                                                                        List<string> errors)
         {
-            var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync(ProcessId);
+            var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFile(ProcessId);
 
             // extract data into object
             var flatFileLines = flatFile.Split("\n");

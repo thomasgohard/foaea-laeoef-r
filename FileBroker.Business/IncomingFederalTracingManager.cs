@@ -19,7 +19,7 @@ public partial class IncomingFederalTracingManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    private async Task MarkTraceEventsAsProcessedAsync(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
+    private async Task MarkTraceEventsAsProcessed(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
                                                   List<ApplicationEventData> activeTraceEvents,
                                                   List<ApplicationEventDetailData> activeTraceEventDetails)
     {
@@ -32,7 +32,7 @@ public partial class IncomingFederalTracingManager
             activeTraceEvent.ActvSt_Cd = "P";
             activeTraceEvent.Event_Compl_Dte = DateTime.Now;
 
-            await APIs.ApplicationEvents.SaveEventAsync(activeTraceEvent);
+            await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
 
             int eventId = activeTraceEvent.Event_Id;
             string eventReason = $"[FileNm:{flatFileName}[ErrDes:000000MSGBRO]" +
@@ -50,13 +50,13 @@ public partial class IncomingFederalTracingManager
                 activeTraceEventDetail.ActvSt_Cd = "C";
                 activeTraceEventDetail.Event_Compl_Dte = DateTime.Now;
 
-                await APIs.ApplicationEvents.SaveEventDetailAsync(activeTraceEventDetail);
+                await APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
             }
         }
 
     }
 
-    private async Task CloseOrInactivateTraceEventDetailsAsync(int cutOffDate, List<ApplicationEventDetailData> activeTraceEventDetails)
+    private async Task CloseOrInactivateTraceEventDetails(int cutOffDate, List<ApplicationEventDetailData> activeTraceEventDetails)
     {
 
         foreach (var row in activeTraceEventDetails)
@@ -73,27 +73,27 @@ public partial class IncomingFederalTracingManager
                 row.Event_Compl_Dte = DateTime.Now;
             }
 
-            await APIs.ApplicationEvents.SaveEventDetailAsync(row);
+            await APIs.ApplicationEvents.SaveEventDetail(row);
 
         }
 
     }
 
-    private async Task UpdateTracingApplicationsAsync(string enfSrvCd, string fileCycle)
+    private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle)
     {
-        var traceToApplData = await APIs.TracingApplications.GetTraceToApplDataAsync();
+        var traceToApplData = await APIs.TracingApplications.GetTraceToApplData();
 
         foreach (var row in traceToApplData)
         {
-            await ProcessTraceToApplDataAsync(row, enfSrvCd, fileCycle);
+            await ProcessTraceToApplData(row, enfSrvCd, fileCycle);
         }
 
     }
 
-    private async Task ProcessTraceToApplDataAsync(TraceToApplData row, string enfSrvCd, string fileCycle)
+    private async Task ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle)
     {
-        var activeTracingEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle);
-        var activeTracingEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetailsAsync(enfSrvCd, fileCycle);
+        var activeTracingEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+        var activeTracingEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
         string newEventState;
 
@@ -103,16 +103,16 @@ public partial class IncomingFederalTracingManager
         }
         else
         {
-            var tracingApplication = await APIs.TracingApplications.GetApplicationAsync(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
+            var tracingApplication = await APIs.TracingApplications.GetApplication(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
 
             if (row.Tot_Childs == row.Tot_Closed)
             {
-                await APIs.TracingApplications.FullyServiceApplicationAsync(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.FullyServiceApplication(tracingApplication, enfSrvCd);
                 newEventState = "C";
             }
             else
             {
-                await APIs.TracingApplications.PartiallyServiceApplicationAsync(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.PartiallyServiceApplication(tracingApplication, enfSrvCd);
                 newEventState = "A";
             }
         }
@@ -122,7 +122,7 @@ public partial class IncomingFederalTracingManager
         if (eventData != null)
         {
             eventData.ActvSt_Cd = newEventState;
-            await APIs.ApplicationEvents.SaveEventAsync(eventData);
+            await APIs.ApplicationEvents.SaveEvent(eventData);
         }
 
         if (newEventState.In("A", "C"))
@@ -131,7 +131,7 @@ public partial class IncomingFederalTracingManager
             if (eventDetailData != null)
             {
                 eventDetailData.Event_Compl_Dte = DateTime.Now;
-                await APIs.ApplicationEvents.SaveEventDetailAsync(eventDetailData);
+                await APIs.ApplicationEvents.SaveEventDetail(eventDetailData);
             }
         }
 

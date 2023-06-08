@@ -16,7 +16,7 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+    public async Task<(string, List<string>)> CreateOutputFile(string fileBaseName)
     {
         var errors = new List<string>();
 
@@ -28,7 +28,7 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 
         try
         {
-            var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+            var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
             if (File.Exists(newFilePath))
@@ -41,19 +41,19 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 
             try
             {
-                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
                 await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.LicenceDenialResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
+                await APIs.LicenceDenialResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
             }
             finally
             {
@@ -68,9 +68,9 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
+            await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return (string.Empty, errors);
@@ -78,14 +78,14 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
 
     }
 
-    private async Task<List<LicenceDenialOutgoingProvincialData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
-                                                                      string recipientCode)
+    private async Task<List<LicenceDenialOutgoingProvincialData>> GetOutgoingDataFromFoaea(FileTableData fileTableData, 
+                                                                                           string actvSt_Cd, string recipientCode)
     {
-        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+        var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = await APIs.LicenceDenialApplications.GetOutgoingProvincialLicenceDenialDataAsync(maxRecords, actvSt_Cd,
-                                                                                         recipientCode);
+        var data = await APIs.LicenceDenialApplications.GetOutgoingProvincialLicenceDenialData(maxRecords, actvSt_Cd,
+                                                                                               recipientCode);
         return data;
     }
 

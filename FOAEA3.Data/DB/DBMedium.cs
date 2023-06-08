@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<MediumData>> GetMediumsAsync()
+        public async Task<DataList<MediumData>> GetMediums()
         {
             var data = await MainDB.GetAllDataAsync<MediumData>("Medium", FillMediumDataFromReader);
 

@@ -22,35 +22,35 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Auto Accept Process", $"Auto Accept Process Started", "O");
+            await prodAudit.Insert("Auto Accept Process", $"Auto Accept Process Started", "O");
 
             var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
 
             foreach (string enfService in Config.AutoAccept)
-                await interceptionManager.AutoAcceptVariationsAsync(enfService);
+                await interceptionManager.AutoAcceptVariations(enfService);
 
-            await prodAudit.InsertAsync("Auto Accept Process", $"Auto Accept Process Completed", "O");
+            await prodAudit.Insert("Auto Accept Process", $"Auto Accept Process Completed", "O");
         }
 
-        public async Task RunAsync(string enfService)
+        public async Task Run(string enfService)
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Auto Accept Process", $"Auto Accept Process for {enfService} Started", "O");
+            await prodAudit.Insert("Auto Accept Process", $"Auto Accept Process for {enfService} Started", "O");
 
             if (Config.AutoAccept.Contains(enfService.ToUpper()))
             {
                 var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
-                await interceptionManager.AutoAcceptVariationsAsync(enfService);
+                await interceptionManager.AutoAcceptVariations(enfService);
             }
             else
-                await prodAudit.InsertAsync("Auto Accept Process", $"Error: {enfService} not in valid auto accept list", "O");
+                await prodAudit.Insert("Auto Accept Process", $"Error: {enfService} not in valid auto accept list", "O");
 
-            await prodAudit.InsertAsync("Auto Accept Process", $"Auto Accept Process for {enfService} Completed", "O");
+            await prodAudit.Insert("Auto Accept Process", $"Auto Accept Process for {enfService} Completed", "O");
         }
     }
 }

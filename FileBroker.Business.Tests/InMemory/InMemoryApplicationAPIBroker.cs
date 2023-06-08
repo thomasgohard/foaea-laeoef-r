@@ -13,22 +13,22 @@ namespace FileBroker.Business.Tests.InMemory
 
         public string Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<ApplicationData> GetApplicationAsync(string appl_EnfSrvCd, string appl_CtrlCd)
+        public Task<ApplicationData> GetApplication(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusDataAsync(int maxRecords, string activeState, string recipientCode)
+        public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData(int maxRecords, string activeState, string recipientCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ApplicationData> SinConfirmationAsync(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
+        public Task<ApplicationData> SinConfirmation(string appl_EnfSrvCd, string appl_CtrlCd, SINConfirmationData confirmationData)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ApplicationData> ValidateCoreValuesAsync(ApplicationData application)
+        public Task<ApplicationData> ValidateCoreValues(ApplicationData application)
         {
             return Task.FromResult(application);
         }

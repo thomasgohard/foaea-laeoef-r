@@ -13,9 +13,7 @@ public class IncomingProvincialTracingManager
     private IncomingProvincialHelper IncomingFileHelper { get; }
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public IncomingProvincialTracingManager(RepositoryList db,
-                                            APIBrokerList foaeaApis,
-                                            string fileName,
+    public IncomingProvincialTracingManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
                                             IFileBrokerConfigurationHelper config)
     {
         FileName = fileName;
@@ -142,7 +140,7 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
-    private MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
+    private static MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
     {
         var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
         var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
@@ -159,8 +157,8 @@ public class IncomingProvincialTracingManager
 
         return tracingRequest;
     }
-    private void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages, 
-                                 MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
+    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+                                        MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
     {
         if (foaeaMessages.ContainsMessagesOfType(MessageType.Error))
         {
@@ -196,7 +194,7 @@ public class IncomingProvincialTracingManager
 
         if (tracingMessageData.MaintenanceAction == "A")
         {
-            tracing = await APIs.TracingApplications.CreateTracingApplicationAsync(tracingMessageData.Application);
+            tracing = await APIs.TracingApplications.CreateTracingApplication(tracingMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
@@ -204,16 +202,16 @@ public class IncomingProvincialTracingManager
             {
                 case "00": // change
                 case "0":
-                    tracing = await APIs.TracingApplications.UpdateTracingApplicationAsync(tracingMessageData.Application);
+                    tracing = await APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
                     tracingMessageData.Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
-                    tracing = await APIs.TracingApplications.CancelTracingApplicationAsync(tracingMessageData.Application);
+                    tracing = await APIs.TracingApplications.CancelTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    tracing = await APIs.TracingApplications.TransferTracingApplicationAsync(tracingMessageData.Application,
+                    tracing = await APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
                                                                                   tracingMessageData.NewRecipientSubmitter,
                                                                                   tracingMessageData.NewIssuingSubmitter);
                     break;
@@ -271,7 +269,6 @@ public class IncomingProvincialTracingManager
             isValid = false;
             result.AddSystemError($"Invalid MaintenanceAction [{actionCode}] and MaintenanceLifeState [{actionState}] combination.");
         }
-
     }
 
     private static MEPTracingFileData ExtractTracingDataFromJson(string sourceTracingData, out string error)

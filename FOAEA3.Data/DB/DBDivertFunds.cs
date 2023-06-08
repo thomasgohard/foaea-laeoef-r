@@ -13,7 +13,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<decimal> GetTotalDivertedForPeriodAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
+        public async Task<decimal> GetTotalDivertedForPeriod(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -25,7 +25,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<decimal>("GetTtlPymDivertedForCurrPeriod", parameters);
         }
 
-        public async Task<decimal> GetTotalFeesDivertedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
+        public async Task<decimal> GetTotalFeesDiverted(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
         {
             var parameters = new Dictionary<string, object>
                 {

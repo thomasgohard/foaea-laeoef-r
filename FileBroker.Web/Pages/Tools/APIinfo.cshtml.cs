@@ -45,7 +45,7 @@ namespace FileBroker.Web.Pages.Tools
 
             var fb_BackendProcessesHelper = new APIBrokerHelper(ApiConfig.BackendProcessesRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER, currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
 
-            string foaeaToken = await TokenHelper.GetFoaeaApiTokenAsync(applicationApiHelper, config);
+            string foaeaToken = await TokenHelper.GetFoaeaApiToken(applicationApiHelper, config);
 
             await AddVersionFor("FOAEA3.API", applicationApiHelper, new ApplicationAPIBroker(applicationApiHelper, foaeaToken));
             await AddVersionFor("FOAEA3.API.Interception", interceptionApiHelper, new InterceptionApplicationAPIBroker(interceptionApiHelper, foaeaToken));
@@ -54,7 +54,7 @@ namespace FileBroker.Web.Pages.Tools
 
             await AddVersionFor("BackendProcesses.API", fb_BackendProcessesHelper, new BackendProcessesAPIBroker(fb_BackendProcessesHelper, foaeaToken));
 
-            string fileBrokerToken = await TokenHelper.GetFileBrokerApiTokenAsync(fb_accountApiHelper, config);
+            string fileBrokerToken = await TokenHelper.GetFileBrokerApiToken(fb_accountApiHelper, config);
 
             await AddVersionFor("FileBroker.API.MEP.Interception", fb_interceptionApiHelper, new MEPInterceptionAPIBroker(fb_interceptionApiHelper, fileBrokerToken));
             await AddVersionFor("FileBroker.API.MEP.LicenceDenial", fb_licenceDenialApiHelper, new MEPLicenceDenialAPIBroker(fb_licenceDenialApiHelper, fileBrokerToken));
@@ -70,10 +70,10 @@ namespace FileBroker.Web.Pages.Tools
         {
 
             // TODO: fix token
-            bool isError = !GetVersionDescription(await broker.GetVersionAsync(), out string versionDescription);
+            bool isError = !GetVersionDescription(await broker.GetVersion(), out string versionDescription);
             string connectionString = string.Empty;
             if (!isError)
-                connectionString = await broker.GetConnectionAsync();
+                connectionString = await broker.GetConnection();
 
             var apiInfo = new ApiInfo
             {

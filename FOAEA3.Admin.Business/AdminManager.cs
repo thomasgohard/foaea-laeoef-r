@@ -25,7 +25,7 @@ namespace FOAEA3.Admin.Business
         }
 
 
-        public async Task<bool> ManuallyConfirmSINAsync(string enfService, string controlCode, string sin,
+        public async Task<bool> ManuallyConfirmSIN(string enfService, string controlCode, string sin,
                                                         ClaimsPrincipal user)
         {
             // manually move application from state 3 to state 6 by adding SIN confirmation information to database
@@ -38,7 +38,7 @@ namespace FOAEA3.Admin.Business
 
                 var applManager = new ApplicationManager(applicationData, DB, config, user);
 
-                if (!await applManager.LoadApplicationAsync(enfService, controlCode))
+                if (!await applManager.LoadApplication(enfService, controlCode))
                     throw new Exception($"Application {enfService}-{controlCode} does not exists or could not be loaded.");
 
                 if (applManager.GetState() != ApplicationState.SIN_CONFIRMATION_PENDING_3)
@@ -47,15 +47,15 @@ namespace FOAEA3.Admin.Business
                 if (!ValidationHelper.IsValidSinNumberMod10(sin))
                     throw new Exception("Invalid SIN!");
 
-                await CloseActiveSinEventAndDetailsForApplicationAsync(applManager);
+                await CloseActiveSinEventAndDetailsForApplication(applManager);
 
-                await CreateSinResultsAsync(enfService, controlCode, sin);
+                await CreateSinResults(enfService, controlCode, sin);
 
                 switch (applManager.GetCategory())
                 {
                     case "I01":
                         var interceptionManager = new InterceptionManager(DB, null, config, user);
-                        await interceptionManager.LoadApplicationAsync(enfService, controlCode);
+                        await interceptionManager.LoadApplication(enfService, controlCode);
                         interceptionManager.InterceptionApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         interceptionManager.InterceptionApplication.Appl_SIN_Cnfrmd_Ind = 1;
                         interceptionManager.InterceptionApplication.Appl_LastUpdate_Usr = "SYSTEM";
@@ -67,7 +67,7 @@ namespace FOAEA3.Admin.Business
 
                     case "T01":
                         var tracingManager = new TracingManager(DB, config, user);
-                        await tracingManager.LoadApplicationAsync(enfService, controlCode);
+                        await tracingManager.LoadApplication(enfService, controlCode);
                         tracingManager.TracingApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         tracingManager.TracingApplication.Appl_SIN_Cnfrmd_Ind = 1;
                         tracingManager.TracingApplication.Appl_LastUpdate_Usr = "SYSTEM";
@@ -79,7 +79,7 @@ namespace FOAEA3.Admin.Business
 
                     case "L01":
                         var licenceDenialManager = new LicenceDenialManager(DB, config, user);
-                        await licenceDenialManager.LoadApplicationAsync(enfService, controlCode);
+                        await licenceDenialManager.LoadApplication(enfService, controlCode);
                         licenceDenialManager.LicenceDenialApplication.Appl_Dbtr_Cnfrmd_SIN = sin;
                         licenceDenialManager.LicenceDenialApplication.Appl_SIN_Cnfrmd_Ind = 1;
                         licenceDenialManager.LicenceDenialApplication.Appl_LastUpdate_Usr = "SYSTEM";
@@ -102,23 +102,23 @@ namespace FOAEA3.Admin.Business
             return success;
         }
 
-        private async Task CloseActiveSinEventAndDetailsForApplicationAsync(ApplicationManager applManager)
+        private async Task CloseActiveSinEventAndDetailsForApplication(ApplicationManager applManager)
         {
-            var sinEvents = await applManager.EventManager.GetApplicationEventsForQueueAsync(EventQueue.EventSIN);
+            var sinEvents = await applManager.EventManager.GetApplicationEventsForQueue(EventQueue.EventSIN);
             var mostRecentEventSIN = sinEvents.OrderByDescending(m => m.Event_TimeStamp)
                                               .First(m => (m.Event_Reas_Cd == EventCode.C50640_SIN_SENT_TO_HRD_FOR_VALIDATION));
             mostRecentEventSIN.ActvSt_Cd = "C";
             mostRecentEventSIN.Event_Compl_Dte = DateTime.Now;
-            await applManager.EventManager.SaveEventAsync(mostRecentEventSIN);
+            await applManager.EventManager.SaveEvent(mostRecentEventSIN);
 
-            var mostRecentEventSINdetails = await DB.ApplicationEventDetailTable.GetEventSINDetailDataForEventIDAsync(mostRecentEventSIN.Event_Id);
+            var mostRecentEventSINdetails = await DB.ApplicationEventDetailTable.GetEventSINDetailDataForEventID(mostRecentEventSIN.Event_Id);
             mostRecentEventSINdetails.ActvSt_Cd = "C";
             mostRecentEventSINdetails.Event_Compl_Dte = DateTime.Now;
-            await applManager.EventDetailManager.SaveEventDetailAsync(mostRecentEventSINdetails);
+            await applManager.EventDetailManager.SaveEventDetail(mostRecentEventSINdetails);
 
         }
 
-        private async Task CreateSinResultsAsync(string enfService, string controlCode, string sin)
+        private async Task CreateSinResults(string enfService, string controlCode, string sin)
         {
             var sinResult = new SINResultData
             {
@@ -136,7 +136,7 @@ namespace FOAEA3.Admin.Business
                 ValStat_Cd = 0,
                 ActvSt_Cd = "C"
             };
-            await DB.SINResultTable.CreateSINResultsAsync(sinResult);
+            await DB.SINResultTable.CreateSINResults(sinResult);
         }
 
 

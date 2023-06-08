@@ -4,7 +4,7 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
-    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
+    public async Task<List<string>> ProcessXmlFile(string sourceTracingDataAsJson, string flatFileName)
     {
         var result = new MessageDataList();
 
@@ -70,25 +70,25 @@ public partial class IncomingFederalTracingManager
                                                        int processId, string enfSrvCd, short fileCycle,
                                                        string flatFileName)
     {
-        string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameterAsync(processId, "evnt_cutoff");
+        string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameter(processId, "evnt_cutoff");
         int cutOffDays = int.Parse(cutOffDaysValue);
 
-        var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle.ToString());
-        var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetailsAsync(enfSrvCd, fileCycle.ToString());
+        var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle.ToString());
+        var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle.ToString());
 
         foreach (var response in traceResponses)
         {
             var item = ConvertCraResponseToFoaeaResponseData(response, fileCycle);
             await APIs.TracingResponses.AddTraceFinancialResponseData(item);
 
-            var appl = await APIs.TracingApplications.GetApplicationAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-            await MarkTraceEventsAsProcessedAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
-                                                  activeTraceEvents, activeTraceEventDetails);
+            var appl = await APIs.TracingApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+            await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
+                                             activeTraceEvents, activeTraceEventDetails);
         }
 
-        await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
-        await UpdateTracingApplicationsAsync(enfSrvCd, fileCycle.ToString());
-        await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
+        await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+        await UpdateTracingApplications(enfSrvCd, fileCycle.ToString());
+        await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
     }
 
     private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)

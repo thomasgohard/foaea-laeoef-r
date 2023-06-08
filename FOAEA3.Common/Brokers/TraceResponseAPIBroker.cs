@@ -15,22 +15,22 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
+        public async Task InsertBulkData(List<TraceResponseData> responseData)
         {
-            _ = await ApiHelper.PostDataAsync<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
+            _ = await ApiHelper.PostData<TraceResponseData, List<TraceResponseData>>("api/v1/traceResponses/bulk",
                                                                                     responseData, token: Token);
         }
 
         public async Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData)
         {
             string apiCall = "api/v1/traceFinancialResponses";
-            _ = await ApiHelper.PostDataAsync<TraceFinancialResponseData, TraceFinancialResponseData>(apiCall,
+            _ = await ApiHelper.PostData<TraceFinancialResponseData, TraceFinancialResponseData>(apiCall,
                                                                                          traceFinancialResultData, token: Token);
         }
 
-        public async Task MarkTraceResultsAsViewedAsync(string enfService)
+        public async Task MarkTraceResultsAsViewed(string enfService)
         {
-            await ApiHelper.SendCommandAsync("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
+            await ApiHelper.SendCommand("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
         }
     }
 }

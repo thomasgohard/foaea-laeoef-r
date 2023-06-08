@@ -5,9 +5,9 @@ namespace FileBroker.Model.Interfaces
 {
     public interface IFileAuditRepository
     {
-        Task<List<FileAuditData>> GetFileAuditDataForFileAsync(string fileName);
+        Task<List<FileAuditData>> GetFileAuditDataForFile(string fileName);
         Task InsertFileAuditData(FileAuditData data);
         Task MarkFileAuditCompletedForFile(string fileName);
-        Task MarkFileAuditCompletedForItemAsync(FileAuditData data);
+        Task MarkFileAuditCompletedForItem(FileAuditData data);
     }
 }

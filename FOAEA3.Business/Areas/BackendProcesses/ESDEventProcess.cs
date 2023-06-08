@@ -25,27 +25,27 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("ESD Events Process", "ESD Events Process Started", "O");
+            await prodAudit.Insert("ESD Events Process", "ESD Events Process Started", "O");
 
             await UpdateESDreceivedDate();
 
             await ProcessRejectedInterceptions();
 
-            await prodAudit.InsertAsync("ESD Events Process", "ESD Events Process Completed", "O");
+            await prodAudit.Insert("ESD Events Process", "ESD Events Process Completed", "O");
         }
 
         private async Task ProcessRejectedInterceptions()
         {
-            var applRejects = await DB.InterceptionTable.GetApplicationsForRejectAsync();
+            var applRejects = await DB.InterceptionTable.GetApplicationsForReject();
 
             foreach (var appl in applRejects)
             {
                 var manager = new InterceptionManager(DB, DBfinance, Config, User);
-                await manager.LoadApplicationAsync(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
+                await manager.LoadApplication(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
 
                 if (appl.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5))
                 {
@@ -53,7 +53,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                     if (dateDiff.Days > 10)
                     {
                         manager.AcceptedWithin30Days = true;
-                        await manager.RejectInterceptionAsync();
+                        await manager.RejectInterception();
                     }
                     else
                     {
@@ -61,14 +61,14 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                         if ((dateDiff.Days == 3) || (dateDiff.Days == 5))
                         {
                             manager.EventManager.AddEvent(EventCode.C50902_AWAITING_AN_ACTION_ON_THIS_APPLICATION, updateSubm: "F02SSS");
-                            await manager.EventManager.SaveEventsAsync();
+                            await manager.EventManager.SaveEvents();
                         }
                     }
                 }
                 else
                 {
                     bool isESDsite = Config.ESDsites.Contains(appl.Appl_EnfSrv_Cd);
-                    manager.GarnisheeSummonsReceiptDate = await DB.InterceptionTable.GetGarnisheeSummonsReceiptDateAsync(
+                    manager.GarnisheeSummonsReceiptDate = await DB.InterceptionTable.GetGarnisheeSummonsReceiptDate(
                                                                             appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, isESDsite);
 
                     if (manager.GarnisheeSummonsReceiptDate is null || manager.GarnisheeSummonsReceiptDate.Value == DateTime.MinValue)
@@ -77,7 +77,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                         if (dateDiff.Days > 18)
                         {
                             manager.AcceptedWithin30Days = true;
-                            await manager.RejectInterceptionAsync();
+                            await manager.RejectInterception();
                         }
                     }
                     else
@@ -86,7 +86,7 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                         if (dateDiff.Days > 18)
                         {
                             manager.AcceptedWithin30Days = true;
-                            await manager.RejectInterceptionAsync();
+                            await manager.RejectInterception();
                         }
                     }
                 }
@@ -95,22 +95,22 @@ namespace FOAEA3.Business.Areas.BackendProcesses
 
         private async Task UpdateESDreceivedDate()
         {
-            var esdRequiredList = await DB.InterceptionTable.GetESDrequiredAsync();
+            var esdRequiredList = await DB.InterceptionTable.GetESDrequired();
             foreach (var esdRequired in esdRequiredList)
             {
                 var enfSrv = esdRequired.Appl_EnfSrv_Cd;
                 var ctrlCd = esdRequired.Appl_CtrlCd;
 
-                (bool isNew, DateTime newDate) = await DB.InterceptionTable.IsNewESDreceivedAsync(enfSrv, ctrlCd,
+                (bool isNew, DateTime newDate) = await DB.InterceptionTable.IsNewESDreceived(enfSrv, ctrlCd,
                                                                                                   esdRequired.ESDRequired);
                 if (isNew)
                 {
-                    await DB.InterceptionTable.UpdateESDrequiredAsync(enfSrv, ctrlCd, newDate);
+                    await DB.InterceptionTable.UpdateESDrequired(enfSrv, ctrlCd, newDate);
                 }
                 else
                 {
                     var manager = new InterceptionManager(DB, DBfinance, Config, User);
-                    await manager.LoadApplicationAsync(enfSrv, ctrlCd);
+                    await manager.LoadApplication(enfSrv, ctrlCd);
 
                     var dateDiff = DateTime.Now - newDate.Date;
                     if ((dateDiff.Days == 4) || (dateDiff.Days == 7))
@@ -121,13 +121,13 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                     {
                         manager.AcceptedWithin30Days = true;
                         manager.ESDReceived = false;
-                        await manager.RejectInterceptionAsync();
+                        await manager.RejectInterception();
                         manager.EventManager.AddEvent(EventCode.C50765_APPLICATION_REJECTED_AS_NO_ELECTRONIC_SUMMONS_DOCUMENT_RECEIVED, updateSubm: "F02SSS");
 
-                        await DB.InterceptionTable.UpdateESDrequiredAsync(enfSrv, ctrlCd, newDate);
+                        await DB.InterceptionTable.UpdateESDrequired(enfSrv, ctrlCd, newDate);
                     }
 
-                    await manager.EventManager.SaveEventsAsync();
+                    await manager.EventManager.SaveEvents();
                 }
             }
         }

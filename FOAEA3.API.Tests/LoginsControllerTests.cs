@@ -44,7 +44,7 @@ namespace FOAEA3.API.Tests
 
             FoaeaLoginData userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetStringAsync("/api/v1/logins/Version");
@@ -64,7 +64,7 @@ namespace FOAEA3.API.Tests
 
                 FoaeaLoginData userLoginInfo = GetSystemUser(_config);
 
-                var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+                var tokenData = await LoginToFoaea(userLoginInfo, client);
 
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
                 var response = await client.GetStringAsync("/api/v1/logins/DB");
@@ -82,7 +82,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             Assert.NotNull(tokenData);
             Assert.True(tokenData.TokenExpiration > DateTime.Now);
@@ -96,7 +96,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetTestUser(_config, TEST_USER.Ontario);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             Assert.NotNull(tokenData);
             Assert.True(tokenData.TokenExpiration > DateTime.Now);
@@ -110,7 +110,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
 
             var response = await client.PostAsync("/api/v1/logins/TestVerify", null);
@@ -126,7 +126,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
 
             var refreshData = new TokenRefreshData

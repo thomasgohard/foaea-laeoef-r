@@ -15,7 +15,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<List<TranslationData>> GetTranslationsAsync()
+        public async Task<List<TranslationData>> GetTranslations()
         {
             return await MainDB.GetDataFromStoredProcAsync<TranslationData>("", FillTranslationDataFromReader);
         }

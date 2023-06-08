@@ -27,8 +27,8 @@ public class TraceResponsesController : FoaeaControllerBase
     {
         var manager = new TracingManager(repositories, config, User);
 
-        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-            return Ok(await manager.GetTraceResultsAsync());
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.GetTraceResults());
         else
             return NotFound();
     }
@@ -36,11 +36,11 @@ public class TraceResponsesController : FoaeaControllerBase
     [HttpPost("bulk")]
     public async Task<ActionResult<int>> CreateTraceResponsesBulk([FromServices] IRepositories repositories)
     {
-        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<TraceResponseData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBody<List<TraceResponseData>>(Request);
 
         var tracingManager = new TracingManager(repositories, config, User);
 
-        await tracingManager.CreateResponseDataAsync(responseData);
+        await tracingManager.CreateResponseData(responseData);
 
         var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
@@ -54,7 +54,7 @@ public class TraceResponsesController : FoaeaControllerBase
     {
         var tracingManager = new TracingManager(repositories, config, User);
 
-        await tracingManager.MarkResponsesAsViewedAsync(enfService);
+        await tracingManager.MarkResponsesAsViewed(enfService);
 
         return Ok();
     }

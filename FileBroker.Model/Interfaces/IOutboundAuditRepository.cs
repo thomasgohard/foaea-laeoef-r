@@ -6,6 +6,6 @@ namespace FileBroker.Model.Interfaces
 {
     public interface IOutboundAuditRepository
     {
-        Task InsertIntoOutboundAuditAsync(string fileName, DateTime fileDate, bool fileCreated, string message);
+        Task InsertIntoOutboundAudit(string fileName, DateTime fileDate, bool fileCreated, string message);
     }
 }

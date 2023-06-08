@@ -19,6 +19,6 @@ public class IFMSController : FoaeaControllerBase
                                                             [FromServices] IRepositories_Finance dbFinance)
     {
         var manager = new FinancialManager(db, dbFinance);
-        return Ok(await manager.GetIFMSdataAsync(batchId));
+        return Ok(await manager.GetIFMSdata(batchId));
     }
 }

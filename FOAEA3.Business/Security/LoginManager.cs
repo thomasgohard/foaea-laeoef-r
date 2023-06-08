@@ -17,71 +17,71 @@ namespace FOAEA3.Business.Security
         }
         public static bool ValidateLogins = true;
 
-        public async Task<bool> LoginIsAccountExpiredAsync(string subjectName)
+        public async Task<bool> LoginIsAccountExpired(string subjectName)
         {
-            return await DB.LoginTable.IsLoginExpiredAsync(subjectName);
+            return await DB.LoginTable.IsLoginExpired(subjectName);
         }
 
-        public async Task<bool> CheckPreviousPasswordsAsync(string subjectName, string newPassword)
+        public async Task<bool> CheckPreviousPasswords(string subjectName, string newPassword)
         {
-            SubjectData subject = await GetSubjectAsync(subjectName);
-            return await DB.LoginTable.CheckPreviousPasswordsAsync(subject.SubjectId, newPassword);
+            SubjectData subject = await GetSubject(subjectName);
+            return await DB.LoginTable.CheckPreviousPasswords(subject.SubjectId, newPassword);
 
         }
-        public async Task<bool> GetAllowedAccessAsync(string username)
+        public async Task<bool> GetAllowedAccess(string username)
         {
-            return await DB.LoginTable.GetAllowedAccessAsync(username);
+            return await DB.LoginTable.GetAllowedAccess(username);
         }
 
-        public async Task AcceptNewTermsOfReferernceAsync(string username)
+        public async Task AcceptNewTermsOfReference(string username)
         {
-            await DB.LoginTable.AcceptNewTermsOfReferernceAsync(username);
+            await DB.LoginTable.AcceptNewTermsOfReferernce(username);
         }
 
-        public async Task<bool> SetPasswordAsync(string username, string password, string passwordSalt)
+        public async Task<bool> SetPassword(string username, string password, string passwordSalt)
         {
-            SubjectData subject = await GetSubjectAsync(username);
+            SubjectData subject = await GetSubject(username);
             if (subject.SubjectName == null)
             {
                 return false;
             }
             else
             {
-                await DB.LoginTable.SetPasswordAsync(username, password, PASSWORD_FORMAT, passwordSalt, PASSWORD_EXPIRY_DAYS);
+                await DB.LoginTable.SetPassword(username, password, PASSWORD_FORMAT, passwordSalt, PASSWORD_EXPIRY_DAYS);
                 return true;
             }
 
         }
 
-        public async Task SendEmailAsync(string subject, string recipient, string body, int isHTML = 1)
+        public async Task SendEmail(string subject, string recipient, string body, int isHTML = 1)
         {
             var dbNotification = new DBNotification(DB.MainDB);
-            await dbNotification.SendEmailAsync(subject, recipient, body, isHTML);
+            await dbNotification.SendEmail(subject, recipient, body, isHTML);
         }
 
-        public async Task<SubjectData> GetSubjectAsync(string subjectName)
+        public async Task<SubjectData> GetSubject(string subjectName)
         {
-            return await DB.SubjectTable.GetSubjectAsync(subjectName);
+            return await DB.SubjectTable.GetSubject(subjectName);
         }
 
-        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
+        public async Task<SubjectData> GetSubjectByConfirmationCode(string confirmationCode)
         {
-            return await DB.SubjectTable.GetSubjectByConfirmationCodeAsync(confirmationCode);
+            return await DB.SubjectTable.GetSubjectByConfirmationCode(confirmationCode);
         }
 
-        public async Task PostConfirmationCodeAsync(int subjectId, string confirmationCode)
+        public async Task PostConfirmationCode(int subjectId, string confirmationCode)
         {
-            await DB.LoginTable.PostConfirmationCodeAsync(subjectId, confirmationCode);
+            await DB.LoginTable.PostConfirmationCode(subjectId, confirmationCode);
         }
 
-        public async Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode)
+        public async Task<string> GetEmailByConfirmationCode(string confirmationCode)
         {
-            return await DB.LoginTable.GetEmailByConfirmationCodeAsync(confirmationCode);
+            return await DB.LoginTable.GetEmailByConfirmationCode(confirmationCode);
         }
 
-        public async Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial)
+        public async Task PostPassword(string confirmationCode, string password, string salt, string initial)
         {
-            await DB.LoginTable.PostPasswordAsync(confirmationCode, password, salt, initial);
+            await DB.LoginTable.PostPassword(confirmationCode, password, salt, initial);
         }
     }
 }

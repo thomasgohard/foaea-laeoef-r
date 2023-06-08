@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<EnfSrvData>> GetEnfServiceAsync(string enforcementServiceCode = null,
+        public async Task<List<EnfSrvData>> GetEnfService(string enforcementServiceCode = null,
                                                 string enforcementServiceName = null,
                                                 string enforcementServiceProvince = null,
                                                 string enforcementServiceCategory = null)

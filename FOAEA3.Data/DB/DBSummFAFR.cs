@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<DataList<SummFAFR_Data>> GetSummFaFrAsync(int summFAFR_Id)
+        public async Task<DataList<SummFAFR_Data>> GetSummFaFr(int summFAFR_Id)
         {
             var parameters = new Dictionary<string, object>() {
                 { "CtrlSummFaFrId", summFAFR_Id }
@@ -28,7 +28,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<DataList<SummFAFR_Data>> GetSummFaFrListAsync(List<SummFAFR_DE_Data> summFAFRs)
+        public async Task<DataList<SummFAFR_Data>> GetSummFaFrList(List<SummFAFR_DE_Data> summFAFRs)
         {
             var firstFAFR = summFAFRs[0];
 

@@ -7,6 +7,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        Task<FoaEventDataDictionary> GetAllFoaMessagesAsync();
+        Task<FoaEventDataDictionary> GetAllFoaMessages();
     }
 }

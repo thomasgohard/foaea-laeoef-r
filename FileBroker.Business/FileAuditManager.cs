@@ -26,7 +26,7 @@ public class FileAuditManager
         bool isFrench = IsFrench(provCd);
         var auditFileContent = new StringBuilder();
 
-        var auditData = await FileAuditDB.GetFileAuditDataForFileAsync(fileName);
+        var auditData = await FileAuditDB.GetFileAuditDataForFile(fileName);
 
         int fileNotLoadedCount = auditData.GroupBy(p => new { p.Appl_EnfSrv_Cd, p.Appl_CtrlCd })
                                           .Select(g => g.First())
@@ -38,10 +38,7 @@ public class FileAuditManager
         if (isFrench)
             LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
 
-        if (isFrench)
-            auditFileContent.AppendLine("Code de l'autorité provinciale\tCode de contrôle\tNumero réf du ministère payeur\tMessage de l'application");
-        else
-            auditFileContent.AppendLine("Enforcement Service Code\tControl Code\tSource Reference Number\tApplication Message");
+        auditFileContent.AppendLine($"{LanguageResource.ENFORCEMENT_SERVICE_CODE}\t{LanguageResource.CONTROL_CODE}\t{LanguageResource.SOURCE_REF_NUMBER}\t{LanguageResource.APP_MESSAGE}");
 
         foreach (var auditRow in auditData)
             if (auditRow.ApplicationMessage.StartsWith(LanguageResource.AUDIT_SUCCESS, StringComparison.InvariantCultureIgnoreCase))
@@ -126,7 +123,7 @@ public class FileAuditManager
 
         string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
 
-        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent, auditFileLocation);
+        await MailService.SendEmail($"Audit {fileName}", recipients, bodyContent, auditFileLocation);
 
     }
 
@@ -155,7 +152,7 @@ public class FileAuditManager
             bodyContent += @"<br />For any questions regarding the content of this email, please contact <a href='email:FLAS-IT-SO@justice.gc.ca'>FLAS-IT-SO@justice.gc.ca</a>";
         }
 
-        await MailService.SendEmailAsync($"Audit {fileName}", recipients, bodyContent);
+        await MailService.SendEmail($"Audit {fileName}", recipients, bodyContent);
 
     }
 }

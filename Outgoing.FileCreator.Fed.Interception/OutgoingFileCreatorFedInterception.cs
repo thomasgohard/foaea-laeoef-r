@@ -19,12 +19,12 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            await CreateOutgoingCRAasync(fileBrokerDB, config.ApiRootData, config);
+            await CreateOutgoingCRA(fileBrokerDB, config.ApiRootData, config);
 
             ColourConsole.Write("Completed.\n");
         }
 
-        private static async Task CreateOutgoingCRAasync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+        private static async Task CreateOutgoingCRA(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                          IFileBrokerConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -33,7 +33,7 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var financialManager = new OutgoingFinancialEISOmanager(foaeaApis, db, config);
 
-            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategoryAsync("EISOOUT")).First();
+            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategory("EISOOUT")).First();
 
             var errors = new List<string>();
 
@@ -45,7 +45,7 @@ namespace Outgoing.FileCreator.Fed.Interception
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{outgoingProcessData.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync(outgoingProcessData.Category, outgoingProcessData.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError(outgoingProcessData.Category, outgoingProcessData.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
         }
@@ -60,12 +60,12 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            await CreateOutgoingEIasync(fileBrokerDB, config.ApiRootData, config, skipChecks);
+            await CreateOutgoingEI(fileBrokerDB, config.ApiRootData, config, skipChecks);
 
             ColourConsole.Write("Completed.\n");
         }
 
-        private static async Task CreateOutgoingEIasync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+        private static async Task CreateOutgoingEI(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                         IFileBrokerConfigurationHelper config, bool skipChecks = false)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -74,7 +74,7 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var financialManager = new OutgoingFinancialEISOmanager(foaeaApis, db, config);
 
-            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategoryAsync("DOJEEOUT")).First();
+            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategory("DOJEEOUT")).First();
 
             var errors = new List<string>();
 
@@ -86,7 +86,7 @@ namespace Outgoing.FileCreator.Fed.Interception
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{outgoingProcessData.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync(outgoingProcessData.Category, outgoingProcessData.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError(outgoingProcessData.Category, outgoingProcessData.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
         }
@@ -101,12 +101,12 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            await CreateOutgoingCPPasync(fileBrokerDB, config.ApiRootData, config);
+            await CreateOutgoingCPP(fileBrokerDB, config.ApiRootData, config);
 
             ColourConsole.Write("Completed.\n");
         }
 
-        private static async Task CreateOutgoingCPPasync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+        private static async Task CreateOutgoingCPP(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                          IFileBrokerConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -115,7 +115,7 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var financialManager = new OutgoingFinancialEISOmanager(foaeaApis, db, config);
 
-            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategoryAsync("DOJCPPOUT")).First();
+            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategory("DOJCPPOUT")).First();
 
             var errors = new List<string>();
 
@@ -127,7 +127,7 @@ namespace Outgoing.FileCreator.Fed.Interception
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{outgoingProcessData.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync(outgoingProcessData.Category, outgoingProcessData.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError(outgoingProcessData.Category, outgoingProcessData.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
 
@@ -150,13 +150,13 @@ namespace Outgoing.FileCreator.Fed.Interception
             {
                 ColourConsole.WriteEmbeddedColorLine($"Processing block funds for [yellow]{category}[/yellow]...");
 
-                await CreateOutgoingBlockFundsAsync(fileBrokerDB, config.ApiRootData, config, category);
+                await CreateOutgoingBlockFunds(fileBrokerDB, config.ApiRootData, config, category);
             }
 
             ColourConsole.Write("Completed.\n");
         }
 
-        private static async Task CreateOutgoingBlockFundsAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+        private static async Task CreateOutgoingBlockFunds(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                                 IFileBrokerConfigurationHelper config, string category)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -165,7 +165,7 @@ namespace Outgoing.FileCreator.Fed.Interception
 
             var financialManager = new OutgoingFinancialBlockFundsManager(foaeaApis, db, config);
 
-            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategoryAsync(category)).First();
+            var outgoingProcessData = (await db.FileTable.GetFileTableDataForCategory(category)).First();
 
             var errors = new List<string>();
 
@@ -177,7 +177,7 @@ namespace Outgoing.FileCreator.Fed.Interception
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{outgoingProcessData.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync(outgoingProcessData.Category, outgoingProcessData.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError(outgoingProcessData.Category, outgoingProcessData.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
         }

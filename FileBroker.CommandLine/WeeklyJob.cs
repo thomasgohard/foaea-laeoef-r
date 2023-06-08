@@ -9,7 +9,7 @@ namespace FileBroker.CommandLine
         // Date.Now.DayOfWeek
         public static async Task Run(IFileTableRepository fileTable)
         {
-            var jobs = (await fileTable.GetAllActiveAsync()).Where(j => j.Frequency == (int)DateTime.Now.DayOfWeek);
+            var jobs = (await fileTable.GetAllActive()).Where(j => j.Frequency == (int)DateTime.Now.DayOfWeek);
             foreach (var job in jobs)
             {
                 string category = job.Category.ToUpper();

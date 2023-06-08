@@ -18,7 +18,7 @@
             Errors = new List<string>();
         }
 
-        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
+        public async Task AddNewFiles(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IL.*");
@@ -37,7 +37,7 @@
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath)
+        public async Task<bool> ProcessNewFile(string fullPath)
         {
             string fileNameNoPath = Path.GetFileName(fullPath);
 
@@ -54,7 +54,7 @@
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
-                    await sinManager.ProcessFlatFileAsync(flatFileContent, fullPath);
+                    await sinManager.ProcessFlatFile(flatFileContent, fullPath);
                     return true;
                 }
                 else

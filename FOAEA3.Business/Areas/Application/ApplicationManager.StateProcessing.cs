@@ -63,7 +63,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!string.IsNullOrEmpty(postalCode) && !string.IsNullOrEmpty(provinceCode) && !string.IsNullOrEmpty(cityName) &&
                 !string.IsNullOrEmpty(countryCode))
             {
-                (isValid, reasonText) = await Validation.IsValidPostalCodeAsync(postalCode, provinceCode, cityName, countryCode);
+                (isValid, reasonText) = await Validation.IsValidPostalCode(postalCode, provinceCode, cityName, countryCode);
                 if (!isValid)
                 {
                     EventManager.AddEvent(EventCode.C50772_INVALID_POSTAL_CODE, reasonText);
@@ -81,7 +81,7 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_Dbtr_Gendr_Cd = "M";
             }
 
-            await Validation.ValidateControlCodeAsync();
+            await Validation.ValidateControlCode();
 
             Validation.ValidateDebtorSurname();
 
@@ -115,7 +115,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 ApplicationState nextState = ApplicationState.SIN_CONFIRMATION_PENDING_3;
 
-                if (await Validation.IsSameDayApplicationAsync())
+                if (await Validation.IsSameDayApplication())
                 {
                     EventManager.AddEvent(EventCode.C50530_AN_APPLICATION_USING_THIS_SIN_WAS_ENTERED_IN_SAME_CATEGORY_TODAY);
                     nextState = ApplicationState.INVALID_APPLICATION_1;
@@ -147,7 +147,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             Application.AppLiSt_Cd = ApplicationState.SIN_NOT_CONFIRMED_5;
             EventManager.AddEvent(EventCode.C50680_CHANGE_OR_SUPPLY_ADDITIONAL_DEBTOR_INFORMATION_SEE_SIN_VERIFICATION_RESULTS_PAGE_IN_FOAEA_FOR_SPECIFIC_DETAILS,
-                                  eventReasonText: await GetSINResultsEventTextAsync());
+                                  eventReasonText: await GetSINResultsEventText());
         }
 
         protected virtual Task Process_06_PendingAcceptanceSwearing()

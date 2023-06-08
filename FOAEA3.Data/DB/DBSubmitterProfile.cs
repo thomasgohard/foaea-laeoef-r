@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
         {
 
         }
-        public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
+        public async Task<SubmitterProfileData> GetSubmitterProfile(string submitterCode)
         {
             var parameters = new Dictionary<string, object>
                 {

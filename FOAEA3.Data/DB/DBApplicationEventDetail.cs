@@ -21,7 +21,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetApplicationEventDetailsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
+        public async Task<List<ApplicationEventDetailData>> GetApplicationEventDetails(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -75,7 +75,7 @@ namespace FOAEA3.Data.DB
                 return data?.FindAll(m => m.ActvSt_Cd == activeState);
         }
 
-        public async Task<ApplicationEventDetailData> GetEventSINDetailDataForEventIDAsync(int eventID)
+        public async Task<ApplicationEventDetailData> GetEventSINDetailDataForEventID(int eventID)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -91,7 +91,7 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault(); // returns null if no data found
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrv_Cd, string cycle)
+        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -108,7 +108,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetailsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
@@ -126,7 +126,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<DataList<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string enfSrv_Cd, string fileName)
+        public async Task<DataList<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -151,7 +151,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<bool> SaveEventDetailAsync(ApplicationEventDetailData eventDetailData)
+        public async Task<bool> SaveEventDetail(ApplicationEventDetailData eventDetailData)
         {
             bool success = false;
 
@@ -165,30 +165,30 @@ namespace FOAEA3.Data.DB
 
                 case EventQueue.EventBFN_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
-                        success = await CreateEventDetailAsync(eventDetailData, "EvntBFN");
+                        success = await CreateEventDetail(eventDetailData, "EvntBFN");
                     else
-                        success = await UpdateBFNEventDetaiAsync(eventDetailData);
+                        success = await UpdateBFNEventDetai(eventDetailData);
                     break;
 
                 case EventQueue.EventTrace_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
-                        success = await CreateEventDetailAsync(eventDetailData, "EvntTrace");
+                        success = await CreateEventDetail(eventDetailData, "EvntTrace");
                     else
-                        success = await UpdateEventDetailAsync(eventDetailData, "MessageBrokerEventTraceDetailUpdate");
+                        success = await UpdateEventDetail(eventDetailData, "MessageBrokerEventTraceDetailUpdate");
                     break;
 
                 case EventQueue.EventLicence_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
-                        success = await CreateEventDetailAsync(eventDetailData, "EvntLicence");
+                        success = await CreateEventDetail(eventDetailData, "EvntLicence");
                     else
-                        success = await UpdateEventDetailAsync(eventDetailData, "MessageBrokerEventLicenseDetailUpdate");
+                        success = await UpdateEventDetail(eventDetailData, "MessageBrokerEventLicenseDetailUpdate");
                     break;
 
                 case EventQueue.EventSIN_dtl:
                     if (eventDetailData.Event_dtl_Id == 0)
-                        success = await CreateEventDetailAsync(eventDetailData, "EvntSIN");
+                        success = await CreateEventDetail(eventDetailData, "EvntSIN");
                     else
-                        success = await UpdateEventDetailAsync(eventDetailData, "MessageBrokerEventSINDetailUpdate");
+                        success = await UpdateEventDetail(eventDetailData, "MessageBrokerEventSINDetailUpdate");
                     break;
 
             }
@@ -196,18 +196,18 @@ namespace FOAEA3.Data.DB
             return success;
         }
 
-        public async Task<bool> SaveEventDetailsAsync(List<ApplicationEventDetailData> eventDetailsData)
+        public async Task<bool> SaveEventDetails(List<ApplicationEventDetailData> eventDetailsData)
         {
             bool success = true;
 
             foreach (var eventDetail in eventDetailsData)
-                if (!(await SaveEventDetailAsync(eventDetail)))
+                if (!(await SaveEventDetail(eventDetail)))
                     success = false;
 
             return success;
         }
 
-        private async Task<bool> CreateEventDetailAsync(ApplicationEventDetailData eventDetailData, string tableName)
+        private async Task<bool> CreateEventDetail(ApplicationEventDetailData eventDetailData, string tableName)
         {
             bool success = false;
 
@@ -239,7 +239,7 @@ namespace FOAEA3.Data.DB
             return success;
         }
 
-        private async Task<bool> UpdateBFNEventDetaiAsync(ApplicationEventDetailData eventDetailData)
+        private async Task<bool> UpdateBFNEventDetai(ApplicationEventDetailData eventDetailData)
         {
             bool success = false;
 
@@ -261,7 +261,7 @@ namespace FOAEA3.Data.DB
             return success;
         }
 
-        private async Task<bool> UpdateEventDetailAsync(ApplicationEventDetailData eventDetailData, string procName)
+        private async Task<bool> UpdateEventDetail(ApplicationEventDetailData eventDetailData, string procName)
         {
             bool success = false;
 
@@ -298,7 +298,7 @@ namespace FOAEA3.Data.DB
             return success;
         }
 
-        public async Task UpdateOutboundEventDetailAsync(string activeState, string applicationState, string enfSrvCode,
+        public async Task UpdateOutboundEventDetail(string activeState, string applicationState, string enfSrvCode,
                                               string writtenFile, List<int> eventIds)
         {
             string xmlEventList = ConvertEventIdsListToXml(eventIds);

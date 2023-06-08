@@ -7,6 +7,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<FoaEventDataDictionary> GetFoaEventsAsync();
+        Task<FoaEventDataDictionary> GetFoaEvents();
     }
 }

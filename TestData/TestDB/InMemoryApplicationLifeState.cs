@@ -10,7 +10,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
+        public Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStates()
         {
             var result = new DataList<ApplicationLifeStateData>();
 

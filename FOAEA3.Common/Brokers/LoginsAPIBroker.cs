@@ -18,70 +18,70 @@ namespace FOAEA3.Common.Brokers
             Token = currentToken;
         }
 
-        public async Task<string> GetVersionAsync()
+        public async Task<string> GetVersion()
         {
             string apiCall = $"api/v1/logins/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync()
+        public async Task<string> GetConnection()
         {
             string apiCall = $"api/v1/logins/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<TokenData> SubjectLoginAsync(FoaeaLoginData loginData)
+        public async Task<TokenData> SubjectLogin(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/SubjectLogin";
-            var data = await ApiHelper.PostDataAsync<TokenData, FoaeaLoginData>(apiCall, loginData);
+            var data = await ApiHelper.PostData<TokenData, FoaeaLoginData>(apiCall, loginData);
             return data;
         }
 
-        public async Task<List<string>> GetAvailableSubmittersAsync()
+        public async Task<List<string>> GetAvailableSubmitters()
         {
             string apiCall = $"api/v1/logins/Submitters";
-            var data = await ApiHelper.GetDataAsync<List<string>>(apiCall, token: Token);
+            var data = await ApiHelper.GetData<List<string>>(apiCall, token: Token);
             return data;
         }
 
-        public async Task<TokenData> SelectSubmitterAsync(string submitter)
+        public async Task<TokenData> SelectSubmitter(string submitter)
         {
             string apiCall = $"api/v1/logins/SelectSubmitter?submitter={submitter}";
-            var data = await ApiHelper.PutDataAsync<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
+            var data = await ApiHelper.PutData<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
             return data;
         }
 
          public async Task<TokenData> AcceptTerms()
         {
             string apiCall = $"api/v1/logins/AcceptTerms";
-            var data = await ApiHelper.PutDataAsync<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
+            var data = await ApiHelper.PutData<TokenData, FoaeaLoginData>(apiCall, new FoaeaLoginData(), token: Token);
             return data;
         }
 
-        public async Task<TokenData> LoginAsync(FoaeaLoginData loginData)
+        public async Task<TokenData> Login(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/SingleStepLogin";
-            var data = await ApiHelper.PostDataAsync<TokenData, FoaeaLoginData>(apiCall, loginData);
+            var data = await ApiHelper.PostData<TokenData, FoaeaLoginData>(apiCall, loginData);
             return data;
         }
 
-        public async Task<string> LoginVerificationAsync(FoaeaLoginData loginData)
+        public async Task<string> LoginVerification(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testVerify";
-            var data = await ApiHelper.PostDataGetStringAsync<FoaeaLoginData>(apiCall, loginData, token: Token);
+            var data = await ApiHelper.PostDataGetString<FoaeaLoginData>(apiCall, loginData, token: Token);
             return data;
         }
 
 
-        public async Task<string> LogoutAsync(FoaeaLoginData loginData)
+        public async Task<string> Logout(FoaeaLoginData loginData)
         {
             string apiCall = "api/v1/logins/testLogout";
-            _ = await ApiHelper.PostDataAsync<List<string>, FoaeaLoginData>(apiCall, loginData, token: Token);
+            _ = await ApiHelper.PostData<List<string>, FoaeaLoginData>(apiCall, loginData, token: Token);
 
             return string.Empty;
         }
 
-        public async Task<TokenData> RefreshTokenAsync(string oldToken, string oldRefreshToken)
+        public async Task<TokenData> RefreshToken(string oldToken, string oldRefreshToken)
         {
             var refreshData = new TokenRefreshData
             {
@@ -90,7 +90,7 @@ namespace FOAEA3.Common.Brokers
             };
 
             string apiCall = "api/v1/logins/TestRefreshToken";
-            var data = await ApiHelper.PostDataAsync<TokenData, TokenRefreshData>(apiCall, refreshData,
+            var data = await ApiHelper.PostData<TokenData, TokenRefreshData>(apiCall, refreshData,
                                                                                   token: oldToken);
 
             return data;

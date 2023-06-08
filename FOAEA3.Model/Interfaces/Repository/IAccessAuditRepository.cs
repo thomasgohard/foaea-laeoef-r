@@ -9,8 +9,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<int> SaveDataPageInfoAsync(AccessAuditPage auditPage, string subject_submitter);
-        Task SaveDataValueAsync(int pageId, string key, string value);
-        Task<List<AccessAuditElementTypeData>> GetAllElementAccessTypeAsync();
+        Task<int> SaveDataPageInfo(AccessAuditPage auditPage, string subject_submitter);
+        Task SaveDataValue(int pageId, string key, string value);
+        Task<List<AccessAuditElementTypeData>> GetAllElementAccessType();
     }
 }

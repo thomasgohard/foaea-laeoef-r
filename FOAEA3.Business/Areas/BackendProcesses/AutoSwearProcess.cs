@@ -23,43 +23,43 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Auto Swear Process", "Auto Swear Process Started", "O");
+            await prodAudit.Insert("Auto Swear Process", "Auto Swear Process Started", "O");
 
             var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
             foreach (string autoSwearEnfSrv in Config.AutoSwear)
             {
                 bool isESDsite = Config.ESDsites.Contains(autoSwearEnfSrv);
 
-                var applications = await interceptionManager.GetApplicationsForVariationAutoAcceptAsync(autoSwearEnfSrv);
+                var applications = await interceptionManager.GetApplicationsForVariationAutoAccept(autoSwearEnfSrv);
                 foreach (var appl in applications)
                 {
                     bool exGratia = false;
 
                     var manager = new InterceptionManager(appl, DB, DBfinance, Config, User);
-                    if (await manager.IsSinBlockedAsync() || await manager.IsRefNumberBlockedAsync())
+                    if (await manager.IsSinBlocked() || await manager.IsRefNumberBlocked())
                     {
                         exGratia = true;
                     }
 
                     manager.AcceptedWithin30Days = true;
-                    manager.GarnisheeSummonsReceiptDate = await DB.InterceptionTable.GetGarnisheeSummonsReceiptDateAsync(
+                    manager.GarnisheeSummonsReceiptDate = await DB.InterceptionTable.GetGarnisheeSummonsReceiptDate(
                                                                                 appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, isESDsite);
 
                     var dateDiff = DateTime.Now - manager.GarnisheeSummonsReceiptDate.Value;
                     if (dateDiff.Days > 30)
                     {
                         manager.AcceptedWithin30Days = false;
-                        await manager.RejectInterceptionAsync();
+                        await manager.RejectInterception();
                     }
                     else
                     {
                         string enfSrv = manager.InterceptionApplication.Appl_EnfSrv_Cd;
                         string ctrlCd = manager.InterceptionApplication.Appl_CtrlCd;
-                        var overrideAppl = await DB.InterceptionTable.GetAutoAcceptGarnisheeOverrideDataAsync(enfSrv, ctrlCd);
+                        var overrideAppl = await DB.InterceptionTable.GetAutoAcceptGarnisheeOverrideData(enfSrv, ctrlCd);
                         DateTime supportingDocDate;
 
                         if ((overrideAppl is not null) && (overrideAppl.Appl_CtrlCd == ctrlCd))
@@ -68,12 +68,12 @@ namespace FOAEA3.Business.Areas.BackendProcesses
                             supportingDocDate = DateTime.Now;
 
                         if (!exGratia)
-                            await manager.AcceptInterceptionAsync(supportingDocDate);
+                            await manager.AcceptInterception(supportingDocDate);
                     }
                 }
             }
 
-            await prodAudit.InsertAsync("Auto Swear Process", "Auto Swear Process Completed", "O");
+            await prodAudit.Insert("Auto Swear Process", "Auto Swear Process Completed", "O");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<LicenceDenialApplicationData> GetLicenceDenialDataAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null)
+        public async Task<LicenceDenialApplicationData> GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null)
         {
 
 
@@ -39,7 +39,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -52,7 +52,7 @@ namespace FOAEA3.Data.DB
             return data;
         }
 
-        public async Task CreateLicenceDenialDataAsync(LicenceDenialApplicationData data)
+        public async Task CreateLicenceDenialData(LicenceDenialApplicationData data)
         {
             var parameters = SetParameters(data);
 
@@ -60,14 +60,14 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task UpdateLicenceDenialDataAsync(LicenceDenialApplicationData data)
+        public async Task UpdateLicenceDenialData(LicenceDenialApplicationData data)
         {
             var parameters = SetParameters(data);
 
             await MainDB.ExecProcAsync("LicSuspUpdate", parameters);
         }
 
-        public async Task<bool> CloseSameDayLicenceEventAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
+        public async Task<bool> CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -201,7 +201,7 @@ namespace FOAEA3.Data.DB
             return parameters;
         }
 
-        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
+        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingData(int maxRecords,
                                                                       string activeState,
                                                                       ApplicationState lifeState,
                                                                       string enfServiceCode)
@@ -220,7 +220,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string fedSource)
+        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplData(string fedSource)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -231,7 +231,7 @@ namespace FOAEA3.Data.DB
                                                                          parameters, FillLicenceDenialToApplDataFromReader);
         }
 
-        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML = true)
+        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML = true)
         {
             var parameters = new Dictionary<string, object>
             {

@@ -7,6 +7,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode);
+        Task<SubmitterProfileData> GetSubmitterProfile(string submitterCode);
     }
 }

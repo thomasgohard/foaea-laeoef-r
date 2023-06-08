@@ -28,7 +28,7 @@ namespace FileBroker.API.Account.Controllers
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            var thisUser = await userTable.GetUserByNameAsync(loginData.UserName);
+            var thisUser = await userTable.GetUserByName(loginData.UserName);
 
             if (!IsValidLogin(loginData, thisUser))
                 return BadRequest();
@@ -51,16 +51,16 @@ namespace FileBroker.API.Account.Controllers
                 EmailAddress = thisUser.EmailAddress,
                 // FromRefreshToken = 
             };
-            await securityTokenTable.CreateAsync(securityTokenData);
+            await securityTokenTable.Create(securityTokenData);
 
             return Created("", token);
         }
 
         [AllowAnonymous]
         [HttpPost("Refresh")]
-        public async Task<ActionResult> RefreshTokenAsync([FromBody] TokenRefreshData refreshData,
-                                                          [FromServices] IUserRepository userTable,
-                                                          [FromServices] ISecurityTokenRepository securityTokenTable)
+        public async Task<ActionResult> RefreshToken([FromBody] TokenRefreshData refreshData,
+                                                     [FromServices] IUserRepository userTable,
+                                                     [FromServices] ISecurityTokenRepository securityTokenTable)
         {
             var configHelper = new FileBrokerConfigurationHelper();
             var tokenConfig = configHelper.Tokens;
@@ -73,7 +73,7 @@ namespace FileBroker.API.Account.Controllers
 
             oldToken = oldToken[7..]; // get rid of the word Bearer that is at the beginning
 
-            var lastSecurityToken = await securityTokenTable.GetTokenDataAsync(oldToken);
+            var lastSecurityToken = await securityTokenTable.GetTokenData(oldToken);
 
             if (lastSecurityToken is null ||
                 !string.Equals(lastSecurityToken.RefreshToken, refreshData.RefreshToken) ||
@@ -89,7 +89,7 @@ namespace FileBroker.API.Account.Controllers
             string audience = tokenConfig.Audience.ReplaceVariablesWithEnvironmentValues();
             int expireMinutes = tokenConfig.ExpireMinutes;
 
-            var thisUser = await userTable.GetUserByIdAsync(lastSecurityToken.UserId);
+            var thisUser = await userTable.GetUserById(lastSecurityToken.UserId);
 
             var token = CreateNewToken(apiKey, issuer, audience, expireMinutes, thisUser);
 
@@ -105,7 +105,7 @@ namespace FileBroker.API.Account.Controllers
                 FromRefreshToken = lastSecurityToken.RefreshToken
             };
 
-            await securityTokenTable.CreateAsync(securityTokenData);
+            await securityTokenTable.Create(securityTokenData);
 
             return Created("", token);
 
