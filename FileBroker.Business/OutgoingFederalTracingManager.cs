@@ -1,4 +1,5 @@
 ﻿using FileBroker.Common.Helpers;
+using FOAEA3.Common.Helpers;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -31,7 +32,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         string federalEnfServiceCode = processCodes.EnfSrv_Cd;
 
         string newCycle;
-        if (federalEnfServiceCode == "RC01") 
+        if (federalEnfServiceCode == "RC01")
             newCycle = fileTableData.Cycle.ToString("000");
         else
             newCycle = fileTableData.Cycle.ToString("000000");
@@ -62,7 +63,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 if (!data.Any())
                 {
                     errors.Add("No data found!?");
-                    return ("", errors); 
+                    return ("", errors);
                 }
 
                 var eventIds = new List<int>();
@@ -87,7 +88,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd, federalEnfServiceCode, 
+                await APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd, federalEnfServiceCode,
                                                                        "OK: Written to " + newFilePath, eventIds);
             }
             finally
@@ -231,7 +232,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         }
 
         var output = new StringBuilder();
-        output.AppendLine($"<Trace_Request>");
+        output.AppendLine($"<TraceRequest>");
         if (wantSinOnly)
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", "01")); // special case, send a 01 for entity but treat it like a MEP (04)
         else
@@ -254,7 +255,10 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                     output.AppendLine($"      <Tax_Data>");
                     output.AppendLine($"         <Tax_Year>{year}</Tax_Year>");
                     foreach (var form in taxForms)
-                        output.AppendLine($"         <Tax_Form>{form}</Tax_Form>");
+                    {
+                        string shortName = FormHelper.ConvertTaxFormNameToShortName(form);
+                        output.AppendLine($"         <Tax_Form>{shortName}</Tax_Form>");
+                    }
                     output.AppendLine($"      </Tax_Data>");
                 }
             }
@@ -264,7 +268,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             output.AppendLine($"   <Tax_Year />");
         }
 
-        output.Append($"</Trace_Request>");
+        output.Append($"</TraceRequest>");
 
         return output.ToString();
     }
@@ -278,4 +282,5 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         return output.ToString();
     }
+
 }

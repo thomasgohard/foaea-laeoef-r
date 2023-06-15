@@ -56,7 +56,7 @@ public static class OutgoingFileCreatorFedTracing
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
                     await db.ErrorTrackingTable.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name,
-                                                                               new Exception(error), displayExceptionError: true);
+                                                                   new Exception(error), displayExceptionError: true);
                 }
         }
 
