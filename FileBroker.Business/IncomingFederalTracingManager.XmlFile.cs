@@ -131,29 +131,45 @@ public partial class IncomingFederalTracingManager
 
             foreach (var taxData in traceResponse.Tax_Response.Tax_Data)
             {
-                var details = new TraceFinancialResponseDetailData
+                string thisForm = taxData.Form.ToUpper();
+                if (thisForm == "ID")
+                    thisForm = "T1";
+                if (short.TryParse(taxData.Year, out short thisFiscalYear))
                 {
-                    TaxForm = taxData.Form
-                };
-                if (short.TryParse(taxData.Year, out short fiscalYear))
-                    details.FiscalYear = fiscalYear;
-
-                if (taxData.Field is not null)
-                {
-                    details.TraceDetailValues = new List<TraceFinancialResponseDetailValueData>();
-
-                    foreach (var valueData in taxData.Field)
+                    TraceFinancialResponseDetailData details;
+                    bool isNewDetails = false;
+                    var existingDetails = result.TraceFinancialDetails.Find(m => m.TaxForm == thisForm && m.FiscalYear == thisFiscalYear);
+                    if (existingDetails is null)
                     {
-                        var detailValue = new TraceFinancialResponseDetailValueData
+                        isNewDetails = true;
+                        details = new TraceFinancialResponseDetailData
                         {
-                            FieldName = valueData.Name,
-                            FieldValue = valueData.Value
+                            TaxForm = thisForm,
+                            FiscalYear = thisFiscalYear
                         };
-                        details.TraceDetailValues.Add(detailValue);
                     }
-                }
+                    else
+                        details = existingDetails;
 
-                result.TraceFinancialDetails.Add(details);
+                    if (taxData.Field is not null)
+                    {
+                        if (isNewDetails || details.TraceDetailValues is null)
+                            details.TraceDetailValues = new List<TraceFinancialResponseDetailValueData>();
+
+                        foreach (var valueData in taxData.Field)
+                        {
+                            var detailValue = new TraceFinancialResponseDetailValueData
+                            {
+                                FieldName = valueData.Name,
+                                FieldValue = valueData.Value
+                            };
+                            details.TraceDetailValues.Add(detailValue);
+                        }
+                    }
+
+                    if (isNewDetails)
+                        result.TraceFinancialDetails.Add(details);  
+                }
             }
         }
 
