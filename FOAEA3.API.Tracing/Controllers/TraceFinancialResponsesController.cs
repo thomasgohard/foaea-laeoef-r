@@ -69,17 +69,38 @@ namespace FOAEA3.API.Tracing.Controllers
                         var thisCraField = craFields.Where(m => m.CRAFieldName == fieldName).FirstOrDefault();
                         if (thisCraField is not null)
                         {
-                            string thisLineNumber;
+                            string pdfFieldName;
 
                             if (year >= 2019)
-                                thisLineNumber = thisCraField.CRAFieldCode;
+                                pdfFieldName = thisCraField.CRAFieldCode;
                             else
-                                thisLineNumber = thisCraField.CRAFieldCodeOld;
+                                pdfFieldName = thisCraField.CRAFieldCodeOld;
 
-                            if (!string.IsNullOrEmpty(thisLineNumber))
+                            if (pdfFieldName == "MaritalStatus")
                             {
-                                if (!values.ContainsKey(thisLineNumber))
-                                    values.Add(thisLineNumber, fieldValue);
+                                switch (fieldValue) {
+                                    case "01": pdfFieldName = "Married"; break;
+                                    case "02": pdfFieldName = "CommonLaw"; break;
+                                    case "03": pdfFieldName = "Widowed"; break;
+                                    case "04": pdfFieldName = "Divorced"; break;
+                                    case "05": pdfFieldName = "Separated"; break;
+                                    case "06": pdfFieldName = "Single"; break;
+                                }
+                                fieldValue = "1";
+                            }
+                            if (pdfFieldName == "PreferredLanguage")
+                            {
+                                switch (fieldValue) {
+                                    case "E": pdfFieldName = "English"; break;
+                                    case "F": pdfFieldName = "French"; break;
+                                }
+                                fieldValue = "1";
+                            }
+
+                            if (!string.IsNullOrEmpty(pdfFieldName))
+                            {
+                                if (!values.ContainsKey(pdfFieldName))
+                                    values.Add(pdfFieldName, fieldValue);
                             }
                         }
                     }
