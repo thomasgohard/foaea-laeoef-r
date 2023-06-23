@@ -99,6 +99,8 @@ namespace FOAEA3.API.Tracing.Controllers
 
                             if (!string.IsNullOrEmpty(pdfFieldName))
                             {
+                                pdfFieldName = pdfFieldName.ToUpper();
+
                                 if (!values.ContainsKey(pdfFieldName))
                                     values.Add(pdfFieldName, fieldValue);
                             }

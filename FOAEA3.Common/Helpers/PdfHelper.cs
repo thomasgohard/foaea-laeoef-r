@@ -113,7 +113,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 if (!foundFields.Contains(value.Key))
                     missingFields.Add(value.Key);
 
-            WatermarkPDF(ref pdfDoc);
+            //WatermarkPDF(ref pdfDoc);
 
             pdfDoc.DocumentInformation.Title = "GeneratedPDF";
             pdfDoc.Form.IsFlatten = true;
