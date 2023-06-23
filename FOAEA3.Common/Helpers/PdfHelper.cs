@@ -113,7 +113,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 if (!foundFields.Contains(value.Key))
                     missingFields.Add(value.Key);
 
-            //WatermarkPDF(ref pdfDoc);
+            WatermarkPDF(ref pdfDoc);
 
             pdfDoc.DocumentInformation.Title = "GeneratedPDF";
             pdfDoc.Form.IsFlatten = true;
@@ -134,11 +134,13 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
             foreach (PdfPageBase page in pdf.Pages)
             {
+                page.Canvas.Save();
                 page.Canvas.SetTransparency(0.8f);
                 page.Canvas.TranslateTransform(page.Canvas.Size.Width / 2 - offsetWidth - offsetHeight,
                                                page.Canvas.Size.Height / 2 + offsetWidth - offsetHeight);
                 page.Canvas.RotateTransform(-45);
                 page.Canvas.DrawString(text, font, PdfBrushes.DarkGray, 0, 0);
+                page.Canvas.Restore();
             }
         }
     }
