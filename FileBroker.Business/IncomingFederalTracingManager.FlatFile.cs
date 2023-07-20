@@ -10,7 +10,7 @@ public partial class IncomingFederalTracingManager
         NETP
     }
 
-    public async Task<List<string>> ProcessFlatFile(string flatFileContent, string flatFileName)
+    public async Task<List<string>> ProcessFlatFileData(string flatFileContent, string flatFileName)
     {
         var fileTableData = await GetFileTableData(flatFileName);
         var tracingFileData = new FedTracingFileBase();

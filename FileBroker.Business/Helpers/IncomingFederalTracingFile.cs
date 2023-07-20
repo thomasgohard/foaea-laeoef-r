@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace FileBroker.Business.Helpers
+﻿namespace FileBroker.Business.Helpers
 {
     public class IncomingFederalTracingFile
     {
@@ -51,7 +49,7 @@ namespace FileBroker.Business.Helpers
                 return false;
             }
 
-            string flatFile = File.ReadAllText(fullPath);
+            string fileContent = File.ReadAllText(fullPath);
 
             var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
 
@@ -66,12 +64,9 @@ namespace FileBroker.Business.Helpers
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
                 if (!fileTableData.IsXML)
-                    Errors.AddRange(await tracingManager.ProcessFlatFile(flatFile, fullPath));
+                    Errors.AddRange(await tracingManager.ProcessFlatFileData(fileContent, fullPath));
                 else
-                {
-                    string jsonText = FileHelper.ConvertXmlToJson(flatFile, Errors);
-                    Errors.AddRange(await tracingManager.ProcessXmlFile(jsonText, fileFullName));
-                }
+                    Errors.AddRange(await tracingManager.ProcessXmlData(fileContent, fileFullName));
 
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
 

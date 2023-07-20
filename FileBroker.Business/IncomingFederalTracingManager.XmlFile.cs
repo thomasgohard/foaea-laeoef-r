@@ -4,8 +4,14 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
-    public async Task<List<string>> ProcessXmlFile(string sourceTracingDataAsJson, string flatFileName)
+    public async Task<List<string>> ProcessXmlData(string xmlFileContent, string flatFileName)
     {
+        var errors = new List<string>();
+        string sourceTracingDataAsJson = FileHelper.ConvertXmlToJson(xmlFileContent, errors);
+
+        if (errors.Any())
+            return errors;
+
         var result = new MessageDataList();
 
         short cycle = (short)FileHelper.ExtractCycleFromFilename(flatFileName);
@@ -78,10 +84,11 @@ public partial class IncomingFederalTracingManager
 
         foreach (var response in traceResponses)
         {
-            var item = ConvertCraResponseToFoaeaResponseData(response, fileCycle);
-            await APIs.TracingResponses.AddTraceFinancialResponseData(item);
-
+            var item = ConvertCraResponseToFoaeaResponseData(response, 0);
             var appl = await APIs.TracingApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+            item.TrcRsp_Trace_CyclNr = (short)appl.Trace_Cycl_Qty;
+
+            await APIs.TracingResponses.AddTraceFinancialResponseData(item);
             await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
                                              activeTraceEvents, activeTraceEventDetails);
         }
@@ -109,7 +116,8 @@ public partial class IncomingFederalTracingManager
         return result;
     }
 
-    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse, short cycle)
+    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse, 
+                                                                                    short cycle)
     {
         var result = new TraceFinancialResponseData
         {
