@@ -11,7 +11,7 @@ namespace FOAEA3.API.Security
     {
         public static async Task<ClaimsPrincipal> FoaeaLogin(string user, string password, string submitter, IRepositories db)
         {
-            var subject = await db.SubjectTable.GetSubjectAsync(user);
+            var subject = await db.SubjectTable.GetSubject(user);
 
             if (subject is null || subject.IsAccountLocked is true)
                 return new ClaimsPrincipal();
@@ -24,10 +24,10 @@ namespace FOAEA3.API.Security
 
             string userName = subject.SubjectName;
 
-            var submitterData = (await db.SubmitterTable.GetSubmitterAsync(submitter)).FirstOrDefault();
+            var submitterData = (await db.SubmitterTable.GetSubmitter(submitter)).FirstOrDefault();
 
             // verify that submitter is valid for subject
-            var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(userName);
+            var roles = await db.SubjectRoleTable.GetSubjectRoles(userName);
             var availableSubmitters = (from role in roles select role.RoleName.ToLower()).ToList();
 
             if (submitterData is null || submitterData.ActvSt_Cd != "A" || !availableSubmitters.Contains(submitterData.Subm_SubmCd.ToLower()))

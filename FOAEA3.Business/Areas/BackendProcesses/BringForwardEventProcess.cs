@@ -23,40 +23,40 @@ namespace FOAEA3.Business.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
             var dbApplicationEvent = DB.ApplicationEventTable;
             var dbNotification = DB.NotificationService;
 
-            await prodAudit.InsertAsync("BF Events Process", "BF Events Process Started", "O");
+            await prodAudit.Insert("BF Events Process", "BF Events Process Started", "O");
 
-            var bfEventList = await dbApplicationEvent.GetActiveEventBFsAsync();
+            var bfEventList = await dbApplicationEvent.GetActiveEventBFs();
             foreach (var bfEvent in bfEventList)
             {
                 try
                 {
                     var applicationManager = new ApplicationManager(null, DB, config, User);
-                    await applicationManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                    await applicationManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
 
                     switch (applicationManager.GetCategory())
                     {
                         case "I01":
                             var interceptionManager = new InterceptionManager(null, DB, DBfinance, config, User);
-                            await interceptionManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
-                            await interceptionManager.ProcessBringForwardsAsync(bfEvent);
+                            await interceptionManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await interceptionManager.ProcessBringForwards(bfEvent);
                             break;
 
                         case "T01":
                             var tracingManager = new TracingManager(null, DB, config, User);
-                            await tracingManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
-                            await tracingManager.ProcessBringForwardsAsync(bfEvent);
+                            await tracingManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await tracingManager.ProcessBringForwards(bfEvent);
                             break;
 
                         case "L01":
                             var licencingManager = new LicenceDenialManager(null, DB, config, User);
-                            await licencingManager.LoadApplicationAsync(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
-                            await licencingManager.ProcessBringForwardsAsync(bfEvent);
+                            await licencingManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                            await licencingManager.ProcessBringForwards(bfEvent);
                             break;
 
                         default:
@@ -66,11 +66,11 @@ namespace FOAEA3.Business.BackendProcesses
                 }
                 catch (Exception e)
                 {
-                    await dbNotification.SendEmailAsync("BF Error", config.Recipients.EmailRecipients, e.Message + "\n\n" + e.StackTrace);
+                    await dbNotification.SendEmail("BF Error", config.Recipients.EmailRecipients, e.Message + "\n\n" + e.StackTrace);
                 }
             }
 
-            await prodAudit.InsertAsync("BF Events Process", "BF Events Process Completed", "O");
+            await prodAudit.Insert("BF Events Process", "BF Events Process Completed", "O");
         }
     }
 }

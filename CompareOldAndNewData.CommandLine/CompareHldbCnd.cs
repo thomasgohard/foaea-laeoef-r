@@ -6,13 +6,13 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareHldbCnd
     {
-        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
+        public static async Task<List<DiffData>> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd, string category, DateTime foaea2run, DateTime foaea3run)
         {
             var diffs = new List<DiffData>();
 
-            var holdback2 = await repositories2.InterceptionTable.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
-            var holdback3 = await repositories3.InterceptionTable.GetAllHoldbackConditionsAsync(enfSrv, ctrlCd);
+            var holdback2 = await repositories2.InterceptionTable.GetAllHoldbackConditions(enfSrv, ctrlCd);
+            var holdback3 = await repositories3.InterceptionTable.GetAllHoldbackConditions(enfSrv, ctrlCd);
 
             foreach (var holdbackItem2 in holdback2)
             {

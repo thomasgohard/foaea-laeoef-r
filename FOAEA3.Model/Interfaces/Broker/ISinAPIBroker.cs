@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task InsertBulkDataAsync(List<SINResultData> resultData);
-        Task<List<SINOutgoingFederalData>> GetOutgoingFederalSinsAsync(int maxRecords, string activeState, int lifeState, string enfServiceCode);
+        Task InsertBulkData(List<SINResultData> resultData);
+        Task<List<SINOutgoingFederalData>> GetOutgoingFederalSins(int maxRecords, string activeState, int lifeState, string enfServiceCode);
     }
 }

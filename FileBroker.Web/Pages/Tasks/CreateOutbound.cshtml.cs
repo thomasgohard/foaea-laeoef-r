@@ -44,7 +44,7 @@ namespace FileBroker.Web.Pages.Tasks
 
         public async Task OnGet()
         {
-            ActiveOutgoingProcesses = (await FileTable.GetAllActiveAsync()).Where(m => m.Type.ToLower() == "out").ToList();
+            ActiveOutgoingProcesses = (await FileTable.GetAllActive()).Where(m => m.Type.ToLower() == "out").ToList();
         }
 
         public async Task OnPostCreateFiles(int[] selectedProcesses)
@@ -61,7 +61,7 @@ namespace FileBroker.Web.Pages.Tasks
                 MailService = MailServiceDB
             };
 
-            var processData = (await FileTable.GetAllActiveAsync()).Where(m => m.Type.ToLower() == "out").ToList();
+            var processData = (await FileTable.GetAllActive()).Where(m => m.Type.ToLower() == "out").ToList();
 
             InfoMessage = string.Empty;
             int lastItem = selectedProcesses.Last();
@@ -106,7 +106,7 @@ namespace FileBroker.Web.Pages.Tasks
                             break;
                     }
 
-                    (filePath, errors) = await outgoingFileManager.CreateOutputFileAsync(thisProcess.Name);
+                    (filePath, errors) = await outgoingFileManager.CreateOutputFile(thisProcess.Name);
                 }
                 else
                     errors.Add($"Unsupported category [{thisProcess.Category}] for file {fileName}");

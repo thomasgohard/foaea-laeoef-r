@@ -18,20 +18,20 @@ namespace FOAEA3.API.Interception.Controllers
             var applKey = new ApplKey(key);
 
             var manager = new ElectronicSummonsDocumentManager(repositories);
-            await manager.SetCurrentUserAsync(User);
+            await manager.SetCurrentUser(User);
 
-            return await manager.FindDocumentsForApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+            return await manager.FindDocumentsForApplication(applKey.EnfSrv, applKey.CtrlCd);
         }
 
         [HttpPost]
         public async Task<ActionResult<ElectronicSummonsDocumentPdfData>> AddESDPDF([FromServices] IRepositories repositories)
         {
-            var pdfData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ElectronicSummonsDocumentPdfData>(Request);
+            var pdfData = await APIBrokerHelper.GetDataFromRequestBody<ElectronicSummonsDocumentPdfData>(Request);
 
             var manager = new ElectronicSummonsDocumentManager(repositories);
-            await manager.SetCurrentUserAsync(User);
+            await manager.SetCurrentUser(User);
 
-            var pdf = await manager.CreateESDPDFasync(pdfData);
+            var pdf = await manager.CreateESDPDF(pdfData);
             if (pdf is not null)
                 return Ok(pdf);
             else

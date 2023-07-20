@@ -11,7 +11,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_04_SinConfirmed();
 
-            if (TracingValidation.IsC78() || await AffidavitExistsAsync())
+            if (TracingValidation.IsC78() || await AffidavitExists())
                 await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
             else
                 await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
@@ -21,7 +21,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_06_PendingAcceptanceSwearing();
 
-            await Validation.AddDuplicateSINWarningEventsAsync();
+            await Validation.AddDuplicateSINWarningEvents();
 
             if (TracingValidation.IsC78())
             {
@@ -29,7 +29,7 @@ namespace FOAEA3.Business.Areas.Application
             }
             else
             {
-                string signAuthority = await DB.SubmitterTable.GetSignAuthorityForSubmitterAsync(TracingApplication.Subm_SubmCd);
+                string signAuthority = await DB.SubmitterTable.GetSignAuthorityForSubmitter(TracingApplication.Subm_SubmCd);
 
                 EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
                                       recipientSubm: signAuthority);
@@ -63,7 +63,7 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override async Task Process_10_ApplicationAccepted()
         {
-            await Validation.AddDuplicateCreditorWarningEventsAsync();
+            await Validation.AddDuplicateCreditorWarningEvents();
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -89,13 +89,13 @@ namespace FOAEA3.Business.Areas.Application
         {
             if (TracingApplication.Appl_RecvAffdvt_Dte is null)
             {
-                await AddSystemErrorAsync(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
+                await AddSystemError(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
                 return;
             }
 
             DateTime quarterDate;
-            int eventTraceCount = await EventManager.GetTraceEventCountAsync(Appl_EnfSrv_Cd, Appl_CtrlCd,
+            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd,
                                                                              TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1),
                                                                              BFEventReasonCode,
                                                                              BFEvent_Id);
@@ -103,7 +103,7 @@ namespace FOAEA3.Business.Areas.Application
             switch (eventTraceCount)
             {
                 case 0:
-                    await AddSystemErrorAsync(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
+                    await AddSystemError(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
                                    $"Reinstate requested for T01 ({Appl_EnfSrv_Cd}-{Appl_CtrlCd}) with no previous trace requests");
                     return;
                 case 1:
@@ -131,9 +131,9 @@ namespace FOAEA3.Business.Areas.Application
                 if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > quarterDate)
                 {
                     if (eventTraceCount <= 3)
-                        await SetTracingForReinstateAsync(quarterDate, quarterDate, EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        await SetTracingForReinstate(quarterDate, quarterDate, EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                     else if (eventTraceCount == 4)
-                        await SetTracingForReinstateAsync(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        await SetTracingForReinstate(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                     else if (eventTraceCount == 5)
                     {
                         TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
@@ -143,7 +143,7 @@ namespace FOAEA3.Business.Areas.Application
                     }
                     else
                     {
-                        await DB.NotificationService.SendEmailAsync("Trace Cycle requests exceed yearly limit",
+                        await DB.NotificationService.SendEmail("Trace Cycle requests exceed yearly limit",
                                                                       Config.Recipients.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
                         await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }
@@ -165,7 +165,7 @@ namespace FOAEA3.Business.Areas.Application
                     else
                     {
                         if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > DateTime.Now)
-                            await SetTracingForReinstateAsync(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                            await SetTracingForReinstate(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                         else
                             await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }

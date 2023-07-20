@@ -17,9 +17,7 @@ public class IncomingProvincialLicenceDenialManager
 
     private FoaeaSystemAccess FoaeaAccess { get; }
 
-    public IncomingProvincialLicenceDenialManager(RepositoryList db,
-                                                  APIBrokerList foaeaApis,
-                                                  string fileName,
+    public IncomingProvincialLicenceDenialManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
                                                   IFileBrokerConfigurationHelper config)
     {
         FileName = fileName;
@@ -44,7 +42,7 @@ public class IncomingProvincialLicenceDenialManager
 
         if (IsFrench)
         {
-            var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
+            var Translations = DB.TranslationTable.GetTranslations().Result;
             foreach (var translation in Translations)
                 translations.Add(translation.EnglishText, translation.FrenchText);
 
@@ -65,8 +63,8 @@ public class IncomingProvincialLicenceDenialManager
             return englishText;
     }
 
-    public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceLicenceDenialData,
-                                            List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+    public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceLicenceDenialData,
+                                                        List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
@@ -102,13 +100,13 @@ public class IncomingProvincialLicenceDenialManager
                 {
                     if (licenceDenialFile.LICAPPIN30 is not null)
                         foreach (var data in licenceDenialFile.LICAPPIN30)
-                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                            await ProcessLicenceApplications(data, licenceDenialFile, result,
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: false);
 
                     if (licenceDenialFile.LICAPPIN40 is not null)
                         foreach (var data in licenceDenialFile.LICAPPIN40)
-                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                            await ProcessLicenceApplications(data, licenceDenialFile, result,
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: true);
 
@@ -139,10 +137,10 @@ public class IncomingProvincialLicenceDenialManager
         return result;
     }
 
-    private async Task ProcessLicenceApplicationsAsync(MEPLicenceDenial_RecTypeBase data,
-                                                     MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile,
-                                                     MessageDataList result, bool includeInfoInMessages,
-                                                     ResultTracking counts, bool isTermination)
+    private async Task ProcessLicenceApplications(MEPLicenceDenial_RecTypeBase data,
+                                                  MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile,
+                                                  MessageDataList result, bool includeInfoInMessages,
+                                                  ResultTracking counts, bool isTermination)
     {
         bool isValidRequest = true;
 
@@ -186,9 +184,9 @@ public class IncomingProvincialLicenceDenialManager
                     LoadedDateTime = DateTime.Now
                 };
 
-                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+                _ = await DB.RequestLogTable.Add(requestLogData);
 
-                messages = await ProcessApplicationRequestAsync(licenceDenialMessage);
+                messages = await ProcessApplicationRequest(licenceDenialMessage);
             }
             else
             {
@@ -213,9 +211,9 @@ public class IncomingProvincialLicenceDenialManager
                     LoadedDateTime = DateTime.Now
                 };
 
-                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+                _ = await DB.RequestLogTable.Add(requestLogData);
 
-                messages = await ProcessTerminationApplicationRequestAsync(licenceDenialMessage);
+                messages = await ProcessTerminationApplicationRequest(licenceDenialMessage);
             }
 
             if (messages.ContainsMessagesOfType(MessageType.Error))
@@ -255,13 +253,13 @@ public class IncomingProvincialLicenceDenialManager
         await DB.FileAudit.InsertFileAuditData(fileAuditData);
     }
 
-    public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
+    public async Task<MessageDataList> ProcessApplicationRequest(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
     {
         LicenceDenialApplicationData licenceDenial;
 
         if (licenceDenialMessageData.MaintenanceAction == "A")
         {
-            licenceDenial = await APIs.LicenceDenialApplications.CreateLicenceDenialApplicationAsync(licenceDenialMessageData.Application);
+            licenceDenial = await APIs.LicenceDenialApplications.CreateLicenceDenialApplication(licenceDenialMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
@@ -269,11 +267,11 @@ public class IncomingProvincialLicenceDenialManager
             {
                 case "00": // change
                 case "0":
-                    licenceDenial = await APIs.LicenceDenialApplications.UpdateLicenceDenialApplicationAsync(licenceDenialMessageData.Application);
+                    licenceDenial = await APIs.LicenceDenialApplications.UpdateLicenceDenialApplication(licenceDenialMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    licenceDenial = await APIs.LicenceDenialApplications.TransferLicenceDenialApplicationAsync(licenceDenialMessageData.Application,
+                    licenceDenial = await APIs.LicenceDenialApplications.TransferLicenceDenialApplication(licenceDenialMessageData.Application,
                                                                                   licenceDenialMessageData.NewRecipientSubmitter,
                                                                                   licenceDenialMessageData.NewIssuingSubmitter);
                     break;
@@ -289,13 +287,13 @@ public class IncomingProvincialLicenceDenialManager
         return licenceDenial.Messages;
     }
 
-    public async Task<MessageDataList> ProcessTerminationApplicationRequestAsync(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
+    public async Task<MessageDataList> ProcessTerminationApplicationRequest(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
     {
         LicenceDenialApplicationData licenceDenial;
 
         if (licenceDenialMessageData.MaintenanceAction == "A")
         {
-            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application,
+            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplication(licenceDenialMessageData.Application,
                                                                                     licenceDenialMessageData.Application.LicSusp_Appl_CtrlCd);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
@@ -304,15 +302,15 @@ public class IncomingProvincialLicenceDenialManager
             {
                 case "00": // change
                 case "0":
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.UpdateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application);
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.UpdateLicenceDenialTerminationApplication(licenceDenialMessageData.Application);
                     break;
 
                 case "14": // cancellation
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.CancelLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application);
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.CancelLicenceDenialTerminationApplication(licenceDenialMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.TransferLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application,
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.TransferLicenceDenialTerminationApplication(licenceDenialMessageData.Application,
                                                                                   licenceDenialMessageData.NewRecipientSubmitter,
                                                                                   licenceDenialMessageData.NewIssuingSubmitter);
                     break;

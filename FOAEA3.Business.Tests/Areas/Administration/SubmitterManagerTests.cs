@@ -56,7 +56,7 @@ namespace FOAEA3.Data.Tests.Areas.Administration
 
             SubmitterData submitterData = CreateTestSubmitter("ON01", "DOW1");
 
-            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, string.Empty, false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitter(submitterData, string.Empty, false);
 
             ValidateResult("ON2D03", newSubmitter);
 
@@ -71,7 +71,7 @@ namespace FOAEA3.Data.Tests.Areas.Administration
 
             SubmitterData submitterData = CreateTestSubmitter("FO01", "OTT1");
 
-            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, "DS", false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitter(submitterData, "DS", false);
 
             ValidateResult("FO2XDS", newSubmitter);
 
@@ -86,7 +86,7 @@ namespace FOAEA3.Data.Tests.Areas.Administration
             SubmitterData submitterData = CreateTestSubmitter("ON02", "ON15");
             submitterData.Subm_CourtUsr_Ind = true;
 
-            SubmitterData newSubmitter = await submitterManager.CreateSubmitterAsync(submitterData, string.Empty, false);
+            SubmitterData newSubmitter = await submitterManager.CreateSubmitter(submitterData, string.Empty, false);
 
             ValidateResult("ONC003", newSubmitter);
 

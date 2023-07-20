@@ -13,7 +13,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task SendEmailAsync(string subject, string recipient, string body, int isHTML = 1)
+        public async Task SendEmail(string subject, string recipient, string body, int isHTML = 1)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -26,7 +26,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("PasswordResetSendEmail", parameters);
         }
 
-        public async Task SendHtmlEmailAsync(string subject, string recipients, string body, string attachmentPath)
+        public async Task SendHtmlEmail(string subject, string recipients, string body, string attachmentPath)
         {
             var parameters = new Dictionary<string, object>
             {

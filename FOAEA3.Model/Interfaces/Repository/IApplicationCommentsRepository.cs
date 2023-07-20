@@ -9,6 +9,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        Task<DataList<ApplicationCommentsData>> GetApplicationCommentsAsync();
+        Task<DataList<ApplicationCommentsData>> GetApplicationComments();
     }
 }

@@ -34,7 +34,7 @@ public class ApplicationsController : FoaeaControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config, User);
 
-        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
+        if (await applManager.LoadApplication(id.EnfSrv, id.CtrlCd))
             return Ok(appl);
         else
             return NotFound();
@@ -44,7 +44,7 @@ public class ApplicationsController : FoaeaControllerBase
     public async Task<ActionResult<ApplicationData>> ValidateCoreValues([FromRoute] ApplKey id,
                                                             [FromServices] IRepositories repositories)
     {
-        var appl = await APIBrokerHelper.GetDataFromRequestBodyAsync<InterceptionApplicationData>(Request);
+        var appl = await APIBrokerHelper.GetDataFromRequestBody<InterceptionApplicationData>(Request);
         var currentUser = await UserHelper.ExtractDataFromUser(User, repositories);
         var applicationValidation = new ApplicationValidation(appl, repositories, config, currentUser);
 
@@ -64,8 +64,8 @@ public class ApplicationsController : FoaeaControllerBase
         var applManager = new ApplicationManager(appl, repositories, config, User);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-            return Ok(await sinManager.GetSINResultsAsync());
+        if (await applManager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await sinManager.GetSINResults());
         else
             return NotFound();
     }
@@ -78,8 +78,8 @@ public class ApplicationsController : FoaeaControllerBase
         var applManager = new ApplicationManager(appl, repositories, config, User);
         var sinManager = new ApplicationSINManager(appl, applManager);
 
-        if (await applManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-            return Ok(await sinManager.GetSINResultsWithHistoryAsync());
+        if (await applManager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await sinManager.GetSINResultsWithHistory());
         else
             return NotFound();
     }
@@ -89,12 +89,12 @@ public class ApplicationsController : FoaeaControllerBase
                                                          [FromServices] IRepositories repositories,
                                                          [FromServices] IRepositories_Finance repositoriesFinance)
     {
-        var sinConfirmationData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINConfirmationData>(Request);
+        var sinConfirmationData = await APIBrokerHelper.GetDataFromRequestBody<SINConfirmationData>(Request);
 
         var application = new ApplicationData();
 
         var appManager = new ApplicationManager(application, repositories, config, User);
-        await appManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
+        await appManager.LoadApplication(id.EnfSrv, id.CtrlCd);
 
         ApplicationSINManager sinManager;
 
@@ -102,17 +102,17 @@ public class ApplicationsController : FoaeaControllerBase
         {
             case "T01":
                 var tracingManager = new TracingManager(repositories, config, User);
-                await tracingManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
+                await tracingManager.LoadApplication(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(tracingManager.TracingApplication, tracingManager);
                 break;
             case "I01":
                 var interceptionManager = new InterceptionManager(repositories, repositoriesFinance, config, User);
-                await interceptionManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
+                await interceptionManager.LoadApplication(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(interceptionManager.InterceptionApplication, interceptionManager);
                 break;
             case "L01":
                 var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
-                await licenceDenialManager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd);
+                await licenceDenialManager.LoadApplication(id.EnfSrv, id.CtrlCd);
                 sinManager = new ApplicationSINManager(licenceDenialManager.LicenceDenialApplication, licenceDenialManager);
                 break;
             default:
@@ -120,7 +120,7 @@ public class ApplicationsController : FoaeaControllerBase
                 break;
         }
 
-        await sinManager.SINconfirmationAsync(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
+        await sinManager.SINconfirmation(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
                                               confirmedSin: sinConfirmationData.ConfirmedSIN,
                                               lastUpdateUser: repositories.CurrentSubmitter);
 
@@ -136,7 +136,7 @@ public class ApplicationsController : FoaeaControllerBase
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config, User);
 
-        return await applManager.GetProvincialStatsOutgoingDataAsync(maxRecords, activeState, recipientCode);
+        return await applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
     }
 
 

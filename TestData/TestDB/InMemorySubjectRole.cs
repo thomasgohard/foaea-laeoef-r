@@ -16,12 +16,12 @@ namespace TestData.TestDB
 
         }
 
-        public Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
+        public Task<List<SubjectRoleData>> GetSubjectRoles(string subjectName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
+        public Task<List<string>> GetAssumedRolesForSubject(string subjectName)
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace FOAEA3.API.Interception.Controllers
 
             var manager = new InterceptionManager(repositories, repositoriesFinance, config, User);
 
-            var data = (await manager.GetSummonsSummaryAsync(applKey.EnfSrv, applKey.CtrlCd)).FirstOrDefault();
+            var data = (await manager.GetSummonsSummary(applKey.EnfSrv, applKey.CtrlCd)).FirstOrDefault();
 
             return Ok(data);
         }

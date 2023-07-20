@@ -19,7 +19,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<ApplicationData> GetApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<ApplicationData> GetApplication(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -33,7 +33,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<ApplicationData>> GetApplicationsForAutomationAsync(string appl_EnfSrv_Cd, string medium_Cd,
+        public async Task<List<ApplicationData>> GetApplicationsForAutomation(string appl_EnfSrv_Cd, string medium_Cd,
                                                                   ApplicationState appLiSt_Cd, string appCtgy_Cd,
                                                                   string actvSt_Cd)
         {
@@ -52,7 +52,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> CreateApplicationAsync(ApplicationData application)
+        public async Task<bool> CreateApplication(ApplicationData application)
         {
             var parameters = SetParameters(application);
 
@@ -67,7 +67,7 @@ namespace FOAEA3.Data.DB
                 return true;
         }
 
-        public async Task UpdateApplicationAsync(ApplicationData application)
+        public async Task UpdateApplication(ApplicationData application)
         {
             var parameters = SetParameters(application);
 
@@ -156,7 +156,7 @@ namespace FOAEA3.Data.DB
             return parameters;
         }
 
-        public async Task<DataList<ApplicationData>> GetApplicationsWaitingForAffidavitAsync(string appCategory)
+        public async Task<DataList<ApplicationData>> GetApplicationsWaitingForAffidavit(string appCategory)
         {
             var result = new DataList<ApplicationData>();
 
@@ -180,7 +180,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<bool> ApplicationExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> ApplicationExists(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -194,7 +194,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<string> GenerateApplicationControlCodeAsync(string appl_EnfSrv_Cd)
+        public async Task<string> GenerateApplicationControlCode(string appl_EnfSrv_Cd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -246,7 +246,7 @@ namespace FOAEA3.Data.DB
             data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
         }
 
-        public async Task UpdateSubmitterDefaultControlCodeAsync(string subm_SubmCd, string appl_CtrlCd)
+        public async Task UpdateSubmitterDefaultControlCode(string subm_SubmCd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -258,7 +258,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> GetApplLocalConfirmedSINExistsAsync(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate,
+        public async Task<bool> GetApplLocalConfirmedSINExists(string enteredSIN, string debtorSurname, DateTime? debtorBirthDate,
                                                    string submCd, string ctrlCd, string debtorFirstName = "")
         {
             var parameters = new Dictionary<string, object>
@@ -279,7 +279,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<bool> GetConfirmedSINSameEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd,
+        public async Task<bool> GetConfirmedSINSameEnforcementOfficeExists(string appl_EnfSrv_Cd, string subm_SubmCd,
                                                                  string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN, string categoryCode)
         {
             var parameters = new Dictionary<string, object>
@@ -312,7 +312,7 @@ namespace FOAEA3.Data.DB
             data.SVR_SIN = rdr["SVR_SIN"] as string;
         }
 
-        public async Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExistsAsync(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public async Task<List<ApplicationConfirmedSINData>> GetConfirmedSINOtherEnforcementOfficeExists(string appl_EnfSrv_Cd, string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -324,7 +324,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<ApplicationConfirmedSINData>("ApplGetConfirmedSINOtherEnforcementOffice", parameters, FillConfirmedSINDataFromReader);
 
         }
-        public async Task<DataList<ApplicationData>> GetRequestedSINApplDataForFileAsync(string enfSrv_Cd, string fileName)
+        public async Task<DataList<ApplicationData>> GetRequestedSINApplDataForFile(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -345,7 +345,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<ApplicationData>> GetSameCreditorForAppCtgyAsync(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
+        public async Task<List<ApplicationData>> GetSameCreditorForAppCtgy(string appl_CtrlCd, string subm_SubmCd, string appl_Dbtr_Entrd_SIN, byte appl_SIN_Cnfrmd_Ind, string actvSt_Cd, string appCtgy_Cd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -361,7 +361,7 @@ namespace FOAEA3.Data.DB
         }
 
 
-        public async Task<(string errorSameEnfOFf, string errorDiffEnfOff)> GetConfirmedSINRecordsAsync(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
+        public async Task<(string errorSameEnfOFf, string errorDiffEnfOff)> GetConfirmedSINRecords(string subm_SubmCd, string appl_CtrlCd, string appl_Dbtr_Cnfrmd_SIN)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -397,7 +397,7 @@ namespace FOAEA3.Data.DB
             return (errorSameEnfOff.ToString(), errorDiffEnfOff.ToString());
         }
 
-        public async Task<List<ApplicationData>> GetDailyApplCountBySINAsync(string appl_Dbtr_Entrd_SIN,
+        public async Task<List<ApplicationData>> GetDailyApplCountBySIN(string appl_Dbtr_Entrd_SIN,
                                                               string appl_EnfSrv_Cd,
                                                               string appl_CtrlCd,
                                                               string appCtgy_Cd,
@@ -417,7 +417,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("ApplGetDailyApplCountBySIN", parameters, FillApplicationDataFromReader);
         }
 
-        public async Task<List<StatsOutgoingProvincialData>> GetStatsProvincialOutgoingDataAsync(int maxRecords,
+        public async Task<List<StatsOutgoingProvincialData>> GetStatsProvincialOutgoingData(int maxRecords,
                                                                                 string activeState,
                                                                                 string recipientCode,
                                                                                 bool isXML = true)

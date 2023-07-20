@@ -34,7 +34,7 @@ public class ControlBatchesController : FoaeaControllerBase
                                                       [FromServices] IRepositories_Finance dbFinance)
     {
         var manager = new ControlBatchManager(db, dbFinance);
-        await manager.CloseControlBatchAsync(batchId);
+        await manager.CloseControlBatch(batchId);
 
         return Ok();
     }
@@ -44,11 +44,11 @@ public class ControlBatchesController : FoaeaControllerBase
                                                       [FromServices] IRepositories db,
                                                       [FromServices] IRepositories_Finance dbFinance)
     {
-        var controlBatchData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ControlBatchData>(Request);
+        var controlBatchData = await APIBrokerHelper.GetDataFromRequestBody<ControlBatchData>(Request);
        
         var manager = new ControlBatchManager(db, dbFinance);
         if (controlBatchData.BatchType_Cd == "FA")
-            await manager.UpdateBatchStateFtpProcessedAsync(batchId, -1);
+            await manager.UpdateBatchStateFtpProcessed(batchId, -1);
 
         return Ok();
     }
@@ -74,10 +74,10 @@ public class ControlBatchesController : FoaeaControllerBase
     public async Task<ActionResult<ControlBatchData>> CreateControlBatch([FromServices] IRepositories db,
                                                                          [FromServices] IRepositories_Finance dbFinance)
     {
-        var controlBatchData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ControlBatchData>(Request);
+        var controlBatchData = await APIBrokerHelper.GetDataFromRequestBody<ControlBatchData>(Request);
 
         var manager = new ControlBatchManager(db, dbFinance);
-        controlBatchData = await manager.CreateControlBatchAsync(controlBatchData);
+        controlBatchData = await manager.CreateControlBatch(controlBatchData);
 
         if (controlBatchData is not null)
         {

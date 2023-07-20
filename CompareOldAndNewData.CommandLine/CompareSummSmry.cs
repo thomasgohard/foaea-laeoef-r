@@ -5,15 +5,15 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareSummSmry
     {
-        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories_Finance repositories2, IRepositories_Finance repositories3,
+        public static async Task<List<DiffData>> Run(string tableName, IRepositories_Finance repositories2, IRepositories_Finance repositories3,
                                          string enfSrv, string ctrlCd, string category)
         {
             var diffs = new List<DiffData>();
 
             string key = ApplKey.MakeKey(enfSrv, ctrlCd) + " " + category + " ";
 
-            var summSmry2 = (await repositories2.SummonsSummaryRepository.GetSummonsSummaryAsync(enfSrv, ctrlCd)).FirstOrDefault();
-            var summSmry3 = (await repositories3.SummonsSummaryRepository.GetSummonsSummaryAsync(enfSrv, ctrlCd)).FirstOrDefault();
+            var summSmry2 = (await repositories2.SummonsSummaryRepository.GetSummonsSummary(enfSrv, ctrlCd)).FirstOrDefault();
+            var summSmry3 = (await repositories3.SummonsSummaryRepository.GetSummonsSummary(enfSrv, ctrlCd)).FirstOrDefault();
 
             if ((summSmry2 is null) && (summSmry3 is null))
                 return diffs;

@@ -42,30 +42,30 @@ public class ApplicationEventsController : FoaeaControllerBase
         else
             eventQueue = EventQueue.EventSubm;
 
-        return await GetEventsForQueueAsync(id, repositories, eventQueue);
+        return await GetEventsForQueue(id, repositories, eventQueue);
     }
 
     [HttpPost]
     public async Task<ActionResult<ApplicationEventData>> SaveEvent([FromServices] IRepositories repositories)
     {
-        var applicationEvent = await APIBrokerHelper.GetDataFromRequestBodyAsync<ApplicationEventData>(Request);
+        var applicationEvent = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventData>(Request);
 
         var eventManager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        await eventManager.SaveEventAsync(applicationEvent);
+        await eventManager.SaveEvent(applicationEvent);
 
         return Ok();
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
-        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(await manager.EventManager.GetApplicationEventsForQueueAsync(queue));
+        if (await manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await manager.EventManager.GetApplicationEventsForQueue(queue));
         else
             return NotFound();
     }
@@ -75,7 +75,7 @@ public class ApplicationEventsController : FoaeaControllerBase
     {
         var applManager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        return await applManager.GetLatestSinEventDataSummaryAsync();
+        return await applManager.GetLatestSinEventDataSummary();
     }
 
 }

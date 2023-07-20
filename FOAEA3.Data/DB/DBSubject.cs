@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<SubjectData> GetSubjectAsync(string subjectName)
+        public async Task<SubjectData> GetSubject(string subjectName)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -29,7 +29,7 @@ namespace FOAEA3.Data.DB
             return data;
         }
 
-        public async Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
+        public async Task<List<SubjectData>> GetSubjectsForSubmitter(string submCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -39,7 +39,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<SubjectData>("SubmGetSubjects", parameters, FillSubmitterSubjectDataFromReader);
         }
 
-        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
+        public async Task<SubjectData> GetSubjectByConfirmationCode(string confirmationCode)
         {
             var parameters = new Dictionary<string, object>
                 {

@@ -7,8 +7,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task CreateAsync(SecurityTokenData securityToken);
-        Task<SecurityTokenData> GetTokenDataAsync(string token);
+        Task Create(SecurityTokenData securityToken);
+        Task<SecurityTokenData> GetTokenData(string token);
         Task MarkTokenAsExpired(string token);
     }
 }

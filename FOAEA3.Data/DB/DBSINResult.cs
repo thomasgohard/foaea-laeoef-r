@@ -19,7 +19,7 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages { get; set; }
 
-        public async Task CreateSINResultsAsync(SINResultData resultData)
+        public async Task CreateSINResults(SINResultData resultData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -55,7 +55,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<DataList<SINResultData>> GetSINResultsAsync(string applEnfSrvCd, string applCtrlCd)
+        public async Task<DataList<SINResultData>> GetSINResults(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -68,7 +68,7 @@ namespace FOAEA3.Data.DB
             return new DataList<SINResultData>(data, MainDB.LastError);
         }
 
-        public async Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistoryAsync(string applEnfSrvCd, string applCtrlCd)
+        public async Task<DataList<SINResultWithHistoryData>> GetSINResultsWithHistory(string applEnfSrvCd, string applCtrlCd)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -81,7 +81,7 @@ namespace FOAEA3.Data.DB
             return new DataList<SINResultWithHistoryData>(data, MainDB.LastError);
         }
 
-        public async Task<List<SINOutgoingFederalData>> GetFederalSINOutgoingDataAsync(int maxRecords,
+        public async Task<List<SINOutgoingFederalData>> GetFederalSINOutgoingData(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
@@ -99,7 +99,7 @@ namespace FOAEA3.Data.DB
                                                                         parameters, FillSINOutgoingFederalData);
         }
 
-        public async Task InsertBulkDataAsync(List<SINResultData> responseData)
+        public async Task InsertBulkData(List<SINResultData> responseData)
         {
             await MainDB.BulkUpdateAsync<SINResultData>(responseData, "SINValRslt");
         }

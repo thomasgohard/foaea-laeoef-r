@@ -83,7 +83,7 @@ namespace FileBroker.Common
                 string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
 
                 string backupRoot = config.FTPbackupRoot;
-                string ftpFolder = (await db.Settings.GetSettingsDataForFileNameAsync(fileNameNoCycle)).Paths;
+                string ftpFolder = (await db.Settings.GetSettingsDataForFileName(fileNameNoCycle)).Paths;
 
                 string destinationFileName = backupRoot + ftpFolder + sourceFileNoPath;
 
@@ -127,12 +127,12 @@ namespace FileBroker.Common
                     if (FileEquals(fileInfo.FullName, dupFileInfo.FullName))
                     {
                         string msgBody = $"Inbound file {fileInfo.Name} is identical to file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Duplicate file not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
+                        await mailService.SendEmail($"Duplicate file not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                     else
                     {
                         string msgBody = $"Inbound file {fileInfo.Name} is with the same cycle but different content from file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Different file with the same cycle not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
+                        await mailService.SendEmail($"Different file with the same cycle not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                 }
                 return true;

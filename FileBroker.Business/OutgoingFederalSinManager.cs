@@ -18,7 +18,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+    public async Task<(string, List<string>)> CreateOutputFile(string fileBaseName)
     {
         var errors = new List<string>();
 
@@ -34,7 +34,7 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
 
         try
         {
-            var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+            var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
             if (File.Exists(newFilePath))
@@ -47,8 +47,8 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
 
             try
             {
-                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                           processCodes.EnfSrv_Cd);
+                var data = await GetOutgoingData(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                                 processCodes.EnfSrv_Cd);
 
                 var eventIds = new List<int>();
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle, ref eventIds);
@@ -56,14 +56,14 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
                 await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                      "Outbound File created successfully.");
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                                 processCodes.EnfSrv_Cd,
-                                                                 "OK: Written to " + newFilePath, eventIds);
+                await APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                                                       processCodes.EnfSrv_Cd,
+                                                                       "OK: Written to " + newFilePath, eventIds);
             }
             finally
             {
@@ -78,22 +78,22 @@ public class OutgoingFederalSinManager : IOutgoingFileManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
+            await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return (string.Empty, errors);
         }
     }
 
-    private async Task<List<SINOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
+    private async Task<List<SINOutgoingFederalData>> GetOutgoingData(FileTableData fileTableData, string actvSt_Cd,
                                                          int appLiSt_Cd, string enfSrvCode)
     {
-        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+        var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = await APIs.Sins.GetOutgoingFederalSinsAsync(maxRecords, actvSt_Cd, appLiSt_Cd, enfSrvCode);
+        var data = await APIs.Sins.GetOutgoingFederalSins(maxRecords, actvSt_Cd, appLiSt_Cd, enfSrvCode);
         return data;
     }
 

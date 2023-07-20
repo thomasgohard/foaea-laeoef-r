@@ -8,8 +8,8 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task InsertBulkDataAsync(List<TraceResponseData> responseData);
+        Task InsertBulkData(List<TraceResponseData> responseData);
         Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData);
-        Task MarkTraceResultsAsViewedAsync(string enfService);
+        Task MarkTraceResultsAsViewed(string enfService);
     }
 }

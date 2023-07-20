@@ -24,7 +24,7 @@ class Program
 
         var federalFileManager = new IncomingFederalTracingFile(db, foaeaApis, config);
 
-        var traceInFileTableData = await db.FileTable.GetFileTableDataForCategoryAsync("TRCIN");
+        var traceInFileTableData = await db.FileTable.GetFileTableDataForCategory("TRCIN");
         var folders = traceInFileTableData.Select(m => m.Path).Distinct().ToList();
 
         var processedFiles = new List<string>();
@@ -58,7 +58,7 @@ class Program
                     {
                         finished = true;
                         foreach (var error in federalFileManager.Errors)
-                            await db.ErrorTrackingTable.MessageBrokerErrorAsync("TRCIN", thisFile, new Exception(error), displayExceptionError: true);
+                            await db.ErrorTrackingTable.MessageBrokerError("TRCIN", thisFile, new Exception(error), displayExceptionError: true);
                     }
                 }
             }

@@ -16,10 +16,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<List<GenderData>> GetGendersAsync()
+        public async Task<List<GenderData>> GetGenders()
         {
             string apiCall = $"api/v1/Genders";
-            var result = await ApiHelper.GetDataAsync<DataList<GenderData>>(apiCall, token: Token);
+            var result = await ApiHelper.GetData<DataList<GenderData>>(apiCall, token: Token);
             return result.Items;
         }
     }

@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<DocumentTypeData>> GetDocumentTypesAsync()
+        public async Task<DataList<DocumentTypeData>> GetDocumentTypes()
         {
             var data = await MainDB.GetAllDataAsync<DocumentTypeData>("DocTyp", FillDocumentTypeDataFromReader);
 

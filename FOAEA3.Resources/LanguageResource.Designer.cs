@@ -88,6 +88,15 @@ namespace FOAEA3.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Application Message.
+        /// </summary>
+        public static string APP_MESSAGE {
+            get {
+                return ResourceManager.GetString("APP_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Comments.
         /// </summary>
         public static string APPL_COMMENT {
@@ -435,6 +444,15 @@ namespace FOAEA3.Resources {
         public static string ENFORCEMENT_SERVICE {
             get {
                 return ResourceManager.GetString("ENFORCEMENT_SERVICE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enforcement Service Code.
+        /// </summary>
+        public static string ENFORCEMENT_SERVICE_CODE {
+            get {
+                return ResourceManager.GetString("ENFORCEMENT_SERVICE_CODE", resourceCulture);
             }
         }
         
@@ -795,6 +813,15 @@ namespace FOAEA3.Resources {
         public static string SINDATASENT {
             get {
                 return ResourceManager.GetString("SINDATASENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source Reference Number.
+        /// </summary>
+        public static string SOURCE_REF_NUMBER {
+            get {
+                return ResourceManager.GetString("SOURCE_REF_NUMBER", resourceCulture);
             }
         }
         

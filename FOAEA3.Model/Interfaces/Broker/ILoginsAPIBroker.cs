@@ -8,13 +8,13 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<TokenData> SubjectLoginAsync(FoaeaLoginData loginData);
-        Task<List<string>> GetAvailableSubmittersAsync();
-        Task<TokenData> SelectSubmitterAsync(string submitter);
+        Task<TokenData> SubjectLogin(FoaeaLoginData loginData);
+        Task<List<string>> GetAvailableSubmitters();
+        Task<TokenData> SelectSubmitter(string submitter);
         Task<TokenData> AcceptTerms();
-        Task<TokenData> LoginAsync(FoaeaLoginData loginData);
-        Task<string> LoginVerificationAsync(FoaeaLoginData loginData);
-        Task<string> LogoutAsync(FoaeaLoginData loginData);
-        Task<TokenData> RefreshTokenAsync(string oldToken, string oldRefreshToken);
+        Task<TokenData> Login(FoaeaLoginData loginData);
+        Task<string> LoginVerification(FoaeaLoginData loginData);
+        Task<string> Logout(FoaeaLoginData loginData);
+        Task<TokenData> RefreshToken(string oldToken, string oldRefreshToken);
     }
 }

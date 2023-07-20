@@ -9,25 +9,21 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<LicenceDenialApplicationData> GetLicenceDenialDataAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null);
-        Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<LicenceDenialApplicationData> GetLicenceDenialData(string appl_EnfSrv_Cd, string appl_L01_CtrlCd = null, string appl_L03_CtrlCd = null);
+        Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory(string appl_EnfSrv_Cd, string appl_CtrlCd);
 
-        Task CreateLicenceDenialDataAsync(LicenceDenialApplicationData data);
-        Task UpdateLicenceDenialDataAsync(LicenceDenialApplicationData data);
+        Task CreateLicenceDenialData(LicenceDenialApplicationData data);
+        Task UpdateLicenceDenialData(LicenceDenialApplicationData data);
 
-        Task<bool> CloseSameDayLicenceEventAsync(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
+        Task<bool> CloseSameDayLicenceEvent(string appl_EnfSrv_Cd, string appl_L01_CtrlCd, string appl_L03_CtrlCd);
 
-        Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
-                                                                string activeState,
-                                                                ApplicationState lifeState,
-                                                                string enfServiceCode);
+        Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingData(int maxRecords, string activeState,
+                                                                            ApplicationState lifeState, string enfServiceCode);
 
-        Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string fedSource);
+        Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplData(string fedSource);
 
-        Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords,
-                                                                            string activeState,
-                                                                            string recipientCode,
-                                                                            bool isXML = true);
+        Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingData(int maxRecords, string activeState,
+                                                                                  string recipientCode, bool isXML = true);
 
         Task<List<SingleStringColumnData>> GetActiveLO1ApplsForDebtor(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }

@@ -13,7 +13,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<ActiveSummonsCoreData> GetActiveSummonsCoreAsync(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ActiveSummonsCoreData> GetActiveSummonsCore(DateTime payableDate, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var data = (from s in InMemData.SummSmryTestData
                         join a in InMemData.ApplicationTestData on new { s.Appl_EnfSrv_Cd, s.Appl_CtrlCd } equals new { a.Appl_EnfSrv_Cd, a.Appl_CtrlCd }
@@ -31,7 +31,7 @@ namespace TestData.TestDB
             return Task.FromResult(result);
         }
 
-        public Task<ActiveSummonsData> GetActiveSummonsDataAsync(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
+        public Task<ActiveSummonsData> GetActiveSummonsData(DateTime payableDate, string appl_CtrlCd, string appl_EnfSrv_Cd, bool isVariation = false)
         {
             var data = (from a in InMemData.ApplicationTestData
                         join i in InMemData.IntFinHoldbackTestData on new { a.Appl_EnfSrv_Cd, a.Appl_CtrlCd } equals new { i.Appl_EnfSrv_Cd, i.Appl_CtrlCd }
@@ -107,7 +107,7 @@ namespace TestData.TestDB
             return Task.FromResult(result);
         }
 
-        public Task<DateTime> GetLegalDateAsync(string appl_CtrlCd, string appl_EnfSrv_Cd)
+        public Task<DateTime> GetLegalDate(string appl_CtrlCd, string appl_EnfSrv_Cd)
         {            
             throw new NotImplementedException();
         }

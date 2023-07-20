@@ -12,27 +12,27 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get; set; }
 
-        public Task CreateSummonsSummaryAsync(SummonsSummaryData summSmryData)
+        public Task CreateSummonsSummary(SummonsSummaryData summSmryData)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync()
+        public Task<List<SummonsSummaryData>> GetAmountOwedRecords()
         {
             return Task.FromResult(InMemData.SummSmryTestData.FindAll(m => m.SummSmry_Recalc_Dte <= DateTime.Now.Date));
         }
 
-        public Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
+        public Task<decimal> GetFeesOwedTotal(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
             return Task.FromResult(38.0M);  // these are the annual fees since 1999-03-01});
         }
 
-        public Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+        public Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecords()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        public Task<List<SummonsSummaryData>> GetSummonsSummary(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
         {
             if (!string.IsNullOrEmpty(appl_CtrlCd))
                 return Task.FromResult(InMemData.SummSmryTestData.FindAll(m => m.Appl_CtrlCd == appl_CtrlCd));
@@ -40,7 +40,7 @@ namespace TestData.TestDB
                 return Task.FromResult(InMemData.SummSmryTestData);
         }
 
-        public Task UpdateSummonsSummaryAsync(SummonsSummaryData summSmryData)
+        public Task UpdateSummonsSummary(SummonsSummaryData summSmryData)
         {
             var currentSummSmry = InMemData.SummSmryTestData.FindAll(m => (m.Appl_CtrlCd == summSmryData.Appl_CtrlCd) && (m.Appl_EnfSrv_Cd == summSmryData.Appl_EnfSrv_Cd)).FirstOrDefault();
 

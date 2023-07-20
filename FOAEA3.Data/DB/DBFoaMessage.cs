@@ -28,7 +28,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<FoaEventDataDictionary> GetAllFoaMessagesAsync()
+        public async Task<FoaEventDataDictionary> GetAllFoaMessages()
         {
             var result = new FoaEventDataDictionary();
 

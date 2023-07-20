@@ -19,12 +19,12 @@ namespace Outgoing.FileCreator.IFMS
 
             var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-            await CreateOutgoingIFMSAsync(fileBrokerDB, config.ApiRootData, config);
+            await CreateOutgoingIFMS(fileBrokerDB, config.ApiRootData, config);
 
             ColourConsole.Write("Completed.\n");
         }
 
-        private static async Task CreateOutgoingIFMSAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+        private static async Task CreateOutgoingIFMS(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                           IFileBrokerConfigurationHelper config)
         {
             var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -33,13 +33,13 @@ namespace Outgoing.FileCreator.IFMS
 
             var financialManager = new OutgoingFinancialIFMSmanager(foaeaApis, db, config);
 
-            var outgoingIFMSdata = (await db.FileTable.GetFileTableDataForCategoryAsync("IFMSFDOUT"))
+            var outgoingIFMSdata = (await db.FileTable.GetFileTableDataForCategory("IFMSFDOUT"))
                                     .Where(s => s.Active == true).ToList();
 
             if ((outgoingIFMSdata is null) || (outgoingIFMSdata.Count > 1))
             {
                 ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]IFMS[/cyan] file: [red]Too many active IFMSFDOUT entries![/red]");
-                await db.ErrorTrackingTable.MessageBrokerErrorAsync("IFMSFDOUT", "IFMSFDOUT",
+                await db.ErrorTrackingTable.MessageBrokerError("IFMSFDOUT", "IFMSFDOUT",
                                                                      new Exception("Too many active IFMSFDOUT entries!"), displayExceptionError: true);
                 return;
             }
@@ -55,7 +55,7 @@ namespace Outgoing.FileCreator.IFMS
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{outgoingIFMSfile.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync("SINOUT", outgoingIFMSfile.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError("SINOUT", outgoingIFMSfile.Name,
                                                                                 new Exception(error), displayExceptionError: true);
                 }
         }

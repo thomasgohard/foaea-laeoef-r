@@ -8,8 +8,8 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<GarnSummaryData>> GetGarnSummaryAsync(string appl_EnfSrv_Cd, string enfOfficeCd, int fiscalMonth, int fiscalYear);
-        Task CreateGarnSummaryAsync(GarnSummaryData garnSummaryData);
-        Task UpdateGarnSummaryAsync(GarnSummaryData garnSummaryData);
+        Task<List<GarnSummaryData>> GetGarnSummary(string appl_EnfSrv_Cd, string enfOfficeCd, int fiscalMonth, int fiscalYear);
+        Task CreateGarnSummary(GarnSummaryData garnSummaryData);
+        Task UpdateGarnSummary(GarnSummaryData garnSummaryData);
     }
 }

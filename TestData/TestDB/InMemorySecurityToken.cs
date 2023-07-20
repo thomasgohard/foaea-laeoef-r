@@ -14,13 +14,13 @@ namespace TestData.TestDB
 
         private List<SecurityTokenData> _data = new List<SecurityTokenData>();
 
-        public Task CreateAsync(SecurityTokenData securityToken)
+        public Task Create(SecurityTokenData securityToken)
         {
             _data.Add(securityToken);
             return Task.CompletedTask;
         }
 
-        public Task<SecurityTokenData> GetTokenDataAsync(string token)
+        public Task<SecurityTokenData> GetTokenData(string token)
         {
             var thisToken = _data.Where(m => m.Token == token).FirstOrDefault();
             return Task.FromResult(thisToken);

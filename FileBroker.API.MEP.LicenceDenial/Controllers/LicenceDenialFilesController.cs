@@ -22,7 +22,7 @@ public class LicenceDenialFilesController : ControllerBase
     {
         string fileContent;
         string lastFileName;
-        (fileContent, lastFileName) = await LoadLatestProvincialLicenceDenialFileAsync(partnerId, fileTable);
+        (fileContent, lastFileName) = await LoadLatestProvincialLicenceDenialFile(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -38,9 +38,9 @@ public class LicenceDenialFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestProvincialLicenceDenialFileAsync(string partnerId, IFileTableRepository fileTable)
+    private static async Task<(string, string)> LoadLatestProvincialLicenceDenialFile(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("LICAPPOUT"))
+        var fileTableData = (await fileTable.GetFileTableDataForCategory("LICAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 

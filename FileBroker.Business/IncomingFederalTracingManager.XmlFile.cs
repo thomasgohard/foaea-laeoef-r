@@ -4,8 +4,14 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
-    public async Task<List<string>> ProcessXmlFileAsync(string sourceTracingDataAsJson, string flatFileName)
+    public async Task<List<string>> ProcessXmlData(string xmlFileContent, string flatFileName)
     {
+        var errors = new List<string>();
+        string sourceTracingDataAsJson = FileHelper.ConvertXmlToJson(xmlFileContent, errors);
+
+        if (errors.Any())
+            return errors;
+
         var result = new MessageDataList();
 
         short cycle = (short)FileHelper.ExtractCycleFromFilename(flatFileName);
@@ -70,25 +76,26 @@ public partial class IncomingFederalTracingManager
                                                        int processId, string enfSrvCd, short fileCycle,
                                                        string flatFileName)
     {
-        string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameterAsync(processId, "evnt_cutoff");
+        string cutOffDaysValue = await DB.ProcessParameterTable.GetValueForParameter(processId, "evnt_cutoff");
         int cutOffDays = int.Parse(cutOffDaysValue);
 
-        var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle.ToString());
-        var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetailsAsync(enfSrvCd, fileCycle.ToString());
+        var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle.ToString());
+        var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle.ToString());
 
         foreach (var response in traceResponses)
         {
-            var item = ConvertCraResponseToFoaeaResponseData(response, fileCycle);
-            await APIs.TracingResponses.AddTraceFinancialResponseData(item);
+            var item = ConvertCraResponseToFoaeaResponseData(response, 0);
+            var appl = await APIs.TracingApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+            item.TrcRsp_Trace_CyclNr = (short)appl.Trace_Cycl_Qty;
 
-            var appl = await APIs.TracingApplications.GetApplicationAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-            await MarkTraceEventsAsProcessedAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
-                                                  activeTraceEvents, activeTraceEventDetails);
+            await APIs.TracingResponses.AddTraceFinancialResponseData(item);
+            await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
+                                             activeTraceEvents, activeTraceEventDetails);
         }
 
-        await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
-        await UpdateTracingApplicationsAsync(enfSrvCd, fileCycle.ToString());
-        await CloseOrInactivateTraceEventDetailsAsync(cutOffDays, activeTraceEventDetails);
+        await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+        await UpdateTracingApplications(enfSrvCd, fileCycle.ToString());
+        await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
     }
 
     private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)
@@ -109,7 +116,8 @@ public partial class IncomingFederalTracingManager
         return result;
     }
 
-    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse, short cycle)
+    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse, 
+                                                                                    short cycle)
     {
         var result = new TraceFinancialResponseData
         {
@@ -131,29 +139,45 @@ public partial class IncomingFederalTracingManager
 
             foreach (var taxData in traceResponse.Tax_Response.Tax_Data)
             {
-                var details = new TraceFinancialResponseDetailData
+                string thisForm = taxData.Form.ToUpper();
+                if (thisForm == "ID")
+                    thisForm = "T1";
+                if (short.TryParse(taxData.Year, out short thisFiscalYear))
                 {
-                    TaxForm = taxData.Form
-                };
-                if (short.TryParse(taxData.Year, out short fiscalYear))
-                    details.FiscalYear = fiscalYear;
-
-                if (taxData.Field is not null)
-                {
-                    details.TraceDetailValues = new List<TraceFinancialResponseDetailValueData>();
-
-                    foreach (var valueData in taxData.Field)
+                    TraceFinancialResponseDetailData details;
+                    bool isNewDetails = false;
+                    var existingDetails = result.TraceFinancialDetails.Find(m => m.TaxForm == thisForm && m.FiscalYear == thisFiscalYear);
+                    if (existingDetails is null)
                     {
-                        var detailValue = new TraceFinancialResponseDetailValueData
+                        isNewDetails = true;
+                        details = new TraceFinancialResponseDetailData
                         {
-                            FieldName = valueData.Name,
-                            FieldValue = valueData.Value
+                            TaxForm = thisForm,
+                            FiscalYear = thisFiscalYear
                         };
-                        details.TraceDetailValues.Add(detailValue);
                     }
-                }
+                    else
+                        details = existingDetails;
 
-                result.TraceFinancialDetails.Add(details);
+                    if (taxData.Field is not null)
+                    {
+                        if (isNewDetails || details.TraceDetailValues is null)
+                            details.TraceDetailValues = new List<TraceFinancialResponseDetailValueData>();
+
+                        foreach (var valueData in taxData.Field)
+                        {
+                            var detailValue = new TraceFinancialResponseDetailValueData
+                            {
+                                FieldName = valueData.Name,
+                                FieldValue = valueData.Value
+                            };
+                            details.TraceDetailValues.Add(detailValue);
+                        }
+                    }
+
+                    if (isNewDetails)
+                        result.TraceFinancialDetails.Add(details);  
+                }
             }
         }
 

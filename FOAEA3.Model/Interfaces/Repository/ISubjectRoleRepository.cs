@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName);
-        Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName);
+        Task<List<SubjectRoleData>> GetSubjectRoles(string subjectName);
+        Task<List<string>> GetAssumedRolesForSubject(string subjectName);
     }
 }

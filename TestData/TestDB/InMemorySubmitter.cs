@@ -18,7 +18,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task CreateSubmitterAsync(SubmitterData newSubmitter)
+        public Task CreateSubmitter(SubmitterData newSubmitter)
         {
             newSubmitter.Subm_Create_Usr = "Test";
             newSubmitter.Subm_CourtUsr_Ind = true;
@@ -26,27 +26,27 @@ namespace TestData.TestDB
             return Task.CompletedTask;
         }
 
-        public Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
+        public Task CreateSubmitterMessage(SubmitterMessageData submitterMessage)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<CommissionerData>> GetCommissionersAsync(string locationCode, string currentSubmitter)
+        public Task<List<CommissionerData>> GetCommissioners(string locationCode, string currentSubmitter)
         {
             throw new NotImplementedException();
         }
 
-        public Task<string> GetMaxSubmitterCodeAsync(string submCodePart)
+        public Task<string> GetMaxSubmitterCode(string submCodePart)
         {
             return Task.FromResult("02");
         }
 
-        public Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
+        public Task<string> GetSignAuthorityForSubmitter(string submCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<SubmitterData>> GetSubmitterAsync(string submCode = null, string submName = null,
+        public Task<List<SubmitterData>> GetSubmitter(string submCode = null, string submName = null,
                                                 string enfOffCode = null, string enfServCode = null,
                                                 string submFName = null, string submMName = null,
                                                 string prov = null)
@@ -84,21 +84,21 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)
+        public Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitter(string submitterID, int languageCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task SubmitterMessageDeleteAsync(string submitterID)
+        public Task SubmitterMessageDelete(string submitterID)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateSubmitterAsync(SubmitterData newSubmitter)
+        public Task UpdateSubmitter(SubmitterData newSubmitter)
         {
             throw new NotImplementedException();
         }
-        public Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
+        public Task<DateTime> UpdateSubmitterLastLogin(string submCd)
         {
             throw new NotImplementedException();
         }

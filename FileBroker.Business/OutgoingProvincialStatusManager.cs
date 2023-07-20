@@ -16,7 +16,7 @@ namespace FileBroker.Business
             FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
         }
 
-        public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+        public async Task<(string, List<string>)> CreateOutputFile(string fileBaseName)
         {
             var errors = new List<string>();
 
@@ -28,7 +28,7 @@ namespace FileBroker.Business
 
             try
             {
-                var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
                 string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
                 if (File.Exists(newFilePath))
@@ -41,14 +41,14 @@ namespace FileBroker.Business
 
                 try
                 {
-                    var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                    var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
                     string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
                     await File.WriteAllTextAsync(newFilePath, fileContent);
                     fileCreated = true;
 
-                    await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                    await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
                                                                              "Outbound File created successfully.");
 
                     await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
@@ -66,9 +66,9 @@ namespace FileBroker.Business
                 string error = "Error Creating Outbound Data File: " + e.Message;
                 errors.Add(error);
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-                await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
+                await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                            "Error creating outbound file", e, displayExceptionError: true);
 
                 return (string.Empty, errors);
@@ -76,20 +76,18 @@ namespace FileBroker.Business
 
         }
 
-        private async Task<List<StatsOutgoingProvincialData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
-                                                                string recipientCode)
+        private async Task<List<StatsOutgoingProvincialData>> GetOutgoingDataFromFoaea(FileTableData fileTableData, 
+                                                                                       string actvSt_Cd, string recipientCode)
         {
-            var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+            var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
             int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
             // TODO: fix token
-            var data = await APIs.Applications.GetOutgoingProvincialStatusDataAsync(maxRecords, actvSt_Cd, recipientCode);
+            var data = await APIs.Applications.GetOutgoingProvincialStatusData(maxRecords, actvSt_Cd, recipientCode);
             return data;
         }
 
-
-        private static string GenerateOutputFileContentFromData(List<StatsOutgoingProvincialData> data,
-                                                                string newCycle)
+        private static string GenerateOutputFileContentFromData(List<StatsOutgoingProvincialData> data, string newCycle)
         {
             var result = new StringBuilder();
 

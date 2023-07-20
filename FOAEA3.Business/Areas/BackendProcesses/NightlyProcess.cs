@@ -21,24 +21,24 @@ namespace FOAEA3.Business.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Nightly Process", "Nightly Process Started", "O");
+            await prodAudit.Insert("Nightly Process", "Nightly Process Started", "O");
 
             var completeI01process = new CompletedInterceptionsProcess(DB, DBfinance, Config, User);
-            await completeI01process.RunAsync();
+            await completeI01process.Run();
 
             var amountOwedProcess = new AmountOwedProcess(DB, DBfinance);
-            await amountOwedProcess.RunAsync();
+            await amountOwedProcess.Run();
 
             var divertFundProcess = new DivertFundsProcess(DB, DBfinance);
-            await divertFundProcess.RunAsync();
+            await divertFundProcess.Run();
 
             ChequeReqProcess.Run();
 
-            await prodAudit.InsertAsync("Nightly Process", "Nightly Process Completed", "O");
+            await prodAudit.Insert("Nightly Process", "Nightly Process Completed", "O");
         }
     }
 }

@@ -11,7 +11,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<List<ProvinceData>> GetProvincesAsync()
+        public Task<List<ProvinceData>> GetProvinces()
         {
             throw new NotImplementedException();
         }

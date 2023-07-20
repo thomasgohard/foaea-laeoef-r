@@ -23,13 +23,13 @@ namespace FOAEA3.Business.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Completed I01 Process", "Completed I01 Process Started", "O");
+            await prodAudit.Insert("Completed I01 Process", "Completed I01 Process Started", "O");
 
-            var applTerminated = await DB.InterceptionTable.GetTerminatedI01Async();
+            var applTerminated = await DB.InterceptionTable.GetTerminatedI01();
 
             foreach (var appl in applTerminated)
             {
@@ -37,7 +37,7 @@ namespace FOAEA3.Business.BackendProcesses
                 await manager.CompleteApplication();
             }
 
-            await prodAudit.InsertAsync("Completed I01 Process", "Completed I01 Process Completed", "O");
+            await prodAudit.Insert("Completed I01 Process", "Completed I01 Process Completed", "O");
         }
     }
 }

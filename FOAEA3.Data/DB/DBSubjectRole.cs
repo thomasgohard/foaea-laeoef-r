@@ -13,16 +13,16 @@ namespace FOAEA3.Data.DB
         {
 
         }
-        public async Task<List<SubjectRoleData>> GetAllSubjectRolesAsync()
+        public async Task<List<SubjectRoleData>> GetAllSubjectRoles()
         {
             return await MainDB.GetAllDataAsync<SubjectRoleData>("SubjectRole", FillSubjectRoleData);
         }
 
-        public async Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
+        public async Task<List<string>> GetAssumedRolesForSubject(string subjectName)
         {
             var assumedRoles = new List<string>();
 
-            foreach (SubjectRoleData subjectRoleData in await GetSubjectRolesAsync(subjectName))
+            foreach (SubjectRoleData subjectRoleData in await GetSubjectRoles(subjectName))
             {
                 assumedRoles.Add(subjectRoleData.RoleName);
             }
@@ -30,7 +30,7 @@ namespace FOAEA3.Data.DB
             return assumedRoles;
         }
 
-        public async Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
+        public async Task<List<SubjectRoleData>> GetSubjectRoles(string subjectName)
         {
             var parameters = new Dictionary<string, object>
             {

@@ -43,7 +43,7 @@ namespace FileBroker.Business
 
                 if (DateTime.Now.DayOfWeek.NotIn(DayOfWeek.Saturday, DayOfWeek.Sunday))
                 {
-                    var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                    var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
                     var data = await APIs.InterceptionApplications.GetEIexchangeOutData(processCodes.EnfSrv_Cd);
 
@@ -53,14 +53,14 @@ namespace FileBroker.Business
                     await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                     string message = fileTableData.Category + " Outbound EI EISO File created successfully.";
-                    await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+                    await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                              fileCreated: true, message);
                 }
             }
             catch (Exception e)
             {
                 string errorMessage = e.Message;
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                          fileCreated: true, errorMessage);
             }
             finally

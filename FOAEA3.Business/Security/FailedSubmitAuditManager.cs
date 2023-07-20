@@ -16,12 +16,12 @@ namespace FOAEA3.Business.Security
             Application = application;
         }
 
-        public async Task AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType activityType)
+        public async Task AddToFailedSubmitAudit(FailedSubmitActivityAreaType activityType)
         {
             string subject_submitter = $"{DB.CurrentUser} ({DB.CurrentSubmitter})";
 
             foreach (var errorInfo in Application.Messages.GetMessagesForType(MessageType.Error))
-                await DB.FailedSubmitAuditTable.AppendFiledSubmitAuditAsync(subject_submitter, activityType, errorInfo.Description);
+                await DB.FailedSubmitAuditTable.AppendFiledSubmitAudit(subject_submitter, activityType, errorInfo.Description);
 
         }
 

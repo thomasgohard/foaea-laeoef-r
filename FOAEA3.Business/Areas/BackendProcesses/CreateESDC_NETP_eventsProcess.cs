@@ -19,16 +19,16 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Create ESDC(NETP) Events Process", $"Create ESDC(NETP) Events Process Started", "O");
+            await prodAudit.Insert("Create ESDC(NETP) Events Process", $"Create ESDC(NETP) Events Process Started", "O");
 
             var tracingManager = new TracingManager(DB, Config, User);
-            await tracingManager.CreateNETPeventsAsync();
+            await tracingManager.CreateNETPevents();
 
-            await prodAudit.InsertAsync("Create ESDC(NETP) Events Process", $"Create ESDC(NETP) Events Process Completed", "O");
+            await prodAudit.Insert("Create ESDC(NETP) Events Process", $"Create ESDC(NETP) Events Process Completed", "O");
         }
 
     }

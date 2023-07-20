@@ -15,7 +15,7 @@ namespace FileBroker.Business.Tests.InMemory
             FileAuditTable = new List<FileAuditData>();
         }
 
-        public Task<List<FileAuditData>> GetFileAuditDataForFileAsync(string fileName)
+        public Task<List<FileAuditData>> GetFileAuditDataForFile(string fileName)
         {
             return Task.FromResult(FileAuditTable);
         }
@@ -36,7 +36,7 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.CompletedTask;
         }
 
-        public Task MarkFileAuditCompletedForItemAsync(FileAuditData data)
+        public Task MarkFileAuditCompletedForItem(FileAuditData data)
         {
             var item = FileAuditTable.Where(m => (m.InboundFilename == data.InboundFilename) &&
                                      (m.Appl_EnfSrv_Cd == data.Appl_EnfSrv_Cd) &&

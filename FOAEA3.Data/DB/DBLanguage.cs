@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<LanguageData>> GetLanguagesAsync()
+        public async Task<DataList<LanguageData>> GetLanguages()
         {
             var data = await MainDB.GetAllDataAsync<LanguageData>("Lng", FillLanguageDataFromReader);
 

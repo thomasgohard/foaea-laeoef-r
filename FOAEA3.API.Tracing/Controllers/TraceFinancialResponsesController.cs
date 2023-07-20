@@ -4,9 +4,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Outgoing.FileCreator.Fed.Tracing;
 
 namespace FOAEA3.API.Tracing.Controllers
@@ -21,8 +19,8 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             var manager = new TracingManager(repositories, config, User);
 
-            if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-                return Ok(await manager.GetTraceFinancialResultsAsync());
+            if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+                return Ok(await manager.GetTraceFinancialResults());
             else
                 return NotFound();
         }
@@ -33,26 +31,33 @@ namespace FOAEA3.API.Tracing.Controllers
         {
             var manager = new TracingManager(repositories, config, User);
 
-            if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
+            if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
             {
-                var finResults = (await manager.GetTraceFinancialResultsAsync()).Items;
+                var finResults = (await manager.GetTraceFinancialResults()).Items;
                 var finDetails = finResults?.Where(m => m.TrcRsp_Trace_CyclNr == cycle)?.FirstOrDefault()?.TraceFinancialDetails;
                 var finValues = finDetails?.Where(m => m.FiscalYear == year && m.TaxForm == form)?.FirstOrDefault()?.TraceDetailValues;
 
                 if (finValues is not null)
-                {                    
+                {
                     var craFields = await manager.GetCraFields();
                     var craForms = await manager.GetCraForms();
 
                     string province = "ON";
-                    string language = "E";
-                    
-                    string templateName = craForms.Where(m => m.CRAFormProvince == province && m.CRAFormLanguage == language && 
+
+                    // "Accept-Language"
+                    string headerLanguage = GetLanguageFromHeader(Request.Headers);
+
+                    string formLanguage = headerLanguage switch { "fr" => "F", _ => "E" };
+                    string formShortName = FormHelper.ConvertTaxFormNameToShortName(form);
+
+                    string templateName = craForms.Where(m => m.CRAFormProvince == province && m.CRAFormLanguage == formLanguage &&
                                                               m.CRAFormYear == year && m.CRAFormSchedule == form)
                                                   .FirstOrDefault()?
                                                   .CRAFormPDFName;
 
-                    string template = @$"C:\CRATaxForms\{year}\{templateName}.pdf";
+                    string templateLanguage = formLanguage switch { "F" => "French", _ => "English" };
+
+                    string template = @$"C:\CRATaxForms\{templateLanguage}\{year}\{templateName}.pdf";
 
                     var values = new Dictionary<string, string>();
 
@@ -64,10 +69,42 @@ namespace FOAEA3.API.Tracing.Controllers
                         var thisCraField = craFields.Where(m => m.CRAFieldName == fieldName).FirstOrDefault();
                         if (thisCraField is not null)
                         {
-                            string thisLineNumber = thisCraField.CRAFieldCode;
-                            if (!string.IsNullOrEmpty(thisLineNumber))
-                                values.Add(thisLineNumber, fieldValue);
-                        }                        
+                            string pdfFieldName;
+
+                            if (year >= 2019)
+                                pdfFieldName = thisCraField.CRAFieldCode;
+                            else
+                                pdfFieldName = thisCraField.CRAFieldCodeOld;
+
+                            if (pdfFieldName == "MaritalStatus")
+                            {
+                                switch (fieldValue) {
+                                    case "01": pdfFieldName = "Married"; break;
+                                    case "02": pdfFieldName = "CommonLaw"; break;
+                                    case "03": pdfFieldName = "Widowed"; break;
+                                    case "04": pdfFieldName = "Divorced"; break;
+                                    case "05": pdfFieldName = "Separated"; break;
+                                    case "06": pdfFieldName = "Single"; break;
+                                }
+                                fieldValue = "1";
+                            }
+                            if (pdfFieldName == "PreferredLanguage")
+                            {
+                                switch (fieldValue) {
+                                    case "E": pdfFieldName = "English"; break;
+                                    case "F": pdfFieldName = "French"; break;
+                                }
+                                fieldValue = "1";
+                            }
+
+                            if (!string.IsNullOrEmpty(pdfFieldName))
+                            {
+                                pdfFieldName = pdfFieldName.ToUpper();
+
+                                if (!values.ContainsKey(pdfFieldName))
+                                    values.Add(pdfFieldName, fieldValue);
+                            }
+                        }
                     }
 
                     (var fileContent, _) = PdfHelper.FillPdf(template, values);
@@ -78,17 +115,28 @@ namespace FOAEA3.API.Tracing.Controllers
                 }
             }
 
-            return null;
+            return NotFound();
+        }
+
+        private string GetLanguageFromHeader(IHeaderDictionary headers)
+        {
+            if ((headers is not null) && headers.ContainsKey("Accept-Language"))
+            {
+                var languageHeader = Request.Headers["Accept-Language"];
+                return languageHeader[0]?.ToLower() ?? "en";
+            }
+            else
+                return "en";
         }
 
         [HttpPost]
         public async Task<ActionResult<int>> CreateTraceFinancialResponses([FromServices] IRepositories repositories)
         {
-            var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<TraceFinancialResponseData>(Request);
+            var responseData = await APIBrokerHelper.GetDataFromRequestBody<TraceFinancialResponseData>(Request);
 
             var tracingManager = new TracingManager(repositories, config, User);
 
-            await tracingManager.CreateFinancialResponseDataAsync(responseData);
+            await tracingManager.CreateFinancialResponseData(responseData);
 
             var rootPath = "https://" + HttpContext.Request.Host.ToString();
 

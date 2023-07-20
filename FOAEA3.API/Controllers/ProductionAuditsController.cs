@@ -20,10 +20,10 @@ namespace FOAEA3.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductionAuditData>> InsertNotification([FromServices] IRepositories repositories)
         {
-            var productionAuditData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ProductionAuditData>(Request);
+            var productionAuditData = await APIBrokerHelper.GetDataFromRequestBody<ProductionAuditData>(Request);
 
             var productionAuditManager = new ProductionAuditManager(repositories);
-            await productionAuditManager.InsertAsync(productionAuditData);
+            await productionAuditManager.Insert(productionAuditData);
 
             return Ok(productionAuditData);
         }

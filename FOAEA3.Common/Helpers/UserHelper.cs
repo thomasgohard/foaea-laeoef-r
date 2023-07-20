@@ -38,12 +38,12 @@ namespace FOAEA3.Common.Helpers
             {
                 var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
                 var submitterCode = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
-                var submitterData = (await db.SubmitterTable.GetSubmitterAsync(submCode: submitterCode)).FirstOrDefault();
+                var submitterData = (await db.SubmitterTable.GetSubmitter(submCode: submitterCode)).FirstOrDefault();
 
                 if ((submitterData is null) || (!submitterData.Subm_SubmCd.Equals(submitterCode, StringComparison.InvariantCultureIgnoreCase)))
                     submitterData = new SubmitterData();
 
-                var enfOffData = (await db.EnfOffTable.GetEnfOffAsync(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+                var enfOffData = (await db.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
 
                 var currentUser = new FoaeaUser
                 {

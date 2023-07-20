@@ -13,10 +13,10 @@ namespace FOAEA3.Business.Utilities
             DB = repositories;
         }
 
-        public async Task<EnfSrvData> GetEnforcementServiceAsync(string enfSrvCd)
+        public async Task<EnfSrvData> GetEnforcementService(string enfSrvCd)
         {
             IEnfSrvRepository db = DB.EnfSrvTable;
-            var result = await db.GetEnfServiceAsync(enfSrvCd);
+            var result = await db.GetEnfService(enfSrvCd);
             if (result.Count == 1)
                 return result[0];
             else

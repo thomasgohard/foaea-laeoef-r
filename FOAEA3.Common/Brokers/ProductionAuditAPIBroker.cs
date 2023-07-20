@@ -15,7 +15,7 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task Insert(string processName, string description, string audience, DateTime? completedDate = null)
         {
             var productionAuditData = new ProductionAuditData
             {
@@ -25,13 +25,13 @@ namespace FOAEA3.Common.Brokers
                 Compl_dte = completedDate
             };
 
-            _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
+            _ = await ApiHelper.PostData<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
                                                                              productionAuditData, token: Token);
         }
 
-        public async Task InsertAsync(ProductionAuditData productionAuditData)
+        public async Task Insert(ProductionAuditData productionAuditData)
         {
-            _ = await ApiHelper.PostDataAsync<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
+            _ = await ApiHelper.PostData<ProductionAuditData, ProductionAuditData>("api/v1/productionAudits",
                                                                               productionAuditData, token: Token);
         }
     }

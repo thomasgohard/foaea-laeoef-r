@@ -16,7 +16,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<SettingsData> GetSettingsDataForFileNameAsync(string fileNameNoExt)
+        public async Task<SettingsData> GetSettingsDataForFileName(string fileNameNoExt)
         {
             var parameters = new Dictionary<string, object> {
                     { "thisName",  fileNameNoExt}

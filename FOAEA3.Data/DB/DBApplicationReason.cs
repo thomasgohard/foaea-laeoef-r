@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<ApplicationReasonData>> GetApplicationReasonsAsync()
+        public async Task<DataList<ApplicationReasonData>> GetApplicationReasons()
         {
             var data = await MainDB.GetAllDataAsync<ApplicationReasonData>("AppReas", FillApplicationReasonDataFromReader);
 

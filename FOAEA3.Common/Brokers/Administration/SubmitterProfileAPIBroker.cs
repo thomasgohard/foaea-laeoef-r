@@ -15,10 +15,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
+        public async Task<SubmitterProfileData> GetSubmitterProfile(string submitterCode)
         {
             string apiCall = $"api/v1/SubmitterProfiles/{submitterCode}";
-            return await ApiHelper.GetDataAsync<SubmitterProfileData>(apiCall, token: Token);
+            return await ApiHelper.GetData<SubmitterProfileData>(apiCall, token: Token);
         }
     }
 }

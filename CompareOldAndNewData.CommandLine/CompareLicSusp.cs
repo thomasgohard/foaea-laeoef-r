@@ -6,7 +6,7 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareLicSusp
     {
-        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories foaea2db, IRepositories foaea3db,
+        public static async Task<List<DiffData>> Run(string tableName, IRepositories foaea2db, IRepositories foaea3db,
                                  string enfSrv, string ctrlCd, string category)
         {
             var diffs = new List<DiffData>();
@@ -17,13 +17,13 @@ namespace CompareOldAndNewData.CommandLine
             LicenceDenialApplicationData appl3;
             if (category == "L01")
             {
-                appl2 = await foaea2db.LicenceDenialTable.GetLicenceDenialDataAsync(enfSrv, appl_L01_CtrlCd: ctrlCd);
-                appl3 = await foaea3db.LicenceDenialTable.GetLicenceDenialDataAsync(enfSrv, appl_L01_CtrlCd: ctrlCd);
+                appl2 = await foaea2db.LicenceDenialTable.GetLicenceDenialData(enfSrv, appl_L01_CtrlCd: ctrlCd);
+                appl3 = await foaea3db.LicenceDenialTable.GetLicenceDenialData(enfSrv, appl_L01_CtrlCd: ctrlCd);
             }
             else
             {
-                appl2 = await foaea2db.LicenceDenialTable.GetLicenceDenialDataAsync(enfSrv, appl_L03_CtrlCd: ctrlCd);
-                appl3 = await foaea3db.LicenceDenialTable.GetLicenceDenialDataAsync(enfSrv, appl_L03_CtrlCd: ctrlCd);
+                appl2 = await foaea2db.LicenceDenialTable.GetLicenceDenialData(enfSrv, appl_L03_CtrlCd: ctrlCd);
+                appl3 = await foaea3db.LicenceDenialTable.GetLicenceDenialData(enfSrv, appl_L03_CtrlCd: ctrlCd);
             }
 
             if ((appl2 is null) && (appl3 is null))

@@ -8,6 +8,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        Task<DataList<ActiveStatusData>> GetActiveStatusAsync();
+        Task<DataList<ActiveStatusData>> GetActiveStatus();
     }
 }

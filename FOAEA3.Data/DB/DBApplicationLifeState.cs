@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStatesAsync()
+        public async Task<DataList<ApplicationLifeStateData>> GetApplicationLifeStates()
         {
             var data = await MainDB.GetAllDataAsync<ApplicationLifeStateData>("AppLiSt", FillApplicationLifeStateDataFromReader);
 

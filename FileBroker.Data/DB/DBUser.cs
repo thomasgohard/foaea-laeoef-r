@@ -17,7 +17,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<UserData> GetUserByNameAsync(string userName)
+        public async Task<UserData> GetUserByName(string userName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -28,7 +28,7 @@ namespace FileBroker.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task<UserData> GetUserByIdAsync(int userId)
+        public async Task<UserData> GetUserById(int userId)
         {
             var parameters = new Dictionary<string, object>
             {

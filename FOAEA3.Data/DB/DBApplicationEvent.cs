@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<ApplicationEventData>> GetApplicationEventsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
+        public async Task<List<ApplicationEventData>> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -92,7 +92,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<ApplicationEventData>> GetEventBFAsync(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
+        public async Task<List<ApplicationEventData>> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -110,7 +110,7 @@ namespace FOAEA3.Data.DB
             return data; // returns null if no data found
         }
 
-        public async Task<List<ApplicationEventData>> GetActiveEventBFsAsync()
+        public async Task<List<ApplicationEventData>> GetActiveEventBFs()
         {
             var data = await MainDB.GetDataFromStoredProcAsync<ApplicationEventData>("GetActiveEvntBF", FillEventDataFromReader);
             foreach (var item in data)
@@ -119,14 +119,14 @@ namespace FOAEA3.Data.DB
             return data; // returns null if no data found
         }
 
-        public async Task<bool> SaveEventsAsync(List<ApplicationEventData> events, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        public async Task<bool> SaveEvents(List<ApplicationEventData> events, ApplicationState applicationState = ApplicationState.UNDEFINED,
                                string activeState = "")
         {
             bool success = true;
 
             foreach (var eventData in events)
             {
-                success = await SaveEventAsync(eventData, applicationState, activeState);
+                success = await SaveEvent(eventData, applicationState, activeState);
 
                 if (!success)
                     break;
@@ -136,20 +136,20 @@ namespace FOAEA3.Data.DB
             return success;
         }
 
-        public async Task<bool> SaveEventAsync(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        public async Task<bool> SaveEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
                               string activeState = "")
         {
             bool success;
 
             if (eventData.Event_Id == 0)
-                success = await CreateEventAsync(eventData, applicationState, activeState);
+                success = await CreateEvent(eventData, applicationState, activeState);
             else
-                success = await UpdateEventAsync(eventData, applicationState, activeState);
+                success = await UpdateEvent(eventData, applicationState, activeState);
 
             return success;
         }
 
-        private async Task<bool> CreateEventAsync(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        private async Task<bool> CreateEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
                                 string activeState = "")
         {
             if (applicationState == ApplicationState.UNDEFINED)
@@ -188,7 +188,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        private async Task<bool> UpdateEventAsync(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        private async Task<bool> UpdateEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
                                 string activeState = "")
         {
             var parameters = new Dictionary<string, object>();
@@ -274,12 +274,12 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task CloseNETPTraceEventsAsync()
+        public async Task CloseNETPTraceEvents()
         {
             await MainDB.ExecProcAsync("MessageBrokerCloseESDCTraceEvents");
         }
 
-        public async Task<int> GetTraceEventCountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
+        public async Task<int> GetTraceEventCount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
                                       EventCode eventReasonCode, int eventId)
         {
             var parameters = new Dictionary<string, object>
@@ -294,7 +294,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.ExecProcAsync("EvntTraceGetEventCount", parameters);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEventsAsync(string enfSrv_Cd, string cycle)
+        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -310,7 +310,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
@@ -327,7 +327,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string enfSrv_Cd, string fileName)
+        public async Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -352,7 +352,7 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
         {
             return await MainDB.GetDataFromStoredProcAsync<SinInboundToApplData>("MessageBrokerGetSINInboundToApplData", FillLatestSinEventDataFromReader);
         }
@@ -374,7 +374,7 @@ namespace FOAEA3.Data.DB
             data.ValStat_Cd = (short)rdr["ValStat_Cd"];
         }
 
-        public async Task DeleteBFEventAsync(string subm_SubmCd, string appl_CtrlCd)
+        public async Task DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {

@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<int> SaveDataPageInfoAsync(AccessAuditPage auditPage, string subject_submitter)
+        public async Task<int> SaveDataPageInfo(AccessAuditPage auditPage, string subject_submitter)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -26,12 +26,12 @@ namespace FOAEA3.Data.DB
             decimal returnValue = await MainDB.GetDataFromProcSingleValueAsync<decimal>("AccessAuditDataHeader_Insert", parameters);
 
             if (!string.IsNullOrEmpty(MainDB.LastError))
-                await LogErrorAsync(MainDB.LastError);
+                await LogError(MainDB.LastError);
 
             return (int)returnValue;
         }
 
-        public async Task SaveDataValueAsync(int pageId, string key, string value)
+        public async Task SaveDataValue(int pageId, string key, string value)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -43,15 +43,15 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("AccessAuditDataElementValue_Insert", parameters);
 
             if (!string.IsNullOrEmpty(MainDB.LastError))
-                await LogErrorAsync(MainDB.LastError);
+                await LogError(MainDB.LastError);
         }
 
-        public async Task<List<AccessAuditElementTypeData>> GetAllElementAccessTypeAsync()
+        public async Task<List<AccessAuditElementTypeData>> GetAllElementAccessType()
         {
             return await MainDB.GetAllDataAsync<AccessAuditElementTypeData>("AccessAuditDataElementValueType", FillAccessAuditElementTypeData);
         }
 
-        private async Task LogErrorAsync(string errorMessage)
+        private async Task LogError(string errorMessage)
         {
             var parameters = new Dictionary<string, object>
             {

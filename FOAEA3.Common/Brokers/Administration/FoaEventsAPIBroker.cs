@@ -15,10 +15,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<FoaEventDataDictionary> GetFoaEventsAsync()
+        public async Task<FoaEventDataDictionary> GetFoaEvents()
         {
             string apiCall = $"api/v1/FoaEvents";
-            var result = await ApiHelper.GetDataAsync<FoaEventDataDictionary>(apiCall, token: Token);
+            var result = await ApiHelper.GetData<FoaEventDataDictionary>(apiCall, token: Token);
             return result;
         }
     }

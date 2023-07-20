@@ -23,7 +23,7 @@ internal class Program
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
         var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-        await db.RequestLogTable.DeleteAllAsync();
+        await db.RequestLogTable.DeleteAll();
 
         string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
         var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB));
@@ -99,7 +99,7 @@ internal class Program
                         {
                             foreach (var error in errors)
                             {
-                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", thisfile, new Exception(error), displayExceptionError: true);
+                                await db.ErrorTrackingTable.MessageBrokerError($"{provinceCode} incoming file processing error", thisfile, new Exception(error), displayExceptionError: true);
                                 WriteEmbeddedColorLine($"[red]Error[/red]: [yellow]{error}[/yellow]");
                             }
                             finishedForProvince = true;
@@ -126,7 +126,7 @@ internal class Program
     private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)
     {
         WriteEmbeddedColorLine(error);
-        await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
+        await errorTrackingDB.MessageBrokerError($"Incoming MEP File Processing", "Error starting MEP File Monitor",
                                                       new Exception(error), displayExceptionError: true);
     }
 
@@ -170,16 +170,16 @@ internal class Program
             switch (option)
             {
                 case "TRACE_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("TRCAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("TRCAPPIN"));
                     loadAllCategories = false;
                     break;
                 case "INTERCEPTION_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("INTAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("ESD"));
                     loadAllCategories = false;
                     break;
                 case "LICENCE_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("LICAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAPPIN"));
                     loadAllCategories = false;
                     break;
                 default:
@@ -188,10 +188,10 @@ internal class Program
         }
         if (loadAllCategories)
         {
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("TRCAPPIN"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("LICAPPIN"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("TRCAPPIN"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("INTAPPIN"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("ESD"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAPPIN"));
         }
 
         fileTableData = fileTableData.Where(f => f.Active.HasValue && f.Active.Value).ToList();

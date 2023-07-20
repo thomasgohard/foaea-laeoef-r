@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<ActiveStatusData>> GetActiveStatusAsync()
+        public async Task<DataList<ActiveStatusData>> GetActiveStatus()
         {
             var data = await MainDB.GetAllDataAsync<ActiveStatusData>("ActvSt", FillActiveStatusDataFromReader);
 

@@ -29,14 +29,14 @@ public class SelectSubmitterModel : FoaeaPageModel
     {
         var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
-        Submitters = await loginAPIs.GetAvailableSubmittersAsync();
+        Submitters = await loginAPIs.GetAvailableSubmitters();
     }
 
     public async Task<ActionResult> OnPostSelectSubmitter()
     {
         var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
-        var result = await loginAPIs.SelectSubmitterAsync(Submitter);
+        var result = await loginAPIs.SelectSubmitter(Submitter);
 
         if ((result.Token == null) || string.IsNullOrEmpty(result.Token))
         {
@@ -46,7 +46,7 @@ public class SelectSubmitterModel : FoaeaPageModel
         else
         {
             var submitterAPIs = new SubmitterAPIBroker(BaseAPIs);
-            var submitter = await submitterAPIs.GetSubmitterAsync(Submitter);
+            var submitter = await submitterAPIs.GetSubmitter(Submitter);
 
             HttpContext.Session.SetString(SessionValue.TOKEN, result.Token);
             HttpContext.Session.SetString(SessionValue.REFRESH_TOKEN, result.RefreshToken);

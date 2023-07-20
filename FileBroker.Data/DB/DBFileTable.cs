@@ -58,14 +58,14 @@ namespace FileBroker.Data.DB
             await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
         }
 
-        public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
+        public async Task<List<FileTableData>> GetFileTableDataForCategory(string category)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
             return fileTableData.AsParallel().Where(f => f.Category == category).ToList();
         }
 
-        public async Task<List<FileTableData>> GetAllActiveAsync()
+        public async Task<List<FileTableData>> GetAllActive()
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
@@ -90,7 +90,7 @@ namespace FileBroker.Data.DB
 
         }
 
-        public async Task<bool> IsFileLoadingAsync(int processId)
+        public async Task<bool> IsFileLoading(int processId)
         {
             var parameters = new Dictionary<string, object>
             {

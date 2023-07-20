@@ -25,7 +25,7 @@ public class TracingFilesController : ControllerBase
     {
         string fileContent;
         string lastFileName;
-        (fileContent, lastFileName) = await LoadLatestProvincialTracingFileAsync(partnerId, fileTable);
+        (fileContent, lastFileName) = await LoadLatestProvincialTracingFile(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -41,9 +41,9 @@ public class TracingFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestProvincialTracingFileAsync(string partnerId, IFileTableRepository fileTable)
+    private static async Task<(string, string)> LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("TRCAPPOUT"))
+        var fileTableData = (await fileTable.GetFileTableDataForCategory("TRCAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 

@@ -30,7 +30,7 @@ public class LoginModel : FoaeaPageModel
     {
         var loginAPIs = new LoginsAPIBroker(BaseAPIs);
 
-        var result = await loginAPIs.SubjectLoginAsync(LoginData);
+        var result = await loginAPIs.SubjectLogin(LoginData);
 
         var errors = loginAPIs.ApiHelper.ErrorData;
 

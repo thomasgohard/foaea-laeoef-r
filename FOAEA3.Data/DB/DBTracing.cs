@@ -19,7 +19,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<TracingApplicationData> GetTracingData(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -51,7 +51,7 @@ namespace FOAEA3.Data.DB
             return traceData;
         }
 
-        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
+        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -62,28 +62,28 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters, FillTraceCycleQuantityDataFromReader);
         }
 
-        public async Task CreateTracingDataAsync(TracingApplicationData data)
+        public async Task CreateTracingData(TracingApplicationData data)
         {
-            await ChangeTracingDataAsync(data, "TrcApplDtlInsert");
+            await ChangeTracingData(data, "TrcApplDtlInsert");
 
             await CreateYearsAndTaxForms(data);
         }
 
-        public async Task UpdateTracingDataAsync(TracingApplicationData data)
+        public async Task UpdateTracingData(TracingApplicationData data)
         {
-            await ChangeTracingDataAsync(data, "TrcApplDtlUpdate");
+            await ChangeTracingData(data, "TrcApplDtlUpdate");
 
             await DeleteFinancialDataForAppl(data);
             if ((data.YearsAndTaxForms is not null) && data.YearsAndTaxForms.Any())
                 await CreateYearsAndTaxForms(data);
         }
 
-        public async Task CreateESDCEventTraceDataAsync()
+        public async Task CreateESDCEventTraceData()
         {
             await MainDB.ExecProcAsync("CreateESDCEventTraceData");
         }
 
-        private async Task ChangeTracingDataAsync(TracingApplicationData data, string procName)
+        private async Task ChangeTracingData(TracingApplicationData data, string procName)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -111,7 +111,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync(procName, parameters);
         }
 
-        public async Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> TracingDataExists(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -124,12 +124,12 @@ namespace FOAEA3.Data.DB
             return count > 0;
         }
 
-        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
+        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavit()
         {
             var result = new DataList<TracingApplicationData>();
 
             var appDB = new DBApplication(MainDB);
-            var data = await appDB.GetApplicationsWaitingForAffidavitAsync("T01");
+            var data = await appDB.GetApplicationsWaitingForAffidavit("T01");
 
             string provinceCode = CurrentSubmitter[0..2];
 
@@ -151,12 +151,12 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
+        public async Task<List<TraceToApplData>> GetTraceToApplData()
         {
             return await MainDB.GetAllDataAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
         }
 
-        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
+        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingData(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
@@ -190,7 +190,7 @@ namespace FOAEA3.Data.DB
             );
         }
 
-        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)

@@ -28,9 +28,9 @@ namespace FOAEA3.API.Interception.Controllers
                                                                                  [FromServices] IRepositories repositories)
         {
             var manager = new ElectronicSummonsDocumentManager(repositories);
-            await manager.SetCurrentUserAsync(User);
+            await manager.SetCurrentUser(User);
 
-            var electronicSummons = await manager.GetESDasync(fileName);
+            var electronicSummons = await manager.GetESD(fileName);
             if (electronicSummons is not null)
                 return Ok(electronicSummons);
             else
@@ -40,10 +40,10 @@ namespace FOAEA3.API.Interception.Controllers
         [HttpPost]
         public async Task<ActionResult<ElectronicSummonsDocumentZipData>> CreateESD([FromServices] IRepositories repositories)
         {
-            var zipData = await APIBrokerHelper.GetDataFromRequestBodyAsync<ElectronicSummonsDocumentZipData>(Request);
+            var zipData = await APIBrokerHelper.GetDataFromRequestBody<ElectronicSummonsDocumentZipData>(Request);
 
             var manager = new ElectronicSummonsDocumentManager(repositories);
-            await manager.SetCurrentUserAsync(User);
+            await manager.SetCurrentUser(User);
 
             var electronicSummons = await manager.CreateESD(zipData);
             if (electronicSummons is not null)

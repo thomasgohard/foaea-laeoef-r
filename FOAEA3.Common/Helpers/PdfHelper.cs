@@ -39,7 +39,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
             missingFields = new List<string>();
             foundFields = new List<string>();
-            var standardFont = new PdfFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Bold);
+            var standardFont = new PdfFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Regular);
 
             var form = pdfDoc.Form as PdfFormWidget;
 
@@ -66,6 +66,45 @@ namespace Outgoing.FileCreator.Fed.Tracing
                                     }
                                 }
                                 break;
+                            case "PDFCHECKBOXWIDGETFIELDWIDGET":
+                                var checkBox = field as PdfCheckBoxWidgetFieldWidget;
+                                if (checkBox is not null)
+                                {
+                                    var fieldName = checkBox.Name.ToUpper();
+                                    if (values.ContainsKey(fieldName))
+                                    {
+                                        checkBox.Checked = values[fieldName] == "1";
+                                        foundFields.Add(fieldName);
+                                    }
+                                }
+                                break;
+                            case "PDFCOMBOBOXWIDGETFIELDWIDGET":
+                                var comboBox = field as PdfComboBoxWidgetFieldWidget;
+                                if (comboBox is not null)
+                                {
+                                    var fieldName = comboBox.Name.ToUpper();
+                                    if (values.ContainsKey(fieldName))
+                                    {
+                                        // var comboValues = comboBox.Values;
+                                        comboBox.SelectedValue = values[fieldName];
+                                    }
+                                }
+                                break;
+                            case "PDFRADIOBUTTONLISTFIELDWIDGET":
+                                var radioButton = field as PdfRadioButtonListFieldWidget;
+                                if (radioButton is not null)
+                                {
+                                    var fieldName = radioButton.Name.ToUpper();
+                                    if (values.ContainsKey(fieldName))
+                                    {
+                                        // var comboValues = comboBox.Values;
+                                        radioButton.SelectedValue = values[fieldName];
+                                    }
+                                }
+                                break;
+                            default:
+                                // TODO: Log invalid types?
+                                break;
                         }
                     }
                 }
@@ -74,9 +113,35 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 if (!foundFields.Contains(value.Key))
                     missingFields.Add(value.Key);
 
+            WatermarkPDF(ref pdfDoc);
+
+            pdfDoc.DocumentInformation.Title = "GeneratedPDF";
             pdfDoc.Form.IsFlatten = true;
 
             return pdfDoc;
+        }
+
+        private static void WatermarkPDF(ref PdfDocument pdf)
+        {
+            var font = new PdfFont(PdfFontFamily.Helvetica, 12f, PdfFontStyle.Regular);
+
+            string text = "REPLICA created by the Department of Justice Canada Family Law Assistance Services Information Technology Team \n for the purposes of sharing information under Part I of the Family Orders and Agreements Enforcement Assistance Act \n and the Release of Information for Family Orders and Agreements Enforcement Assistance Regulations";
+
+            var textSize = font.MeasureString(text);
+
+            float offsetWidth = (float)(textSize.Width * Math.Sqrt(2) / 4);
+            float offsetHeight = (float)(textSize.Height * Math.Sqrt(2) / 4);
+
+            foreach (PdfPageBase page in pdf.Pages)
+            {
+                page.Canvas.Save();
+                page.Canvas.SetTransparency(0.8f);
+                page.Canvas.TranslateTransform(page.Canvas.Size.Width / 2 - offsetWidth - offsetHeight,
+                                               page.Canvas.Size.Height / 2 + offsetWidth - offsetHeight);
+                page.Canvas.RotateTransform(-45);
+                page.Canvas.DrawString(text, font, PdfBrushes.DarkGray, 0, 0);
+                page.Canvas.Restore();
+            }
         }
     }
 }

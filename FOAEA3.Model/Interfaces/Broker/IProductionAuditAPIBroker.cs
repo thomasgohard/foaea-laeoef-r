@@ -8,7 +8,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null);
-        Task InsertAsync(ProductionAuditData productionAuditData);
+        Task Insert(string processName, string description, string audience, DateTime? completedDate = null);
+        Task Insert(ProductionAuditData productionAuditData);
     }
 }

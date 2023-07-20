@@ -64,8 +64,8 @@ namespace BackendProcesses.Business.Tests
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: Initial Data", "ON01", "00002", periodicPaymentCode);
 
             // Act
-            await backendProcess.RunAsync();
-            var data = await backendProcess.GetSummonsSummaryDataAsync("ON01", "00002");
+            await backendProcess.Run();
+            var data = await backendProcess.GetSummonsSummaryData("ON01", "00002");
 
             LogTestData("VariousPeriod_NoDivertReceived_PeriodicOwed_Test: After Amount Owed Recalc", "ON01", "00002", periodicPaymentCode);
 

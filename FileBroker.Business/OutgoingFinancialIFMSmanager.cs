@@ -20,8 +20,9 @@ namespace FileBroker.Business
 
         public async Task<string> CreateIFMSfile(string fileBaseName, List<string> errors)
         {
-            var fileTableData = (await DB.FileTable.GetFileTableDataForCategoryAsync("IFMSFDOUT"))
-                                    .Where(s => s.Active == true).First();
+            var fileTableData = (await DB.FileTable.GetFileTableDataForCategory("IFMSFDOUT"))
+                                 .Where(s => s.Active == true)
+                                 .First();
             
             string newCycle = (fileTableData.Cycle + 1).ToString();
             string newFilePath = fileTableData.Path.AppendToPath(fileTableData.Name + "." + newCycle, isFileName: true);
@@ -35,9 +36,9 @@ namespace FileBroker.Business
             await FoaeaAccess.SystemLogin();
             try
             {
-                var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-                var batches = await APIs.Financials.GetActiveCR_PADReventsAsync(processCodes.EnfSrv_Cd);
+                var batches = await APIs.Financials.GetActiveCR_PADRevents(processCodes.EnfSrv_Cd);
 
                 if ((batches is null) || (batches.Count == 0))
                 {
@@ -53,26 +54,26 @@ namespace FileBroker.Business
 
                 var batch = batches.First();
 
-                var data = await APIs.Financials.GetIFMSasync(batch.Batch_Id);
+                var data = await APIs.Financials.GetIFMSDataFromFoaea(batch.Batch_Id);
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
                 await File.WriteAllTextAsync(newFilePath, fileContent);
 
-                await APIs.Financials.CloseCR_PADReventsAsync(batch.Batch_Id, processCodes.EnfSrv_Cd);
+                await APIs.Financials.CloseCR_PADRevents(batch.Batch_Id, processCodes.EnfSrv_Cd);
                 await APIs.ControlBatches.CloseControlBatch(batch.Batch_Id);
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 string message = fileTableData.Category + " Outbound IFMS File created successfully.";
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
-                                                                         fileCreated: true, message);
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
+                                                                    fileCreated: true, message);
 
             }
             catch (Exception e)
             {
                 string errorMessage = e.Message;
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
-                                                                         fileCreated: true, errorMessage);
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
+                                                                    fileCreated: true, errorMessage);
             }
             finally
             {

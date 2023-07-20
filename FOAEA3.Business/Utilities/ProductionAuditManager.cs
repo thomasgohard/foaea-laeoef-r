@@ -14,14 +14,14 @@ namespace FOAEA3.Business.Utilities
             DB = repositories;
         }
 
-        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task Insert(string processName, string description, string audience, DateTime? completedDate = null)
         {
-            await DB.ProductionAuditTable.InsertAsync(processName, description, audience, completedDate);
+            await DB.ProductionAuditTable.Insert(processName, description, audience, completedDate);
         }
 
-        public async Task InsertAsync(ProductionAuditData productionAuditData)
+        public async Task Insert(ProductionAuditData productionAuditData)
         {
-            await DB.ProductionAuditTable.InsertAsync(productionAuditData);
+            await DB.ProductionAuditTable.Insert(productionAuditData);
         }
     }
 }

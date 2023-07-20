@@ -12,9 +12,9 @@ namespace FOAEA3.Business.Areas.Administration
             DB = repositories;
         }
 
-        public async Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
+        public async Task<SubjectData> GetSubjectByConfirmationCode(string confirmationCode)
         {
-            return await DB.SubjectTable.GetSubjectByConfirmationCodeAsync(confirmationCode);
+            return await DB.SubjectTable.GetSubjectByConfirmationCode(confirmationCode);
         }
 
     }

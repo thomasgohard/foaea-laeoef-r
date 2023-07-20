@@ -9,6 +9,6 @@ namespace FileBroker.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<TokenData> CreateTokenAsync(FileBrokerLoginData loginData);
+        Task<TokenData> CreateToken(FileBrokerLoginData loginData);
     }
 }

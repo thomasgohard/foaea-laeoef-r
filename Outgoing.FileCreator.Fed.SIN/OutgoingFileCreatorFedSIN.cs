@@ -23,12 +23,12 @@ public static class OutgoingFileCreatorFedSIN
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-        await CreateOutgoingFederalSinFileAsync(fileBrokerDB, config.ApiRootData, config);
+        await CreateOutgoingFederalSinFile(fileBrokerDB, config.ApiRootData, config);
 
         ColourConsole.Write("Completed.\n");
     }
 
-    private static async Task CreateOutgoingFederalSinFileAsync(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
+    private static async Task CreateOutgoingFederalSinFile(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
                                                         IFileBrokerConfigurationHelper config)
     {
         var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(apiRootData);
@@ -37,13 +37,13 @@ public static class OutgoingFileCreatorFedSIN
 
         var federalFileManager = new OutgoingFederalSinManager(foaeaApis, db, config);
 
-        var federalSinOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("SINOUT"))
+        var federalSinOutgoingSources = (await db.FileTable.GetFileTableDataForCategory("SINOUT"))
                                           .Where(s => s.Active == true);
 
         foreach (var federalSinOutgoingSource in federalSinOutgoingSources)
         {
             var errors = new List<string>();
-            (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalSinOutgoingSource.Name);
+            (string filePath, errors) = await federalFileManager.CreateOutputFile(federalSinOutgoingSource.Name);
 
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
@@ -51,7 +51,7 @@ public static class OutgoingFileCreatorFedSIN
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalSinOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync("SINOUT", federalSinOutgoingSource.Name,
+                    await db.ErrorTrackingTable.MessageBrokerError("SINOUT", federalSinOutgoingSource.Name,
                                                                                new Exception(error), displayExceptionError: true);
                 }
         }

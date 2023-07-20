@@ -1,5 +1,5 @@
 ﻿using FileBroker.Common.Helpers;
-using System.Diagnostics.Eventing.Reader;
+using FOAEA3.Common.Helpers;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -20,7 +20,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+    public async Task<(string, List<string>)> CreateOutputFile(string fileBaseName)
     {
         var errors = new List<string>();
 
@@ -28,24 +28,29 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
-        var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+        var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
+        string federalEnfServiceCode = processCodes.EnfSrv_Cd;
 
         string newCycle;
-        if (processCodes.EnfSrv_Cd == "RC01") // TODO: should be a flag in the FileTable...
+        if (federalEnfServiceCode == "RC01")
             newCycle = fileTableData.Cycle.ToString("000");
         else
             newCycle = fileTableData.Cycle.ToString("000000");
 
         try
         {
-            string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle;
-            if (processCodes.EnfSrv_Cd == "RC02")
-                newFilePath += ".XML";
+            string newFilePath;
+            if (federalEnfServiceCode != "RC02")
+                newFilePath = $"{fileTableData.Path}{fileBaseName}.{newCycle}";
+            else
+                newFilePath = $"{fileTableData.Path}{fileBaseName}.{newCycle}.XML";
+
             if (File.Exists(newFilePath))
             {
                 errors.Add($"** Error: File Already Exists ({newFilePath})");
                 return (newFilePath, errors);
             }
+
             if (!await FoaeaAccess.SystemLogin())
             {
                 errors.Add("Failed to login to FOAEA!");
@@ -53,45 +58,38 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             }
             try
             {
-                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                      processCodes.EnfSrv_Cd);
-
+                var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
+                                                          federalEnfServiceCode);
                 if (!data.Any())
                 {
-                    return ("", errors); /// nothing to generate
+                    errors.Add("No data found!?");
+                    return ("", errors);
                 }
 
                 var eventIds = new List<int>();
                 string fileContent = string.Empty;
 
-                if (processCodes.EnfSrv_Cd != "RC02")
-                {
-                    // tracing requests
-                    fileContent = GenerateTraceOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, ref eventIds);
-                }
+                if (federalEnfServiceCode != "RC02")
+                    (fileContent, eventIds) = GenerateTraceOutputFileContentFromData(data, newCycle, federalEnfServiceCode);
                 else
-                {
-                    // financial requests
-                    (fileContent, eventIds) = await GenerateFinancialOutputFileContentFromData(data, newCycle, processCodes.EnfSrv_Cd, eventIds);
-                }
+                    (fileContent, eventIds) = await GenerateFinancialOutputFileContentFromData(data, newCycle);
 
                 await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
-                string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
+                string errorMessage = await FileHelper.BackupFile(newFilePath, DB, Config);
 
-                if (!string.IsNullOrEmpty(errorDoingBackup))
-                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {newFilePath}",
-                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
+                if (!string.IsNullOrEmpty(errorMessage))
+                    await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {newFilePath}",
+                                                                   "Error creating backup of outbound file: " + errorMessage);
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                         "Outbound File created successfully.");
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                    "Outbound File created successfully.");
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.ApplicationEvents.UpdateOutboundEventDetailAsync(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd,
-                                                                            processCodes.EnfSrv_Cd,
-                                                                            "OK: Written to " + newFilePath, eventIds);
+                await APIs.ApplicationEvents.UpdateOutboundEventDetail(processCodes.ActvSt_Cd, processCodes.AppLiSt_Cd, federalEnfServiceCode,
+                                                                       "OK: Written to " + newFilePath, eventIds);
             }
             finally
             {
@@ -99,66 +97,65 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             }
 
             return (newFilePath, errors);
-
         }
         catch (Exception e)
         {
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
-                                                             "Error creating outbound file", e, displayExceptionError: true);
+            await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
+                                                           "Error creating outbound file", e, displayExceptionError: true);
 
             return (string.Empty, errors);
         }
-
     }
 
-    private async Task<List<TracingOutgoingFederalData>> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
-                                                           int appLiSt_Cd, string enfSrvCode)
+    private async Task<List<TracingOutgoingFederalData>> GetOutgoingDataFromFoaea(FileTableData fileTableData, string actvSt_Cd,
+                                                                                  int appLiSt_Cd, string enfSrvCode)
     {
-        int maxRecords = 0;
+        int maxRecords;
         try
         {
-            var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+            var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
             maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
         }
-        catch (Exception e)
+        catch
         {
             throw new Exception("Error getting rec_max value. Set to 0.");
         }
 
-        var data = await APIs.TracingApplications.GetOutgoingFederalTracingRequestsAsync(maxRecords, actvSt_Cd,
-                                                                                         appLiSt_Cd, enfSrvCode);
+        var data = await APIs.TracingApplications.GetOutgoingFederalTracingRequests(maxRecords, actvSt_Cd, appLiSt_Cd, enfSrvCode);
+
         return data;
     }
 
-    private static string GenerateTraceOutputFileContentFromData(List<TracingOutgoingFederalData> data,
-                                                            string newCycle, string enfSrvCode, ref List<int> eventIds)
+    private static (string, List<int>) GenerateTraceOutputFileContentFromData(List<TracingOutgoingFederalData> data,
+                                                                              string newCycle, string enfSrvCode)
     {
         var result = new StringBuilder();
+        var eventIds = new List<int>();
 
-        result.AppendLine(GenerateHeaderLine(newCycle));
+        result.AppendLine(GenerateTraceHeaderLine(newCycle));
         foreach (var item in data)
         {
-            result.AppendLine(GenerateDetailLine(item, enfSrvCode));
+            result.AppendLine(GenerateTraceDetailLine(item, enfSrvCode));
             eventIds.Add(item.Event_dtl_Id);
         }
-        result.AppendLine(GenerateFooterLine(data.Count));
+        result.AppendLine(GenerateTraceFooterLine(data.Count));
 
-        return result.ToString();
+        return (result.ToString(), eventIds);
     }
 
-    private static string GenerateHeaderLine(string newCycle)
+    private static string GenerateTraceHeaderLine(string newCycle)
     {
         string julianDate = DateTime.Now.AsJulianString();
 
         return $"01{newCycle}{julianDate}";
     }
 
-    private static string GenerateDetailLine(TracingOutgoingFederalData item, string enfSrvCode)
+    private static string GenerateTraceDetailLine(TracingOutgoingFederalData item, string enfSrvCode)
     {
         string result = $"02{item.Appl_Dbtr_Cnfrmd_SIN,9}{item.Appl_EnfSrv_Cd,6}{item.Appl_CtrlCd,6}";
 
@@ -168,33 +165,35 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         return result;
     }
 
-    private static string GenerateFooterLine(int rowCount)
+    private static string GenerateTraceFooterLine(int rowCount)
     {
         return $"99{rowCount:000000}";
     }
 
     private async Task<(string, List<int>)> GenerateFinancialOutputFileContentFromData(List<TracingOutgoingFederalData> data,
-                                                                     string newCycle, string enfSrvCode, List<int> eventIds)
+                                                                                       string newCycle)
     {
         var result = new StringBuilder();
+        var eventIds = new List<int>();
 
         result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
         result.AppendLine("<CRATraceOut>");
 
-        result.AppendLine(GenerateFinHeaderLine(newCycle));
+        result.AppendLine(GenerateFinancialsHeaderLine(newCycle));
         foreach (var item in data)
         {
-            var appl = await APIs.TracingApplications.GetApplicationAsync(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
-
-            result.AppendLine(GenerateFinDetailLine(item, appl));
+            var appl = await APIs.TracingApplications.GetApplication(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd);
+            result.AppendLine(GenerateFinancialsDetailLine(appl));
             eventIds.Add(item.Event_dtl_Id);
         }
-        result.AppendLine(GenerateFinFooterLine(data.Count));
+        result.AppendLine(GenerateFinancialsFooterLine(data.Count));
+
+        result.AppendLine("</CRATraceOut>");
 
         return (result.ToString(), eventIds);
     }
 
-    private static string GenerateFinHeaderLine(string newCycle)
+    private static string GenerateFinancialsHeaderLine(string newCycle)
     {
         string xmlCreationDateTime = DateTime.Now.ToString("o");
 
@@ -207,18 +206,33 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
         return output.ToString();
     }
 
-    private static string GenerateFinDetailLine(TracingOutgoingFederalData item, TracingApplicationData appl)
+    private static string GenerateFinancialsDetailLine(TracingApplicationData appl)
     {
         string xmlDebtorBirthDate = appl.Appl_Dbtr_Brth_Dte?.ToString("o");
 
-        string entity = "04"; // 04 for MEP, courts can be 01 or 02 -- not sure how to identify this
-        if (appl.Subm_SubmCd[2] == 'C')
-            entity = "01"; // court
+        bool wantSinOnly = false;
+        string entity;
+        switch (appl.Subm_SubmCd[2])
+        {
+            case 'C': // court
+                if (appl.AppReas_Cd == "1")
+                    entity = "01";
+                else
+                    entity = "02";
+                break;
 
-        bool wantSinOnly = !appl.IncludeFinancialInformation && appl.IncludeSinInformation;
+            case 'S': // Provincial Child Support Services
+                entity = "03";
+                break;
+
+            default: // MEP
+                entity = "04";
+                wantSinOnly = !appl.IncludeFinancialInformation && appl.IncludeSinInformation;
+                break;
+        }
 
         var output = new StringBuilder();
-        output.AppendLine($"<Trace_Request>");
+        output.AppendLine($"<TraceRequest>");
         if (wantSinOnly)
             output.AppendLine(XmlHelper.GenerateXMLTagWithValue("EntityType", "01")); // special case, send a 01 for entity but treat it like a MEP (04)
         else
@@ -238,10 +252,13 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 {
                     short year = taxYear.Key;
                     var taxForms = taxYear.Value;
-                    output.AppendLine($"      </Tax_Data>");
-                    output.AppendLine($"          <Tax_Year>{year}</Tax_Year>");
+                    output.AppendLine($"      <Tax_Data>");
+                    output.AppendLine($"         <Tax_Year>{year}</Tax_Year>");
                     foreach (var form in taxForms)
-                        output.AppendLine($"         <Tax_Form>{form}</Tax_Form>");
+                    {
+                        string shortName = FormHelper.ConvertTaxFormNameToShortName(form);
+                        output.AppendLine($"         <Tax_Form>{shortName}</Tax_Form>");
+                    }
                     output.AppendLine($"      </Tax_Data>");
                 }
             }
@@ -251,12 +268,12 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
             output.AppendLine($"   <Tax_Year />");
         }
 
-        output.Append($"</Trace_Request>");
+        output.Append($"</TraceRequest>");
 
         return output.ToString();
     }
 
-    private static string GenerateFinFooterLine(int count)
+    private static string GenerateFinancialsFooterLine(int count)
     {
         var output = new StringBuilder();
         output.AppendLine($"<Footer>");
@@ -265,4 +282,5 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         return output.ToString();
     }
+
 }

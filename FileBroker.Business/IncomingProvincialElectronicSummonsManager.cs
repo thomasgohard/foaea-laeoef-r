@@ -48,7 +48,7 @@ namespace FileBroker.Business
 
             if (IsFrench)
             {
-                var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
+                var Translations = DB.TranslationTable.GetTranslations().Result;
                 foreach (var translation in Translations)
                     translations.Add(translation.EnglishText, translation.FrenchText);
 
@@ -69,7 +69,7 @@ namespace FileBroker.Business
                 return englishText;
         }
 
-        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceFilePath)
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceFilePath)
         {
             var result = new MessageDataList();
 
@@ -150,7 +150,7 @@ namespace FileBroker.Business
                         enfServiceCode = pdfNameNoExtension[..2] + "01";
                         controlCode = pdfNameNoExtension[5..(pdfNameNoExtension.Length - 1)];
 
-                        var appl = await APIs.Applications.GetApplicationAsync(enfServiceCode, controlCode);
+                        var appl = await APIs.Applications.GetApplication(enfServiceCode, controlCode);
 
                         if ((appl == null) || (appl.Appl_CtrlCd != controlCode))
                             warning = Translate("Warning: Appl Record does not exist");

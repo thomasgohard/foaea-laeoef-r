@@ -19,7 +19,7 @@ public class PADReventsController : FoaeaControllerBase
                                                                                    [FromServices] IRepositories_Finance dbFinance)
     {
         var manager = new FinancialManager(db, dbFinance);
-        return Ok(await manager.GetActiveCR_PADReventsAsync(enfSrv));
+        return Ok(await manager.GetActiveCR_PADRevents(enfSrv));
     }
 
     [HttpPost("close")]
@@ -30,7 +30,7 @@ public class PADReventsController : FoaeaControllerBase
                                                        [FromServices] IRepositories_Finance dbFinance)
     {
         var manager = new FinancialManager(db, dbFinance);
-        await manager.CloseCR_PADReventsAsync(batchId, enfSrv);
+        await manager.CloseCR_PADRevents(batchId, enfSrv);
 
         return Ok();
     }

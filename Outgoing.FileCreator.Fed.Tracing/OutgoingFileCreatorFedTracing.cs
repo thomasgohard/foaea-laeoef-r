@@ -37,13 +37,13 @@ public static class OutgoingFileCreatorFedTracing
 
         var federalFileManager = new OutgoingFederalTracingManager(foaeaApis, db, config);
 
-        var federalTraceOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("TRCOUT"))
+        var federalTraceOutgoingSources = (await db.FileTable.GetFileTableDataForCategory("TRCOUT"))
                                             .Where(s => s.Active == true);
 
         foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
         {
             var errors = new List<string>();
-            (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalTraceOutgoingSource.Name);
+            (string filePath, errors) = await federalFileManager.CreateOutputFile(federalTraceOutgoingSource.Name);
             if (errors.Count == 0)
             {
                 if (!string.IsNullOrEmpty(filePath))
@@ -55,8 +55,8 @@ public static class OutgoingFileCreatorFedTracing
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name,
-                                                                               new Exception(error), displayExceptionError: true);
+                    await db.ErrorTrackingTable.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name,
+                                                                   new Exception(error), displayExceptionError: true);
                 }
         }
 

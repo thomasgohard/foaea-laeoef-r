@@ -11,7 +11,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<List<EnfSrvData>> GetEnfServiceAsync(string enforcementServiceCode = null, string enforcementServiceName = null, string enforcementServiceProvince = null, string enforcementServiceCategory = null)
+        public Task<List<EnfSrvData>> GetEnfService(string enforcementServiceCode = null, string enforcementServiceName = null, string enforcementServiceProvince = null, string enforcementServiceCategory = null)
         {
             throw new NotImplementedException();
         }

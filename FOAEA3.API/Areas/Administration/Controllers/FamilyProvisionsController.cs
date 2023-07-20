@@ -21,6 +21,6 @@ public class FamilyProvisionsController : FoaeaControllerBase
     [HttpGet]
     public async Task<ActionResult<List<FamilyProvisionData>>> GetFamilyProvisions([FromServices] IRepositories repositories)
     {
-        return Ok(await repositories.FamilyProvisionTable.GetFamilyProvisionsAsync());
+        return Ok(await repositories.FamilyProvisionTable.GetFamilyProvisions());
     }
 }

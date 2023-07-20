@@ -17,7 +17,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<DataList<ControlBatchData>> GetFADAReadyBatchAsync(string EnfSrv_Source_Cd = "", string DAFABatchID = "")
+        public async Task<DataList<ControlBatchData>> GetFADAReadyBatch(string EnfSrv_Source_Cd = "", string DAFABatchID = "")
         {
             var parameters = new Dictionary<string, object>();
 
@@ -32,7 +32,7 @@ namespace FOAEA3.Data.DB
             return new DataList<ControlBatchData>(data, MainDB.LastError);
         }
 
-        public async Task<ControlBatchData> GetControlBatchAsync(string batchId)
+        public async Task<ControlBatchData> GetControlBatch(string batchId)
         {
             var parameters = new Dictionary<string, object> {
                 { "Batch_Id", batchId }
@@ -43,7 +43,7 @@ namespace FOAEA3.Data.DB
             return data.FirstOrDefault();
         }
 
-        public async Task CloseControlBatchAsync(string batchId)
+        public async Task CloseControlBatch(string batchId)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -53,7 +53,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("CtrlBatchUpdateFTPCtrlBatch", parameters);
         }
 
-        public async Task UpdateBatchAsync(ControlBatchData batch)
+        public async Task UpdateBatch(ControlBatchData batch)
         {
             var parameters = new Dictionary<string, object>() {
                 { "Batch_Id", batch.Batch_Id },
@@ -77,7 +77,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("CtrlBatchUpdateNew", parameters);            
         }
 
-        public async Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount)
+        public async Task UpdateBatchStateFtpProcessed(string batchId, int recordCount)
         {
             var parameters = new Dictionary<string, object>() {
                 { "Batch_Id", batchId },
@@ -126,7 +126,7 @@ namespace FOAEA3.Data.DB
             data.DataEntryBatch_Id = rdr["DataEntryBatch_Id"] as string; // can be null 
         }
 
-        public async Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values)
+        public async Task<(string, string, string, string)> CreateXFControlBatch(ControlBatchData values)
         {
             var parameters = new Dictionary<string, object>() {
                 { "chrEnfSrv_Src_Cd", values.EnfSrv_Src_Cd },

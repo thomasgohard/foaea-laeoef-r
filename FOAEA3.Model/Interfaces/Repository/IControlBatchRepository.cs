@@ -9,13 +9,13 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<DataList<ControlBatchData>> GetFADAReadyBatchAsync(string EnfSrv_Source_Cd = "", string DAFABatchID = "");
+        Task<DataList<ControlBatchData>> GetFADAReadyBatch(string EnfSrv_Source_Cd = "", string DAFABatchID = "");
         Task<List<BatchSimpleData>> GetReadyDivertFundsBatches(string enfSrv_Cd, string enfSrv_Loc_Cd);
-        Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData values);
-        Task<ControlBatchData> GetControlBatchAsync(string batchId);
-        Task CloseControlBatchAsync(string batchId);
-        Task UpdateBatchAsync(ControlBatchData batch);
-        Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount);
+        Task<(string, string, string, string)> CreateXFControlBatch(ControlBatchData values);
+        Task<ControlBatchData> GetControlBatch(string batchId);
+        Task CloseControlBatch(string batchId);
+        Task UpdateBatch(ControlBatchData batch);
+        Task UpdateBatchStateFtpProcessed(string batchId, int recordCount);
         Task<bool> GetPaymentIdIsSinIndicator(string batchId);
     }
 }

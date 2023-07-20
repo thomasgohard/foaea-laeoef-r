@@ -18,7 +18,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task MessageBrokerErrorAsync(string errorType, string errorSubject, Exception exceptionData, bool displayExceptionError,
+        public async Task MessageBrokerError(string errorType, string errorSubject, Exception exceptionData, bool displayExceptionError,
                                        DataRow row = null)
         {
             var rowValues = new StringBuilder();
@@ -48,7 +48,7 @@ namespace FileBroker.Data.DB
             await MainDB.ExecProcAsync("MessageBrokerError", parameters);
         }
 
-        public async Task MessageBrokerErrorAsync(string errorSubject, string errorMessage)
+        public async Task MessageBrokerError(string errorSubject, string errorMessage)
         {
             var parameters = new Dictionary<string, object>
             {

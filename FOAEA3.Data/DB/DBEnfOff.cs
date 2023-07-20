@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null,
+        public async Task<List<EnfOffData>> GetEnfOff(string enfOffName = null, string enfOffCode = null,
             string province = null, string enfServCode = null)
         {
             var parameters = new Dictionary<string, object>();

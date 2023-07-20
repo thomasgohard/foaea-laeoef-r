@@ -7,6 +7,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<AffidavitData> GetAffidavitDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<AffidavitData> GetAffidavitData(string appl_EnfSrv_Cd, string appl_CtrlCd);
     }
 }

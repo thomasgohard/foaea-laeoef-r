@@ -15,7 +15,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task InsertIntoOutboundAuditAsync(string fileName, DateTime fileDate, bool fileCreated, string message)
+        public async Task InsertIntoOutboundAudit(string fileName, DateTime fileDate, bool fileCreated, string message)
         {
             var parameters = new Dictionary<string, object>
             {

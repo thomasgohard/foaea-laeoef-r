@@ -66,20 +66,20 @@ public static class OutgoingFileCreatorMEP
     private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
                                                            IOutgoingFileManager outgoingProvincialFileManager)
     {
-        var provincialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync(category))
+        var provincialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategory(category))
                                                               .Where(s => s.Active == true);
 
         foreach (var provincialOutgoingSource in provincialOutgoingSources)
         {
             var errors = new List<string>();
-            (string filePath, errors) = await outgoingProvincialFileManager.CreateOutputFileAsync(provincialOutgoingSource.Name);
+            (string filePath, errors) = await outgoingProvincialFileManager.CreateOutputFile(provincialOutgoingSource.Name);
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
             else
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingTable.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name,
+                    await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
                                                                     new Exception(error), displayExceptionError: true);
                 }
         }

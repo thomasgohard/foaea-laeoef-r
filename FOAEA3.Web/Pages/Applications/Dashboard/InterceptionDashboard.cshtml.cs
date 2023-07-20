@@ -54,15 +54,15 @@ public class InterceptionDashboardModel : FoaeaPageModel
         if (LifeStates is null)
         {
             var apiRefBroker = new ApplicationLifeStatesAPIBroker(BaseAPIs);
-            LifeStates = apiRefBroker.GetApplicationLifeStatesAsync().Result;
+            LifeStates = apiRefBroker.GetApplicationLifeStates().Result;
         }
 
         if (EnfOffices is null)
         {
             var apiSubmitters = new SubmitterAPIBroker(BaseAPIs);
-            var submitterInfo = apiSubmitters.GetSubmitterAsync(CurrentSubmitter).Result;
+            var submitterInfo = apiSubmitters.GetSubmitter(CurrentSubmitter).Result;
             var apiEnfOffices = new EnfOfficesAPIBroker(BaseAPIs);
-            EnfOffices = apiEnfOffices.GetEnfOfficesForEnfServiceAsync(submitterInfo.EnfSrv_Cd).Result;
+            EnfOffices = apiEnfOffices.GetEnfOfficesForEnfService(submitterInfo.EnfSrv_Cd).Result;
             EnfOffices = EnfOffices.OrderBy(m => m.EnfSrv_Nme).ToList();
         }
 
@@ -220,8 +220,8 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task<IActionResult> OnPostSuspendApplication()
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var interception = await interceptionApi.GetApplicationAsync(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
-        interception = await interceptionApi.SuspendInterceptionApplicationAsync(interception);
+        var interception = await interceptionApi.GetApplication(SuspendData.Appl_EnfSrv_Cd, SuspendData.Appl_CtrlCd);
+        interception = await interceptionApi.SuspendInterceptionApplication(interception);
         // to do: also store Suspend reason description...
 
         if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -236,8 +236,8 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task<IActionResult> OnPostCancelApplication()
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var interception = await interceptionApi.GetApplicationAsync(CancelData.Appl_EnfSrv_Cd, CancelData.Appl_CtrlCd);
-        interception = await interceptionApi.CancelInterceptionApplicationAsync(interception);
+        var interception = await interceptionApi.GetApplication(CancelData.Appl_EnfSrv_Cd, CancelData.Appl_CtrlCd);
+        interception = await interceptionApi.CancelInterceptionApplication(interception);
         // to do: also store Cancel reason description...
 
         if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -252,12 +252,12 @@ public class InterceptionDashboardModel : FoaeaPageModel
     public async Task<IActionResult> OnPostTransferApplication()
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var interception = await interceptionApi.GetApplicationAsync(TransferData.Appl_EnfSrv_Cd, TransferData.Appl_CtrlCd);
+        var interception = await interceptionApi.GetApplication(TransferData.Appl_EnfSrv_Cd, TransferData.Appl_CtrlCd);
 
         if (string.IsNullOrEmpty(TransferData.NewIssuingSubmitter))
             TransferData.NewIssuingSubmitter = TransferData.NewRecipientSubmitter;
 
-        interception = await interceptionApi.TransferInterceptionApplicationAsync(interception, TransferData.NewRecipientSubmitter,
+        interception = await interceptionApi.TransferInterceptionApplication(interception, TransferData.NewRecipientSubmitter,
                                                                                   TransferData.NewIssuingSubmitter);
 
         if (interception.Messages.ContainsMessagesOfType(MessageType.Error))
@@ -318,7 +318,7 @@ public class InterceptionDashboardModel : FoaeaPageModel
         };
 
         var searchApi = new ApplicationSearchesAPIBroker(BaseAPIs);
-        return await searchApi.SearchAsync(quickSearch);
+        return await searchApi.Search(quickSearch);
     }
 
     private async Task<List<ApplicationModificationActivitySummaryData>> GetCreatedToday()
@@ -391,12 +391,12 @@ public class InterceptionDashboardModel : FoaeaPageModel
         var apiInterception = new InterceptionApplicationAPIBroker(InterceptionAPIs);
 
         var activeStatusesBroker = new ActiveStatusesAPIBroker(BaseAPIs);
-        var activeStatuses = activeStatusesBroker.GetActiveStatusesAsync().Result;
+        var activeStatuses = activeStatusesBroker.GetActiveStatuses().Result;
 
         SearchResults = new List<ApplicationSearchResultData>();
         foreach (var sinPendingAppl in modifiedFiles)
         {
-            var thisAppl = await apiApplication.GetApplicationAsync(sinPendingAppl.Appl_EnfSrv_Cd, sinPendingAppl.Appl_CtrlCd);
+            var thisAppl = await apiApplication.GetApplication(sinPendingAppl.Appl_EnfSrv_Cd, sinPendingAppl.Appl_CtrlCd);
             var summonsSummary = await apiInterception.GetSummonsSummaryForApplication(sinPendingAppl.Appl_EnfSrv_Cd, sinPendingAppl.Appl_CtrlCd);
 
             SearchResults.Add(new ApplicationSearchResultData

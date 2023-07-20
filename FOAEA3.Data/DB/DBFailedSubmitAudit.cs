@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task AppendFiledSubmitAuditAsync(string subject_submitter, FailedSubmitActivityAreaType activityAreaType, string error)
+        public async Task AppendFiledSubmitAudit(string subject_submitter, FailedSubmitActivityAreaType activityAreaType, string error)
         {
             var parameters = new Dictionary<string, object>
             {

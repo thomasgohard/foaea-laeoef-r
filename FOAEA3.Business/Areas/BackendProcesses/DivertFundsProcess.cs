@@ -18,24 +18,24 @@ namespace FOAEA3.Business.BackendProcesses
             DBfinance = repositoriesFinance;
         }
 
-        public async Task RunAsync(string source = "", string FABatchID = "")
+        public async Task Run(string source = "", string FABatchID = "")
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Divert Funds", "Divert Funds Started", "O");
+            await prodAudit.Insert("Divert Funds", "Divert Funds Started", "O");
 
-            var controlBatchList = await GetDAFAReadyBatchesAsync(source, FABatchID);
+            var controlBatchList = await GetDAFAReadyBatches(source, FABatchID);
             if (controlBatchList.Items.Count > 0)
             {
-                await ExecDivertFundsAsync(controlBatchList);
-                await prodAudit.InsertAsync("Divert Funds", "Divert Funds Completed", "O");
+                await ExecDivertFunds(controlBatchList);
+                await prodAudit.Insert("Divert Funds", "Divert Funds Completed", "O");
             }
             else
-                await prodAudit.InsertAsync("Divert Funds", "Divert Funds - No FA Ready Bacthes", "O");
+                await prodAudit.Insert("Divert Funds", "Divert Funds - No FA Ready Bacthes", "O");
 
         }
 
-        private async Task ExecDivertFundsAsync(DataList<ControlBatchData> controlBatchList)
+        private async Task ExecDivertFunds(DataList<ControlBatchData> controlBatchList)
         {
             //bool _flagErrorInDFBatch = false;
             var prodAudit = DB.ProductionAuditTable;
@@ -43,11 +43,11 @@ namespace FOAEA3.Business.BackendProcesses
             foreach (var rowDAFABatch in controlBatchList.Items)
             {
               //  _flagErrorInDFBatch = false;
-                string _DFBatchID = await GetDFBatchIDAsync(rowDAFABatch);
+                string _DFBatchID = await GetDFBatchID(rowDAFABatch);
 
-                await prodAudit.InsertAsync("Divert Funds", $"Divert Funds Batch Created - {_DFBatchID} Time: {DateTime.Now}", "O");
+                await prodAudit.Insert("Divert Funds", $"Divert Funds Batch Created - {_DFBatchID} Time: {DateTime.Now}", "O");
 
-                var transactionList = await GetSummFaFrDEBatchesAsync(rowDAFABatch);
+                var transactionList = await GetSummFaFrDEBatches(rowDAFABatch);
 
                 // process all FRs first
                 foreach (var rowTransaction in transactionList.Items)
@@ -60,7 +60,7 @@ namespace FOAEA3.Business.BackendProcesses
                         var _debtorId = rowTransaction.Dbtr_Id;
                         if (rowTransaction.SummFAFR_OrigFA_IndDesc == "FR")
                         {
-                            ProcessFRBatchesAsync(); //rowTransaction.SummFAFR_Id);
+                            ProcessFRBatches(); //rowTransaction.SummFAFR_Id);
                         }
 
                     }
@@ -210,7 +210,7 @@ namespace FOAEA3.Business.BackendProcesses
              */
         }
 
-        private static void ProcessFRBatchesAsync() //int summFAFR_Id)
+        private static void ProcessFRBatches() //int summFAFR_Id)
         {
             //var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
             //var summFAFR_DB = DBfinance.SummFAFRRepository;
@@ -256,21 +256,21 @@ namespace FOAEA3.Business.BackendProcesses
         }
 
 
-        private async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDEBatchesAsync(ControlBatchData rowDAFABatch)
+        private async Task<DataList<SummFAFR_DE_Data>> GetSummFaFrDEBatches(ControlBatchData rowDAFABatch)
         {
             var summFAFR_DE_DB = DBfinance.SummFAFR_DERepository;
 
-            return await summFAFR_DE_DB.GetSummFaFrDeReadyBatchesAsync(rowDAFABatch.EnfSrv_Src_Cd, rowDAFABatch.Batch_Id);
+            return await summFAFR_DE_DB.GetSummFaFrDeReadyBatches(rowDAFABatch.EnfSrv_Src_Cd, rowDAFABatch.Batch_Id);
         }
 
-        public async Task<DataList<ControlBatchData>> GetDAFAReadyBatchesAsync(string source = "", string FABatchID = "")
+        public async Task<DataList<ControlBatchData>> GetDAFAReadyBatches(string source = "", string FABatchID = "")
         {
             var controlBatchDB = DBfinance.ControlBatchRepository;
 
-            return await controlBatchDB.GetFADAReadyBatchAsync(source, FABatchID);
+            return await controlBatchDB.GetFADAReadyBatch(source, FABatchID);
         }
 
-        private async Task<string> GetDFBatchIDAsync(ControlBatchData rowDAFABatch)
+        private async Task<string> GetDFBatchID(ControlBatchData rowDAFABatch)
         {
             var controlBatchDB = DBfinance.ControlBatchRepository;
 
@@ -295,7 +295,7 @@ namespace FOAEA3.Business.BackendProcesses
 
             string batchID;
 
-            (_, batchID, _, _) = await controlBatchDB.CreateXFControlBatchAsync(values);
+            (_, batchID, _, _) = await controlBatchDB.CreateXFControlBatch(values);
 
             return batchID;
 
