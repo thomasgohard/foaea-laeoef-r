@@ -1,5 +1,6 @@
 ﻿using FileBroker.Common;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Model.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NJsonSchema;
@@ -18,6 +19,7 @@ public class TracingFilesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("TracingFiles API Version 1.0");
 
     [HttpGet("DB")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet("")]
