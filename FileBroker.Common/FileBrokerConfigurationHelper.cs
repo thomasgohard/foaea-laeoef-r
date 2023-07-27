@@ -3,8 +3,6 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace FileBroker.Common
 {

@@ -1,7 +1,6 @@
 ﻿using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
-using System;
 
 namespace FileBroker.Common.Filters
 {

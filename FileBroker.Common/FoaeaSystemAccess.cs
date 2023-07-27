@@ -1,6 +1,5 @@
 ﻿using FOAEA3.Common.Brokers;
 using FOAEA3.Model;
-using System.Threading.Tasks;
 
 namespace FileBroker.Common.Helpers
 {
@@ -24,7 +23,7 @@ namespace FileBroker.Common.Helpers
                 Submitter = submitter
             };
         }
-        
+
         public FoaeaSystemAccess(APIBrokerList apis, FoaeaLoginData foaeaLoginData)
         {
             APIs = apis;

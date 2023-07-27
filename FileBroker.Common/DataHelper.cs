@@ -2,8 +2,6 @@
 using FileBroker.Data;
 using FileBroker.Data.DB;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Resources.Helpers;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileBroker.Common
