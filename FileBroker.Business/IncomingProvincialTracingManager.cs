@@ -1,30 +1,14 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
-public class IncomingProvincialTracingManager
+public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 {
-    private string FileName { get; }
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private IFileBrokerConfigurationHelper Config { get; }
-    private IncomingProvincialHelper IncomingFileHelper { get; }
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
     public IncomingProvincialTracingManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
-                                            IFileBrokerConfigurationHelper config)
+                                            IFileBrokerConfigurationHelper config) : 
+                                                base(db, foaeaApis, fileName, config)
     {
-        FileName = fileName;
-        APIs = foaeaApis;
-        DB = db;
-        Config = config;
-
-        string provCode = FileName[..2].ToUpper();
-        IncomingFileHelper = new IncomingProvincialHelper(Config, provCode);
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
@@ -257,9 +241,9 @@ public class IncomingProvincialTracingManager
         string actionCode = data.Maintenance_ActionCd.Trim();
         string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-        if ((actionCode == "A") && actionState.NotIn("00", "0"))
+        if ((actionCode == "A") && actionState.NotIn(LIFESTATE_00, LIFESTATE_0))
             validActionLifeState = false;
-        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
+        else if ((actionCode == "C") && (actionState.NotIn(LIFESTATE_00, LIFESTATE_0, LIFESTATE_CANCEL, LIFESTATE_TRANSFER)))
             validActionLifeState = false;
         else if (actionCode.NotIn("A", "C"))
             validActionLifeState = false;
