@@ -1,22 +1,13 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
 
 namespace FileBroker.Business;
 
-public partial class IncomingFederalTracingManager
+public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
 {
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
     public IncomingFederalTracingManager(APIBrokerList apis, RepositoryList repositories,
-                                         IFileBrokerConfigurationHelper config)
+                                         IFileBrokerConfigurationHelper config) :
+                                                        base(apis, repositories, config)
     {
-        APIs = apis;
-        DB = repositories;
-
-        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     private async Task MarkTraceEventsAsProcessed(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
@@ -53,12 +44,10 @@ public partial class IncomingFederalTracingManager
                 await APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
             }
         }
-
     }
 
     private async Task CloseOrInactivateTraceEventDetails(int cutOffDate, List<ApplicationEventDetailData> activeTraceEventDetails)
     {
-
         foreach (var row in activeTraceEventDetails)
         {
             if (row.Event_TimeStamp.AddDays(cutOffDate) < DateTime.Now)
@@ -74,9 +63,7 @@ public partial class IncomingFederalTracingManager
             }
 
             await APIs.ApplicationEvents.SaveEventDetail(row);
-
         }
-
     }
 
     private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle)
@@ -87,7 +74,6 @@ public partial class IncomingFederalTracingManager
         {
             await ProcessTraceToApplData(row, enfSrvCd, fileCycle);
         }
-
     }
 
     private async Task ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle)
@@ -134,7 +120,5 @@ public partial class IncomingFederalTracingManager
                 await APIs.ApplicationEvents.SaveEventDetail(eventDetailData);
             }
         }
-
     }
-
 }

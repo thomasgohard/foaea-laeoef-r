@@ -177,13 +177,6 @@ public partial class IncomingFederalTracingManager
         }
     }
 
-    private async Task<FileTableData> GetFileTableData(string flatFileName)
-    {
-        string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
-
-        return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
-    }
-
     private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileData(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
                                                                         List<string> errors)
     {

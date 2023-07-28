@@ -1,20 +1,10 @@
-﻿using FileBroker.Common.Helpers;
+﻿namespace FileBroker.Business;
 
-namespace FileBroker.Business;
-
-public class IncomingFederalSinManager
+public class IncomingFederalSinManager : IncomingFederalManagerBase
 {
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
     public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
-                                     IFileBrokerConfigurationHelper config)
+                                     IFileBrokerConfigurationHelper config) : base(apis, repositories, config)
     {
-        APIs = apis;
-        DB = repositories;
-
-        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
     public async Task<List<string>> ProcessFlatFile(string flatFileContent, string flatFileName)
@@ -310,13 +300,6 @@ public class IncomingFederalSinManager
         }
 
         return sinResults;
-    }
-
-    private async Task<FileTableData> GetFileTableData(string flatFileName)
-    {
-        string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
-
-        return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
     }
 
     private static void ValidateHeader(FedSin_RecType01 dataFromFile, string flatFileName, ref List<string> errors)
