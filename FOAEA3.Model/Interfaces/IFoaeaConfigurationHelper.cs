@@ -14,5 +14,6 @@ namespace FOAEA3.Model.Interfaces
         List<string> ESDsites { get; }
         DeclarationData LicenceDenialDeclaration { get; }
         DeclarationData TracingDeclaration { get; }
+        string TaxFormsRootPath { get; }
     }
 }

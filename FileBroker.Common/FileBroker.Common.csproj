@@ -35,6 +35,9 @@
         <None Update="FileBrokerConfiguration.Denis.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="FileBrokerConfiguration.FoaeaDev.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
         <None Update="FileBrokerConfiguration.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

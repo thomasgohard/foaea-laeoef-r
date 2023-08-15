@@ -36,6 +36,9 @@
 	  <None Update="FoaeaConfiguration.Denis.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="FoaeaConfiguration.FoaeaDev.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="FoaeaConfiguration.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

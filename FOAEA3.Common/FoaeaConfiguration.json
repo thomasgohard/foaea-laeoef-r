@@ -41,6 +41,7 @@
     "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
     "SystemErrorRecipients": "Flas-it-SO@justice.gc.ca"
   },
+  "TaxFormsRootPath": "C:\\CRATaxForms",
   "Tokens": {
     "Key": "%FILEBROKER_TOKEN_KEY%",
     "Issuer": "%FILEBROKER_TOKEN_ISSUER%",
