@@ -11,10 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using System;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace FileBroker.Common
 {

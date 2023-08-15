@@ -1,66 +1,14 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
-public class IncomingProvincialLicenceDenialManager
+public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerBase
 {
-    private string FileName { get; }
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private IFileBrokerConfigurationHelper Config { get; }
-    private Dictionary<string, string> Translations { get; }
-    private bool IsFrench { get; }
-
-    private IncomingProvincialHelper IncomingFileHelper { get; }
-
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
     public IncomingProvincialLicenceDenialManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
-                                                  IFileBrokerConfigurationHelper config)
+                                                  IFileBrokerConfigurationHelper config) : 
+                                                        base(db, foaeaApis, fileName, config)
     {
-        FileName = fileName;
-        APIs = foaeaApis;
-        DB = db;
-        Config = config;
-
-        string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
-
-        Translations = LoadTranslations();
-
-        string provCode = FileName[..2].ToUpper();
-        IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
-    }
-
-    private Dictionary<string, string> LoadTranslations()
-    {
-        var translations = new Dictionary<string, string>();
-
-        if (IsFrench)
-        {
-            var Translations = DB.TranslationTable.GetTranslations().Result;
-            foreach (var translation in Translations)
-                translations.Add(translation.EnglishText, translation.FrenchText);
-
-            APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
-            LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
-        }
-
-        return translations;
-    }
-
-    private string Translate(string englishText)
-    {
-        if (IsFrench && Translations.ContainsKey(englishText))
-        {
-            return Translations[englishText];
-        }
-        else
-            return englishText;
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceLicenceDenialData,
@@ -265,12 +213,12 @@ public class IncomingProvincialLicenceDenialManager
         {
             switch (licenceDenialMessageData.MaintenanceLifeState)
             {
-                case "00": // change
-                case "0":
+                case LIFESTATE_00: 
+                case LIFESTATE_0:
                     licenceDenial = await APIs.LicenceDenialApplications.UpdateLicenceDenialApplication(licenceDenialMessageData.Application);
                     break;
 
-                case "29": // transfer
+                case LIFESTATE_TRANSFER: 
                     licenceDenial = await APIs.LicenceDenialApplications.TransferLicenceDenialApplication(licenceDenialMessageData.Application,
                                                                                   licenceDenialMessageData.NewRecipientSubmitter,
                                                                                   licenceDenialMessageData.NewIssuingSubmitter);
@@ -383,9 +331,9 @@ public class IncomingProvincialLicenceDenialManager
 
         if (!string.IsNullOrEmpty(actionCode) && !string.IsNullOrEmpty(actionState))
         {
-            if ((actionCode == "A") && actionState.NotIn("00", "0"))
+            if ((actionCode == "A") && actionState.NotIn(LIFESTATE_00, LIFESTATE_0))
                 validActionLifeState = false;
-            else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
+            else if ((actionCode == "C") && (actionState.NotIn(LIFESTATE_00, LIFESTATE_0, LIFESTATE_CANCEL, LIFESTATE_TRANSFER)))
                 validActionLifeState = false;
             else if (actionCode.NotIn("A", "C"))
                 validActionLifeState = false;

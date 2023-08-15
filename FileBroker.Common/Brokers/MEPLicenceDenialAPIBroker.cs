@@ -1,7 +1,6 @@
 ﻿using FileBroker.Model.Interfaces.Broker;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Threading.Tasks;
 
 namespace FileBroker.Common.Brokers
 {

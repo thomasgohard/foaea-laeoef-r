@@ -4,6 +4,7 @@ using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Outgoing.FileCreator.Fed.Tracing;
 
@@ -57,7 +58,7 @@ namespace FOAEA3.API.Tracing.Controllers
 
                     string templateLanguage = formLanguage switch { "F" => "French", _ => "English" };
 
-                    string template = @$"C:\CRATaxForms\{templateLanguage}\{year}\{templateName}.pdf";
+                    string template = config.TaxFormsRootPath.AppendToPath(@$"{templateLanguage}\{year}\{templateName}.pdf");
 
                     var values = new Dictionary<string, string>();
 

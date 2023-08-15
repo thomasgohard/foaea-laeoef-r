@@ -1,7 +1,4 @@
 {
-  "ConnectionStrings": {
-    "FOAEAMain": "Server=%FOAEA_DB_SERVER%;Database=FOAEA_DEV;Integrated Security=SSPI;Trust Server Certificate=true;"
-  },
   "RecipientsConfig": {
     "EmailRecipients": "kfast@justice.gc.ca",
     "ExGratiaRecipients": "kfast@justice.gc.ca",

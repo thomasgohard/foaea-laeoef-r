@@ -5,13 +5,8 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -46,7 +41,8 @@ namespace FileBroker.Common
                 return -1;
         }
 
-        public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, out int actualCycle)
+        public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, 
+                                                                                         out int actualCycle)
         {
             expectedCycle = fileTableData.Cycle;
             actualCycle = ExtractCycleFromFilename(fileName);
@@ -58,7 +54,7 @@ namespace FileBroker.Common
         {
             try
             {
-                xmlData = FileHelper.RemoveXMLartifacts(xmlData);
+                xmlData = RemoveXMLartifacts(xmlData);
                 var doc = new XmlDocument();
                 doc.LoadXml(xmlData);
                 return JsonConvert.SerializeXmlNode(doc);
@@ -106,7 +102,7 @@ namespace FileBroker.Common
             var fileInfo = new FileInfo(fullPath);
 
             string fileName = fileInfo.Name.ToUpper();
-            string baseName = FileHelper.TrimCycleAndXmlExtension(fileName);
+            string baseName = TrimCycleAndXmlExtension(fileName);
             string folderName = fileInfo.DirectoryName.ExtractSubfolder();
 
             var dInfo = new DirectoryInfo(config.FTPbackupRoot.AppendToPath(folderName));
@@ -141,7 +137,7 @@ namespace FileBroker.Common
             return false;
         }
 
-        public static bool FileEquals(string path1, string path2)
+        private static bool FileEquals(string path1, string path2)
         {
             byte[] file1 = File.ReadAllBytes(path1);
             byte[] file2 = File.ReadAllBytes(path2);
@@ -203,7 +199,7 @@ namespace FileBroker.Common
                     outputPath = fileData.Path;
                     outputFile = outputPath.AppendToPath(fileName, isFileName: true);
 
-                    await System.IO.File.WriteAllTextAsync(outputFile, bodyContent);
+                    await File.WriteAllTextAsync(outputFile, bodyContent);
 
                     return new OkResult();
 
@@ -224,7 +220,7 @@ namespace FileBroker.Common
                     outputPath = fileData.Path;
                     outputFile = outputPath.AppendToPath(fileName, isFileName: true);
 
-                    await System.IO.File.WriteAllTextAsync(outputFile, bodyContent);
+                    await File.WriteAllTextAsync(outputFile, bodyContent);
 
                     return new OkResult();
 
@@ -247,11 +243,9 @@ namespace FileBroker.Common
 
                     var doc = JsonConvert.DeserializeXNode(bodyContent)!;
 
-                    XDeclaration _defaultDeclaration = new("1.0", null, null);
+                    var declaration = doc.Declaration ?? new XDeclaration("1.0", null, null);
 
-                    var declaration = doc.Declaration ?? _defaultDeclaration;
-
-                    await System.IO.File.WriteAllTextAsync(outputFile, $"{declaration}{Environment.NewLine}{doc}");
+                    await File.WriteAllTextAsync(outputFile, $"{declaration}{Environment.NewLine}{doc}");
 
                     return new OkResult();
 
