@@ -43,13 +43,12 @@ namespace FOAEA3.API.Tracing.Controllers
                     var craFields = await manager.GetCraFields();
                     var craForms = await manager.GetCraForms();
 
-                    string province = "ON";
+                    string province = id.EnfSrv[0..2];
 
-                    // "Accept-Language"
                     string headerLanguage = GetLanguageFromHeader(Request.Headers);
 
                     string formLanguage = headerLanguage switch { "fr" => "F", _ => "E" };
-                    string formShortName = FormHelper.ConvertTaxFormNameToShortName(form);
+                    string formShortName = FormHelper.ConvertTaxFormFullNameToAbbreviation(form);
 
                     string templateName = craForms.Where(m => m.CRAFormProvince == province && m.CRAFormLanguage == formLanguage &&
                                                               m.CRAFormYear == year && m.CRAFormSchedule == form)

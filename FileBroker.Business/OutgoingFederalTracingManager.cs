@@ -256,7 +256,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                     output.AppendLine($"         <Tax_Year>{year}</Tax_Year>");
                     foreach (var form in taxForms)
                     {
-                        string shortName = FormHelper.ConvertTaxFormNameToShortName(form);
+                        string shortName = FormHelper.ConvertTaxFormFullNameToAbbreviation(form);
                         output.AppendLine($"         <Tax_Form>{shortName}</Tax_Form>");
                     }
                     output.AppendLine($"      </Tax_Data>");
