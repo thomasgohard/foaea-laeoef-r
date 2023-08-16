@@ -2,7 +2,7 @@
 {
     public class FormHelper
     {
-        public static string ConvertTaxFormNameToShortName(string formName)
+        public static string ConvertTaxFormFullNameToAbbreviation(string formName)
         {
             return formName.ToUpper() switch
             {
