@@ -68,6 +68,8 @@
                 else
                     Errors.AddRange(await tracingManager.ProcessXmlData(fileContent, fileFullName));
 
+                if (Errors.Count == 0)
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData);
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
 
                 if (!Errors.Any())
@@ -76,7 +78,7 @@
 
                     if (!string.IsNullOrEmpty(errorDoingBackup))
                         await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fullPath}",
-                                                                            "Error creating backup of outbound file: " + errorDoingBackup);
+                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
                 }
 
                 return true;
