@@ -1,6 +1,8 @@
 ﻿using FOAEA3.Model.Enums;
 using FOAEA3.Resources.Helpers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
@@ -179,7 +181,23 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_12_PartiallyServiced();
 
-            EventManager.AddEvent(EventCode.C50821_FIRST_TRACE_RESULT_RECEIVED);
+            if (FedSource == FederalSource.CRA_TracingFinancials)
+                EventManager.AddEvent(EventCode.C50820_FINANCIAL_RESULTS_RECEIVED);
+            else
+            {
+                var fedSources = await GetReceivedResponseSourcesForLatestCycle();
+                if (fedSources.Count == 2) // we've received from both CRA and EI
+                    EventManager.AddEvent(EventCode.C50823_LAST_TRACE_RESULT);
+                else
+                    EventManager.AddEvent(EventCode.C50821_FIRST_TRACE_RESULT_RECEIVED);
+            }
+        }
+
+        private async Task<List<string>> GetReceivedResponseSourcesForLatestCycle()
+        {
+            var traceResponses = (await DB.TraceResponseTable.GetTraceResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd)).Items;
+            short latestTraceCycle = traceResponses.Max(m => m.TrcRsp_Trace_CyclNr);
+            return traceResponses.Where(m => m.TrcRsp_Trace_CyclNr == latestTraceCycle).Select(m => m.EnfSrv_Cd).Distinct().ToList();
         }
 
         protected override async Task Process_14_ManuallyTerminated()
@@ -192,8 +210,6 @@ namespace FOAEA3.Business.Areas.Application
         protected override async Task Process_15_Expired()
         {
             await base.Process_15_Expired();
-
-            EventManager.AddEvent(EventCode.C50823_LAST_TRACE_RESULT);
         }
     }
 }

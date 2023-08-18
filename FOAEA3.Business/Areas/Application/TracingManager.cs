@@ -21,6 +21,7 @@ namespace FOAEA3.Business.Areas.Application
         private DateTime ReinstateEffectiveDate { get; set; }
         private EventCode BFEventReasonCode { get; set; }
         private int BFEvent_Id { get; set; }
+        private FederalSource FedSource { get; set; } = FederalSource.Unknown;
 
         public TracingManager(TracingApplicationData tracing, IRepositories repositories, IFoaeaConfigurationHelper config, ClaimsPrincipal user) :
             base(tracing, repositories, config, user, new TracingValidation(tracing, repositories, config, null))
@@ -276,8 +277,10 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Messages.AddInformation(EventCode.C50763_AFFIDAVIT_REJECTED_BY_FOAEA);
         }
 
-        public async Task PartiallyServiceApplication()
+        public async Task PartiallyServiceApplication(FederalSource fedSource)
         {
+            FedSource = fedSource;
+
             await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
             MakeUpperCase();

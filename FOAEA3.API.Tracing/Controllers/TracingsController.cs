@@ -81,7 +81,7 @@ public class TracingsController : FoaeaControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<TracingApplicationData>> UpdateApplication([FromRoute] string key,
                                                                               [FromQuery] string command,
-                                                                              [FromQuery] string enforcementServiceCode,
+                                                                              [FromQuery] FederalSource fedSource,
                                                                               [FromServices] IRepositories repositories)
     {
         var applKey = new ApplKey(key);
@@ -103,7 +103,7 @@ public class TracingsController : FoaeaControllerBase
                 break;
 
             case "partiallyserviceapplication":
-                await tracingManager.PartiallyServiceApplication();
+                await tracingManager.PartiallyServiceApplication(fedSource);
                 break;
 
             case "fullyserviceapplication":
