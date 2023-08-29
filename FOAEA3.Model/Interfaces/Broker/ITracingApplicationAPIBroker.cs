@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using FOAEA3.Model.Enums;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Broker
@@ -11,7 +12,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<TracingApplicationData> CancelTracingApplication(TracingApplicationData tracingApplication);
         Task<TracingApplicationData> CreateTracingApplication(TracingApplicationData tracingData);
         Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd);
-        Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd);
+        Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource);
         Task<TracingApplicationData> GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
         Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle);
         Task<List<TraceToApplData>> GetTraceToApplData();

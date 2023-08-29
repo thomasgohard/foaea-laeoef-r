@@ -152,8 +152,8 @@ namespace FOAEA3.Data.DB
         }
 
         public async Task<List<TraceToApplData>> GetTraceToApplData()
-        {
-            return await MainDB.GetAllDataAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
+        {                                                       
+            return await MainDB.GetDataFromStoredProcAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
         }
 
         public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingData(int maxRecords,

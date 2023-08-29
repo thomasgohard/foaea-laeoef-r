@@ -353,6 +353,8 @@ namespace TestData.TestDB
                 new FoaMessageData { Error = 50804, Severity = 16, Dlevel = 0, Description = "Cédule à rétablir", MsgLangId = 1036 },
                 new FoaMessageData { Error = 50805, Severity = 16, Dlevel = 0, Description = "Change of debtor information not allowed on a re-instate", MsgLangId = 1033 },
                 new FoaMessageData { Error = 50805, Severity = 16, Dlevel = 0, Description = "Les informations du débiteur ne peuvent être changées en renouvelant", MsgLangId = 1036 },
+                new FoaMessageData { Error = 50820, Severity = 16, Dlevel = 0, Description = "Financial results received", MsgLangId = 1033 },
+                new FoaMessageData { Error = 50820, Severity = 16, Dlevel = 0, Description = "Résultats financiers reçus", MsgLangId = 1036 },
                 new FoaMessageData { Error = 50821, Severity = 16, Dlevel = 0, Description = "First trace result received", MsgLangId = 1033 },
                 new FoaMessageData { Error = 50821, Severity = 16, Dlevel = 0, Description = "Premier résultat de la recherche de renseignements reçu", MsgLangId = 1036 },
                 new FoaMessageData { Error = 50822, Severity = 16, Dlevel = 0, Description = "Additional trace results", MsgLangId = 1033 },

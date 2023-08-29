@@ -94,7 +94,7 @@ public partial class IncomingFederalTracingManager
         }
 
         await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
-        await UpdateTracingApplications(enfSrvCd, fileCycle.ToString());
+        await UpdateTracingApplications(enfSrvCd, fileCycle.ToString(), FederalSource.CRA_TracingFinancials);
         await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
     }
 

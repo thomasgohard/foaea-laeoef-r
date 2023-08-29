@@ -6,9 +6,9 @@ namespace Outgoing.FileCreator.Fed.Tracing
 {
     public class PdfHelper
     {
-        public static List<string> FillPdf(string templatePath, string outputPath, Dictionary<string, string> values)
+        public static List<string> FillPdf(string templatePath, string outputPath, Dictionary<string, string> values, bool isEnglish = true)
         {
-            var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields);
+            var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields, isEnglish);
 
             if (File.Exists(outputPath))
                 File.Delete(outputPath);
@@ -19,9 +19,9 @@ namespace Outgoing.FileCreator.Fed.Tracing
             return missingFields;
         }
 
-        public static (MemoryStream, List<string>) FillPdf(string templatePath, Dictionary<string, string> values)
+        public static (MemoryStream, List<string>) FillPdf(string templatePath, Dictionary<string, string> values, bool isEnglish = true)
         {
-            var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields);
+            var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields, isEnglish);
 
             var data = pdfDoc.SaveToStream(FileFormat.PDF);
 
@@ -32,7 +32,8 @@ namespace Outgoing.FileCreator.Fed.Tracing
         }
 
         private static PdfDocument CreatePdfFromTemplate(string templatePath, Dictionary<string, string> values,
-                                                         out List<string> missingFields, out List<string> foundFields)
+                                                         out List<string> missingFields, out List<string> foundFields,
+                                                         bool isEnglish = true)
         {
             var pdfDoc = new PdfDocument();
             pdfDoc.LoadFromFile(templatePath);
@@ -113,7 +114,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 if (!foundFields.Contains(value.Key))
                     missingFields.Add(value.Key);
 
-            WatermarkPDF(ref pdfDoc);
+            WatermarkPDF(ref pdfDoc, isEnglish);
 
             pdfDoc.DocumentInformation.Title = "GeneratedPDF";
             pdfDoc.Form.IsFlatten = true;
@@ -121,25 +122,41 @@ namespace Outgoing.FileCreator.Fed.Tracing
             return pdfDoc;
         }
 
-        private static void WatermarkPDF(ref PdfDocument pdf)
+        private static void WatermarkPDF(ref PdfDocument pdf, bool isEnglish = true)
         {
-            var font = new PdfFont(PdfFontFamily.Helvetica, 12f, PdfFontStyle.Regular);
+            var fontSmall = new PdfFont(PdfFontFamily.Helvetica, 9f, PdfFontStyle.Bold);
+            var fontSmallItalic = new PdfFont(PdfFontFamily.Helvetica, 9f, PdfFontStyle.Italic | PdfFontStyle.Bold);
+            var fontBig = new PdfFont(PdfFontFamily.Helvetica, 14f, PdfFontStyle.Bold);
 
-            string text = "REPLICA created by the Department of Justice Canada Family Law Assistance Services Information Technology Team \n for the purposes of sharing information under Part I of the Family Orders and Agreements Enforcement Assistance Act \n and the Release of Information for Family Orders and Agreements Enforcement Assistance Regulations";
+            var brush = PdfBrushes.CornflowerBlue;
 
-            var textSize = font.MeasureString(text);
+            string textLine1;
+            string textLine2;
+            string textLine2Italic;
+            string textREPLICA = "REPLICA";
 
-            float offsetWidth = (float)(textSize.Width * Math.Sqrt(2) / 4);
-            float offsetHeight = (float)(textSize.Height * Math.Sqrt(2) / 4);
+            if (isEnglish)
+            {
+                textLine1 = "Important Notice: Edited by the Department of Justice Canada for the purposes of releasing information under";
+                textLine2 = "Part I of the";
+                textLine2Italic = "Family Orders and Agreements Enforcement Assistance Act";
+            }
+            else
+            {
+                textLine1 = "Avis important : Édité par le ministère de la Justice du Canada aux fins de la communication de renseignements";
+                textLine2 = "en vertu de la partie I de la";
+                textLine2Italic = "Loi d'aide à l'exécution des ordonnances et des ententes familiales";
+            }
 
             foreach (PdfPageBase page in pdf.Pages)
             {
                 page.Canvas.Save();
-                page.Canvas.SetTransparency(0.8f);
-                page.Canvas.TranslateTransform(page.Canvas.Size.Width / 2 - offsetWidth - offsetHeight,
-                                               page.Canvas.Size.Height / 2 + offsetWidth - offsetHeight);
-                page.Canvas.RotateTransform(-45);
-                page.Canvas.DrawString(text, font, PdfBrushes.DarkGray, 0, 0);
+
+                page.Canvas.DrawString(textLine1, fontSmall, brush, 24, -1);
+                page.Canvas.DrawString(textLine2, fontSmall, brush, 24, 9);
+                page.Canvas.DrawString(textLine2Italic, fontSmallItalic, brush, isEnglish ? 76 : 140, 9);
+                page.Canvas.DrawString(textREPLICA, fontBig, brush, 520, 0);
+
                 page.Canvas.Restore();
             }
         }

@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace FileBroker.Business.Tests.InMemory
             throw new System.NotImplementedException();
         }
 
-        public Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource)
         {
             throw new System.NotImplementedException();
         }

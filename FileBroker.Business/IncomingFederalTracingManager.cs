@@ -66,17 +66,17 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
         }
     }
 
-    private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle)
+    private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle, FederalSource fedSource)
     {
         var traceToApplData = await APIs.TracingApplications.GetTraceToApplData();
 
         foreach (var row in traceToApplData)
         {
-            await ProcessTraceToApplData(row, enfSrvCd, fileCycle);
+            await ProcessTraceToApplData(row, enfSrvCd, fileCycle, fedSource);
         }
     }
 
-    private async Task ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle)
+    private async Task ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle, FederalSource fedSource)
     {
         var activeTracingEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
         var activeTracingEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
@@ -98,7 +98,7 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
             }
             else
             {
-                await APIs.TracingApplications.PartiallyServiceApplication(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.PartiallyServiceApplication(tracingApplication, fedSource);
                 newEventState = "A";
             }
         }

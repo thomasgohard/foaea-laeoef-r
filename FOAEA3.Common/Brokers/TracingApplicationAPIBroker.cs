@@ -1,5 +1,6 @@
 ﻿using FOAEA3.Common.Helpers;
 using FOAEA3.Model;
+using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 
@@ -55,10 +56,10 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutData<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 
-        public async Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public async Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
-            string apiCall = $"api/v1/tracings/{key}?command=PartiallyServiceApplication&EnforcementServiceCode={enfSrvCd}";
+            string apiCall = $"api/v1/tracings/{key}?command=PartiallyServiceApplication&fedSource={fedSource}";
             return await ApiHelper.PutData<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 

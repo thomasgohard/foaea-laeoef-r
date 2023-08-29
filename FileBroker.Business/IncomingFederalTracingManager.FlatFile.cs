@@ -2,23 +2,15 @@
 
 public partial class IncomingFederalTracingManager
 {
-    public enum EFederalSource
-    {
-        Unknown,
-        CRA,
-        EI,
-        NETP
-    }
-
     public async Task<List<string>> ProcessFlatFileData(string flatFileContent, string flatFileName)
     {
         var fileTableData = await GetFileTableData(flatFileName);
         var tracingFileData = new FedTracingFileBase();
-        (string enfSrvCd, EFederalSource fedSource) = ConfigureTracingFileDataBasedOnSource(tracingFileData, fileTableData.Name);
+        (string enfSrvCd, FederalSource fedSource) = ConfigureTracingFileDataBasedOnSource(tracingFileData, fileTableData.Name);
 
         var errors = new List<string>();
 
-        if (fedSource == EFederalSource.Unknown)
+        if (fedSource == FederalSource.Unknown)
             errors.Add($"No match for [{fileTableData.Name}] or not support federal tracing source.");
 
         else if (!fileTableData.Active.HasValue || !fileTableData.Active.Value)
@@ -49,7 +41,7 @@ public partial class IncomingFederalTracingManager
             }
             try
             {
-                if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == EFederalSource.NETP))
+                if ((tracingFileData.TRCIN02.Count == 0) && (fedSource == FederalSource.NETP_Tracing))
                     await CloseNETPTraceEvents();
                 else
                 {
@@ -98,18 +90,18 @@ public partial class IncomingFederalTracingManager
         }
     }
 
-    private static (string enfSrvCd, EFederalSource fedSource) ConfigureTracingFileDataBasedOnSource(
+    private static (string enfSrvCd, FederalSource fedSource) ConfigureTracingFileDataBasedOnSource(
                                                                        FedTracingFileBase fedTracingData,
                                                                        string fileTableName)
     {
         string enfSrvCd = string.Empty;
-        EFederalSource fedSource = EFederalSource.Unknown;
+        FederalSource fedSource = FederalSource.Unknown;
 
         switch (fileTableName)
         {
             case "RC3STSIT": // CRA Tracing
                 enfSrvCd = "RC01";
-                fedSource = EFederalSource.CRA;
+                fedSource = FederalSource.CRA_TracingAddresses;
                 fedTracingData.AddResidentialRecTypes("03", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
                                                       "16", "17", "18", "19", "20", "21");
                 fedTracingData.AddEmployerRecTypes("04", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
@@ -118,14 +110,14 @@ public partial class IncomingFederalTracingManager
 
             case "HR3STSIT": // EI Tracing
                 enfSrvCd = "HR01";
-                fedSource = EFederalSource.EI;
+                fedSource = FederalSource.EI_Tracing;
                 fedTracingData.AddResidentialRecTypes("03");
                 fedTracingData.AddEmployerRecTypes("04");
                 break;
 
             case "EI3STSIT":  // NETP Tracing
                 enfSrvCd = "EI02";
-                fedSource = EFederalSource.NETP;
+                fedSource = FederalSource.NETP_Tracing;
                 fedTracingData.AddEmployerRecTypes("80", "81");
                 break;
         }
@@ -134,7 +126,7 @@ public partial class IncomingFederalTracingManager
     }
 
     public async Task SendTracingResponsesToFoaea(List<FedTracing_RecType02> fileTracingSummary, List<TraceResponseData> tracingResponses,
-                                                  int processId, string enfSrvCd, EFederalSource fedSource, string fileCycle,
+                                                  int processId, string enfSrvCd, FederalSource fedSource, string fileCycle,
                                                   string flatFileName, List<string> errors)
     {
         try
@@ -145,7 +137,7 @@ public partial class IncomingFederalTracingManager
             var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
             var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
-            if (fedSource == EFederalSource.NETP)
+            if (fedSource == FederalSource.NETP_Tracing)
             {
                 foreach (var item in fileTracingSummary)
                 {
@@ -167,7 +159,7 @@ public partial class IncomingFederalTracingManager
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
                 await SendTRACEDataToTrcRsp(tracingResponses);
-                await UpdateTracingApplications(enfSrvCd, fileCycle);
+                await UpdateTracingApplications(enfSrvCd, fileCycle, fedSource);
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
             }
         }
