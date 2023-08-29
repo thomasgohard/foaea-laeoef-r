@@ -57,7 +57,7 @@ namespace FOAEA3.API.Tracing.Controllers
 
                     string templateLanguage = formLanguage switch { "F" => "French", _ => "English" };
 
-                    string template = config.TaxFormsRootPath.AppendToPath(@$"{templateLanguage}\{year}\{templateName}.pdf");
+                    string template = config.TaxFormsRootPath.AppendToPath(@$"{templateLanguage}\{year}\{templateName}.pdf", isFileName: true);
 
                     var values = new Dictionary<string, string>();
 
@@ -78,7 +78,8 @@ namespace FOAEA3.API.Tracing.Controllers
 
                             if (pdfFieldName == "MaritalStatus")
                             {
-                                switch (fieldValue) {
+                                switch (fieldValue)
+                                {
                                     case "01": pdfFieldName = "Married"; break;
                                     case "02": pdfFieldName = "CommonLaw"; break;
                                     case "03": pdfFieldName = "Widowed"; break;
@@ -90,7 +91,8 @@ namespace FOAEA3.API.Tracing.Controllers
                             }
                             if (pdfFieldName == "PreferredLanguage")
                             {
-                                switch (fieldValue) {
+                                switch (fieldValue)
+                                {
                                     case "E": pdfFieldName = "English"; break;
                                     case "F": pdfFieldName = "French"; break;
                                 }
@@ -107,7 +109,7 @@ namespace FOAEA3.API.Tracing.Controllers
                         }
                     }
 
-                    (var fileContent, _) = PdfHelper.FillPdf(template, values);
+                    (var fileContent, _) = PdfHelper.FillPdf(template, values, formLanguage == "E");
 
                     byte[] bytes = fileContent.ToArray();
 
