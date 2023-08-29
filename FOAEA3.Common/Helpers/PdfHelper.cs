@@ -133,7 +133,7 @@ namespace Outgoing.FileCreator.Fed.Tracing
             string textLine1;
             string textLine2;
             string textLine2Italic;
-            string textREPLICA;
+            string textREPLICA = "REPLICA";
 
             if (isEnglish)
             {
@@ -143,11 +143,10 @@ namespace Outgoing.FileCreator.Fed.Tracing
             }
             else
             {
-                textLine1 = "Avis important : Édité par le ministère de la Justice du Canada aux fins de la communication des renseignements";
+                textLine1 = "Avis important : Édité par le ministère de la Justice du Canada aux fins de la communication de renseignements";
                 textLine2 = "en vertu de la partie I de la";
                 textLine2Italic = "Loi d'aide à l'exécution des ordonnances et des ententes familiales";
             }
-            textREPLICA = "REPLICA";
 
             foreach (PdfPageBase page in pdf.Pages)
             {

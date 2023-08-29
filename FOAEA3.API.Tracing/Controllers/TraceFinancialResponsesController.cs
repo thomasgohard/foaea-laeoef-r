@@ -5,6 +5,7 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Outgoing.FileCreator.Fed.Tracing;
 
@@ -27,6 +28,7 @@ namespace FOAEA3.API.Tracing.Controllers
         }
 
         [HttpGet("{id}/pdf")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetCRAform([FromRoute] ApplKey id, [FromServices] IRepositories repositories,
                                                    [FromQuery] short year, [FromQuery] string form, [FromQuery] short cycle)
         {
