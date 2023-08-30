@@ -24,7 +24,7 @@ public class FederalTracingFilesController : ControllerBase
     {
         string fileName = partnerId + "3STSOT"; // e.g. RC3STSOT
 
-        int fileCycleLength = 6; // TODO: should come from FileTable
+        int fileCycleLength = 6; 
         if (partnerId == "RC")
             fileCycleLength = 3;
 

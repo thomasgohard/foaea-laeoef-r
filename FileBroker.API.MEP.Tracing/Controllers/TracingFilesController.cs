@@ -60,7 +60,7 @@ public class TracingFilesController : ControllerBase
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle;
 
-        int fileCycleLength = 6; // TODO: should come from FileTable
+        int fileCycleLength = 6; 
 
         var lifeCyclePattern = new string('0', fileCycleLength);
         string lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);

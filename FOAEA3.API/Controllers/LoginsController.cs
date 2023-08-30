@@ -347,7 +347,7 @@ namespace FOAEA3.API.Controllers
             }
             catch (Exception)
             {
-                //TODO: Log Error
+                // TODO: Log Error
                 return null;
             }
 

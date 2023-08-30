@@ -47,15 +47,25 @@ namespace FOAEA3.API.Tracing.Controllers
 
                     string headerLanguage = GetLanguageFromHeader(Request.Headers);
 
-                    string formLanguage = headerLanguage switch { "fr" => "F", _ => "E" };
+                    string formLanguage;
+                    string templateLanguage;
+                    if (headerLanguage == "fr")
+                    {
+                        formLanguage = "F";
+                        templateLanguage = "French";
+                    }
+                    else
+                    {
+                        formLanguage = "E";
+                        templateLanguage = "English";
+                    }
+
                     string formShortName = FormHelper.ConvertTaxFormFullNameToAbbreviation(form);
 
                     string templateName = craForms.Where(m => m.CRAFormProvince == province && m.CRAFormLanguage == formLanguage &&
-                                                              m.CRAFormYear == year && m.CRAFormSchedule == form)
+                                                              m.CRAFormYear == year && m.CRAFormSchedule == formShortName)
                                                   .FirstOrDefault()?
                                                   .CRAFormPDFName;
-
-                    string templateLanguage = formLanguage switch { "F" => "French", _ => "English" };
 
                     string template = config.TaxFormsRootPath.AppendToPath(@$"{templateLanguage}\{year}\{templateName}.pdf", isFileName: true);
 

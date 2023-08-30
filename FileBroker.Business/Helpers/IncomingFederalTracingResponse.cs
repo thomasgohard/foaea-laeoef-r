@@ -252,20 +252,20 @@ public class IncomingFederalTracingResponse
     private static void UpdateTraceCycleNumber(List<TraceResponseData> responseData,
                                                List<TraceCycleQuantityData> cycles)
     {
-        // TODO: special process for NETP
-
         foreach (var row in responseData)
         {
             foreach (var cycleRow in cycles)
             {
                 if ((cycleRow.Appl_CtrlCd == row.Appl_CtrlCd) && (cycleRow.Appl_EnfSrv_Cd == row.Appl_EnfSrv_Cd))
                 {
-                    row.TrcRsp_Trace_CyclNr = (short)cycleRow.Trace_Cycl_Qty;
+                    if (row.EnfSrv_Cd == "EI02") // add 100 to the cycle for NETP
+                        row.TrcRsp_Trace_CyclNr = (short)(100 + cycleRow.Trace_Cycl_Qty);
+                    else
+                        row.TrcRsp_Trace_CyclNr = (short)cycleRow.Trace_Cycl_Qty;
                     break;
                 }
             }
         }
-
     }
 
 }

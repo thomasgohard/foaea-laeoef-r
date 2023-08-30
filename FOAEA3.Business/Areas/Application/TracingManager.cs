@@ -402,7 +402,7 @@ namespace FOAEA3.Business.Areas.Application
                         case EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING:
                             if (currentLifeState.In(ApplicationState.PARTIALLY_SERVICED_12, ApplicationState.EXPIRED_15))
                             {
-                                // TODO: if it is at state 15, how can it re-instate?
+                                // TODO: if it is at state 15, how can it re-instate? legacy code?
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
                                 await SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
