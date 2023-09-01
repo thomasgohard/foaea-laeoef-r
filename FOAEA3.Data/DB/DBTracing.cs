@@ -195,7 +195,7 @@ namespace FOAEA3.Data.DB
                                                                              string recipientCode,
                                                                              bool isXML = true)
         {
-            var parameters = new Dictionary<string, object>
+            var paramTracing = new Dictionary<string, object>
             {
                 { "intRecMax", maxRecords },
                 { "dchrActvSt_Cd", activeState },
@@ -204,10 +204,17 @@ namespace FOAEA3.Data.DB
             };
 
             var tracingData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialTracingData>("MessageBrokerGetTRCAPPOUTOutboundData",
-                                                                                                            parameters, FillTracingOutgoingProvincialTracingData);
+                                                                                                            paramTracing, FillTracingOutgoingProvincialTracingData);
+
+            var paramFinancials = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "chrRecptCd", recipientCode }
+            };
 
             var financialData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialFinancialData>("TrcRspFin_SelectForOutboundData",
-                                                                                                            parameters, FillTracingOutgoingProvincialFinancialData);
+                                                                                                            paramFinancials, FillTracingOutgoingProvincialFinancialData);
 
             if (financialData is not null)
             {

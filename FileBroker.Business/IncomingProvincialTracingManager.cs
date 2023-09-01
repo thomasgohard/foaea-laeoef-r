@@ -6,7 +6,7 @@ namespace FileBroker.Business;
 public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 {
     public IncomingProvincialTracingManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
-                                            IFileBrokerConfigurationHelper config) : 
+                                            IFileBrokerConfigurationHelper config) :
                                                 base(db, foaeaApis, fileName, config)
     {
     }
@@ -67,7 +67,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                             ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
 
                             if (isValidActionCode)
-                            {                                
+                            {
                                 var tracingRequest = SetupRequestFromFileData(baseData, tracingFile);
 
                                 var loadInboundAuditTable = DB.LoadInboundAuditTable;
@@ -84,7 +84,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                                                     ref errorCount, ref warningCount, ref successCount);
 
                                     await loadInboundAuditTable.MarkRowAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
-                                }   
+                                }
                             }
                             else
                             {
@@ -141,7 +141,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 
         return tracingRequest;
     }
-    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages,
                                         MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
     {
         if (foaeaMessages.ContainsMessagesOfType(MessageType.Error))
@@ -327,6 +327,17 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
             // financial data
             IncludeFinancialInformation = tracingFinData?.dat_Financial_Information.ConvertToBool() ?? false
         };
+
+        if ((tracingFinData is not null) && (tracingFinData.Value.dat_Financial_Details.Tax_Data is not null))
+        {
+            foreach (var detail in tracingFinData.Value.dat_Financial_Details.Tax_Data)
+            {
+                if (short.TryParse(detail.Tax_Year, out var taxYear))
+                    tracingApplication.YearsAndTaxForms.Add(taxYear, detail.Tax_Form);
+                
+                // TODO: report bad data if tryparse failed
+            }
+        }
 
         return tracingApplication;
     }

@@ -68,62 +68,13 @@ namespace FOAEA3.API.Tracing.Controllers
                                                   .CRAFormPDFName;
 
                     string template = config.TaxFormsRootPath.AppendToPath(@$"{templateLanguage}\{year}\{templateName}.pdf", isFileName: true);
+                    var values = PdfHelper.GetValuesForPDF(year, finValues, craFields);
 
-                    var values = new Dictionary<string, string>();
+                    // TODO: send email to FLAS-IT-SO about missing fields?
 
-                    foreach (var value in finValues)
-                    {
-                        string fieldName = value.FieldName;
-                        string fieldValue = value.FieldValue;
+                    (var fileContent, var missingFields) = PdfHelper.FillPdf(template, values, formLanguage == "E");
 
-                        var thisCraField = craFields.Where(m => m.CRAFieldName == fieldName).FirstOrDefault();
-                        if (thisCraField is not null)
-                        {
-                            string pdfFieldName;
-
-                            if (year >= 2019)
-                                pdfFieldName = thisCraField.CRAFieldCode;
-                            else
-                                pdfFieldName = thisCraField.CRAFieldCodeOld;
-
-                            if (pdfFieldName == "MaritalStatus")
-                            {
-                                switch (fieldValue)
-                                {
-                                    case "01": pdfFieldName = "Married"; break;
-                                    case "02": pdfFieldName = "CommonLaw"; break;
-                                    case "03": pdfFieldName = "Widowed"; break;
-                                    case "04": pdfFieldName = "Divorced"; break;
-                                    case "05": pdfFieldName = "Separated"; break;
-                                    case "06": pdfFieldName = "Single"; break;
-                                }
-                                fieldValue = "1";
-                            }
-                            if (pdfFieldName == "PreferredLanguage")
-                            {
-                                switch (fieldValue)
-                                {
-                                    case "E": pdfFieldName = "English"; break;
-                                    case "F": pdfFieldName = "French"; break;
-                                }
-                                fieldValue = "1";
-                            }
-
-                            if (!string.IsNullOrEmpty(pdfFieldName))
-                            {
-                                pdfFieldName = pdfFieldName.ToUpper();
-
-                                if (!values.ContainsKey(pdfFieldName))
-                                    values.Add(pdfFieldName, fieldValue);
-                            }
-                        }
-                    }
-
-                    (var fileContent, _) = PdfHelper.FillPdf(template, values, formLanguage == "E");
-
-                    byte[] bytes = fileContent.ToArray();
-
-                    return File(bytes, "application/pdf", $"{templateName}-{year}-{cycle}.pdf");
+                    return File(fileContent.ToArray(), "application/pdf", $"{templateName}-{year}-{cycle}.pdf");
                 }
             }
 
