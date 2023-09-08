@@ -33,7 +33,7 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
         return await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
     }
 
-    [HttpPost("")]
+    [HttpPost]
     public async Task<ActionResult<ApplicationEventDetailData>> SaveEventDetail([FromServices] IRepositories repositories)
     {
         var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
@@ -46,7 +46,7 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
 
     }
 
-    [HttpPut("")]
+    [HttpPut]
     public async Task<ActionResult<ApplicationEventDetailData>> UpdateEventDetail([FromServices] IRepositories repositories,
                                                                       [FromQuery] string command,
                                                                       [FromQuery] string activeState,
