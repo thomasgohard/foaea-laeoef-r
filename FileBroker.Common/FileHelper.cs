@@ -220,7 +220,7 @@ namespace FileBroker.Common
                     outputPath = fileData.Path;
                     outputFile = outputPath.AppendToPath(fileName, isFileName: true);
 
-                    await File.WriteAllTextAsync(outputFile, bodyContent);
+                    await File.WriteAllTextAsync(outputFile, bodyContent, Encoding.UTF8);
 
                     return new OkResult();
 

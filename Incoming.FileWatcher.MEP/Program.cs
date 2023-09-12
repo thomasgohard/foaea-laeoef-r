@@ -91,9 +91,7 @@ internal class Program
 
                         WriteEmbeddedColorLine($"Processing [green]{thisfile}[/green]...");
 
-                        var errors = new List<string>();
-
-                        errors = await provincialFileManager.ProcessWaitingFile(thisfile, errors);
+                        var errors = await provincialFileManager.ProcessWaitingFile(thisfile);
 
                         if (errors.Any())
                         {

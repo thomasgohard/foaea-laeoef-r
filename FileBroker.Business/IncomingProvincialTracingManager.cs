@@ -32,8 +32,8 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
         else
         {
-            ValidateHeader(tracingFile.TRCAPPIN01, ref result, ref isValid);
-            ValidateFooter(tracingFile, ref result, ref isValid);
+            ValidateHeader(tracingFile.TRCAPPIN01, result, ref isValid);
+            ValidateFooter(tracingFile, result, ref isValid);
 
             if (isValid)
             {
@@ -64,7 +64,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 
                             var requestError = new MessageDataList();
 
-                            ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
+                            ValidateActionCode(baseData, requestError, ref isValidActionCode);
 
                             if (isValidActionCode)
                             {
@@ -211,7 +211,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         return tracing.Messages;
     }
 
-    private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
+    private void ValidateHeader(MEPTracing_RecType01 headerData, MessageDataList result, ref bool isValid)
     {
         int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(headerData.Cycle) != cycle)
@@ -226,7 +226,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
     }
 
-    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
+    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, MessageDataList result, ref bool isValid)
     {
         if (int.Parse(tracingFile.TRCAPPIN99.ResponseCnt) != tracingFile.TRCAPPIN20.Count)
         {
@@ -235,7 +235,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
     }
 
-    private static void ValidateActionCode(MEPTracing_RecType20 data, ref MessageDataList result, ref bool isValid)
+    private static void ValidateActionCode(MEPTracing_RecType20 data, MessageDataList result, ref bool isValid)
     {
         bool validActionLifeState = true;
         string actionCode = data.Maintenance_ActionCd.Trim();

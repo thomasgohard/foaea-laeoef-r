@@ -8,7 +8,6 @@ namespace FileBroker.Business.Helpers
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
-        private FileBaseName FileBaseName { get; }
         private IFileBrokerConfigurationHelper Config { get; }
 
         public IncomingProvincialFile(RepositoryList db,
@@ -20,8 +19,10 @@ namespace FileBroker.Business.Helpers
             Config = config;
         }
 
-        public async Task<List<string>> ProcessWaitingFile(string fullPath, List<string> errors)
+        public async Task<List<string>> ProcessWaitingFile(string fullPath)
         {
+            var errors = new List<string>();
+
             if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
                 errors = await ProcessIncomingXmlFile(fullPath, errors);
 

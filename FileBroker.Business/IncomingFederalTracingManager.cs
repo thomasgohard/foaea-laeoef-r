@@ -15,7 +15,7 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
                                                   List<ApplicationEventDetailData> activeTraceEventDetails)
     {
         var activeTraceEvent = activeTraceEvents
-                                   .Where(m => m.Appl_EnfSrv_Cd == applEnfSrvCd && m.Appl_CtrlCd == applCtrlCd)
+                                   .Where(m => m.Appl_EnfSrv_Cd.Trim() == applEnfSrvCd.Trim() && m.Appl_CtrlCd.Trim() == applCtrlCd.Trim())
                                    .FirstOrDefault();
 
         if (activeTraceEvent != null)

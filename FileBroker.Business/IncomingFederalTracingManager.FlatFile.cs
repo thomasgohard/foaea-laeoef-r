@@ -1,4 +1,6 @@
-﻿namespace FileBroker.Business;
+﻿using DBHelper;
+
+namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager
 {
@@ -30,6 +32,7 @@ public partial class IncomingFederalTracingManager
 
             ValidateHeader(tracingFileData.TRCIN01, flatFileName, ref errors);
             ValidateFooter(tracingFileData.TRCIN99, tracingFileData.TRCIN02, ref errors);
+
 
             if (errors.Any())
                 return errors;
@@ -109,7 +112,7 @@ public partial class IncomingFederalTracingManager
                 break;
 
             case "HR3STSIT": // EI Tracing
-                enfSrvCd = "HR01";
+                enfSrvCd = "HR02";
                 fedSource = FederalSource.EI_Tracing;
                 fedTracingData.AddResidentialRecTypes("03");
                 fedTracingData.AddEmployerRecTypes("04");
@@ -135,6 +138,11 @@ public partial class IncomingFederalTracingManager
             int cutOffDays = int.Parse(cutOffDaysValue);
 
             var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+
+            // WARNING: ˅ ˅ ˅ for testing only! ˅ ˅ ˅ 
+            activeTraceEvents.RemoveAll(m => m.Appl_CtrlCd.Trim().NotIn("A44", "A488", "A489", "A490", "A491", "A492", "A493", "A494", "A495", "A496", "A497"));
+            // WARNING: ˄ ˄ ˄ for testing only! ˄ ˄ ˄ 
+
             var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
             if (fedSource == FederalSource.NETP_Tracing)
@@ -145,7 +153,7 @@ public partial class IncomingFederalTracingManager
                                                           activeTraceEvents, activeTraceEventDetails);
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
-                await SendTRACEDataToTrcRsp(tracingResponses);
+                await SendTRACEDataToTrcRsp(tracingResponses, errors);
                 await CloseNETPTraceEvents();
             }
             else
@@ -155,10 +163,10 @@ public partial class IncomingFederalTracingManager
                     var appl = await APIs.TracingApplications.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
 
                     await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
-                                                          activeTraceEvents, activeTraceEventDetails);
+                                                     activeTraceEvents, activeTraceEventDetails);
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
-                await SendTRACEDataToTrcRsp(tracingResponses);
+                await SendTRACEDataToTrcRsp(tracingResponses, errors);
                 await UpdateTracingApplications(enfSrvCd, fileCycle, fedSource);
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
             }
@@ -170,11 +178,27 @@ public partial class IncomingFederalTracingManager
     }
 
     private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileData(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
-                                                                        List<string> errors)
+                                                                                    List<string> errors)
     {
         var cycles = await APIs.TracingApplications.GetTraceCycleQuantityData(enfSrvCd, fileCycle);
 
-        return IncomingFederalTracingResponse.GenerateFromFileData(tracingFileData, enfSrvCd, cycles, ref errors);
+        var responseData = IncomingFederalTracingResponse.GenerateFromFileData(tracingFileData, enfSrvCd, cycles, ref errors);
+
+        ValidateResponseData(responseData, errors);
+
+        return responseData;
+    }
+
+    private static void ValidateResponseData(List<TraceResponseData> responseData, List<string> errors)
+    {
+        foreach (var response in responseData)
+        {
+            if ((response.TrcRsp_Addr_LstUpdte is not null) &&
+                (!response.TrcRsp_Addr_LstUpdte.Value.IsValidSqlDatetime()))
+            {
+                errors.Add($"Invalid date ({response.TrcRsp_Addr_LstUpdte}) for {response.Appl_EnfSrv_Cd.Trim()}-{response.Appl_CtrlCd} [{response.Prcs_RecType} {response.TrcRsp_Addr_Ln}]");
+            }
+        }
     }
 
     private async Task CloseNETPTraceEvents()
@@ -182,9 +206,15 @@ public partial class IncomingFederalTracingManager
         await APIs.TracingEvents.CloseNETPTraceEvents();
     }
 
-    private async Task SendTRACEDataToTrcRsp(List<TraceResponseData> responseData)
+    private async Task SendTRACEDataToTrcRsp(List<TraceResponseData> responseData, List<string> errors)
     {
         await APIs.TracingResponses.InsertBulkData(responseData);
+
+        if (APIs.TracingResponses.ApiHelper.ErrorData.Any())
+        {
+            foreach (var error in APIs.TracingResponses.ApiHelper.ErrorData)
+                errors.Add(error.Description);
+        }
     }
 
 }

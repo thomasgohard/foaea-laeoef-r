@@ -542,10 +542,15 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplicationNoValidation();
         }
 
-        public async Task CreateResponseData(List<TraceResponseData> responseData)
+        public async Task<bool> CreateResponseData(List<TraceResponseData> responseData)
         {
             var responsesDB = DB.TraceResponseTable;
             await responsesDB.InsertBulkData(responseData);
+
+            if (!string.IsNullOrEmpty(DB.MainDB.LastError))
+                return false;
+
+            return true;
         }
 
         public async Task CreateFinancialResponseData(TraceFinancialResponseData responseData)

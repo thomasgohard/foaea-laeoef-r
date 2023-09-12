@@ -179,6 +179,9 @@ public class IncomingFederalTracingResponse
                 ActvSt_Cd = "C"
             };
 
+            if (newResponse04.TrcRsp_Addr_LstUpdte == DateTime.MinValue)
+                newResponse04.TrcRsp_Addr_LstUpdte = null;
+
             responseDataTemp.Add(newResponse04);
         }
 

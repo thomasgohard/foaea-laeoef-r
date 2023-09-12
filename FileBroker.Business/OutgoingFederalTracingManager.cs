@@ -74,7 +74,10 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 else
                     (fileContent, eventIds) = await GenerateFinancialOutputFileContentFromData(data, newCycle);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent);
+                if (federalEnfServiceCode == "RC02")
+                    await File.WriteAllTextAsync(newFilePath, fileContent, Encoding.UTF8);
+                else
+                    await File.WriteAllTextAsync(newFilePath, fileContent);
                 fileCreated = true;
 
                 string errorMessage = await FileHelper.BackupFile(newFilePath, DB, Config);

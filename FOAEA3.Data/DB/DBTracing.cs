@@ -333,7 +333,7 @@ namespace FOAEA3.Data.DB
             var enfSrvCd = rdr["Val20"] as string;
             switch (enfSrvCd?.Trim())
             {
-                case "HR01": data.EnfSrv_Cd = "UI00"; break;
+                case "HR02": data.EnfSrv_Cd = "UI00"; break;
                 case "EI02": data.EnfSrv_Cd = "EI00"; break;
                 case "RC01": data.EnfSrv_Cd = "RC00"; break;
                 default:

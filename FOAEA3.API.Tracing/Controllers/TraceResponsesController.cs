@@ -40,11 +40,16 @@ public class TraceResponsesController : FoaeaControllerBase
 
         var tracingManager = new TracingManager(repositories, config, User);
 
-        await tracingManager.CreateResponseData(responseData);
+        bool success = await tracingManager.CreateResponseData(responseData);
 
-        var rootPath = "https://" + HttpContext.Request.Host.ToString();
+        if (success)
+        {
+            var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
-        return Created(rootPath, new TraceResponseData());
+            return Created(rootPath, new TraceResponseData());
+        }
+        else
+            return Problem(tracingManager.DB.MainDB.LastError);
 
     }
 

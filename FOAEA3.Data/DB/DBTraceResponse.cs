@@ -237,9 +237,9 @@ namespace FOAEA3.Data.DB
             data.TrcRsp_RcptViewed_Dte = rdr["TrcRsp_RcptViewed_Dte"] as DateTime?; // can be null 
 
             // extra values
-            data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
-            data.Address = rdr["Address"] as string;
-            data.Originator = rdr["originator"] as string;
+            //data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            //data.Address = rdr["Address"] as string;
+            //data.Originator = rdr["originator"] as string;
         }
 
         private void FillTraceFinancialResultDataFromReader(IDBHelperReader rdr, TraceFinancialResponseData data)

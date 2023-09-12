@@ -52,7 +52,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent);
+                await File.WriteAllTextAsync(newFilePath, fileContent, Encoding.UTF8);
                 fileCreated = true;
 
                 string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
