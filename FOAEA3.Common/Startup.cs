@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Security.Claims;
@@ -110,6 +111,8 @@ namespace FOAEA3.Common
                 {
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
                 });
+
+                IdentityModelEventSource.ShowPII = true;
             }
             else if (configuration.ProductionServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {

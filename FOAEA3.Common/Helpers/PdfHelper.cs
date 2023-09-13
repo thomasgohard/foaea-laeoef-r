@@ -1,4 +1,5 @@
-﻿using Spire.Pdf;
+﻿using FOAEA3.Model;
+using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using Spire.Pdf.Widget;
 
@@ -29,6 +30,61 @@ namespace Outgoing.FileCreator.Fed.Tracing
                 return (data[0] as MemoryStream, missingFields);
             else
                 return (null, null);
+        }
+
+        public static Dictionary<string, string> GetValuesForPDF(short year, List<TraceFinancialResponseDetailValueData> finValues, List<CraFieldData> craFields)
+        {
+            var values = new Dictionary<string, string>();
+
+            foreach (var value in finValues)
+            {
+                string fieldName = value.FieldName;
+                string fieldValue = value.FieldValue;
+
+                var thisCraField = craFields.Where(m => m.CRAFieldName == fieldName).FirstOrDefault();
+                if (thisCraField is not null)
+                {
+                    string pdfFieldName;
+
+                    if (year >= 2019)
+                        pdfFieldName = thisCraField.CRAFieldCode;
+                    else
+                        pdfFieldName = thisCraField.CRAFieldCodeOld;
+
+                    if (pdfFieldName == "MaritalStatus")
+                    {
+                        switch (fieldValue)
+                        {
+                            case "01": pdfFieldName = "Married"; break;
+                            case "02": pdfFieldName = "CommonLaw"; break;
+                            case "03": pdfFieldName = "Widowed"; break;
+                            case "04": pdfFieldName = "Divorced"; break;
+                            case "05": pdfFieldName = "Separated"; break;
+                            case "06": pdfFieldName = "Single"; break;
+                        }
+                        fieldValue = "1";
+                    }
+                    if (pdfFieldName == "PreferredLanguage")
+                    {
+                        switch (fieldValue)
+                        {
+                            case "E": pdfFieldName = "English"; break;
+                            case "F": pdfFieldName = "French"; break;
+                        }
+                        fieldValue = "1";
+                    }
+
+                    if (!string.IsNullOrEmpty(pdfFieldName))
+                    {
+                        pdfFieldName = pdfFieldName.ToUpper();
+
+                        if (!values.ContainsKey(pdfFieldName))
+                            values.Add(pdfFieldName, fieldValue);
+                    }
+                }
+            }
+
+            return values;
         }
 
         private static PdfDocument CreatePdfFromTemplate(string templatePath, Dictionary<string, string> values,

@@ -11,7 +11,7 @@ namespace FOAEA3.Web.Pages.Applications
 {
     public class ViewEventsModel : FoaeaPageModel
     {
-        public List<ApplicationEventData> ApplicationEvents { get; set; }
+        public ApplicationEventsList ApplicationEvents { get; set; }
 
         public ViewEventsModel(IHttpContextAccessor httpContextAccessor, IOptions<ApiConfig> apiConfig) :
                                                                                      base(httpContextAccessor, apiConfig.Value)

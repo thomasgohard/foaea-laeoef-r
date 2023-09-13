@@ -13,7 +13,7 @@ namespace FileBroker.Business.Tests.InMemory
 
         public string Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
+        public Task<ApplicationEventsList> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
@@ -23,12 +23,12 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedSINEventDataForFile(string fileName)
+        public Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile(string fileName)
+        public Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string fileName)
         {
             throw new NotImplementedException();
         }

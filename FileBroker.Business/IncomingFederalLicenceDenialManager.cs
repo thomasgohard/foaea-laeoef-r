@@ -4,15 +4,15 @@ namespace FileBroker.Business;
 
 public class IncomingFederalLicenceDenialManager : IncomingFederalManagerBase
 {
-    private List<ApplicationEventData> ValidEvents { get; set; }
+    private ApplicationEventsList ValidEvents { get; set; }
 
-    private List<ApplicationEventDetailData> ValidEventDetails { get; set; }
+    private ApplicationEventDetailsList ValidEventDetails { get; set; }
 
     public IncomingFederalLicenceDenialManager(APIBrokerList apis, RepositoryList repositories,
                                                IFileBrokerConfigurationHelper config) : base(apis, repositories, config)
     {
-        ValidEvents = new List<ApplicationEventData>();
-        ValidEventDetails = new List<ApplicationEventDetailData>();
+        ValidEvents = new ApplicationEventsList();
+        ValidEventDetails = new ApplicationEventDetailsList();
     }
 
     public async Task<List<string>> ProcessJsonFile(string jsonFileContent, string fileName)
@@ -205,7 +205,11 @@ public class IncomingFederalLicenceDenialManager : IncomingFederalManagerBase
                 {
                     foreach (var eventData in events)
                     {
-                        var existingEventDetailsForAppl = eventDetails.Where(m => m.Event_Id == eventData.Event_Id).ToList();
+                        var existingEventDetailsForApplList = eventDetails.Where(m => m.Event_Id == eventData.Event_Id)
+                                                                          .OrderBy(m => m.Event_TimeStamp);
+                        
+                        var existingEventDetailsForAppl = new ApplicationEventDetailsList(existingEventDetailsForApplList);
+
                         if (existingEventDetailsForAppl.Any())
                             ValidEventDetails.AddRange(existingEventDetailsForAppl);
                     }

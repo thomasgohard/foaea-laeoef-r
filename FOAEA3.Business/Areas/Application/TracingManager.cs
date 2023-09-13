@@ -289,7 +289,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task FullyServiceApplication()
         {
-            await SetNewStateTo(ApplicationState.EXPIRED_15);
+            await SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
 
             MakeUpperCase();
             await UpdateApplication();
@@ -402,7 +402,7 @@ namespace FOAEA3.Business.Areas.Application
                         case EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING:
                             if (currentLifeState.In(ApplicationState.PARTIALLY_SERVICED_12, ApplicationState.EXPIRED_15))
                             {
-                                // TODO: if it is at state 15, how can it re-instate?
+                                // TODO: if it is at state 15, how can it re-instate? legacy code?
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
                                 await SetNewStateTo(ApplicationState.APPLICATION_REINSTATED_11);
@@ -522,12 +522,12 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             return await EventManager.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
         {
             return await EventDetailManager.GetActiveTracingEventDetails(enfSrv_Cd, cycle);
         }
@@ -542,10 +542,15 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplicationNoValidation();
         }
 
-        public async Task CreateResponseData(List<TraceResponseData> responseData)
+        public async Task<bool> CreateResponseData(List<TraceResponseData> responseData)
         {
             var responsesDB = DB.TraceResponseTable;
             await responsesDB.InsertBulkData(responseData);
+
+            if (!string.IsNullOrEmpty(DB.MainDB.LastError))
+                return false;
+
+            return true;
         }
 
         public async Task CreateFinancialResponseData(TraceFinancialResponseData responseData)

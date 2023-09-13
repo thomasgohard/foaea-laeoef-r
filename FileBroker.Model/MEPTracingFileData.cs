@@ -59,19 +59,40 @@ namespace FileBroker.Model
         public string dat_Statute_Cd;
     }
 
+    public struct Tax_Data_Info
+    {
+        public string Tax_Year;
+
+        [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+        public List<string> Tax_Form;
+    }
+
+    public struct FinancialDetails
+    {
+        [DataMember(IsRequired = false)]
+        [JsonConverter(typeof(SingleOrArrayConverter<Tax_Data_Info>))]
+        public List<Tax_Data_Info> Tax_Data;
+    }
+
     public struct MEPTracing_RecType22
     {
         public string RecType;
         public string dat_Subm_SubmCd;
         public string dat_Appl_CtrlCd;
+        
         [DataMember(IsRequired = false)]
         public string dat_Trace_Dbtr_PhoneNumber;
+        
         [DataMember(IsRequired = false)]
         public string dat_Trace_Dbtr_EmailAddress;
+        
         public string dat_Trace_Declaration;
         public string dat_Tracing_Info;
         public string dat_SIN_Information;
         public string dat_Financial_Information;
+
+        [DataMember(IsRequired = false)]
+        public FinancialDetails dat_Financial_Details;
     }
 
     public struct MEPTracing_RecType99

@@ -6,7 +6,7 @@ namespace FileBroker.Business;
 public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 {
     public IncomingProvincialTracingManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
-                                            IFileBrokerConfigurationHelper config) : 
+                                            IFileBrokerConfigurationHelper config) :
                                                 base(db, foaeaApis, fileName, config)
     {
     }
@@ -32,8 +32,8 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
         else
         {
-            ValidateHeader(tracingFile.TRCAPPIN01, ref result, ref isValid);
-            ValidateFooter(tracingFile, ref result, ref isValid);
+            ValidateHeader(tracingFile.TRCAPPIN01, result, ref isValid);
+            ValidateFooter(tracingFile, result, ref isValid);
 
             if (isValid)
             {
@@ -64,10 +64,10 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 
                             var requestError = new MessageDataList();
 
-                            ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
+                            ValidateActionCode(baseData, requestError, ref isValidActionCode);
 
                             if (isValidActionCode)
-                            {                                
+                            {
                                 var tracingRequest = SetupRequestFromFileData(baseData, tracingFile);
 
                                 var loadInboundAuditTable = DB.LoadInboundAuditTable;
@@ -84,7 +84,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                                                     ref errorCount, ref warningCount, ref successCount);
 
                                     await loadInboundAuditTable.MarkRowAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
-                                }   
+                                }
                             }
                             else
                             {
@@ -141,7 +141,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 
         return tracingRequest;
     }
-    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages, 
+    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages,
                                         MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
     {
         if (foaeaMessages.ContainsMessagesOfType(MessageType.Error))
@@ -211,7 +211,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         return tracing.Messages;
     }
 
-    private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
+    private void ValidateHeader(MEPTracing_RecType01 headerData, MessageDataList result, ref bool isValid)
     {
         int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(headerData.Cycle) != cycle)
@@ -226,7 +226,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
     }
 
-    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
+    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, MessageDataList result, ref bool isValid)
     {
         if (int.Parse(tracingFile.TRCAPPIN99.ResponseCnt) != tracingFile.TRCAPPIN20.Count)
         {
@@ -235,7 +235,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
     }
 
-    private static void ValidateActionCode(MEPTracing_RecType20 data, ref MessageDataList result, ref bool isValid)
+    private static void ValidateActionCode(MEPTracing_RecType20 data, MessageDataList result, ref bool isValid)
     {
         bool validActionLifeState = true;
         string actionCode = data.Maintenance_ActionCd.Trim();
@@ -327,6 +327,17 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
             // financial data
             IncludeFinancialInformation = tracingFinData?.dat_Financial_Information.ConvertToBool() ?? false
         };
+
+        if ((tracingFinData is not null) && (tracingFinData.Value.dat_Financial_Details.Tax_Data is not null))
+        {
+            foreach (var detail in tracingFinData.Value.dat_Financial_Details.Tax_Data)
+            {
+                if (short.TryParse(detail.Tax_Year, out var taxYear))
+                    tracingApplication.YearsAndTaxForms.Add(taxYear, detail.Tax_Form);
+                
+                // TODO: report bad data if tryparse failed
+            }
+        }
 
         return tracingApplication;
     }

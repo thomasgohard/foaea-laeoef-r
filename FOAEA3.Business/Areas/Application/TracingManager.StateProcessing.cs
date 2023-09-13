@@ -193,6 +193,22 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
+        protected override async Task Process_13_FullyServiced()
+        {
+            await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
+
+            var eventBF = await EventManager.GetEventBF(TracingApplication.Subm_SubmCd, Appl_CtrlCd,
+                                                  EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
+
+            if (!eventBF.Any() ||
+                ((TracingApplication.Appl_RecvAffdvt_Dte is not null) &&
+                 (DateTime.Now > TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1))
+                ))
+            {
+                await SetNewStateTo(ApplicationState.EXPIRED_15);
+            }
+        }
+
         private async Task<List<string>> GetReceivedResponseSourcesForLatestCycle()
         {
             var traceResponses = (await DB.TraceResponseTable.GetTraceResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd)).Items;

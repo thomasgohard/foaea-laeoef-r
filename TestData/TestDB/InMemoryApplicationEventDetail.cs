@@ -1,5 +1,4 @@
 ﻿using FOAEA3.Model;
-using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
@@ -13,12 +12,12 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string UserId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
+        public Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventDetailData>> GetApplicationEventDetails(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
+        public Task<ApplicationEventDetailsList> GetApplicationEventDetails(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
         {
             throw new NotImplementedException();
         }
@@ -28,12 +27,12 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationEventDetailsList> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DataList<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
+        public Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
         {
             throw new NotImplementedException();
         }
@@ -43,7 +42,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<bool> SaveEventDetails(List<ApplicationEventDetailData> eventDetailsData)
+        public Task<bool> SaveEventDetails(ApplicationEventDetailsList eventDetailsData)
         {
             throw new NotImplementedException();
         }

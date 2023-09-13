@@ -49,7 +49,6 @@ class Program
 
                     processedFiles.Add(thisFile);
 
-                    var errors = new List<string>();
                     ColourConsole.WriteEmbeddedColorLine($"Processing [green]{thisFile}[/green]...");
 
                     await federalFileManager.ProcessWaitingFile(thisFile);
@@ -60,6 +59,8 @@ class Program
                         foreach (var error in federalFileManager.Errors)
                             await db.ErrorTrackingTable.MessageBrokerError("TRCIN", thisFile, new Exception(error), displayExceptionError: true);
                     }
+
+                    federalFileManager.Errors.Clear();
                 }
             }
             else

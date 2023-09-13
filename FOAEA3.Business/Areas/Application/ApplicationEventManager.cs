@@ -10,7 +10,7 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationEventManager
     {
-        public List<ApplicationEventData> Events { get; }
+        public ApplicationEventsList Events { get; }
 
         ApplicationData Application { get; }
         IApplicationEventRepository EventDB { get; }
@@ -18,11 +18,11 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventManager(ApplicationData applicationData, IRepositories repositories)
         {
             Application = applicationData;
-            Events = new List<ApplicationEventData>();
+            Events = new ApplicationEventsList();
             EventDB = repositories.ApplicationEventTable;
         }
 
-        public async Task<List<ApplicationEventData>> GetApplicationEventsForQueue(EventQueue queue)
+        public async Task<ApplicationEventsList> GetApplicationEventsForQueue(EventQueue queue)
         {
             return await EventDB.GetApplicationEvents(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd, queue);
         }
@@ -114,7 +114,7 @@ namespace FOAEA3.Business.Areas.Application
 
         #region EventBF
 
-        public async Task<List<ApplicationEventData>> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
+        public async Task<ApplicationEventsList> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
         {
             return await EventDB.GetEventBF(subm_SubmCd, appl_CtrlCd, eventCode, activeState);
         }
@@ -134,7 +134,7 @@ namespace FOAEA3.Business.Areas.Application
 
         #region SIN
 
-        public async Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
+        public async Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
             return await EventDB.GetRequestedSINEventDataForFile(enfSrv_Cd, fileName);
         }
@@ -157,12 +157,12 @@ namespace FOAEA3.Business.Areas.Application
             return await EventDB.GetTraceEventCount(appl_EnfSrv_Cd, appl_CtrlCd, receivedAffidavitDate, eventReasonCode, eventId);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             return await EventDB.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
             return await EventDB.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);

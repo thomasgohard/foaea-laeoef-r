@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using Azure.Core;
+using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -136,6 +137,7 @@ namespace FOAEA3.Common.Helpers
                     if (callResult.IsSuccessStatusCode)
                     {
                         string content = await callResult.Content.ReadAsStringAsync();
+
                         result = JsonConvert.DeserializeObject<T>(content);
                     }
                     else if (callResult.StatusCode == HttpStatusCode.InternalServerError)

@@ -10,17 +10,17 @@ namespace FOAEA3.Business.Areas.Application
     internal class ApplicationEventDetailManager
     {
         ApplicationData Application { get; }
-        public List<ApplicationEventDetailData> EventDetails { get; }
+        public ApplicationEventDetailsList EventDetails { get; }
         IApplicationEventDetailRepository EventDetailDB { get; }
 
         public ApplicationEventDetailManager(ApplicationData applicationData, IRepositories repositories)
         {
             Application = applicationData;
-            EventDetails = new List<ApplicationEventDetailData>();
+            EventDetails = new ApplicationEventDetailsList();
             EventDetailDB = repositories.ApplicationEventDetailTable;
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetApplicationEventDetailsForQueue(EventQueue queue)
+        public async Task<ApplicationEventDetailsList> GetApplicationEventDetailsForQueue(EventQueue queue)
         {
             return await EventDetailDB.GetApplicationEventDetails(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd, queue);
         }
@@ -41,17 +41,17 @@ namespace FOAEA3.Business.Areas.Application
             await EventDetailDB.UpdateOutboundEventDetail(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
         }
 
-        public async Task<DataList<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
+        public async Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string enfSrv_Cd, string fileName)
         {
             return await EventDetailDB.GetRequestedSINEventDetailDataForFile(enfSrv_Cd, fileName);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
         {
             return await EventDetailDB.GetActiveTracingEventDetails(enfSrv_Cd, cycle);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<ApplicationEventDetailsList> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                        string appl_CtrlCd)
         {
             return await EventDetailDB.GetRequestedLICINLicenceDenialEventDetails(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);

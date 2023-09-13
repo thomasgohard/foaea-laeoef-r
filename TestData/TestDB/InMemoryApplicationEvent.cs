@@ -23,17 +23,17 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetActiveEventBFs()
+        public Task<ApplicationEventsList> GetActiveEventBFs()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
+        public Task<ApplicationEventsList> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
+        public Task<ApplicationEventsList> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
         {
             throw new NotImplementedException();
         }
@@ -48,17 +48,17 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
+        public Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
+        public Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             throw new NotImplementedException();
         }
@@ -73,7 +73,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<bool> SaveEvents(List<ApplicationEventData> events, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
+        public Task<bool> SaveEvents(ApplicationEventsList events, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
         {
             throw new NotImplementedException();
         }

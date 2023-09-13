@@ -11,11 +11,11 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
     }
 
     private async Task MarkTraceEventsAsProcessed(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
-                                                  List<ApplicationEventData> activeTraceEvents,
-                                                  List<ApplicationEventDetailData> activeTraceEventDetails)
+                                                  ApplicationEventsList activeTraceEvents,
+                                                  ApplicationEventDetailsList activeTraceEventDetails)
     {
         var activeTraceEvent = activeTraceEvents
-                                   .Where(m => m.Appl_EnfSrv_Cd == applEnfSrvCd && m.Appl_CtrlCd == applCtrlCd)
+                                   .Where(m => m.Appl_EnfSrv_Cd.Trim() == applEnfSrvCd.Trim() && m.Appl_CtrlCd.Trim() == applCtrlCd.Trim())
                                    .FirstOrDefault();
 
         if (activeTraceEvent != null)
@@ -46,7 +46,7 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
         }
     }
 
-    private async Task CloseOrInactivateTraceEventDetails(int cutOffDate, List<ApplicationEventDetailData> activeTraceEventDetails)
+    private async Task CloseOrInactivateTraceEventDetails(int cutOffDate, ApplicationEventDetailsList activeTraceEventDetails)
     {
         foreach (var row in activeTraceEventDetails)
         {

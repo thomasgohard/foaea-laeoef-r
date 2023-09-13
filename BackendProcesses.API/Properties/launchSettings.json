@@ -2,16 +2,8 @@
   "profiles": {
     "BackendProcesses.API": {
       "commandName": "Project",
-      "launchBrowser": true,
       "applicationUrl": "https://localhost:13728;http://localhost:13729"
     }
   },
-  "$schema": "http://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "https://localhost:51053"
-    }
-  }
+  "$schema": "http://json.schemastore.org/launchsettings.json"
 }
