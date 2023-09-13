@@ -32,7 +32,7 @@ public class TracingEventsController : FoaeaControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] ApplKey id,
+    public async Task<ActionResult<ApplicationEventsList>> GetEvents([FromRoute] ApplKey id,
                                                               [FromQuery] int? queue,
                                                               [FromServices] IRepositories repositories)
     {
@@ -46,7 +46,7 @@ public class TracingEventsController : FoaeaControllerBase
     }
 
     [HttpGet("RequestedTRCIN")]
-    public async Task<ActionResult<ApplicationEventData>> GetRequestedTRCINTracingEvents([FromQuery] string enforcementServiceCode,
+    public async Task<ActionResult<ApplicationEventsList>> GetRequestedTRCINTracingEvents([FromQuery] string enforcementServiceCode,
                                                                              [FromQuery] string fileCycle,
                                                                              [FromServices] IRepositories repositories)
     {
@@ -60,11 +60,10 @@ public class TracingEventsController : FoaeaControllerBase
 
         var result = await manager.GetRequestedTRCINTracingEvents(enforcementServiceCode, fileCycle);
         return Ok(result);
-
     }
 
     [HttpGet("Details/Active")]
-    public async Task<ActionResult<ApplicationEventDetailData>> GetActiveTracingEventDetails([FromQuery] string enforcementServiceCode,
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetActiveTracingEventDetails([FromQuery] string enforcementServiceCode,
                                                                                  [FromQuery] string fileCycle,
                                                                                  [FromServices] IRepositories repositories)
     {
@@ -75,7 +74,7 @@ public class TracingEventsController : FoaeaControllerBase
         return Ok(result);
     }
 
-    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueue(ApplKey id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<ApplicationEventsList>> GetEventsForQueue(ApplKey id, IRepositories repositories, EventQueue queue)
     {
         var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 

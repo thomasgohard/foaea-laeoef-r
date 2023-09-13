@@ -81,11 +81,6 @@ public partial class IncomingFederalTracingManager
         int cutOffDays = int.Parse(cutOffDaysValue);
 
         var activeTraceEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle.ToString());
-
-        // WARNING: ˅ ˅ ˅ for testing only! ˅ ˅ ˅ */
-        activeTraceEvents.RemoveAll(m => m.Appl_CtrlCd.Trim().NotIn("A44", "A488", "A489", "A490", "A491", "A492", "A493", "A494", "A495", "A496", "A497"));
-        // WARNING: ˄ ˄ ˄ for testing only! ˄ ˄ ˄ */
-
         var activeTraceEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle.ToString());
 
         foreach (var response in traceResponses)

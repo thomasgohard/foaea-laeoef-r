@@ -38,21 +38,21 @@ public class ApplicationFederalSinsController : FoaeaControllerBase
     }
 
     [HttpGet("RequestedEventsForFile")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<ApplicationEventsList>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
                                                                                     [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        return (await manager.GetRequestedSINEventDataForFile("HR01", fileName)).Items;
+        return (await manager.GetRequestedSINEventDataForFile("HR01", fileName));
     }
 
     [HttpGet("RequestedEventDetailsForFile")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
                                                                                           [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        return (await manager.GetRequestedSINEventDetailDataForFile("HR01", fileName)).Items;
+        return (await manager.GetRequestedSINEventDetailDataForFile("HR01", fileName));
     }
 
 }

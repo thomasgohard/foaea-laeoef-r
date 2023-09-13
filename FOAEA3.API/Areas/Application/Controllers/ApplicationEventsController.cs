@@ -32,7 +32,7 @@ public class ApplicationEventsController : FoaeaControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] string id,
+    public async Task<ActionResult<ApplicationEventsList>> GetEvents([FromRoute] string id,
                                                                           [FromQuery] int? queue,
                                                                           [FromServices] IRepositories repositories)
     {
@@ -58,7 +58,7 @@ public class ApplicationEventsController : FoaeaControllerBase
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<ApplicationEventsList>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 

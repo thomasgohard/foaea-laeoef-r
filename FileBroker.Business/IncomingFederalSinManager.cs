@@ -95,7 +95,7 @@ public class IncomingFederalSinManager : IncomingFederalManagerBase
 
     }
 
-    private async Task UpdateStateForSinEvent(List<ApplicationEventData> requestedEvents, int eventId, string newState)
+    private async Task UpdateStateForSinEvent(ApplicationEventsList requestedEvents, int eventId, string newState)
     {
         var eventsForThisAppl = requestedEvents.Where(m => m.Event_Id == eventId).ToList();
 
@@ -108,7 +108,7 @@ public class IncomingFederalSinManager : IncomingFederalManagerBase
     }
 
     private async Task UpdateApplicationBasedOnReceivedSinResult(SinInboundToApplData updatedSinDataSummary,
-                                                                 List<ApplicationEventData> requestedEvents)
+                                                                 ApplicationEventsList requestedEvents)
     {
         string appl_EnfSrv_Cd = updatedSinDataSummary.Appl_EnfSrv_Cd;
         string appl_CtrlCd = updatedSinDataSummary.Appl_CtrlCd;
@@ -240,8 +240,8 @@ public class IncomingFederalSinManager : IncomingFederalManagerBase
     }
 
     private void UpdateSinEventTables(SINResultData sinResult,
-                                      List<ApplicationEventData> requestedEvents,
-                                      List<ApplicationEventDetailData> requestedEventDetails,
+                                      ApplicationEventsList requestedEvents,
+                                      ApplicationEventDetailsList requestedEventDetails,
                                       string flatFileName, short appLiSt_Cd)
     {
         var eventForThisAppl = requestedEvents.Where(m => m.Appl_EnfSrv_Cd == sinResult.Appl_EnfSrv_Cd &&

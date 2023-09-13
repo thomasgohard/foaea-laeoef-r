@@ -22,13 +22,13 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         return await GetEventsForQueue(id, repositories, EventQueue.EventSIN_dtl);
     }
 
     [HttpGet("{id}/Trace")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
         return await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
     }
@@ -67,7 +67,7 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<ApplicationEventDetailsList>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 

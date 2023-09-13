@@ -9,7 +9,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         string Token { get; set; }
 
         Task CloseNETPTraceEvents();
-        Task<List<ApplicationEventData>> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle);
-        Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle);
+        Task<ApplicationEventsList> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle);
+        Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle);
     }
 }

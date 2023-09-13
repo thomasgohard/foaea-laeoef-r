@@ -17,16 +17,16 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedSINEventDataForFile(string fileName)
+        public async Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string fileName)
         {
             string apiCall = $"api/v1/applicationFederalSins/RequestedEventsForFile?fileName={fileName}";
-            return await ApiHelper.GetData<List<ApplicationEventData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventsList>(apiCall, token: Token);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFile(string fileName)
+        public async Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string fileName)
         {
             string apiCall = $"api/v1/applicationFederalSins/RequestedEventDetailsForFile?fileName={fileName}";
-            return await ApiHelper.GetData<List<ApplicationEventDetailData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventDetailsList>(apiCall, token: Token);
         }
 
         public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
@@ -35,11 +35,11 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetData<List<SinInboundToApplData>>(apiCall, token: Token);
         }
 
-        public async Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
+        public async Task<ApplicationEventsList> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
             string apiCall = $"api/v1/applicationEvents/{key}";
-            return await ApiHelper.GetData<List<ApplicationEventData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventsList>(apiCall, token: Token);
         }
 
         public async Task SaveEvent(ApplicationEventData eventData)

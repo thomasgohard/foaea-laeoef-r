@@ -289,7 +289,7 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task FullyServiceApplication()
         {
-            await SetNewStateTo(ApplicationState.EXPIRED_15);
+            await SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
 
             MakeUpperCase();
             await UpdateApplication();
@@ -522,12 +522,12 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             return await EventManager.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrv_Cd, string cycle)
         {
             return await EventDetailManager.GetActiveTracingEventDetails(enfSrv_Cd, cycle);
         }

@@ -11,12 +11,12 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<ApplicationEventData>> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null);
-        Task<List<ApplicationEventData>> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState);
-        Task<List<ApplicationEventData>> GetActiveEventBFs();
+        Task<ApplicationEventsList> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null);
+        Task<ApplicationEventsList> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState);
+        Task<ApplicationEventsList> GetActiveEventBFs();
         Task<bool> SaveEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
                        string activeState = "");
-        Task<bool> SaveEvents(List<ApplicationEventData> events, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        Task<bool> SaveEvents(ApplicationEventsList events, ApplicationState applicationState = ApplicationState.UNDEFINED,
                         string activeState = "");
         string GetLastError();
         
@@ -25,12 +25,12 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task CloseNETPTraceEvents();
         Task<int> GetTraceEventCount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
                                EventCode eventReasonCode, int eventId);
-        Task<List<ApplicationEventData>> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle);
-        Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle);
+        Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                         string appl_CtrlCd);
 
         Task DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd);
-        Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName);
+        Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName);
         Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary();
     }
 }

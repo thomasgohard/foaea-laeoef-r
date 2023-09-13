@@ -538,37 +538,37 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool revertedSomeFields = false;
 
-            if ((Application.Appl_EnfSrv_Cd != current.Appl_EnfSrv_Cd) ||
-                (Application.Appl_CtrlCd != current.Appl_CtrlCd) ||
-                (Application.Subm_SubmCd != current.Subm_SubmCd) ||
-                (Application.Subm_Recpt_SubmCd != current.Subm_Recpt_SubmCd) ||
+            if ((Application.Appl_EnfSrv_Cd?.Trim() != current.Appl_EnfSrv_Cd?.Trim()) ||
+                (Application.Appl_CtrlCd?.Trim() != current.Appl_CtrlCd?.Trim()) ||
+                (Application.Subm_SubmCd?.Trim() != current.Subm_SubmCd?.Trim()) ||
+                (Application.Subm_Recpt_SubmCd?.Trim() != current.Subm_Recpt_SubmCd?.Trim()) ||
                 (!Application.Appl_Lgl_Dte.AreDatesEqual(current.Appl_Lgl_Dte)) ||
                 (!Application.Appl_Rcptfrm_Dte.AreDatesEqual(current.Appl_Rcptfrm_Dte)) ||
-                (Application.Appl_Group_Batch_Cd != current.Appl_Group_Batch_Cd) ||
-                (Application.Subm_Affdvt_SubmCd != current.Subm_Affdvt_SubmCd) ||
+                (Application.Appl_Group_Batch_Cd?.Trim() != current.Appl_Group_Batch_Cd?.Trim()) ||
+                (Application.Subm_Affdvt_SubmCd?.Trim() != current.Subm_Affdvt_SubmCd?.Trim()) ||
                 (!Application.Appl_RecvAffdvt_Dte.AreDatesEqual(current.Appl_RecvAffdvt_Dte)) ||
-                (Application.Appl_Affdvt_DocTypCd != current.Appl_Affdvt_DocTypCd) ||
-                (Application.Appl_JusticeNr != current.Appl_JusticeNr) ||
-                (Application.Appl_Crdtr_FrstNme != current.Appl_Crdtr_FrstNme) ||
-                (Application.Appl_Crdtr_MddleNme != current.Appl_Crdtr_MddleNme) ||
-                (Application.Appl_Crdtr_SurNme != current.Appl_Crdtr_SurNme) ||
-                (Application.Appl_Dbtr_FrstNme != current.Appl_Dbtr_FrstNme) ||
-                (Application.Appl_Dbtr_MddleNme != current.Appl_Dbtr_MddleNme) ||
-                (Application.Appl_Dbtr_SurNme != current.Appl_Dbtr_SurNme) ||
+                (Application.Appl_Affdvt_DocTypCd?.Trim() != current.Appl_Affdvt_DocTypCd?.Trim()) ||
+                (Application.Appl_JusticeNr?.Trim() != current.Appl_JusticeNr?.Trim()) ||
+                (Application.Appl_Crdtr_FrstNme?.Trim() != current.Appl_Crdtr_FrstNme?.Trim()) ||
+                (Application.Appl_Crdtr_MddleNme?.Trim() != current.Appl_Crdtr_MddleNme?.Trim()) ||
+                (Application.Appl_Crdtr_SurNme?.Trim() != current.Appl_Crdtr_SurNme?.Trim()) ||
+                (Application.Appl_Dbtr_FrstNme?.Trim() != current.Appl_Dbtr_FrstNme?.Trim()) ||
+                (Application.Appl_Dbtr_MddleNme?.Trim() != current.Appl_Dbtr_MddleNme?.Trim()) ||
+                (Application.Appl_Dbtr_SurNme?.Trim() != current.Appl_Dbtr_SurNme?.Trim()) ||
                 (Application.Appl_Dbtr_Parent_SurNme_Birth != current.Appl_Dbtr_Parent_SurNme_Birth) ||
                 (!Application.Appl_Dbtr_Brth_Dte.AreDatesEqual(current.Appl_Dbtr_Brth_Dte)) ||
-                (Application.Appl_Dbtr_LngCd != current.Appl_Dbtr_LngCd) ||
-                (Application.Appl_Dbtr_Gendr_Cd != current.Appl_Dbtr_Gendr_Cd) ||
-                (Application.Appl_Dbtr_Entrd_SIN != current.Appl_Dbtr_Entrd_SIN) ||
-                (Application.Appl_Dbtr_Cnfrmd_SIN != current.Appl_Dbtr_Cnfrmd_SIN) ||
-                (Application.Appl_Dbtr_RtrndBySrc_SIN != current.Appl_Dbtr_RtrndBySrc_SIN) ||
-                (Application.Medium_Cd != current.Medium_Cd) ||
+                (Application.Appl_Dbtr_LngCd?.Trim() != current.Appl_Dbtr_LngCd?.Trim()) ||
+                (Application.Appl_Dbtr_Gendr_Cd?.Trim() != current.Appl_Dbtr_Gendr_Cd?.Trim()) ||
+                (Application.Appl_Dbtr_Entrd_SIN?.Trim() != current.Appl_Dbtr_Entrd_SIN?.Trim()) ||
+                (Application.Appl_Dbtr_Cnfrmd_SIN?.Trim() != current.Appl_Dbtr_Cnfrmd_SIN?.Trim()) ||
+                (Application.Appl_Dbtr_RtrndBySrc_SIN?.Trim() != current.Appl_Dbtr_RtrndBySrc_SIN?.Trim()) ||
+                (Application.Medium_Cd?.Trim() != current.Medium_Cd?.Trim()) ||
                 (!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
                 (Application.Appl_SIN_Cnfrmd_Ind != current.Appl_SIN_Cnfrmd_Ind) ||
-                (Application.AppCtgy_Cd != current.AppCtgy_Cd) ||
-                (Application.AppReas_Cd != current.AppReas_Cd) ||
+                (Application.AppCtgy_Cd?.Trim() != current.AppCtgy_Cd?.Trim()) ||
+                (Application.AppReas_Cd?.Trim() != current.AppReas_Cd?.Trim()) ||
                 (!Application.Appl_Create_Dte.AreDatesEqual(current.Appl_Create_Dte)) ||
-                (Application.Appl_Create_Usr != current.Appl_Create_Usr) ||
+                (Application.Appl_Create_Usr?.Trim() != current.Appl_Create_Usr?.Trim()) ||
                 (Application.Appl_WFID != current.Appl_WFID) ||
                 (!Application.Appl_Crdtr_Brth_Dte.AreDatesEqual(current.Appl_Crdtr_Brth_Dte)))
             {
