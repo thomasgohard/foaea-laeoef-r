@@ -79,7 +79,7 @@ public class TracingEventsController : FoaeaControllerBase
         var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
         if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
-            return Ok(manager.EventManager.GetApplicationEventsForQueue(queue));
+            return Ok(await manager.EventManager.GetApplicationEventsForQueue(queue));
         else
             return NotFound();
     }

@@ -30,17 +30,7 @@ public class TracingEventDetailsController : FoaeaControllerBase
     [HttpGet("{id}/Trace")]
     public async Task<ActionResult<ApplicationEventDetailsList>> GetTraceEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
-        //var result = await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
-        //return result;
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
-
-        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
-        {
-            var result = await manager.EventDetailManager.GetApplicationEventDetailsForQueue(EventQueue.EventTrace_dtl);
-            return Ok(result);
-        }
-        else
-            return NotFound();
+        return await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
     }
 
     [HttpPost("")]
@@ -84,7 +74,7 @@ public class TracingEventDetailsController : FoaeaControllerBase
 
         if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
         {
-            var result = manager.EventDetailManager.GetApplicationEventDetailsForQueue(queue);
+            var result = await manager.EventDetailManager.GetApplicationEventDetailsForQueue(queue);
             return Ok(result);
         }
         else
