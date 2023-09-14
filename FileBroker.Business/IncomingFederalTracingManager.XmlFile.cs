@@ -42,7 +42,7 @@ public partial class IncomingFederalTracingManager
                 }
                 try
                 {
-                    await SendTraceFinancialResultToFoaea(tracingFile.TraceResponse, fileTableData.PrcId, "RC02", cycle, fileNameNoCycle);
+                    await SendTraceFinancialResultToFoaea(tracingFile.TraceResponse, fileTableData.PrcId, "RC02", cycle, flatFileName);
                 }
                 finally
                 {
@@ -90,7 +90,7 @@ public partial class IncomingFederalTracingManager
             item.TrcRsp_Trace_CyclNr = (short)appl.Trace_Cycl_Qty;
 
             await APIs.TracingResponses.AddTraceFinancialResponseData(item);
-            await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
+            await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, 0,
                                              activeTraceEvents, activeTraceEventDetails);
         }
 
