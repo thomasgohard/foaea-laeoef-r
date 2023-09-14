@@ -44,6 +44,17 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
                 await APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
             }
 
+        }
+    }
+
+    private async Task ResetOrCloseTraceEventDetails(string applEnfSrvCd, string applCtrlCd, ApplicationEventsList activeTraceEvents)
+    {
+        var activeTraceEvent = activeTraceEvents
+                                   .Where(m => m.Appl_EnfSrv_Cd.Trim() == applEnfSrvCd.Trim() && m.Appl_CtrlCd.Trim() == applCtrlCd.Trim())
+                                   .FirstOrDefault();
+
+        if (activeTraceEvent != null)
+        {
             var activeEventDetails = await APIs.TracingEvents.GetActiveTraceDetailEventsForApplication(applEnfSrvCd, applCtrlCd);
 
             if (!activeEventDetails.Any())

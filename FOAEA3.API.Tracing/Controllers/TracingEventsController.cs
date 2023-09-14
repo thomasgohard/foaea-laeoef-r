@@ -42,7 +42,13 @@ public class TracingEventsController : FoaeaControllerBase
         else
             eventQueue = EventQueue.EventSubm;
 
-        return await GetEventsForQueue(id, repositories, eventQueue);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventManager.GetApplicationEventsForQueue(eventQueue));
+        else
+            return NotFound();
+
     }
 
     [HttpGet("RequestedTRCIN")]
@@ -74,13 +80,4 @@ public class TracingEventsController : FoaeaControllerBase
         return Ok(result);
     }
 
-    private async Task<ActionResult<ApplicationEventsList>> GetEventsForQueue(ApplKey id, IRepositories repositories, EventQueue queue)
-    {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
-
-        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
-            return Ok(await manager.EventManager.GetApplicationEventsForQueue(queue));
-        else
-            return NotFound();
-    }
 }

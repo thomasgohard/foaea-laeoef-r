@@ -154,16 +154,16 @@ public partial class IncomingFederalTracingManager
             else
             {
                 foreach (var item in fileTracingSummary)
-                {
-                    var appl = await APIs.TracingApplications.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
-
                     await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, 0,
                                                      activeTraceEvents, activeTraceEventDetails);
-                }
+
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
                 await SendTRACEDataToTrcRsp(tracingResponses, errors);
                 await UpdateTracingApplications(enfSrvCd, fileCycle, fedSource);
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+
+                foreach(var item in fileTracingSummary)
+                    await ResetOrCloseTraceEventDetails(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, activeTraceEvents);
             }
         }
         catch (Exception e)
@@ -171,7 +171,7 @@ public partial class IncomingFederalTracingManager
             errors.Add("Error sending tracing responses to FOAEA: " + e.Message);
         }
     }
-
+        
     private async Task<List<TraceResponseData>> ExtractTracingResponsesFromFileData(FedTracingFileBase tracingFileData, string enfSrvCd, string fileCycle,
                                                                                     List<string> errors)
     {

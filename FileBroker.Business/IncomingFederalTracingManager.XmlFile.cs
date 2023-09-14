@@ -1,4 +1,5 @@
-﻿using DBHelper;
+﻿using Azure;
+using DBHelper;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -97,6 +98,13 @@ public partial class IncomingFederalTracingManager
         await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
         await UpdateTracingApplications(enfSrvCd, fileCycle.ToString(), FederalSource.CRA_TracingFinancials);
         await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
+
+        foreach (var response in traceResponses)
+        {
+            var item = ConvertCraResponseToFoaeaResponseData(response, 0);
+            await ResetOrCloseTraceEventDetails(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, activeTraceEvents);
+        }
+
     }
 
     private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)
