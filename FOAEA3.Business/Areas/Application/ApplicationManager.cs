@@ -312,9 +312,6 @@ namespace FOAEA3.Business.Areas.Application
             }
             else // regular update
             {
-                Application.AppLiSt_Cd = current.Application.AppLiSt_Cd;
-                Application.ActvSt_Cd = current.Application.ActvSt_Cd;
-
                 Validation.ValidateAndRevertNonUpdateFields(current.Application);
 
                 // update reason text with message
