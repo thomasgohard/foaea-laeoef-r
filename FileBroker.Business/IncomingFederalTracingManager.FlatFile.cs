@@ -157,7 +157,7 @@ public partial class IncomingFederalTracingManager
                 {
                     var appl = await APIs.TracingApplications.GetApplication(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd);
 
-                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, (short)appl.AppLiSt_Cd,
+                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, 0,
                                                      activeTraceEvents, activeTraceEventDetails);
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);

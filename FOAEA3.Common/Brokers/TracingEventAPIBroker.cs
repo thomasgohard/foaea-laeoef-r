@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
 using Spire.Pdf.Lists;
@@ -34,5 +35,18 @@ namespace FOAEA3.Common.Brokers
             var data = await ApiHelper.GetData<List<ApplicationEventData>>(apiCall, token: Token);
             return new ApplicationEventsList(data);
         }
+
+        public async Task<ApplicationEventDetailsList> GetActiveTraceDetailEventsForApplication(string appl_EnfSrvCd, string appl_CtrlCd)
+        {
+            string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
+            string apiCall = $"api/v1/tracingEventDetails/{key}/Trace";
+            var data = await ApiHelper.GetData<List<ApplicationEventDetailData>>(apiCall, token: Token);
+
+            data.RemoveAll(m => m.ActvSt_Cd.ToUpper() != "A");
+
+            return new ApplicationEventDetailsList(data);
+        }
+
+
     }
 }

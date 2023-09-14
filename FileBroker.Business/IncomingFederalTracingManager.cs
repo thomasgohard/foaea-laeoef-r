@@ -26,7 +26,7 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
             await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
 
             int eventId = activeTraceEvent.Event_Id;
-            string eventReason = $"[FileNm:{flatFileName}[ErrDes:000000MSGBRO]" +
+            string eventReason = $"[FileNm:{Path.GetFileName(flatFileName)}][ErrDes:000000MSGBRO]" +
                                  $"[(EnfSrv:{applEnfSrvCd.Trim()})(CtrlCd:{applCtrlCd.Trim()})]";
 
             var activeTraceEventDetail = activeTraceEventDetails
@@ -42,6 +42,23 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
                 activeTraceEventDetail.Event_Compl_Dte = DateTime.Now;
 
                 await APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
+            }
+
+            var activeEventDetails = await APIs.TracingEvents.GetActiveTraceDetailEventsForApplication(applEnfSrvCd, applCtrlCd);
+
+            if (!activeEventDetails.Any())
+            {
+                activeTraceEvent.ActvSt_Cd = "C";
+                activeTraceEvent.Event_Compl_Dte = DateTime.Now;
+
+                await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
+            }
+            else
+            {
+                activeTraceEvent.ActvSt_Cd = "A";
+                activeTraceEvent.Event_Compl_Dte = DateTime.Now;
+
+                await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
             }
         }
     }
