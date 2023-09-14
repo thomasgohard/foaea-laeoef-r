@@ -24,13 +24,23 @@ public class TracingEventDetailsController : FoaeaControllerBase
     [HttpGet("{id}/SIN")]
     public async Task<ActionResult<ApplicationEventDetailsList>> GetSINEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueue(id, repositories, EventQueue.EventSIN_dtl);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueue(EventQueue.EventSIN_dtl));
+        else
+            return NotFound();
     }
 
     [HttpGet("{id}/Trace")]
     public async Task<ActionResult<ApplicationEventDetailsList>> GetTraceEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueue(EventQueue.EventTrace_dtl));
+        else
+            return NotFound();
     }
 
     [HttpPost("")]
@@ -67,17 +77,4 @@ public class TracingEventDetailsController : FoaeaControllerBase
 
     }
 
-    private async Task<ActionResult<ApplicationEventDetailsList>> GetEventsForQueue(ApplKey id,
-                                                                IRepositories repositories, EventQueue queue)
-    {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
-
-        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
-        {
-            var result = await manager.EventDetailManager.GetApplicationEventDetailsForQueue(queue);
-            return Ok(result);
-        }
-        else
-            return NotFound();
-    }
 }
