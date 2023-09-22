@@ -69,16 +69,14 @@ namespace FOAEA3.Business.Areas.Application
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
-            EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
-
-            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
-
             EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                       appState: ApplicationState.APPLICATION_REINSTATED_11);
-
             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                     appState: ApplicationState.APPLICATION_REINSTATED_11,
                                     effectiveDateTime: DateTime.Now.AddMonths(3));
+
+            EventManager.AddTraceEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
+            EventManager.AddSubmEvent(EventCode.C50780_APPLICATION_ACCEPTED, appState: ApplicationState.APPLICATION_ACCEPTED_10);
 
             TracingApplication.Messages.AddInformation(EventCode.C50780_APPLICATION_ACCEPTED);
 
@@ -89,18 +87,28 @@ namespace FOAEA3.Business.Areas.Application
 
         protected override async Task Process_11_ApplicationReinstated()
         {
-            if (TracingApplication.Appl_RecvAffdvt_Dte is null)
+            if (!TracingValidation.IsC78() && TracingApplication.Appl_RecvAffdvt_Dte is null)
             {
                 await AddSystemError(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
-                               $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
+                                     $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
                 return;
             }
 
             DateTime quarterDate;
-            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd,
-                                                                             TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1),
-                                                                             BFEventReasonCode,
-                                                                             BFEvent_Id);
+            DateTime activatedDate;
+            if (TracingValidation.IsC78())
+                activatedDate = TracingApplication.Appl_Create_Dte;
+            else if (TracingApplication.Appl_RecvAffdvt_Dte is not null)
+                activatedDate = TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1);
+            else
+            {
+                await AddSystemError(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
+                                     $"Appl_RecvAffdvt_Dte is null for {Appl_EnfSrv_Cd}-{Appl_CtrlCd}. Cannot process state 11 (Reinstate).");
+                return;
+            }
+
+            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd, activatedDate, 
+                                                                        BFEventReasonCode, BFEvent_Id);
 
             switch (eventTraceCount)
             {
@@ -128,20 +136,20 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.ActvSt_Cd = "A";
             TracingApplication.Appl_Reactv_Dte = ReinstateEffectiveDate;
 
-            if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > DateTime.Now)
+            if (activatedDate.AddYears(1) > DateTime.Now)
             {
-                if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > quarterDate)
+                if (activatedDate.AddYears(1) > quarterDate)
                 {
                     if (eventTraceCount <= 3)
                         await SetTracingForReinstate(quarterDate, quarterDate, EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                     else if (eventTraceCount == 4)
-                        await SetTracingForReinstate(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                     else if (eventTraceCount == 5)
                     {
                         TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
                         EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                                 appState: ApplicationState.APPLICATION_REINSTATED_11,
-                                                effectiveDateTime: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
+                                                effectiveDateTime: activatedDate.AddYears(1).AddDays(1));
                     }
                     else
                     {
@@ -154,20 +162,20 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     if (eventTraceCount > 4)
                     {
-                        if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > DateTime.Now)
+                        if (activatedDate.AddYears(1) > DateTime.Now)
                         {
                             TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
                             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                                     appState: ApplicationState.APPLICATION_REINSTATED_11,
-                                                    effectiveDateTime: TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1));
+                                                    effectiveDateTime: activatedDate.AddYears(1).AddDays(1));
                         }
                         else
                             await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }
                     else
                     {
-                        if (TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1) > DateTime.Now)
-                            await SetTracingForReinstate(quarterDate, TracingApplication.Appl_RecvAffdvt_Dte.Value.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        if (activatedDate.AddYears(1) > DateTime.Now)
+                            await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
                         else
                             await SetNewStateTo(ApplicationState.EXPIRED_15);
                     }

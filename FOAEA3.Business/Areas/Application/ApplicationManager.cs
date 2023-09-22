@@ -343,7 +343,6 @@ namespace FOAEA3.Business.Areas.Application
                 // update messages for display in UI
                 if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
                 if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
-
             }
             catch (Exception e)
             {
@@ -518,16 +517,15 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task ApplySINconfirmation()
         {
-            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
-
             var sinManager = new ApplicationSINManager(Application, this);
             await sinManager.UpdateSINChangeHistory();
 
             foreach (var eventItem in EventManager.Events)
                 eventItem.Subm_Update_SubmCd = "SYSTEM";
 
-            await UpdateApplicationNoValidation();
+            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
 
+            await UpdateApplicationNoValidation();
         }
 
         private static string BuildCommentsChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)

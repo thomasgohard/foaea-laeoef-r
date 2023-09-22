@@ -225,7 +225,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                 break;
 
             case 'S': // Provincial Child Support Services
-                entity = "03";
+                entity = "07";
                 break;
 
             default: // MEP

@@ -120,7 +120,6 @@ namespace DBHelper
                     using SqlDataReader rdr = await cmd.ExecuteReaderAsync();
                     while (await rdr.ReadAsync())
                     {
-
                         var data = new Tdata();
 
                         var dataReader = new DBHelperReader(rdr);

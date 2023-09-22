@@ -46,7 +46,7 @@ namespace FileBroker.Business.Helpers
                 return errors;
             }
 
-            string xmlData = File.ReadAllText(fullPath);
+            string xmlData = File.ReadAllText(fullPath, System.Text.Encoding.UTF8);
             string jsonText = FileHelper.ConvertXmlToJson(xmlData, errors);
 
             if (errors.Any())
