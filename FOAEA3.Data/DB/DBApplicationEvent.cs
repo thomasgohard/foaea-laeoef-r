@@ -320,11 +320,11 @@ namespace FOAEA3.Data.DB
                 {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd},
                 {"Appl_CtrlCd", appl_CtrlCd},
                 {"Appl_RecvAffdvt_Dte", receivedAffidavitDate},
-                {"Event_Reas_Cd", eventReasonCode},
+                {"Event_Reas_Cd", (int) eventReasonCode},
                 {"EventId", eventId},
             };
 
-            return await MainDB.ExecProcAsync("EvntTraceGetEventCount", parameters);
+            return await MainDB.GetDataFromProcSingleValueAsync<int>("EvntTraceGetEventCount", parameters);
         }
 
         public async Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
@@ -433,19 +433,19 @@ namespace FOAEA3.Data.DB
         {
             data.Event_Id = (int)rdr["Event_Id"];
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string; // can be null 
-            data.Event_TimeStamp = (DateTime)rdr["Event_TimeStamp"];
-            data.Event_Compl_Dte = rdr["Event_Compl_Dte"] as DateTime?; // can be null 
             if (rdr["Event_Reas_Cd"] != null)  // can be null
             {
                 int reasonCode = (int)rdr["Event_Reas_Cd"];
                 data.Event_Reas_Cd = (EventCode)reasonCode;
             }
-            data.Event_Reas_Text = rdr["Event_Reas_Text"] as string; // can be null 
-            data.Event_Priority_Ind = rdr["Event_Priority_Ind"] as string; // can be null 
             data.Event_Effctv_Dte = (DateTime)rdr["Event_Effctv_Dte"];
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
             data.AppLiSt_Cd = (ApplicationState)rdr["AppLiSt_Cd"];
 
+            if (rdr.ColumnExists("Event_TimeStamp")) data.Event_TimeStamp = (DateTime)rdr["Event_TimeStamp"];
+            if (rdr.ColumnExists("Event_Compl_Dte")) data.Event_Compl_Dte = rdr["Event_Compl_Dte"] as DateTime?; // can be null 
+            if (rdr.ColumnExists("Event_Reas_Text")) data.Event_Reas_Text = rdr["Event_Reas_Text"] as string; // can be null 
+            if (rdr.ColumnExists("Event_Priority_Ind")) data.Event_Priority_Ind = rdr["Event_Priority_Ind"] as string; // can be null 
             if (rdr.ColumnExists("Subm_SubmCd")) data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
             if (rdr.ColumnExists("Subm_Recpt_SubmCd")) data.Subm_Recpt_SubmCd = rdr["Subm_Recpt_SubmCd"] as string;
             if (rdr.ColumnExists("Event_RecptSubm_ActvStCd")) data.Event_RecptSubm_ActvStCd = rdr["Event_RecptSubm_ActvStCd"] as string;

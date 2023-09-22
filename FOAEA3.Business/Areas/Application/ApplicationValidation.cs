@@ -563,7 +563,7 @@ namespace FOAEA3.Business.Areas.Application
                 (Application.Appl_Dbtr_Cnfrmd_SIN?.Trim() != current.Appl_Dbtr_Cnfrmd_SIN?.Trim()) ||
                 (Application.Appl_Dbtr_RtrndBySrc_SIN?.Trim() != current.Appl_Dbtr_RtrndBySrc_SIN?.Trim()) ||
                 (Application.Medium_Cd?.Trim() != current.Medium_Cd?.Trim()) ||
-                (!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
+                //(!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
                 (Application.Appl_SIN_Cnfrmd_Ind != current.Appl_SIN_Cnfrmd_Ind) ||
                 (Application.AppCtgy_Cd?.Trim() != current.AppCtgy_Cd?.Trim()) ||
                 (Application.AppReas_Cd?.Trim() != current.AppReas_Cd?.Trim()) ||
@@ -599,7 +599,7 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_Dbtr_Cnfrmd_SIN = current.Appl_Dbtr_Cnfrmd_SIN;
                 Application.Appl_Dbtr_RtrndBySrc_SIN = current.Appl_Dbtr_RtrndBySrc_SIN;
                 Application.Medium_Cd = current.Medium_Cd;
-                Application.Appl_Reactv_Dte = current.Appl_Reactv_Dte;
+                //Application.Appl_Reactv_Dte = current.Appl_Reactv_Dte;
                 Application.Appl_SIN_Cnfrmd_Ind = current.Appl_SIN_Cnfrmd_Ind;
                 Application.AppCtgy_Cd = current.AppCtgy_Cd;
                 Application.AppReas_Cd = current.AppReas_Cd;

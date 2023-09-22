@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Business.Areas.Application;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
@@ -36,28 +37,28 @@ namespace FOAEA3.Business.BackendProcesses
             {
                 try
                 {
-                    var applicationManager = new ApplicationManager(null, DB, config, User);
+                    var applicationManager = new ApplicationManager(new ApplicationData(), DB, config, User);
                     await applicationManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
 
                     switch (applicationManager.GetCategory())
                     {
-                        case "I01":
-                            var interceptionManager = new InterceptionManager(null, DB, DBfinance, config, User);
-                            await interceptionManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
-                            await interceptionManager.ProcessBringForwards(bfEvent);
-                            break;
+                        //case "I01":
+                        //    var interceptionManager = new InterceptionManager(DB, DBfinance, config, User);
+                        //    await interceptionManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                        //    await interceptionManager.ProcessBringForwards(bfEvent);
+                        //    break;
 
                         case "T01":
-                            var tracingManager = new TracingManager(null, DB, config, User);
+                            var tracingManager = new TracingManager(DB, config, User);
                             await tracingManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
                             await tracingManager.ProcessBringForwards(bfEvent);
                             break;
 
-                        case "L01":
-                            var licencingManager = new LicenceDenialManager(null, DB, config, User);
-                            await licencingManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
-                            await licencingManager.ProcessBringForwards(bfEvent);
-                            break;
+                        //case "L01":
+                        //    var licencingManager = new LicenceDenialManager(DB, config, User);
+                        //    await licencingManager.LoadApplication(bfEvent.Appl_EnfSrv_Cd, bfEvent.Appl_CtrlCd);
+                        //    await licencingManager.ProcessBringForwards(bfEvent);
+                        //    break;
 
                         default:
                             break;

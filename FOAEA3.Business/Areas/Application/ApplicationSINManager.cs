@@ -106,9 +106,10 @@ namespace FOAEA3.Business.Areas.Application
             }
 
             ApplicationManager.MakeUpperCase();
-            await ApplicationManager.UpdateApplicationNoValidation();
 
             await UpdateSINChangeHistory(HRDCcomments);
+
+            await ApplicationManager.UpdateApplicationNoValidation();
 
             await EventManager.SaveEvents();
         }
@@ -138,7 +139,8 @@ namespace FOAEA3.Business.Areas.Application
                 else
                 {
                     sinChangeHistoryData.SINChangeHistoryComment = "SIN Confirmation";
-                    EventManager.AddEvent(EventCode.C50650_SIN_CONFIRMED, eventReasonText: await ApplicationManager.GetSINResultsEventText());
+                    EventManager.AddEvent(EventCode.C50650_SIN_CONFIRMED, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
+                                          eventReasonText: await ApplicationManager.GetSINResultsEventText());
                 }
 
                 await DB.SINChangeHistoryTable.CreateSINChangeHistory(sinChangeHistoryData);
