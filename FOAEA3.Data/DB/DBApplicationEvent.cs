@@ -239,8 +239,9 @@ namespace FOAEA3.Data.DB
 
                 case EventQueue.EventBF:
                     parameters.Add("Event_Id", eventData.Event_Id);
-                    parameters.Add("AppLiSt_Cd", applicationState);
-                    parameters.Add("ActvSt_Cd", activeState);
+                    parameters.Add("Event_Effctv_Dte", eventData.Event_Effctv_Dte);
+                    parameters.Add("AppLiSt_Cd", applicationState == ApplicationState.UNDEFINED ? eventData.AppLiSt_Cd : applicationState);
+                    parameters.Add("ActvSt_Cd", string.IsNullOrEmpty(activeState) ? eventData.ActvSt_Cd : activeState);
 
                     await MainDB.ExecProcAsync("EvntBF_Update", parameters);
                     break;

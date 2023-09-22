@@ -55,7 +55,7 @@ namespace BackendProcesses.CommandLine
             Console.WriteLine("OPTION 5 - Run Auto Accept Variations for QC");
             Console.WriteLine("OPTION 6 - ESD Event Processing");
             Console.WriteLine("OPTION 7 - Update Fixed Amount Recalc Date");
-            Console.WriteLine("OPTION 8 - Create ESDC (NEPT) Trace Events");
+            Console.WriteLine("OPTION 8 - Create ESDC (NETP) Trace Events");
             Console.WriteLine("OPTION 9 - FTP Batches Without Transactions Notifications");
             Console.WriteLine("OPTION 10 - Run Amount Owed Calculations");
             Console.WriteLine("OPTION 11 - Delete CRA Outgoing History Data");

@@ -9,6 +9,7 @@ using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -316,7 +317,18 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(EventCode.C50780_APPLICATION_ACCEPTED);
 
             EventManager.AddEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: traceDate);
-            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
+
+            var eventBF = await EventManager.GetEventBF(TracingApplication.Subm_SubmCd, Appl_CtrlCd,
+                                                  EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
+
+            if (eventBF is not null)
+            {
+                var firstEventBF = eventBF.First();
+                firstEventBF.Event_Effctv_Dte = bfDate;
+                EventManager.UpdateEvent(firstEventBF);
+            }
+            else
+                EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
 
             await Validation.AddDuplicateCreditorWarningEvents();
         }

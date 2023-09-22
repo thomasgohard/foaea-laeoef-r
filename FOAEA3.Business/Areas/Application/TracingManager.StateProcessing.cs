@@ -71,6 +71,7 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.AddSubmEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                       appState: ApplicationState.APPLICATION_REINSTATED_11);
+
             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
                                     appState: ApplicationState.APPLICATION_REINSTATED_11,
                                     effectiveDateTime: DateTime.Now.AddMonths(3));
@@ -107,7 +108,7 @@ namespace FOAEA3.Business.Areas.Application
                 return;
             }
 
-            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd, activatedDate, 
+            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd, activatedDate,
                                                                         BFEventReasonCode, BFEvent_Id);
 
             switch (eventTraceCount)
