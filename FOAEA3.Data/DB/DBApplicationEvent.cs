@@ -305,7 +305,6 @@ namespace FOAEA3.Data.DB
                 return true;
             else
                 return false;
-
         }
 
         public async Task CloseNETPTraceEvents()
