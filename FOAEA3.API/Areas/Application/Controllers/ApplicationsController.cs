@@ -8,6 +8,7 @@ using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Spire.Pdf.Lists;
 
 namespace FOAEA3.API.Areas.Application.Controllers;
 
@@ -121,23 +122,32 @@ public class ApplicationsController : FoaeaControllerBase
         }
 
         await sinManager.SINconfirmation(isSinConfirmed: sinConfirmationData.IsSinConfirmed,
-                                              confirmedSin: sinConfirmationData.ConfirmedSIN,
-                                              lastUpdateUser: repositories.CurrentSubmitter);
+                                         confirmedSin: sinConfirmationData.ConfirmedSIN,
+                                         lastUpdateUser: repositories.CurrentSubmitter);
 
         return Ok(application);
     }
 
+    [HttpGet("ConfirmedSIN")]
+    public async Task<ActionResult<List<ApplicationData>>> GetApplicationsForConfirmedSin([FromServices] IRepositories repositories)
+    {
+        string confirmedSin = (await APIBrokerHelper.GetDataFromRequestBody<StringData>(Request)).Data;
+
+        var appManager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        return Ok(await appManager.GetApplicationsForSin(confirmedSin));
+    }
+
     [HttpGet("Stats")]
     public async Task<ActionResult<List<StatsOutgoingProvincialData>>> GetOutgoingProvincialStatusData([FromServices] IRepositories repositories,
-                                                               [FromQuery] int maxRecords,
-                                                               [FromQuery] string activeState,
-                                                               [FromQuery] string recipientCode)
+                                                                                                       [FromQuery] int maxRecords,
+                                                                                                       [FromQuery] string activeState,
+                                                                                                       [FromQuery] string recipientCode)
     {
         var appl = new ApplicationData();
         var applManager = new ApplicationManager(appl, repositories, config, User);
 
         return await applManager.GetProvincialStatsOutgoingData(maxRecords, activeState, recipientCode);
     }
-
 
 }

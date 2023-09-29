@@ -4,10 +4,13 @@ namespace FileBroker.Business;
 
 public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
 {
+    private List<InboundAuditData> InboundAudit { get; }
+
     public IncomingFederalTracingManager(APIBrokerList apis, RepositoryList repositories,
                                          IFileBrokerConfigurationHelper config) :
                                                         base(apis, repositories, config)
     {
+        InboundAudit = new List<InboundAuditData>();
     }
 
     private async Task MarkTraceEventsAsProcessed(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,

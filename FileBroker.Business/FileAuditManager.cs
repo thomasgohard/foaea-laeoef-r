@@ -1,4 +1,5 @@
 ﻿using FOAEA3.Resources;
+using Spire.Pdf.Exporting.XPS.Schema;
 using System.Text;
 
 namespace FileBroker.Business;
@@ -20,7 +21,48 @@ public class FileAuditManager
 
     private bool IsFrench(string provCd) => FrenchProvinceCodes.Contains(provCd);
 
-    public async Task<int> GenerateAuditFile(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
+    public async Task GenerateCraAuditFile(string fileName, List<InboundAuditData> inboundAudit)
+    {
+        var auditFileContent = new StringBuilder();
+
+        auditFileContent.AppendLine($"{LanguageResource.ENFORCEMENT_SERVICE_CODE}\t{LanguageResource.CONTROL_CODE}\t{LanguageResource.SOURCE_REF_NUMBER}\t{LanguageResource.APP_MESSAGE}");
+
+        int successCount = 0;
+        int failureCount = 0;
+        foreach(var auditRow in inboundAudit)
+        {
+            auditFileContent.AppendLine($"{auditRow.EnforcementServiceCode,-30}\t{auditRow.ControlCode,-16}\t" +
+                                        $"{auditRow.SourceReferenceNumber,-30}\t{auditRow.ApplicationMessage}");
+
+            if (auditRow.ApplicationMessage.ToUpper().IndexOf("SUCC") > -1)
+                successCount++;
+            else
+                failureCount++;
+        }
+
+        auditFileContent.AppendLine();
+
+        auditFileContent.AppendLine($"Total records: {successCount + failureCount}");
+        auditFileContent.AppendLine($"Total success: {successCount}");
+        auditFileContent.AppendLine($"Total failed: {failureCount}");
+
+        string fullFileName = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.txt";
+        await File.WriteAllTextAsync(fullFileName, auditFileContent.ToString());
+
+        string recipients = AuditConfiguration.AuditRecipients;
+        string bodyContent = $"Total records: {successCount + failureCount}<br/><br/>" +
+                             $"Total success: {successCount}<br/><br/>" +
+                             $"Total failed: {failureCount}<br/><br/>";
+        await MailService.SendEmail($"Audit {fileName}", recipients, bodyContent, fullFileName);
+
+        if (failureCount >= successCount)
+        {
+            bodyContent = $"Multiple failures loading file: {fileName}<br/><br/>" + bodyContent;
+            await MailService.SendEmail($"Multiple failures loading file: {fileName}", recipients, bodyContent);
+        }
+    }
+
+    public async Task<int> GenerateProvincialAuditFile(string fileName, List<UnknownTag> unknownTags, int errorCount, int warningCount, int successCount)
     {
         string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
@@ -91,7 +133,7 @@ public class FileAuditManager
     }
 
     public async Task SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount,
-                                                  int successCount, int xmlWarningCount, int totalFilesCount)
+                                             int successCount, int xmlWarningCount, int totalFilesCount)
     {
         string provCd = fileName.Substring(0, 2).ToUpper();
         bool isFrench = IsFrench(provCd);

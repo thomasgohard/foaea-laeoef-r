@@ -319,7 +319,7 @@ namespace FOAEA3.Data.DB
             return string.Equals(debtorId, result, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public async Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        public async Task<string> GetDebtorIdByConfirmedSinForCategory(string sin, string category)
         {
             var parameters = new Dictionary<string, object> {
                     { "chrDbtr_Cnfrmd_SIN",  sin},
@@ -345,6 +345,18 @@ namespace FOAEA3.Data.DB
             }
 
             return false;
+        }
+
+        public async Task ModifyMultipleDebtorIds(string debtorId, string debtorSuffix, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "DebtorID",  debtorId },
+                    { "DebtorSuffixID", debtorSuffix },
+                    { "Appl_EnfSrv_Cd", appl_EnfSrv_Cd },
+                    { "Appl_CtrlCd", appl_CtrlCd }
+                };
+
+            await MainDB.ExecProcAsync("ModifyMultipleDebtorID", parameters);
         }
 
         public async Task<DateTime> GetGarnisheeSummonsReceiptDate(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD)
@@ -386,6 +398,27 @@ namespace FOAEA3.Data.DB
             var data = await MainDB.GetDataFromStoredProcViaReturnParametersAsync("MessageBrokerDeleteEISOOUTHistoryBySIN", parameters, returnParameters);
 
             return data["message"] as string;
+        }
+
+        public async Task<List<ApplicationJusticeNumberData>> GetJusticeNumberDataForSin(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Appl_Dbtr_Cnfrmd_SIN", confirmedSIN }
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationJusticeNumberData>("GetApplJusticeNumbersForSIN", parameters, FillJusticeNumberData);
+
+            return data;
+        }
+
+        private void FillJusticeNumberData(IDBHelperReader rdr, ApplicationJusticeNumberData data)
+        {
+            data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
+            data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
+            data.Appl_Dbtr_Cnfrmd_SIN = rdr["Appl_Dbtr_Cnfrmd_SIN"] as string;
+            data.DebtorID = rdr["Dbtr_Id"] as string;
+            data.DebtorIDSuffix = rdr["Appl_JusticeNrSfx"] as string; // can be null 
+            data.StartDate = (DateTime)rdr["Start_Dte"];
         }
 
         public async Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySIN(string confirmedSIN)

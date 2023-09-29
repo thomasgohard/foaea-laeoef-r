@@ -58,7 +58,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: true);
 
-                    int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
+                    int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
                     await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                             counts.ErrorCount, counts.WarningCount, counts.SuccessCount, 
                                                             unknownTags.Count, totalFilesCount);

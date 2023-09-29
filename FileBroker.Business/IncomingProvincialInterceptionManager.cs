@@ -138,7 +138,7 @@ public class IncomingProvincialInterceptionManager : IncomingProvincialManagerBa
 
                     }
 
-                    int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                    int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
                     await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                                        errorCount, warningCount, successCount, unknownTags.Count,
                                                                        totalFilesCount);

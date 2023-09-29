@@ -33,5 +33,7 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications();
         Task<List<EIoutgoingFederalData>> GetEIexchangeOutData(string enfSrv);
+        Task<string> FixDebtorIdForSin(string newSIN);
+        Task<string> DeleteEISOhistoryForSIN(string oldSIN);
     }
 }

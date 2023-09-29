@@ -33,6 +33,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<string> DeleteEISOhistoryForSIN(string oldSIN)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ElectronicSummonsDocumentPdfData> ESDPDF_Create(ElectronicSummonsDocumentPdfData newPdf)
         {
             throw new NotImplementedException();
@@ -44,6 +49,11 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public Task<ElectronicSummonsDocumentZipData> ESD_Create(int processId, string fileName, DateTime dateReceived)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> FixDebtorIdForSin(string newSIN)
         {
             throw new NotImplementedException();
         }

@@ -47,6 +47,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<ApplicationModificationActivitySummaryData>> GetApplicationWithEventForSubmitter(string submCd, int eventReasonCode)
         {
             throw new NotImplementedException();

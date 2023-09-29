@@ -2,6 +2,7 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -175,5 +176,24 @@ namespace FOAEA3.Common.Brokers
             string apiCall = $"api/v1/EISOrequests/EI?enfSrv={enfSrv}";
             return await ApiHelper.GetData<List<EIoutgoingFederalData>>(apiCall, token: Token);
         }
+
+        public async Task<string> FixDebtorIdForSin(string newSIN)
+        {
+            string apiCall = $"api/v1/interceptions/FixDebtorIdForSIN";
+            var data = new StringData { Data = newSIN };
+            var result = await ApiHelper.PutData<StringData, StringData>(apiCall, data, token: Token);
+
+            return result.Data;
+        }
+
+        public async Task<string> DeleteEISOhistoryForSIN(string oldSIN)
+        {
+            string apiCall = $"api/v1/interceptions/DeleteEISOhistoryForOldSIN";
+            var data = new StringData { Data = oldSIN };
+            var result = await ApiHelper.PutData<StringData, StringData>(apiCall, data, token: Token);
+
+            return result.Data;
+        }
+
     }
 }

@@ -5,7 +5,6 @@
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
         private IFileBrokerConfigurationHelper Config { get; }
-
         public List<string> Errors { get; }
 
         public IncomingFederalTracingFile(RepositoryList db,
