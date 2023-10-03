@@ -51,7 +51,7 @@ namespace FOAEA3.Common.Brokers
 
             var confirmedSinData = new StringData { Data = confirmedSIN };
 
-            return await ApiHelper.PutData<List<ApplicationData>, StringData>(apiCall, confirmedSinData, token: Token);
+            return await ApiHelper.GetData<List<ApplicationData>, StringData>(apiCall, confirmedSinData, token: Token);
         }
 
         public async Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData(int maxRecords,

@@ -148,7 +148,7 @@ internal class ApplicationSINManager
 
     }
 
-    public async Task<string> ProcessCRAPendingSIN(string action, string oldSIN = "", string newSIN = "")
+    public async Task<string> ProcessCRAPendingUpdateSIN(string action, string oldSIN = "", string newSIN = "")
     {
         string result = string.Empty;
 

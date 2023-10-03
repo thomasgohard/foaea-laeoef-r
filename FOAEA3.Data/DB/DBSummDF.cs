@@ -27,7 +27,7 @@ namespace FOAEA3.Data.DB
                     { "Dbtr_Cnfrmd_SIN",  confirmedSIN}
                 };
 
-            int count = await MainDB.GetDataFromProcSingleValueAsync<int>("", parameters);
+            int count = await MainDB.GetDataFromProcSingleValueAsync<int>("ActiveDFExistsforSIN", parameters);
 
             return count > 0;
         }

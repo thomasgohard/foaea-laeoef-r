@@ -140,6 +140,7 @@ public partial class IncomingFederalTracingManager
                             PreviousConfirmedSIN = oldSIN,
                             SinUpdateComment = sinComment
                         };
+
                         string message = await APIs.DataModifications.Update(dataModificationData);
 
                         if (string.IsNullOrEmpty(message))

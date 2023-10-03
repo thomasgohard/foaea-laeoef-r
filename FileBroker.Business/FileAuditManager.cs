@@ -31,8 +31,8 @@ public class FileAuditManager
         int failureCount = 0;
         foreach(var auditRow in inboundAudit)
         {
-            auditFileContent.AppendLine($"{auditRow.EnforcementServiceCode,-30}\t{auditRow.ControlCode,-16}\t" +
-                                        $"{auditRow.SourceReferenceNumber,-30}\t{auditRow.ApplicationMessage}");
+            auditFileContent.AppendLine($"{auditRow.EnforcementServiceCode,-24}\t{auditRow.ControlCode,-12}\t" +
+                                        $"{auditRow.SourceReferenceNumber.Trim(),-23}\t{auditRow.ApplicationMessage}");
 
             if (auditRow.ApplicationMessage.ToUpper().IndexOf("SUCC") > -1)
                 successCount++;

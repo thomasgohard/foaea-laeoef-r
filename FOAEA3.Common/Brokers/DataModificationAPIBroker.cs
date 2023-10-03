@@ -18,7 +18,7 @@ namespace FOAEA3.Common.Brokers
         public async Task<string> Update(DataModificationData dataModificationData)
         {
             string apiCall = $"api/v1/DataModifications/update";
-            var messageData = await ApiHelper.PostData<StringData, DataModificationData>(apiCall, dataModificationData, token: Token);
+            var messageData = await ApiHelper.PutData<StringData, DataModificationData>(apiCall, dataModificationData, token: Token);
             return messageData.Data;
         }
 

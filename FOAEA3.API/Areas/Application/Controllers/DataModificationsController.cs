@@ -11,7 +11,7 @@ namespace FOAEA3.API.Areas.Application.Controllers
     [ApiController]
     public class DataModificationsController : FoaeaControllerBase
     {
-        [HttpPost("update")]
+        [HttpPut("update")]
         public async Task<ActionResult<StringData>> Update([FromServices] IRepositories repositories,
                                                        [FromServices] IRepositories_Finance repositoriesFinance)
         {
@@ -24,23 +24,23 @@ namespace FOAEA3.API.Areas.Application.Controllers
         }
 
         [HttpPost("SINpending/insert")]
-        public async Task<ActionResult<StringData>> InsertCRAPendingSIN()
+        public async Task<ActionResult<StringData>> InsertCRAPendingUpdateSIN()
         {
             var sinModificationData = await APIBrokerHelper.GetDataFromRequestBody<SinModificationData>(Request);
 
             var sinManager = new ApplicationSINManager(null, null);
-            string message = await sinManager.ProcessCRAPendingSIN("insert", sinModificationData.OldSIN, sinModificationData.NewSIN);
+            string message = await sinManager.ProcessCRAPendingUpdateSIN("insert", sinModificationData.OldSIN, sinModificationData.NewSIN);
 
             return Ok(new StringData { Data = message });
         }
 
         [HttpPost("SINpending/delete")]
-        public async Task<ActionResult<StringData>> DeleteCRAPendingSIN()
+        public async Task<ActionResult<StringData>> DeleteCRAPendingUpdateSIN()
         {
             var sinModificationData = await APIBrokerHelper.GetDataFromRequestBody<SinModificationData>(Request);
 
             var sinManager = new ApplicationSINManager(null, null);
-            string message = await sinManager.ProcessCRAPendingSIN("delete", newSIN: sinModificationData.NewSIN);
+            string message = await sinManager.ProcessCRAPendingUpdateSIN("delete", newSIN: sinModificationData.NewSIN);
 
             return Ok(new StringData { Data = message });
         }
