@@ -408,6 +408,11 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
+        public async Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
+        {
+            return await DB.ApplicationTable.GetApplicationsForSin(confirmedSIN);
+        }
+
         public virtual Task ProcessBringForwards(ApplicationEventData bfEvent)
         {
             throw new NotImplementedException("ProcessBringForwards has not been implemented!");

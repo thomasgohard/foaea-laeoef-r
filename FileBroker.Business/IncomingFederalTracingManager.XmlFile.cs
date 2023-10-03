@@ -1,6 +1,4 @@
-﻿using Azure;
-using DBHelper;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
@@ -9,6 +7,9 @@ public partial class IncomingFederalTracingManager
     public async Task<List<string>> ProcessXmlData(string xmlFileContent, string flatFileName)
     {
         var errors = new List<string>();
+
+        InboundAudit.Clear();
+
         string sourceTracingDataAsJson = FileHelper.ConvertXmlToJson(xmlFileContent, errors);
 
         if (errors.Any())
@@ -52,6 +53,12 @@ public partial class IncomingFederalTracingManager
             }
         }
 
+        if (InboundAudit.Any())
+        {
+            var auditManager = new FileAuditManager(DB.FileAudit, Config, DB.MailService);
+            await auditManager.GenerateCraAuditFile(flatFileName, InboundAudit);
+        }
+
         return result.Select(m => m.Description).ToList();
     }
 
@@ -93,6 +100,10 @@ public partial class IncomingFederalTracingManager
             await APIs.TracingResponses.AddTraceFinancialResponseData(item);
             await MarkTraceEventsAsProcessed(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, flatFileName, 0,
                                              activeTraceEvents, activeTraceEventDetails);
+
+            if (response.ResponseCode == "08")
+                await UpdateConfirmedSIN(oldSIN: appl.Appl_Dbtr_Cnfrmd_SIN, newSIN: response.SIN_XRef);
+
         }
 
         await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
@@ -105,6 +116,90 @@ public partial class IncomingFederalTracingManager
             await ResetOrCloseTraceEventDetails(item.Appl_EnfSrv_Cd, item.Appl_CtrlCd, activeTraceEvents);
         }
 
+    }
+
+    private async Task UpdateConfirmedSIN(string oldSIN, string newSIN)
+    {
+        if (!string.IsNullOrEmpty(newSIN) && (ValidationHelper.IsValidSinNumberMod10(newSIN)))
+        {
+            var applications = await APIs.Applications.GetApplicationsForSin(oldSIN);
+            if (applications.Any())
+            {
+                foreach (var application in applications)
+                {
+                    application.Appl_Dbtr_Cnfrmd_SIN = newSIN;
+
+                    try
+                    {
+                        string sinComment = $"SIN updated by CRA - Success. SIN modified from: {oldSIN} to {newSIN}";
+
+                        var dataModificationData = new DataModificationData
+                        {
+                            Applications = applications,
+                            UpdateAction = DataModAction.UpdateConfirmedSIN,
+                            PreviousConfirmedSIN = oldSIN,
+                            SinUpdateComment = sinComment
+                        };
+
+                        string message = await APIs.DataModifications.Update(dataModificationData);
+
+                        if (string.IsNullOrEmpty(message))
+                        {
+                            message = $"Success. SIN modifed from: {oldSIN} to {newSIN}";
+                            message += " " + await FixDebtorIdForSIN(newSIN);
+                            message += " " + await DeleteEISOhistoryForSIN(oldSIN);
+                        }
+                        else
+                        {
+                            var sinModificationData = new SinModificationData(oldSIN, newSIN);
+                            await APIs.DataModifications.InsertCraSinPending(sinModificationData);
+                        }
+
+                        AddToInboundAudit(InboundAudit, application, message);
+                    }
+                    catch
+                    {
+                        AddToInboundAudit(InboundAudit, application, $"Error modifying SIN: {oldSIN} to {newSIN}");
+                    }
+                }
+            }
+            else
+                AddToInboundAudit(InboundAudit, null, $"SIN not found: {oldSIN} to {newSIN}");
+        }
+        else
+            AddToInboundAudit(InboundAudit, null, $"Invalid SIN: {newSIN}");
+    }
+
+    private static void AddToInboundAudit(List<InboundAuditData> inboundAudit, ApplicationData application, string message)
+    {
+        string applEnfSrvCd = application.Appl_EnfSrv_Cd;
+        string applCtrlCd = application.Appl_CtrlCd;
+        string applSourceReference = application.Appl_Source_RfrNr;
+
+        if (application is null)
+        {
+            applEnfSrvCd = "XXXX";
+            applCtrlCd = "XXXXXX";
+            applSourceReference = "XXXXXX";
+        }
+
+        inboundAudit.Add(new InboundAuditData
+        {
+            EnforcementServiceCode = applEnfSrvCd,
+            ControlCode = applCtrlCd,
+            ApplicationMessage = message,
+            SourceReferenceNumber = applSourceReference
+        });
+    }
+
+    private async Task<string> DeleteEISOhistoryForSIN(string oldSIN)
+    {
+        return await APIs.InterceptionApplications.DeleteEISOhistoryForSIN(oldSIN);
+    }
+
+    private async Task<string> FixDebtorIdForSIN(string newSIN)
+    {
+        return await APIs.InterceptionApplications.FixDebtorIdForSin(newSIN);
     }
 
     private static FedTracingFinancialFileBase ExtractTracingFinancialDataFromJson(string sourceTracingData, out string error)
@@ -125,7 +220,7 @@ public partial class IncomingFederalTracingManager
         return result;
     }
 
-    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse, 
+    private static TraceFinancialResponseData ConvertCraResponseToFoaeaResponseData(FedTracingFinancial_TraceResponse traceResponse,
                                                                                     short cycle)
     {
         var result = new TraceFinancialResponseData
@@ -185,7 +280,7 @@ public partial class IncomingFederalTracingManager
                     }
 
                     if (isNewDetails)
-                        result.TraceFinancialDetails.Add(details);  
+                        result.TraceFinancialDetails.Add(details);
                 }
             }
         }

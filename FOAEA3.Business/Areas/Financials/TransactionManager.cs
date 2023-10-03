@@ -184,7 +184,7 @@ namespace FOAEA3.Business.Areas.Financials
             string debtorId = data.Dbtr_Id;
 
             if ((data.EnfSrv_Src_Cd == "UI00") && (data.Dbtr_Id == "9999999"))
-                debtorId = await DB.InterceptionTable.GetDebtorIdByConfirmedSin(sin, "I01");
+                debtorId = await DB.InterceptionTable.GetDebtorIdByConfirmedSinForCategory(sin, "I01");
 
             bool debtorExists = await DB.InterceptionTable.CheckDebtorIdExists(debtorId);
             if (!debtorExists)

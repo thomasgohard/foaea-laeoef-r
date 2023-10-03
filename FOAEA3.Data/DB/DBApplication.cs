@@ -437,6 +437,15 @@ namespace FOAEA3.Data.DB
 
         }
 
+        public async Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "confirmedSIN",  confirmedSIN}
+                };
+
+            return await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetAppsForSIN", parameters, FillApplicationDataFromReader);
+        }
+
         private void FillStatsOutgoingProvincialData(IDBHelperReader rdr, StatsOutgoingProvincialData data)
         {
             data.Event_dtl_Id = (int)rdr["Event_dtl_Id"];

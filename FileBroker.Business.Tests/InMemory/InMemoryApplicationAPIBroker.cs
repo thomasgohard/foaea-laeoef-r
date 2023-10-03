@@ -18,6 +18,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<StatsOutgoingProvincialData>> GetOutgoingProvincialStatusData(int maxRecords, string activeState, string recipientCode)
         {
             throw new NotImplementedException();

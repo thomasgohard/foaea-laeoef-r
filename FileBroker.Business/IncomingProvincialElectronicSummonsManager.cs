@@ -148,7 +148,7 @@ namespace FileBroker.Business
 
                 }
 
-                int totalFilesCount = await fileAuditManager.GenerateAuditFile(fileName, null, errorCount, warningCount, successCount);
+                int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(fileName, null, errorCount, warningCount, successCount);
                 await fileAuditManager.SendStandardAuditEmail(fileName, Config.AuditConfig.AuditRecipients,
                                                                    errorCount, warningCount, successCount, 0, totalFilesCount);
 

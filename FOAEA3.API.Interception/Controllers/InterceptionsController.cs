@@ -217,6 +217,30 @@ public class InterceptionsController : FoaeaControllerBase
         return Ok(application);
     }
 
+    [HttpPut("FixDebtorIdForSIN")]
+    public async Task<ActionResult<StringData>> FixDebtorIdForSin([FromServices] IRepositories repositories,
+                                                                  [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        string newSIN = (await APIBrokerHelper.GetDataFromRequestBody<StringData>(Request)).Data;
+
+        var application = new InterceptionApplicationData();
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
+
+        return Ok(new StringData(await appManager.FixDebtorIdForSin(newSIN)));
+    }
+
+    [HttpPut("DeleteEISOhistoryForOldSIN")]
+    public async Task<ActionResult<StringData>> DeleteEISOhistoryForOldSIN([FromServices] IRepositories repositories,
+                                                                           [FromServices] IRepositories_Finance repositoriesFinance)
+    {
+        string oldSIN = (await APIBrokerHelper.GetDataFromRequestBody<StringData>(Request)).Data;
+
+        var application = new InterceptionApplicationData();
+        var appManager = new InterceptionManager(application, repositories, repositoriesFinance, config, User);
+
+        return Ok(new StringData(await appManager.EISOHistoryDeleteBySIN(oldSIN)));
+    }
+
     [HttpPut("{key}/Vary")]
     public async Task<ActionResult<InterceptionApplicationData>> Vary([FromRoute] string key,
                                                           [FromServices] IRepositories repositories,

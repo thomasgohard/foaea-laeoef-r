@@ -1,13 +1,14 @@
 ﻿using FOAEA3.Model.Base;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface ISummDFRepository
     {
-        public string CurrentSubmitter { get; set; }
-        public string UserId { get; set; }
+        string CurrentSubmitter { get; set; }
+        string UserId { get; set; }
 
-        public DataList<SummDF_Data> GetSummDFList(int summFAFR_Id);
-
+        DataList<SummDF_Data> GetSummDFList(int summFAFR_Id);
+        Task<bool> ActiveDFExistsForSin(string confirmedSIN);
     }
 }

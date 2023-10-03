@@ -107,7 +107,7 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<string> GetDebtorIdByConfirmedSin(string sin, string category)
+        public Task<string> GetDebtorIdByConfirmedSinForCategory(string sin, string category)
         {
             throw new NotImplementedException();
         }
@@ -158,6 +158,11 @@ namespace TestData.TestDB
         }
 
         public Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTerms(string enfService, string controlCode, string activeState = "A")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ApplicationJusticeNumberData>> GetJusticeNumberDataForSin(string confirmedSIN)
         {
             throw new NotImplementedException();
         }
@@ -223,6 +228,11 @@ namespace TestData.TestDB
         }
 
         public Task MessageBrokerCRAReconciliation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ModifyMultipleDebtorIds(string debtorId, string debtorSuffix, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }

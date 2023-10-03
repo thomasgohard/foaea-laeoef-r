@@ -31,6 +31,7 @@ namespace FOAEA3.Data.Base
         private ISINResultRepository sinResultDB;
         private IProductionAuditRepository productionAuditDB;
         private ISINChangeHistoryRepository sinChangeHistoryDB;
+        private ICraSinPendingRepository craSinPendingDB;
         private IFamilyProvisionRepository familyProvisionDB;
         private IInfoBankRepository infoBankDB;
         private IAccessAuditRepository accessAuditDB;
@@ -286,6 +287,15 @@ namespace FOAEA3.Data.Base
             {
                 sinChangeHistoryDB ??= new DBSINChangeHistory(MainDB);
                 return sinChangeHistoryDB;
+            }
+        }
+
+        public ICraSinPendingRepository CraSinPendingTable
+        {
+            get
+            {
+                craSinPendingDB ??= new DBCraSinPending(MainDB);
+                return craSinPendingDB;
             }
         }
 

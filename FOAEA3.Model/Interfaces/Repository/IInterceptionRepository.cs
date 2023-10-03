@@ -35,7 +35,9 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<ExGratiaListData>> GetExGratias();
         Task<string> GetApplicationJusticeNumber(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd);
         Task<string> GetDebtorId(string first3Char);
-        Task<string> GetDebtorIdByConfirmedSin(string sin, string category);
+        Task<string> GetDebtorIdByConfirmedSinForCategory(string sin, string category);
+        Task<List<ApplicationJusticeNumberData>> GetJusticeNumberDataForSin(string confirmedSIN);
+        Task ModifyMultipleDebtorIds(string debtorId, string debtorSuffix, string appl_EnfSrv_Cd, string appl_CtrlCd);
         Task<bool> CheckDebtorIdExists(string debtorId);
         Task<bool> IsAlreadyUsedJusticeNumber(string justiceNumber);
         Task<DateTime> GetGarnisheeSummonsReceiptDate(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD);

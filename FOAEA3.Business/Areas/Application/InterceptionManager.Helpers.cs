@@ -17,6 +17,39 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.InterceptionTable.GetPaymentPeriods();
         }
 
+        public async Task<string> EISOHistoryDeleteBySIN(string thisSIN, bool removeSIN = false)
+        {
+            return await DB.InterceptionTable.EISOHistoryDeleteBySIN(thisSIN, removeSIN);
+        }
+
+        public async Task<string> FixDebtorIdForSin(string newSIN)
+        {
+            string message = string.Empty;
+            var debtorIds = await DB.InterceptionTable.GetJusticeNumberDataForSin(newSIN);
+
+            if (debtorIds.Count > 1 ) 
+            {
+                message = "A conflict of Multiple Debtor ID's for this SIN have been corrected for the following applications.\n";
+
+                var firstDebtorIdData = debtorIds[0];
+                string firstDebtorId = firstDebtorIdData.DebtorID;
+
+                foreach (var thisDebtor in debtorIds)
+                {
+                    if (thisDebtor.DebtorID != firstDebtorId)
+                    {
+                        string nextJusticeID = await NextJusticeID(firstDebtorId + firstDebtorIdData.DebtorIDSuffix);
+                        string nextSuffix = nextJusticeID[^1..];
+                        await DB.InterceptionTable.ModifyMultipleDebtorIds(firstDebtorId, nextSuffix, 
+                                                                           thisDebtor.Appl_EnfSrv_Cd, thisDebtor.Appl_CtrlCd);
+                        message += $" {thisDebtor.Appl_EnfSrv_Cd.Trim()}-{thisDebtor.Appl_CtrlCd.Trim()}";
+                    }
+                }
+            }
+
+            return message;
+        }
+
         private async Task SendDebtorLetter()
         {
             // TODO: this checks will currently fail in the old code, but will work here... should it?
