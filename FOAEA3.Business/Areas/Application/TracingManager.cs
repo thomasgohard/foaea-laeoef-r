@@ -74,7 +74,7 @@ namespace FOAEA3.Business.Areas.Application
             // get data from Appl
             bool isSuccess = await base.LoadApplication(enfService, controlCode);
 
-            await TracingValidation.SetC78();
+            await TracingValidation.SetC78infoFromEnfSrv();
 
             if (isSuccess)
             {
@@ -98,7 +98,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            await TracingValidation.SetC78();
+            await TracingValidation.SetC78infoFromEnfSrv();
 
             IsAddressMandatory = false;
             bool success = await base.CreateApplication();
@@ -119,7 +119,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             IsAddressMandatory = false;
 
-            await TracingValidation.SetC78();
+            await TracingValidation.SetC78infoFromEnfSrv();
 
             if (!TracingValidation.IsC78())
             {
@@ -237,7 +237,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            if (!lastUpdateUser.IsInternalUser())
+            if (!lastUpdateUser.IsInternalAgentSubmitter())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = lastUpdateUser;
                 TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
@@ -335,7 +335,7 @@ namespace FOAEA3.Business.Areas.Application
 
         private async Task ValidateAndProcessNewAffidavit()
         {
-            if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalUser())
+            if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalAgentSubmitter())
             {
                 TracingApplication.Subm_Affdvt_SubmCd = null;
             }

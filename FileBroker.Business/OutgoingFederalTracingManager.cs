@@ -215,7 +215,7 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         bool wantSinOnly = false;
         string entity;
-        switch (appl.Subm_SubmCd[2])
+        switch (appl.Subm_SubmCd.ToUpper()[2])
         {
             case 'C': // court
                 if (appl.AppReas_Cd == "1")

@@ -93,7 +93,7 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(searchData.SIN))
             {
                 parameters.Add("Appl_Dbtr_Entrd_SIN", searchData.SIN);
-                if (MainDB.Submitter.IsInternalUser())
+                if (MainDB.Submitter.IsInternalAgentSubmitter())
                 {
                     parameters.Add("IsInternalUser", true);
                     if (searchData.SearchOnlySinConfirmed) parameters.Add("OnlySINConfirmed", searchData.SearchOnlySinConfirmed);

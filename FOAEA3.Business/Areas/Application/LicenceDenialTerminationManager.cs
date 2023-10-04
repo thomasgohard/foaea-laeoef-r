@@ -402,7 +402,7 @@ namespace FOAEA3.Business.Areas.Application
 
             newL03.Appl_CommSubm_Text = appl_CommSubm_Text;
 
-            if (DB.CurrentSubmitter.IsInternalUser())
+            if (DB.CurrentSubmitter.IsInternalAgentSubmitter())
             {
                 newL03.Medium_Cd = "PAP";
             }

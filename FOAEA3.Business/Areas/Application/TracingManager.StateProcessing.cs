@@ -27,7 +27,11 @@ namespace FOAEA3.Business.Areas.Application
 
             if (TracingValidation.IsC78())
             {
-                await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                string originalSubmitter = TracingApplication.Subm_SubmCd;
+                if (originalSubmitter.IsCourtSubmitter())
+                    await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
+                else
+                    await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
             }
             else
             {
@@ -40,7 +44,7 @@ namespace FOAEA3.Business.Areas.Application
                     EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
 
                 // FOAEA users can bypass swearing and go directly to state 10 
-                if (TracingApplication.Subm_Recpt_SubmCd.IsInternalUser() &&
+                if (TracingApplication.Subm_Recpt_SubmCd.IsInternalAgentSubmitter() &&
                     !String.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd) &&
                     TracingApplication.Appl_RecvAffdvt_Dte.HasValue)
                 {
