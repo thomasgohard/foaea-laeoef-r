@@ -109,7 +109,7 @@ namespace FOAEA3.Resources.Helpers
             string result = basePath;
 
             if (result.EndsWith("\\"))
-                result = result.Substring(0, result.Length - 1);
+                result = result[..^1];
 
             int posLastBackslash = result.LastIndexOf('\\');
             if (posLastBackslash > -1)

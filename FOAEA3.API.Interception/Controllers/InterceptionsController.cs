@@ -16,6 +16,7 @@ namespace FOAEA3.API.Interception.Controllers;
 public class InterceptionsController : FoaeaControllerBase
 {
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> Version()
     {
         return Ok("Interceptions API Version 1.0");

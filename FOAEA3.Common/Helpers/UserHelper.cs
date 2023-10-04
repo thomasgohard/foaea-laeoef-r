@@ -66,11 +66,10 @@ namespace FOAEA3.Common.Helpers
             {
                 new Claim(ClaimTypes.Name, "System"),
                 new Claim("Submitter", "MSGBRO"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, "AM"),
+                new Claim(ClaimTypes.Role, Roles.Admin)
             };
-
-            claims.Add(new Claim(ClaimTypes.Role, "AM"));
-            claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
 
             var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);

@@ -135,7 +135,7 @@ public class FileAuditManager
     public async Task SendStandardAuditEmail(string fileName, string recipients, int errorCount, int warningCount,
                                              int successCount, int xmlWarningCount, int totalFilesCount)
     {
-        string provCd = fileName.Substring(0, 2).ToUpper();
+        string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
 
         string bodyContent;
@@ -171,7 +171,7 @@ public class FileAuditManager
 
     public async Task SendSystemErrorAuditEmail(string fileName, string recipients, MessageDataList errors)
     {
-        string provCd = fileName.Substring(0, 2).ToUpper();
+        string provCd = fileName[..2].ToUpper();
         bool isFrench = IsFrench(provCd);
 
         string multipleErrors = (errors.Count) > 1 ? "s" : "";
