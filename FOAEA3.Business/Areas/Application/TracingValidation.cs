@@ -14,9 +14,8 @@ namespace FOAEA3.Business.Areas.Application
     internal class TracingValidation : ApplicationValidation
     {
         private TracingApplicationData TracingApplication { get; }
-
-        public bool HasSignedC78 { get; set; }
-        public DateTime? C78EffectiveDateTime { get; set; }
+        private bool HasSignedC78 { get; set; }
+        private DateTime? C78EffectiveDateTime { get; set; }
 
         public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager,
                                  IRepositories db, IFoaeaConfigurationHelper config, FoaeaUser user) :

@@ -46,10 +46,23 @@ namespace FOAEA3.Data.DB
                     {"ActvSt_Cd", actvSt_Cd}
                 };
 
-            List<ApplicationData> data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetApplProvinceAutomation", parameters, FillApplicationDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("GetApplProvinceAutomation", parameters, FillApplicationDataFromReader);
 
             return data;
 
+        }
+
+        public async Task<List<ApplicationData>> GetApplicationsForCategoryAndLifeState(string category, ApplicationState lifeState)
+        {
+
+            var parameters = new Dictionary<string, object> {
+                    { "AppCtgy_Cd",  category},
+                    { "AppLiSt_Cd",  (short) lifeState}
+                };
+
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationData>("Appl_SelectForCategoryAndLifestate", parameters, FillApplicationDataFromReader);
+
+            return data;
         }
 
         public async Task<bool> CreateApplication(ApplicationData application)
@@ -381,7 +394,7 @@ namespace FOAEA3.Data.DB
                 {
                     string tempString = item.Appl_EnfSrv_Cd.Trim() + "-" + item.Subm_SubmCd.Trim() + "-" + item.Appl_CtrlCd.Trim();
 
-                    if (item.Subm_SubmCd.Substring(0, 2).ToUpper() == subm_SubmCd.Substring(0, 2).ToUpper())
+                    if (item.Subm_SubmCd[..2].ToUpper() == subm_SubmCd[..2].ToUpper())
                         errorSameEnfOff.Append(tempString + "  ");
                     else
                         errorDiffEnfOff.Append(tempString + "  ");

@@ -10,6 +10,7 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -205,6 +206,36 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplication();
 
             return true;
+        }
+
+        public async Task<List<TracingApplicationData>> GetTracingApplicationsWaitingAtState6()
+        {
+            var applications = await DB.ApplicationTable.GetApplicationsForCategoryAndLifeState("T01", 
+                                                                        ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
+            var result = new List<TracingApplicationData>();
+            foreach(var appl in applications)
+            {
+                var thisTracingAppl = new TracingApplicationData();
+                thisTracingAppl.Merge(appl);
+
+                var data = await DB.TracingTable.GetTracingData(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
+
+                if (data != null) 
+                    thisTracingAppl.Merge(data);
+
+                result.Add(thisTracingAppl);
+            }
+
+            return result;
+        }
+
+        public async Task AcceptApplication()
+        {
+            await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+
+            await UpdateApplicationNoValidation();
+
+            await EventManager.SaveEvents();
         }
 
         public async Task<bool> RejectApplication(string enfService, string controlCode, string lastUpdateUser)

@@ -47,6 +47,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<List<ApplicationData>> GetApplicationsForCategoryAndLifeState(string category, ApplicationState lifeState)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
         {
             throw new NotImplementedException();

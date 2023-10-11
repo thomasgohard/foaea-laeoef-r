@@ -28,9 +28,7 @@ namespace FOAEA3.Business.Areas.Application
             if (TracingValidation.IsC78())
             {
                 string originalSubmitter = TracingApplication.Subm_SubmCd;
-                if (originalSubmitter.IsCourtSubmitter())
-                    await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
-                else
+                if (!originalSubmitter.IsCourtSubmitter())
                     await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
             }
             else

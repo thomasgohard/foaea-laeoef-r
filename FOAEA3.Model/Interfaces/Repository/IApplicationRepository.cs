@@ -19,6 +19,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<List<ApplicationData>> GetApplicationsForAutomation(string appl_EnfSrv_Cd, string medium_Cd,
                                                            ApplicationState appLiSt_Cd, string appCtgy_Cd,
                                                            string actvSt_Cd);
+        Task<List<ApplicationData>> GetApplicationsForCategoryAndLifeState(string category, ApplicationState lifeState);
         Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN);
         Task<List<ApplicationModificationActivitySummaryData>> GetApplicationRecentActivityForSubmitter(string submCd, int days = 0);
         Task<List<ApplicationModificationActivitySummaryData>> GetApplicationAtStateForSubmitter(string submCd, ApplicationState state);
