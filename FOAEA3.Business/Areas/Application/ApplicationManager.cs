@@ -301,7 +301,8 @@ namespace FOAEA3.Business.Areas.Application
 
                 await Process_00_InitialState();
             }
-            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) && (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
+            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) && 
+                     (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
             {
                 await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 

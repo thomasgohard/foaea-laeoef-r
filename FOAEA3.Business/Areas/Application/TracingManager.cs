@@ -10,7 +10,6 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -54,13 +53,14 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication = tracing;
 
             // add Tracing specific valid state changes
-            StateEngine.ValidStateChange.Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7, new List<ApplicationState> {
-                                             ApplicationState.SIN_CONFIRMED_4,
-                                             ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
-                                             ApplicationState.APPLICATION_REJECTED_9,
-                                             ApplicationState.APPLICATION_ACCEPTED_10,
-                                             ApplicationState.MANUALLY_TERMINATED_14
-                                            });
+            StateEngine.ValidStateChange.Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
+                                                new List<ApplicationState> {
+                                                    ApplicationState.SIN_CONFIRMED_4,
+                                                    ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
+                                                    ApplicationState.APPLICATION_REJECTED_9,
+                                                    ApplicationState.APPLICATION_ACCEPTED_10,
+                                                    ApplicationState.MANUALLY_TERMINATED_14
+                                                });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
@@ -122,7 +122,24 @@ namespace FOAEA3.Business.Areas.Application
 
             await TracingValidation.SetC78infoFromEnfSrv();
 
-            if (!TracingValidation.IsC78())
+            if (TracingValidation.IsC78())
+            {
+                await DB.TracingTable.UpdateTracingData(TracingApplication);
+
+                MakeUpperCase();
+
+                if (TracingApplication.Subm_SubmCd.IsPeaceOfficerSubmitter())
+                {
+                    if ((TracingApplication.AppLiSt_Cd == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6) &&
+                        !string.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd))
+                    {
+                        await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                    }
+                }
+
+                await base.UpdateApplication();
+            }
+            else
             {
                 var currentDataManager = new TracingManager(DB, Config, CurrentUser);
                 await currentDataManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
@@ -166,14 +183,6 @@ namespace FOAEA3.Business.Areas.Application
                     }
                 }
             }
-            else
-            {
-                await DB.TracingTable.UpdateTracingData(TracingApplication);
-
-                MakeUpperCase();
-
-                await base.UpdateApplication();
-            }
         }
 
         public async Task<bool> ReinstateApplication(string enfService, string controlCode, string lastUpdateUser,
@@ -210,17 +219,17 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task<List<TracingApplicationData>> GetTracingApplicationsWaitingAtState6()
         {
-            var applications = await DB.ApplicationTable.GetApplicationsForCategoryAndLifeState("T01", 
+            var applications = await DB.ApplicationTable.GetApplicationsForCategoryAndLifeState("T01",
                                                                         ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
             var result = new List<TracingApplicationData>();
-            foreach(var appl in applications)
+            foreach (var appl in applications)
             {
                 var thisTracingAppl = new TracingApplicationData();
                 thisTracingAppl.Merge(appl);
 
                 var data = await DB.TracingTable.GetTracingData(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
 
-                if (data != null) 
+                if (data != null)
                     thisTracingAppl.Merge(data);
 
                 result.Add(thisTracingAppl);

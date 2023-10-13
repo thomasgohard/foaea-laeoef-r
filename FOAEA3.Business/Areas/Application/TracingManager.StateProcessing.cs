@@ -28,8 +28,19 @@ namespace FOAEA3.Business.Areas.Application
             if (TracingValidation.IsC78())
             {
                 string originalSubmitter = TracingApplication.Subm_SubmCd;
-                if (!originalSubmitter.IsCourtSubmitter())
+                if (!originalSubmitter.IsCourtSubmitter() && !originalSubmitter.IsPeaceOfficerSubmitter())
                     await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                else if (originalSubmitter.IsPeaceOfficerSubmitter())
+                {
+                    if (!string.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd))
+                        await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                    else
+                    {
+                        string signAuthority = await DB.SubmitterTable.GetSignAuthorityForSubmitter(TracingApplication.Subm_SubmCd);
+                        EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
+                                              recipientSubm: signAuthority);
+                    }
+                }
             }
             else
             {
