@@ -22,17 +22,17 @@ namespace FOAEA3.Business.Areas.Application
                                     base(tracingApplication, eventManager, db, config, user)
         {
             TracingApplication = tracingApplication;
-            _ = SetC78infoFromEnfSrv();
+            _ = GetC78infoFromEnfSrv();
         }
 
         public TracingValidation(TracingApplicationData tracingApplication, IRepositories repositories,
                                  IFoaeaConfigurationHelper config, FoaeaUser user) : base(tracingApplication, repositories, config, user)
         {
             TracingApplication = tracingApplication;
-            _ = SetC78infoFromEnfSrv();
+            _ = GetC78infoFromEnfSrv();
         }
 
-        public async Task SetC78infoFromEnfSrv()
+        public async Task GetC78infoFromEnfSrv()
         {
             if ((TracingApplication is null) || string.IsNullOrEmpty(TracingApplication.Appl_EnfSrv_Cd))
             {

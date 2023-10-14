@@ -1,11 +1,13 @@
 ﻿using DBHelper;
 using FOAEA3.Business.Security;
 using FOAEA3.Common.Models;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -75,7 +77,7 @@ namespace FOAEA3.Business.Areas.Application
             // get data from Appl
             bool isSuccess = await base.LoadApplication(enfService, controlCode);
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
             if (isSuccess)
             {
@@ -99,7 +101,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
             IsAddressMandatory = false;
             bool success = await base.CreateApplication();
@@ -110,7 +112,10 @@ namespace FOAEA3.Business.Areas.Application
                 await failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.T01);
             }
             else
-                await DB.TracingTable.CreateTracingData(TracingApplication);
+            {
+                if (TracingValidation.IsC78())
+                    await DB.TracingTable.CreateTracingData(TracingApplication);
+            }
 
             return success;
 
@@ -120,7 +125,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             IsAddressMandatory = false;
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
             if (TracingValidation.IsC78())
             {
@@ -171,6 +176,9 @@ namespace FOAEA3.Business.Areas.Application
 
                         MakeUpperCase();
 
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
+
                         await base.UpdateApplicationNoValidation();
                     }
                     else
@@ -179,8 +187,20 @@ namespace FOAEA3.Business.Areas.Application
 
                         MakeUpperCase();
 
-                        await base.UpdateApplication();
+                        if (Application.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
+
+                        await base.UpdateApplicationNoValidation();
                     }
+
+                }
+                else
+                {
+                    await DB.TracingTable.CreateTracingData(TracingApplication);
+
+                    MakeUpperCase();
+
+                    await base.UpdateApplicationNoValidation();
                 }
             }
         }
