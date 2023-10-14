@@ -123,6 +123,9 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplication()
         {
+            TracingApplication.Appl_LastUpdate_Usr = CurrentUser.Submitter.Subm_SubmCd;
+            TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
             IsAddressMandatory = false;
 
             await TracingValidation.GetC78infoFromEnfSrv();
@@ -167,12 +170,17 @@ namespace FOAEA3.Business.Areas.Application
                         string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
                         string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
                         string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
+                        string newLastUpdateUser = TracingApplication.Appl_LastUpdate_Usr;
+                        DateTime? newLastUpdateDate = TracingApplication.Appl_LastUpdate_Dte;
 
                         await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
                         TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
                         TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
                         TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
+
+                        TracingApplication.Appl_LastUpdate_Usr = newLastUpdateUser;
+                        TracingApplication.Appl_LastUpdate_Dte = newLastUpdateDate;
 
                         MakeUpperCase();
 
