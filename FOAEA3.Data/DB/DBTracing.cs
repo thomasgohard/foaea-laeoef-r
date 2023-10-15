@@ -99,6 +99,10 @@ namespace FOAEA3.Data.DB
                         {"Trace_LstCyclCmp_Dte", data.Trace_LstCyclCmp_Dte.HasValue ? data.Trace_LstCyclCmp_Dte : DBNull.Value },
                         {"Trace_LiSt_Cd", data.Trace_LiSt_Cd },
                         {"InfoBank_Cd", (object) data.InfoBank_Cd ?? DBNull.Value },
+                        {"S282_Ind",data.IncludeS282 },
+                        {"S283_Ind",data.IncludeS283 },
+                        {"Trace_ReasStepsParent_Text", (object) data.Trace_ReasStepsParent_Text ?? DBNull.Value },
+                        {"Trace_ReasStepsChild_Text", (object) data.Trace_ReasStepsChild_Text ?? DBNull.Value },
                         {"Declaration_Ind", data.DeclarationIndicator },
                         {"Tracing_Information", data.TraceInformation },
                         {"Sin_Information", data.IncludeSinInformation },
@@ -394,6 +398,10 @@ namespace FOAEA3.Data.DB
 
             if (rdr.ColumnExists("Phone_Number")) data.PhoneNumber = rdr["Phone_Number"] as string; // can be null 
             if (rdr.ColumnExists("Email_Address")) data.EmailAddress = rdr["Email_Address"] as string; // can be null 
+            if (rdr.ColumnExists("S282_Ind")) data.IncludeS282 = (bool)rdr["S282_Ind"];
+            if (rdr.ColumnExists("S283_Ind")) data.IncludeS283 = (bool)rdr["S283_Ind"];
+            if (rdr.ColumnExists("Trace_ReasStepsParent_Text")) data.Trace_ReasStepsParent_Text = rdr["Trace_ReasStepsParent_Text"] as string;
+            if (rdr.ColumnExists("Trace_ReasStepsChild_Text")) data.Trace_ReasStepsChild_Text = rdr["Trace_ReasStepsChild_Text"] as string;
             if (rdr.ColumnExists("Declaration_Ind")) data.DeclarationIndicator = (bool)rdr["Declaration_Ind"];
 
             if (rdr.ColumnExists("Tracing_Information")) data.TraceInformation = (short)rdr["Tracing_Information"];

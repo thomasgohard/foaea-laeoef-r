@@ -21,12 +21,11 @@ public class ActiveStatusesController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet]
-    public ActionResult<DataList<ActiveStatusData>> GetActiveStatuses([FromServices] IActiveStatusRepository activeStatusRepository)
+    public ActionResult<DataList<ActiveStatusData>> GetActiveStatuses()
     {
         List<ActiveStatusData> items = ReferenceData.Instance().ActiveStatuses.Values.ToList();
         var data = new DataList<ActiveStatusData>(items, string.Empty);
 
         return Ok(data);
     }
-
 }

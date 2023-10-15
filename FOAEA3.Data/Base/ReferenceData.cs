@@ -48,10 +48,7 @@ namespace FOAEA3.Data.Base
         {
             lock (syncLock) // thread safe
             {
-                if (instance is null)
-                {
-                    instance = new ReferenceData();
-                }
+                instance ??= new ReferenceData();
             }
 
             return instance;

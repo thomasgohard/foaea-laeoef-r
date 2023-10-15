@@ -33,5 +33,13 @@
             else
                 return false;
         }
+
+        public static bool IsDesignatedAuthoritySubmitter(this string submCd)
+        {
+            if (submCd?.Length > 3)
+                return (submCd.ToUpper()[2] == 'D');
+            else
+                return false;
+        }
     }
 }

@@ -23,6 +23,10 @@ namespace FOAEA3.Model
         // new fields
         public string PhoneNumber { get; set; }
         public string EmailAddress { get; set; }
+        public bool IncludeS282 { get; set; }
+        public bool IncludeS283 { get; set; }
+        public string Trace_ReasStepsParent_Text { get; set; }
+        public string Trace_ReasStepsChild_Text { get; set; }
         public bool DeclarationIndicator { get; set; }
         public string Declaration { get; set; }
         public short TraceInformation { get; set; }

@@ -128,8 +128,7 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     var holdbackConditions = await DB.InterceptionTable.GetHoldbackConditions(enfService, controlCode,
                                                                                                    finTerms.IntFinH_Dte, activeState);
-                    if (holdbackConditions == null)
-                        holdbackConditions = new List<HoldbackConditionData>();
+                    holdbackConditions ??= new List<HoldbackConditionData>();
                     InterceptionApplication.HldbCnd = holdbackConditions;
                 }
             }

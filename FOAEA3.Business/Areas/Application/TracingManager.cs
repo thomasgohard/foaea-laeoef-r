@@ -1,11 +1,13 @@
 ﻿using DBHelper;
 using FOAEA3.Business.Security;
 using FOAEA3.Common.Models;
+using FOAEA3.Data.Base;
 using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
+using FOAEA3.Resources;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -53,13 +55,14 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication = tracing;
 
             // add Tracing specific valid state changes
-            StateEngine.ValidStateChange.Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7, new List<ApplicationState> {
-                                             ApplicationState.SIN_CONFIRMED_4,
-                                             ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
-                                             ApplicationState.APPLICATION_REJECTED_9,
-                                             ApplicationState.APPLICATION_ACCEPTED_10,
-                                             ApplicationState.MANUALLY_TERMINATED_14
-                                            });
+            StateEngine.ValidStateChange.Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
+                                                new List<ApplicationState> {
+                                                    ApplicationState.SIN_CONFIRMED_4,
+                                                    ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7,
+                                                    ApplicationState.APPLICATION_REJECTED_9,
+                                                    ApplicationState.APPLICATION_ACCEPTED_10,
+                                                    ApplicationState.MANUALLY_TERMINATED_14
+                                                });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
@@ -74,7 +77,7 @@ namespace FOAEA3.Business.Areas.Application
             // get data from Appl
             bool isSuccess = await base.LoadApplication(enfService, controlCode);
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
             if (isSuccess)
             {
@@ -98,7 +101,7 @@ namespace FOAEA3.Business.Areas.Application
             if (!IsValidCategory("T01"))
                 return false;
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
             IsAddressMandatory = false;
             bool success = await base.CreateApplication();
@@ -109,7 +112,10 @@ namespace FOAEA3.Business.Areas.Application
                 await failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.T01);
             }
             else
-                await DB.TracingTable.CreateTracingData(TracingApplication);
+            {
+                if (TracingValidation.IsC78())
+                    await DB.TracingTable.CreateTracingData(TracingApplication);
+            }
 
             return success;
 
@@ -117,11 +123,31 @@ namespace FOAEA3.Business.Areas.Application
 
         public override async Task UpdateApplication()
         {
+            TracingApplication.Appl_LastUpdate_Usr = CurrentUser.Submitter.Subm_SubmCd;
+            TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
+
             IsAddressMandatory = false;
 
-            await TracingValidation.SetC78infoFromEnfSrv();
+            await TracingValidation.GetC78infoFromEnfSrv();
 
-            if (!TracingValidation.IsC78())
+            if (TracingValidation.IsC78())
+            {
+                await DB.TracingTable.UpdateTracingData(TracingApplication);
+
+                MakeUpperCase();
+
+                if (TracingApplication.Subm_SubmCd.IsPeaceOfficerSubmitter())
+                {
+                    if ((TracingApplication.AppLiSt_Cd == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6) &&
+                        !string.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd))
+                    {
+                        await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                    }
+                }
+
+                await base.UpdateApplication();
+            }
+            else
             {
                 var currentDataManager = new TracingManager(DB, Config, CurrentUser);
                 await currentDataManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
@@ -144,6 +170,8 @@ namespace FOAEA3.Business.Areas.Application
                         string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
                         string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
                         string newAppl_Crdtr_SurNme = TracingApplication.Appl_Crdtr_SurNme;
+                        string newLastUpdateUser = TracingApplication.Appl_LastUpdate_Usr;
+                        DateTime? newLastUpdateDate = TracingApplication.Appl_LastUpdate_Dte;
 
                         await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
@@ -151,7 +179,13 @@ namespace FOAEA3.Business.Areas.Application
                         TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
                         TracingApplication.Appl_Crdtr_SurNme = newAppl_Crdtr_SurNme;
 
+                        TracingApplication.Appl_LastUpdate_Usr = newLastUpdateUser;
+                        TracingApplication.Appl_LastUpdate_Dte = newLastUpdateDate;
+
                         MakeUpperCase();
+
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
 
                         await base.UpdateApplicationNoValidation();
                     }
@@ -161,17 +195,21 @@ namespace FOAEA3.Business.Areas.Application
 
                         MakeUpperCase();
 
-                        await base.UpdateApplication();
+                        if (Application.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
+                        if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
+
+                        await base.UpdateApplicationNoValidation();
                     }
+
                 }
-            }
-            else
-            {
-                await DB.TracingTable.UpdateTracingData(TracingApplication);
+                else
+                {
+                    await DB.TracingTable.CreateTracingData(TracingApplication);
 
-                MakeUpperCase();
+                    MakeUpperCase();
 
-                await base.UpdateApplication();
+                    await base.UpdateApplicationNoValidation();
+                }
             }
         }
 
@@ -205,6 +243,36 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplication();
 
             return true;
+        }
+
+        public async Task<List<TracingApplicationData>> GetTracingApplicationsWaitingAtState6()
+        {
+            var applications = await DB.ApplicationTable.GetApplicationsForCategoryAndLifeState("T01",
+                                                                        ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
+            var result = new List<TracingApplicationData>();
+            foreach (var appl in applications)
+            {
+                var thisTracingAppl = new TracingApplicationData();
+                thisTracingAppl.Merge(appl);
+
+                var data = await DB.TracingTable.GetTracingData(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd);
+
+                if (data != null)
+                    thisTracingAppl.Merge(data);
+
+                result.Add(thisTracingAppl);
+            }
+
+            return result;
+        }
+
+        public async Task AcceptApplication()
+        {
+            await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+
+            await UpdateApplicationNoValidation();
+
+            await EventManager.SaveEvents();
         }
 
         public async Task<bool> RejectApplication(string enfService, string controlCode, string lastUpdateUser)

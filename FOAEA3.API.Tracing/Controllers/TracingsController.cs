@@ -44,6 +44,16 @@ public class TracingsController : FoaeaControllerBase
 
     }
 
+    [HttpGet("AtState6")]
+    public async Task<ActionResult<List<TracingApplicationData>>> GetTracingApplicationsAtState6([FromServices] IRepositories repositories)
+    {
+        var manager = new TracingManager(repositories, config, User);
+
+        var data = await manager.GetTracingApplicationsWaitingAtState6();
+
+        return Ok(data);
+    }
+
     [HttpPost]
     public async Task<ActionResult<TracingApplicationData>> CreateApplication([FromServices] IRepositories db)
     {
@@ -120,6 +130,42 @@ public class TracingsController : FoaeaControllerBase
         else
             return UnprocessableEntity(application);
 
+    }
+
+    [HttpPut("{key}/AcceptApplication")]
+    public async Task<ActionResult<TracingApplicationData>> AcceptApplication([FromRoute] string key,
+                                                                              [FromServices] IRepositories repositories)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = await APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new TracingManager(application, repositories, config, User);
+
+        await appManager.AcceptApplication();
+
+        return Ok(application);
+    }
+
+    [HttpPut("{key}/RejectApplication")]
+    public async Task<ActionResult<TracingApplicationData>> RejectApplication([FromRoute] string key,
+                                                                              [FromServices] IRepositories repositories)
+    {
+        var applKey = new ApplKey(key);
+
+        var application = await APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+
+        if (!APIHelper.ValidateRequest(application, applKey, out string error))
+            return UnprocessableEntity(error);
+
+        var appManager = new TracingManager(application, repositories, config, User);
+
+        await appManager.AcceptApplication();
+
+        return Ok(application);
     }
 
     [HttpPut("{key}/Transfer")]
