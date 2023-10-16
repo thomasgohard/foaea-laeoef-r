@@ -1,0 +1,10 @@
+{
+  "AuditConfig": {
+    "AuditRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "AuditRootPath": "C:\\Audit\\FOAEA\\AuditFiles"
+  },
+  "emailRecipients": "FLAS-IT_Testing@justice.gc.ca",
+  "FTPbackupRoot": "D:\\FOAEAftpbackup",
+  "FTProot": "C:\\FOAEA\\ftpin",
+  "opsRecipients": "FLAS-IT_Testing@justice.gc.ca"
+}

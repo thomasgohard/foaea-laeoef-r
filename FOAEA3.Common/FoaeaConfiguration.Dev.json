@@ -4,5 +4,5 @@
     "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
     "SystemErrorRecipients": "FLAS-IT_Testing@justice.gc.ca"
   },
-  "TaxFormsRootPath": "D:\\CRATaxForms"
+  "TaxFormsRootPath": "D:\\CustomCRAForms"
 }

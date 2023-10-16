@@ -1,8 +1,0 @@
-{
-  "emailRecipients": "FLAS-IT_Testing@justice.gc.ca",
-  "opsRecipients": "FLAS-IT_Testing@justice.gc.ca",
-  "AuditConfig": {
-    "AuditRecipients": "FLAS-IT_Testing@justice.gc.ca",
-    "AuditRootPath": "D:\\FoaeaAudit"
-  }
-}
