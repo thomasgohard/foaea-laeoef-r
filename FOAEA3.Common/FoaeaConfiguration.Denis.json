@@ -6,5 +6,6 @@
     "EmailRecipients": "dsarrazi@justice.gc.ca",
     "ExGratiaRecipients": "dsarrazi@justice.gc.ca",
     "SystemErrorRecipients": "dsarrazi@justice.gc.ca"
-  }
+  },
+  "TaxFormsRootPath": "C:\\CRATaxForms"
 }
