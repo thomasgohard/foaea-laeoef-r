@@ -1,8 +1,10 @@
 {
-  "emailRecipients": "dsarrazi@justice.gc.ca",
-  "opsRecipients": "dsarrazi@justice.gc.ca",
   "AuditConfig": {
     "AuditRecipients": "dsarrazi@justice.gc.ca",
     "AuditRootPath": "C:\\Audit"
-  }
+  },
+  "emailRecipients": "dsarrazi@justice.gc.ca",
+  "FTPbackupRoot": "C:\\FOAEA_Backup\\FTProot",
+  "FTProot": "C:\\FOAEA\\FTPRoot",
+  "opsRecipients": "dsarrazi@justice.gc.ca"
 }
