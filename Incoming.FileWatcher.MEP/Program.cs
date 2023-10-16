@@ -4,7 +4,6 @@ using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -119,6 +118,8 @@ internal class Program
         var duration = end - start;
 
         WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+
+        Console.ReadKey();
     }
 
     private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)

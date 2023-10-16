@@ -12,6 +12,7 @@ namespace FileBroker.Model.Interfaces
         Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency);
         Task<List<FileTableData>> GetFileTableDataForCategory(string category);
         Task<List<FileTableData>> GetAllActive();
+        Task<FileTableFlagData> GetAuditFileFormatForProcessId(int processId);
 
         Task SetNextCycleForFileType(FileTableData fileData, int length = 6);
         Task<bool> IsFileLoading(int processId);

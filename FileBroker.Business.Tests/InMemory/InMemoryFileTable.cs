@@ -124,5 +124,10 @@ namespace FileBroker.Business.Tests.InMemory
         {
             throw new System.NotImplementedException();
         }
+
+        public Task<FileTableFlagData> GetAuditFileFormatForProcessId(int processId)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DBHelper;
+using FileBroker.Model.Enums;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
@@ -95,10 +96,15 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                             await DB.FileAudit.InsertFileAuditData(fileAuditData);
                         }
 
-                        int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
-                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
-                                                                      errorCount, warningCount, successCount, unknownTags.Count,
-                                                                      totalFilesCount);
+                        AuditFileFormat outputFormat = await GetAuditOutputFormat(fileTableData.PrcId);
+                        int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags,
+                                                                                                 errorCount, warningCount, successCount,
+                                                                                                 outputFormat);
+
+                        if (outputFormat.In(AuditFileFormat.TextFormat, AuditFileFormat.Both))
+                            await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                                                                          errorCount, warningCount, successCount, unknownTags.Count,
+                                                                          totalFilesCount);
                     }
                     finally
                     {
@@ -122,6 +128,16 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         }
 
         return result;
+    }
+
+    private async Task<AuditFileFormat> GetAuditOutputFormat(int prcId)
+    {
+        var fileTableFlagData = await DB.FileTable.GetAuditFileFormatForProcessId(prcId);
+
+        if (int.TryParse(fileTableFlagData.IncludeAudit, out int formatFlag))
+            return (AuditFileFormat)formatFlag;
+        else
+            return AuditFileFormat.TextFormat;
     }
 
     private static MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
@@ -334,7 +350,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
             {
                 if (short.TryParse(detail.Tax_Year, out var taxYear))
                     tracingApplication.YearsAndTaxForms.Add(taxYear, detail.Tax_Form);
-                
+
                 // TODO: report bad data if tryparse failed
             }
         }
