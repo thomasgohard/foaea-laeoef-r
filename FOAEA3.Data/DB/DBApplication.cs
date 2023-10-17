@@ -331,10 +331,12 @@ namespace FOAEA3.Data.DB
                 {
                     {"enteredSIN", appl_Dbtr_Cnfrmd_SIN},
                     {"Subm_SubmCd", subm_SubmCd },
-                    {"Appl_CtrlCd", appl_CtrlCd }
+                    {"Appl_CtrlCd", appl_CtrlCd },
+                    {"Appl_EnfSrv_Cd", appl_EnfSrv_Cd }
                 };
 
-            return await MainDB.GetDataFromStoredProcAsync<ApplicationConfirmedSINData>("ApplGetConfirmedSINOtherEnforcementOffice", parameters, FillConfirmedSINDataFromReader);
+            var data = await MainDB.GetDataFromStoredProcAsync<ApplicationConfirmedSINData>("ApplGetConfirmedSINOtherEnforcementOffice", parameters, FillConfirmedSINDataFromReader);
+            return data;
 
         }
         public async Task<DataList<ApplicationData>> GetRequestedSINApplDataForFile(string enfSrv_Cd, string fileName)
