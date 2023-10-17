@@ -263,7 +263,6 @@ public class FileAuditManager
             string auditFileLocation = AuditConfiguration.AuditRootPath + @"\" + fileName + ".audit.XML";
             await MailService.SendEmail($"Audit {fileName}", recipients, bodyContent, auditFileLocation);
         }
-
     }
 
     public async Task SendSystemErrorAuditEmail(string fileName, string recipients, MessageDataList errors)

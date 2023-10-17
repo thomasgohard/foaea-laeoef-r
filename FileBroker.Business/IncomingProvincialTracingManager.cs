@@ -101,10 +101,9 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                                                                                                  errorCount, warningCount, successCount,
                                                                                                  outputFormat);
 
-                        if (outputFormat.In(AuditFileFormat.TextFormat, AuditFileFormat.Both))
-                            await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
-                                                                          errorCount, warningCount, successCount, unknownTags.Count,
-                                                                          totalFilesCount);
+                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                                                                      errorCount, warningCount, successCount, unknownTags.Count,
+                                                                      totalFilesCount, outputFormat);
                     }
                     finally
                     {
