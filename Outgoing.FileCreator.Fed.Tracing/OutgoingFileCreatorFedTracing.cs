@@ -20,6 +20,12 @@ public static class OutgoingFileCreatorFedTracing
         ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
 
         var config = new FileBrokerConfigurationHelper(args);
+        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        ColourConsole.WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
