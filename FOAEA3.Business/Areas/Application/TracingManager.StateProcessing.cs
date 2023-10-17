@@ -13,7 +13,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_04_SinConfirmed();
 
-            if (TracingValidation.IsC78() || await AffidavitExists())
+            if (TracingValidation.IsC78() || await TraceDataExists())
                 await SetNewStateTo(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
             else
                 await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);

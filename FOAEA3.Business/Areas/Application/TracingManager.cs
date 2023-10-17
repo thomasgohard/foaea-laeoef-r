@@ -161,11 +161,9 @@ namespace FOAEA3.Business.Areas.Application
                 else if (!string.IsNullOrEmpty(TracingApplication.FamPro_Cd))
                 {
                     // affidavit data has been passed -- need to either create it or update it
-                    if (!await AffidavitExists())
+                    if (!await TraceDataExists())
                     {
-                        await ValidateAndProcessNewAffidavit();
-
-                        // ignore all changes other than Creditor
+                        await ValidateAndCreateTraceData();
 
                         string newAppl_Crdtr_FrstNme = TracingApplication.Appl_Crdtr_FrstNme;
                         string newAppl_Crdtr_MddleNme = TracingApplication.Appl_Crdtr_MddleNme;
@@ -173,7 +171,20 @@ namespace FOAEA3.Business.Areas.Application
                         string newLastUpdateUser = TracingApplication.Appl_LastUpdate_Usr;
                         DateTime? newLastUpdateDate = TracingApplication.Appl_LastUpdate_Dte;
 
+                        DateTime? newAffdvtDate = TracingApplication.Appl_RecvAffdvt_Dte;
+                        string newAffdvtSubmitter = TracingApplication.Subm_Affdvt_SubmCd;
+
                         await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+                        if (CurrentUser.Submitter.Subm_SubmCd.IsInternalAgentSubmitter())
+                        {
+                            TracingApplication.Appl_RecvAffdvt_Dte = newAffdvtDate;
+                            TracingApplication.Subm_Affdvt_SubmCd = newAffdvtSubmitter;
+
+                            if (TracingApplication.AppLiSt_Cd.In(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6, 
+                                                                 ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7))
+                                await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
+                        }
 
                         TracingApplication.Appl_Crdtr_FrstNme = newAppl_Crdtr_FrstNme;
                         TracingApplication.Appl_Crdtr_MddleNme = newAppl_Crdtr_MddleNme;
@@ -401,7 +412,7 @@ namespace FOAEA3.Business.Areas.Application
             await Validation.AddDuplicateCreditorWarningEvents();
         }
 
-        private async Task ValidateAndProcessNewAffidavit()
+        private async Task ValidateAndCreateTraceData()
         {
             if (!TracingApplication.Appl_LastUpdate_Usr.IsInternalAgentSubmitter())
             {
@@ -546,7 +557,7 @@ namespace FOAEA3.Business.Areas.Application
             return await DB.TracingTable.GetApplicationsWaitingForAffidavit();
         }
 
-        private async Task<bool> AffidavitExists()
+        private async Task<bool> TraceDataExists()
         {
             return await DB.TracingTable.TracingDataExists(Appl_EnfSrv_Cd, Appl_CtrlCd);
         }

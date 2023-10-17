@@ -411,16 +411,10 @@ namespace FOAEA3.Business.Areas.Application
                     string errorMessage = Application.Appl_EnfSrv_Cd.Trim() + "-" + Application.Subm_SubmCd.Trim() + "-" + Application.Appl_CtrlCd.Trim();
                     foreach (ApplicationConfirmedSINData confirmedAppl in applsInOtherJurisdictions)
                     {
-                        // add event to each of the applications found
-                        EventManager.Events.Add(new ApplicationEventData
-                        {
-                            Appl_CtrlCd = confirmedAppl.Appl_CtrlCd,
-                            Appl_EnfSrv_Cd = confirmedAppl.Appl_EnfSrv_Cd,
-                            Subm_SubmCd = confirmedAppl.Subm_SubmCd,
-                            Event_Reas_Cd = EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
-                            Event_Reas_Text = errorMessage
-                        });
-
+                        EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
+                                              eventReasonText: errorMessage, 
+                                              enfSrv: confirmedAppl.Appl_EnfSrv_Cd, controlCode: confirmedAppl.Appl_CtrlCd,
+                                              submCd: confirmedAppl.Subm_SubmCd);
                     }
 
                 }
@@ -448,15 +442,11 @@ namespace FOAEA3.Business.Areas.Application
                     {
                         allMatchErrorMessage.Append($"{applicationFound.Appl_EnfSrv_Cd.Trim()}-{applicationFound.Subm_SubmCd.Trim()}-{applicationFound.Appl_CtrlCd.Trim()} ");
 
-                        var eventData = new ApplicationEventData
-                        {
-                            Event_Reas_Cd = EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
-                            Event_Reas_Text = originalApplicationErrorMessage,
-                            Appl_EnfSrv_Cd = applicationFound.Appl_EnfSrv_Cd,
-                            Appl_CtrlCd = applicationFound.Appl_CtrlCd
-                        };
+                        EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
+                                              eventReasonText: originalApplicationErrorMessage,
+                                              enfSrv: applicationFound.Appl_EnfSrv_Cd, controlCode: applicationFound.Appl_CtrlCd,
+                                              submCd: applicationFound.Subm_SubmCd);
 
-                        EventManager.Events.Add(eventData);
                     }
                 }
 
