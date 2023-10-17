@@ -23,7 +23,25 @@ namespace FileBroker.Data.DB
 
             return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
         }
-        
+
+        public async Task<FileTableFlagData> GetAuditFileFormatForProcessId(int processId)
+        {
+
+            var parameters = new Dictionary<string, object> {
+                    { "PrcId",  processId }
+                };
+
+            var fileTableFlagData = await MainDB.GetDataFromStoredProcAsync<FileTableFlagData>("MessageBrokerConfigGetIncludeAudit", parameters, FillFileFlagTableDataFromReader);
+
+            return fileTableFlagData.AsParallel().FirstOrDefault();
+        }
+
+        private void FillFileFlagTableDataFromReader(IDBHelperReader rdr, FileTableFlagData data)
+        {
+            if (rdr.ColumnExists("PrcId")) data.PrcId = (int)rdr["PrcId"];
+            data.IncludeAudit = rdr["IncludeAudit"] as string;
+        }
+
         public async Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
         {
             var parameters = new Dictionary<string, object>

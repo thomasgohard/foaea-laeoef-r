@@ -41,6 +41,21 @@ namespace FileBroker.Common
                 return -1;
         }
 
+        public static string ExtractCycleAsStringFromFilename(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return string.Empty;
+
+            if (fileName.ToUpper().EndsWith(".XML"))
+                fileName = Path.GetFileNameWithoutExtension(fileName);
+
+            int lastPeriod = fileName.LastIndexOf('.');
+            if (lastPeriod > 0)
+                return fileName[(lastPeriod + 1)..];
+            else
+                return string.Empty;
+        }
+
         public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, 
                                                                                          out int actualCycle)
         {

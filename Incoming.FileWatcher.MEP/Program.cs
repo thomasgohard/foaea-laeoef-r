@@ -4,7 +4,6 @@ using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
@@ -19,6 +18,12 @@ internal class Program
     static async Task Main(string[] args)
     {
         var config = new FileBrokerConfigurationHelper(args);
+        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+        WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+        WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+        WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
         var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
