@@ -160,6 +160,7 @@ public class FileAuditManager
             if (unknownTags is not null && unknownTags.Any())
                 auditXmlFileContent.AppendLine($"    <XmlValidationWarnings>{unknownTags.Count}</XmlValidationWarnings>");
             auditXmlFileContent.AppendLine($"  </Trailer>");
+            auditXmlFileContent.AppendLine($"</NewDataSet>");
         }
 
         // save file to proper location

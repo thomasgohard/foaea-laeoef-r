@@ -18,6 +18,12 @@ internal class Program
     static async Task Main(string[] args)
     {
         var config = new FileBrokerConfigurationHelper(args);
+        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+        WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+        WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+        WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
         var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
@@ -118,8 +124,6 @@ internal class Program
         var duration = end - start;
 
         WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
-
-        Console.ReadKey();
     }
 
     private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)
