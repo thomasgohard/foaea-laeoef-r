@@ -136,6 +136,9 @@ namespace FOAEA3.Business.Areas.Application
 
                 MakeUpperCase();
 
+                var affidavitDate = TracingApplication.Appl_RecvAffdvt_Dte;
+                var affidavitSubm = TracingApplication.Subm_Affdvt_SubmCd;
+
                 if (TracingApplication.Subm_SubmCd.IsPeaceOfficerSubmitter())
                 {
                     if ((TracingApplication.AppLiSt_Cd == ApplicationState.PENDING_ACCEPTANCE_SWEARING_6) &&
@@ -146,6 +149,19 @@ namespace FOAEA3.Business.Areas.Application
                 }
 
                 await base.UpdateApplication();
+
+                if ((!TracingApplication.Messages.ContainsMessagesOfType(MessageType.Error)) && 
+                    TracingApplication.Subm_SubmCd.IsPeaceOfficerSubmitter())
+                {
+                    if ((TracingApplication.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3) &&
+                        !string.IsNullOrEmpty(affidavitSubm))
+                    {
+                        TracingApplication.Appl_RecvAffdvt_Dte = affidavitDate;
+                        TracingApplication.Subm_Affdvt_SubmCd = affidavitSubm;
+
+                        await UpdateApplicationNoValidation();
+                    }
+                }
             }
             else
             {
