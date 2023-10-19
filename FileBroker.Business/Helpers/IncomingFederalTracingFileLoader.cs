@@ -40,8 +40,16 @@ public class IncomingFederalTracingFileLoader
                         break;
 
                     case string rt when fileData.TRCINEmployers.ContainsKey(rt):
-                        const string EMPLOYERS_SPEC_CODE = "04";
-                        FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.TRCINEmployers[rt], flatFileLine, specs, EMPLOYERS_SPEC_CODE, ref error);
+                        if ((rt != "80") && (rt != "81"))
+                        {
+                            const string EMPLOYERS_SPEC_CODE = "04";
+                            FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.TRCINEmployers[rt], flatFileLine, specs, EMPLOYERS_SPEC_CODE, ref error);
+                        }
+                        else
+                        {
+                            FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.TRCINEmployers[rt], flatFileLine, specs, rt, ref error);
+                        }
+
                         break;
 
                     case "99":
