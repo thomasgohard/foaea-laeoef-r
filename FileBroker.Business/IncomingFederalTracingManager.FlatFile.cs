@@ -145,7 +145,7 @@ public partial class IncomingFederalTracingManager
                 foreach (var item in fileTracingSummary)
                 {
                     await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, newState: 2,
-                                                          activeTraceEvents, activeTraceEventDetails);
+                                                     activeTraceEvents, activeTraceEventDetails);
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
                 await SendTRACEDataToTrcRsp(tracingResponses, errors);
