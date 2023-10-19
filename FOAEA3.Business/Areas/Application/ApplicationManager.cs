@@ -154,7 +154,7 @@ namespace FOAEA3.Business.Areas.Application
 
             if ((data != null) && (CurrentUser is not null))
             {
-                if (CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
+                if (await CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
                 {
                     Application.Merge(data);
                     return true;
@@ -181,7 +181,7 @@ namespace FOAEA3.Business.Areas.Application
         public virtual async Task<bool> CreateApplication()
         {
             if ((CurrentUser is null) ||
-                (!CurrentUserHasFullAccess(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd)))
+                (!await CurrentUserHasFullAccess(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd)))
             {
                 Application.Messages.AddError(ErrorResource.CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED);
                 return false;
@@ -587,45 +587,53 @@ namespace FOAEA3.Business.Areas.Application
             await repositories.NotificationService.SendEmail(subject, recipients, message);
         }
 
-        private bool CurrentUserHasReadAccess(string enfService, string subm_SubmCd)
+        private async Task<bool> CurrentUserHasReadAccess(string enfService, string subm_SubmCd)
         {
             bool canAccess = true;
+
+            bool isSameEnfService = CurrentUser.IsSameEnfService(enfService);
+            
+            var submitterData = (await DB.SubmitterTable.GetSubmitter(submCode: subm_SubmCd)).FirstOrDefault();
+            var enfOffData = (await DB.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+            bool isSameOffice = enfOffData?.EnfOff_AbbrCd == CurrentUser.OfficeCode;
 
             if ((CurrentUser.HasRole(Roles.EnforcementService) ||
                  CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||
                  CurrentUser.HasRole(Roles.FileTransfer)) &&
-                !CurrentUser.IsSameEnfService(enfService))
+                 !isSameEnfService)
                 canAccess = false;
 
             if ((CurrentUser.HasRole(Roles.EnforcementOffice) ||
                  CurrentUser.HasRole(Roles.EnforcementOfficeReadOnly)) &&
-                (!CurrentUser.IsSameEnfService(enfService) ||
-                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                (!isSameEnfService || !isSameOffice))
                 canAccess = false;
 
-            if (CurrentUser.HasRole(Roles.CourtUser) &&
-                !CurrentUser.IsSameEnfService(enfService))
+            if (CurrentUser.HasRole(Roles.CourtUser) && !isSameEnfService)
                 canAccess = false;
 
             return canAccess;
         }
 
-        private bool CurrentUserHasFullAccess(string enfService, string subm_SubmCd)
+        private async Task<bool> CurrentUserHasFullAccess(string enfService, string subm_SubmCd)
         {
             bool canAccess = true;
 
+            bool isSameEnfService = CurrentUser.IsSameEnfService(enfService);
+
+            var submitterData = (await DB.SubmitterTable.GetSubmitter(submCode: subm_SubmCd)).FirstOrDefault();
+            var enfOffData = (await DB.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+            bool isSameOffice = enfOffData?.EnfOff_AbbrCd == CurrentUser.OfficeCode;
+
             if ((CurrentUser.HasRole(Roles.EnforcementService) ||
                  CurrentUser.HasRole(Roles.FileTransfer)) &&
-                !CurrentUser.IsSameEnfService(enfService))
+                !isSameEnfService)
                 canAccess = false;
 
             if (CurrentUser.HasRole(Roles.EnforcementOffice) &&
-                (!CurrentUser.IsSameEnfService(enfService) ||
-                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                (!isSameEnfService || !isSameOffice))
                 canAccess = false;
 
-            if (CurrentUser.HasRole(Roles.CourtUser) &&
-                !CurrentUser.IsSameEnfService(enfService))
+            if (CurrentUser.HasRole(Roles.CourtUser) && !isSameEnfService)
                 canAccess = false;
 
             if (CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||

@@ -13,7 +13,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        ColourConsole.WriteEmbeddedColorLine("Starting [cyan]Ontario[/cyan] Federal Tracing File Monitor");
+        ColourConsole.WriteEmbeddedColorLine("Starting Incoming Federal Tracing File Monitor");
 
         var config = new FileBrokerConfigurationHelper(args);
         string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
