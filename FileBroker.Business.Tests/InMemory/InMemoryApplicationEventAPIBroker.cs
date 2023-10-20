@@ -43,6 +43,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
+        public Task SaveEventDetails(ApplicationEventDetailsList eventDetails)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
         {
             throw new NotImplementedException();

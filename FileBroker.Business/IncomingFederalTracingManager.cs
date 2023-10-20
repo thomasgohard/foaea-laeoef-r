@@ -92,9 +92,9 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
                 row.ActvSt_Cd = "C";
                 row.Event_Compl_Dte = DateTime.Now;
             }
-
-            await APIs.ApplicationEvents.SaveEventDetail(row);
         }
+
+        await APIs.ApplicationEvents.SaveEventDetails(activeTraceEventDetails);
     }
 
     private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle, FederalSource fedSource)

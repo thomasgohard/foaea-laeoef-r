@@ -54,6 +54,12 @@ namespace FOAEA3.Common.Brokers
             _ = await ApiHelper.PostData<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, eventDetail, token: Token);
         }
 
+        public async Task SaveEventDetails(ApplicationEventDetailsList eventDetails)
+        {
+            string apiCall = $"api/v1/applicationEventDetails/Batch";
+            _ = await ApiHelper.PostData<ApplicationEventDetailData, ApplicationEventDetailsList>(apiCall, eventDetails, token: Token);
+        }
+
         public async Task UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
         {
             string writtenFile = HttpUtility.UrlEncode(newFilePath);
