@@ -377,7 +377,14 @@ namespace FOAEA3.Data.DB
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
-            data.Trace_Cycl_Qty = (int)rdr["Trace_Cycl_Qty"];
+            try
+            {
+                data.Trace_Cycl_Qty = (int)rdr["Trace_Cycl_Qty"];
+            }
+            catch
+            {
+                data.Trace_Cycl_Qty = (short)rdr["Trace_Cycl_Qty"];
+            }
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, TracingApplicationData data)

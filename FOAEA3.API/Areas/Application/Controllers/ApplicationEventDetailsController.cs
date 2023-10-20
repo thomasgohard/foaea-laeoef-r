@@ -34,7 +34,7 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApplicationEventDetailData>> SaveEventDetail([FromServices] IRepositories repositories)
+    public async Task<ActionResult> SaveEventDetail([FromServices] IRepositories repositories)
     {
         var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
 
@@ -46,13 +46,25 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
 
     }
 
+    [HttpPost("Batch")]
+    public async Task<ActionResult> SaveEventDetails([FromServices] IRepositories repositories)
+    {
+        var applicationEventDetails = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailsList>(Request);
+
+        var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
+        eventDetailManager.EventDetails.AddRange(applicationEventDetails);
+        await eventDetailManager.SaveEventDetails();
+
+        return Ok();
+    }
+
     [HttpPut]
     public async Task<ActionResult<ApplicationEventDetailData>> UpdateEventDetail([FromServices] IRepositories repositories,
-                                                                      [FromQuery] string command,
-                                                                      [FromQuery] string activeState,
-                                                                      [FromQuery] string applicationState,
-                                                                      [FromQuery] string enfSrvCode,
-                                                                      [FromQuery] string writtenFile)
+                                                                                  [FromQuery] string command,
+                                                                                  [FromQuery] string activeState,
+                                                                                  [FromQuery] string applicationState,
+                                                                                  [FromQuery] string enfSrvCode,
+                                                                                  [FromQuery] string writtenFile)
     {
         var eventIds = await APIBrokerHelper.GetDataFromRequestBody<List<int>>(Request);
 
