@@ -31,12 +31,15 @@
                     fileName = fileName[..^4];
 
                 int cycle = FileHelper.ExtractCycleFromFilename(fileName);
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                if (cycle != FileHelper.INVALID_CYCLE)
+                {
+                    var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
+                    var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
-                    (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName);
+                    if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                        (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                        newFiles.Add(fileInfo.FullName);
+                }
             }
         }
 
