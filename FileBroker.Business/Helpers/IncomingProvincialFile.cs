@@ -201,14 +201,19 @@ namespace FileBroker.Business.Helpers
         private async Task<bool> IsNextExpectedIncomingCycle(FileInfo thisFile)
         {
             int cycle = FileHelper.ExtractCycleFromFilename(thisFile.Name);
-            string baseFileName = FileHelper.TrimCycleAndXmlExtension(thisFile.Name);
-            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseFileName);
+            if (cycle != FileHelper.INVALID_CYCLE)
+            {
 
-            if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
-                (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                return true;
-            else
-                return false;
+                string baseFileName = FileHelper.TrimCycleAndXmlExtension(thisFile.Name);
+                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseFileName);
+
+                if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                    (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                    return true;
+                else
+                    return false;
+            }
+            return false;
         }
 
         public async Task AddNewESDfiles(string rootPath, List<string> newFiles)

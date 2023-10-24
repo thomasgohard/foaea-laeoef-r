@@ -59,8 +59,8 @@ namespace FileBroker.Common
 
             EmailRecipient = configuration["emailRecipients"];
             OpsRecipient = configuration["opsRecipients"];
-            FTProot = configuration["FTProot"];
-            FTPbackupRoot = configuration["FTPbackupRoot"];
+            FTProot = configuration["FTProot"].ReplaceVariablesWithEnvironmentValues();
+            FTPbackupRoot = configuration["FTPbackupRoot"].ReplaceVariablesWithEnvironmentValues();
 
             ApiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
             AuditConfig = configuration.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();

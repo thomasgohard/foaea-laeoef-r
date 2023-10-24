@@ -207,7 +207,7 @@ public class IncomingFederalLicenceDenialManager : IncomingFederalManagerBase
                     {
                         var existingEventDetailsForApplList = eventDetails.Where(m => m.Event_Id == eventData.Event_Id)
                                                                           .OrderBy(m => m.Event_TimeStamp);
-                        
+
                         var existingEventDetailsForAppl = new ApplicationEventDetailsList(existingEventDetailsForApplList);
 
                         if (existingEventDetailsForAppl.Any())

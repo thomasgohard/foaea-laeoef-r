@@ -4,7 +4,7 @@
     "AuditRootPath": "C:\\FOAEA\\AuditFiles"
   },
   "emailRecipients": "FLAS-IT_Testing@justice.gc.ca",
-  "FTPbackupRoot": "D:\\FOAEAftpbackup",
-  "FTProot": "C:\\FOAEA\\ftpin",
+  "FTPbackupRoot": "\\\\%FOAEA_WEB_SERVER%\\FOAEAftpbackup",
+  "FTProot": "\\\\%FOAEA_WEB_SERVER%\\ftpin",
   "opsRecipients": "FLAS-IT_Testing@justice.gc.ca"
 }

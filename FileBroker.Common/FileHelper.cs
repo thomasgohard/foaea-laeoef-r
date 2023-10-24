@@ -14,6 +14,8 @@ namespace FileBroker.Common
 {
     public static class FileHelper
     {
+        public const int INVALID_CYCLE = -1;
+
         public static string TrimCycleAndXmlExtension(string fileName)
         {
             if (fileName.ToUpper().EndsWith(".XML"))
@@ -38,7 +40,7 @@ namespace FileBroker.Common
             if (lastPeriod > 0)
                 return int.TryParse(fileName[(lastPeriod + 1)..], out int cycle) ? cycle : -1;
             else
-                return -1;
+                return INVALID_CYCLE;
         }
 
         public static string ExtractCycleAsStringFromFilename(string fileName)

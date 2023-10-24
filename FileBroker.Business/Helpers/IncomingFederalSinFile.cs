@@ -28,12 +28,15 @@
             foreach (var fileInfo in files)
             {
                 int cycle = FileHelper.ExtractCycleFromFilename(fileInfo.Name);
-                var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                if (cycle != FileHelper.INVALID_CYCLE)
+                {
+                    var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
+                    var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
+                    var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName);
+                    if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                        newFiles.Add(fileInfo.FullName);
+                }
             }
         }
 
