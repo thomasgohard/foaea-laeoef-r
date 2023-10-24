@@ -30,8 +30,8 @@ public static class OutgoingFileCreatorMEP
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
         bool generateTracingFiles = true;
-        bool generateLicencingFiles = true;
-        bool generateStatsFiles = true;
+        bool generateLicencingFiles = false; // TODO: fix when support for licencing is added
+        bool generateStatsFiles = false; // TODO: fix when support for stats file is added
 
         if (args.Length > 0)
         {
