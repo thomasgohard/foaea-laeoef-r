@@ -98,7 +98,6 @@ namespace FOAEA3.Data.DB
                         {"Trace_LstCyclStr_Dte", data.Trace_LstCyclStr_Dte == DateTime.MinValue ? DateTime.Now : data.Trace_LstCyclStr_Dte },
                         {"Trace_LstCyclCmp_Dte", data.Trace_LstCyclCmp_Dte.HasValue ? data.Trace_LstCyclCmp_Dte : DBNull.Value },
                         {"Trace_LiSt_Cd", data.Trace_LiSt_Cd },
-                        {"InfoBank_Cd", (object) data.InfoBank_Cd ?? DBNull.Value },
                         {"S282_Ind",data.IncludeS282 },
                         {"S283_Ind",data.IncludeS283 },
                         {"Trace_ReasStepsParent_Text", (object) data.Trace_ReasStepsParent_Text ?? DBNull.Value },
@@ -108,6 +107,11 @@ namespace FOAEA3.Data.DB
                         {"Sin_Information", data.IncludeSinInformation },
                         {"Financial_Information", data.IncludeFinancialInformation }
                     };
+
+            if (string.IsNullOrEmpty(data.InfoBank_Cd))
+                parameters.Add("InfoBank_Cd", DBNull.Value);
+            else
+                parameters.Add("InfoBank_Cd", data.InfoBank_Cd);
 
             if (data.PhoneNumber is not null) parameters.Add("Phone_Number", data.PhoneNumber);
             if (data.EmailAddress is not null) parameters.Add("Email_Address", data.EmailAddress);
