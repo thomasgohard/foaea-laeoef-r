@@ -67,7 +67,14 @@ namespace FOAEA3.Data.DB
 
         public async Task InsertBulkData(List<TraceResponseData> responseData)
         {
-            await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
+            var bulkData = new List<TraceResponseBulkData>();
+            foreach (var data in responseData)
+            {
+                var thisData = new TraceResponseBulkData();
+                thisData.LoadFrom(data);
+                bulkData.Add(thisData);
+            }
+            await MainDB.BulkUpdateAsync<TraceResponseBulkData>(bulkData, "TrcRsp");
         }
 
         public async Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
@@ -131,7 +138,7 @@ namespace FOAEA3.Data.DB
                     { "TrcSt_Cd",  data.TrcSt_Cd},
                     { "TrcRsp_Trace_CyclNr",  data.TrcRsp_Trace_CyclNr},
                     { "ActvSt_Cd",  data.ActvSt_Cd},
-                    { "Prcs_RecType",  data.Prcs_RecType},                   
+                    { "Prcs_RecType",  data.Prcs_RecType},
                     { "SIN",  data.Sin},
                     { "SIN_XRef",  data.SinXref}
                 };
@@ -139,7 +146,7 @@ namespace FOAEA3.Data.DB
             if (data.TrcRsp_RcptViewed_Dte is not null)
                 parameters.Add("TrcRsp_RcptViewed_Dte", data.TrcRsp_RcptViewed_Dte);
 
-            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");            
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");
         }
 
         public async Task<int> CreateTraceFinancialResponseDetail(TraceFinancialResponseDetailData data)
@@ -237,9 +244,9 @@ namespace FOAEA3.Data.DB
             data.TrcRsp_RcptViewed_Dte = rdr["TrcRsp_RcptViewed_Dte"] as DateTime?; // can be null 
 
             // extra values
-            //data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
-            //data.Address = rdr["Address"] as string;
-            //data.Originator = rdr["originator"] as string;
+            data.Subm_SubmCd = rdr["Subm_SubmCd"] as string;
+            data.Address = rdr["Address"] as string;
+            data.Originator = rdr["originator"] as string;
         }
 
         private void FillTraceFinancialResultDataFromReader(IDBHelperReader rdr, TraceFinancialResponseData data)
@@ -263,7 +270,7 @@ namespace FOAEA3.Data.DB
         {
             data.TrcRspFin_Dtl_Id = (int)rdr["TrcRspFin_Dtl_Id"];
             data.TrcRspFin_Id = (int)rdr["TrcRspFin_Id"];
-            data.FiscalYear = (short) rdr["FiscalYear"];
+            data.FiscalYear = (short)rdr["FiscalYear"];
             data.TaxForm = rdr["TaxForm"] as string;
         }
 
