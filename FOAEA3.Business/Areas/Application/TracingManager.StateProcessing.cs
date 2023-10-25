@@ -234,8 +234,13 @@ namespace FOAEA3.Business.Areas.Application
         private async Task<List<string>> GetReceivedResponseSourcesForLatestCycle()
         {
             var traceResponses = (await DB.TraceResponseTable.GetTraceResponseForApplication(Appl_EnfSrv_Cd, Appl_CtrlCd)).Items;
-            short latestTraceCycle = traceResponses.Max(m => m.TrcRsp_Trace_CyclNr);
-            return traceResponses.Where(m => m.TrcRsp_Trace_CyclNr == latestTraceCycle).Select(m => m.EnfSrv_Cd).Distinct().ToList();
+            if (traceResponses.Any())
+            {
+                short latestTraceCycle = traceResponses.Max(m => m.TrcRsp_Trace_CyclNr);
+                return traceResponses.Where(m => m.TrcRsp_Trace_CyclNr == latestTraceCycle).Select(m => m.EnfSrv_Cd).Distinct().ToList();
+            }
+            else
+                return new List<string>();
         }
 
         protected override async Task Process_14_ManuallyTerminated()

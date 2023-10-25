@@ -95,7 +95,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
         var fileAuditData = new FileAuditData
         {
             Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = data.dat_Appl_CtrlCd,
+            Appl_CtrlCd = data.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
             InboundFilename = FileName + ".XML"
         };
@@ -111,7 +111,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
 
             if (!isTermination)
             {
-                var licenceDenialData = licenceDenialFile.LICAPPIN31.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                var licenceDenialData = licenceDenialFile.LICAPPIN31.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
 
                 licenceDenialMessage = new MessageData<LicenceDenialApplicationData>
                 {
@@ -138,7 +138,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
             }
             else
             {
-                var licenceDenialData = licenceDenialFile.LICAPPIN41.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                var licenceDenialData = licenceDenialFile.LICAPPIN41.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
 
                 licenceDenialMessage = new MessageData<LicenceDenialApplicationData>
                 {
@@ -391,7 +391,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
         var licenceDenialApplication = new LicenceDenialApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,
@@ -458,7 +458,7 @@ public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerB
         var licenceDenialTerminationApplication = new LicenceDenialApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,

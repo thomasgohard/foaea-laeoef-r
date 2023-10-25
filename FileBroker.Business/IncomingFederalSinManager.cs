@@ -283,7 +283,7 @@ public class IncomingFederalSinManager : IncomingFederalManagerBase
                 new SINResultData
                 {
                     Appl_EnfSrv_Cd = sinResult.dat_Appl_EnfSrvCd,
-                    Appl_CtrlCd = sinResult.dat_Appl_CtrlCd,
+                    Appl_CtrlCd = sinResult.dat_Appl_CtrlCd.Trim(),
                     SVR_TimeStamp = sinFileData.SININ01.FileDate,
                     SVR_TolCd = sinResult.dat_SVR_TolCd,
                     SVR_SIN = sinResult.dat_SVR_SIN,

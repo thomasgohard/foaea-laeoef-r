@@ -144,7 +144,7 @@ public partial class IncomingFederalTracingManager
             {
                 foreach (var item in fileTracingSummary)
                 {
-                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, newState: 2,
+                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd.Trim(), flatFileName, newState: 2,
                                                      activeTraceEvents, activeTraceEventDetails);
                 }
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
@@ -154,7 +154,7 @@ public partial class IncomingFederalTracingManager
             else
             {
                 foreach (var item in fileTracingSummary)
-                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, flatFileName, 0,
+                    await MarkTraceEventsAsProcessed(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd.Trim(), flatFileName, 0,
                                                      activeTraceEvents, activeTraceEventDetails);
 
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
@@ -163,7 +163,7 @@ public partial class IncomingFederalTracingManager
                 await CloseOrInactivateTraceEventDetails(cutOffDays, activeTraceEventDetails);
 
                 foreach(var item in fileTracingSummary)
-                    await ResetOrCloseTraceEventDetails(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd, activeTraceEvents);
+                    await ResetOrCloseTraceEventDetails(item.dat_Appl_EnfSrvCd, item.dat_Appl_CtrlCd.Trim(), activeTraceEvents);
             }
         }
         catch (Exception e)

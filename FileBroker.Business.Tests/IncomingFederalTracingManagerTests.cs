@@ -51,7 +51,7 @@ namespace FileBroker.Business.Tests
                     Assert.True(false, error);
             }
             Assert.Equal<int>(1, netpTracingData.TRCIN01.Cycle);
-            Assert.Equal("D62990", netpTracingData.TRCIN02[0].dat_Appl_CtrlCd);
+            Assert.Equal("D62990", netpTracingData.TRCIN02[0].dat_Appl_CtrlCd.Trim());
 
         }
 
