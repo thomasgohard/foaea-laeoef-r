@@ -31,8 +31,8 @@ namespace FOAEA3.Model
 
         // extra values
 
-        //public string Subm_SubmCd { get; set; }
-        //public string Address { get; set; }
-        //public string Originator { get; set; }
+        public string Subm_SubmCd { get; set; }
+        public string Address { get; set; }
+        public string Originator { get; set; }
     }
 }
