@@ -11,7 +11,7 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         Task<TracingApplicationData> CancelTracingApplication(TracingApplicationData tracingApplication);
         Task<TracingApplicationData> CreateTracingApplication(TracingApplicationData tracingData);
-        Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd);
+        Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource);
         Task<TracingApplicationData> PartiallyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource);
         Task<TracingApplicationData> GetApplication(string dat_Appl_EnfSrvCd, string dat_Appl_CtrlCd);
         Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle);

@@ -26,7 +26,7 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.FromResult(tracingData);
         }
 
-        public Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource)
         {
             throw new System.NotImplementedException();
         }
