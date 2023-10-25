@@ -49,10 +49,10 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.GetData<List<TraceToApplData>>(apiCall, token: Token);
         }
 
-        public async Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, string enfSrvCd)
+        public async Task<TracingApplicationData> FullyServiceApplication(TracingApplicationData tracingApplication, FederalSource fedSource)
         {
             string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
-            string apiCall = $"api/v1/tracings/{key}?command=FullyServiceApplication&EnforcementServiceCode={enfSrvCd}";
+            string apiCall = $"api/v1/tracings/{key}?command=FullyServiceApplication&fedSource={fedSource}";
             return await ApiHelper.PutData<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 

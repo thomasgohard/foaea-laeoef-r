@@ -31,7 +31,7 @@ namespace FOAEA3.Resources.Helpers
                 }
                 catch
                 {
-                    error = $"Invalid date passed: [{flatDate}]";
+                    error = $"(2) Invalid date passed: [{flatDate}]";
                     return new DateTime(); // SqlStyleExtensions.SQL_MIN_DATETIME;
                 }
             }

@@ -124,7 +124,7 @@ public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
 
             if (row.Tot_Childs == row.Tot_Closed)
             {
-                await APIs.TracingApplications.FullyServiceApplication(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.FullyServiceApplication(tracingApplication, fedSource);
                 newEventState = "C";
             }
             else

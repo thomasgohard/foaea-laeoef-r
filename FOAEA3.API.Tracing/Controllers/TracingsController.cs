@@ -117,7 +117,7 @@ public class TracingsController : FoaeaControllerBase
                 break;
 
             case "fullyserviceapplication":
-                await tracingManager.FullyServiceApplication();
+                await tracingManager.FullyServiceApplication(fedSource);
                 break;
 
             default:

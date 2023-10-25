@@ -383,8 +383,10 @@ namespace FOAEA3.Business.Areas.Application
             await UpdateApplication();
         }
 
-        public async Task FullyServiceApplication()
+        public async Task FullyServiceApplication(FederalSource fedSource)
         {
+            FedSource = fedSource;
+            
             await SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
 
             MakeUpperCase();
