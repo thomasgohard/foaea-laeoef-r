@@ -97,7 +97,7 @@ namespace FileBroker.Business.Tests
             {
                 RecType = "10",
                 dat_Subm_SubmCd = submitterCode,
-                dat_Appl_CtrlCd = controlCode,
+                dat_Appl_CtrlCd = controlCode.Trim(),
                 dat_Appl_Source_RfrNr = "",
                 dat_Appl_EnfSrvCd = enfSrv,
                 dat_Subm_Rcpt_SubmCd = "",
@@ -127,7 +127,7 @@ namespace FileBroker.Business.Tests
             {
                 RecType = "11",
                 dat_Subm_SubmCd = submitterCode,
-                dat_Appl_CtrlCd = controlCode,
+                dat_Appl_CtrlCd = controlCode.Trim(),
                 dat_Appl_Dbtr_LngCd = "",
                 dat_Appl_Dbtr_Addr_Ln = "",
                 dat_Appl_Dbtr_Addr_Ln1 = "",
@@ -144,7 +144,7 @@ namespace FileBroker.Business.Tests
             {
                 RecType = "12",
                 dat_Subm_SubmCd = submitterCode,
-                dat_Appl_CtrlCd = controlCode,
+                dat_Appl_CtrlCd = controlCode.Trim(),
                 dat_IntFinH_LmpSum_Money = "",
                 dat_IntFinH_Perpym_Money = "",
                 dat_PymPr_Cd = "",
@@ -161,7 +161,7 @@ namespace FileBroker.Business.Tests
                 new MEPInterception_RecType13{
                     RecType= "13",
                     dat_Subm_SubmCd= submitterCode,
-                    dat_Appl_CtrlCd= controlCode,
+                    dat_Appl_CtrlCd= controlCode.Trim(),
                     dat_EnfSrv_Cd= "",
                     dat_HldbCtg_Cd= "",
                     dat_HldbCnd_SrcHldbPrcnt= "",
@@ -171,7 +171,7 @@ namespace FileBroker.Business.Tests
                 new MEPInterception_RecType13{
                     RecType= "13",
                     dat_Subm_SubmCd= submitterCode,
-                    dat_Appl_CtrlCd= controlCode,
+                    dat_Appl_CtrlCd= controlCode.Trim(),
                     dat_EnfSrv_Cd= "",
                     dat_HldbCtg_Cd= "",
                     dat_HldbCnd_SrcHldbPrcnt= "",

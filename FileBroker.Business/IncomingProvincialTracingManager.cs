@@ -58,7 +58,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                             var fileAuditData = new FileAuditData
                             {
                                 Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-                                Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+                                Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
                                 Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
                                 InboundFilename = FileName + ".XML"
                             };
@@ -141,8 +141,8 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 
     private static MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
     {
-        var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
-        var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+        var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd.Trim() == baseData.dat_Appl_CtrlCd.Trim());
+        var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd.Trim() == baseData.dat_Appl_CtrlCd.Trim());
 
         var tracingRequest = new MessageData<TracingApplicationData>
         {
@@ -295,7 +295,7 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         var tracingApplication = new TracingApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,

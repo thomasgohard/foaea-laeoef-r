@@ -6,6 +6,8 @@ namespace DBHelper
 {
     public static class SqlStyleExtensions
     {
+        public static DateTime SQL_MIN_DATETIME = new(1753, 1, 1);
+
         public static bool IsBetween(this DateTime dt, DateTime start, DateTime end)
         {
             return dt >= start && dt < end;
@@ -40,10 +42,7 @@ namespace DBHelper
         {
             bool isValid = false;
 
-            var minDateTime = new DateTime(1753, 1, 1);
-//            var maxDateTime = new DateTime(9999, 12, 31, 23, 59, 59, 997);
-
-            if (dateTimeValue >= minDateTime)
+            if (dateTimeValue >= SQL_MIN_DATETIME)
                 isValid = true;
 
             return isValid;

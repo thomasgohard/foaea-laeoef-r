@@ -74,7 +74,7 @@ public class IncomingProvincialInterceptionManager : IncomingProvincialManagerBa
                         var fileAuditData = new FileAuditData
                         {
                             Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-                            Appl_CtrlCd = data.dat_Appl_CtrlCd,
+                            Appl_CtrlCd = data.dat_Appl_CtrlCd.Trim(),
                             Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
                             InboundFilename = FileName + ".XML"
                         };
@@ -85,9 +85,9 @@ public class IncomingProvincialInterceptionManager : IncomingProvincialManagerBa
 
                         if (isValidRequest)
                         {
-                            var interceptionData = interceptionFile.INTAPPIN11.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var financialData = interceptionFile.INTAPPIN12.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
-                            var sourceSpecificData = interceptionFile.INTAPPIN13.Where(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd).ToList();
+                            var interceptionData = interceptionFile.INTAPPIN11.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
+                            var financialData = interceptionFile.INTAPPIN12.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
+                            var sourceSpecificData = interceptionFile.INTAPPIN13.Where(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim()).ToList();
 
                             int thisErrorCount = 0;
                             bool isValidData = true;
@@ -490,7 +490,7 @@ public class IncomingProvincialInterceptionManager : IncomingProvincialManagerBa
         var interceptionApplication = new InterceptionApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,

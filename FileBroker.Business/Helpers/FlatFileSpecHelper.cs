@@ -62,7 +62,7 @@ public static class FlatFileSpecHelper
                 {
                     if ((specItem.Val_Required == 1) ||
                         ((specItem.Val_Required == 0) && (!string.IsNullOrEmpty(valueFromFlatFileLine?.Trim()))))
-                        error = $"[{itemName} ({specItem.PrcsType_Cd.ToLower().Trim()})]: " + error;
+                        error = $"[{itemName} ({specItem.PrcsType_Cd.ToLower().Trim()})]: " + error + ": " + flatFileLine;
                     else
                         error = string.Empty; // only report error if field is mandatory or 
                                               // if it is optional and there is an invalid value
