@@ -28,18 +28,24 @@ public partial class IncomingFederalTracingManager
             await fileLoader.FillTracingFileDataFromFlatFile(tracingFileData, flatFileContent, errors);
 
             if (errors.Any())
+            {
+                errors.Add($"File {flatFileName} was not loaded.");
                 return errors;
+            }
 
             ValidateHeader(tracingFileData.TRCIN01, flatFileName, ref errors);
             ValidateFooter(tracingFileData.TRCIN99, tracingFileData.TRCIN02, ref errors);
 
-
             if (errors.Any())
+            {
+                errors.Add($"File {flatFileName} was not loaded.");
                 return errors;
+            }
 
             if (!await FoaeaAccess.SystemLogin())
             {
                 errors.Add("Failed to login to FOAEA!");
+                errors.Add($"File {flatFileName} was not loaded.");
                 return errors;
             }
             try
@@ -51,7 +57,10 @@ public partial class IncomingFederalTracingManager
                     var tracingResponses = await ExtractTracingResponsesFromFileData(tracingFileData, enfSrvCd, fileCycle, errors);
 
                     if (errors.Any())
+                    {
+                        errors.Add($"File {flatFileName} was not loaded.");
                         return errors;
+                    }
 
                     if ((tracingResponses != null) && (tracingFileData.TRCIN02.Count > 0))
                         await SendTracingResponsesToFoaea(tracingFileData.TRCIN02, tracingResponses, fileTableData.PrcId,
@@ -73,7 +82,6 @@ public partial class IncomingFederalTracingManager
         }
 
         return errors;
-
     }
 
     private static void ValidateHeader(FedTracing_RecType01 dataFromFile, string flatFileName, ref List<string> errors)
@@ -191,7 +199,7 @@ public partial class IncomingFederalTracingManager
             if ((response.TrcRsp_Addr_LstUpdte is not null) &&
                 (!response.TrcRsp_Addr_LstUpdte.Value.IsValidSqlDatetime()))
             {
-                errors.Add($"Invalid date ({response.TrcRsp_Addr_LstUpdte}) for {response.Appl_EnfSrv_Cd.Trim()}-{response.Appl_CtrlCd} [{response.Prcs_RecType} {response.TrcRsp_Addr_Ln}]");
+                errors.Add($"(3) Invalid date ({response.TrcRsp_Addr_LstUpdte}) for {response.Appl_EnfSrv_Cd.Trim()}-{response.Appl_CtrlCd} [{response.Prcs_RecType} {response.TrcRsp_Addr_Ln}]");
             }
         }
     }

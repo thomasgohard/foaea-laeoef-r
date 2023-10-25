@@ -6,8 +6,7 @@ namespace DBHelper
 {
     public static class SqlStyleExtensions
     {
-        public static DateTime SQL_MIN_DATETIME = new(1753, 1, 1);
-
+        public static DateTime SQL_MIN_DATETIME => new(1753, 1, 1);
         public static bool IsBetween(this DateTime dt, DateTime start, DateTime end)
         {
             return dt >= start && dt < end;
