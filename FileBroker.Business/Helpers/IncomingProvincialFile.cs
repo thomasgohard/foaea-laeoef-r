@@ -26,8 +26,8 @@ namespace FileBroker.Business.Helpers
             if (Path.GetExtension(fullPath)?.ToUpper() == ".XML")
                 errors = await ProcessIncomingXmlFile(fullPath, errors);
 
-            else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
-                await ProcessIncomingESDfile(fullPath, errors);
+            //else if (Path.GetExtension(fullPath)?.ToUpper() == ".ZIP")
+            //    await ProcessIncomingESDfile(fullPath, errors);
 
             else
                 errors.Add($"Unknown file type: {Path.GetExtension(fullPath)?.ToUpper()} for file {fullPath}");
@@ -59,13 +59,13 @@ namespace FileBroker.Business.Helpers
                     errors = await ProcessIncomingTracing(jsonText, fileNameNoXmlExtension, errors);
                     break;
 
-                case 'I':
-                    errors = await ProcessIncomingInterception(jsonText, fileNameNoXmlExtension, errors);
-                    break;
+                //case 'I':
+                //    errors = await ProcessIncomingInterception(jsonText, fileNameNoXmlExtension, errors);
+                //    break;
 
-                case 'L':
-                    errors = await ProcessIncomingLicencing(jsonText, fileNameNoXmlExtension, errors);
-                    break;
+                //case 'L':
+                //    errors = await ProcessIncomingLicencing(jsonText, fileNameNoXmlExtension, errors);
+                //    break;
 
                 default:
                     errors.Add($"Unknown file type: {fileType}");
@@ -184,7 +184,7 @@ namespace FileBroker.Business.Helpers
                     errors.Add(error.Description);
         }
 
-        public async Task AddNewIncomingXMLfilesIfExpected(string rootPath, List<string> newFiles)
+        public async Task AddNewIncomingXMLfilesIfExpected(string rootPath, List<string> newFiles, string option)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = await Task.Run(() => { return directory.GetFiles("*.xml"); });
@@ -193,25 +193,27 @@ namespace FileBroker.Business.Helpers
 
             foreach (var thisFile in files)
             {
-                if (await IsNextExpectedIncomingCycle(thisFile))
+                if (await IsNextExpectedIncomingCycle(thisFile, option))
                     newFiles.Add(thisFile.FullName);
             }
         }
 
-        private async Task<bool> IsNextExpectedIncomingCycle(FileInfo thisFile)
+        private async Task<bool> IsNextExpectedIncomingCycle(FileInfo thisFile, string option)
         {
             int cycle = FileHelper.ExtractCycleFromFilename(thisFile.Name);
             if (cycle != FileHelper.INVALID_CYCLE)
             {
-
                 string baseFileName = FileHelper.TrimCycleAndXmlExtension(thisFile.Name);
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseFileName);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
-                    (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    return true;
-                else
-                    return false;
+                if ((option == "TRACE_ONLY") && (fileTableData.Category == "TRCAPPIN"))
+                {
+                    if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                        (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                        return true;
+                    else
+                        return false;
+                }
             }
             return false;
         }
@@ -251,16 +253,17 @@ namespace FileBroker.Business.Helpers
             }
         }
 
-        public async Task<List<string>> GetNextExpectedIncomingFilesFoundInFolder(List<string> searchPaths)
+        public async Task<List<string>> GetNextExpectedIncomingFilesFoundInFolder(List<string> searchPaths, string option)
         {
             var allNewFiles = new List<string>();
 
             foreach (string searchPath in searchPaths)
+            {
                 if (!searchPath.Contains("ESD"))
-                    await AddNewIncomingXMLfilesIfExpected(searchPath, allNewFiles);
-                else
-                    await AddNewESDfiles(searchPath, allNewFiles);
-
+                    await AddNewIncomingXMLfilesIfExpected(searchPath, allNewFiles, option);
+                //else
+                //    await AddNewESDfiles(searchPath, allNewFiles);
+            }
             return allNewFiles;
         }
 
