@@ -94,8 +94,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrv_Cd", applEnfSrvCd },
-                    {"CtrlCd", applCtrlCd }
+                    {"Appl_EnfSrv_Cd", applEnfSrvCd },
+                    {"Appl_CtrlCd", applCtrlCd }
                 };
 
             var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseData>("TrcRspFin_ActiveSelectForAppl", parameters, FillTraceFinancialResultDataFromReader);

@@ -361,7 +361,7 @@ namespace FOAEA3.Data.DB
             data.TrcRsp_Rcpt_Dte = (DateTime)rdr["TrcRsp_Rcpt_Dte"];
             data.TrcRsp_SeqNr = rdr["TrcRsp_SeqNr"] as string;
             data.TrcSt_Cd = rdr["TrcSt_Cd"] as string;
-            data.Prcs_RecType = (int)rdr["Prcs_RecType"];
+            data.Prcs_RecType = (int?)rdr["Prcs_RecType"] ?? 0;
             data.EnfSrv_Cd = "RC00";
         }
 
