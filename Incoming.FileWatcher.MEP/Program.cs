@@ -31,7 +31,8 @@ internal class Program
         await db.RequestLogTable.DeleteAll();
 
         string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
-        var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB));
+        string option = args.Length > 1 ? args[1].ToUpper() : string.Empty;
+        var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB), option);
 
         if (!filesToProcess.Any())
         {
@@ -71,7 +72,7 @@ internal class Program
             bool finishedForProvince = false;
             while (!finishedForProvince)
             {
-                var allNewExpectedFiles = await provincialFileManager.GetNextExpectedIncomingFilesFoundInFolder(searchFolders);
+                var allNewExpectedFiles = await provincialFileManager.GetNextExpectedIncomingFilesFoundInFolder(searchFolders, option);
 
                 if (allNewExpectedFiles.Any())
                 {
@@ -162,14 +163,14 @@ internal class Program
                             .ToList();
     }
 
-    private static async Task<List<FileTableData>> GetFileTableDataForIncomingMEPfiles(string[] args, DBFileTable fileTable)
+    private static async Task<List<FileTableData>> GetFileTableDataForIncomingMEPfiles(string[] args, 
+                                                                                       DBFileTable fileTable, string option)
     {
         var fileTableData = new List<FileTableData>();
 
         bool loadAllCategories = true;
         if (args.Length > 1)
         {
-            string option = args[1].ToUpper();
             switch (option)
             {
                 case "TRACE_ONLY":
