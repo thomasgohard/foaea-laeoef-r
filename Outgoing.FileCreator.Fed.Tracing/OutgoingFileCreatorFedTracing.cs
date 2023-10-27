@@ -6,6 +6,7 @@ using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,23 +16,33 @@ public static class OutgoingFileCreatorFedTracing
 {
     public static async Task Run(string[] args = null)
     {
-        args ??= Array.Empty<string>();
+        var consoleOut = Console.Out;
+        using (var textOut = new StreamWriter(new FileStream("log.txt", FileMode.Append)))
+        {
+            args ??= Array.Empty<string>();
 
-        ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
+            var config = new FileBrokerConfigurationHelper(args);
 
-        var config = new FileBrokerConfigurationHelper(args);
-        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (config.LogConsoleOutputToFile)
+                Console.SetOut(textOut);
+            Console.WriteLine($"*** Started {AppDomain.CurrentDomain.FriendlyName}.exe: {DateTime.Now}");
+            ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
 
-        ColourConsole.WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
-        ColourConsole.WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
-        ColourConsole.WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
-        ColourConsole.WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
+            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+            ColourConsole.WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
-        await CreateOutgoingFederalTracingFiles(fileBrokerDB, config.ApiRootData, config);
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
-        ColourConsole.Write("Completed.");
+            await CreateOutgoingFederalTracingFiles(fileBrokerDB, config.ApiRootData, config);
+
+            ColourConsole.WriteLine("Completed.");
+            Console.WriteLine($"*** Ended: {DateTime.Now}\n");
+        }
+        Console.SetOut(consoleOut);
     }
 
     private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,

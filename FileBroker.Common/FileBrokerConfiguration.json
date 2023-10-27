@@ -46,6 +46,7 @@
   },
   "FTProot": "C:\\FOAEA\\FTPRoot",
   "FTPbackupRoot": "C:\\FOAEA_Backup\\FTProot",
+  "LogConsoleOutputToFile": false,
   "ProductionServers": [ "%PRODUCTION_OPS_SERVER%", "%PRODUCTION_WEB_SERVER%" ],
   "Tokens": {
     "Key": "%FILEBROKER_TOKEN_KEY%",
