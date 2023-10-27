@@ -33,8 +33,12 @@ namespace FOAEA3.Business.BackendProcesses
             await prodAudit.Insert("BF Events Process", "BF Events Process Started", "O");
 
             var bfEventList = await dbApplicationEvent.GetActiveEventBFs();
+            int total = bfEventList.Count;
+            int current = 1;
+            Console.WriteLine($"Processing {total} BF events");
             foreach (var bfEvent in bfEventList)
             {
+                Console.WriteLine($"[{current}/{total}] Processing BF event {bfEvent.Event_Id}:{bfEvent.Appl_EnfSrv_Cd.Trim()}-{bfEvent.Appl_CtrlCd.Trim()} --> {bfEvent.Event_Reas_Cd}({bfEvent.Event_TimeStamp})");
                 try
                 {
                     var applicationManager = new ApplicationManager(new ApplicationData(), DB, config, User);

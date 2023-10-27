@@ -423,12 +423,11 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task AddDuplicateCreditorWarningEvents()
         {
-
             var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgy(Application.Appl_CtrlCd, Application.Subm_SubmCd,
-                                                                                     Application.Appl_Dbtr_Entrd_SIN,
-                                                                                     Application.Appl_SIN_Cnfrmd_Ind,
-                                                                                     Application.ActvSt_Cd,
-                                                                                     Application.AppCtgy_Cd);
+                                                                                      Application.Appl_Dbtr_Entrd_SIN,
+                                                                                      Application.Appl_SIN_Cnfrmd_Ind,
+                                                                                      Application.ActvSt_Cd,
+                                                                                      Application.AppCtgy_Cd);
 
             if (applicationList.Count > 0)
             {
@@ -438,7 +437,7 @@ namespace FOAEA3.Business.Areas.Application
                 foreach (var applicationFound in applicationList)
                 {
                     if ((!String.IsNullOrEmpty(applicationFound.Appl_Crdtr_SurNme)) &&
-                        (applicationFound.Appl_Crdtr_SurNme.ToUpper() == Application.Appl_Crdtr_SurNme.ToUpper()))
+                        (applicationFound.Appl_Crdtr_SurNme.ToUpper() == Application.Appl_Crdtr_SurNme?.ToUpper()))
                     {
                         allMatchErrorMessage.Append($"{applicationFound.Appl_EnfSrv_Cd.Trim()}-{applicationFound.Subm_SubmCd.Trim()}-{applicationFound.Appl_CtrlCd.Trim()} ");
 
@@ -450,8 +449,11 @@ namespace FOAEA3.Business.Areas.Application
                     }
                 }
 
-                EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
-                                     allMatchErrorMessage.ToString().Trim());
+                if (!string.IsNullOrEmpty(allMatchErrorMessage.ToString()))
+                {
+                    EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
+                                          allMatchErrorMessage.ToString().Trim());
+                }
 
             }
 
