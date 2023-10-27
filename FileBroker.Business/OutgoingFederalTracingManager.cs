@@ -62,7 +62,6 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
                                                           federalEnfServiceCode);
                 if (!data.Any())
                 {
-                    errors.Add("No data found!?");
                     return ("", errors);
                 }
 
