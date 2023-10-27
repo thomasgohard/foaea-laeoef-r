@@ -15,6 +15,7 @@ namespace FileBroker.Common
         public string OpsRecipient { get; }
         public string FTProot { get; }
         public string FTPbackupRoot { get; }
+        public bool LogConsoleOutputToFile { get; }
 
         public ApiConfig ApiRootData { get; }
         public FoaeaLoginData FoaeaLogin { get; }
@@ -67,6 +68,8 @@ namespace FileBroker.Common
             ProvinceConfig = configuration.GetSection("ProvinceConfig").Get<ProvinceConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
+
+            LogConsoleOutputToFile = configuration["LogConsoleOutputToFile"]?.ToLower() == "true";
         }
     }
 }
