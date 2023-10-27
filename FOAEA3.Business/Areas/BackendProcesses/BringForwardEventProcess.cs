@@ -39,6 +39,7 @@ namespace FOAEA3.Business.BackendProcesses
             foreach (var bfEvent in bfEventList)
             {
                 Console.WriteLine($"[{current}/{total}] Processing BF event {bfEvent.Event_Id}:{bfEvent.Appl_EnfSrv_Cd.Trim()}-{bfEvent.Appl_CtrlCd.Trim()} --> {bfEvent.Event_Reas_Cd}({bfEvent.Event_TimeStamp})");
+                current++;
                 try
                 {
                     var applicationManager = new ApplicationManager(new ApplicationData(), DB, config, User);
