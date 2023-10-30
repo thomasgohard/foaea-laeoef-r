@@ -21,6 +21,11 @@ namespace FileBroker.Business.Tests.InMemory
             throw new System.NotImplementedException();
         }
 
+        public Task<TracingApplicationData> CertifyTracingApplication(TracingApplicationData tracingApplication)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task<TracingApplicationData> CreateTracingApplication(TracingApplicationData tracingData)
         {
             return Task.FromResult(tracingData);
@@ -52,6 +57,11 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public Task<List<TraceToApplData>> GetTraceToApplData()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<TracingApplicationData> InsertAffidavit(AffidavitData data)
         {
             throw new System.NotImplementedException();
         }

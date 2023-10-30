@@ -59,6 +59,10 @@ namespace FileBroker.Business.Helpers
                     errors = await ProcessIncomingTracing(jsonText, fileNameNoXmlExtension, errors);
                     break;
 
+                case 'W':
+                    errors = await ProcessIncomingSwearing(jsonText, fileNameNoXmlExtension, errors);
+                    break;
+
                 //case 'I':
                 //    errors = await ProcessIncomingInterception(jsonText, fileNameNoXmlExtension, errors);
                 //    break;
@@ -114,6 +118,35 @@ namespace FileBroker.Business.Helpers
             return errors;
         }
 
+        private async Task<List<string>> ProcessIncomingSwearing(string sourceSwearingJsonData, string fileName, List<string> errors)
+        {
+            errors = JsonHelper.Validate<MEPSwearingFileData>(sourceSwearingJsonData, out List<UnknownTag> unknownTags);
+
+            if (errors.Any())
+                return errors;
+
+            var tracingManager = new IncomingProvincialSwearingManager(DB, FoaeaApis, fileName, Config);
+
+            var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
+            var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+            if (!fileTableData.IsLoading)
+            {
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
+
+                var info = await tracingManager.ExtractAndProcessRequestsInFile(sourceSwearingJsonData, unknownTags);
+
+                await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
+
+                if ((info is not null) && (info.ContainsMessagesOfType(MessageType.Error)))
+                    foreach (var error in info.GetMessagesForType(MessageType.Error))
+                        errors.Add(error.Description);
+
+            }
+            else
+                errors.Add("File was already loading?");
+
+            return errors;
+        }
         public async Task<List<string>> ProcessIncomingInterception(string sourceInterceptionJsonData, string fileName, List<string> errors)
         {
             errors = JsonHelper.Validate<MEPInterceptionFileData>(sourceInterceptionJsonData, out List<UnknownTag> unknownTags);
@@ -206,7 +239,8 @@ namespace FileBroker.Business.Helpers
                 string baseFileName = FileHelper.TrimCycleAndXmlExtension(thisFile.Name);
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileName(baseFileName);
 
-                if ((option == "TRACE_ONLY") && (fileTableData.Category == "TRCAPPIN"))
+                if ((option == "TRACE_ONLY") && (
+                    (fileTableData.Category == "TRCAPPIN") || (fileTableData.Category == "LICAFFDVTIN")))
                 {
                     if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
                         (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
@@ -264,7 +298,8 @@ namespace FileBroker.Business.Helpers
                 //else
                 //    await AddNewESDfiles(searchPath, allNewFiles);
             }
-            return allNewFiles;
+
+            return allNewFiles.OrderBy(q => q[^12]).ToList(); // sort by last character so hopefully, swearing files will come last
         }
 
     }
