@@ -63,6 +63,19 @@ namespace FOAEA3.Common.Brokers
             return await ApiHelper.PutData<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
         }
 
+        public async Task<TracingApplicationData> CertifyTracingApplication(TracingApplicationData tracingApplication)
+        {
+            string key = ApplKey.MakeKey(tracingApplication.Appl_EnfSrv_Cd, tracingApplication.Appl_CtrlCd);
+            string apiCall = $"api/v1/tracings/{key}/CertifyAffidavit";
+            return await ApiHelper.PutData<TracingApplicationData, TracingApplicationData>(apiCall, tracingApplication, token: Token);
+        }
+
+        public async Task<TracingApplicationData> InsertAffidavit(AffidavitData data)
+        {
+            string apiCall = $"api/v1/tracings/InsertAffidavit";
+            return await ApiHelper.PostData<TracingApplicationData, AffidavitData>(apiCall, data, token: Token);
+        }
+
         public async Task<TracingApplicationData> CreateTracingApplication(TracingApplicationData tracingApplication)
         {
             var data = await ApiHelper.PostData<TracingApplicationData, TracingApplicationData>("api/v1/tracings",

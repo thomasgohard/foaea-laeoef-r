@@ -59,6 +59,18 @@ namespace FOAEA3.Business.Areas.Application
                 {
                     await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
                 }
+
+                var affidavitData = await DB.AffidavitTable.GetAffidavitData(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                if ((affidavitData is not null) && (!string.IsNullOrEmpty(affidavitData.Appl_CtrlCd)) && 
+                    (affidavitData.AppCtgy_Cd == "T01"))
+                {
+                    TracingApplication.Appl_RecvAffdvt_Dte = affidavitData.Affdvt_Sworn_Dte;
+                    TracingApplication.Subm_Affdvt_SubmCd = affidavitData.Subm_Affdvt_SubmCd;
+
+                    await DB.AffidavitTable.CloseAffidavitData(affidavitData);
+
+                    await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                }
             }
         }
 

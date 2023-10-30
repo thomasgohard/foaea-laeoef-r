@@ -17,6 +17,8 @@ namespace FOAEA3.Model.Interfaces.Broker
         Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrvCd, string fileCycle);
         Task<List<TraceToApplData>> GetTraceToApplData();
         Task<TracingApplicationData> UpdateTracingApplication(TracingApplicationData tracingApplication);
+        Task<TracingApplicationData> CertifyTracingApplication(TracingApplicationData tracingApplication);
+        Task<TracingApplicationData> InsertAffidavit(AffidavitData data);
         Task<TracingApplicationData> TransferTracingApplication(TracingApplicationData tracingApplication,
                                                                  string newRecipientSubmitter,
                                                                  string newIssuingSubmitter);

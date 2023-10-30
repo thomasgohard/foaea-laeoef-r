@@ -334,8 +334,11 @@ namespace FOAEA3.Business.Areas.Application
 
             if (!lastUpdateUser.IsInternalAgentSubmitter())
             {
-                TracingApplication.Subm_Affdvt_SubmCd = lastUpdateUser;
-                TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
+                if (string.IsNullOrEmpty(TracingApplication.Subm_Affdvt_SubmCd))
+                {
+                    TracingApplication.Subm_Affdvt_SubmCd = lastUpdateUser;
+                    TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
+                }
 
                 await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
@@ -706,6 +709,11 @@ namespace FOAEA3.Business.Areas.Application
             var tracingDB = DB.TracingTable;
             var data = await tracingDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
             return data;
+        }
+
+        public async Task InsertAffidavitData(AffidavitData data)
+        {
+            await DB.AffidavitTable.InsertAffidavitData(data);
         }
 
     }

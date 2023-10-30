@@ -189,6 +189,7 @@ internal class Program
             {
                 case "TRACE_ONLY":
                     fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("TRCAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAFFDVTIN"));
                     loadAllCategories = false;
                     break;
                 case "INTERCEPTION_ONLY":

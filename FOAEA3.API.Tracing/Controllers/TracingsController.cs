@@ -214,11 +214,17 @@ public class TracingsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = new TracingApplicationData();
+        var application = await APIBrokerHelper.GetDataFromRequestBody<TracingApplicationData>(Request);
+
+        var affidavitDate = application.Appl_RecvAffdvt_Dte;
+        var affidavitSubm = application.Subm_Affdvt_SubmCd;
 
         var appManager = new TracingManager(application, repositories, config, User);
 
         await appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
+
+        application.Appl_RecvAffdvt_Dte = affidavitDate;
+        application.Subm_Affdvt_SubmCd = affidavitSubm;
 
         await appManager.CertifyAffidavit(repositories.CurrentSubmitter);
 
@@ -238,6 +244,20 @@ public class TracingsController : FoaeaControllerBase
         await appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
 
         await appManager.RejectAffidavit(repositories.CurrentSubmitter);
+
+        return Ok(application);
+    }
+
+    [HttpPost("InsertAffidavit")]
+    public async Task<ActionResult<TracingApplicationData>> InsertAffidavit([FromServices] IRepositories repositories)
+    {
+        var affidavitData = await APIBrokerHelper.GetDataFromRequestBody<AffidavitData>(Request);
+
+        var application = new TracingApplicationData();
+
+        var appManager = new TracingManager(application, repositories, config, User);
+
+        await appManager.InsertAffidavitData(affidavitData);
 
         return Ok(application);
     }

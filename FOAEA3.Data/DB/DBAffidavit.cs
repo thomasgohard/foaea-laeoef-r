@@ -32,6 +32,30 @@ namespace FOAEA3.Data.DB
                 return new AffidavitData();
         }
 
+        public async Task CloseAffidavitData(AffidavitData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "EnfSrv_Cd", data.EnfSrv_Cd },
+                    { "Appl_CtrlCd", data.Appl_CtrlCd }
+                };
+
+            await MainDB.ExecProcAsync("UpdateAffidavitSwearingData", parameters);
+        }
+
+        public async Task InsertAffidavitData(AffidavitData data)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "EnfSrv_Cd",  data.EnfSrv_Cd},
+                    { "Appl_CtrlCd",  data.Appl_CtrlCd},
+                    { "Subm_Affdvt_SubmCd",  data.Subm_Affdvt_SubmCd},
+                    { "Affdvt_Sworn_Dte",  data.Affdvt_Sworn_Dte},
+                    { "AppCtgy_Cd",  data.AppCtgy_Cd},
+                    { "originalFileName",  data.OriginalFileName},
+                };
+
+            await MainDB.ExecProcAsync("MessageBrokerInsertAffidavitData", parameters);
+        }
+
         private void FillDataFromReader(IDBHelperReader rdr, AffidavitData data)
         {
             data.Event_Id = (int)rdr["Event_Id"];
