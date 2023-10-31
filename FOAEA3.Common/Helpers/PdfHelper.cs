@@ -206,14 +206,18 @@ namespace FOAEA3.Common.Helpers
                 textLine2Italic = "Loi d'aide à l'exécution des ordonnances et des ententes familiales";
             }
 
+            try
+            {
+                pdf.Pages[0].DeleteImage(0);
+            }
+            catch
+            {
+                // ignore if no image was found
+            }
+
             foreach (PdfPageBase page in pdf.Pages)
             {
                 page.Canvas.Save();
-
-                var whiteBlockBrush = PdfBrushes.White;
-                var whiteBlockRectangle = new System.Drawing.RectangleF(x: 24, y: -1, width: 200, 
-                                                                        height: isEnglish ? 49 : 53);
-                page.Canvas.DrawRectangle(whiteBlockBrush, whiteBlockRectangle);
 
                 page.Canvas.DrawString(textLine1, fontSmall, brush, 24, -1);
                 page.Canvas.DrawString(textLine2, fontSmall, brush, 24, 9);

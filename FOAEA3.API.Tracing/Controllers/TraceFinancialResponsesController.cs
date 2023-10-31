@@ -27,7 +27,6 @@ namespace FOAEA3.API.Tracing.Controllers
         }
 
         [HttpGet("{id}/pdf")]
-        [AllowAnonymous]
         public async Task<ActionResult> GetCRAform([FromRoute] ApplKey id, [FromServices] IRepositories repositories,
                                                    [FromQuery] short year, [FromQuery] string form, [FromQuery] short cycle)
         {
