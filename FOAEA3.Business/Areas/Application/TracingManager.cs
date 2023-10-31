@@ -150,7 +150,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await base.UpdateApplication();
 
-                if ((!TracingApplication.Messages.ContainsMessagesOfType(MessageType.Error)) && 
+                if ((!TracingApplication.Messages.ContainsMessagesOfType(MessageType.Error)) &&
                     TracingApplication.Subm_SubmCd.IsPeaceOfficerSubmitter())
                 {
                     if ((TracingApplication.AppLiSt_Cd == ApplicationState.SIN_CONFIRMATION_PENDING_3) &&
@@ -197,7 +197,7 @@ namespace FOAEA3.Business.Areas.Application
                             TracingApplication.Appl_RecvAffdvt_Dte = newAffdvtDate;
                             TracingApplication.Subm_Affdvt_SubmCd = newAffdvtSubmitter;
 
-                            if (TracingApplication.AppLiSt_Cd.In(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6, 
+                            if (TracingApplication.AppLiSt_Cd.In(ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
                                                                  ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7))
                                 await SetNewStateTo(ApplicationState.APPLICATION_ACCEPTED_10);
                         }
@@ -389,7 +389,7 @@ namespace FOAEA3.Business.Areas.Application
         public async Task FullyServiceApplication(FederalSource fedSource)
         {
             FedSource = fedSource;
-            
+
             await SetNewStateTo(ApplicationState.FULLY_SERVICED_13);
 
             MakeUpperCase();
@@ -419,7 +419,7 @@ namespace FOAEA3.Business.Areas.Application
             EventManager.AddEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: traceDate);
 
             var eventBF = await EventManager.GetEventBF(TracingApplication.Subm_SubmCd, Appl_CtrlCd,
-                                                  EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
+                                                        EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
 
             if (eventBF is not null)
             {
@@ -514,7 +514,7 @@ namespace FOAEA3.Business.Areas.Application
                             if (currentLifeState == ApplicationState.PARTIALLY_SERVICED_12)
                             {
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
-                                                     bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
+                                                           bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
                             }
                             break;
 

@@ -301,7 +301,7 @@ namespace FOAEA3.Business.Areas.Application
 
                 await Process_00_InitialState();
             }
-            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) && 
+            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) &&
                      (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
             {
                 await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
@@ -592,7 +592,7 @@ namespace FOAEA3.Business.Areas.Application
             bool canAccess = true;
 
             bool isSameEnfService = CurrentUser.IsSameEnfService(enfService);
-            
+
             var submitterData = (await DB.SubmitterTable.GetSubmitter(submCode: subm_SubmCd)).FirstOrDefault();
             var enfOffData = (await DB.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
             bool isSameOffice = enfOffData?.EnfOff_AbbrCd == CurrentUser.OfficeCode;

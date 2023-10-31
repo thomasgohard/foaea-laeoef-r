@@ -201,18 +201,22 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
             {
                 case "00": // change
                 case "0":
+                    tracingMessageData.Application.Appl_LastUpdate_Dte = DateTime.Now;
+                    tracingMessageData.Application.Appl_LastUpdate_Usr = tracingMessageData.NewUpdateSubmitter;
                     tracing = await APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
                     tracingMessageData.Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
+                    tracingMessageData.Application.Appl_LastUpdate_Dte = DateTime.Now;
+                    tracingMessageData.Application.Appl_LastUpdate_Usr = tracingMessageData.NewUpdateSubmitter;
                     tracing = await APIs.TracingApplications.CancelTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
                     tracing = await APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
-                                                                                  tracingMessageData.NewRecipientSubmitter,
-                                                                                  tracingMessageData.NewIssuingSubmitter);
+                                                                                        tracingMessageData.NewRecipientSubmitter,
+                                                                                        tracingMessageData.NewIssuingSubmitter);
                     break;
 
                 default:

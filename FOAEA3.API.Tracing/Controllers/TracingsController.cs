@@ -92,7 +92,7 @@ public class TracingsController : FoaeaControllerBase
     public async Task<ActionResult<TracingApplicationData>> UpdateApplication([FromRoute] string key,
                                                                               [FromQuery] string command,
                                                                               [FromQuery] FederalSource fedSource,
-                                                                              [FromServices] IRepositories repositories)
+                                                                              [FromServices] IRepositories db)
     {
         var applKey = new ApplKey(key);
 
@@ -101,7 +101,17 @@ public class TracingsController : FoaeaControllerBase
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
-        var tracingManager = new TracingManager(application, repositories, config, User);
+        var tracingManager = new TracingManager(application, db, config, User);
+
+        if (application.Medium_Cd == "FTP")
+        {
+            var submitter = (await db.SubmitterTable.GetSubmitter(application.Appl_LastUpdate_Usr)).FirstOrDefault();
+            if (submitter is not null)
+            {
+                tracingManager.CurrentUser.Submitter = submitter;
+                db.CurrentSubmitter = submitter.Subm_SubmCd;
+            }
+        }
 
         if (string.IsNullOrEmpty(command))
             command = "";
