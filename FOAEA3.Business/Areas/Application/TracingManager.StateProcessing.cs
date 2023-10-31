@@ -49,8 +49,8 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6,
                                       recipientSubm: signAuthority);
 
-                if (TracingApplication.Medium_Cd == "FTP")
-                    EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
+                //if (TracingApplication.Medium_Cd == "FTP")
+                //    EventManager.AddEvent(EventCode.C51042_REQUIRES_LEGAL_AUTHORIZATION, appState: ApplicationState.PENDING_ACCEPTANCE_SWEARING_6);
 
                 // FOAEA users can bypass swearing and go directly to state 10 
                 if (TracingApplication.Subm_Recpt_SubmCd.IsInternalAgentSubmitter() &&

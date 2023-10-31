@@ -3,7 +3,7 @@ using Spire.Pdf;
 using Spire.Pdf.Graphics;
 using Spire.Pdf.Widget;
 
-namespace Outgoing.FileCreator.Fed.Tracing
+namespace FOAEA3.Common.Helpers
 {
     public class PdfHelper
     {
@@ -188,19 +188,21 @@ namespace Outgoing.FileCreator.Fed.Tracing
 
             string textLine1;
             string textLine2;
+            string textLine3 = string.Empty;
             string textLine2Italic;
             string textREPLICA = "REPLICA";
 
             if (isEnglish)
             {
-                textLine1 = "Important Notice: Edited by the Department of Justice Canada for the purposes of releasing information under";
-                textLine2 = "Part I of the";
+                textLine1 = "Important Notice: Populated by the Department of Justice Canada based on taxpayer information";                    
+                textLine2 = "shared by the Canada Revenue Agency for the purposes of releasing information under Part I of the";
                 textLine2Italic = "Family Orders and Agreements Enforcement Assistance Act";
             }
             else
             {
-                textLine1 = "Avis important : Édité par le ministère de la Justice du Canada aux fins de la communication de renseignements";
-                textLine2 = "en vertu de la partie I de la";
+                textLine1 = "Avis important : Rempli par le ministère de la Justice du Canada à partir de renseignements des";
+                textLine2 = "contribuables partagés par l'Agence du revenu du Canada aux fins de la communication de renseignements";
+                textLine3 = "en vertu de la partie I de la";
                 textLine2Italic = "Loi d'aide à l'exécution des ordonnances et des ententes familiales";
             }
 
@@ -208,9 +210,16 @@ namespace Outgoing.FileCreator.Fed.Tracing
             {
                 page.Canvas.Save();
 
+                var whiteBlockBrush = PdfBrushes.White;
+                var whiteBlockRectangle = new System.Drawing.RectangleF(x: 24, y: -1, width: 200, 
+                                                                        height: isEnglish ? 49 : 53);
+                page.Canvas.DrawRectangle(whiteBlockBrush, whiteBlockRectangle);
+
                 page.Canvas.DrawString(textLine1, fontSmall, brush, 24, -1);
                 page.Canvas.DrawString(textLine2, fontSmall, brush, 24, 9);
-                page.Canvas.DrawString(textLine2Italic, fontSmallItalic, brush, isEnglish ? 76 : 140, 9);
+                if (!isEnglish)
+                    page.Canvas.DrawString(textLine3, fontSmall, brush, 24, 19);
+                page.Canvas.DrawString(textLine2Italic, fontSmallItalic, brush, isEnglish ? 24 : 140, 19);
                 page.Canvas.DrawString(textREPLICA, fontBig, brush, 520, 0);
 
                 page.Canvas.Restore();
