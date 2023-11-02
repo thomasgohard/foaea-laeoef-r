@@ -1,5 +1,4 @@
-﻿using FileBroker.Common.Helpers;
-using System.Text;
+﻿using System.Text;
 
 namespace FileBroker.Business;
 
@@ -85,8 +84,8 @@ public class OutgoingFederalLicenceDenialManager : IOutgoingFileManager
 
     }
 
-    private async Task<List<LicenceDenialOutgoingFederalData>> GetOutgoingDataFromFoaea(FileTableData fileTableData, 
-                                                                                        string actvSt_Cd, int appLiSt_Cd, 
+    private async Task<List<LicenceDenialOutgoingFederalData>> GetOutgoingDataFromFoaea(FileTableData fileTableData,
+                                                                                        string actvSt_Cd, int appLiSt_Cd,
                                                                                         string enfSrvCode)
     {
         var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");

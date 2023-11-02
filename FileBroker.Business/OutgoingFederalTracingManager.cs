@@ -33,9 +33,9 @@ public class OutgoingFederalTracingManager : IOutgoingFileManager
 
         string newCycle;
         if (federalEnfServiceCode == "RC01")
-            newCycle = fileTableData.Cycle.ToString("000");
+            newCycle = (fileTableData.Cycle + 1).ToString("000");
         else
-            newCycle = fileTableData.Cycle.ToString("000000");
+            newCycle = (fileTableData.Cycle + 1).ToString("000000");
 
         try
         {

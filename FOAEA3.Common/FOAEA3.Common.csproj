@@ -33,6 +33,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="FoaeaConfiguration.FoaeaProduction.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="FoaeaConfiguration.UAT.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

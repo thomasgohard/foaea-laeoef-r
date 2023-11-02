@@ -32,6 +32,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="FileBrokerConfiguration.FoaeaProduction.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
         <None Update="FileBrokerConfiguration.UAT.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

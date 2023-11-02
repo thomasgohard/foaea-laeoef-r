@@ -24,7 +24,7 @@ namespace FileBroker.Business
 
             var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
-            string newCycle = fileTableData.Cycle.ToString("000000");
+            string newCycle = (fileTableData.Cycle+1).ToString("000000");
 
             try
             {
