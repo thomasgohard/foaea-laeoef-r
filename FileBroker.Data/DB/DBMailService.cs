@@ -16,7 +16,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<string> SendEmailAsync(string subject, string recipients, string body, string attachmentPath = null)
+        public async Task<string> SendEmail(string subject, string recipients, string body, string attachmentPath = null)
         {
          
             var parameters = new Dictionary<string, object>
@@ -28,7 +28,7 @@ namespace FileBroker.Data.DB
 
             if (!string.IsNullOrEmpty(attachmentPath))
             {
-                int attachmentId = await UploadAttachmentToDatabaseAsync(attachmentPath);
+                int attachmentId = await UploadAttachmentToDatabase(attachmentPath);
 
                 if (!string.IsNullOrEmpty(MainDB.LastError))
                     return MainDB.LastError;
@@ -44,7 +44,7 @@ namespace FileBroker.Data.DB
             return "";
         }
 
-        private async Task<int> UploadAttachmentToDatabaseAsync(string attachmentPath)
+        private async Task<int> UploadAttachmentToDatabase(string attachmentPath)
         {
             string attachmentFileName = Path.GetFileName(attachmentPath);
             string attachmentContent = File.ReadAllText(attachmentPath);

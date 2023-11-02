@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<CountryData>> GetCountriesAsync()
+        public async Task<DataList<CountryData>> GetCountries()
         {
             var data = await MainDB.GetAllDataAsync<CountryData>("Ctry", FillCountryDataFromReader);
 

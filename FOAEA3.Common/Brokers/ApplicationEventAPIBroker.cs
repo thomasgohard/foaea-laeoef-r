@@ -17,50 +17,56 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName)
+        public async Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string fileName)
         {
             string apiCall = $"api/v1/applicationFederalSins/RequestedEventsForFile?fileName={fileName}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventsList>(apiCall, token: Token);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName)
+        public async Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string fileName)
         {
             string apiCall = $"api/v1/applicationFederalSins/RequestedEventDetailsForFile?fileName={fileName}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventDetailsList>(apiCall, token: Token);
         }
 
-        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
         {
             string apiCall = $"api/v1/applicationEvents/GetLatestSinEventDataSummary";
-            return await ApiHelper.GetDataAsync<List<SinInboundToApplData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<List<SinInboundToApplData>>(apiCall, token: Token);
         }
 
-        public async Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
+        public async Task<ApplicationEventsList> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
             string apiCall = $"api/v1/applicationEvents/{key}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall, token: Token);
+            return await ApiHelper.GetData<ApplicationEventsList>(apiCall, token: Token);
         }
 
-        public async Task SaveEventAsync(ApplicationEventData eventData)
+        public async Task SaveEvent(ApplicationEventData eventData)
         {
             string apiCall = $"api/v1/applicationEvents";
-            _ = await ApiHelper.PostDataAsync<ApplicationEventData, ApplicationEventData>(apiCall, eventData, token: Token);
+            _ = await ApiHelper.PostData<ApplicationEventData, ApplicationEventData>(apiCall, eventData, token: Token);
         }
 
-        public async Task SaveEventDetailAsync(ApplicationEventDetailData eventDetail)
+        public async Task SaveEventDetail(ApplicationEventDetailData eventDetail)
         {
             string apiCall = $"api/v1/applicationEventDetails";
-            _ = await ApiHelper.PostDataAsync<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, eventDetail, token: Token);
+            _ = await ApiHelper.PostData<ApplicationEventDetailData, ApplicationEventDetailData>(apiCall, eventDetail, token: Token);
         }
 
-        public async Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
+        public async Task SaveEventDetails(ApplicationEventDetailsList eventDetails)
+        {
+            string apiCall = $"api/v1/applicationEventDetails/Batch";
+            _ = await ApiHelper.PostData<ApplicationEventDetailData, ApplicationEventDetailsList>(apiCall, eventDetails, token: Token);
+        }
+
+        public async Task UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
         {
             string writtenFile = HttpUtility.UrlEncode(newFilePath);
 
             string apiCall = $"api/v1/applicationEventDetails?command=MarkOutboundProcessed&activeState={actvSt_Cd}" +
                              $"&applicationState={appLiSt_Cd}&enfSrvCode={enfSrv_Cd}&writtenFile={writtenFile}";
-            _ = await ApiHelper.PutDataAsync<ApplicationEventDetailData, List<int>>(apiCall, eventIds, token: Token);
+            _ = await ApiHelper.PutData<ApplicationEventDetailData, List<int>>(apiCall, eventIds, token: Token);
         }
 
     }

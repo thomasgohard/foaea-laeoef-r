@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task CreateAsync(SecurityTokenData securityToken)
+        public async Task Create(SecurityTokenData securityToken)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -35,7 +35,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("SecurityToken_Insert", parameters);
         }
 
-        public async Task<SecurityTokenData> GetTokenDataAsync(string token)
+        public async Task<SecurityTokenData> GetTokenData(string token)
         {
             var parameters = new Dictionary<string, object>
             {

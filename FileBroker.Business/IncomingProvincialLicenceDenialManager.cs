@@ -1,72 +1,18 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
-public class IncomingProvincialLicenceDenialManager
+public class IncomingProvincialLicenceDenialManager : IncomingProvincialManagerBase
 {
-    private string FileName { get; }
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private IFileBrokerConfigurationHelper Config { get; }
-    private Dictionary<string, string> Translations { get; }
-    private bool IsFrench { get; }
-
-    private IncomingProvincialHelper IncomingFileHelper { get; }
-
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
-    public IncomingProvincialLicenceDenialManager(RepositoryList db,
-                                                  APIBrokerList foaeaApis,
-                                                  string fileName,
-                                                  IFileBrokerConfigurationHelper config)
+    public IncomingProvincialLicenceDenialManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
+                                                  IFileBrokerConfigurationHelper config) : 
+                                                        base(db, foaeaApis, fileName, config)
     {
-        FileName = fileName;
-        APIs = foaeaApis;
-        DB = db;
-        Config = config;
-
-        string provinceCode = fileName[0..2].ToUpper();
-        IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
-
-        Translations = LoadTranslations();
-
-        string provCode = FileName[..2].ToUpper();
-        IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
-    private Dictionary<string, string> LoadTranslations()
-    {
-        var translations = new Dictionary<string, string>();
-
-        if (IsFrench)
-        {
-            var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
-            foreach (var translation in Translations)
-                translations.Add(translation.EnglishText, translation.FrenchText);
-
-            APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
-            LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
-        }
-
-        return translations;
-    }
-
-    private string Translate(string englishText)
-    {
-        if (IsFrench && Translations.ContainsKey(englishText))
-        {
-            return Translations[englishText];
-        }
-        else
-            return englishText;
-    }
-
-    public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceLicenceDenialData,
-                                            List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
+    public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceLicenceDenialData,
+                                                        List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
     {
         var result = new MessageDataList();
 
@@ -102,17 +48,17 @@ public class IncomingProvincialLicenceDenialManager
                 {
                     if (licenceDenialFile.LICAPPIN30 is not null)
                         foreach (var data in licenceDenialFile.LICAPPIN30)
-                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                            await ProcessLicenceApplications(data, licenceDenialFile, result,
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: false);
 
                     if (licenceDenialFile.LICAPPIN40 is not null)
                         foreach (var data in licenceDenialFile.LICAPPIN40)
-                            await ProcessLicenceApplicationsAsync(data, licenceDenialFile, result,
+                            await ProcessLicenceApplications(data, licenceDenialFile, result,
                                                                   includeInfoInMessages, counts,
                                                                   isTermination: true);
 
-                    int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
+                    int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags, counts.ErrorCount, counts.WarningCount, counts.SuccessCount);
                     await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                             counts.ErrorCount, counts.WarningCount, counts.SuccessCount, 
                                                             unknownTags.Count, totalFilesCount);
@@ -139,17 +85,17 @@ public class IncomingProvincialLicenceDenialManager
         return result;
     }
 
-    private async Task ProcessLicenceApplicationsAsync(MEPLicenceDenial_RecTypeBase data,
-                                                     MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile,
-                                                     MessageDataList result, bool includeInfoInMessages,
-                                                     ResultTracking counts, bool isTermination)
+    private async Task ProcessLicenceApplications(MEPLicenceDenial_RecTypeBase data,
+                                                  MEPLicenceDenial_LicenceDenialDataSet licenceDenialFile,
+                                                  MessageDataList result, bool includeInfoInMessages,
+                                                  ResultTracking counts, bool isTermination)
     {
         bool isValidRequest = true;
 
         var fileAuditData = new FileAuditData
         {
             Appl_EnfSrv_Cd = data.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = data.dat_Appl_CtrlCd,
+            Appl_CtrlCd = data.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = data.dat_Appl_Source_RfrNr,
             InboundFilename = FileName + ".XML"
         };
@@ -165,7 +111,7 @@ public class IncomingProvincialLicenceDenialManager
 
             if (!isTermination)
             {
-                var licenceDenialData = licenceDenialFile.LICAPPIN31.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                var licenceDenialData = licenceDenialFile.LICAPPIN31.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
 
                 licenceDenialMessage = new MessageData<LicenceDenialApplicationData>
                 {
@@ -186,13 +132,13 @@ public class IncomingProvincialLicenceDenialManager
                     LoadedDateTime = DateTime.Now
                 };
 
-                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+                _ = await DB.RequestLogTable.Add(requestLogData);
 
-                messages = await ProcessApplicationRequestAsync(licenceDenialMessage);
+                messages = await ProcessApplicationRequest(licenceDenialMessage);
             }
             else
             {
-                var licenceDenialData = licenceDenialFile.LICAPPIN41.Find(t => t.dat_Appl_CtrlCd == data.dat_Appl_CtrlCd);
+                var licenceDenialData = licenceDenialFile.LICAPPIN41.Find(t => t.dat_Appl_CtrlCd.Trim() == data.dat_Appl_CtrlCd.Trim());
 
                 licenceDenialMessage = new MessageData<LicenceDenialApplicationData>
                 {
@@ -213,9 +159,9 @@ public class IncomingProvincialLicenceDenialManager
                     LoadedDateTime = DateTime.Now
                 };
 
-                _ = await DB.RequestLogTable.AddAsync(requestLogData);
+                _ = await DB.RequestLogTable.Add(requestLogData);
 
-                messages = await ProcessTerminationApplicationRequestAsync(licenceDenialMessage);
+                messages = await ProcessTerminationApplicationRequest(licenceDenialMessage);
             }
 
             if (messages.ContainsMessagesOfType(MessageType.Error))
@@ -255,25 +201,25 @@ public class IncomingProvincialLicenceDenialManager
         await DB.FileAudit.InsertFileAuditData(fileAuditData);
     }
 
-    public async Task<MessageDataList> ProcessApplicationRequestAsync(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
+    public async Task<MessageDataList> ProcessApplicationRequest(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
     {
         LicenceDenialApplicationData licenceDenial;
 
         if (licenceDenialMessageData.MaintenanceAction == "A")
         {
-            licenceDenial = await APIs.LicenceDenialApplications.CreateLicenceDenialApplicationAsync(licenceDenialMessageData.Application);
+            licenceDenial = await APIs.LicenceDenialApplications.CreateLicenceDenialApplication(licenceDenialMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
             switch (licenceDenialMessageData.MaintenanceLifeState)
             {
-                case "00": // change
-                case "0":
-                    licenceDenial = await APIs.LicenceDenialApplications.UpdateLicenceDenialApplicationAsync(licenceDenialMessageData.Application);
+                case LIFESTATE_00: 
+                case LIFESTATE_0:
+                    licenceDenial = await APIs.LicenceDenialApplications.UpdateLicenceDenialApplication(licenceDenialMessageData.Application);
                     break;
 
-                case "29": // transfer
-                    licenceDenial = await APIs.LicenceDenialApplications.TransferLicenceDenialApplicationAsync(licenceDenialMessageData.Application,
+                case LIFESTATE_TRANSFER: 
+                    licenceDenial = await APIs.LicenceDenialApplications.TransferLicenceDenialApplication(licenceDenialMessageData.Application,
                                                                                   licenceDenialMessageData.NewRecipientSubmitter,
                                                                                   licenceDenialMessageData.NewIssuingSubmitter);
                     break;
@@ -289,13 +235,13 @@ public class IncomingProvincialLicenceDenialManager
         return licenceDenial.Messages;
     }
 
-    public async Task<MessageDataList> ProcessTerminationApplicationRequestAsync(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
+    public async Task<MessageDataList> ProcessTerminationApplicationRequest(MessageData<LicenceDenialApplicationData> licenceDenialMessageData)
     {
         LicenceDenialApplicationData licenceDenial;
 
         if (licenceDenialMessageData.MaintenanceAction == "A")
         {
-            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application,
+            licenceDenial = await APIs.LicenceDenialTerminationApplications.CreateLicenceDenialTerminationApplication(licenceDenialMessageData.Application,
                                                                                     licenceDenialMessageData.Application.LicSusp_Appl_CtrlCd);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
@@ -304,15 +250,15 @@ public class IncomingProvincialLicenceDenialManager
             {
                 case "00": // change
                 case "0":
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.UpdateLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application);
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.UpdateLicenceDenialTerminationApplication(licenceDenialMessageData.Application);
                     break;
 
                 case "14": // cancellation
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.CancelLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application);
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.CancelLicenceDenialTerminationApplication(licenceDenialMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    licenceDenial = await APIs.LicenceDenialTerminationApplications.TransferLicenceDenialTerminationApplicationAsync(licenceDenialMessageData.Application,
+                    licenceDenial = await APIs.LicenceDenialTerminationApplications.TransferLicenceDenialTerminationApplication(licenceDenialMessageData.Application,
                                                                                   licenceDenialMessageData.NewRecipientSubmitter,
                                                                                   licenceDenialMessageData.NewIssuingSubmitter);
                     break;
@@ -385,9 +331,9 @@ public class IncomingProvincialLicenceDenialManager
 
         if (!string.IsNullOrEmpty(actionCode) && !string.IsNullOrEmpty(actionState))
         {
-            if ((actionCode == "A") && actionState.NotIn("00", "0"))
+            if ((actionCode == "A") && actionState.NotIn(LIFESTATE_00, LIFESTATE_0))
                 validActionLifeState = false;
-            else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
+            else if ((actionCode == "C") && (actionState.NotIn(LIFESTATE_00, LIFESTATE_0, LIFESTATE_CANCEL, LIFESTATE_TRANSFER)))
                 validActionLifeState = false;
             else if (actionCode.NotIn("A", "C"))
                 validActionLifeState = false;
@@ -445,7 +391,7 @@ public class IncomingProvincialLicenceDenialManager
         var licenceDenialApplication = new LicenceDenialApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,
@@ -512,7 +458,7 @@ public class IncomingProvincialLicenceDenialManager
         var licenceDenialTerminationApplication = new LicenceDenialApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,

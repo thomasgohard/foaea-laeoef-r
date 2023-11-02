@@ -2,7 +2,7 @@
 
 namespace FileBroker.Business.Helpers
 {
-    internal class IncomingProvincialHelper
+    public class IncomingProvincialHelper
     {
         private IFileBrokerConfigurationHelper Config { get; }
 

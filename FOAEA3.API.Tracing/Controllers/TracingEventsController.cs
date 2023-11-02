@@ -32,7 +32,7 @@ public class TracingEventsController : FoaeaControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetEvents([FromRoute] ApplKey id,
+    public async Task<ActionResult<ApplicationEventsList>> GetEvents([FromRoute] ApplKey id,
                                                               [FromQuery] int? queue,
                                                               [FromServices] IRepositories repositories)
     {
@@ -42,11 +42,17 @@ public class TracingEventsController : FoaeaControllerBase
         else
             eventQueue = EventQueue.EventSubm;
 
-        return await GetEventsForQueueAsync(id, repositories, eventQueue);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventManager.GetApplicationEventsForQueue(eventQueue));
+        else
+            return NotFound();
+
     }
 
     [HttpGet("RequestedTRCIN")]
-    public async Task<ActionResult<ApplicationEventData>> GetRequestedTRCINTracingEvents([FromQuery] string enforcementServiceCode,
+    public async Task<ActionResult<ApplicationEventsList>> GetRequestedTRCINTracingEvents([FromQuery] string enforcementServiceCode,
                                                                              [FromQuery] string fileCycle,
                                                                              [FromServices] IRepositories repositories)
     {
@@ -58,30 +64,20 @@ public class TracingEventsController : FoaeaControllerBase
         if (string.IsNullOrEmpty(fileCycle))
             return BadRequest("Missing fileCycle parameter");
 
-        var result = await manager.GetRequestedTRCINTracingEventsAsync(enforcementServiceCode, fileCycle);
+        var result = await manager.GetRequestedTRCINTracingEvents(enforcementServiceCode, fileCycle);
         return Ok(result);
-
     }
 
     [HttpGet("Details/Active")]
-    public async Task<ActionResult<ApplicationEventDetailData>> GetActiveTracingEventDetails([FromQuery] string enforcementServiceCode,
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetActiveTracingEventDetails([FromQuery] string enforcementServiceCode,
                                                                                  [FromQuery] string fileCycle,
                                                                                  [FromServices] IRepositories repositories)
     {
         var manager = new TracingManager(repositories, config, User);
 
-        var result = await manager.GetActiveTracingEventDetailsAsync(enforcementServiceCode, fileCycle);
+        var result = await manager.GetActiveTracingEventDetails(enforcementServiceCode, fileCycle);
 
         return Ok(result);
     }
 
-    private async Task<ActionResult<List<ApplicationEventData>>> GetEventsForQueueAsync(ApplKey id, IRepositories repositories, EventQueue queue)
-    {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
-
-        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-            return Ok(manager.EventManager.GetApplicationEventsForQueueAsync(queue));
-        else
-            return NotFound();
-    }
 }

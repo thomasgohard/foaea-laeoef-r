@@ -5,13 +5,8 @@ using FOAEA3.Resources.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -19,6 +14,8 @@ namespace FileBroker.Common
 {
     public static class FileHelper
     {
+        public const int INVALID_CYCLE = -1;
+
         public static string TrimCycleAndXmlExtension(string fileName)
         {
             if (fileName.ToUpper().EndsWith(".XML"))
@@ -43,10 +40,26 @@ namespace FileBroker.Common
             if (lastPeriod > 0)
                 return int.TryParse(fileName[(lastPeriod + 1)..], out int cycle) ? cycle : -1;
             else
-                return -1;
+                return INVALID_CYCLE;
         }
 
-        public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, out int actualCycle)
+        public static string ExtractCycleAsStringFromFilename(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return string.Empty;
+
+            if (fileName.ToUpper().EndsWith(".XML"))
+                fileName = Path.GetFileNameWithoutExtension(fileName);
+
+            int lastPeriod = fileName.LastIndexOf('.');
+            if (lastPeriod > 0)
+                return fileName[(lastPeriod + 1)..];
+            else
+                return string.Empty;
+        }
+
+        public static bool IsExpectedCycle(FileTableData fileTableData, string fileName, out int expectedCycle, 
+                                                                                         out int actualCycle)
         {
             expectedCycle = fileTableData.Cycle;
             actualCycle = ExtractCycleFromFilename(fileName);
@@ -58,7 +71,7 @@ namespace FileBroker.Common
         {
             try
             {
-                xmlData = FileHelper.RemoveXMLartifacts(xmlData);
+                xmlData = RemoveXMLartifacts(xmlData);
                 var doc = new XmlDocument();
                 doc.LoadXml(xmlData);
                 return JsonConvert.SerializeXmlNode(doc);
@@ -83,7 +96,7 @@ namespace FileBroker.Common
                 string fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName);
 
                 string backupRoot = config.FTPbackupRoot;
-                string ftpFolder = (await db.Settings.GetSettingsDataForFileNameAsync(fileNameNoCycle)).Paths;
+                string ftpFolder = (await db.Settings.GetSettingsDataForFileName(fileNameNoCycle)).Paths;
 
                 string destinationFileName = backupRoot + ftpFolder + sourceFileNoPath;
 
@@ -106,7 +119,7 @@ namespace FileBroker.Common
             var fileInfo = new FileInfo(fullPath);
 
             string fileName = fileInfo.Name.ToUpper();
-            string baseName = FileHelper.TrimCycleAndXmlExtension(fileName);
+            string baseName = TrimCycleAndXmlExtension(fileName);
             string folderName = fileInfo.DirectoryName.ExtractSubfolder();
 
             var dInfo = new DirectoryInfo(config.FTPbackupRoot.AppendToPath(folderName));
@@ -127,12 +140,12 @@ namespace FileBroker.Common
                     if (FileEquals(fileInfo.FullName, dupFileInfo.FullName))
                     {
                         string msgBody = $"Inbound file {fileInfo.Name} is identical to file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Duplicate file not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
+                        await mailService.SendEmail($"Duplicate file not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                     else
                     {
                         string msgBody = $"Inbound file {fileInfo.Name} is with the same cycle but different content from file {dupFileInfo.Name} that was received on {dupFileInfo.LastWriteTime:yyyy-MM-dd}";
-                        await mailService.SendEmailAsync($"Different file with the same cycle not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
+                        await mailService.SendEmail($"Different file with the same cycle not loaded: {fileInfo.Name}", config.OpsRecipient, msgBody);
                     }
                 }
                 return true;
@@ -141,7 +154,7 @@ namespace FileBroker.Common
             return false;
         }
 
-        public static bool FileEquals(string path1, string path2)
+        private static bool FileEquals(string path1, string path2)
         {
             byte[] file1 = File.ReadAllBytes(path1);
             byte[] file2 = File.ReadAllBytes(path2);
@@ -203,7 +216,7 @@ namespace FileBroker.Common
                     outputPath = fileData.Path;
                     outputFile = outputPath.AppendToPath(fileName, isFileName: true);
 
-                    await System.IO.File.WriteAllTextAsync(outputFile, bodyContent);
+                    await File.WriteAllTextAsync(outputFile, bodyContent);
 
                     return new OkResult();
 
@@ -224,7 +237,7 @@ namespace FileBroker.Common
                     outputPath = fileData.Path;
                     outputFile = outputPath.AppendToPath(fileName, isFileName: true);
 
-                    await System.IO.File.WriteAllTextAsync(outputFile, bodyContent);
+                    await File.WriteAllTextAsync(outputFile, bodyContent, Encoding.UTF8);
 
                     return new OkResult();
 
@@ -247,11 +260,9 @@ namespace FileBroker.Common
 
                     var doc = JsonConvert.DeserializeXNode(bodyContent)!;
 
-                    XDeclaration _defaultDeclaration = new("1.0", null, null);
+                    var declaration = doc.Declaration ?? new XDeclaration("1.0", null, null);
 
-                    var declaration = doc.Declaration ?? _defaultDeclaration;
-
-                    await System.IO.File.WriteAllTextAsync(outputFile, $"{declaration}{Environment.NewLine}{doc}");
+                    await File.WriteAllTextAsync(outputFile, $"{declaration}{Environment.NewLine}{doc}");
 
                     return new OkResult();
 

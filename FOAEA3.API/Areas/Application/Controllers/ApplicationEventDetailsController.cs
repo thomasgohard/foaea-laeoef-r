@@ -22,59 +22,71 @@ public class ApplicationEventDetailsController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetSINEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventSIN_dtl);
+        return await GetEventsForQueue(id, repositories, EventQueue.EventSIN_dtl);
     }
 
     [HttpGet("{id}/Trace")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetTraceEvents([FromRoute] string id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventTrace_dtl);
+        return await GetEventsForQueue(id, repositories, EventQueue.EventTrace_dtl);
     }
 
-    [HttpPost("")]
-    public async Task<ActionResult<ApplicationEventDetailData>> SaveEventDetail([FromServices] IRepositories repositories)
+    [HttpPost]
+    public async Task<ActionResult> SaveEventDetail([FromServices] IRepositories repositories)
     {
-        var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBodyAsync<ApplicationEventDetailData>(Request);
+        var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        await eventDetailManager.SaveEventDetailAsync(applicationEventDetail);
+        await eventDetailManager.SaveEventDetail(applicationEventDetail);
 
         return Ok();
 
     }
 
-    [HttpPut("")]
-    public async Task<ActionResult<ApplicationEventDetailData>> UpdateEventDetail([FromServices] IRepositories repositories,
-                                                                      [FromQuery] string command,
-                                                                      [FromQuery] string activeState,
-                                                                      [FromQuery] string applicationState,
-                                                                      [FromQuery] string enfSrvCode,
-                                                                      [FromQuery] string writtenFile)
+    [HttpPost("Batch")]
+    public async Task<ActionResult> SaveEventDetails([FromServices] IRepositories repositories)
     {
-        var eventIds = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<int>>(Request);
+        var applicationEventDetails = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailsList>(Request);
+
+        var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
+        eventDetailManager.EventDetails.AddRange(applicationEventDetails);
+        await eventDetailManager.SaveEventDetails();
+
+        return Ok();
+    }
+
+    [HttpPut]
+    public async Task<ActionResult<ApplicationEventDetailData>> UpdateEventDetail([FromServices] IRepositories repositories,
+                                                                                  [FromQuery] string command,
+                                                                                  [FromQuery] string activeState,
+                                                                                  [FromQuery] string applicationState,
+                                                                                  [FromQuery] string enfSrvCode,
+                                                                                  [FromQuery] string writtenFile)
+    {
+        var eventIds = await APIBrokerHelper.GetDataFromRequestBody<List<int>>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
         if (command?.ToLower() == "markoutboundprocessed")
         {
-            await eventDetailManager.UpdateOutboundEventDetailAsync(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
+            await eventDetailManager.UpdateOutboundEventDetail(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
         }
 
         return Ok();
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(string id, IRepositories repositories, EventQueue queue)
+    private async Task<ActionResult<ApplicationEventDetailsList>> GetEventsForQueue(string id, IRepositories repositories, EventQueue queue)
     {
         var applKey = new ApplKey(id);
 
         var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
 
-        if (await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd))
-            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));
+        if (await manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueue(queue));
         else
             return NotFound();
     }

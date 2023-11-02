@@ -60,23 +60,23 @@ namespace FOAEA3.Business.Areas.Application
             StateEngine.ValidStateChange[ApplicationState.SIN_CONFIRMED_4].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
         }
 
-        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingDataAsync(int maxRecords, string activeState, string recipientCode, bool isXML)
+        public async Task<List<LicenceDenialOutgoingProvincialData>> GetProvincialOutgoingData(int maxRecords, string activeState, string recipientCode, bool isXML)
         {
             var licenceDenialDB = DB.LicenceDenialTable;
-            var data = await licenceDenialDB.GetProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
+            var data = await licenceDenialDB.GetProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
             return data;
         }
 
-        public override async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
+        public override async Task<bool> LoadApplication(string enfService, string controlCode)
         {
             // get data from Appl
-            bool isSuccess = await base.LoadApplicationAsync(enfService, controlCode);
+            bool isSuccess = await base.LoadApplication(enfService, controlCode);
 
             if (isSuccess)
             {
                 // get additional data from LicSusp table 
                 var licenceDenialDB = DB.LicenceDenialTable;
-                var data = await licenceDenialDB.GetLicenceDenialDataAsync(enfService, appl_L01_CtrlCd: controlCode);
+                var data = await licenceDenialDB.GetLicenceDenialData(enfService, appl_L01_CtrlCd: controlCode);
 
                 if (data != null)
                     LicenceDenialApplication.Merge(data);
@@ -85,7 +85,7 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public override async Task<bool> CreateApplicationAsync()
+        public override async Task<bool> CreateApplication()
         {
             if (!IsValidCategory("L01"))
                 return false;
@@ -98,20 +98,20 @@ namespace FOAEA3.Business.Areas.Application
             if (string.IsNullOrEmpty(LicenceDenialApplication.Appl_Dbtr_LngCd))
                 LicenceDenialApplication.Appl_Dbtr_LngCd = "E";
 
-            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+            bool success = await ValidateOrderOrProvisionInDefault();
 
             if (success)
-                success = await base.CreateApplicationAsync();
+                success = await base.CreateApplication();
             else
                 success = false;
 
             if (!success)
             {
                 var failedSubmitterManager = new FailedSubmitAuditManager(DB, LicenceDenialApplication);
-                await failedSubmitterManager.AddToFailedSubmitAuditAsync(FailedSubmitActivityAreaType.L01);
+                await failedSubmitterManager.AddToFailedSubmitAudit(FailedSubmitActivityAreaType.L01);
 
                 LicenceDenialApplication.LicSusp_LiStCd = 2;
-                await DB.LicenceDenialTable.CreateLicenceDenialDataAsync(LicenceDenialApplication);
+                await DB.LicenceDenialTable.CreateLicenceDenialData(LicenceDenialApplication);
             }
 
             return success;
@@ -155,13 +155,13 @@ namespace FOAEA3.Business.Areas.Application
             LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd = LicenceDenialApplication.LicSusp_Dbtr_Brth_CtryCd?.ToUpper();
         }
 
-        private async Task<bool> ValidateOrderOrProvisionInDefaultAsync()
+        private async Task<bool> ValidateOrderOrProvisionInDefault()
         {
             bool result = true;
 
             var app = LicenceDenialApplication;
 
-            if (!await IsValidPaymentPeriodAsync(app.PymPr_Cd))
+            if (!await IsValidPaymentPeriod(app.PymPr_Cd))
             {
                 app.Messages.AddError($"Invalid PymPr_Cd: {app.PymPr_Cd}");
                 result = false;
@@ -177,9 +177,9 @@ namespace FOAEA3.Business.Areas.Application
             return result;
         }
 
-        private async Task<bool> IsValidPaymentPeriodAsync(string paymentPeriodCode)
+        private async Task<bool> IsValidPaymentPeriod(string paymentPeriodCode)
         {
-            var paymentPeriods = await DB.InterceptionTable.GetPaymentPeriodsAsync();
+            var paymentPeriods = await DB.InterceptionTable.GetPaymentPeriods();
             return paymentPeriods.Any(m => (m.PymPr_Cd == paymentPeriodCode.ToUpper()) && (m.ActvSt_Cd == "A"));
         }
 
@@ -197,12 +197,12 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistoryAsync()
+        public async Task<List<LicenceSuspensionHistoryData>> GetLicenceSuspensionHistory()
         {
-            return await DB.LicenceDenialTable.GetLicenceSuspensionHistoryAsync(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
+            return await DB.LicenceDenialTable.GetLicenceSuspensionHistory(LicenceDenialApplication.Appl_EnfSrv_Cd, LicenceDenialApplication.Appl_CtrlCd);
         }
 
-        public async Task CancelApplicationAsync()
+        public async Task CancelApplication()
         {
             LicenceDenialApplication.Appl_LastUpdate_Dte = DateTime.Now;
             LicenceDenialApplication.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
@@ -210,30 +210,30 @@ namespace FOAEA3.Business.Areas.Application
             await SetNewStateTo(ApplicationState.MANUALLY_TERMINATED_14);
 
             MakeUpperCase();
-            await UpdateApplicationNoValidationAsync();
+            await UpdateApplicationNoValidation();
 
-            await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialApplication);
+            await DB.LicenceDenialTable.UpdateLicenceDenialData(LicenceDenialApplication);
         }
 
-        public override async Task UpdateApplicationAsync()
+        public override async Task UpdateApplication()
         {
             var current = new LicenceDenialManager(DB, Config, CurrentUser);
-            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            await current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             // keep these stored values
             LicenceDenialApplication.Appl_Create_Dte = current.LicenceDenialApplication.Appl_Create_Dte;
             LicenceDenialApplication.Appl_Create_Usr = current.LicenceDenialApplication.Appl_Create_Usr;
 
-            bool success = await ValidateOrderOrProvisionInDefaultAsync();
+            bool success = await ValidateOrderOrProvisionInDefault();
 
             if (success)
-                await base.UpdateApplicationAsync();
+                await base.UpdateApplication();
 
         }
 
-        public async Task<bool> ProcessLicenceDenialResponseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> ProcessLicenceDenialResponse(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
-            if (!await LoadApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd))
+            if (!await LoadApplication(appl_EnfSrv_Cd, appl_CtrlCd))
             {
                 LicenceDenialApplication.Messages.AddError(SystemMessage.APPLICATION_NOT_FOUND);
                 return false;
@@ -253,49 +253,49 @@ namespace FOAEA3.Business.Areas.Application
 
             await SetNewStateTo(ApplicationState.PARTIALLY_SERVICED_12);
 
-            await UpdateApplicationNoValidationAsync();
+            await UpdateApplicationNoValidation();
 
-            await DB.LicenceDenialTable.UpdateLicenceDenialDataAsync(LicenceDenialApplication);
+            await DB.LicenceDenialTable.UpdateLicenceDenialData(LicenceDenialApplication);
 
-            await EventManager.SaveEventsAsync();
+            await EventManager.SaveEvents();
 
             return true;
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
-            return await EventManager.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+            return await EventManager.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetRequestedLICINLicenceDenialEventDetailsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<ApplicationEventDetailsList> GetRequestedLICINLicenceDenialEventDetails(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
-            return await EventDetailManager.GetRequestedLICINLicenceDenialEventDetailsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+            return await EventDetailManager.GetRequestedLICINLicenceDenialEventDetails(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
 
-        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
-                                                                      string activeState,
-                                                                      ApplicationState lifeState,
-                                                                      string enfServiceCode)
+        public async Task<List<LicenceDenialOutgoingFederalData>> GetFederalOutgoingData(int maxRecords,
+                                                                                         string activeState,
+                                                                                         ApplicationState lifeState,
+                                                                                         string enfServiceCode)
         {
             var licenceDenialDB = DB.LicenceDenialTable;
-            return await licenceDenialDB.GetFederalOutgoingDataAsync(maxRecords, activeState, lifeState, enfServiceCode);
+            return await licenceDenialDB.GetFederalOutgoingData(maxRecords, activeState, lifeState, enfServiceCode);
         }
 
-        public async Task CreateResponseDataAsync(List<LicenceDenialResponseData> responseData)
+        public async Task CreateResponseData(List<LicenceDenialResponseData> responseData)
         {
             var responsesDB = DB.LicenceDenialResponseTable;
-            await responsesDB.InsertBulkDataAsync(responseData);
+            await responsesDB.InsertBulkData(responseData);
         }
 
-        public async Task MarkResponsesAsViewedAsync(string enfService)
+        public async Task MarkResponsesAsViewed(string enfService)
         {
             var responsesDB = DB.LicenceDenialResponseTable;
-            await responsesDB.MarkResponsesAsViewedAsync(enfService);
+            await responsesDB.MarkResponsesAsViewed(enfService);
         }
 
-        public override async Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
+        public override async Task ProcessBringForwards(ApplicationEventData bfEvent)
         {
             bool closeEvent = false;
 
@@ -315,7 +315,7 @@ namespace FOAEA3.Business.Areas.Application
                 bfEvent.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
                 bfEvent.ActvSt_Cd = "I";
 
-                await EventManager.SaveEventAsync(bfEvent);
+                await EventManager.SaveEvent(bfEvent);
 
                 closeEvent = false;
             }
@@ -391,16 +391,16 @@ namespace FOAEA3.Business.Areas.Application
                 bfEvent.AppLiSt_Cd = LicenceDenialApplication.AppLiSt_Cd;
                 bfEvent.ActvSt_Cd = "C";
 
-                await EventManager.SaveEventAsync(bfEvent);
+                await EventManager.SaveEvent(bfEvent);
             }
 
-            await EventManager.SaveEventsAsync();
+            await EventManager.SaveEvents();
         }
 
-        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplDataAsync(string federalSource)
+        public async Task<List<LicenceDenialToApplData>> GetLicenceDenialToApplData(string federalSource)
         {
             var licenceDenialDB = DB.LicenceDenialTable;
-            return await licenceDenialDB.GetLicenceDenialToApplDataAsync(federalSource);
+            return await licenceDenialDB.GetLicenceDenialToApplData(federalSource);
         }
     }
 }

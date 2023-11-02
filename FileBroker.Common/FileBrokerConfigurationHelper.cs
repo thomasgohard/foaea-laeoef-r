@@ -3,8 +3,6 @@ using FileBroker.Model.Interfaces;
 using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 
 namespace FileBroker.Common
 {
@@ -17,6 +15,7 @@ namespace FileBroker.Common
         public string OpsRecipient { get; }
         public string FTProot { get; }
         public string FTPbackupRoot { get; }
+        public bool LogConsoleOutputToFile { get; }
 
         public ApiConfig ApiRootData { get; }
         public FoaeaLoginData FoaeaLogin { get; }
@@ -61,14 +60,16 @@ namespace FileBroker.Common
 
             EmailRecipient = configuration["emailRecipients"];
             OpsRecipient = configuration["opsRecipients"];
-            FTProot = configuration["FTProot"];
-            FTPbackupRoot = configuration["FTPbackupRoot"];
+            FTProot = configuration["FTProot"].ReplaceVariablesWithEnvironmentValues();
+            FTPbackupRoot = configuration["FTPbackupRoot"].ReplaceVariablesWithEnvironmentValues();
 
             ApiRootData = configuration.GetSection("APIroot").Get<ApiConfig>();
             AuditConfig = configuration.GetSection("AuditConfig").Get<ProvincialAuditFileConfig>();
             ProvinceConfig = configuration.GetSection("ProvinceConfig").Get<ProvinceConfig>();
             Tokens = configuration.GetSection("Tokens").Get<TokenConfig>();
             ProductionServers = configuration.GetSection("ProductionServers").Get<List<string>>();
+
+            LogConsoleOutputToFile = configuration["LogConsoleOutputToFile"]?.ToLower() == "true";
         }
     }
 }

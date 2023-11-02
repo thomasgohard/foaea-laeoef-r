@@ -13,9 +13,9 @@ namespace FOAEA3.Business.Security
             DB = repositories;
         }
 
-        public async Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
+        public async Task<SubmitterProfileData> GetSubmitterProfile(string submitterCode)
         {
-            return await DB.SubmitterProfileTable.GetSubmitterProfileAsync(submitterCode);
+            return await DB.SubmitterProfileTable.GetSubmitterProfile(submitterCode);
         }
 
     }

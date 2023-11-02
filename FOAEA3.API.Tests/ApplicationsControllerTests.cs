@@ -25,7 +25,7 @@ namespace FOAEA3.API.Tests
 
             FoaeaLoginData userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetStringAsync("/api/v1/applications/Version");
@@ -40,7 +40,7 @@ namespace FOAEA3.API.Tests
 
             FoaeaLoginData userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetStringAsync("/api/v1/applications/DB");
@@ -60,7 +60,7 @@ namespace FOAEA3.API.Tests
 
             FoaeaLoginData userLoginInfo = GetSystemUser(_config);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetAsync($"/api/v1/applications/{enfSrv}-{ctrlCd}");
@@ -84,7 +84,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetTestUser(_config, TEST_USER.Ontario);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetAsync($"/api/v1/applications/{enfSrv}-{ctrlCd}");
@@ -102,7 +102,7 @@ namespace FOAEA3.API.Tests
 
             var userLoginInfo = GetTestUser(_config, TEST_USER.Ontario);
 
-            var tokenData = await LoginToFoaeaAsync(userLoginInfo, client);
+            var tokenData = await LoginToFoaea(userLoginInfo, client);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenData.Token);
             var response = await client.GetAsync($"/api/v1/applications/{enfSrv}-{ctrlCd}");

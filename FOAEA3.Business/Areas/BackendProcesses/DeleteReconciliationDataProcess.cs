@@ -22,17 +22,17 @@ namespace FOAEA3.Business.Areas.BackendProcesses
             User = user;
         }
 
-        public async Task RunAsync()
+        public async Task Run()
         {
             var prodAudit = DB.ProductionAuditTable;
 
-            await prodAudit.InsertAsync("Delete Reconciliation Process", $"Delete Reconciliation Process Started", "O");
+            await prodAudit.Insert("Delete Reconciliation Process", $"Delete Reconciliation Process Started", "O");
 
             var interceptionManager = new InterceptionManager(DB, DBfinance, Config, User);
 
             await interceptionManager.MessageBrokerCRAReconciliation();
 
-            await prodAudit.InsertAsync("Delete Reconciliation Process", $"Delete Reconciliation Process Completed", "O");
+            await prodAudit.Insert("Delete Reconciliation Process", $"Delete Reconciliation Process Completed", "O");
         }
     }
 }

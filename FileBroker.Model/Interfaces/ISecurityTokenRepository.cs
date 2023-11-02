@@ -4,8 +4,8 @@ namespace FileBroker.Model.Interfaces
 {
     public interface ISecurityTokenRepository
     {
-        Task CreateAsync(SecurityTokenData securityToken);
-        Task<SecurityTokenData> GetTokenDataAsync(string token);
+        Task Create(SecurityTokenData securityToken);
+        Task<SecurityTokenData> GetTokenData(string token);
         Task MarkTokenAsExpired(string token);
     }
 }

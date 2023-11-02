@@ -7,7 +7,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task SendEmailAsync(string subject, string recipient, string body, int isHTML = 1);
-        Task SendHtmlEmailAsync(string subject, string recipient, string body, string attachmentPath);
+        Task SendEmail(string subject, string recipient, string body, int isHTML = 1);
+        Task SendHtmlEmail(string subject, string recipient, string body, string attachmentPath);
     }
 }

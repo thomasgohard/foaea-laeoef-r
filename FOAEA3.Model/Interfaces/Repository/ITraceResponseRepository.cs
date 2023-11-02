@@ -9,11 +9,11 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false);
+        Task<DataList<TraceResponseData>> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false);
         Task<List<CraFieldData>> GetCraFields();
         Task<List<CraFormData>> GetCraForms();
 
-        Task InsertBulkDataAsync(List<TraceResponseData> responseData);
+        Task InsertBulkData(List<TraceResponseData> responseData);
 
         Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);
         Task<DataList<TraceFinancialResponseData>> GetActiveTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd);
@@ -25,7 +25,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task<int> CreateTraceFinancialResponseDetailValue(TraceFinancialResponseDetailValueData data);
         Task UpdateTraceResponseFinancial(TraceFinancialResponseData data);
 
-        Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd);
-        Task MarkResponsesAsViewedAsync(string enfService);
+        Task DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd);
+        Task MarkResponsesAsViewed(string enfService);
     }
 }

@@ -9,10 +9,10 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<LicenceDenialResponseData> GetLastResponseDataAsync(string applEnfSrvCd, string applCtrlCd);
+        Task<LicenceDenialResponseData> GetLastResponseData(string applEnfSrvCd, string applCtrlCd);
         //DataList<TraceResponseData> GetLicenceDenialResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false);
-        Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData);
-        Task MarkResponsesAsViewedAsync(string enfService);
+        Task InsertBulkData(List<LicenceDenialResponseData> responseData);
+        Task MarkResponsesAsViewed(string enfService);
 
     }
 }

@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<EnfSrvData>> GetEnfServiceAsync(string enforcementServiceCode = null,
+        public async Task<List<EnfSrvData>> GetEnfService(string enforcementServiceCode = null,
                                                 string enforcementServiceName = null,
                                                 string enforcementServiceProvince = null,
                                                 string enforcementServiceCategory = null)
@@ -70,6 +70,9 @@ namespace FOAEA3.Data.DB
             data.EnfCtgy_Cd = rdr["EnfCtgy_Cd"] as string;
             data.ActvSt_Cd = rdr["ActvSt_Cd"] as string;
             data.PaymentId_Is_SIN_Ind = rdr["PaymentId_Is_SIN_Ind"] as string; // can be null
+            data.HasSignedC78 = (bool) rdr["HasSignedC78"];
+            if (data.HasSignedC78)
+                data.C78EffectiveDateTime = (DateTime?)rdr["C78EffectiveDateTime"];
             data.Ctrl_cd_char = rdr["Ctrl_cd_char"] as string; // can be null
 
             data.EnfSrv_Nme_F = rdr["EnfSrv_Nme_F"] as string; // can be null

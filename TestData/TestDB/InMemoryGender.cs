@@ -12,7 +12,7 @@ namespace TestData.TestDB
 
         public MessageDataList Messages => new();
 
-        public Task<DataList<GenderData>> GetGendersAsync()
+        public Task<DataList<GenderData>> GetGenders()
         {
             var result = new DataList<GenderData>();
 

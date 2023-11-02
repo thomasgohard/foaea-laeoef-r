@@ -57,7 +57,7 @@ public class IncomingFederalTracingResponse
                    from r in empResponse.AsParallel()
                    select new
                    {
-                       r.dat_Appl_CtrlCd,
+                       dat_Appl_CtrlCd = r.dat_Appl_CtrlCd.Trim(),
                        r.dat_Appl_EnfSrvCd,
                        d.dat_TrcSt_Cd,
                        r.dat_TrcRsp_Addr_Ln,
@@ -77,7 +77,7 @@ public class IncomingFederalTracingResponse
             var newResponse03 = new TraceResponseData
             {
                 Appl_EnfSrv_Cd = item.dat_Appl_EnfSrvCd,
-                Appl_CtrlCd = item.dat_Appl_CtrlCd,
+                Appl_CtrlCd = item.dat_Appl_CtrlCd.Trim(),
                 EnfSrv_Cd = enfSrvCd,
                 TrcRsp_Rcpt_Dte = DateTime.Now,
                 TrcRsp_SeqNr = section3recordId++ + max,
@@ -104,7 +104,7 @@ public class IncomingFederalTracingResponse
             .GroupBy(m => new
             {
                 m.Appl_EnfSrv_Cd,
-                m.Appl_CtrlCd,
+                Appl_CtrlCd = m.Appl_CtrlCd.Trim(),
                 m.EnfSrv_Cd,
                 m.TrcRsp_EmplNme,
                 m.TrcRsp_EmplNme1,
@@ -132,13 +132,13 @@ public class IncomingFederalTracingResponse
 
         var data = from d in tracingIN02.AsParallel()
                    join emp in tracingIN04.AsParallel()
-                           on new { d.dat_Appl_EnfSrvCd, d.dat_Appl_CtrlCd } equals new { emp.dat_Appl_EnfSrvCd, emp.dat_Appl_CtrlCd }
+                           on new { d.dat_Appl_EnfSrvCd, dat_Appl_CtrlCd = d.dat_Appl_CtrlCd.Trim() } equals new { emp.dat_Appl_EnfSrvCd, dat_Appl_CtrlCd = emp.dat_Appl_CtrlCd.Trim() }
                    into empResponse
                    where string.IsNullOrEmpty(d.dat_TrcSt_Cd?.Trim())
                    from r in empResponse.AsParallel()
                    select new
                    {
-                       r.dat_Appl_CtrlCd,
+                       dat_Appl_CtrlCd = r.dat_Appl_CtrlCd.Trim(),
                        r.dat_Appl_EnfSrvCd,
                        r.dat_TrcRcp_EmplNme,
                        r.dat_TrcRcp_EmplNme1,
@@ -160,7 +160,7 @@ public class IncomingFederalTracingResponse
             var newResponse04 = new TraceResponseData
             {
                 Appl_EnfSrv_Cd = item.dat_Appl_EnfSrvCd,
-                Appl_CtrlCd = item.dat_Appl_CtrlCd,
+                Appl_CtrlCd = item.dat_Appl_CtrlCd.Trim(),
                 EnfSrv_Cd = enfSrvCd,
                 TrcRsp_Rcpt_Dte = DateTime.Now,
                 TrcRsp_SeqNr = section4recordId++ + max,
@@ -179,6 +179,9 @@ public class IncomingFederalTracingResponse
                 ActvSt_Cd = "C"
             };
 
+            if (newResponse04.TrcRsp_Addr_LstUpdte == DateTime.MinValue)
+                newResponse04.TrcRsp_Addr_LstUpdte = null;
+
             responseDataTemp.Add(newResponse04);
         }
 
@@ -189,7 +192,7 @@ public class IncomingFederalTracingResponse
             .GroupBy(m => new
             {
                 m.Appl_EnfSrv_Cd,
-                m.Appl_CtrlCd,
+                Appl_CtrlCd = m.Appl_CtrlCd.Trim(),
                 m.EnfSrv_Cd,
                 m.TrcRsp_EmplNme,
                 m.TrcRsp_EmplNme1,
@@ -217,7 +220,7 @@ public class IncomingFederalTracingResponse
                          where d.dat_TrcSt_Cd == traceState
                          select new
                          {
-                             d.dat_Appl_CtrlCd,
+                             dat_Appl_CtrlCd = d.dat_Appl_CtrlCd.Trim(),
                              d.dat_Appl_EnfSrvCd,
                              d.dat_TrcSt_Cd,
                              d.RecType
@@ -230,7 +233,7 @@ public class IncomingFederalTracingResponse
             var newResponseLocked = new TraceResponseData
             {
                 Appl_EnfSrv_Cd = itemLocked.dat_Appl_EnfSrvCd,
-                Appl_CtrlCd = itemLocked.dat_Appl_CtrlCd,
+                Appl_CtrlCd = itemLocked.dat_Appl_CtrlCd.Trim(),
                 EnfSrv_Cd = enfSrvCd,
                 TrcRsp_Rcpt_Dte = DateTime.Now,
                 TrcRsp_SeqNr = section2recordId++ + maxRsp,
@@ -252,20 +255,20 @@ public class IncomingFederalTracingResponse
     private static void UpdateTraceCycleNumber(List<TraceResponseData> responseData,
                                                List<TraceCycleQuantityData> cycles)
     {
-        // TODO: special process for NETP
-
         foreach (var row in responseData)
         {
             foreach (var cycleRow in cycles)
             {
                 if ((cycleRow.Appl_CtrlCd == row.Appl_CtrlCd) && (cycleRow.Appl_EnfSrv_Cd == row.Appl_EnfSrv_Cd))
                 {
-                    row.TrcRsp_Trace_CyclNr = (short)cycleRow.Trace_Cycl_Qty;
+                    if (row.EnfSrv_Cd == "EI02") // add 100 to the cycle for NETP
+                        row.TrcRsp_Trace_CyclNr = (short)(100 + cycleRow.Trace_Cycl_Qty);
+                    else
+                        row.TrcRsp_Trace_CyclNr = (short)cycleRow.Trace_Cycl_Qty;
                     break;
                 }
             }
         }
-
     }
 
 }

@@ -8,8 +8,9 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task CloseNETPTraceEventsAsync();
-        Task<List<ApplicationEventData>> GetRequestedTRCINEventsAsync(string enfSrvCd, string fileCycle);
-        Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrvCd, string fileCycle);
+        Task CloseNETPTraceEvents();
+        Task<ApplicationEventsList> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle);
+        Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle);
+        Task<ApplicationEventDetailsList> GetActiveTraceDetailEventsForApplication(string appl_EnfSrvCd, string appl_CtrlCd);
     }
 }

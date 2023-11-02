@@ -55,7 +55,7 @@ namespace FOAEA3.Business.Areas.Application
             }
         }
 
-        protected async Task SetCurrentUserAsync(ClaimsPrincipal user)
+        protected async Task SetCurrentUser(ClaimsPrincipal user)
         {
             CurrentUser = await UserHelper.ExtractDataFromUser(user, DB);
         }
@@ -64,7 +64,7 @@ namespace FOAEA3.Business.Areas.Application
                                   ClaimsPrincipal user, ApplicationValidation applicationValidation = null) :
             this(applicationData, repositories, config, applicationValidation)
         {
-            SetCurrentUserAsync(user).Wait();
+            SetCurrentUser(user).Wait();
         }
 
         public ApplicationManager(ApplicationData applicationData, IRepositories repositories, IFoaeaConfigurationHelper config,
@@ -148,13 +148,13 @@ namespace FOAEA3.Business.Areas.Application
                 return true;
         }
 
-        public virtual async Task<bool> LoadApplicationAsync(string enfService, string controlCode)
+        public virtual async Task<bool> LoadApplication(string enfService, string controlCode)
         {
-            var data = await DB.ApplicationTable.GetApplicationAsync(enfService, controlCode);
+            var data = await DB.ApplicationTable.GetApplication(enfService, controlCode);
 
             if ((data != null) && (CurrentUser is not null))
             {
-                if (CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
+                if (await CurrentUserHasReadAccess(enfService, data.Subm_SubmCd))
                 {
                     Application.Merge(data);
                     return true;
@@ -168,26 +168,26 @@ namespace FOAEA3.Business.Areas.Application
             return false;
         }
 
-        public async Task<bool> ApplicationExistsAsync()
+        public async Task<bool> ApplicationExists()
         {
             if (!String.IsNullOrEmpty(Appl_CtrlCd) && (Appl_CtrlCd != Application.Subm_SubmCd))
             {
-                return await DB.ApplicationTable.ApplicationExistsAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                return await DB.ApplicationTable.ApplicationExists(Appl_EnfSrv_Cd, Appl_CtrlCd);
             }
             else
                 return false;
         }
 
-        public virtual async Task<bool> CreateApplicationAsync()
+        public virtual async Task<bool> CreateApplication()
         {
             if ((CurrentUser is null) ||
-                (!CurrentUserHasFullAccess(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd)))
+                (!await CurrentUserHasFullAccess(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd)))
             {
                 Application.Messages.AddError(ErrorResource.CANT_CREATE_OR_MODIFY_APPLICATION_UNAUTHORIZED);
                 return false;
             }
 
-            if (await ApplicationExistsAsync())
+            if (await ApplicationExists())
             {
                 Application.Messages.AddError(ErrorResource.CANT_CREATE_APPLICATION_ALREADY_EXISTS);
                 return false;
@@ -209,7 +209,7 @@ namespace FOAEA3.Business.Areas.Application
             // generate control code if not entered
             if (String.IsNullOrEmpty(Appl_CtrlCd) || (Appl_CtrlCd == Application.Subm_SubmCd))
             {
-                Application.Appl_CtrlCd = await DB.ApplicationTable.GenerateApplicationControlCodeAsync(Appl_EnfSrv_Cd);
+                Application.Appl_CtrlCd = await DB.ApplicationTable.GenerateApplicationControlCode(Appl_EnfSrv_Cd);
                 Validation.IsSystemGeneratedControlCode = true;
             }
 
@@ -230,15 +230,15 @@ namespace FOAEA3.Business.Areas.Application
             try
             {
                 // save the application to the database
-                isSuccess = await DB.ApplicationTable.CreateApplicationAsync(Application);
+                isSuccess = await DB.ApplicationTable.CreateApplication(Application);
 
                 if (isSuccess)
                 {
                     // update submitter code with last control code used
-                    await UpdateSubmitterDefaultControlCodeAsync();
+                    await UpdateSubmitterDefaultControlCode();
 
                     // save the events for the newly created application
-                    await EventManager.SaveEventsAsync();
+                    await EventManager.SaveEvents();
 
                     // update messages for display in UI
                     if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Appl_CtrlCd}");
@@ -257,17 +257,17 @@ namespace FOAEA3.Business.Areas.Application
             return isSuccess;
         }
 
-        public virtual async Task UpdateApplicationNoValidationAsync()
+        public virtual async Task UpdateApplicationNoValidation()
         {
-            await DB.ApplicationTable.UpdateApplicationAsync(Application);
-            await DB.SubmitterTable.SubmitterMessageDeleteAsync(Application.Appl_LastUpdate_Usr);
+            await DB.ApplicationTable.UpdateApplication(Application);
+            await DB.SubmitterTable.SubmitterMessageDelete(Application.Appl_LastUpdate_Usr);
 
-            await EventManager.SaveEventsAsync();
+            await EventManager.SaveEvents();
         }
 
-        public virtual async Task UpdateApplicationAsync()
+        public virtual async Task UpdateApplication()
         {
-            if (!(await ApplicationExistsAsync()))
+            if (!(await ApplicationExists()))
             {
                 Application.Messages.AddError(ErrorResource.CANT_UPDATE_APPLICATION_DOES_NOT_EXISTS);
                 return;
@@ -279,7 +279,7 @@ namespace FOAEA3.Business.Areas.Application
                 CurrentUser = this.CurrentUser
             };
 
-            await current.LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            await current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";
             bool isReset = current.Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
@@ -301,9 +301,10 @@ namespace FOAEA3.Business.Areas.Application
 
                 await Process_00_InitialState();
             }
-            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) && (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
+            else if ((current.Application.AppLiSt_Cd != Application.AppLiSt_Cd) &&
+                     (Application.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
             {
-                await LoadApplicationAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                await LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
                 Application.Appl_LastUpdate_Dte = DateTime.Now;
                 Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
@@ -312,9 +313,6 @@ namespace FOAEA3.Business.Areas.Application
             }
             else // regular update
             {
-                Application.AppLiSt_Cd = current.Application.AppLiSt_Cd;
-                Application.ActvSt_Cd = current.Application.ActvSt_Cd;
-
                 Validation.ValidateAndRevertNonUpdateFields(current.Application);
 
                 // update reason text with message
@@ -335,18 +333,17 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_LastUpdate_Usr = DB.CurrentSubmitter;
 
                 // save the application to the database
-                await DB.ApplicationTable.UpdateApplicationAsync(Application);
+                await DB.ApplicationTable.UpdateApplication(Application);
 
                 // update submitter code with last control code used
-                await UpdateSubmitterDefaultControlCodeAsync();
+                await UpdateSubmitterDefaultControlCode();
 
                 // save the events for the newly created application
-                await EventManager.SaveEventsAsync();
+                await EventManager.SaveEvents();
 
                 // update messages for display in UI
                 if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
                 if (Application.Medium_Cd != "FTP") Application.Messages.AddInformation(ReferenceData.Instance().ApplicationLifeStates[Application.AppLiSt_Cd].Description);
-
             }
             catch (Exception e)
             {
@@ -355,7 +352,7 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task TransferApplicationAsync(string applSelectedSubmitter, string applSelectedRecipient)
+        public async Task TransferApplication(string applSelectedSubmitter, string applSelectedRecipient)
         {
 
             Application.Subm_SubmCd = applSelectedSubmitter;
@@ -372,22 +369,22 @@ namespace FOAEA3.Business.Areas.Application
                 Subm_Recpt_SubmCd = applSelectedRecipient,
                 Subm_SubmCd = applSelectedSubmitter
             };
-            await DB.CaseManagementTable.CreateCaseManagementAsync(caseManagementData);
+            await DB.CaseManagementTable.CreateCaseManagement(caseManagementData);
 
             EventManager.AddEvent(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
             Application.Messages.AddInformation(EventCode.C51202_APPLICATION_HAS_BEEN_TRANSFERED);
 
-            await UpdateApplicationNoValidationAsync();
+            await UpdateApplicationNoValidation();
 
         }
 
-        public async Task<List<StatsOutgoingProvincialData>> GetProvincialStatsOutgoingDataAsync(int maxRecords,
-                                                                     string activeState,
-                                                                     string recipientCode,
-                                                                     bool isXML = true)
+        public async Task<List<StatsOutgoingProvincialData>> GetProvincialStatsOutgoingData(int maxRecords,
+                                                                                            string activeState,
+                                                                                            string recipientCode,
+                                                                                            bool isXML = true)
         {
             var applicationDB = DB.ApplicationTable;
-            var data = await applicationDB.GetStatsProvincialOutgoingDataAsync(maxRecords, activeState, recipientCode, isXML);
+            var data = await applicationDB.GetStatsProvincialOutgoingData(maxRecords, activeState, recipientCode, isXML);
             return data;
         }
 
@@ -412,7 +409,12 @@ namespace FOAEA3.Business.Areas.Application
             return data;
         }
 
-        public virtual Task ProcessBringForwardsAsync(ApplicationEventData bfEvent)
+        public async Task<List<ApplicationData>> GetApplicationsForSin(string confirmedSIN)
+        {
+            return await DB.ApplicationTable.GetApplicationsForSin(confirmedSIN);
+        }
+
+        public virtual Task ProcessBringForwards(ApplicationEventData bfEvent)
         {
             throw new NotImplementedException("ProcessBringForwards has not been implemented!");
         }
@@ -433,9 +435,9 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        protected async Task UpdateSubmitterDefaultControlCodeAsync()
+        protected async Task UpdateSubmitterDefaultControlCode()
         {
-            await DB.ApplicationTable.UpdateSubmitterDefaultControlCodeAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd);
+            await DB.ApplicationTable.UpdateSubmitterDefaultControlCode(Application.Subm_SubmCd, Application.Appl_CtrlCd);
         }
 
         protected virtual void TrimSpaces()
@@ -502,11 +504,11 @@ namespace FOAEA3.Business.Areas.Application
             Application.ActvSt_Cd = Application.ActvSt_Cd?.ToUpper();
         }
 
-        public async Task<string> GetSINResultsEventTextAsync()
+        public async Task<string> GetSINResultsEventText()
         {
             string result = string.Empty;
 
-            var data = await DB.SINResultTable.GetSINResultsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
+            var data = await DB.SINResultTable.GetSINResults(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd);
             var sinData = data.Items.FirstOrDefault();
 
             if (sinData != null)
@@ -521,16 +523,15 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task ApplySINconfirmation()
         {
-            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
-
             var sinManager = new ApplicationSINManager(Application, this);
-            await sinManager.UpdateSINChangeHistoryAsync();
+            await sinManager.UpdateSINChangeHistory();
 
             foreach (var eventItem in EventManager.Events)
                 eventItem.Subm_Update_SubmCd = "SYSTEM";
 
-            await UpdateApplicationNoValidationAsync();
+            await SetNewStateTo(ApplicationState.SIN_CONFIRMED_4);
 
+            await UpdateApplicationNoValidation();
         }
 
         private static string BuildCommentsChangeReasonText(ApplicationData newAppl, ApplicationData currentAppl)
@@ -577,54 +578,62 @@ namespace FOAEA3.Business.Areas.Application
                 return "";
         }
 
-        public static async Task AddSystemErrorAsync(IRepositories repositories, MessageDataList messages, string recipients, string errorMessage)
+        public static async Task AddSystemError(IRepositories repositories, MessageDataList messages, string recipients, string errorMessage)
         {
             messages.AddSystemError(errorMessage);
 
             string subject = "System Error";
             string message = $"<b>Error: </b>{errorMessage}";
-            await repositories.NotificationService.SendEmailAsync(subject, recipients, message);
+            await repositories.NotificationService.SendEmail(subject, recipients, message);
         }
 
-        private bool CurrentUserHasReadAccess(string enfService, string subm_SubmCd)
+        private async Task<bool> CurrentUserHasReadAccess(string enfService, string subm_SubmCd)
         {
             bool canAccess = true;
+
+            bool isSameEnfService = CurrentUser.IsSameEnfService(enfService);
+
+            var submitterData = (await DB.SubmitterTable.GetSubmitter(submCode: subm_SubmCd)).FirstOrDefault();
+            var enfOffData = (await DB.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+            bool isSameOffice = enfOffData?.EnfOff_AbbrCd == CurrentUser.OfficeCode;
 
             if ((CurrentUser.HasRole(Roles.EnforcementService) ||
                  CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||
                  CurrentUser.HasRole(Roles.FileTransfer)) &&
-                !CurrentUser.IsSameEnfService(enfService))
+                 !isSameEnfService)
                 canAccess = false;
 
             if ((CurrentUser.HasRole(Roles.EnforcementOffice) ||
                  CurrentUser.HasRole(Roles.EnforcementOfficeReadOnly)) &&
-                (!CurrentUser.IsSameEnfService(enfService) ||
-                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                (!isSameEnfService || !isSameOffice))
                 canAccess = false;
 
-            if (CurrentUser.HasRole(Roles.CourtUser) &&
-                !CurrentUser.IsSameEnfService(enfService))
+            if (CurrentUser.HasRole(Roles.CourtUser) && !isSameEnfService)
                 canAccess = false;
 
             return canAccess;
         }
 
-        private bool CurrentUserHasFullAccess(string enfService, string subm_SubmCd)
+        private async Task<bool> CurrentUserHasFullAccess(string enfService, string subm_SubmCd)
         {
             bool canAccess = true;
 
+            bool isSameEnfService = CurrentUser.IsSameEnfService(enfService);
+
+            var submitterData = (await DB.SubmitterTable.GetSubmitter(submCode: subm_SubmCd)).FirstOrDefault();
+            var enfOffData = (await DB.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+            bool isSameOffice = enfOffData?.EnfOff_AbbrCd == CurrentUser.OfficeCode;
+
             if ((CurrentUser.HasRole(Roles.EnforcementService) ||
                  CurrentUser.HasRole(Roles.FileTransfer)) &&
-                !CurrentUser.IsSameEnfService(enfService))
+                !isSameEnfService)
                 canAccess = false;
 
             if (CurrentUser.HasRole(Roles.EnforcementOffice) &&
-                (!CurrentUser.IsSameEnfService(enfService) ||
-                 !CurrentUser.IsSameOffice(subm_SubmCd)))
+                (!isSameEnfService || !isSameOffice))
                 canAccess = false;
 
-            if (CurrentUser.HasRole(Roles.CourtUser) &&
-                !CurrentUser.IsSameEnfService(enfService))
+            if (CurrentUser.HasRole(Roles.CourtUser) && !isSameEnfService)
                 canAccess = false;
 
             if (CurrentUser.HasRole(Roles.EnforcementServiceReadOnly) ||

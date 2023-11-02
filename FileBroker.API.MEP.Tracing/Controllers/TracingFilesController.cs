@@ -1,5 +1,6 @@
 ﻿using FileBroker.Common;
 using FileBroker.Model.Interfaces;
+using FOAEA3.Model.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NJsonSchema;
@@ -18,6 +19,7 @@ public class TracingFilesController : ControllerBase
     public ActionResult<string> GetVersion() => Ok("TracingFiles API Version 1.0");
 
     [HttpGet("DB")]
+    [Authorize(Roles = Roles.Admin)]
     public ActionResult<string> GetDatabase([FromServices] IFileTableRepository fileTable) => Ok(fileTable.MainDB.ConnectionString);
 
     [HttpGet("")]
@@ -25,7 +27,7 @@ public class TracingFilesController : ControllerBase
     {
         string fileContent;
         string lastFileName;
-        (fileContent, lastFileName) = await LoadLatestProvincialTracingFileAsync(partnerId, fileTable);
+        (fileContent, lastFileName) = await LoadLatestProvincialTracingFile(partnerId, fileTable);
 
         if (fileContent == null)
             return NotFound();
@@ -41,9 +43,9 @@ public class TracingFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestProvincialTracingFileAsync(string partnerId, IFileTableRepository fileTable)
+    private static async Task<(string, string)> LoadLatestProvincialTracingFile(string partnerId, IFileTableRepository fileTable)
     {
-        var fileTableData = (await fileTable.GetFileTableDataForCategoryAsync("TRCAPPOUT"))
+        var fileTableData = (await fileTable.GetFileTableDataForCategory("TRCAPPOUT"))
                                      .FirstOrDefault(m => m.Name.StartsWith(partnerId) &&
                                                           m.Active.HasValue && m.Active.Value);
 
@@ -58,7 +60,7 @@ public class TracingFilesController : ControllerBase
         var fileLocation = fileTableData.Path;
         int lastFileCycle = fileTableData.Cycle;
 
-        int fileCycleLength = 6; // TODO: should come from FileTable
+        int fileCycleLength = 6; 
 
         var lifeCyclePattern = new string('0', fileCycleLength);
         string lastFileCycleString = lastFileCycle.ToString(lifeCyclePattern);

@@ -8,6 +8,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<EnfOffData>> GetEnfOffAsync(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null);
+        Task<List<EnfOffData>> GetEnfOff(string enfOffName = null, string enfOffCode = null, string province = null, string enfServCode = null);
     }
 }

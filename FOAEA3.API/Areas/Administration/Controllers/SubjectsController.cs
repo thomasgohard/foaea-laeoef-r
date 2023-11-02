@@ -23,7 +23,7 @@ public class SubjectsController : FoaeaControllerBase
     public async Task<ActionResult<List<SubjectData>>> GetSubjects([FromServices] IRepositories repositories, [FromQuery] string submCd)
     {
         if (submCd != null)
-            return Ok(await repositories.SubjectTable.GetSubjectsForSubmitterAsync(submCd));
+            return Ok(await repositories.SubjectTable.GetSubjectsForSubmitter(submCd));
         else
             return UnprocessableEntity("Missing submCd parameter"); // not allowed to get all subjects currently
     }
@@ -31,7 +31,7 @@ public class SubjectsController : FoaeaControllerBase
     [HttpGet("{subjectName}")]
     public async Task<ActionResult<SubjectData>> GetSubject([FromServices] IRepositories repositories, [FromRoute] string subjectName)
     {
-        var data = await repositories.SubjectTable.GetSubjectAsync(subjectName);
+        var data = await repositories.SubjectTable.GetSubject(subjectName);
         return Ok(data);
     }
 
@@ -39,7 +39,7 @@ public class SubjectsController : FoaeaControllerBase
     public async Task<ActionResult<SubjectData>> AcceptTermsOfReference([FromServices] IRepositories repositories, [FromBody] SubjectData subject)
     {
         var loginManager = new LoginManager(repositories);
-        await loginManager.AcceptNewTermsOfReferernceAsync(subject.SubjectName);
+        await loginManager.AcceptNewTermsOfReference(subject.SubjectName);
 
         return Ok(subject);
     }

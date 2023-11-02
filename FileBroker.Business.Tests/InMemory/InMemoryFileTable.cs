@@ -47,7 +47,7 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.FromResult(result);
         }
 
-        public Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
+        public Task<List<FileTableData>> GetFileTableDataForCategory(string category)
         {
             return Task.FromResult(new List<FileTableData>
                 {
@@ -80,7 +80,7 @@ namespace FileBroker.Business.Tests.InMemory
                 });
         }
 
-        public Task<List<FileTableData>> GetAllActiveAsync()
+        public Task<List<FileTableData>> GetAllActive()
         {
             throw new System.NotImplementedException();
         }
@@ -97,7 +97,7 @@ namespace FileBroker.Business.Tests.InMemory
             return Task.CompletedTask;
         }
 
-        public Task<bool> IsFileLoadingAsync(int processId)
+        public Task<bool> IsFileLoading(int processId)
         {
             return Task.FromResult(FileLoading);
         }
@@ -121,6 +121,11 @@ namespace FileBroker.Business.Tests.InMemory
         }
 
         public Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<FileTableFlagData> GetAuditFileFormatForProcessId(int processId)
         {
             throw new System.NotImplementedException();
         }

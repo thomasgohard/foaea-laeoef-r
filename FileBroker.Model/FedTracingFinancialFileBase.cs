@@ -51,6 +51,9 @@ namespace FileBroker.Model
 
     public struct FedTracingFinancial_Field
     {
+        [JsonProperty("@code")]
+        public string Code;
+
         [JsonProperty("@name")]
         public string Name;
 

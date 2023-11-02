@@ -13,27 +13,27 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task CloseNETPTraceEventsAsync()
+        public Task CloseNETPTraceEvents()
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteBFEventAsync(string subm_SubmCd, string appl_CtrlCd)
+        public Task DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetActiveEventBFsAsync()
+        public Task<ApplicationEventsList> GetActiveEventBFs()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetApplicationEventsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
+        public Task<ApplicationEventsList> GetApplicationEvents(string appl_EnfSrv_Cd, string appl_CtrlCd, EventQueue queue, string activeState = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetEventBFAsync(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
+        public Task<ApplicationEventsList> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
         {
             throw new NotImplementedException();
         }
@@ -43,37 +43,37 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
-        public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string enfSrv_Cd, string fileName)
+        public Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedTRCINTracingEventsAsync(string enfSrv_Cd, string cycle)
+        public Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
             throw new NotImplementedException();
         }
 
-        public Task<int> GetTraceEventCountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate, EventCode eventReasonCode, int eventId)
+        public Task<int> GetTraceEventCount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate, EventCode eventReasonCode, int eventId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SaveEventAsync(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
+        public Task<bool> SaveEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SaveEventsAsync(List<ApplicationEventData> events, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
+        public Task<bool> SaveEvents(ApplicationEventsList events, ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
         {
             throw new NotImplementedException();
         }

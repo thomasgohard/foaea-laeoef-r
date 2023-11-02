@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<InfoBankData>> GetInfoBanksAsync()
+        public async Task<List<InfoBankData>> GetInfoBanks()
         {
             return await MainDB.GetAllDataAsync<InfoBankData>("InfoBank", FillDataFromReader);
         }

@@ -16,8 +16,7 @@ namespace FOAEA3.Common.Helpers
         public List<string> AutoSwear { get; }
         public List<string> AutoAccept { get; }
         public List<string> ESDsites { get; }
-
-        public DateTime TracingC78CutOff { get; }
+        public string TaxFormsRootPath { get; }
 
         public FoaeaConfigurationHelper(string[] args = null)
         {
@@ -45,11 +44,7 @@ namespace FOAEA3.Common.Helpers
             LicenceDenialDeclaration = configuration.GetSection("Declaration:LicenceDenial").Get<DeclarationData>();
             TracingDeclaration = configuration.GetSection("Declaration:Tracing").Get<DeclarationData>();
 
-            var tracingCutOffValue = configuration["TracingC78CutOff"];
-            if (tracingCutOffValue != null)
-                TracingC78CutOff = tracingCutOffValue.ConvertToDateTimeIgnoringTimeZone() ?? DateTime.Now;
-            else
-                TracingC78CutOff = DateTime.Now;
+            TaxFormsRootPath = configuration["TaxFormsRootPath"];
         }
     }
 }

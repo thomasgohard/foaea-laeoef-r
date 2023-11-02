@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace FOAEA3.Model
 {
-    [DebuggerDisplay("{Event_Id}: {Appl_EnfSrv_Cd}-{Appl_CtrlCd} [{Queue}]: {ActvSt_Cd}")]
+    [DebuggerDisplay("{Event_Id}: {Appl_EnfSrv_Cd}-{Appl_CtrlCd} {Event_Reas_Cd} [{Queue}]: {ActvSt_Cd}")]
     public class ApplicationEventData
     {
         public EventQueue Queue { get; set; }

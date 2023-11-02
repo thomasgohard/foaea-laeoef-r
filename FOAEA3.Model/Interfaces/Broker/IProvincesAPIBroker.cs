@@ -8,6 +8,6 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<List<ProvinceData>> GetProvincesAsync();
+        Task<List<ProvinceData>> GetProvinces();
     }
 }

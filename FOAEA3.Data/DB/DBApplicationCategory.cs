@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
             Messages = new MessageDataList();
         }
 
-        public async Task<DataList<ApplicationCategoryData>> GetApplicationCategoriesAsync()
+        public async Task<DataList<ApplicationCategoryData>> GetApplicationCategories()
         {
             var data = await MainDB.GetAllDataAsync<ApplicationCategoryData>("AppCtgy", FillApplicationCategoryDataFromReader);
 

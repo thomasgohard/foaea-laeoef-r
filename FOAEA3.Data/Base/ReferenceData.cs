@@ -48,10 +48,7 @@ namespace FOAEA3.Data.Base
         {
             lock (syncLock) // thread safe
             {
-                if (instance is null)
-                {
-                    instance = new ReferenceData();
-                }
+                instance ??= new ReferenceData();
             }
 
             return instance;
@@ -61,15 +58,15 @@ namespace FOAEA3.Data.Base
 
         public MessageDataList Messages { get; set; }
 
-        public async Task LoadApplicationCommentsAsync(IApplicationCommentsRepository applicationCommentsRepository)
+        public async Task LoadApplicationComments(IApplicationCommentsRepository applicationCommentsRepository)
         {
-            var applicationComments = await applicationCommentsRepository.GetApplicationCommentsAsync();
+            var applicationComments = await applicationCommentsRepository.GetApplicationComments();
             ApplicationComments.AddRange(applicationComments.Items);
         }
 
-        public async Task LoadActiveStatusesAsync(IActiveStatusRepository activeStatusRepository)
+        public async Task LoadActiveStatuses(IActiveStatusRepository activeStatusRepository)
         {
-            var data = await activeStatusRepository.GetActiveStatusAsync();
+            var data = await activeStatusRepository.GetActiveStatus();
 
             if (data.Messages.Count > 0)
                 Messages.AddRange(data.Messages);
@@ -78,17 +75,17 @@ namespace FOAEA3.Data.Base
                 ActiveStatuses.TryAdd(activeStatus.ActvSt_Cd, activeStatus);
         }
 
-        public async Task LoadApplicationLifeStatesAsync(IApplicationLifeStateRepository applicationLifeStateRepository)
+        public async Task LoadApplicationLifeStates(IApplicationLifeStateRepository applicationLifeStateRepository)
         {
-            var data = await applicationLifeStateRepository.GetApplicationLifeStatesAsync();
+            var data = await applicationLifeStateRepository.GetApplicationLifeStates();
 
             foreach (var applicationLifeState in data.Items)
                 ApplicationLifeStates.TryAdd(applicationLifeState.AppLiSt_Cd, applicationLifeState);
         }
 
-        public async Task LoadGendersAsync(IGenderRepository genderRepository)
+        public async Task LoadGenders(IGenderRepository genderRepository)
         {
-            var data = await genderRepository.GetGendersAsync();
+            var data = await genderRepository.GetGenders();
 
             if (genderRepository.Messages.Count > 0)
                 Messages.AddRange(genderRepository.Messages);
@@ -97,17 +94,17 @@ namespace FOAEA3.Data.Base
                 Genders.TryAdd(gender.Gender_Cd, gender);
         }
 
-        public async Task LoadProvincesAsync(IProvinceRepository provinceRepository)
+        public async Task LoadProvinces(IProvinceRepository provinceRepository)
         {
-            var data = await provinceRepository.GetProvincesAsync();
+            var data = await provinceRepository.GetProvinces();
 
             foreach (var province in data)
                 Provinces.TryAdd(province.PrvCd, province);
         }
 
-        public async Task LoadMediumsAsync(IMediumRepository mediumRepository)
+        public async Task LoadMediums(IMediumRepository mediumRepository)
         {
-            var data = await mediumRepository.GetMediumsAsync();
+            var data = await mediumRepository.GetMediums();
 
             if (mediumRepository.Messages.Count > 0)
                 Messages.AddRange(mediumRepository.Messages);
@@ -116,9 +113,9 @@ namespace FOAEA3.Data.Base
                 Mediums.TryAdd(medium.Medium_Cd, medium);
         }
 
-        public async Task LoadLanguagesAsync(ILanguageRepository languageRepository)
+        public async Task LoadLanguages(ILanguageRepository languageRepository)
         {
-            var data = await languageRepository.GetLanguagesAsync();
+            var data = await languageRepository.GetLanguages();
 
             if (languageRepository.Messages.Count > 0)
                 Messages.AddRange(languageRepository.Messages);
@@ -127,9 +124,9 @@ namespace FOAEA3.Data.Base
                 Languages.TryAdd(language.Lng_Cd, language);
         }
 
-        public async Task LoadFoaEventsAsync(IFoaEventsRepository foaMessageRepository)
+        public async Task LoadFoaEvents(IFoaEventsRepository foaMessageRepository)
         {
-            var data = await foaMessageRepository.GetAllFoaMessagesAsync();
+            var data = await foaMessageRepository.GetAllFoaMessages();
 
             if (data.Messages.Count > 0)
                 Messages.AddRange(data.Messages);
@@ -142,9 +139,9 @@ namespace FOAEA3.Data.Base
             
         }
 
-        public async Task LoadApplicationCategoriesAsync(IApplicationCategoryRepository applicationCategoryRepository)
+        public async Task LoadApplicationCategories(IApplicationCategoryRepository applicationCategoryRepository)
         {
-            var data = await applicationCategoryRepository.GetApplicationCategoriesAsync();
+            var data = await applicationCategoryRepository.GetApplicationCategories();
 
             if (applicationCategoryRepository.Messages.Count > 0)
                 Messages.AddRange(applicationCategoryRepository.Messages);
@@ -154,9 +151,9 @@ namespace FOAEA3.Data.Base
 
         }
 
-        public async Task LoadApplicationReasonsAsync(IApplicationReasonRepository applicationReasonRepository)
+        public async Task LoadApplicationReasons(IApplicationReasonRepository applicationReasonRepository)
         {
-            var data = await applicationReasonRepository.GetApplicationReasonsAsync();
+            var data = await applicationReasonRepository.GetApplicationReasons();
 
             if (applicationReasonRepository.Messages.Count > 0)
                 Messages.AddRange(applicationReasonRepository.Messages);
@@ -165,9 +162,9 @@ namespace FOAEA3.Data.Base
                 ApplicationReasons.TryAdd(applicationReason.AppReas_Cd.Trim(), applicationReason);
         }
 
-        public async Task LoadCountriesAsync(ICountryRepository countryRepository)
+        public async Task LoadCountries(ICountryRepository countryRepository)
         {
-            var data = await countryRepository.GetCountriesAsync();
+            var data = await countryRepository.GetCountries();
 
             if (countryRepository.Messages.Count > 0)
                 Messages.AddRange(countryRepository.Messages);
@@ -176,9 +173,9 @@ namespace FOAEA3.Data.Base
                 Countries.TryAdd(country.Ctry_Cd, country);
         }
 
-        public async Task LoadDocumentTypesAsync(IDocumentTypeRepository documentTypeRepository)
+        public async Task LoadDocumentTypes(IDocumentTypeRepository documentTypeRepository)
         {
-            var data = await documentTypeRepository.GetDocumentTypesAsync();
+            var data = await documentTypeRepository.GetDocumentTypes();
 
             if (documentTypeRepository.Messages.Count > 0)
                 Messages.AddRange(documentTypeRepository.Messages);

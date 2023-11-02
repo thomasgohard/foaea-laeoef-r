@@ -23,7 +23,25 @@ namespace FileBroker.Data.DB
 
             return fileTableData.AsParallel().Where(f => f.Name.ToUpper() == fileNameNoExt.ToUpper()).FirstOrDefault();
         }
-        
+
+        public async Task<FileTableFlagData> GetAuditFileFormatForProcessId(int processId)
+        {
+
+            var parameters = new Dictionary<string, object> {
+                    { "PrcId",  processId }
+                };
+
+            var fileTableFlagData = await MainDB.GetDataFromStoredProcAsync<FileTableFlagData>("MessageBrokerConfigGetIncludeAudit", parameters, FillFileFlagTableDataFromReader);
+
+            return fileTableFlagData.AsParallel().FirstOrDefault();
+        }
+
+        private void FillFileFlagTableDataFromReader(IDBHelperReader rdr, FileTableFlagData data)
+        {
+            if (rdr.ColumnExists("PrcId")) data.PrcId = (int)rdr["PrcId"];
+            data.IncludeAudit = rdr["IncludeAudit"] as string;
+        }
+
         public async Task<List<FileTableData>> MessageBrokerSchedulerGetDueProcess(string frequency)
         {
             var parameters = new Dictionary<string, object>
@@ -58,14 +76,14 @@ namespace FileBroker.Data.DB
             await MainDB.ExecProcAsync("MessageBrokerEnableDisableFileProcess", parameters);
         }
 
-        public async Task<List<FileTableData>> GetFileTableDataForCategoryAsync(string category)
+        public async Task<List<FileTableData>> GetFileTableDataForCategory(string category)
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
             return fileTableData.AsParallel().Where(f => f.Category == category).ToList();
         }
 
-        public async Task<List<FileTableData>> GetAllActiveAsync()
+        public async Task<List<FileTableData>> GetAllActive()
         {
             var fileTableData = await MainDB.GetAllDataAsync<FileTableData>("FileTable", FillFileTableDataFromReader);
 
@@ -90,7 +108,7 @@ namespace FileBroker.Data.DB
 
         }
 
-        public async Task<bool> IsFileLoadingAsync(int processId)
+        public async Task<bool> IsFileLoading(int processId)
         {
             var parameters = new Dictionary<string, object>
             {

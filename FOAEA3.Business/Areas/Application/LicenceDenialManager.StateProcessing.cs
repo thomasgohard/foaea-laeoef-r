@@ -23,7 +23,7 @@ namespace FOAEA3.Business.Areas.Application
         {
             await base.Process_12_PartiallyServiced();
 
-            var licenceResponseData = await DB.LicenceDenialResponseTable.GetLastResponseDataAsync(Appl_EnfSrv_Cd, Appl_CtrlCd);
+            var licenceResponseData = await DB.LicenceDenialResponseTable.GetLastResponseData(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             if (licenceResponseData != null)
             {

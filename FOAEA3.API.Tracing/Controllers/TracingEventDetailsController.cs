@@ -22,25 +22,35 @@ public class TracingEventDetailsController : FoaeaControllerBase
     public ActionResult<string> GetDatabase([FromServices] IRepositories repositories) => Ok(repositories.MainDB.ConnectionString);
 
     [HttpGet("{id}/SIN")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetSINEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetSINEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventSIN_dtl);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueue(EventQueue.EventSIN_dtl));
+        else
+            return NotFound();
     }
 
     [HttpGet("{id}/Trace")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetTraceEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetTraceEvents([FromRoute] ApplKey id, [FromServices] IRepositories repositories)
     {
-        return await GetEventsForQueueAsync(id, repositories, EventQueue.EventTrace_dtl);
+        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
+
+        if (await manager.LoadApplication(id.EnfSrv, id.CtrlCd))
+            return Ok(await manager.EventDetailManager.GetApplicationEventDetailsForQueue(EventQueue.EventTrace_dtl));
+        else
+            return NotFound();
     }
 
     [HttpPost("")]
     public async Task<ActionResult<ApplicationEventDetailData>> SaveEventDetail([FromServices] IRepositories repositories)
     {
-        var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBodyAsync<ApplicationEventDetailData>(Request);
+        var applicationEventDetail = await APIBrokerHelper.GetDataFromRequestBody<ApplicationEventDetailData>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        await eventDetailManager.SaveEventDetailAsync(applicationEventDetail);
+        await eventDetailManager.SaveEventDetail(applicationEventDetail);
 
         return Ok();
 
@@ -54,27 +64,17 @@ public class TracingEventDetailsController : FoaeaControllerBase
                                                                       [FromQuery] string enfSrvCode,
                                                                       [FromQuery] string writtenFile)
     {
-        var eventIds = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<int>>(Request);
+        var eventIds = await APIBrokerHelper.GetDataFromRequestBody<List<int>>(Request);
 
         var eventDetailManager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
         if (command?.ToLower() == "markoutboundprocessed")
         {
-            await eventDetailManager.UpdateOutboundEventDetailAsync(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
+            await eventDetailManager.UpdateOutboundEventDetail(activeState, applicationState, enfSrvCode, writtenFile, eventIds);
         }
 
         return Ok();
 
     }
 
-    private async Task<ActionResult<List<ApplicationEventDetailData>>> GetEventsForQueueAsync(ApplKey id,
-                                                                IRepositories repositories, EventQueue queue)
-    {
-        var manager = new ApplicationManager(new ApplicationData(), repositories, config, User);
-
-        if (await manager.LoadApplicationAsync(id.EnfSrv, id.CtrlCd))
-            return Ok(manager.EventDetailManager.GetApplicationEventDetailsForQueueAsync(queue));
-        else
-            return NotFound();
-    }
 }

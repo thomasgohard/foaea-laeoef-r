@@ -1,25 +1,15 @@
-﻿using FileBroker.Common.Helpers;
+﻿namespace FileBroker.Business;
 
-namespace FileBroker.Business;
-
-public class IncomingFederalSinManager
+public class IncomingFederalSinManager : IncomingFederalManagerBase
 {
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
     public IncomingFederalSinManager(APIBrokerList apis, RepositoryList repositories,
-                                     IFileBrokerConfigurationHelper config)
+                                     IFileBrokerConfigurationHelper config) : base(apis, repositories, config)
     {
-        APIs = apis;
-        DB = repositories;
-
-        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<List<string>> ProcessFlatFileAsync(string flatFileContent, string flatFileName)
+    public async Task<List<string>> ProcessFlatFile(string flatFileContent, string flatFileName)
     {
-        var fileTableData = await GetFileTableDataAsync(flatFileName);
+        var fileTableData = await GetFileTableData(flatFileName);
 
         var sinFileData = new FedSinFileBase();
 
@@ -46,7 +36,7 @@ public class IncomingFederalSinManager
         try
         {
             var fileLoader = new IncomingFederalSinFileLoader(DB.FlatFileSpecs, fileTableData.PrcId);
-            await fileLoader.FillSinFileDataFromFlatFileAsync(sinFileData, flatFileContent, errors);
+            await fileLoader.FillSinFileDataFromFlatFile(sinFileData, flatFileContent, errors);
 
             if (errors.Any())
                 return errors;
@@ -61,9 +51,9 @@ public class IncomingFederalSinManager
 
             if ((sinResults != null) && (sinFileData.SININ02.Count > 0))
             {
-                var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
-                await SendSinResultsToFOAEAAsync(sinResults, flatFileName, (short)processCodes.AppLiSt_Cd);
+                await SendSinResultsToFoaea(sinResults, flatFileName, (short)processCodes.AppLiSt_Cd);
             }
 
         }
@@ -81,22 +71,22 @@ public class IncomingFederalSinManager
         return errors;
     }
 
-    private async Task SendSinResultsToFOAEAAsync(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
+    private async Task SendSinResultsToFoaea(List<SINResultData> sinResults, string flatFileName, short appLiSt_Cd)
     {
         await FoaeaAccess.SystemLogin();
         try
         {
-            var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFileAsync(flatFileName);
-            var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFileAsync(flatFileName);
+            var requestedEvents = await APIs.ApplicationEvents.GetRequestedSINEventDataForFile(flatFileName);
+            var requestedEventDetails = await APIs.ApplicationEvents.GetRequestedSINEventDetailDataForFile(flatFileName);
 
             foreach (var sinResult in sinResults)
                 UpdateSinEventTables(sinResult, requestedEvents, requestedEventDetails, flatFileName, appLiSt_Cd);
 
             UpdateSinResultTable(sinResults);
 
-            var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummaryAsync();
+            var latestUpdatedSinData = await APIs.ApplicationEvents.GetLatestSinEventDataSummary();
             foreach (var updatedSinDataSummary in latestUpdatedSinData)
-                await UpdateApplicationBasedOnReceivedSinResultAsync(updatedSinDataSummary, requestedEvents);
+                await UpdateApplicationBasedOnReceivedSinResult(updatedSinDataSummary, requestedEvents);
         }
         finally
         {
@@ -105,7 +95,7 @@ public class IncomingFederalSinManager
 
     }
 
-    private async Task UpdateStateForSinEventAsync(List<ApplicationEventData> requestedEvents, int eventId, string newState)
+    private async Task UpdateStateForSinEvent(ApplicationEventsList requestedEvents, int eventId, string newState)
     {
         var eventsForThisAppl = requestedEvents.Where(m => m.Event_Id == eventId).ToList();
 
@@ -113,12 +103,12 @@ public class IncomingFederalSinManager
         {
             var thisEvent = eventsForThisAppl.First();
             thisEvent.ActvSt_Cd = newState;
-            await APIs.ApplicationEvents.SaveEventAsync(thisEvent);
+            await APIs.ApplicationEvents.SaveEvent(thisEvent);
         }
     }
 
-    private async Task UpdateApplicationBasedOnReceivedSinResultAsync(SinInboundToApplData updatedSinDataSummary,
-                                                                      List<ApplicationEventData> requestedEvents)
+    private async Task UpdateApplicationBasedOnReceivedSinResult(SinInboundToApplData updatedSinDataSummary,
+                                                                 ApplicationEventsList requestedEvents)
     {
         string appl_EnfSrv_Cd = updatedSinDataSummary.Appl_EnfSrv_Cd;
         string appl_CtrlCd = updatedSinDataSummary.Appl_CtrlCd;
@@ -126,11 +116,11 @@ public class IncomingFederalSinManager
         bool sourceModifiedSin = false;
 
         // TODO: fix token
-        var appl = await APIs.Applications.GetApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
+        var appl = await APIs.Applications.GetApplication(appl_EnfSrv_Cd, appl_CtrlCd);
 
         if (appl.ActvSt_Cd != "A")
         {
-            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "P"); // shouldn't this close the event???
+            await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "P"); // shouldn't this close the event???
             return;
         }
 
@@ -141,7 +131,7 @@ public class IncomingFederalSinManager
                 sourceModifiedSin = true; // why only check when not at state 3 and why allowed to continue???
             else
             {
-                await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+                await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
                 AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50482_APPLICATION_STATE_WAS_NOT_AT_3_EVENT_WAS_MARKED_AS_INNACTIVE);
                 return;
             }
@@ -150,20 +140,20 @@ public class IncomingFederalSinManager
         if (!updatedSinDataSummary.ValStat_Cd.HasValue)
         {
             // this hasn't occurred since 1997 -- probably not needed anymore???
-            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+            await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             AddSysEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50483_NO_MATCHING_ACTIVE_DETAIL_EVENTS_WERE_FOUND_FOR_INBOUND_RECORD);
             return;
         }
 
         if (updatedSinDataSummary.Tot_Invalid > 0)
         {
-            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "I");
+            await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "I");
             return;
         }
 
         if (updatedSinDataSummary.Tot_Childs != updatedSinDataSummary.Tot_Closed)
         {
-            await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "A");
+            await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "A");
             return;
         }
 
@@ -179,7 +169,7 @@ public class IncomingFederalSinManager
             };
 
             // TODO: fix token
-            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            await APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
         }
         else // SIN is NOT confirmed
         {
@@ -190,14 +180,14 @@ public class IncomingFederalSinManager
             };
 
             // TODO: fix token
-            await APIs.Applications.SinConfirmationAsync(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
+            await APIs.Applications.SinConfirmation(appl_EnfSrv_Cd, appl_CtrlCd, confirmationSinData);
 
             if (sourceModifiedSin)
                 AddAMEvent(appl_EnfSrv_Cd, appl_CtrlCd, EventCode.C50532_SOURCE_MODIFIED_SIN_NOT_CONFIRMED,
                            $"SIN {updatedSinDataSummary.SVR_SIN} was not confirmed");
         }
 
-        await UpdateStateForSinEventAsync(requestedEvents, updatedSinDataSummary.Event_Id, "C");
+        await UpdateStateForSinEvent(requestedEvents, updatedSinDataSummary.Event_Id, "C");
     }
 
     private void AddSysEvent(string appl_EnfSrv_Cd, string appl_CtrlCd, EventCode eventCode)
@@ -216,7 +206,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEvents.SaveEventAsync(newSysEvent);
+        APIs.ApplicationEvents.SaveEvent(newSysEvent);
     }
 
     private void AddAMEvent(string appl_EnfSrv_Cd, string appl_CtrlCd, EventCode eventCode, string reasonText)
@@ -236,7 +226,7 @@ public class IncomingFederalSinManager
             ActvSt_Cd = "A",
             AppLiSt_Cd = ApplicationState.INITIAL_STATE_0
         };
-        APIs.ApplicationEvents.SaveEventAsync(newSysEvent);
+        APIs.ApplicationEvents.SaveEvent(newSysEvent);
     }
 
     private static bool IsSinConfirmed(SinInboundToApplData updatedSinDataSummary)
@@ -246,12 +236,12 @@ public class IncomingFederalSinManager
 
     private void UpdateSinResultTable(List<SINResultData> sinResults)
     {
-        APIs.Sins.InsertBulkDataAsync(sinResults);
+        APIs.Sins.InsertBulkData(sinResults);
     }
 
     private void UpdateSinEventTables(SINResultData sinResult,
-                                      List<ApplicationEventData> requestedEvents,
-                                      List<ApplicationEventDetailData> requestedEventDetails,
+                                      ApplicationEventsList requestedEvents,
+                                      ApplicationEventDetailsList requestedEventDetails,
                                       string flatFileName, short appLiSt_Cd)
     {
         var eventForThisAppl = requestedEvents.Where(m => m.Appl_EnfSrv_Cd == sinResult.Appl_EnfSrv_Cd &&
@@ -262,7 +252,7 @@ public class IncomingFederalSinManager
             int eventId = eventForThisAppl.Event_Id;
             eventForThisAppl.ActvSt_Cd = "P";
             eventForThisAppl.Event_Compl_Dte = DateTime.Now;
-            APIs.ApplicationEvents.SaveEventAsync(eventForThisAppl);
+            APIs.ApplicationEvents.SaveEvent(eventForThisAppl);
 
             var eventDetailForThisAppl = requestedEventDetails.Where(m => m.Event_Id == eventId).FirstOrDefault();
 
@@ -278,7 +268,7 @@ public class IncomingFederalSinManager
                 eventDetailForThisAppl.ActvSt_Cd = "C";
                 eventDetailForThisAppl.Event_Compl_Dte = DateTime.Now;
 
-                APIs.ApplicationEvents.SaveEventDetailAsync(eventDetailForThisAppl);
+                APIs.ApplicationEvents.SaveEventDetail(eventDetailForThisAppl);
             }
         }
     }
@@ -293,7 +283,7 @@ public class IncomingFederalSinManager
                 new SINResultData
                 {
                     Appl_EnfSrv_Cd = sinResult.dat_Appl_EnfSrvCd,
-                    Appl_CtrlCd = sinResult.dat_Appl_CtrlCd,
+                    Appl_CtrlCd = sinResult.dat_Appl_CtrlCd.Trim(),
                     SVR_TimeStamp = sinFileData.SININ01.FileDate,
                     SVR_TolCd = sinResult.dat_SVR_TolCd,
                     SVR_SIN = sinResult.dat_SVR_SIN,
@@ -310,13 +300,6 @@ public class IncomingFederalSinManager
         }
 
         return sinResults;
-    }
-
-    private async Task<FileTableData> GetFileTableDataAsync(string flatFileName)
-    {
-        string fileNameNoCycle = Path.GetFileNameWithoutExtension(flatFileName);
-
-        return await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
     }
 
     private static void ValidateHeader(FedSin_RecType01 dataFromFile, string flatFileName, ref List<string> errors)

@@ -73,7 +73,7 @@ namespace FOAEA3.API.Controllers
                     // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
-                await db.SecurityTokenTable.CreateAsync(securityToken);
+                await db.SecurityTokenTable.Create(securityToken);
 
                 return Ok(tokenData);
             }
@@ -96,7 +96,7 @@ namespace FOAEA3.API.Controllers
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            await db.LoginTable.AcceptNewTermsOfReferernceAsync(subjectName);
+            await db.LoginTable.AcceptNewTermsOfReferernce(subjectName);
 
             var principal = LoginHandler.AcceptTermsOfReference(subjectName, db);
 
@@ -133,7 +133,7 @@ namespace FOAEA3.API.Controllers
                     // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
-                await db.SecurityTokenTable.CreateAsync(securityToken);
+                await db.SecurityTokenTable.Create(securityToken);
 
                 return Ok(tokenData);
             }
@@ -156,7 +156,7 @@ namespace FOAEA3.API.Controllers
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
+            var roles = await db.SubjectRoleTable.GetSubjectRoles(subjectName);
             var availableSubmitters = (from role in roles select role.RoleName).ToList();
 
             return Ok(availableSubmitters);
@@ -176,7 +176,7 @@ namespace FOAEA3.API.Controllers
             if (tokenConfig == null)
                 return StatusCode(500);
 
-            var roles = await db.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
+            var roles = await db.SubjectRoleTable.GetSubjectRoles(subjectName);
             var availableSubmitters = (from role in roles select role.RoleName).ToList();
             if (!availableSubmitters.Contains(submitter))
             {
@@ -217,7 +217,7 @@ namespace FOAEA3.API.Controllers
                     // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
-                await db.SecurityTokenTable.CreateAsync(securityToken);
+                await db.SecurityTokenTable.Create(securityToken);
 
                 return Ok(tokenData);
             }
@@ -272,7 +272,7 @@ namespace FOAEA3.API.Controllers
                     // fix this to handle multiple roles
                     Subm_Class = principal.Claims.Where(m => m.Type == ClaimTypes.Role).FirstOrDefault()?.Value
                 };
-                await db.SecurityTokenTable.CreateAsync(securityToken);
+                await db.SecurityTokenTable.Create(securityToken);
 
                 return Ok(tokenData);
             }
@@ -327,7 +327,7 @@ namespace FOAEA3.API.Controllers
 
             oldToken = oldToken[7..]; // get rid of the word Bearer that is at the beginning
 
-            var lastSecurityToken = await db.SecurityTokenTable.GetTokenDataAsync(oldToken);
+            var lastSecurityToken = await db.SecurityTokenTable.GetTokenData(oldToken);
 
             if (lastSecurityToken is null ||
                 !string.Equals(lastSecurityToken.RefreshToken, refreshData.RefreshToken) ||
@@ -347,7 +347,7 @@ namespace FOAEA3.API.Controllers
             }
             catch (Exception)
             {
-                //TODO: Log Error
+                // TODO: Log Error
                 return null;
             }
 
@@ -391,7 +391,7 @@ namespace FOAEA3.API.Controllers
                 Subm_Class = lastSecurityToken.Subm_Class,
                 FromRefreshToken = lastSecurityToken.RefreshToken
             };
-            await db.SecurityTokenTable.CreateAsync(securityToken);
+            await db.SecurityTokenTable.Create(securityToken);
 
             return Ok(tokenData);
         }
@@ -411,10 +411,10 @@ namespace FOAEA3.API.Controllers
         }
 
         [HttpGet("CheckPreviousPasswords")]
-        public async Task<ActionResult<string>> CheckPreviousPasswordsAsync([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
+        public async Task<ActionResult<string>> CheckPreviousPasswords([FromQuery] string subjectName, [FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {
             var loginManager = new LoginManager(repositories);
-            var result = await loginManager.CheckPreviousPasswordsAsync(subjectName, encryptedNewPassword);
+            var result = await loginManager.CheckPreviousPasswords(subjectName, encryptedNewPassword);
 
             return Ok(result ? "true" : "false");
         }
@@ -422,10 +422,10 @@ namespace FOAEA3.API.Controllers
         [HttpPut("SetPassword")]
         public async Task<ActionResult<string>> SetNewPassword([FromQuery] string encryptedNewPassword, [FromServices] IRepositories repositories)
         {
-            var subject = await APIBrokerHelper.GetDataFromRequestBodyAsync<SubjectData>(Request);
+            var subject = await APIBrokerHelper.GetDataFromRequestBody<SubjectData>(Request);
 
             var loginManager = new LoginManager(repositories);
-            var result = await loginManager.CheckPreviousPasswordsAsync(subject.SubjectName, encryptedNewPassword);
+            var result = await loginManager.CheckPreviousPasswords(subject.SubjectName, encryptedNewPassword);
 
             return Ok(result ? "true" : "false");
         }
@@ -434,10 +434,10 @@ namespace FOAEA3.API.Controllers
         [Authorize(Roles = "System")]
         public async Task<ActionResult<string>> SendEmail([FromServices] IRepositories repositories)
         {
-            var emailData = await APIBrokerHelper.GetDataFromRequestBodyAsync<EmailData>(Request);
+            var emailData = await APIBrokerHelper.GetDataFromRequestBody<EmailData>(Request);
 
             var loginManager = new LoginManager(repositories);
-            await loginManager.SendEmailAsync(emailData.Subject, emailData.Recipient, emailData.Body, emailData.IsHTML);
+            await loginManager.SendEmail(emailData.Subject, emailData.Recipient, emailData.Body, emailData.IsHTML);
 
             return Ok(emailData);
 
@@ -448,7 +448,7 @@ namespace FOAEA3.API.Controllers
         public async Task<ActionResult<string>> PostConfirmationCode([FromQuery] int subjectId, [FromQuery] string confirmationCode, [FromServices] IRepositories repositories)
         {
             var loginManager = new LoginManager(repositories);
-            await loginManager.PostConfirmationCodeAsync(subjectId, confirmationCode);
+            await loginManager.PostConfirmationCode(subjectId, confirmationCode);
 
             return Ok(string.Empty);
         }
@@ -459,7 +459,7 @@ namespace FOAEA3.API.Controllers
         {
             var loginManager = new LoginManager(repositories);
 
-            return Ok(await loginManager.GetEmailByConfirmationCodeAsync(confirmationCode));
+            return Ok(await loginManager.GetEmailByConfirmationCode(confirmationCode));
         }
 
         [HttpGet("GetSubjectByConfirmationCode")]
@@ -468,17 +468,17 @@ namespace FOAEA3.API.Controllers
         {
             var subjectManager = new SubjectManager(repositories);
 
-            return Ok(await subjectManager.GetSubjectByConfirmationCodeAsync(confirmationCode));
+            return Ok(await subjectManager.GetSubjectByConfirmationCode(confirmationCode));
         }
 
         [HttpPut("PostPassword")]
         [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<PasswordData>> PostPassword([FromServices] IRepositories repositories)
         {
-            var passwordData = await APIBrokerHelper.GetDataFromRequestBodyAsync<PasswordData>(Request);
+            var passwordData = await APIBrokerHelper.GetDataFromRequestBody<PasswordData>(Request);
 
             var loginManager = new LoginManager(repositories);
-            await loginManager.PostPasswordAsync(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
+            await loginManager.PostPassword(passwordData.ConfirmationCode, passwordData.Password, passwordData.Salt, passwordData.Initial);
 
             return Ok(passwordData);
         }

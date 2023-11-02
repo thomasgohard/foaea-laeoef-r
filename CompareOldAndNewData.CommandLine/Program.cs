@@ -23,7 +23,7 @@ var repositories2Finance = new DbRepositories_Finance(foaea2DB);
 var repositories3Finance = new DbRepositories_Finance(foaea3DB);
 
 var requestLogDB = new DBRequestLog(fileBrokerDB);
-var requests = await requestLogDB.GetAllAsync();
+var requests = await requestLogDB.GetAll();
 int n = 1;
 
 var output = new StringBuilder();

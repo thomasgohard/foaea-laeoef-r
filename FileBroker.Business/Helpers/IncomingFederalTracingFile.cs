@@ -1,13 +1,10 @@
-﻿using System.Text;
-
-namespace FileBroker.Business.Helpers
+﻿namespace FileBroker.Business.Helpers
 {
     public class IncomingFederalTracingFile
     {
         private RepositoryList DB { get; }
         private APIBrokerList FoaeaApis { get; }
         private IFileBrokerConfigurationHelper Config { get; }
-
         public List<string> Errors { get; }
 
         public IncomingFederalTracingFile(RepositoryList db,
@@ -34,12 +31,15 @@ namespace FileBroker.Business.Helpers
                     fileName = fileName[..^4];
 
                 int cycle = FileHelper.ExtractCycleFromFilename(fileName);
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                if (cycle != FileHelper.INVALID_CYCLE)
+                {
+                    var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileName); // remove cycle
+                    var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
-                    (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName);
+                    if ((cycle == fileTableData.Cycle) && (fileTableData.Type.ToLower() == "in") &&
+                        (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                        newFiles.Add(fileInfo.FullName);
+                }
             }
         }
 
@@ -51,7 +51,7 @@ namespace FileBroker.Business.Helpers
                 return false;
             }
 
-            string flatFile = File.ReadAllText(fullPath);
+            string fileContent = File.ReadAllText(fullPath);
 
             var tracingManager = new IncomingFederalTracingManager(FoaeaApis, DB, Config);
 
@@ -66,13 +66,12 @@ namespace FileBroker.Business.Helpers
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, true);
 
                 if (!fileTableData.IsXML)
-                    Errors.AddRange(await tracingManager.ProcessFlatFileAsync(flatFile, fullPath));
+                    Errors.AddRange(await tracingManager.ProcessFlatFileData(fileContent, fullPath));
                 else
-                {
-                    string jsonText = FileHelper.ConvertXmlToJson(flatFile, Errors);
-                    Errors.AddRange(await tracingManager.ProcessXmlFileAsync(jsonText, fileFullName));
-                }
+                    Errors.AddRange(await tracingManager.ProcessXmlData(fileContent, fileFullName));
 
+                if (Errors.Count == 0)
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData);
                 await DB.FileTable.SetIsFileLoadingValue(fileTableData.PrcId, false);
 
                 if (!Errors.Any())
@@ -80,8 +79,8 @@ namespace FileBroker.Business.Helpers
                     string errorDoingBackup = await FileHelper.BackupFile(fullPath, DB, Config);
 
                     if (!string.IsNullOrEmpty(errorDoingBackup))
-                        await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fullPath}",
-                                                                            "Error creating backup of outbound file: " + errorDoingBackup);
+                        await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fullPath}",
+                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
                 }
 
                 return true;

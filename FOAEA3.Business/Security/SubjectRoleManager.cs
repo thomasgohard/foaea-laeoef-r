@@ -14,13 +14,13 @@ namespace FOAEA3.Business.Security
         {
             DB = repositories;
         }
-        public async Task<List<SubjectRoleData>> GetSubjectRolesAsync(string subjectName)
+        public async Task<List<SubjectRoleData>> GetSubjectRoles(string subjectName)
         {
-            return await DB.SubjectRoleTable.GetSubjectRolesAsync(subjectName);
+            return await DB.SubjectRoleTable.GetSubjectRoles(subjectName);
         }
-        public async Task<List<string>> GetAssumedRolesForSubjectAsync(string subjectName)
+        public async Task<List<string>> GetAssumedRolesForSubject(string subjectName)
         {
-            return await DB.SubjectRoleTable.GetAssumedRolesForSubjectAsync(subjectName);
+            return await DB.SubjectRoleTable.GetAssumedRolesForSubject(subjectName);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace BackendProcess.API.Controllers
             var startTime = DateTime.Now;
 
             var amountOwedProcess = new AmountOwedProcess(repositories, repositoriesFinance);
-            await amountOwedProcess.RunAsync();
+            await amountOwedProcess.Run();
 
             var endTime = DateTime.Now;
 
@@ -47,7 +47,7 @@ namespace BackendProcess.API.Controllers
                 string ctrlCd = values[1];
 
                 var amountOwedProcess = new AmountOwedProcess(repositories, repositoriesFinance);
-                var (summSmryNewData, _) = await amountOwedProcess.CalculateAndUpdateAmountOwedForVariationAsync(enfSrv, ctrlCd);
+                var (summSmryNewData, _) = await amountOwedProcess.CalculateAndUpdateAmountOwedForVariation(enfSrv, ctrlCd);
 
                 if (summSmryNewData != null)
                 {

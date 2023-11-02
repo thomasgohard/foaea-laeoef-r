@@ -23,11 +23,11 @@ public class LicenceDenialResponsesController : FoaeaControllerBase
     [HttpPost("bulk")]
     public async Task<ActionResult<int>> CreateLicenceDenialResponsesBulk([FromServices] IRepositories repositories)
     {
-        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<LicenceDenialResponseData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBody<List<LicenceDenialResponseData>>(Request);
 
         var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
 
-        await licenceDenialManager.CreateResponseDataAsync(responseData);
+        await licenceDenialManager.CreateResponseData(responseData);
 
         var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
@@ -41,7 +41,7 @@ public class LicenceDenialResponsesController : FoaeaControllerBase
     {
         var licenceDenialManager = new LicenceDenialManager(repositories, config, User);
 
-        await licenceDenialManager.MarkResponsesAsViewedAsync(enfService);
+        await licenceDenialManager.MarkResponsesAsViewed(enfService);
 
         return Ok();
     }

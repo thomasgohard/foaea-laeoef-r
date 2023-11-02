@@ -20,12 +20,18 @@ public static class OutgoingFileCreatorMEP
         ColourConsole.WriteEmbeddedColorLine("Starting MEP Outgoing File Creator");
 
         var config = new FileBrokerConfigurationHelper(args);
+        string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        ColourConsole.WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+        ColourConsole.WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
         var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
 
         bool generateTracingFiles = true;
-        bool generateLicencingFiles = true;
-        bool generateStatsFiles = true;
+        bool generateLicencingFiles = false; // TODO: fix when support for licencing is added
+        bool generateStatsFiles = false; // TODO: fix when support for stats file is added
 
         if (args.Length > 0)
         {
@@ -66,20 +72,20 @@ public static class OutgoingFileCreatorMEP
     private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
                                                            IOutgoingFileManager outgoingProvincialFileManager)
     {
-        var provincialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategoryAsync(category))
+        var provincialOutgoingSources = (await repositories.FileTable.GetFileTableDataForCategory(category))
                                                               .Where(s => s.Active == true);
 
         foreach (var provincialOutgoingSource in provincialOutgoingSources)
         {
             var errors = new List<string>();
-            (string filePath, errors) = await outgoingProvincialFileManager.CreateOutputFileAsync(provincialOutgoingSource.Name);
+            (string filePath, errors) = await outgoingProvincialFileManager.CreateOutputFile(provincialOutgoingSource.Name);
             if (errors.Count == 0)
                 ColourConsole.WriteEmbeddedColorLine($"Successfully created [cyan]{filePath}[/cyan]");
             else
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingTable.MessageBrokerErrorAsync(category, provincialOutgoingSource.Name,
+                    await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
                                                                     new Exception(error), displayExceptionError: true);
                 }
         }

@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<(bool, string, PostalCodeFlag)> ValidatePostalCodeAsync(string postalCode, string provinceCode, string cityName)
+        public async Task<(bool, string, PostalCodeFlag)> ValidatePostalCode(string postalCode, string provinceCode, string cityName)
         {
             PostalCodeFlag validFlags;
 

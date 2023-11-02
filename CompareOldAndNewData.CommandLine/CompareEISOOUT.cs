@@ -5,7 +5,7 @@ namespace CompareOldAndNewData.CommandLine
 {
     internal static class CompareEISOOUT
     {
-        public static async Task<List<DiffData>> RunAsync(string tableName, IRepositories repositories2, IRepositories repositories3,
+        public static async Task<List<DiffData>> Run(string tableName, IRepositories repositories2, IRepositories repositories3,
                                          string enfSrv, string ctrlCd)
         {
             // compare table Prcs_EISOOUT_History for SIN
@@ -14,8 +14,8 @@ namespace CompareOldAndNewData.CommandLine
 
             string key = ApplKey.MakeKey(enfSrv, ctrlCd);
 
-            var appl2 = await repositories2.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
-            var appl3 = await repositories3.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
+            var appl2 = await repositories2.ApplicationTable.GetApplication(enfSrv, ctrlCd);
+            var appl3 = await repositories3.ApplicationTable.GetApplication(enfSrv, ctrlCd);
 
             if ((appl2 is null) && (appl3 is null))
                 return diffs;
@@ -34,8 +34,8 @@ namespace CompareOldAndNewData.CommandLine
                 return diffs;
             }
 
-            var eisoout2 = (await repositories2.InterceptionTable.GetEISOHistoryBySINAsync(appl2.Appl_Dbtr_Cnfrmd_SIN)).FirstOrDefault();
-            var eisoout3 = (await repositories3.InterceptionTable.GetEISOHistoryBySINAsync(appl3.Appl_Dbtr_Cnfrmd_SIN)).FirstOrDefault();
+            var eisoout2 = (await repositories2.InterceptionTable.GetEISOHistoryBySIN(appl2.Appl_Dbtr_Cnfrmd_SIN)).FirstOrDefault();
+            var eisoout3 = (await repositories3.InterceptionTable.GetEISOHistoryBySIN(appl3.Appl_Dbtr_Cnfrmd_SIN)).FirstOrDefault();
 
             if ((eisoout2 is null) && (eisoout3 is null))
                 return diffs;

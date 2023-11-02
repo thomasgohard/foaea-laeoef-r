@@ -12,7 +12,7 @@ namespace TestData.TestDB
 
         public MessageDataList Messages => new();
 
-        public Task<DataList<ActiveStatusData>> GetActiveStatusAsync()
+        public Task<DataList<ActiveStatusData>> GetActiveStatus()
         {
             var result = new DataList<ActiveStatusData>();
 

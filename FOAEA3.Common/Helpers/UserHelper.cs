@@ -1,11 +1,9 @@
 ﻿using FOAEA3.Common.Models;
-using FOAEA3.Data.DB;
 using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Interfaces.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security;
 using System.Security.Claims;
 
 namespace FOAEA3.Common.Helpers
@@ -38,12 +36,12 @@ namespace FOAEA3.Common.Helpers
             {
                 var userRoles = claims.Where(m => m.Type == ClaimTypes.Role);
                 var submitterCode = claims.Where(m => m.Type == "Submitter").FirstOrDefault()?.Value;
-                var submitterData = (await db.SubmitterTable.GetSubmitterAsync(submCode: submitterCode)).FirstOrDefault();
+                var submitterData = (await db.SubmitterTable.GetSubmitter(submCode: submitterCode)).FirstOrDefault();
 
                 if ((submitterData is null) || (!submitterData.Subm_SubmCd.Equals(submitterCode, StringComparison.InvariantCultureIgnoreCase)))
                     submitterData = new SubmitterData();
 
-                var enfOffData = (await db.EnfOffTable.GetEnfOffAsync(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
+                var enfOffData = (await db.EnfOffTable.GetEnfOff(enfOffCode: submitterData?.EnfOff_City_LocCd)).FirstOrDefault();
 
                 var currentUser = new FoaeaUser
                 {
@@ -66,11 +64,10 @@ namespace FOAEA3.Common.Helpers
             {
                 new Claim(ClaimTypes.Name, "System"),
                 new Claim("Submitter", "MSGBRO"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, "AM"),
+                new Claim(ClaimTypes.Role, Roles.Admin)
             };
-
-            claims.Add(new Claim(ClaimTypes.Role, "AM"));
-            claims.Add(new Claim(ClaimTypes.Role, Roles.Admin));
 
             var identity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);

@@ -16,10 +16,10 @@ namespace FOAEA3.Common.Brokers.Administration
             Token = token;
         }
 
-        public async Task<List<EnfOffData>> GetEnfOfficesForEnfServiceAsync(string enfService)
+        public async Task<List<EnfOffData>> GetEnfOfficesForEnfService(string enfService)
         {
             string apiCall = $"api/v1/EnfOffices?enfServCode={enfService}";
-            var result = await ApiHelper.GetDataAsync<List<EnfOffData>>(apiCall, token: Token);
+            var result = await ApiHelper.GetData<List<EnfOffData>>(apiCall, token: Token);
             return result;
         }
     }

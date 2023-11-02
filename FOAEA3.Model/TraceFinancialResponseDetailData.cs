@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace FOAEA3.Model
 {
+    [DebuggerDisplay("{FiscalYear}/{TaxForm}")]
+
     public class TraceFinancialResponseDetailData
     {
         public int TrcRspFin_Dtl_Id { get; set; }

@@ -18,7 +18,7 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages { get; set; }
 
-        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        public async Task<DataList<TraceResponseData>> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -45,7 +45,8 @@ namespace FOAEA3.Data.DB
             data.CRAFieldCode = rdr["CRAFieldCode"] as string; // can be null 
             data.CRAComment = rdr["CRAComment"] as string; // can be null 
             data.CRAFieldName = rdr["CRAFieldName"] as string; // can be null 
-            data.CRAFieldDescription = rdr["CRAFieldDescription"] as string; // can be null 
+            data.CRAFieldDescriptionEnglish = rdr["CRAFieldDescriptionEnglish"] as string; // can be null 
+            data.CRAFieldDescriptionFrench = rdr["CRAFieldDescriptionFrench"] as string; // can be null 
         }
 
         public async Task<List<CraFormData>> GetCraForms()
@@ -64,9 +65,16 @@ namespace FOAEA3.Data.DB
             data.CRAFormLanguage = rdr["CRAFormLanguage"] as string; // can be null 
         }
 
-        public async Task InsertBulkDataAsync(List<TraceResponseData> responseData)
+        public async Task InsertBulkData(List<TraceResponseData> responseData)
         {
-            await MainDB.BulkUpdateAsync<TraceResponseData>(responseData, "TrcRsp");
+            var bulkData = new List<TraceResponseBulkData>();
+            foreach (var data in responseData)
+            {
+                var thisData = new TraceResponseBulkData();
+                thisData.LoadFrom(data);
+                bulkData.Add(thisData);
+            }
+            await MainDB.BulkUpdateAsync<TraceResponseBulkData>(bulkData, "TrcRsp");
         }
 
         public async Task<DataList<TraceFinancialResponseData>> GetTraceResponseFinancialsForApplication(string applEnfSrvCd, string applCtrlCd)
@@ -86,8 +94,8 @@ namespace FOAEA3.Data.DB
         {
             var parameters = new Dictionary<string, object>
                 {
-                    {"EnfSrv_Cd", applEnfSrvCd },
-                    {"CtrlCd", applCtrlCd }
+                    {"Appl_EnfSrv_Cd", applEnfSrvCd },
+                    {"Appl_CtrlCd", applCtrlCd }
                 };
 
             var data = await MainDB.GetDataFromStoredProcAsync<TraceFinancialResponseData>("TrcRspFin_ActiveSelectForAppl", parameters, FillTraceFinancialResultDataFromReader);
@@ -130,7 +138,7 @@ namespace FOAEA3.Data.DB
                     { "TrcSt_Cd",  data.TrcSt_Cd},
                     { "TrcRsp_Trace_CyclNr",  data.TrcRsp_Trace_CyclNr},
                     { "ActvSt_Cd",  data.ActvSt_Cd},
-                    { "Prcs_RecType",  data.Prcs_RecType},                   
+                    { "Prcs_RecType",  data.Prcs_RecType},
                     { "SIN",  data.Sin},
                     { "SIN_XRef",  data.SinXref}
                 };
@@ -138,7 +146,7 @@ namespace FOAEA3.Data.DB
             if (data.TrcRsp_RcptViewed_Dte is not null)
                 parameters.Add("TrcRsp_RcptViewed_Dte", data.TrcRsp_RcptViewed_Dte);
 
-            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");            
+            return await MainDB.GetDataFromStoredProcViaReturnParameterAsync<int>("TrcRspFin_Insert", parameters, "TrcRspFin_Id");
         }
 
         public async Task<int> CreateTraceFinancialResponseDetail(TraceFinancialResponseDetailData data)
@@ -186,7 +194,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("TrcRspFin_Update", parameters);
         }
 
-        public async Task MarkResponsesAsViewedAsync(string enfService)
+        public async Task MarkResponsesAsViewed(string enfService)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -196,7 +204,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("TrcAPPTraceUpdate", parameters);
         }
 
-        public async Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        public async Task DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -262,7 +270,7 @@ namespace FOAEA3.Data.DB
         {
             data.TrcRspFin_Dtl_Id = (int)rdr["TrcRspFin_Dtl_Id"];
             data.TrcRspFin_Id = (int)rdr["TrcRspFin_Id"];
-            data.FiscalYear = (short) rdr["FiscalYear"];
+            data.FiscalYear = (short)rdr["FiscalYear"];
             data.TaxForm = rdr["TaxForm"] as string;
         }
 

@@ -13,37 +13,42 @@ namespace FileBroker.Business.Tests.InMemory
 
         public string Token { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
+        public Task<ApplicationEventsList> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName)
+        public Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName)
+        public Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public Task SaveEventAsync(ApplicationEventData eventData)
+        public Task SaveEvent(ApplicationEventData eventData)
         {
             throw new NotImplementedException();
         }
 
-        public Task SaveEventDetailAsync(ApplicationEventDetailData activeTraceEventDetail)
+        public Task SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
+        public Task SaveEventDetails(ApplicationEventDetailsList eventDetails)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds)
         {
             throw new NotImplementedException();
         }

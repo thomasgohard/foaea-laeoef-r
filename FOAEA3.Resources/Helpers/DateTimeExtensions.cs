@@ -31,12 +31,12 @@ namespace FOAEA3.Resources.Helpers
                 }
                 catch
                 {
-                    error = $"Invalid date passed: [{flatDate}]";
-                    return new DateTime();
+                    error = $"(2) Invalid date passed: [{flatDate}]";
+                    return new DateTime(); // SqlStyleExtensions.SQL_MIN_DATETIME;
                 }
             }
             else
-                return new DateTime();
+                return new DateTime(); // SqlStyleExtensions.SQL_MIN_DATETIME;
         }
 
         public static int MonthDifference(this DateTime lValue, DateTime rValue)

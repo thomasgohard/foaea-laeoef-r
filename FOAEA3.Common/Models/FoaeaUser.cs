@@ -24,9 +24,5 @@ namespace FOAEA3.Common.Models
             return Submitter.EnfSrv_Cd == enfService;
         }
 
-        public bool IsSameOffice(string submitterCode)
-        {
-            return OfficeCode == submitterCode.Substring(3, 1);
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<GarnSummaryData>> GetGarnSummaryAsync(string appl_EnfSrv_Cd, string enfOfficeCode, int fiscalMonth, int fiscalYear)
+        public async Task<List<GarnSummaryData>> GetGarnSummary(string appl_EnfSrv_Cd, string enfOfficeCode, int fiscalMonth, int fiscalYear)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -29,14 +29,14 @@ namespace FOAEA3.Data.DB
             return data;
         }
 
-        public async Task CreateGarnSummaryAsync(GarnSummaryData garnSummaryData)
+        public async Task CreateGarnSummary(GarnSummaryData garnSummaryData)
         {
             var parameters = SetGarnSummaryParameters(garnSummaryData);
 
             await MainDB.ExecProcAsync("GarnSmry_Insert", parameters);
         }
 
-        public async Task UpdateGarnSummaryAsync(GarnSummaryData garnSummaryData)
+        public async Task UpdateGarnSummary(GarnSummaryData garnSummaryData)
         {
             var parameters = SetGarnSummaryParameters(garnSummaryData);
 

@@ -21,25 +21,25 @@ namespace FOAEA3.Business.Areas.Application
             AuditManager = new AccessAuditManager(DB);
         }
 
-        public async Task<(List<ApplicationSearchResultData>, int)> SearchAsync(QuickSearchData searchCriteria,
+        public async Task<(List<ApplicationSearchResultData>, int)> Search(QuickSearchData searchCriteria,
                                                                            int page, int perPage, string orderBy)
         {
-            int accessAuditId = await AuditManager.AddAuditHeaderAsync(AccessAuditPage.ApplicationSearch);
-            await AddSearchCriteriaToAccessAuditAsync(accessAuditId, searchCriteria);
+            int accessAuditId = await AuditManager.AddAuditHeader(AccessAuditPage.ApplicationSearch);
+            await AddSearchCriteriaToAccessAudit(accessAuditId, searchCriteria);
 
             List<ApplicationSearchResultData> searchResults;
             int totalCount;
-            (searchResults, totalCount) = await DB.ApplicationSearchTable.QuickSearchAsync(searchCriteria,
+            (searchResults, totalCount) = await DB.ApplicationSearchTable.QuickSearch(searchCriteria,
                                                                                          page, perPage, orderBy);
 
             LastError = DB.ApplicationSearchTable.LastError;
 
-            await AddSearchResultsToAccessAuditAsync(accessAuditId, searchResults);
+            await AddSearchResultsToAccessAudit(accessAuditId, searchResults);
 
             return (searchResults, totalCount);
         }
 
-        private async Task AddSearchCriteriaToAccessAuditAsync(int accessAuditId, QuickSearchData searchCriteria)
+        private async Task AddSearchCriteriaToAccessAudit(int accessAuditId, QuickSearchData searchCriteria)
         {
             var items = new Dictionary<AccessAuditElement, string>();
 
@@ -64,15 +64,15 @@ namespace FOAEA3.Business.Areas.Application
             if (searchCriteria.ViewAllJurisdiction) items.Add(AccessAuditElement.ViewAllJurisdictions, searchCriteria.ViewAllJurisdiction.ToString());
             if (searchCriteria.SearchOnlySinConfirmed) items.Add(AccessAuditElement.SINConfirmed, searchCriteria.SearchOnlySinConfirmed.ToString());
 
-            await AuditManager.AddAuditElementsAsync(accessAuditId, items);
+            await AuditManager.AddAuditElements(accessAuditId, items);
         }
 
-        private async Task AddSearchResultsToAccessAuditAsync(int accessAuditId, List<ApplicationSearchResultData> searchResults)
+        private async Task AddSearchResultsToAccessAudit(int accessAuditId, List<ApplicationSearchResultData> searchResults)
         {
             foreach (var searchResult in searchResults)
             {
                 string key = $"{searchResult.Appl_EnfSrv_Cd.Trim()}-{searchResult.Appl_CtrlCd.Trim()}";
-                await AuditManager.AddAuditElementAsync(accessAuditId, AccessAuditElement.ApplicationID, key);
+                await AuditManager.AddAuditElement(accessAuditId, AccessAuditElement.ApplicationID, key);
             }
         }
 

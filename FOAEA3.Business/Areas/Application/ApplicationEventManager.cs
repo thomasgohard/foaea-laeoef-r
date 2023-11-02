@@ -10,7 +10,7 @@ namespace FOAEA3.Business.Areas.Application
 {
     internal class ApplicationEventManager
     {
-        public List<ApplicationEventData> Events { get; }
+        public ApplicationEventsList Events { get; }
 
         ApplicationData Application { get; }
         IApplicationEventRepository EventDB { get; }
@@ -18,21 +18,21 @@ namespace FOAEA3.Business.Areas.Application
         public ApplicationEventManager(ApplicationData applicationData, IRepositories repositories)
         {
             Application = applicationData;
-            Events = new List<ApplicationEventData>();
+            Events = new ApplicationEventsList();
             EventDB = repositories.ApplicationEventTable;
         }
 
-        public async Task<List<ApplicationEventData>> GetApplicationEventsForQueueAsync(EventQueue queue)
+        public async Task<ApplicationEventsList> GetApplicationEventsForQueue(EventQueue queue)
         {
-            return await EventDB.GetApplicationEventsAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd, queue);
+            return await EventDB.GetApplicationEvents(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd, queue);
         }
 
-        public void AddSubmEvent(EventCode eventCode, string eventReasonText = null, 
+        public void AddSubmEvent(EventCode eventCode, string eventReasonText = null,
                      ApplicationState appState = ApplicationState.UNDEFINED, DateTime? effectiveDateTime = null,
                      string recipientSubm = null, string submCd = null, string enfSrv = null, string controlCode = null,
                      string activeState = "A", string updateSubm = null)
         {
-            AddEvent(eventCode, eventReasonText, EventQueue.EventSubm, appState, effectiveDateTime, recipientSubm, submCd, 
+            AddEvent(eventCode, eventReasonText, EventQueue.EventSubm, appState, effectiveDateTime, recipientSubm, submCd,
                      enfSrv, controlCode, activeState, updateSubm);
         }
 
@@ -43,6 +43,11 @@ namespace FOAEA3.Business.Areas.Application
         {
             AddEvent(eventCode, eventReasonText, EventQueue.EventTrace, appState, effectiveDateTime, recipientSubm, submCd,
                      enfSrv, controlCode, activeState, updateSubm);
+        }
+
+        public void UpdateEvent(ApplicationEventData eventData)
+        {
+            Events.Add(eventData);
         }
 
         public void AddEvent(EventCode eventCode, string eventReasonText = null, EventQueue queue = EventQueue.EventSubm,
@@ -66,7 +71,7 @@ namespace FOAEA3.Business.Areas.Application
                         eventEffectiveDateTime = DateTime.Now.AddDays(10);
                 }
             }
-            
+
             Events.Add(new ApplicationEventData
             {
                 Queue = queue,
@@ -86,11 +91,11 @@ namespace FOAEA3.Business.Areas.Application
             });
         }
 
-        public async Task<bool> SaveEventsAsync(ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
+        public async Task<bool> SaveEvents(ApplicationState applicationState = ApplicationState.UNDEFINED, string activeState = "")
         {
             if (!string.IsNullOrEmpty(Application.Appl_CtrlCd))
             {
-                bool success = await EventDB.SaveEventsAsync(Events, applicationState, activeState);
+                bool success = await EventDB.SaveEvents(Events, applicationState, activeState);
 
                 Events.Clear();
 
@@ -101,10 +106,10 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task<bool> SaveEventAsync(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
+        public async Task<bool> SaveEvent(ApplicationEventData eventData, ApplicationState applicationState = ApplicationState.UNDEFINED,
                               string activeState = "")
         {
-            return await EventDB.SaveEventAsync(eventData, applicationState, activeState);
+            return await EventDB.SaveEvent(eventData, applicationState, activeState);
         }
 
         public string GetLastError()
@@ -114,12 +119,12 @@ namespace FOAEA3.Business.Areas.Application
 
         #region EventBF
 
-        public async Task<List<ApplicationEventData>> GetEventBFAsync(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
+        public async Task<ApplicationEventsList> GetEventBF(string subm_SubmCd, string appl_CtrlCd, EventCode eventCode, string activeState)
         {
-            return await EventDB.GetEventBFAsync(subm_SubmCd, appl_CtrlCd, eventCode, activeState);
+            return await EventDB.GetEventBF(subm_SubmCd, appl_CtrlCd, eventCode, activeState);
         }
 
-        public void AddBFEvent(EventCode eventCode, string eventReasonText = null, ApplicationState appState = ApplicationState.UNDEFINED, 
+        public void AddBFEvent(EventCode eventCode, string eventReasonText = null, ApplicationState appState = ApplicationState.UNDEFINED,
                                DateTime? effectiveDateTime = null)
         {
             AddEvent(eventCode, eventReasonText, queue: EventQueue.EventBF, appState: appState, effectiveDateTime: effectiveDateTime);
@@ -127,16 +132,16 @@ namespace FOAEA3.Business.Areas.Application
 
         public async Task DeleteBFEvent(string subm_SubmCd, string appl_CtrlCd)
         {
-            await EventDB.DeleteBFEventAsync(subm_SubmCd, appl_CtrlCd);
+            await EventDB.DeleteBFEvent(subm_SubmCd, appl_CtrlCd);
         }
 
         #endregion
 
         #region SIN
 
-        public async Task<DataList<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string enfSrv_Cd, string fileName)
+        public async Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string enfSrv_Cd, string fileName)
         {
-            return await EventDB.GetRequestedSINEventDataForFileAsync(enfSrv_Cd, fileName);
+            return await EventDB.GetRequestedSINEventDataForFile(enfSrv_Cd, fileName);
         }
 
         public void AddSINEvent(EventCode eventCode, string eventReasonText = null, ApplicationState appState = ApplicationState.UNDEFINED)
@@ -151,26 +156,26 @@ namespace FOAEA3.Business.Areas.Application
 
         #region Tracing
 
-        public async Task<int> GetTraceEventCountAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
+        public async Task<int> GetTraceEventCount(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime receivedAffidavitDate,
                                       EventCode eventReasonCode, int eventId)
         {
-            return await EventDB.GetTraceEventCountAsync(appl_EnfSrv_Cd, appl_CtrlCd, receivedAffidavitDate, eventReasonCode, eventId);
+            return await EventDB.GetTraceEventCount(appl_EnfSrv_Cd, appl_CtrlCd, receivedAffidavitDate, eventReasonCode, eventId);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINTracingEventsAsync(string enfSrv_Cd, string cycle)
+        public async Task<ApplicationEventsList> GetRequestedTRCINTracingEvents(string enfSrv_Cd, string cycle)
         {
-            return await EventDB.GetRequestedTRCINTracingEventsAsync(enfSrv_Cd, cycle);
+            return await EventDB.GetRequestedTRCINTracingEvents(enfSrv_Cd, cycle);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedLICINLicenceDenialEventsAsync(string enfSrv_Cd, string appl_EnfSrv_Cd,
+        public async Task<ApplicationEventsList> GetRequestedLICINLicenceDenialEvents(string enfSrv_Cd, string appl_EnfSrv_Cd,
                                                                                string appl_CtrlCd)
         {
-            return await EventDB.GetRequestedLICINLicenceDenialEventsAsync(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
+            return await EventDB.GetRequestedLICINLicenceDenialEvents(enfSrv_Cd, appl_EnfSrv_Cd, appl_CtrlCd);
         }
 
-        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync()
+        public async Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary()
         {
-            return await EventDB.GetLatestSinEventDataSummaryAsync();
+            return await EventDB.GetLatestSinEventDataSummary();
         }
         #endregion
 

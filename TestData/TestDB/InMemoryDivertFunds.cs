@@ -10,7 +10,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<decimal> GetTotalDivertedForPeriodAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
+        public Task<decimal> GetTotalDivertedForPeriod(string appl_EnfSrv_Cd, string appl_CtrlCd, int period)
         {
             var result = 0.0M;
 
@@ -22,7 +22,7 @@ namespace TestData.TestDB
             return Task.FromResult(result);
         }
 
-        public Task<decimal> GetTotalFeesDivertedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
+        public Task<decimal> GetTotalFeesDiverted(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isCumulativeFees)
         {
             var lastAnniversaryDate = GetApplicationLastAnniversaryDate(appl_CtrlCd, appl_EnfSrv_Cd);
 

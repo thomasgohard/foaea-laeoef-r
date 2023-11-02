@@ -9,7 +9,7 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<SubmitterData> GetSubmitterAsync(string submitterCode);
+        Task<SubmitterData> GetSubmitter(string submitterCode);
         Task<List<ApplicationModificationActivitySummaryData>> GetRecentActivity(string submitterCode, int days = 0);
         Task<List<ApplicationModificationActivitySummaryData>> GetAllAtState(string submitterCode, ApplicationState state);
         Task<List<ApplicationModificationActivitySummaryData>> GetAllWithEvent(string submitterCode, EventCode eventReasonCode);

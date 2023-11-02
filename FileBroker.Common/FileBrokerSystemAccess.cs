@@ -1,7 +1,6 @@
 ﻿using FileBroker.Model;
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
-using System.Threading.Tasks;
 
 namespace FileBroker.Common.Helpers
 {
@@ -25,20 +24,20 @@ namespace FileBroker.Common.Helpers
 
             ApiFilesConfig = apiFilesConfig;
             APIs = apiBrokerHelper;
-            APIs.GetRefreshedToken = RefreshTokenAsync;
+            APIs.GetRefreshedToken = RefreshToken;
         }
 
-        public async Task SystemLoginAsync()
+        public async Task SystemLogin()
         {
             string api = "api/v1/Tokens";
-            var token = await APIs.PostDataAsync<TokenData, FileBrokerLoginData>(api,
+            var token = await APIs.PostData<TokenData, FileBrokerLoginData>(api,
                                                               LoginData, ApiFilesConfig.FileBrokerAccountRootAPI);
 
             CurrentToken = token.Token;
             CurrentRefreshToken = token.RefreshToken;
         }
 
-        public async Task SystemLogoutAsync()
+        public async Task SystemLogout()
         {
             var refreshData = new TokenRefreshData
             {
@@ -47,11 +46,11 @@ namespace FileBroker.Common.Helpers
             };
 
             string api = "api/v1/Tokens/ExpireToken";
-            var token = await APIs.PostDataAsync<TokenData, TokenRefreshData>(api,
+            var token = await APIs.PostData<TokenData, TokenRefreshData>(api,
                                                               refreshData, ApiFilesConfig.FileBrokerAccountRootAPI);
         }
 
-        private async Task<string> RefreshTokenAsync()
+        private async Task<string> RefreshToken()
         {
             var refreshData = new TokenRefreshData
             {
@@ -60,7 +59,7 @@ namespace FileBroker.Common.Helpers
             };
 
             string api = "api/v1/Tokens/Refresh";
-            var result = await APIs.PostDataAsync<TokenData, TokenRefreshData>(api,
+            var result = await APIs.PostData<TokenData, TokenRefreshData>(api,
                                                               refreshData, ApiFilesConfig.FileBrokerAccountRootAPI);
 
             CurrentToken = result.Token;

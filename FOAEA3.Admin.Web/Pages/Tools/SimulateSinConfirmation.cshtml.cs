@@ -36,7 +36,7 @@ public class SimulateSinConfirmationModel : PageModel
 
             try
             {
-                var success = await adminManager.ManuallyConfirmSINAsync(SimulateSinConfirmation.EnfService,
+                var success = await adminManager.ManuallyConfirmSIN(SimulateSinConfirmation.EnfService,
                                                                          SimulateSinConfirmation.ControlCode,
                                                                          SimulateSinConfirmation.Sin, User);
 

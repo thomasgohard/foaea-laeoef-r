@@ -1,32 +1,15 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
+using FileBroker.Model.Enums;
 using Newtonsoft.Json;
 
 namespace FileBroker.Business;
 
-public class IncomingProvincialTracingManager
+public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
 {
-    private string FileName { get; }
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-    private IFileBrokerConfigurationHelper Config { get; }
-    private IncomingProvincialHelper IncomingFileHelper { get; }
-    private FoaeaSystemAccess FoaeaAccess { get; }
-
-    public IncomingProvincialTracingManager(RepositoryList db,
-                                            APIBrokerList foaeaApis,
-                                            string fileName,
-                                            IFileBrokerConfigurationHelper config)
+    public IncomingProvincialTracingManager(RepositoryList db, APIBrokerList foaeaApis, string fileName,
+                                            IFileBrokerConfigurationHelper config) :
+                                                base(db, foaeaApis, fileName, config)
     {
-        FileName = fileName;
-        APIs = foaeaApis;
-        DB = db;
-        Config = config;
-
-        string provCode = FileName[..2].ToUpper();
-        IncomingFileHelper = new IncomingProvincialHelper(Config, provCode);
-
-        FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
     }
 
     public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceTracingData, List<UnknownTag> unknownTags, bool includeInfoInMessages = false)
@@ -50,8 +33,8 @@ public class IncomingProvincialTracingManager
         }
         else
         {
-            ValidateHeader(tracingFile.TRCAPPIN01, ref result, ref isValid);
-            ValidateFooter(tracingFile, ref result, ref isValid);
+            ValidateHeader(tracingFile.TRCAPPIN01, result, ref isValid);
+            ValidateFooter(tracingFile, result, ref isValid);
 
             if (isValid)
             {
@@ -75,59 +58,34 @@ public class IncomingProvincialTracingManager
                             var fileAuditData = new FileAuditData
                             {
                                 Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-                                Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+                                Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
                                 Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
                                 InboundFilename = FileName + ".XML"
                             };
 
                             var requestError = new MessageDataList();
 
-                            ValidateActionCode(baseData, ref requestError, ref isValidActionCode);
+                            ValidateActionCode(baseData, requestError, ref isValidActionCode);
 
                             if (isValidActionCode)
                             {
-                                var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
-                                var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd == baseData.dat_Appl_CtrlCd);
+                                var tracingRequest = SetupRequestFromFileData(baseData, tracingFile);
 
-                                var tracingMessage = new MessageData<TracingApplicationData>
+                                var loadInboundAuditTable = DB.LoadInboundAuditTable;
+                                var appl = tracingRequest.Application;
+                                var fileName = FileName + ".XML";
+
+                                if (!await loadInboundAuditTable.RowExists(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName))
                                 {
-                                    Application = CombineMatchingTracingApplicationDataFromRequest(baseData, traceData, traceFinData),
-                                    MaintenanceAction = baseData.Maintenance_ActionCd,
-                                    MaintenanceLifeState = baseData.dat_Appl_LiSt_Cd,
-                                    NewRecipientSubmitter = baseData.dat_New_Owner_RcptSubmCd,
-                                    NewIssuingSubmitter = baseData.dat_New_Owner_SubmCd,
-                                    NewUpdateSubmitter = baseData.dat_Update_SubmCd
-                                };
+                                    await loadInboundAuditTable.AddRow(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
 
-                                var messages = await SendRequestToFoaea(tracingMessage);
+                                    var foaeaMessages = await SendRequestToFoaea(tracingRequest);
 
-                                if (messages.ContainsMessagesOfType(MessageType.Error))
-                                {
-                                    var errors = messages.FindAll(m => m.Severity == MessageType.Error);
+                                    ProcessMessages(foaeaMessages, fileAuditData, includeInfoInMessages, result,
+                                                    ref errorCount, ref warningCount, ref successCount);
 
-                                    fileAuditData.ApplicationMessage = errors[0].Description;
-                                    errorCount++;
+                                    await loadInboundAuditTable.MarkRowAsCompleted(appl.Appl_EnfSrv_Cd, appl.Appl_CtrlCd, appl.Appl_Source_RfrNr, fileName);
                                 }
-                                else if (messages.ContainsMessagesOfType(MessageType.Warning))
-                                {
-                                    var warnings = messages.FindAll(m => m.Severity == MessageType.Warning);
-
-                                    fileAuditData.ApplicationMessage = warnings[0].Description;
-                                    warningCount++;
-                                }
-                                else
-                                {
-                                    if (includeInfoInMessages)
-                                    {
-                                        var infos = messages.FindAll(m => m.Severity == MessageType.Information);
-
-                                        result.AddRange(infos);
-                                    }
-
-                                    fileAuditData.ApplicationMessage = "Success";
-                                    successCount++;
-                                }
-
                             }
                             else
                             {
@@ -136,13 +94,16 @@ public class IncomingProvincialTracingManager
                             }
 
                             await DB.FileAudit.InsertFileAuditData(fileAuditData);
-
                         }
 
-                        int totalFilesCount = await fileAuditManager.GenerateAuditFile(FileName + ".XML", unknownTags, errorCount, warningCount, successCount);
+                        AuditFileFormat outputFormat = await GetAuditOutputFormat(fileTableData.PrcId);
+                        int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags,
+                                                                                                 errorCount, warningCount, successCount,
+                                                                                                 outputFormat);
+
                         await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
                                                                       errorCount, warningCount, successCount, unknownTags.Count,
-                                                                      totalFilesCount);
+                                                                      totalFilesCount, outputFormat);
                     }
                     finally
                     {
@@ -150,7 +111,6 @@ public class IncomingProvincialTracingManager
                     }
                 }
             }
-
         }
 
         if (!isValid)
@@ -169,13 +129,71 @@ public class IncomingProvincialTracingManager
         return result;
     }
 
+    private async Task<AuditFileFormat> GetAuditOutputFormat(int prcId)
+    {
+        var fileTableFlagData = await DB.FileTable.GetAuditFileFormatForProcessId(prcId);
+
+        if (int.TryParse(fileTableFlagData.IncludeAudit, out int formatFlag))
+            return (AuditFileFormat)formatFlag;
+        else
+            return AuditFileFormat.TextFormat;
+    }
+
+    private static MessageData<TracingApplicationData> SetupRequestFromFileData(MEPTracing_RecType20 baseData, MEPTracing_TracingDataSet tracingFile)
+    {
+        var traceData = tracingFile.TRCAPPIN21?.Find(t => t.dat_Appl_CtrlCd.Trim() == baseData.dat_Appl_CtrlCd.Trim());
+        var traceFinData = tracingFile.TRCAPPIN22?.Find(t => t.dat_Appl_CtrlCd.Trim() == baseData.dat_Appl_CtrlCd.Trim());
+
+        var tracingRequest = new MessageData<TracingApplicationData>
+        {
+            Application = CombineMatchingTracingApplicationDataFromRequest(baseData, traceData, traceFinData),
+            MaintenanceAction = baseData.Maintenance_ActionCd,
+            MaintenanceLifeState = baseData.dat_Appl_LiSt_Cd,
+            NewRecipientSubmitter = baseData.dat_New_Owner_RcptSubmCd,
+            NewIssuingSubmitter = baseData.dat_New_Owner_SubmCd,
+            NewUpdateSubmitter = baseData.dat_Update_SubmCd
+        };
+
+        return tracingRequest;
+    }
+    private static void ProcessMessages(MessageDataList foaeaMessages, FileAuditData fileAuditData, bool includeInfoInMessages,
+                                        MessageDataList result, ref int errorCount, ref int warningCount, ref int successCount)
+    {
+        if (foaeaMessages.ContainsMessagesOfType(MessageType.Error))
+        {
+            var errors = foaeaMessages.FindAll(m => m.Severity == MessageType.Error);
+
+            fileAuditData.ApplicationMessage = errors[0].Description;
+            errorCount++;
+        }
+        else if (foaeaMessages.ContainsMessagesOfType(MessageType.Warning))
+        {
+            var warnings = foaeaMessages.FindAll(m => m.Severity == MessageType.Warning);
+
+            fileAuditData.ApplicationMessage = warnings[0].Description;
+            warningCount++;
+        }
+        else
+        {
+            if (includeInfoInMessages)
+            {
+                var infos = foaeaMessages.FindAll(m => m.Severity == MessageType.Information);
+
+                result.AddRange(infos);
+            }
+
+            fileAuditData.ApplicationMessage = "Success";
+            successCount++;
+        }
+    }
+
     public async Task<MessageDataList> SendRequestToFoaea(MessageData<TracingApplicationData> tracingMessageData)
     {
         TracingApplicationData tracing;
 
         if (tracingMessageData.MaintenanceAction == "A")
         {
-            tracing = await APIs.TracingApplications.CreateTracingApplicationAsync(tracingMessageData.Application);
+            tracing = await APIs.TracingApplications.CreateTracingApplication(tracingMessageData.Application);
         }
         else // if (tracingMessageData.MaintenanceAction == "C")
         {
@@ -183,18 +201,22 @@ public class IncomingProvincialTracingManager
             {
                 case "00": // change
                 case "0":
-                    tracing = await APIs.TracingApplications.UpdateTracingApplicationAsync(tracingMessageData.Application);
+                    tracingMessageData.Application.Appl_LastUpdate_Dte = DateTime.Now;
+                    tracingMessageData.Application.Appl_LastUpdate_Usr = tracingMessageData.NewUpdateSubmitter;
+                    tracing = await APIs.TracingApplications.UpdateTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "14": // cancellation
                     tracingMessageData.Application.AppLiSt_Cd = ApplicationState.MANUALLY_TERMINATED_14;
-                    tracing = await APIs.TracingApplications.CancelTracingApplicationAsync(tracingMessageData.Application);
+                    tracingMessageData.Application.Appl_LastUpdate_Dte = DateTime.Now;
+                    tracingMessageData.Application.Appl_LastUpdate_Usr = tracingMessageData.NewUpdateSubmitter;
+                    tracing = await APIs.TracingApplications.CancelTracingApplication(tracingMessageData.Application);
                     break;
 
                 case "29": // transfer
-                    tracing = await APIs.TracingApplications.TransferTracingApplicationAsync(tracingMessageData.Application,
-                                                                                  tracingMessageData.NewRecipientSubmitter,
-                                                                                  tracingMessageData.NewIssuingSubmitter);
+                    tracing = await APIs.TracingApplications.TransferTracingApplication(tracingMessageData.Application,
+                                                                                        tracingMessageData.NewRecipientSubmitter,
+                                                                                        tracingMessageData.NewIssuingSubmitter);
                     break;
 
                 default:
@@ -208,7 +230,7 @@ public class IncomingProvincialTracingManager
         return tracing.Messages;
     }
 
-    private void ValidateHeader(MEPTracing_RecType01 headerData, ref MessageDataList result, ref bool isValid)
+    private void ValidateHeader(MEPTracing_RecType01 headerData, MessageDataList result, ref bool isValid)
     {
         int cycle = FileHelper.ExtractCycleFromFilename(FileName);
         if (int.Parse(headerData.Cycle) != cycle)
@@ -223,7 +245,7 @@ public class IncomingProvincialTracingManager
         }
     }
 
-    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, ref MessageDataList result, ref bool isValid)
+    private static void ValidateFooter(MEPTracing_TracingDataSet tracingFile, MessageDataList result, ref bool isValid)
     {
         if (int.Parse(tracingFile.TRCAPPIN99.ResponseCnt) != tracingFile.TRCAPPIN20.Count)
         {
@@ -232,15 +254,15 @@ public class IncomingProvincialTracingManager
         }
     }
 
-    private static void ValidateActionCode(MEPTracing_RecType20 data, ref MessageDataList result, ref bool isValid)
+    private static void ValidateActionCode(MEPTracing_RecType20 data, MessageDataList result, ref bool isValid)
     {
         bool validActionLifeState = true;
         string actionCode = data.Maintenance_ActionCd.Trim();
         string actionState = data.dat_Appl_LiSt_Cd.Trim();
 
-        if ((actionCode == "A") && actionState.NotIn("00", "0"))
+        if ((actionCode == "A") && actionState.NotIn(LIFESTATE_00, LIFESTATE_0))
             validActionLifeState = false;
-        else if ((actionCode == "C") && (actionState.NotIn("00", "0", "14", "29")))
+        else if ((actionCode == "C") && (actionState.NotIn(LIFESTATE_00, LIFESTATE_0, LIFESTATE_CANCEL, LIFESTATE_TRANSFER)))
             validActionLifeState = false;
         else if (actionCode.NotIn("A", "C"))
             validActionLifeState = false;
@@ -250,7 +272,6 @@ public class IncomingProvincialTracingManager
             isValid = false;
             result.AddSystemError($"Invalid MaintenanceAction [{actionCode}] and MaintenanceLifeState [{actionState}] combination.");
         }
-
     }
 
     private static MEPTracingFileData ExtractTracingDataFromJson(string sourceTracingData, out string error)
@@ -278,7 +299,7 @@ public class IncomingProvincialTracingManager
         var tracingApplication = new TracingApplicationData
         {
             Appl_EnfSrv_Cd = baseData.dat_Appl_EnfSrvCd,
-            Appl_CtrlCd = baseData.dat_Appl_CtrlCd,
+            Appl_CtrlCd = baseData.dat_Appl_CtrlCd.Trim(),
             Appl_Source_RfrNr = baseData.dat_Appl_Source_RfrNr,
             Subm_Recpt_SubmCd = baseData.dat_Subm_Rcpt_SubmCd,
             Subm_SubmCd = baseData.dat_Subm_SubmCd,
@@ -325,6 +346,17 @@ public class IncomingProvincialTracingManager
             // financial data
             IncludeFinancialInformation = tracingFinData?.dat_Financial_Information.ConvertToBool() ?? false
         };
+
+        if ((tracingFinData is not null) && (tracingFinData.Value.dat_Financial_Details.Tax_Data is not null))
+        {
+            foreach (var detail in tracingFinData.Value.dat_Financial_Details.Tax_Data)
+            {
+                if (short.TryParse(detail.Tax_Year, out var taxYear))
+                    tracingApplication.YearsAndTaxForms.Add(taxYear, detail.Tax_Form);
+
+                // TODO: report bad data if tryparse failed
+            }
+        }
 
         return tracingApplication;
     }

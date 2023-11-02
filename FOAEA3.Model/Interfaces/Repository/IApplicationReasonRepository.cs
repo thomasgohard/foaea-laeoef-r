@@ -8,6 +8,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<DataList<ApplicationReasonData>> GetApplicationReasonsAsync();
+        Task<DataList<ApplicationReasonData>> GetApplicationReasons();
     }
 }

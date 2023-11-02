@@ -13,40 +13,40 @@ namespace CompareOldAndNewData.CommandLine
                                string action, string enfSrv, string ctrlCd, DateTime foaea2RunDate, DateTime foaea3RunDate,
                                StringBuilder output)
         {
-            var appl = await foaea2db.ApplicationTable.GetApplicationAsync(enfSrv, ctrlCd);
+            var appl = await foaea2db.ApplicationTable.GetApplication(enfSrv, ctrlCd);
             if (appl is null)
                 return;
 
             string category = appl.AppCtgy_Cd.ToUpper();
 
-            var diffs = await CompareAppl.RunAsync("Appl", foaea2db, foaea3db, enfSrv, ctrlCd, category);
+            var diffs = await CompareAppl.Run("Appl", foaea2db, foaea3db, enfSrv, ctrlCd, category);
 
             if (category == "I01")
             {
-                diffs.AddRange(await CompareSummSmry.RunAsync("SummSmry", foaea2financeDb, foaea3financeDb, enfSrv, ctrlCd, category));
-                diffs.AddRange(await CompareIntFinH.RunAsync("IntFinH", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
-                diffs.AddRange(await CompareHldbCnd.RunAsync("HldbCnd", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
-                diffs.AddRange(await CompareEvents.RunAsync("EvntDbtr", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventDbtr));
+                diffs.AddRange(await CompareSummSmry.Run("SummSmry", foaea2financeDb, foaea3financeDb, enfSrv, ctrlCd, category));
+                diffs.AddRange(await CompareIntFinH.Run("IntFinH", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
+                diffs.AddRange(await CompareHldbCnd.Run("HldbCnd", foaea2db, foaea3db, enfSrv, ctrlCd, category, foaea2RunDate, foaea3RunDate));
+                diffs.AddRange(await CompareEvents.Run("EvntDbtr", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventDbtr));
             }
 
-            diffs.AddRange(await CompareEvents.RunAsync("EvntSubm", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSubm));
+            diffs.AddRange(await CompareEvents.Run("EvntSubm", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSubm));
 
             if (category != "L03")
             {
-                diffs.AddRange(await CompareEvents.RunAsync("EvntBF", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBF));
-                diffs.AddRange(await CompareEvents.RunAsync("EvntBFN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBFN));
-                diffs.AddRange(await CompareEvents.RunAsync("EvntSIN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSIN));
+                diffs.AddRange(await CompareEvents.Run("EvntBF", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBF));
+                diffs.AddRange(await CompareEvents.Run("EvntBFN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventBFN));
+                diffs.AddRange(await CompareEvents.Run("EvntSIN", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventSIN));
             }
 
             if (category.In("L01", "L03"))
             {
-                diffs.AddRange(await CompareEvents.RunAsync("EvntLicence", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventLicence));
-                diffs.AddRange(await CompareLicSusp.RunAsync("LicSusp", foaea2db, foaea3db, enfSrv, ctrlCd, category));
+                diffs.AddRange(await CompareEvents.Run("EvntLicence", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventLicence));
+                diffs.AddRange(await CompareLicSusp.Run("LicSusp", foaea2db, foaea3db, enfSrv, ctrlCd, category));
             }
 
             if (category == "T01")
             {
-                diffs.AddRange(await CompareEvents.RunAsync("EvntTrace", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventTrace));
+                diffs.AddRange(await CompareEvents.Run("EvntTrace", foaea2db, foaea3db, enfSrv, ctrlCd, category, EventQueue.EventTrace));
             }
 
             CleanupData(foaea2RunDate, foaea3RunDate, diffs);

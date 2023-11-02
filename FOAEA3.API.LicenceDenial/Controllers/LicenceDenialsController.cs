@@ -29,7 +29,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var manager = new LicenceDenialManager(repositories, config, User);
 
-        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
@@ -50,12 +50,12 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var manager = new LicenceDenialManager(repositories, config, User);
 
-        bool success = await manager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        bool success = await manager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
         if (success)
         {
             if (manager.LicenceDenialApplication.AppCtgy_Cd == "L01")
             {
-                var suspensionHistory = manager.GetLicenceSuspensionHistoryAsync();
+                var suspensionHistory = manager.GetLicenceSuspensionHistory();
 
                 return Ok(suspensionHistory);
             }
@@ -70,20 +70,20 @@ public class LicenceDenialsController : FoaeaControllerBase
     [HttpPost]
     public async Task<ActionResult<LicenceDenialApplicationData>> CreateApplication([FromServices] IRepositories db)
     {
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey: null, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialManager(application, db, config, User);
-        var submitter = (await db.SubmitterTable.GetSubmitterAsync(application.Subm_SubmCd)).FirstOrDefault();
+        var submitter = (await db.SubmitterTable.GetSubmitter(application.Subm_SubmCd)).FirstOrDefault();
         if (submitter is not null)
         {
             licenceDenialManager.CurrentUser.Submitter = submitter;
             db.CurrentSubmitter = submitter.Subm_SubmCd;
         }
 
-        bool isCreated = await licenceDenialManager.CreateApplicationAsync();
+        bool isCreated = await licenceDenialManager.CreateApplication();
         if (isCreated)
         {
             var appKey = $"{application.Appl_EnfSrv_Cd}-{application.Appl_CtrlCd}";
@@ -105,13 +105,13 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var licenceDenialManager = new LicenceDenialManager(application, repositories, config, User);
-        await licenceDenialManager.UpdateApplicationAsync();
+        await licenceDenialManager.UpdateApplication();
 
         if (!application.Messages.ContainsMessagesOfType(MessageType.Error))
             return Ok(application);
@@ -128,14 +128,14 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var application = await APIBrokerHelper.GetDataFromRequestBodyAsync<LicenceDenialApplicationData>(Request);
+        var application = await APIBrokerHelper.GetDataFromRequestBody<LicenceDenialApplicationData>(Request);
 
         if (!APIHelper.ValidateRequest(application, applKey, out string error))
             return UnprocessableEntity(error);
 
         var appManager = new LicenceDenialManager(application, repositories, config, User);
 
-        await appManager.TransferApplicationAsync(newIssuingSubmitter, newRecipientSubmitter);
+        await appManager.TransferApplication(newIssuingSubmitter, newRecipientSubmitter);
 
         return Ok(application);
     }
@@ -146,19 +146,19 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var applKey = new ApplKey(key);
 
-        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SINBypassData>(Request);
+        var sinBypassData = await APIBrokerHelper.GetDataFromRequestBody<SINBypassData>(Request);
 
         var application = new LicenceDenialApplicationData();
 
         var appManager = new LicenceDenialManager(application, repositories, config, User);
 
-        await appManager.LoadApplicationAsync(applKey.EnfSrv, applKey.CtrlCd);
+        await appManager.LoadApplication(applKey.EnfSrv, applKey.CtrlCd);
 
         if (!APIHelper.ValidateRequest(appManager.LicenceDenialApplication, applKey, out string error))
             return UnprocessableEntity(error);
 
         var sinManager = new ApplicationSINManager(application, appManager);
-        await sinManager.SINconfirmationBypassAsync(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
+        await sinManager.SINconfirmationBypass(sinBypassData.NewSIN, repositories.CurrentSubmitter, false, sinBypassData.Reason);
 
         return Ok(application);
     }
@@ -173,7 +173,7 @@ public class LicenceDenialsController : FoaeaControllerBase
 
         var appManager = new LicenceDenialManager(application, repositories, config, User);
 
-        if (await appManager.ProcessLicenceDenialResponseAsync(applKey.EnfSrv, applKey.CtrlCd))
+        if (await appManager.ProcessLicenceDenialResponse(applKey.EnfSrv, applKey.CtrlCd))
             return Ok(application);
         else
             return UnprocessableEntity(application);
@@ -185,7 +185,7 @@ public class LicenceDenialsController : FoaeaControllerBase
     {
         var manager = new LicenceDenialManager(repositories, config, User);
 
-        var data = await manager.GetLicenceDenialToApplDataAsync(federalSource);
+        var data = await manager.GetLicenceDenialToApplData(federalSource);
 
         return Ok(data);
 

@@ -37,8 +37,8 @@ namespace FOAEA3.Business.Areas.Financials
             else
                 (newTransaction, batch) = await BuildPendingFA(transactionType, faTransaction, result.ReasonCode);
 
-            await DBfinance.SummFAFR_DERepository.CreateFaFrDeAsync(newTransaction);
-            await DBfinance.ControlBatchRepository.UpdateBatchAsync(batch);
+            await DBfinance.SummFAFR_DERepository.CreateFaFrDe(newTransaction);
+            await DBfinance.ControlBatchRepository.UpdateBatch(batch);
 
             return result;
         }
@@ -73,7 +73,7 @@ namespace FOAEA3.Business.Areas.Financials
                 SummFAFR_Comments = data.Dbtr_Id
             };
 
-            var batch = await DBfinance.ControlBatchRepository.GetControlBatchAsync(data.Batch_Id);
+            var batch = await DBfinance.ControlBatchRepository.GetControlBatch(data.Batch_Id);
             if (batch is null)
                 throw new Exception("BatchID does not exist");
 
@@ -115,7 +115,7 @@ namespace FOAEA3.Business.Areas.Financials
                 SummFAFR_Comments = data.Dbtr_Id
             };
 
-            var batch = await DBfinance.ControlBatchRepository.GetControlBatchAsync(data.Batch_Id);
+            var batch = await DBfinance.ControlBatchRepository.GetControlBatch(data.Batch_Id);
             if (batch is null)
                 throw new Exception("BatchID does not exist for InsertPendingForProcessingFAFR");
 
@@ -132,7 +132,7 @@ namespace FOAEA3.Business.Areas.Financials
 
         public async Task<SummFAFR_DE_Data> GetFaFrDe(int summFaFrDeId)
         {
-            return await DBfinance.SummFAFR_DERepository.GetSummFaFrDeAsync(summFaFrDeId);
+            return await DBfinance.SummFAFR_DERepository.GetSummFaFrDe(summFaFrDeId);
         }
 
         private async Task<TransactionResult> ValidateTransaction(string transactionType, SummFAFR_DE_Data newTransaction, 
@@ -184,7 +184,7 @@ namespace FOAEA3.Business.Areas.Financials
             string debtorId = data.Dbtr_Id;
 
             if ((data.EnfSrv_Src_Cd == "UI00") && (data.Dbtr_Id == "9999999"))
-                debtorId = await DB.InterceptionTable.GetDebtorIdByConfirmedSin(sin, "I01");
+                debtorId = await DB.InterceptionTable.GetDebtorIdByConfirmedSinForCategory(sin, "I01");
 
             bool debtorExists = await DB.InterceptionTable.CheckDebtorIdExists(debtorId);
             if (!debtorExists)

@@ -4,6 +4,8 @@ using FOAEA3.Model;
 using FOAEA3.Model.Base;
 using FOAEA3.Model.Interfaces.Repository;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Data.DB
 {
@@ -17,6 +19,17 @@ namespace FOAEA3.Data.DB
         public DataList<SummDF_Data> GetSummDFList(int summFAFR_Id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> ActiveDFExistsForSin(string confirmedSIN)
+        {
+            var parameters = new Dictionary<string, object> {
+                    { "Dbtr_Cnfrmd_SIN",  confirmedSIN}
+                };
+
+            int count = await MainDB.GetDataFromProcSingleValueAsync<int>("ActiveDFExistsforSIN", parameters);
+
+            return count > 0;
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, SummDF_Data data)

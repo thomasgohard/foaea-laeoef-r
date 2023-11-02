@@ -15,15 +15,15 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task InsertBulkDataAsync(List<LicenceDenialResponseData> responseData)
+        public async Task InsertBulkData(List<LicenceDenialResponseData> responseData)
         {
-            _ = await ApiHelper.PostDataAsync<LicenceDenialResponseData, List<LicenceDenialResponseData>>("api/v1/licenceDenialResponses/bulk",
+            _ = await ApiHelper.PostData<LicenceDenialResponseData, List<LicenceDenialResponseData>>("api/v1/licenceDenialResponses/bulk",
                                                                                                     responseData, token: Token);
         }
 
-        public async Task MarkTraceResultsAsViewedAsync(string enfService)
+        public async Task MarkTraceResultsAsViewed(string enfService)
         {
-            await ApiHelper.SendCommandAsync("api/v1/licenceDenialResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
+            await ApiHelper.SendCommand("api/v1/licenceDenialResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
         }
     }
 }

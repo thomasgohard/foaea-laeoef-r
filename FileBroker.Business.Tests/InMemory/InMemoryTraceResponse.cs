@@ -29,7 +29,7 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
-        public Task DeleteCancelledApplicationTraceResponseDataAsync(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
+        public Task DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd)
         {
             throw new NotImplementedException();
         }
@@ -64,17 +64,17 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
-        public Task<DataList<TraceResponseData>> GetTraceResponseForApplicationAsync(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
+        public Task<DataList<TraceResponseData>> GetTraceResponseForApplication(string applEnfSrvCd, string applCtrlCd, bool checkCycle = false)
         {
             throw new NotImplementedException();
         }
 
-        public Task InsertBulkDataAsync(List<TraceResponseData> responseData)
+        public Task InsertBulkData(List<TraceResponseData> responseData)
         {
             throw new NotImplementedException();
         }
 
-        public Task MarkResponsesAsViewedAsync(string enfService)
+        public Task MarkResponsesAsViewed(string enfService)
         {
             throw new NotImplementedException();
         }

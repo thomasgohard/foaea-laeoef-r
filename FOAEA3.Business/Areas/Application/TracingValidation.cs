@@ -6,23 +6,64 @@ using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Repository;
 using FOAEA3.Resources;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Application
 {
     internal class TracingValidation : ApplicationValidation
     {
         private TracingApplicationData TracingApplication { get; }
-        public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager, IRepositories repositories,
-                                 IFoaeaConfigurationHelper config, FoaeaUser user) :
-                                    base(tracingApplication, eventManager, repositories, config, user)
+        private bool HasSignedC78 { get; set; }
+        private DateTime? C78EffectiveDateTime { get; set; }
+
+        public TracingValidation(TracingApplicationData tracingApplication, ApplicationEventManager eventManager,
+                                 IRepositories db, IFoaeaConfigurationHelper config, FoaeaUser user) :
+                                    base(tracingApplication, eventManager, db, config, user)
         {
             TracingApplication = tracingApplication;
+            _ = GetC78infoFromEnfSrv();
         }
 
         public TracingValidation(TracingApplicationData tracingApplication, IRepositories repositories,
                                  IFoaeaConfigurationHelper config, FoaeaUser user) : base(tracingApplication, repositories, config, user)
         {
             TracingApplication = tracingApplication;
+            _ = GetC78infoFromEnfSrv();
+        }
+
+        public async Task GetC78infoFromEnfSrv()
+        {
+            if ((TracingApplication is null) || string.IsNullOrEmpty(TracingApplication.Appl_EnfSrv_Cd))
+            {
+                HasSignedC78 = false;
+                C78EffectiveDateTime = null;
+            }
+            else
+            {
+                string enfSrv = TracingApplication.Appl_EnfSrv_Cd.Trim();
+                var enfSrvData = (await DB.EnfSrvTable.GetEnfService(enforcementServiceCode: enfSrv)).FirstOrDefault();
+                if (enfSrvData is not null)
+                {
+                    HasSignedC78 = enfSrvData.HasSignedC78;
+                    C78EffectiveDateTime = enfSrvData.C78EffectiveDateTime;
+                }
+                else
+                {
+                    HasSignedC78 = false;
+                    C78EffectiveDateTime = null;
+                }
+            }
+        }
+
+        public bool IsC78()
+        {
+            if (TracingApplication.DeclarationIndicator)
+                return true;
+            else if (HasSignedC78)
+                return TracingApplication.Appl_Create_Dte >= C78EffectiveDateTime;
+            else
+                return false;
         }
 
         public override bool IsValidMandatoryData()
@@ -46,7 +87,7 @@ namespace FOAEA3.Business.Areas.Application
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.Appl_Crdtr_FrstNme, Resources.ErrorResource.MISSING_CREDITOR_FIRST_NAME);
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.Appl_Crdtr_SurNme, Resources.ErrorResource.MISSING_CREDITOR_SURNAME);
                     isSuccess = IsValidMandatory(isSuccess, TracingApplication.FamPro_Cd, Resources.ErrorResource.MISSING_FAMPRO);
-                    isSuccess = IsValidMandatory(isSuccess, TracingApplication.Trace_Breach_Text, Resources.ErrorResource.MISSING_BREACH);
+//                    isSuccess = IsValidMandatory(isSuccess, TracingApplication.Trace_Breach_Text, Resources.ErrorResource.MISSING_BREACH);
                 }
             }
 

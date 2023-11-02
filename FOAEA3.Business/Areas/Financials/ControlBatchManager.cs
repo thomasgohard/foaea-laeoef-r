@@ -23,22 +23,22 @@ namespace FOAEA3.Business.Areas.Financials
         }
 
 
-        public async Task CloseControlBatchAsync(string batchId)
+        public async Task CloseControlBatch(string batchId)
         {
-            await DBfinance.ControlBatchRepository.CloseControlBatchAsync(batchId);
+            await DBfinance.ControlBatchRepository.CloseControlBatch(batchId);
         }
 
-        public async Task UpdateBatchAsync(ControlBatchData batch)
+        public async Task UpdateBatch(ControlBatchData batch)
         {
-            await DBfinance.ControlBatchRepository.UpdateBatchAsync(batch);
+            await DBfinance.ControlBatchRepository.UpdateBatch(batch);
         }
 
-        public async Task UpdateBatchStateFtpProcessedAsync(string batchId, int recordCount)
+        public async Task UpdateBatchStateFtpProcessed(string batchId, int recordCount)
         {
-            await DBfinance.ControlBatchRepository.UpdateBatchStateFtpProcessedAsync(batchId, recordCount);
+            await DBfinance.ControlBatchRepository.UpdateBatchStateFtpProcessed(batchId, recordCount);
         }
 
-        public async Task<(string, string, string, string)> CreateXFControlBatchAsync(ControlBatchData batchData)
+        public async Task<(string, string, string, string)> CreateXFControlBatch(ControlBatchData batchData)
         {
             var controlBatchDB = DBfinance.ControlBatchRepository;
 
@@ -62,15 +62,15 @@ namespace FOAEA3.Business.Areas.Financials
                 FeesTtlAmt_Money = batchData.FeesTtlAmt_Money
             };
 
-            return await controlBatchDB.CreateXFControlBatchAsync(values);
+            return await controlBatchDB.CreateXFControlBatch(values);
         }
 
-        public async Task<ControlBatchData> CreateControlBatchAsync(ControlBatchData controlBatchData)
+        public async Task<ControlBatchData> CreateControlBatch(ControlBatchData controlBatchData)
         {
             string batchID;
             string reasonCode;
 
-            (_, batchID, reasonCode, _) = await CreateXFControlBatchAsync(controlBatchData);
+            (_, batchID, reasonCode, _) = await CreateXFControlBatch(controlBatchData);
 
             controlBatchData.Batch_Id = batchID;
 
@@ -83,7 +83,7 @@ namespace FOAEA3.Business.Areas.Financials
         public async Task<ControlBatchData> GetControlBatch(string batchId)
         {
             var controlBatchDB = DBfinance.ControlBatchRepository;
-            return await controlBatchDB.GetControlBatchAsync(batchId);
+            return await controlBatchDB.GetControlBatch(batchId);
         }
 
         public async Task<DateTime> GetDateLastUIBatchLoaded()

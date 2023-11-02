@@ -29,7 +29,7 @@ namespace FOAEA3.API.Interception.Controllers
                                                                        [FromServices] IRepositories db,
                                                                        [FromServices] IRepositories_Finance dbFinance)
         {
-            var fafrdeData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SummFAFR_DE_Data>(Request);
+            var fafrdeData = await APIBrokerHelper.GetDataFromRequestBody<SummFAFR_DE_Data>(Request);
 
             var manager = new TransactionManager(db, dbFinance);
             var result = await manager.CreateFaFrDe(transactionType, fafrdeData);

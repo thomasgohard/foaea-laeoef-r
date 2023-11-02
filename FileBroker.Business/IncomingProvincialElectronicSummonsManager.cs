@@ -1,75 +1,20 @@
-﻿using FileBroker.Common.Helpers;
-using FOAEA3.Resources;
+﻿using FOAEA3.Resources;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 namespace FileBroker.Business
 {
-    public class IncomingProvincialElectronicSummonsManager
+    public class IncomingProvincialElectronicSummonsManager : IncomingProvincialManagerBase
     {
-        private string FileName { get; }
-        private APIBrokerList APIs { get; }
-        private RepositoryList DB { get; }
-        private IFileBrokerConfigurationHelper Config { get; }
-        private Dictionary<string, string> Translations { get; }
-        private bool IsFrench { get; }
-        private string EnfSrv_Cd { get; }
-
-        private IncomingProvincialHelper IncomingFileHelper { get; }
-
-        private FoaeaSystemAccess FoaeaAccess { get; }
-
         public IncomingProvincialElectronicSummonsManager(RepositoryList db,
                                                           APIBrokerList foaeaApis,
                                                           string fileName,
-                                                          IFileBrokerConfigurationHelper config)
+                                                          IFileBrokerConfigurationHelper config) :
+                                                                base(db, foaeaApis, fileName, config)
         {
-            FileName = fileName;
-            APIs = foaeaApis;
-            DB = db;
-            Config = config;
-
-            string provinceCode = fileName[0..2].ToUpper();
-            IsFrench = Config.ProvinceConfig.FrenchAuditProvinceCodes?.Contains(provinceCode) ?? false;
-
-            Translations = LoadTranslations();
-
-            EnfSrv_Cd = provinceCode + "01"; // e.g. ON01
-
-            string provCode = FileName[..2].ToUpper();
-            IncomingFileHelper = new IncomingProvincialHelper(config, provCode);
-
-            FoaeaAccess = new FoaeaSystemAccess(foaeaApis, Config.FoaeaLogin);
         }
 
-        private Dictionary<string, string> LoadTranslations()
-        {
-            var translations = new Dictionary<string, string>();
-
-            if (IsFrench)
-            {
-                var Translations = DB.TranslationTable.GetTranslationsAsync().Result;
-                foreach (var translation in Translations)
-                    translations.Add(translation.EnglishText, translation.FrenchText);
-
-                APIs.InterceptionApplications.ApiHelper.CurrentLanguage = LanguageHelper.FRENCH_LANGUAGE;
-                LanguageHelper.SetLanguage(LanguageHelper.FRENCH_LANGUAGE);
-            }
-
-            return translations;
-        }
-
-        private string Translate(string englishText)
-        {
-            if (IsFrench && Translations.ContainsKey(englishText))
-            {
-                return Translations[englishText];
-            }
-            else
-                return englishText;
-        }
-
-        public async Task<MessageDataList> ExtractAndProcessRequestsInFileAsync(string sourceFilePath)
+        public async Task<MessageDataList> ExtractAndProcessRequestsInFile(string sourceFilePath)
         {
             var result = new MessageDataList();
 
@@ -150,7 +95,7 @@ namespace FileBroker.Business
                         enfServiceCode = pdfNameNoExtension[..2] + "01";
                         controlCode = pdfNameNoExtension[5..(pdfNameNoExtension.Length - 1)];
 
-                        var appl = await APIs.Applications.GetApplicationAsync(enfServiceCode, controlCode);
+                        var appl = await APIs.Applications.GetApplication(enfServiceCode, controlCode);
 
                         if ((appl == null) || (appl.Appl_CtrlCd != controlCode))
                             warning = Translate("Warning: Appl Record does not exist");
@@ -203,7 +148,7 @@ namespace FileBroker.Business
 
                 }
 
-                int totalFilesCount = await fileAuditManager.GenerateAuditFile(fileName, null, errorCount, warningCount, successCount);
+                int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(fileName, null, errorCount, warningCount, successCount);
                 await fileAuditManager.SendStandardAuditEmail(fileName, Config.AuditConfig.AuditRecipients,
                                                                    errorCount, warningCount, successCount, 0, totalFilesCount);
 

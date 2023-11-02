@@ -22,7 +22,7 @@ namespace FileBroker.Data.Tests
             await File.WriteAllTextAsync(@"C:\Work\MyFile.txt", attachmentContent);
 
             // act
-            string error = await mailService.SendEmailAsync(body: "This is the body1", recipients: "dsarrazi@justice.gc.ca",
+            string error = await mailService.SendEmail(body: "This is the body1", recipients: "dsarrazi@justice.gc.ca",
                                                  subject: "This is the subject1",
                                                  attachmentPath: @"C:\Work\MyFile.txt");
 

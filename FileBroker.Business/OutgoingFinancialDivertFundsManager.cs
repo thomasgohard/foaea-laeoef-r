@@ -35,7 +35,7 @@ namespace FileBroker.Business
             await FoaeaAccess.SystemLogin();
             try
             {
-                var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+                var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
                 var readyDivertFundsBatches = await APIs.ControlBatches.GetReadyDivertFundsBatches(processCodes.EnfSrv_Cd, processCodes.EnfSrv_Loc_Cd);
                 if ((readyDivertFundsBatches is null) || !readyDivertFundsBatches.Any())
@@ -52,7 +52,7 @@ namespace FileBroker.Business
 
 
                 var batch = readyDivertFundsBatches.First();
-                var divertFundsData = await APIs.Financials.GetDivertFundsAsync(processCodes.EnfSrv_Cd, batch.Batch_Id);
+                var divertFundsData = await APIs.Financials.GetDivertFunds(processCodes.EnfSrv_Cd, batch.Batch_Id);
 
                 if ((divertFundsData is null) || (!divertFundsData.Any()))
                 {
@@ -70,7 +70,7 @@ namespace FileBroker.Business
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
                 string message = fileTableData.Category + $" Outbound {fileBaseName} file created successfully.";
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                          fileCreated: true, message);
 
                 /*
@@ -85,7 +85,7 @@ namespace FileBroker.Business
             }
             catch (Exception e)
             {
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now,
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now,
                                                                          fileCreated: true, e.Message);
             }
             finally

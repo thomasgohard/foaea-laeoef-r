@@ -29,7 +29,7 @@ namespace FOAEA3.Web.Helpers
                 MenuActionChoice.Menu
             };
 
-            var isAgent = submitter.IsInternalUser();
+            var isAgent = submitter.IsInternalAgentSubmitter();
             category = category.ToUpper().Trim();
 
             switch (state)

@@ -36,7 +36,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
         string fileContent;
         string lastFileCycleString;
 
-        (fileContent, lastFileCycleString) = await LoadLatestFederalLicenceDenialFileAsync(fileName, fileTable, fileCycleLength);
+        (fileContent, lastFileCycleString) = await LoadLatestFederalLicenceDenialFile(fileName, fileTable, fileCycleLength);
 
         if (fileContent == null)
             return NotFound();
@@ -52,7 +52,7 @@ public class FederalLicenceDenialFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);        
     }
 
-    private static async Task<(string, string)> LoadLatestFederalLicenceDenialFileAsync(string fileName, IFileTableRepository fileTable,
+    private static async Task<(string, string)> LoadLatestFederalLicenceDenialFile(string fileName, IFileTableRepository fileTable,
                                                              int fileCycleLength)
     {
         var fileTableData = await fileTable.GetFileTableDataForFileName(fileName);

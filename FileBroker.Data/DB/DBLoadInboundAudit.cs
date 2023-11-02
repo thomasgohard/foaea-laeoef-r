@@ -14,7 +14,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task AddNewAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task AddRow(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -27,7 +27,7 @@ namespace FileBroker.Data.DB
             await MainDB.ExecProcAsync("LoadInboundAuditInsert", parameters);
         }
 
-        public async Task<bool> AlreadyExistsAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task<bool> RowExists(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -42,7 +42,7 @@ namespace FileBroker.Data.DB
             return (count > 0);
         }
 
-        public async Task MarkAsCompletedAsync(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
+        public async Task MarkRowAsCompleted(string applEnfSrvCd, string applCtrlCd, string sourceRefNumber, string inboundFileName)
         {
             var parameters = new Dictionary<string, object>
             {

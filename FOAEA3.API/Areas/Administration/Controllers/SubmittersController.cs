@@ -31,16 +31,16 @@ public class SubmittersController : FoaeaControllerBase
         var submitterManager = new SubmitterManager(repositories);
 
         if ((enfSrvCode is null) && (enfOffCode is null))
-            return Ok(await submitterManager.GetSubmittersForProvinceAsync(provCd, onlyActive == "true"));
+            return Ok(await submitterManager.GetSubmittersForProvince(provCd, onlyActive == "true"));
         else
-            return Ok(await submitterManager.GetSubmittersForProvinceAndOfficeAsync(provCd, enfOffCode, enfSrvCode, onlyActive == "true"));
+            return Ok(await submitterManager.GetSubmittersForProvinceAndOffice(provCd, enfOffCode, enfSrvCode, onlyActive == "true"));
     }
 
     [HttpGet("{submCd}", Name = "GetSubmitter")]
     public async Task<ActionResult<SubmitterData>> GetSubmitter([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterManager = new SubmitterManager(repositories);
-        var submitter = await submitterManager.GetSubmitterAsync(submCd);
+        var submitter = await submitterManager.GetSubmitter(submCd);
 
         if (submitter != null)
         {
@@ -67,7 +67,7 @@ public class SubmittersController : FoaeaControllerBase
     public async Task<ActionResult<string>> GetDeclarant([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
         var submitterManager = new SubmitterManager(repositories);
-        var submitter = await submitterManager.GetSubmitterAsync(submCd);
+        var submitter = await submitterManager.GetSubmitter(submCd);
 
         string declarant = string.Empty;
         if (submitter != null)
@@ -111,7 +111,7 @@ public class SubmittersController : FoaeaControllerBase
     {
         var submitterManager = new SubmitterManager(repositories);
 
-        return Ok(await submitterManager.GetCommissionersAsync(enfOffLocCode, repositories.CurrentSubmitter));
+        return Ok(await submitterManager.GetCommissioners(enfOffLocCode, repositories.CurrentSubmitter));
 
     }
 
@@ -122,7 +122,7 @@ public class SubmittersController : FoaeaControllerBase
         var submitterData = JsonConvert.DeserializeObject<SubmitterData>(sourceSubmitterData);
 
         var submitterManager = new SubmitterManager(repositories);
-        submitterData = await submitterManager.CreateSubmitterAsync(submitterData, suffixCode, readOnlyAccess == "true");
+        submitterData = await submitterManager.CreateSubmitter(submitterData, suffixCode, readOnlyAccess == "true");
 
         if (!submitterData.Messages.ContainsMessagesOfType(MessageType.Error))
         {
@@ -141,12 +141,12 @@ public class SubmittersController : FoaeaControllerBase
     [HttpPut]
     public async Task<ActionResult<TracingApplicationData>> UpdateSubmitter([FromServices] IRepositories repositories)
     {
-        var submitterData = await APIBrokerHelper.GetDataFromRequestBodyAsync<SubmitterData>(Request);
+        var submitterData = await APIBrokerHelper.GetDataFromRequestBody<SubmitterData>(Request);
 
         bool readOnly = ((submitterData.Subm_Class == "RO") || (submitterData.Subm_Class == "R1"));
 
         var submitterManager = new SubmitterManager(repositories);
-        submitterData = await submitterManager.UpdateSubmitterAsync(submitterData, readOnly);
+        submitterData = await submitterManager.UpdateSubmitter(submitterData, readOnly);
 
         return Ok(submitterData);
 

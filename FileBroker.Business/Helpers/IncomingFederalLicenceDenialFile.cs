@@ -18,7 +18,7 @@
             Errors = new List<string>();
         }
 
-        public async Task AddNewFilesAsync(string rootPath, List<string> newFiles)
+        public async Task AddNewFiles(string rootPath, List<string> newFiles)
         {
             var directory = new DirectoryInfo(rootPath);
             var allFiles = directory.GetFiles("*IL.*");
@@ -28,16 +28,19 @@
             foreach (var fileInfo in files)
             {
                 int cycle = FileHelper.ExtractCycleFromFilename(fileInfo.Name);
-                var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
-                var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
-                var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
+                if (cycle != FileHelper.INVALID_CYCLE)
+                {
+                    var fileNameNoXmlExt = Path.GetFileNameWithoutExtension(fileInfo.Name); // remove xml extension 
+                    var fileNameNoCycle = Path.GetFileNameWithoutExtension(fileNameNoXmlExt); // remove cycle extension
+                    var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
 
-                if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
-                    newFiles.Add(fileInfo.FullName);
+                    if ((cycle == fileTableData.Cycle) && (fileTableData.Active.HasValue) && (fileTableData.Active.Value))
+                        newFiles.Add(fileInfo.FullName);
+                }
             }
         }
 
-        public async Task<bool> ProcessNewFileAsync(string fullPath)
+        public async Task<bool> ProcessNewFile(string fullPath)
         {
             string fileNameNoPath = Path.GetFileName(fullPath);
 
@@ -55,7 +58,7 @@
                 var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileNameNoCycle);
                 if (!fileTableData.IsLoading)
                 {
-                    await licenceDenialManager.ProcessJsonFileAsync(jsonText, fullPath);
+                    await licenceDenialManager.ProcessJsonFile(jsonText, fullPath);
                     return true;
                 }
                 else

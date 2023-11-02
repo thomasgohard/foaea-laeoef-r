@@ -15,7 +15,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task InsertAsync(string processName, string description, string audience, DateTime? completedDate = null)
+        public async Task Insert(string processName, string description, string audience, DateTime? completedDate = null)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -33,9 +33,9 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("ProductionAuditInsert", parameters);
         }
 
-        public async Task InsertAsync(ProductionAuditData productionAuditData)
+        public async Task Insert(ProductionAuditData productionAuditData)
         {
-            await InsertAsync(productionAuditData.Process_name, productionAuditData.Description, productionAuditData.Audience,
+            await Insert(productionAuditData.Process_name, productionAuditData.Description, productionAuditData.Audience,
                               productionAuditData.Compl_dte);
         }
     }

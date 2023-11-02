@@ -62,7 +62,7 @@ namespace FOAEA3.Business.Areas.Application
                 EventManager.AddEvent(EventCode.C50512_CANNOT_PREASSIGN_OR_CHANGE_A_JUSTICE_NUMBER);
         }
 
-        public virtual async Task ValidateControlCodeAsync()
+        public virtual async Task ValidateControlCode()
         {
             bool isValid;
             bool isUpdate = false;
@@ -72,7 +72,7 @@ namespace FOAEA3.Business.Areas.Application
             {
                 var existingApp = new ApplicationManager(new ApplicationData(), DB, Config, CurrentUser);
 
-                if (await existingApp.LoadApplicationAsync(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
+                if (await existingApp.LoadApplication(Application.Appl_EnfSrv_Cd, Application.Appl_CtrlCd))
                 {
                     // update
                     isUpdate = true;
@@ -224,8 +224,8 @@ namespace FOAEA3.Business.Areas.Application
             return isValid;
         }
 
-        public virtual async Task<(bool, string)> IsValidPostalCodeAsync(string postalCode, string provinceCode, string cityName,
-                                                                         string countryCode)
+        public virtual async Task<(bool, string)> IsValidPostalCode(string postalCode, string provinceCode, string cityName,
+                                                                    string countryCode)
         {
             // --- error messages for postal code: are stored in a DB table - PostalCodeErrorMessages ---
             // 1-Postal code does not exist (if the postal code in question is not in the Canada Post file at all)
@@ -261,7 +261,7 @@ namespace FOAEA3.Business.Areas.Application
                 string validProvCode;
                 PostalCodeFlag validFlags;
 
-                (isValid, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCodeAsync(postalCode.Replace(" ", ""), provinceCode, cityName);
+                (isValid, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCode(postalCode.Replace(" ", ""), provinceCode, cityName);
 
                 if (!isValid)
                 {
@@ -347,7 +347,7 @@ namespace FOAEA3.Business.Areas.Application
             return ReferenceData.Instance().Genders.ContainsKey(Application.Appl_Dbtr_Gendr_Cd);
         }
 
-        public async Task<bool> IsSINLocallyConfirmedAsync()
+        public async Task<bool> IsSINLocallyConfirmed()
         {
             bool isConfirmed = false;
 
@@ -355,9 +355,9 @@ namespace FOAEA3.Business.Areas.Application
             bool doesLocalSINExists;
 
             if (Application.AppCtgy_Cd == "I01")
-                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExists(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd);
             else
-                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExistsAsync(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
+                doesLocalSINExists = await DB.ApplicationTable.GetApplLocalConfirmedSINExists(Application.Appl_Dbtr_Entrd_SIN, Application.Appl_Dbtr_SurNme, Application.Appl_Dbtr_Brth_Dte, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_FrstNme);
 
             if (!isTempSIN && doesLocalSINExists)
             {
@@ -370,13 +370,13 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task<bool> IsSameDayApplicationAsync()
+        public async Task<bool> IsSameDayApplication()
         {
             bool isSameDayApplication = false;
 
             if (!String.IsNullOrEmpty(Application.Appl_Dbtr_Entrd_SIN))
             {
-                var applications = await DB.ApplicationTable.GetDailyApplCountBySINAsync(
+                var applications = await DB.ApplicationTable.GetDailyApplCountBySIN(
                                                                             Application.Appl_Dbtr_Entrd_SIN,
                                                                             Application.Appl_EnfSrv_Cd,
                                                                             Application.Appl_CtrlCd,
@@ -390,18 +390,18 @@ namespace FOAEA3.Business.Areas.Application
 
         }
 
-        public async Task AddDuplicateSINWarningEventsAsync()
+        public async Task AddDuplicateSINWarningEvents()
         {
-            (string errorSameEnfOFf, string errorDiffEnfOff) = await DB.ApplicationTable.GetConfirmedSINRecordsAsync(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+            (string errorSameEnfOFf, string errorDiffEnfOff) = await DB.ApplicationTable.GetConfirmedSINRecords(Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
             if (!String.IsNullOrEmpty(errorSameEnfOFf) &&
-                (await DB.ApplicationTable.GetConfirmedSINSameEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
+                (await DB.ApplicationTable.GetConfirmedSINSameEnforcementOfficeExists(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN, Application.AppCtgy_Cd)))
             {
                 EventManager.AddEvent(EventCode.C50931_MORE_THAN_ONE_ACTIVE_APPL_FOR_THIS_DEBTOR_WITHIN_YOUR_JURISDIC, errorSameEnfOFf);
             }
 
             if (!String.IsNullOrEmpty(errorDiffEnfOff))
             {
-                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await DB.ApplicationTable.GetConfirmedSINOtherEnforcementOfficeExistsAsync(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
+                List<ApplicationConfirmedSINData> applsInOtherJurisdictions = await DB.ApplicationTable.GetConfirmedSINOtherEnforcementOfficeExists(Application.Appl_EnfSrv_Cd, Application.Subm_SubmCd, Application.Appl_CtrlCd, Application.Appl_Dbtr_Cnfrmd_SIN);
 
                 if (applsInOtherJurisdictions.Count > 0)
                 {
@@ -411,30 +411,23 @@ namespace FOAEA3.Business.Areas.Application
                     string errorMessage = Application.Appl_EnfSrv_Cd.Trim() + "-" + Application.Subm_SubmCd.Trim() + "-" + Application.Appl_CtrlCd.Trim();
                     foreach (ApplicationConfirmedSINData confirmedAppl in applsInOtherJurisdictions)
                     {
-                        // add event to each of the applications found
-                        EventManager.Events.Add(new ApplicationEventData
-                        {
-                            Appl_CtrlCd = confirmedAppl.Appl_CtrlCd,
-                            Appl_EnfSrv_Cd = confirmedAppl.Appl_EnfSrv_Cd,
-                            Subm_SubmCd = confirmedAppl.Subm_SubmCd,
-                            Event_Reas_Cd = EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
-                            Event_Reas_Text = errorMessage
-                        });
-
+                        EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
+                                              eventReasonText: errorMessage, 
+                                              enfSrv: confirmedAppl.Appl_EnfSrv_Cd, controlCode: confirmedAppl.Appl_CtrlCd,
+                                              submCd: confirmedAppl.Subm_SubmCd);
                     }
 
                 }
             }
         }
 
-        public async Task AddDuplicateCreditorWarningEventsAsync()
+        public async Task AddDuplicateCreditorWarningEvents()
         {
-
-            var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgyAsync(Application.Appl_CtrlCd, Application.Subm_SubmCd,
-                                                                                     Application.Appl_Dbtr_Entrd_SIN,
-                                                                                     Application.Appl_SIN_Cnfrmd_Ind,
-                                                                                     Application.ActvSt_Cd,
-                                                                                     Application.AppCtgy_Cd);
+            var applicationList = await DB.ApplicationTable.GetSameCreditorForAppCtgy(Application.Appl_CtrlCd, Application.Subm_SubmCd,
+                                                                                      Application.Appl_Dbtr_Entrd_SIN,
+                                                                                      Application.Appl_SIN_Cnfrmd_Ind,
+                                                                                      Application.ActvSt_Cd,
+                                                                                      Application.AppCtgy_Cd);
 
             if (applicationList.Count > 0)
             {
@@ -444,24 +437,23 @@ namespace FOAEA3.Business.Areas.Application
                 foreach (var applicationFound in applicationList)
                 {
                     if ((!String.IsNullOrEmpty(applicationFound.Appl_Crdtr_SurNme)) &&
-                        (applicationFound.Appl_Crdtr_SurNme.ToUpper() == Application.Appl_Crdtr_SurNme.ToUpper()))
+                        (applicationFound.Appl_Crdtr_SurNme.ToUpper() == Application.Appl_Crdtr_SurNme?.ToUpper()))
                     {
                         allMatchErrorMessage.Append($"{applicationFound.Appl_EnfSrv_Cd.Trim()}-{applicationFound.Subm_SubmCd.Trim()}-{applicationFound.Appl_CtrlCd.Trim()} ");
 
-                        var eventData = new ApplicationEventData
-                        {
-                            Event_Reas_Cd = EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
-                            Event_Reas_Text = originalApplicationErrorMessage,
-                            Appl_EnfSrv_Cd = applicationFound.Appl_EnfSrv_Cd,
-                            Appl_CtrlCd = applicationFound.Appl_CtrlCd
-                        };
+                        EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
+                                              eventReasonText: originalApplicationErrorMessage,
+                                              enfSrv: applicationFound.Appl_EnfSrv_Cd, controlCode: applicationFound.Appl_CtrlCd,
+                                              submCd: applicationFound.Subm_SubmCd);
 
-                        EventManager.Events.Add(eventData);
                     }
                 }
 
-                EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
-                                     allMatchErrorMessage.ToString().Trim());
+                if (!string.IsNullOrEmpty(allMatchErrorMessage.ToString()))
+                {
+                    EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
+                                          allMatchErrorMessage.ToString().Trim());
+                }
 
             }
 
@@ -538,37 +530,37 @@ namespace FOAEA3.Business.Areas.Application
         {
             bool revertedSomeFields = false;
 
-            if ((Application.Appl_EnfSrv_Cd != current.Appl_EnfSrv_Cd) ||
-                (Application.Appl_CtrlCd != current.Appl_CtrlCd) ||
-                (Application.Subm_SubmCd != current.Subm_SubmCd) ||
-                (Application.Subm_Recpt_SubmCd != current.Subm_Recpt_SubmCd) ||
+            if ((Application.Appl_EnfSrv_Cd?.Trim() != current.Appl_EnfSrv_Cd?.Trim()) ||
+                (Application.Appl_CtrlCd?.Trim() != current.Appl_CtrlCd?.Trim()) ||
+                (Application.Subm_SubmCd?.Trim() != current.Subm_SubmCd?.Trim()) ||
+                (Application.Subm_Recpt_SubmCd?.Trim() != current.Subm_Recpt_SubmCd?.Trim()) ||
                 (!Application.Appl_Lgl_Dte.AreDatesEqual(current.Appl_Lgl_Dte)) ||
                 (!Application.Appl_Rcptfrm_Dte.AreDatesEqual(current.Appl_Rcptfrm_Dte)) ||
-                (Application.Appl_Group_Batch_Cd != current.Appl_Group_Batch_Cd) ||
-                (Application.Subm_Affdvt_SubmCd != current.Subm_Affdvt_SubmCd) ||
+                (Application.Appl_Group_Batch_Cd?.Trim() != current.Appl_Group_Batch_Cd?.Trim()) ||
+                (Application.Subm_Affdvt_SubmCd?.Trim() != current.Subm_Affdvt_SubmCd?.Trim()) ||
                 (!Application.Appl_RecvAffdvt_Dte.AreDatesEqual(current.Appl_RecvAffdvt_Dte)) ||
-                (Application.Appl_Affdvt_DocTypCd != current.Appl_Affdvt_DocTypCd) ||
-                (Application.Appl_JusticeNr != current.Appl_JusticeNr) ||
-                (Application.Appl_Crdtr_FrstNme != current.Appl_Crdtr_FrstNme) ||
-                (Application.Appl_Crdtr_MddleNme != current.Appl_Crdtr_MddleNme) ||
-                (Application.Appl_Crdtr_SurNme != current.Appl_Crdtr_SurNme) ||
-                (Application.Appl_Dbtr_FrstNme != current.Appl_Dbtr_FrstNme) ||
-                (Application.Appl_Dbtr_MddleNme != current.Appl_Dbtr_MddleNme) ||
-                (Application.Appl_Dbtr_SurNme != current.Appl_Dbtr_SurNme) ||
+                (Application.Appl_Affdvt_DocTypCd?.Trim() != current.Appl_Affdvt_DocTypCd?.Trim()) ||
+                (Application.Appl_JusticeNr?.Trim() != current.Appl_JusticeNr?.Trim()) ||
+                (Application.Appl_Crdtr_FrstNme?.Trim() != current.Appl_Crdtr_FrstNme?.Trim()) ||
+                (Application.Appl_Crdtr_MddleNme?.Trim() != current.Appl_Crdtr_MddleNme?.Trim()) ||
+                (Application.Appl_Crdtr_SurNme?.Trim() != current.Appl_Crdtr_SurNme?.Trim()) ||
+                (Application.Appl_Dbtr_FrstNme?.Trim() != current.Appl_Dbtr_FrstNme?.Trim()) ||
+                (Application.Appl_Dbtr_MddleNme?.Trim() != current.Appl_Dbtr_MddleNme?.Trim()) ||
+                (Application.Appl_Dbtr_SurNme?.Trim() != current.Appl_Dbtr_SurNme?.Trim()) ||
                 (Application.Appl_Dbtr_Parent_SurNme_Birth != current.Appl_Dbtr_Parent_SurNme_Birth) ||
                 (!Application.Appl_Dbtr_Brth_Dte.AreDatesEqual(current.Appl_Dbtr_Brth_Dte)) ||
-                (Application.Appl_Dbtr_LngCd != current.Appl_Dbtr_LngCd) ||
-                (Application.Appl_Dbtr_Gendr_Cd != current.Appl_Dbtr_Gendr_Cd) ||
-                (Application.Appl_Dbtr_Entrd_SIN != current.Appl_Dbtr_Entrd_SIN) ||
-                (Application.Appl_Dbtr_Cnfrmd_SIN != current.Appl_Dbtr_Cnfrmd_SIN) ||
-                (Application.Appl_Dbtr_RtrndBySrc_SIN != current.Appl_Dbtr_RtrndBySrc_SIN) ||
-                (Application.Medium_Cd != current.Medium_Cd) ||
-                (!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
+                (Application.Appl_Dbtr_LngCd?.Trim() != current.Appl_Dbtr_LngCd?.Trim()) ||
+                (Application.Appl_Dbtr_Gendr_Cd?.Trim() != current.Appl_Dbtr_Gendr_Cd?.Trim()) ||
+                (Application.Appl_Dbtr_Entrd_SIN?.Trim() != current.Appl_Dbtr_Entrd_SIN?.Trim()) ||
+                (Application.Appl_Dbtr_Cnfrmd_SIN?.Trim() != current.Appl_Dbtr_Cnfrmd_SIN?.Trim()) ||
+                (Application.Appl_Dbtr_RtrndBySrc_SIN?.Trim() != current.Appl_Dbtr_RtrndBySrc_SIN?.Trim()) ||
+                (Application.Medium_Cd?.Trim() != current.Medium_Cd?.Trim()) ||
+                //(!Application.Appl_Reactv_Dte.AreDatesEqual(current.Appl_Reactv_Dte)) ||
                 (Application.Appl_SIN_Cnfrmd_Ind != current.Appl_SIN_Cnfrmd_Ind) ||
-                (Application.AppCtgy_Cd != current.AppCtgy_Cd) ||
-                (Application.AppReas_Cd != current.AppReas_Cd) ||
+                (Application.AppCtgy_Cd?.Trim() != current.AppCtgy_Cd?.Trim()) ||
+                (Application.AppReas_Cd?.Trim() != current.AppReas_Cd?.Trim()) ||
                 (!Application.Appl_Create_Dte.AreDatesEqual(current.Appl_Create_Dte)) ||
-                (Application.Appl_Create_Usr != current.Appl_Create_Usr) ||
+                (Application.Appl_Create_Usr?.Trim() != current.Appl_Create_Usr?.Trim()) ||
                 (Application.Appl_WFID != current.Appl_WFID) ||
                 (!Application.Appl_Crdtr_Brth_Dte.AreDatesEqual(current.Appl_Crdtr_Brth_Dte)))
             {
@@ -599,7 +591,7 @@ namespace FOAEA3.Business.Areas.Application
                 Application.Appl_Dbtr_Cnfrmd_SIN = current.Appl_Dbtr_Cnfrmd_SIN;
                 Application.Appl_Dbtr_RtrndBySrc_SIN = current.Appl_Dbtr_RtrndBySrc_SIN;
                 Application.Medium_Cd = current.Medium_Cd;
-                Application.Appl_Reactv_Dte = current.Appl_Reactv_Dte;
+                //Application.Appl_Reactv_Dte = current.Appl_Reactv_Dte;
                 Application.Appl_SIN_Cnfrmd_Ind = current.Appl_SIN_Cnfrmd_Ind;
                 Application.AppCtgy_Cd = current.AppCtgy_Cd;
                 Application.AppReas_Cd = current.AppReas_Cd;
@@ -650,7 +642,7 @@ namespace FOAEA3.Business.Areas.Application
                 return false;
             }
 
-            var enfServices = await DB.EnfSrvTable.GetEnfServiceAsync();
+            var enfServices = await DB.EnfSrvTable.GetEnfService();
             if (enfServices != null)
             {
                 var service = enfServices.FirstOrDefault(m => m.EnfSrv_Cd.Trim() == Application.Appl_EnfSrv_Cd.Trim());
@@ -687,8 +679,6 @@ namespace FOAEA3.Business.Areas.Application
 
             return true;
         }
-
-        public bool IsC78() => Application.Appl_Create_Dte >= Config.TracingC78CutOff;
 
         private async Task PostalCodeValidationInBound()
         {
@@ -741,7 +731,7 @@ namespace FOAEA3.Business.Areas.Application
                 var postalCodeDB = DB.PostalCodeTable;
                 string validProvCode;
                 PostalCodeFlag validFlags;
-                (_, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCodeAsync(debtorPostalCode, debtorProvince ?? "", debtorCity);
+                (_, validProvCode, validFlags) = await postalCodeDB.ValidatePostalCode(debtorPostalCode, debtorProvince ?? "", debtorCity);
 
                 if (!string.IsNullOrEmpty(validProvCode))
                 {

@@ -1,7 +1,6 @@
 ﻿using FileBroker.Model.Interfaces.Broker;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Threading.Tasks;
 
 namespace FileBroker.Common.Brokers
 {
@@ -16,16 +15,16 @@ namespace FileBroker.Common.Brokers
             Token = token;
         }
 
-        public async Task<string> GetVersionAsync()
+        public async Task<string> GetVersion()
         {
             string apiCall = $"api/v1/SinFiles/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync()
+        public async Task<string> GetConnection()
         {
             string apiCall = $"api/v1/SinFiles/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
     }
 }

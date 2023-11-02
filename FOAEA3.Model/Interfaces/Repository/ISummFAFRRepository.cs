@@ -9,7 +9,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<DataList<SummFAFR_Data>> GetSummFaFrAsync(int summFAFR_Id);
-        Task<DataList<SummFAFR_Data>> GetSummFaFrListAsync(List<SummFAFR_DE_Data> summFAFRs);
+        Task<DataList<SummFAFR_Data>> GetSummFaFr(int summFAFR_Id);
+        Task<DataList<SummFAFR_Data>> GetSummFaFrList(List<SummFAFR_DE_Data> summFAFRs);
     }
 }

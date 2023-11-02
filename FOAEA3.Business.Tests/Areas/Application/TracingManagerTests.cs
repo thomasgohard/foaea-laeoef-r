@@ -16,7 +16,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
         public async Task TestProcessFinancialTermsVaried_17GenerateEvent50933()
         {
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
-            await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
+            await ReferenceData.Instance().LoadFoaEvents(new InMemoryFoaEvents());
 
             var user = UserHelper.CreateSystemAdminUser();
 
@@ -45,7 +45,7 @@ namespace FOAEA3.Data.Tests.Areas.Application
         public async Task TestProcessFinancialTermsVaried_17StateNotChanged()
         {
             //if (ReferenceData.Instance().FoaEvents.FoaEvents.Keys.Count == 0)
-            await ReferenceData.Instance().LoadFoaEventsAsync(new InMemoryFoaEvents());
+            await ReferenceData.Instance().LoadFoaEvents(new InMemoryFoaEvents());
 
             var user = UserHelper.CreateSystemAdminUser();
 

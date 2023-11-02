@@ -35,6 +35,7 @@ namespace FOAEA3.Model.Interfaces.Repository
         ISINResultRepository SINResultTable { get; }
         IProductionAuditRepository ProductionAuditTable { get; }
         ISINChangeHistoryRepository SINChangeHistoryTable { get; }
+        ICraSinPendingRepository CraSinPendingTable { get; }
         IFamilyProvisionRepository FamilyProvisionTable { get; }
         IInfoBankRepository InfoBankTable { get; }
         IAccessAuditRepository AccessAuditTable { get; }

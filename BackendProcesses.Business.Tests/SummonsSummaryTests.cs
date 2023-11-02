@@ -26,7 +26,7 @@ namespace BackendProcesses.Business.Tests
             var summSmryDB = inMemRepositoryFinance.SummonsSummaryRepository;
 
             // Act
-            var data = await summSmryDB.GetAmountOwedRecordsAsync();
+            var data = await summSmryDB.GetAmountOwedRecords();
 
             // Assert
             Assert.Single(data);

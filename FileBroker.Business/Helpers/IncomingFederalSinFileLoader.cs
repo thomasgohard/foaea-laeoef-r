@@ -11,12 +11,13 @@ public class IncomingFederalSinFileLoader
         ProcessId = processId;
     }
 
-    public async Task FillSinFileDataFromFlatFileAsync(FedSinFileBase fileData, string flatFile, List<string> errors)
+    public async Task FillSinFileDataFromFlatFile(FedSinFileBase fileData, string flatFile, List<string> errors)
     {
-        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFileAsync(ProcessId);
+        var specs = await FlatFileSpecs.GetFlatFileSpecificationsForFile(ProcessId);
 
         // extract data into object
         var flatFileLines = flatFile.Split("\n");
+        int lineNumber = 1;
         foreach (var flatFileLine in flatFileLines)
         {
             string error = string.Empty;
@@ -27,21 +28,23 @@ public class IncomingFederalSinFileLoader
                 switch (recType)
                 {
                     case "01":
-                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ01, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ01, flatFileLine, specs, recType, lineNumber, ref error);
                         break;
 
                     case "02":
-                        FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.SININ02, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeMultiple(fileData.SININ02, flatFileLine, specs, recType, lineNumber, ref error);
                         break;
 
                     case "99":
-                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ99, flatFileLine, specs, recType, ref error);
+                        FlatFileSpecHelper.ExtractRecTypeSingle(ref fileData.SININ99, flatFileLine, specs, recType, lineNumber, ref error);
                         break;
                 }
             }
 
             if (!string.IsNullOrEmpty(error))
                 errors.Add(error);
+
+            lineNumber++;
 
         }
 

@@ -5,6 +5,6 @@ namespace FileBroker.Model.Interfaces
 {
     public interface ITranslationRepository
     {
-        Task<List<TranslationData>> GetTranslationsAsync();
+        Task<List<TranslationData>> GetTranslations();
     }
 }

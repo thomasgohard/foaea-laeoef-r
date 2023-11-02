@@ -11,7 +11,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<SubjectData> GetSubjectAsync(string subjectName)
+        public Task<SubjectData> GetSubject(string subjectName)
         {
             var subjectData = new SubjectData
             {
@@ -24,12 +24,12 @@ namespace TestData.TestDB
             return Task.FromResult(subjectData);
         }
 
-        public Task<SubjectData> GetSubjectByConfirmationCodeAsync(string confirmationCode)
+        public Task<SubjectData> GetSubjectByConfirmationCode(string confirmationCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<SubjectData>> GetSubjectsForSubmitterAsync(string submCd)
+        public Task<List<SubjectData>> GetSubjectsForSubmitter(string submCd)
         {
             throw new NotImplementedException();
         }

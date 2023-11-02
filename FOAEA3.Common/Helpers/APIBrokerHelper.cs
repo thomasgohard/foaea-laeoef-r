@@ -1,4 +1,5 @@
-﻿using FOAEA3.Model;
+﻿using Azure.Core;
+using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -40,7 +41,7 @@ namespace FOAEA3.Common.Helpers
             ErrorData = new MessageDataList();
         }
 
-        public static async Task<T> GetDataFromRequestBodyAsync<T>(HttpRequest request)
+        public static async Task<T> GetDataFromRequestBody<T>(HttpRequest request)
         {
             string bodyDataAsJSON;
             using (var reader = new StreamReader(request.Body, Encoding.UTF8))
@@ -51,7 +52,7 @@ namespace FOAEA3.Common.Helpers
             return JsonConvert.DeserializeObject<T>(bodyDataAsJSON);
         }
 
-        public async Task<string> GetStringAsync(string api, string root = "",
+        public async Task<string> GetString(string api, string root = "",
                                                  int maxAttempts = GlobalConfiguration.MAX_API_ATTEMPTS,
                                                  string token = null)
         {
@@ -111,7 +112,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> GetDataAsync<T>(string api, string root = "", string token = null)
+        public async Task<T> GetData<T>(string api, string root = "", string token = null)
             where T : new()
         {
             if ((token is null) && (GetToken is not null))
@@ -136,6 +137,7 @@ namespace FOAEA3.Common.Helpers
                     if (callResult.IsSuccessStatusCode)
                     {
                         string content = await callResult.Content.ReadAsStringAsync();
+
                         result = JsonConvert.DeserializeObject<T>(content);
                     }
                     else if (callResult.StatusCode == HttpStatusCode.InternalServerError)
@@ -192,7 +194,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<T> GetDataAsync<T, P>(string api, P data, string root = "", string token = null) where T : new()
+        public async Task<T> GetData<T, P>(string api, P data, string root = "", string token = null) where T : new()
         {
             if ((token is null) && (GetToken is not null))
                 token = GetToken();
@@ -283,31 +285,31 @@ namespace FOAEA3.Common.Helpers
             return result;
         }
 
-        public async Task<T> PostDataAsync<T, P>(string api, P data, string root = "", string token = null)
+        public async Task<T> PostData<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()
             where P : class
         {
             return await SendDataAsync<T, P>(api, data, "POST", root, token);
         }
 
-        public async Task<T> PutDataAsync<T, P>(string api, P data, string root = "", string token = null)
+        public async Task<T> PutData<T, P>(string api, P data, string root = "", string token = null)
             where T : class, new()
             where P : class
         {
             return await SendDataAsync<T, P>(api, data, "PUT", root, token);
         }
 
-        public async Task<string> PostDataGetStringAsync<P>(string api, P data, string root = "", string token = null) where P : class
+        public async Task<string> PostDataGetString<P>(string api, P data, string root = "", string token = null) where P : class
         {
             return await SendDataGetStringAsync<P>(api, data, "POST", root, token);
         }
 
-        public async Task<string> PutDataGetStringAsync<P>(string api, P data, string root = "", string token = null) where P : class
+        public async Task<string> PutDataGetString<P>(string api, P data, string root = "", string token = null) where P : class
         {
             return await SendDataGetStringAsync<P>(api, data, "PUT", root, token);
         }
 
-        public async Task SendCommandAsync(string api, string root = "", string token = null)
+        public async Task SendCommand(string api, string root = "", string token = null)
         {
             await SendCommandAsync(api, "PUT", root, token);
         }
@@ -502,7 +504,7 @@ namespace FOAEA3.Common.Helpers
 
         }
 
-        public async Task<HttpResponseMessage> PostJsonFileAsync(string api, string jsonData,
+        public async Task<HttpResponseMessage> PostJsonFile(string api, string jsonData,
                                                                  string rootAPI = null, string token = null)
         {
             if ((token is null) && (GetToken is not null))
@@ -516,7 +518,7 @@ namespace FOAEA3.Common.Helpers
             return await httpClient.PostAsync(root + api, content);
         }
 
-        public async Task<HttpResponseMessage> PostFlatFileAsync(string api, string flatFileData,
+        public async Task<HttpResponseMessage> PostFlatFile(string api, string flatFileData,
                                                                  string rootAPI = null, string token = null)
         {
             if ((token is null) && (GetToken is not null))

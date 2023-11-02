@@ -1,30 +1,24 @@
 ﻿using DBHelper;
-using FileBroker.Common.Helpers;
 
 namespace FileBroker.Business;
 
-public partial class IncomingFederalTracingManager
+public partial class IncomingFederalTracingManager : IncomingFederalManagerBase
 {
-    private APIBrokerList APIs { get; }
-    private RepositoryList DB { get; }
-
-    private FoaeaSystemAccess FoaeaAccess { get; }
+    private List<InboundAuditData> InboundAudit { get; }
 
     public IncomingFederalTracingManager(APIBrokerList apis, RepositoryList repositories,
-                                         IFileBrokerConfigurationHelper config)
+                                         IFileBrokerConfigurationHelper config) :
+                                                        base(apis, repositories, config)
     {
-        APIs = apis;
-        DB = repositories;
-
-        FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
+        InboundAudit = new List<InboundAuditData>();
     }
 
-    private async Task MarkTraceEventsAsProcessedAsync(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
-                                                  List<ApplicationEventData> activeTraceEvents,
-                                                  List<ApplicationEventDetailData> activeTraceEventDetails)
+    private async Task MarkTraceEventsAsProcessed(string applEnfSrvCd, string applCtrlCd, string flatFileName, short newState,
+                                                  ApplicationEventsList activeTraceEvents,
+                                                  ApplicationEventDetailsList activeTraceEventDetails)
     {
         var activeTraceEvent = activeTraceEvents
-                                   .Where(m => m.Appl_EnfSrv_Cd == applEnfSrvCd && m.Appl_CtrlCd == applCtrlCd)
+                                   .Where(m => m.Appl_EnfSrv_Cd.Trim() == applEnfSrvCd.Trim() && m.Appl_CtrlCd.Trim() == applCtrlCd.Trim())
                                    .FirstOrDefault();
 
         if (activeTraceEvent != null)
@@ -32,10 +26,10 @@ public partial class IncomingFederalTracingManager
             activeTraceEvent.ActvSt_Cd = "P";
             activeTraceEvent.Event_Compl_Dte = DateTime.Now;
 
-            await APIs.ApplicationEvents.SaveEventAsync(activeTraceEvent);
+            await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
 
             int eventId = activeTraceEvent.Event_Id;
-            string eventReason = $"[FileNm:{flatFileName}[ErrDes:000000MSGBRO]" +
+            string eventReason = $"[FileNm:{Path.GetFileName(flatFileName)}][ErrDes:000000MSGBRO]" +
                                  $"[(EnfSrv:{applEnfSrvCd.Trim()})(CtrlCd:{applCtrlCd.Trim()})]";
 
             var activeTraceEventDetail = activeTraceEventDetails
@@ -50,15 +44,41 @@ public partial class IncomingFederalTracingManager
                 activeTraceEventDetail.ActvSt_Cd = "C";
                 activeTraceEventDetail.Event_Compl_Dte = DateTime.Now;
 
-                await APIs.ApplicationEvents.SaveEventDetailAsync(activeTraceEventDetail);
+                await APIs.ApplicationEvents.SaveEventDetail(activeTraceEventDetail);
             }
-        }
 
+        }
     }
 
-    private async Task CloseOrInactivateTraceEventDetailsAsync(int cutOffDate, List<ApplicationEventDetailData> activeTraceEventDetails)
+    private async Task ResetOrCloseTraceEventDetails(string applEnfSrvCd, string applCtrlCd, ApplicationEventsList activeTraceEvents)
     {
+        var activeTraceEvent = activeTraceEvents
+                                   .Where(m => m.Appl_EnfSrv_Cd.Trim() == applEnfSrvCd.Trim() && m.Appl_CtrlCd.Trim() == applCtrlCd.Trim())
+                                   .FirstOrDefault();
 
+        if (activeTraceEvent != null)
+        {
+            var activeEventDetails = await APIs.TracingEvents.GetActiveTraceDetailEventsForApplication(applEnfSrvCd, applCtrlCd);
+
+            if (!activeEventDetails.Any())
+            {
+                activeTraceEvent.ActvSt_Cd = "C";
+                activeTraceEvent.Event_Compl_Dte = DateTime.Now;
+
+                await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
+            }
+            else
+            {
+                activeTraceEvent.ActvSt_Cd = "A";
+                activeTraceEvent.Event_Compl_Dte = DateTime.Now;
+
+                await APIs.ApplicationEvents.SaveEvent(activeTraceEvent);
+            }
+        }
+    }
+
+    private async Task CloseOrInactivateTraceEventDetails(int cutOffDate, ApplicationEventDetailsList activeTraceEventDetails)
+    {
         foreach (var row in activeTraceEventDetails)
         {
             if (row.Event_TimeStamp.AddDays(cutOffDate) < DateTime.Now)
@@ -72,28 +92,25 @@ public partial class IncomingFederalTracingManager
                 row.ActvSt_Cd = "C";
                 row.Event_Compl_Dte = DateTime.Now;
             }
-
-            await APIs.ApplicationEvents.SaveEventDetailAsync(row);
-
         }
 
+        await APIs.ApplicationEvents.SaveEventDetails(activeTraceEventDetails);
     }
 
-    private async Task UpdateTracingApplicationsAsync(string enfSrvCd, string fileCycle)
+    private async Task UpdateTracingApplications(string enfSrvCd, string fileCycle, FederalSource fedSource)
     {
-        var traceToApplData = await APIs.TracingApplications.GetTraceToApplDataAsync();
+        var traceToApplData = await APIs.TracingApplications.GetTraceToApplData();
 
         foreach (var row in traceToApplData)
         {
-            await ProcessTraceToApplDataAsync(row, enfSrvCd, fileCycle);
+            await ProcessTraceToApplData(row, enfSrvCd, fileCycle, fedSource);
         }
-
     }
 
-    private async Task ProcessTraceToApplDataAsync(TraceToApplData row, string enfSrvCd, string fileCycle)
+    private async Task ProcessTraceToApplData(TraceToApplData row, string enfSrvCd, string fileCycle, FederalSource fedSource)
     {
-        var activeTracingEvents = await APIs.TracingEvents.GetRequestedTRCINEventsAsync(enfSrvCd, fileCycle);
-        var activeTracingEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetailsAsync(enfSrvCd, fileCycle);
+        var activeTracingEvents = await APIs.TracingEvents.GetRequestedTRCINEvents(enfSrvCd, fileCycle);
+        var activeTracingEventDetails = await APIs.TracingEvents.GetActiveTracingEventDetails(enfSrvCd, fileCycle);
 
         string newEventState;
 
@@ -103,16 +120,16 @@ public partial class IncomingFederalTracingManager
         }
         else
         {
-            var tracingApplication = await APIs.TracingApplications.GetApplicationAsync(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
+            var tracingApplication = await APIs.TracingApplications.GetApplication(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
 
             if (row.Tot_Childs == row.Tot_Closed)
             {
-                await APIs.TracingApplications.FullyServiceApplicationAsync(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.FullyServiceApplication(tracingApplication, fedSource);
                 newEventState = "C";
             }
             else
             {
-                await APIs.TracingApplications.PartiallyServiceApplicationAsync(tracingApplication, enfSrvCd);
+                await APIs.TracingApplications.PartiallyServiceApplication(tracingApplication, fedSource);
                 newEventState = "A";
             }
         }
@@ -122,7 +139,7 @@ public partial class IncomingFederalTracingManager
         if (eventData != null)
         {
             eventData.ActvSt_Cd = newEventState;
-            await APIs.ApplicationEvents.SaveEventAsync(eventData);
+            await APIs.ApplicationEvents.SaveEvent(eventData);
         }
 
         if (newEventState.In("A", "C"))
@@ -131,10 +148,8 @@ public partial class IncomingFederalTracingManager
             if (eventDetailData != null)
             {
                 eventDetailData.Event_Compl_Dte = DateTime.Now;
-                await APIs.ApplicationEvents.SaveEventDetailAsync(eventDetailData);
+                await APIs.ApplicationEvents.SaveEventDetail(eventDetailData);
             }
         }
-
     }
-
 }

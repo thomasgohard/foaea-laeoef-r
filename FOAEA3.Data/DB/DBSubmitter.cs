@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<SubmitterData>> GetSubmitterAsync(string submCode = null,
+        public async Task<List<SubmitterData>> GetSubmitter(string submCode = null,
                                                 string submName = null,
                                                 string enfOffCode = null,
                                                 string enfServCode = null,
@@ -55,10 +55,10 @@ namespace FOAEA3.Data.DB
             code = rdr["SubmitterCode"] as string;
         }
 
-        public async Task<List<CommissionerData>> GetCommissionersAsync(string locationCode, string currentSubmitter)
+        public async Task<List<CommissionerData>> GetCommissioners(string locationCode, string currentSubmitter)
         {
 
-            var submittersForLocation = await GetSubmitterAsync(enfOffCode: locationCode);
+            var submittersForLocation = await GetSubmitter(enfOffCode: locationCode);
             var commissioners = (from s in submittersForLocation
                                  where (s.Subm_LglSgnAuth_Ind && (s.Subm_SubmCd != currentSubmitter) && (s.ActvSt_Cd == "A"))
                                  select new CommissionerData
@@ -71,7 +71,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<string> GetSignAuthorityForSubmitterAsync(string submCd)
+        public async Task<string> GetSignAuthorityForSubmitter(string submCd)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -81,7 +81,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<string>("GetSignAuthorityForSubmCd", parameters);
         }
 
-        public async Task<string> GetMaxSubmitterCodeAsync(string submCodePart)
+        public async Task<string> GetMaxSubmitterCode(string submCodePart)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -91,7 +91,7 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<string>("SubmGetMaxSubmitterCode", parameters);
         }
 
-        public async Task CreateSubmitterAsync(SubmitterData newSubmitter)
+        public async Task CreateSubmitter(SubmitterData newSubmitter)
         {
             var parameters = GetParametersForSubmitterData2(newSubmitter);
 
@@ -100,7 +100,7 @@ namespace FOAEA3.Data.DB
 
 
 
-        public async Task UpdateSubmitterAsync(SubmitterData newSubmitter)
+        public async Task UpdateSubmitter(SubmitterData newSubmitter)
         {
             // if update, then call new CRUD proc "Subm_Update"
             await MainDB.UpdateDataAsync<SubmitterData, string>("Subm", newSubmitter, "Subm_SubmCd", newSubmitter.Subm_SubmCd, SetParametersForUpdateSubmitterData);
@@ -109,7 +109,7 @@ namespace FOAEA3.Data.DB
                 newSubmitter.Messages.AddSystemError("Database Error: " + MainDB.LastError);
 
         }
-        public async Task<DateTime> UpdateSubmitterLastLoginAsync(string submCd)
+        public async Task<DateTime> UpdateSubmitterLastLogin(string submCd)
         {
             DateTime loginDate = DateTime.Now;
 
@@ -298,7 +298,7 @@ namespace FOAEA3.Data.DB
 
         #region SubmitterMessage
 
-        public async Task SubmitterMessageDeleteAsync(string submitterID)
+        public async Task SubmitterMessageDelete(string submitterID)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -308,7 +308,7 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("SubmMsgDeleteSubmMsg", parameters);
         }
 
-        public async Task CreateSubmitterMessageAsync(SubmitterMessageData submitterMessage)
+        public async Task CreateSubmitterMessage(SubmitterMessageData submitterMessage)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -326,7 +326,7 @@ namespace FOAEA3.Data.DB
 
         // exec SubmMsgGetSubmMsg @UserID=N'ON2D68',@LanguageCode=1033
 
-        public async Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitterAsync(string submitterID, int languageCode)
+        public async Task<List<SubmitterMessageData>> GetSubmitterMessageForSubmitter(string submitterID, int languageCode)
         {
             var parameters = new Dictionary<string, object>
             {

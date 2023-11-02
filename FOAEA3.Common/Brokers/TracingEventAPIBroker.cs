@@ -1,6 +1,8 @@
-﻿using FOAEA3.Model;
+﻿using FOAEA3.Common.Helpers;
+using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
+using Spire.Pdf.Lists;
 
 namespace FOAEA3.Common.Brokers
 {
@@ -15,21 +17,36 @@ namespace FOAEA3.Common.Brokers
             Token = token;
         }
 
-        public async Task CloseNETPTraceEventsAsync()
+        public async Task CloseNETPTraceEvents()
         {
-            await ApiHelper.SendCommandAsync($"api/v1/tracingEvents/CloseNETPTraceEvents", token: Token);
+            await ApiHelper.SendCommand($"api/v1/tracingEvents/CloseNETPTraceEvents", token: Token);
         }
 
-        public async Task<List<ApplicationEventDetailData>> GetActiveTracingEventDetailsAsync(string enfSrvCd, string fileCycle)
+        public async Task<ApplicationEventDetailsList> GetActiveTracingEventDetails(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/Details/Active?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventDetailData>>(apiCall, token: Token);
+            var data = await ApiHelper.GetData<List<ApplicationEventDetailData>>(apiCall, token: Token);
+            return new ApplicationEventDetailsList(data);
         }
 
-        public async Task<List<ApplicationEventData>> GetRequestedTRCINEventsAsync(string enfSrvCd, string fileCycle)
+        public async Task<ApplicationEventsList> GetRequestedTRCINEvents(string enfSrvCd, string fileCycle)
         {
             string apiCall = $"api/v1/tracingEvents/RequestedTRCIN?enforcementServiceCode={enfSrvCd}&fileCycle={fileCycle}";
-            return await ApiHelper.GetDataAsync<List<ApplicationEventData>>(apiCall, token: Token);
+            var data = await ApiHelper.GetData<List<ApplicationEventData>>(apiCall, token: Token);
+            return new ApplicationEventsList(data);
         }
+
+        public async Task<ApplicationEventDetailsList> GetActiveTraceDetailEventsForApplication(string appl_EnfSrvCd, string appl_CtrlCd)
+        {
+            string key = ApplKey.MakeKey(appl_EnfSrvCd, appl_CtrlCd);
+            string apiCall = $"api/v1/tracingEventDetails/{key}/Trace";
+            var data = await ApiHelper.GetData<List<ApplicationEventDetailData>>(apiCall, token: Token);
+
+            data.RemoveAll(m => m.ActvSt_Cd.ToUpper() != "A");
+
+            return new ApplicationEventDetailsList(data);
+        }
+
+
     }
 }

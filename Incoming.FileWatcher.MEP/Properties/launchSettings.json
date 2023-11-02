@@ -2,7 +2,6 @@
   "profiles": {
     "WSL": {
       "commandName": "WSL2",
-      "environmentVariables": {},
       "distributionName": ""
     },
     "Incoming.FileWatcher.MEP": {
@@ -10,7 +9,7 @@
     },
     "Incoming.FileWatcher.MEP ON": {
       "commandName": "Project",
-      "commandLineArgs": "ON"
+      "commandLineArgs": "ALL TRACE_ONLY"
     },
     "Incoming.FileWatcher.MEP BC": {
       "commandName": "Project",

@@ -1,4 +1,7 @@
-﻿namespace FOAEA3.Model
+﻿using System;
+using System.Collections;
+
+namespace FOAEA3.Model
 {
     public class EnfSrvData
     {
@@ -25,6 +28,8 @@
         public string EnfCtgy_Cd { get; set; }
         public string ActvSt_Cd { get; set; }
         public string PaymentId_Is_SIN_Ind { get; set; }
+        public bool HasSignedC78 { get; set; }
+        public DateTime? C78EffectiveDateTime { get; set; }
         public string Ctrl_cd_char { get; set; }
 
         public string EnfSrv_Nme_F { get; set; }

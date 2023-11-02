@@ -15,7 +15,7 @@ namespace FileBroker.Data.DB
             MainDB = mainDB;
         }
 
-        public async Task<string> GetValueForParameterAsync(int processId, string parameter)
+        public async Task<string> GetValueForParameter(int processId, string parameter)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -35,7 +35,7 @@ namespace FileBroker.Data.DB
             return values[outputParamFieldName] as string;
         }
 
-        public async Task<ProcessCodeData> GetProcessCodesAsync(int processId)
+        public async Task<ProcessCodeData> GetProcessCodes(int processId)
         {
 
             var parameters = new Dictionary<string, object>

@@ -15,6 +15,7 @@ namespace FileBroker.Model.Interfaces
         FoaeaLoginData FoaeaLogin { get; }
         string FTProot { get; }
         string FTPbackupRoot { get; }
+        bool LogConsoleOutputToFile { get; }
         List<string> ProductionServers { get; }
         string TermsAcceptedTextEnglish { get; }
         string TermsAcceptedTextFrench { get; }

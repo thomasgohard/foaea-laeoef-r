@@ -16,7 +16,7 @@ namespace FOAEA3.Data.DB
 
         public MessageDataList Messages { get; set; }
 
-        public async Task<DataList<ApplicationCommentsData>> GetApplicationCommentsAsync()
+        public async Task<DataList<ApplicationCommentsData>> GetApplicationComments()
         {
 
             var data = await MainDB.GetAllDataAsync<ApplicationCommentsData>("ApplicationComments", FillDataFromReader);

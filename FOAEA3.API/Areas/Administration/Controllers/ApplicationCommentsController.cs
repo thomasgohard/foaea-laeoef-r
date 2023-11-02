@@ -22,6 +22,6 @@ public class ApplicationCommentsController : FoaeaControllerBase
     [HttpGet]
     public async Task<ActionResult<DataList<ApplicationCommentsData>>> GetApplicationComments([FromServices] IApplicationCommentsRepository applicationCommentsRepository)
     {
-        return Ok(await applicationCommentsRepository.GetApplicationCommentsAsync());
+        return Ok(await applicationCommentsRepository.GetApplicationComments());
     }
 }

@@ -23,40 +23,40 @@ namespace FOAEA3.Business.BackendProcesses
             DBfinance = repositoriesFinance;
         }
 
-        public async Task RunAsync(List<SummonsSummaryData> summSmryData = null)
+        public async Task Run(List<SummonsSummaryData> summSmryData = null)
         {
 
             var prodAudit = DB.ProductionAuditTable;
             var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
-            await prodAudit.InsertAsync("Amount Owed", "Amount Owed Started", "O");
+            await prodAudit.Insert("Amount Owed", "Amount Owed Started", "O");
 
             if (summSmryData is null)
-                summSmryData = await dbSummonsSummary.GetAmountOwedRecordsAsync();
-            await CalculateAndUpdateAmountOwedAsync(summSmryData);
+                summSmryData = await dbSummonsSummary.GetAmountOwedRecords();
+            await CalculateAndUpdateAmountOwed(summSmryData);
 
-            await prodAudit.InsertAsync("Amount Owed", "Amount Owed Completed", "O");
+            await prodAudit.Insert("Amount Owed", "Amount Owed Completed", "O");
         }
 
-        public async Task<SummonsSummaryData> GetSummonsSummaryDataAsync(string enfSrv, string applCtrl)
+        public async Task<SummonsSummaryData> GetSummonsSummaryData(string enfSrv, string applCtrl)
         {
             var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
-            return (await dbSummonsSummary.GetSummonsSummaryAsync(enfSrv, applCtrl)).FirstOrDefault();
+            return (await dbSummonsSummary.GetSummonsSummary(enfSrv, applCtrl)).FirstOrDefault();
         }
 
-        public async Task<(SummonsSummaryData summSmryNewData, SummonsSummaryFixedAmountData summSmryFixedAmountNewData)> CalculateAndUpdateAmountOwedForVariationAsync(string enfSrv, string applCtrl)
+        public async Task<(SummonsSummaryData summSmryNewData, SummonsSummaryFixedAmountData summSmryFixedAmountNewData)> CalculateAndUpdateAmountOwedForVariation(string enfSrv, string applCtrl)
         {
             var dbSummonsSummary = DBfinance.SummonsSummaryRepository;
 
-            var summSmryData = await dbSummonsSummary.GetSummonsSummaryAsync(enfSrv, applCtrl);
+            var summSmryData = await dbSummonsSummary.GetSummonsSummary(enfSrv, applCtrl);
             (SummonsSummaryData summSmryNewData,
-             SummonsSummaryFixedAmountData summSmryFixedAmountNewData) = await CalculateAndUpdateAmountOwedAsync(summSmryData, isVariation: true);
+             SummonsSummaryFixedAmountData summSmryFixedAmountNewData) = await CalculateAndUpdateAmountOwed(summSmryData, isVariation: true);
 
             return (summSmryNewData, summSmryFixedAmountNewData);
         }
 
-        private async Task<(SummonsSummaryData, SummonsSummaryFixedAmountData)> CalculateAndUpdateAmountOwedAsync(List<SummonsSummaryData> summSmryData,
+        private async Task<(SummonsSummaryData, SummonsSummaryFixedAmountData)> CalculateAndUpdateAmountOwed(List<SummonsSummaryData> summSmryData,
                                                          DateTime? payableDateOverride = null,
                                                          bool isVariation = false)
         {
@@ -70,26 +70,26 @@ namespace FOAEA3.Business.BackendProcesses
             int rowNum = 0;
 
             if (!isVariation)
-                await prodAudit.InsertAsync("Amount Owed", $"Total number of I01 applications to be recalculated: {summSmryData.Count}", "S");
+                await prodAudit.Insert("Amount Owed", $"Total number of I01 applications to be recalculated: {summSmryData.Count}", "S");
             else
             {
                 if (summSmryData.Count == 1)
                 {
                     var variationData = summSmryData[0];
-                    await prodAudit.InsertAsync("Amount Owed", $"Variation recalculations for {variationData.Appl_EnfSrv_Cd}-{variationData.Appl_CtrlCd}", "S");
+                    await prodAudit.Insert("Amount Owed", $"Variation recalculations for {variationData.Appl_EnfSrv_Cd}-{variationData.Appl_CtrlCd}", "S");
                 }
                 else
-                    await prodAudit.InsertAsync("Amount Owed", $"No summSmry data found?!", "S");
+                    await prodAudit.Insert("Amount Owed", $"No summSmry data found?!", "S");
             }
 
             foreach (SummonsSummaryData row in summSmryData)
             {
 
-                AmountOwedRecalcInfo newAmountOwedAndDiverted = await CalculateActualAmountOwedAsync(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd, payableDate, row.SummSmry_Vary_Cnt, row.Start_Dte, isVariation);
+                AmountOwedRecalcInfo newAmountOwedAndDiverted = await CalculateActualAmountOwed(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd, payableDate, row.SummSmry_Vary_Cnt, row.Start_Dte, isVariation);
 
                 if (newAmountOwedAndDiverted.NewRecalcDate != null)
                 {
-                    (summSmryNewData, summSmryFixedAmountNewData) = await SaveDataAsync(row,
+                    (summSmryNewData, summSmryFixedAmountNewData) = await SaveData(row,
                                                                             newAmountOwedAndDiverted.OwedData,
                                                                             newAmountOwedAndDiverted.NewRecalcDate,
                                                                             newAmountOwedAndDiverted.NewFixedAmountRecalcDate,
@@ -100,7 +100,7 @@ namespace FOAEA3.Business.BackendProcesses
                                                                             isVariation);
 
                     if ((rowNum > 0) && (rowNum % 1000 == 0))
-                        await prodAudit.InsertAsync("Amount Owed", $"Record Processed - {rowNum}", "S");
+                        await prodAudit.Insert("Amount Owed", $"Record Processed - {rowNum}", "S");
 
                     rowNum++;
                 }
@@ -108,18 +108,18 @@ namespace FOAEA3.Business.BackendProcesses
             }
 
             if (!isVariation)
-                await prodAudit.InsertAsync("Amount Owed", $"Record Processed - {rowNum}", "O");
+                await prodAudit.Insert("Amount Owed", $"Record Processed - {rowNum}", "O");
 
             return (summSmryNewData, summSmryFixedAmountNewData);
         }
 
-        public async Task<AmountOwedRecalcInfo> CalculateActualAmountOwedAsync(string enfSrvCd, string ctrlCd, DateTime payableDate, short summSmry_Vary_Cnt, DateTime start_Dte, bool isVariation)
+        public async Task<AmountOwedRecalcInfo> CalculateActualAmountOwed(string enfSrvCd, string ctrlCd, DateTime payableDate, short summSmry_Vary_Cnt, DateTime start_Dte, bool isVariation)
         {
             var dbActiveSummons = DBfinance.ActiveSummonsRepository;
 
-            if (await dbActiveSummons.GetActiveSummonsCoreAsync(payableDate, enfSrvCd, ctrlCd) != default)
+            if (await dbActiveSummons.GetActiveSummonsCore(payableDate, enfSrvCd, ctrlCd) != default)
             {
-                ActiveSummonsData activeSummonsData = await dbActiveSummons.GetActiveSummonsDataAsync(payableDate, ctrlCd, enfSrvCd, isVariation);
+                ActiveSummonsData activeSummonsData = await dbActiveSummons.GetActiveSummonsData(payableDate, ctrlCd, enfSrvCd, isVariation);
 
                 if ((activeSummonsData is not null) && (activeSummonsData.Appl_RecvAffdvt_Dte is not null))
                 {
@@ -156,14 +156,14 @@ namespace FOAEA3.Business.BackendProcesses
 
                             if (periodInfo.PeriodFrequency == EPeriodFrequency.Both)
                             {
-                                (lmpSumDivertedTtl_Money, perPymDivertedTtl_Money) = await dbGarnPeriod.UpdateGarnPeriodAsync(enfSrvCd, ctrlCd, activeSummonsData.IntFinH_LmpSum_Money,
+                                (lmpSumDivertedTtl_Money, perPymDivertedTtl_Money) = await dbGarnPeriod.UpdateGarnPeriod(enfSrvCd, ctrlCd, activeSummonsData.IntFinH_LmpSum_Money,
                                                               activeSummonsData.IntFinH_PerPym_Money ?? 0.0m,
                                                               AdjustCalcAcceptedDateBasedOnAcceptedDateAndPeriod(periodInfo.CalcAcceptedDate, acceptedDate, paymentPeriodCode),
                                                               lmpSumDivertedTtl_Money, perPymDivertedTtl_Money);
                             }
                             else
                             {
-                                (lmpSumDivertedTtl_Money, perPymDivertedTtl_Money) = await dbGarnPeriod.UpdateGarnPeriodAsync(enfSrvCd, ctrlCd, activeSummonsData.IntFinH_LmpSum_Money,
+                                (lmpSumDivertedTtl_Money, perPymDivertedTtl_Money) = await dbGarnPeriod.UpdateGarnPeriod(enfSrvCd, ctrlCd, activeSummonsData.IntFinH_LmpSum_Money,
                                                               activeSummonsData.IntFinH_PerPym_Money ?? 0.0m,
                                                               periodInfo.CalcAcceptedDate,
                                                               lmpSumDivertedTtl_Money, perPymDivertedTtl_Money);
@@ -178,7 +178,7 @@ namespace FOAEA3.Business.BackendProcesses
                                                                                                        paymentPeriodCode, fixedAmountPeriodCode,
                                                                                                        periodInfo.CalcAcceptedDate,
                                                                                                        currentPeriodCount, currentPeriodCountFixedAmount);
-                        (OwedTotal owedData, recalcDate) = await CalculateTotalOwedAsync(enfSrvCd, ctrlCd, activeSummonsData, start_Dte,
+                        (OwedTotal owedData, recalcDate) = await CalculateTotalOwed(enfSrvCd, ctrlCd, activeSummonsData, start_Dte,
                                                                            periodInfo, currentPeriodCount, payableDate,
                                                                            summSmry_Vary_Cnt > 0 ? acceptedDate.Date : acceptedDate, recalcDate);
 
@@ -199,7 +199,7 @@ namespace FOAEA3.Business.BackendProcesses
                         var config = new FoaeaConfigurationHelper();
 
                         var dbNotification = DB.NotificationService;
-                        await dbNotification.SendEmailAsync(subject: "Amount Owed Periodic Calculation Error",
+                        await dbNotification.SendEmail(subject: "Amount Owed Periodic Calculation Error",
                                                  recipient: config.Recipients.EmailRecipients,
                                                  body: $"{enfSrvCd}-{ctrlCd}: Invalid periodic amounts \n" +
                                                        $"  Fixed Amount Period: {fixedAmountPeriodCode}\n" +
@@ -259,7 +259,7 @@ namespace FOAEA3.Business.BackendProcesses
             }
         }
 
-        private async Task<(OwedTotal, DateTime?)> CalculateTotalOwedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd,
+        private async Task<(OwedTotal, DateTime?)> CalculateTotalOwed(string appl_EnfSrv_Cd, string appl_CtrlCd,
                                                     ActiveSummonsData activeSummonsForDebtor,
                                                     DateTime startDate, PeriodInfo periodData, int currentPeriod,
                                                     DateTime payableDate,
@@ -269,9 +269,9 @@ namespace FOAEA3.Business.BackendProcesses
             var dbInterception = DB.InterceptionTable;
             var dbDivertFunds = DBfinance.DivertFundsRepository;
 
-            bool isFeeCumulative = await dbInterception.IsFeeCumulativeForApplicationAsync(appl_EnfSrv_Cd, appl_CtrlCd);
+            bool isFeeCumulative = await dbInterception.IsFeeCumulativeForApplication(appl_EnfSrv_Cd, appl_CtrlCd);
 
-            decimal totalDivertedForCurrentPeriod = await dbDivertFunds.GetTotalDivertedForPeriodAsync(appl_EnfSrv_Cd, appl_CtrlCd, currentPeriod);
+            decimal totalDivertedForCurrentPeriod = await dbDivertFunds.GetTotalDivertedForPeriod(appl_EnfSrv_Cd, appl_CtrlCd, currentPeriod);
 
             decimal finTermPerPaymentAmount = activeSummonsForDebtor.IntFinH_PerPym_Money ?? 0.0m;
             decimal periodicPaymentDivertedTotal = activeSummonsForDebtor.PerPymDivertedTtl_Money;
@@ -309,8 +309,8 @@ namespace FOAEA3.Business.BackendProcesses
             if (!periodRecalcDate.HasValue)
                 periodRecalcDate = acceptedDate.AddYears(summYearsActiveCount);
 
-            decimal feesOwedTotal = await dbSummonsSummary.GetFeesOwedTotalAsync(summYearsActiveCount, finTermSummEffectiveDate, isFeeCumulative);
-            decimal feesDivertedTotal = await dbDivertFunds.GetTotalFeesDivertedAsync(appl_EnfSrv_Cd, appl_CtrlCd, isFeeCumulative);
+            decimal feesOwedTotal = await dbSummonsSummary.GetFeesOwedTotal(summYearsActiveCount, finTermSummEffectiveDate, isFeeCumulative);
+            decimal feesDivertedTotal = await dbDivertFunds.GetTotalFeesDiverted(appl_EnfSrv_Cd, appl_CtrlCd, isFeeCumulative);
             feesOwedTotal -= feesDivertedTotal;
 
             return (new OwedTotal { FeesOwedTotal = feesOwedTotal, LumpSumOwedTotal = lumpSumOwedTotal, PeriodicPaymentOwedTotal = periodicPaymentOwedAmount },
@@ -634,7 +634,7 @@ namespace FOAEA3.Business.BackendProcesses
 
         }
 
-        private async Task<(SummonsSummaryData, SummonsSummaryFixedAmountData)> SaveDataAsync(SummonsSummaryData row, OwedTotal owedData,
+        private async Task<(SummonsSummaryData, SummonsSummaryFixedAmountData)> SaveData(SummonsSummaryData row, OwedTotal owedData,
                                      DateTime? newRecalcDate, DateTime? newFixedAmountRecalcDate,
                                      decimal? newLumpSumDivertedTotal, decimal? newPerDivertedTotal,
                                      PeriodInfo periodData, DateTime payableDate, bool isVariation)
@@ -666,12 +666,12 @@ namespace FOAEA3.Business.BackendProcesses
 
                 // update fixed amount
 
-                summSmryFixedAmount = await dbSummSmryFixedAmount.GetSummonsSummaryFixedAmountAsync(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
+                summSmryFixedAmount = await dbSummSmryFixedAmount.GetSummonsSummaryFixedAmount(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd);
 
                 if (summSmryFixedAmount == default)
                 {
                     if ((!isVariation) && (newFixedAmountRecalcDate.HasValue))
-                        await dbSummSmryFixedAmount.CreateSummonsSummaryFixedAmountAsync(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd,
+                        await dbSummSmryFixedAmount.CreateSummonsSummaryFixedAmount(row.Appl_EnfSrv_Cd, row.Appl_CtrlCd,
                                                                               newFixedAmountRecalcDate.Value);
                 }
                 else
@@ -681,7 +681,7 @@ namespace FOAEA3.Business.BackendProcesses
                         summSmryFixedAmount.SummSmry_FixedAmount_Recalc_Dte = newFixedAmountRecalcDate.Value;
 
                     if (!isVariation)
-                        await dbSummSmryFixedAmount.UpdateSummonsSummaryFixedAmountAsync(summSmryFixedAmount);
+                        await dbSummSmryFixedAmount.UpdateSummonsSummaryFixedAmount(summSmryFixedAmount);
                 }
 
             }
@@ -702,7 +702,7 @@ namespace FOAEA3.Business.BackendProcesses
             if (isVariation)
                 summSmryData.SummSmry_Vary_Cnt += 1;
             else
-                await dbSummSmry.UpdateSummonsSummaryAsync(summSmryData);
+                await dbSummSmry.UpdateSummonsSummary(summSmryData);
 
             return (summSmryData, summSmryFixedAmount);
 

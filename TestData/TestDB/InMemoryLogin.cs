@@ -14,42 +14,42 @@ namespace TestData.TestDB
 
         }
 
-        public Task<bool> IsLoginExpiredAsync(string subjectName)
+        public Task<bool> IsLoginExpired(string subjectName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> CheckPreviousPasswordsAsync(int subjectId, string newPassword)
+        public Task<bool> CheckPreviousPasswords(int subjectId, string newPassword)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> GetAllowedAccessAsync(string username)
+        public Task<bool> GetAllowedAccess(string username)
         {
             throw new NotImplementedException();
         }
 
-        public Task AcceptNewTermsOfReferernceAsync(string username)
+        public Task AcceptNewTermsOfReferernce(string username)
         {
             throw new NotImplementedException();
         }
 
-        public Task SetPasswordAsync(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
+        public Task SetPassword(string username, string password, int passwordFormat, string passwordSalt, int passwordExpireDays)
         {
             throw new NotImplementedException();
         }
 
-        public Task PostConfirmationCodeAsync(int subjectId, string confirmationCode)
+        public Task PostConfirmationCode(int subjectId, string confirmationCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task<string> GetEmailByConfirmationCodeAsync(string confirmationCode)
+        public Task<string> GetEmailByConfirmationCode(string confirmationCode)
         {
             throw new NotImplementedException();
         }
 
-        public Task PostPasswordAsync(string confirmationCode, string password, string salt, string initial)
+        public Task PostPassword(string confirmationCode, string password, string salt, string initial)
         {
             throw new NotImplementedException();
         }

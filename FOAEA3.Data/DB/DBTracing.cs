@@ -19,7 +19,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<TracingApplicationData> GetTracingDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<TracingApplicationData> GetTracingData(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -51,7 +51,7 @@ namespace FOAEA3.Data.DB
             return traceData;
         }
 
-        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityDataAsync(string enfSrv_Cd, string cycle)
+        public async Task<List<TraceCycleQuantityData>> GetTraceCycleQuantityData(string enfSrv_Cd, string cycle)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -62,28 +62,28 @@ namespace FOAEA3.Data.DB
             return await MainDB.GetDataFromStoredProcAsync<TraceCycleQuantityData>("MessageBrokerRequestedTRCINCycleQuantityData", parameters, FillTraceCycleQuantityDataFromReader);
         }
 
-        public async Task CreateTracingDataAsync(TracingApplicationData data)
+        public async Task CreateTracingData(TracingApplicationData data)
         {
-            await ChangeTracingDataAsync(data, "TrcApplDtlInsert");
+            await ChangeTracingData(data, "TrcApplDtlInsert");
 
             await CreateYearsAndTaxForms(data);
         }
 
-        public async Task UpdateTracingDataAsync(TracingApplicationData data)
+        public async Task UpdateTracingData(TracingApplicationData data)
         {
-            await ChangeTracingDataAsync(data, "TrcApplDtlUpdate");
+            await ChangeTracingData(data, "TrcApplDtlUpdate");
 
             await DeleteFinancialDataForAppl(data);
             if ((data.YearsAndTaxForms is not null) && data.YearsAndTaxForms.Any())
                 await CreateYearsAndTaxForms(data);
         }
 
-        public async Task CreateESDCEventTraceDataAsync()
+        public async Task CreateESDCEventTraceData()
         {
             await MainDB.ExecProcAsync("CreateESDCEventTraceData");
         }
 
-        private async Task ChangeTracingDataAsync(TracingApplicationData data, string procName)
+        private async Task ChangeTracingData(TracingApplicationData data, string procName)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -98,12 +98,20 @@ namespace FOAEA3.Data.DB
                         {"Trace_LstCyclStr_Dte", data.Trace_LstCyclStr_Dte == DateTime.MinValue ? DateTime.Now : data.Trace_LstCyclStr_Dte },
                         {"Trace_LstCyclCmp_Dte", data.Trace_LstCyclCmp_Dte.HasValue ? data.Trace_LstCyclCmp_Dte : DBNull.Value },
                         {"Trace_LiSt_Cd", data.Trace_LiSt_Cd },
-                        {"InfoBank_Cd", (object) data.InfoBank_Cd ?? DBNull.Value },
+                        {"S282_Ind",data.IncludeS282 },
+                        {"S283_Ind",data.IncludeS283 },
+                        {"Trace_ReasStepsParent_Text", (object) data.Trace_ReasStepsParent_Text ?? DBNull.Value },
+                        {"Trace_ReasStepsChild_Text", (object) data.Trace_ReasStepsChild_Text ?? DBNull.Value },
                         {"Declaration_Ind", data.DeclarationIndicator },
                         {"Tracing_Information", data.TraceInformation },
                         {"Sin_Information", data.IncludeSinInformation },
                         {"Financial_Information", data.IncludeFinancialInformation }
                     };
+
+            if (string.IsNullOrEmpty(data.InfoBank_Cd))
+                parameters.Add("InfoBank_Cd", DBNull.Value);
+            else
+                parameters.Add("InfoBank_Cd", data.InfoBank_Cd);
 
             if (data.PhoneNumber is not null) parameters.Add("Phone_Number", data.PhoneNumber);
             if (data.EmailAddress is not null) parameters.Add("Email_Address", data.EmailAddress);
@@ -111,7 +119,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync(procName, parameters);
         }
 
-        public async Task<bool> TracingDataExistsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd)
+        public async Task<bool> TracingDataExists(string appl_EnfSrv_Cd, string appl_CtrlCd)
         {
             var parameters = new Dictionary<string, object>
                     {
@@ -124,12 +132,12 @@ namespace FOAEA3.Data.DB
             return count > 0;
         }
 
-        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavitAsync()
+        public async Task<DataList<TracingApplicationData>> GetApplicationsWaitingForAffidavit()
         {
             var result = new DataList<TracingApplicationData>();
 
             var appDB = new DBApplication(MainDB);
-            var data = await appDB.GetApplicationsWaitingForAffidavitAsync("T01");
+            var data = await appDB.GetApplicationsWaitingForAffidavit("T01");
 
             string provinceCode = CurrentSubmitter[0..2];
 
@@ -151,12 +159,12 @@ namespace FOAEA3.Data.DB
             return result;
         }
 
-        public async Task<List<TraceToApplData>> GetTraceToApplDataAsync()
-        {
-            return await MainDB.GetAllDataAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
+        public async Task<List<TraceToApplData>> GetTraceToApplData()
+        {                                                       
+            return await MainDB.GetDataFromStoredProcAsync<TraceToApplData>("MessageBrokerGetTRACEInboundToApplData", FillTraceToApplDataFromReader);
         }
 
-        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingDataAsync(int maxRecords,
+        public async Task<List<TracingOutgoingFederalData>> GetFederalOutgoingData(int maxRecords,
                                                                        string activeState,
                                                                        ApplicationState lifeState,
                                                                        string enfServiceCode)
@@ -190,12 +198,12 @@ namespace FOAEA3.Data.DB
             );
         }
 
-        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingDataAsync(int maxRecords,
+        public async Task<TracingOutgoingProvincialData> GetProvincialOutgoingData(int maxRecords,
                                                                              string activeState,
                                                                              string recipientCode,
                                                                              bool isXML = true)
         {
-            var parameters = new Dictionary<string, object>
+            var paramTracing = new Dictionary<string, object>
             {
                 { "intRecMax", maxRecords },
                 { "dchrActvSt_Cd", activeState },
@@ -204,10 +212,17 @@ namespace FOAEA3.Data.DB
             };
 
             var tracingData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialTracingData>("MessageBrokerGetTRCAPPOUTOutboundData",
-                                                                                                            parameters, FillTracingOutgoingProvincialTracingData);
+                                                                                                            paramTracing, FillTracingOutgoingProvincialTracingData);
+
+            var paramFinancials = new Dictionary<string, object>
+            {
+                { "intRecMax", maxRecords },
+                { "dchrActvSt_Cd", activeState },
+                { "chrRecptCd", recipientCode }
+            };
 
             var financialData = await MainDB.GetDataFromStoredProcAsync<TracingOutgoingProvincialFinancialData>("TrcRspFin_SelectForOutboundData",
-                                                                                                            parameters, FillTracingOutgoingProvincialFinancialData);
+                                                                                                            paramFinancials, FillTracingOutgoingProvincialFinancialData);
 
             if (financialData is not null)
             {
@@ -326,7 +341,7 @@ namespace FOAEA3.Data.DB
             var enfSrvCd = rdr["Val20"] as string;
             switch (enfSrvCd?.Trim())
             {
-                case "HR01": data.EnfSrv_Cd = "UI00"; break;
+                case "HR02": data.EnfSrv_Cd = "UI00"; break;
                 case "EI02": data.EnfSrv_Cd = "EI00"; break;
                 case "RC01": data.EnfSrv_Cd = "RC00"; break;
                 default:
@@ -346,7 +361,7 @@ namespace FOAEA3.Data.DB
             data.TrcRsp_Rcpt_Dte = (DateTime)rdr["TrcRsp_Rcpt_Dte"];
             data.TrcRsp_SeqNr = rdr["TrcRsp_SeqNr"] as string;
             data.TrcSt_Cd = rdr["TrcSt_Cd"] as string;
-            data.Prcs_RecType = (int)rdr["Prcs_RecType"];
+            data.Prcs_RecType = (int?)rdr["Prcs_RecType"] ?? 0;
             data.EnfSrv_Cd = "RC00";
         }
 
@@ -366,7 +381,14 @@ namespace FOAEA3.Data.DB
         {
             data.Appl_EnfSrv_Cd = rdr["Appl_EnfSrv_Cd"] as string;
             data.Appl_CtrlCd = rdr["Appl_CtrlCd"] as string;
-            data.Trace_Cycl_Qty = (int)rdr["Trace_Cycl_Qty"];
+            try
+            {
+                data.Trace_Cycl_Qty = (int)rdr["Trace_Cycl_Qty"];
+            }
+            catch
+            {
+                data.Trace_Cycl_Qty = (short)rdr["Trace_Cycl_Qty"];
+            }
         }
 
         private void FillDataFromReader(IDBHelperReader rdr, TracingApplicationData data)
@@ -387,6 +409,10 @@ namespace FOAEA3.Data.DB
 
             if (rdr.ColumnExists("Phone_Number")) data.PhoneNumber = rdr["Phone_Number"] as string; // can be null 
             if (rdr.ColumnExists("Email_Address")) data.EmailAddress = rdr["Email_Address"] as string; // can be null 
+            if (rdr.ColumnExists("S282_Ind")) data.IncludeS282 = (bool)rdr["S282_Ind"];
+            if (rdr.ColumnExists("S283_Ind")) data.IncludeS283 = (bool)rdr["S283_Ind"];
+            if (rdr.ColumnExists("Trace_ReasStepsParent_Text")) data.Trace_ReasStepsParent_Text = rdr["Trace_ReasStepsParent_Text"] as string;
+            if (rdr.ColumnExists("Trace_ReasStepsChild_Text")) data.Trace_ReasStepsChild_Text = rdr["Trace_ReasStepsChild_Text"] as string;
             if (rdr.ColumnExists("Declaration_Ind")) data.DeclarationIndicator = (bool)rdr["Declaration_Ind"];
 
             if (rdr.ColumnExists("Tracing_Information")) data.TraceInformation = (short)rdr["Tracing_Information"];

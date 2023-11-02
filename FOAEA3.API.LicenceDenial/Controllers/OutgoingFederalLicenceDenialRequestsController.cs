@@ -30,7 +30,7 @@ public class OutgoingFederalLicenceDenialRequestsController : FoaeaControllerBas
     {
         var manager = new LicenceDenialManager(repositories, config, User);
 
-        var data = await manager.GetFederalOutgoingDataAsync(maxRecords, activeState, (ApplicationState)lifeState,
+        var data = await manager.GetFederalOutgoingData(maxRecords, activeState, (ApplicationState)lifeState,
                                                              enfServiceCode);
 
         return Ok(data);

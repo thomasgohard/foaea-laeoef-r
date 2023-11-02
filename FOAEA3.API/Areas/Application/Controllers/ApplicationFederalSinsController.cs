@@ -23,14 +23,14 @@ public class ApplicationFederalSinsController : FoaeaControllerBase
     [HttpPost("bulk")]
     public async Task<ActionResult<int>> CreateSinResultBulk([FromServices] IRepositories repositories)
     {
-        var responseData = await APIBrokerHelper.GetDataFromRequestBodyAsync<List<SINResultData>>(Request);
+        var responseData = await APIBrokerHelper.GetDataFromRequestBody<List<SINResultData>>(Request);
 
         var application = new ApplicationData();
 
         var applManager = new ApplicationManager(application, repositories, config, User);
         var sinManager = new ApplicationSINManager(application, applManager);
 
-        await sinManager.CreateResultDataAsync(responseData);
+        await sinManager.CreateResultData(responseData);
 
         var rootPath = "https://" + HttpContext.Request.Host.ToString();
 
@@ -38,21 +38,21 @@ public class ApplicationFederalSinsController : FoaeaControllerBase
     }
 
     [HttpGet("RequestedEventsForFile")]
-    public async Task<ActionResult<List<ApplicationEventData>>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<ApplicationEventsList>> GetRequestedSINEventDataForFile([FromQuery] string fileName,
                                                                                     [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventManager(new ApplicationData(), repositories);
 
-        return (await manager.GetRequestedSINEventDataForFileAsync("HR01", fileName)).Items;
+        return (await manager.GetRequestedSINEventDataForFile("HR01", fileName));
     }
 
     [HttpGet("RequestedEventDetailsForFile")]
-    public async Task<ActionResult<List<ApplicationEventDetailData>>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
+    public async Task<ActionResult<ApplicationEventDetailsList>> GetRequestedSINEventDetailDataForFile([FromQuery] string fileName,
                                                                                           [FromServices] IRepositories repositories)
     {
         var manager = new ApplicationEventDetailManager(new ApplicationData(), repositories);
 
-        return (await manager.GetRequestedSINEventDetailDataForFileAsync("HR01", fileName)).Items;
+        return (await manager.GetRequestedSINEventDetailDataForFile("HR01", fileName));
     }
 
 }

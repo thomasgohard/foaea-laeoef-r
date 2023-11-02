@@ -9,10 +9,10 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<List<CR_PADReventData>> GetActiveCR_PADReventsAsync(string enfSrv);
-        Task CloseCR_PADReventsAsync(string batchId, string enfSrv);
-        Task<List<BlockFundData>> GetBlockFundsAsync(string enfSrv);
-        Task<List<DivertFundData>> GetDivertFundsAsync(string enfSrv, string batchId);
-        Task<List<IFMSdata>> GetIFMSasync(string batchId);
+        Task<List<CR_PADReventData>> GetActiveCR_PADRevents(string enfSrv);
+        Task CloseCR_PADRevents(string batchId, string enfSrv);
+        Task<List<BlockFundData>> GetBlockFunds(string enfSrv);
+        Task<List<DivertFundData>> GetDivertFunds(string enfSrv, string batchId);
+        Task<List<IFMSdata>> GetIFMSDataFromFoaea(string batchId);
     }
 }

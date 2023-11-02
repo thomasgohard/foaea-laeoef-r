@@ -15,7 +15,7 @@ namespace TestData.TestDB
         public string CurrentSubmitter { get; set; }
         public string UserId { get; set; }
 
-        public Task<SubmitterProfileData> GetSubmitterProfileAsync(string submitterCode)
+        public Task<SubmitterProfileData> GetSubmitterProfile(string submitterCode)
         {
             throw new NotImplementedException();
         }

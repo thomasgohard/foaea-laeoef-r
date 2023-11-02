@@ -1,0 +1,8 @@
+{
+  "RecipientsConfig": {
+    "EmailRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "ExGratiaRecipients": "FLAS-IT_Testing@justice.gc.ca",
+    "SystemErrorRecipients": "FLAS-IT_Testing@justice.gc.ca"
+  },
+  "TaxFormsRootPath": "D:\\CustomCRAForms"
+}

@@ -135,6 +135,9 @@
   <data name="APPL_COMMENT" xml:space="preserve">
     <value>Comments</value>
   </data>
+  <data name="APP_MESSAGE" xml:space="preserve">
+    <value>Application Message</value>
+  </data>
   <data name="ASSUME_ROLE" xml:space="preserve">
     <value>Assume Role</value>
   </data>
@@ -242,6 +245,9 @@
   </data>
   <data name="ENFORCEMENT_SERVICE" xml:space="preserve">
     <value>Enforcement Service</value>
+  </data>
+  <data name="ENFORCEMENT_SERVICE_CODE" xml:space="preserve">
+    <value>Enforcement Service Code</value>
   </data>
   <data name="ERRORS_DETECTED" xml:space="preserve">
     <value>Errors detected</value>
@@ -362,6 +368,9 @@
   </data>
   <data name="SIN_NOTCONFIRMED" xml:space="preserve">
     <value>N</value>
+  </data>
+  <data name="SOURCE_REF_NUMBER" xml:space="preserve">
+    <value>Source Reference Number</value>
   </data>
   <data name="STATUS" xml:space="preserve">
     <value>Status</value>

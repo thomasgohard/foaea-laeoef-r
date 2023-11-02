@@ -5,6 +5,6 @@ namespace FOAEA3.Model.Interfaces.Repository
 {
     public interface IPostalCodeRepository
     {
-        Task<(bool, string, PostalCodeFlag)> ValidatePostalCodeAsync(string postalCode, string provinceCode, string cityName);
+        Task<(bool, string, PostalCodeFlag)> ValidatePostalCode(string postalCode, string provinceCode, string cityName);
     }
 }

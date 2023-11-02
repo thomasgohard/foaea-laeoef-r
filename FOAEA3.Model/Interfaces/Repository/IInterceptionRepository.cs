@@ -10,63 +10,65 @@ namespace FOAEA3.Model.Interfaces.Repository
         string CurrentSubmitter { get; set; }
         string UserId { get; set; }
 
-        Task<List<InterceptionApplicationData>> FindMatchingActiveApplicationsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd,
+        Task<List<InterceptionApplicationData>> FindMatchingActiveApplications(string appl_EnfSrv_Cd, string appl_CtrlCd,
                                                                         string confirmedSIN, string creditorFirstName,
                                                                         string creditorSurname);
 
-        Task<bool> IsFeeCumulativeForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<bool> IsVariationIncreaseAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<bool> IsFeeCumulativeForApplication(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<bool> IsVariationIncrease(string appl_EnfSrv_Cd, string appl_CtrlCd);
 
-        Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTermsAsync(string enfService, string controlCode, string activeState = "A");
-        Task<List<InterceptionFinancialHoldbackData>> GetAllInterceptionFinancialTermsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task CreateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH);
-        Task UpdateInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH);
-        Task DeleteInterceptionFinancialTermsAsync(InterceptionFinancialHoldbackData intFinH);
+        Task<InterceptionFinancialHoldbackData> GetInterceptionFinancialTerms(string enfService, string controlCode, string activeState = "A");
+        Task<List<InterceptionFinancialHoldbackData>> GetAllInterceptionFinancialTerms(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task CreateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
+        Task UpdateInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
+        Task DeleteInterceptionFinancialTerms(InterceptionFinancialHoldbackData intFinH);
 
-        Task<List<HoldbackConditionData>> GetHoldbackConditionsAsync(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A");
-        Task<List<HoldbackConditionData>> GetAllHoldbackConditionsAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task CreateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions);
-        Task UpdateHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions);
-        Task DeleteHoldbackConditionsAsync(List<HoldbackConditionData> holdbackConditions);
-        Task DeleteHoldbackConditionAsync(HoldbackConditionData holdbackCondition);
+        Task<List<HoldbackConditionData>> GetHoldbackConditions(string enfService, string controlCode, DateTime intFinH_Date, string activeState = "A");
+        Task<List<HoldbackConditionData>> GetAllHoldbackConditions(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task CreateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
+        Task UpdateHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
+        Task DeleteHoldbackConditions(List<HoldbackConditionData> holdbackConditions);
+        Task DeleteHoldbackCondition(HoldbackConditionData holdbackCondition);
 
-        Task<List<InterceptionApplicationData>> GetSameCreditorForI01Async(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN,
-                                                                 string activeState);
-        Task<List<ExGratiaListData>> GetExGratiasAsync();
-        Task<string> GetApplicationJusticeNumberAsync(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<string> GetDebtorIdAsync(string first3Char);
-        Task<string> GetDebtorIdByConfirmedSin(string sin, string category);
+        Task<List<InterceptionApplicationData>> GetSameCreditorForI01(string appl_CtrlCd, string submCd, string enteredSIN, byte confirmedSIN,
+                                                                      string activeState);
+        Task<List<ExGratiaListData>> GetExGratias();
+        Task<string> GetApplicationJusticeNumber(string confirmedSIN, string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<string> GetDebtorId(string first3Char);
+        Task<string> GetDebtorIdByConfirmedSinForCategory(string sin, string category);
+        Task<List<ApplicationJusticeNumberData>> GetJusticeNumberDataForSin(string confirmedSIN);
+        Task ModifyMultipleDebtorIds(string debtorId, string debtorSuffix, string appl_EnfSrv_Cd, string appl_CtrlCd);
         Task<bool> CheckDebtorIdExists(string debtorId);
-        Task<bool> IsAlreadyUsedJusticeNumberAsync(string justiceNumber);
-        Task<DateTime> GetGarnisheeSummonsReceiptDateAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD);
-        Task<int> GetTotalActiveSummonsAsync(string appl_EnfSrv_Cd, string enfOfficeCode);
-        Task<string> EISOHistoryDeleteBySINAsync(string confirmedSIN, bool removeSIN);
-        Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySINAsync(string confirmedSIN);
+        Task<bool> IsAlreadyUsedJusticeNumber(string justiceNumber);
+        Task<DateTime> GetGarnisheeSummonsReceiptDate(string appl_EnfSrv_Cd, string appl_CtrlCd, bool isESD);
+        Task<int> GetTotalActiveSummons(string appl_EnfSrv_Cd, string enfOfficeCode);
+        Task<string> EISOHistoryDeleteBySIN(string confirmedSIN, bool removeSIN);
+        Task<List<ProcessEISOOUTHistoryData>> GetEISOHistoryBySIN(string confirmedSIN);
         Task<List<ProcessEISOOUTHistoryData>> GetEISOvalidApplications();
         Task<List<EIoutgoingFederalData>> GetEIoutgoingData(string enfSrv);
         Task<DateTime> GetDateLastUIBatchLoaded();
-        Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequiredAsync();
-        Task<List<ApplicationData>> GetApplicationsForRejectAsync();
-        Task<List<ApplicationData>> GetTerminatedI01Async();
-        Task<ApplicationData> GetAutoAcceptGarnisheeOverrideDataAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<List<ElectronicSummonsDocumentRequiredData>> GetESDrequired();
+        Task<List<ApplicationData>> GetApplicationsForReject();
+        Task<List<ApplicationData>> GetTerminatedI01();
+        Task<ApplicationData> GetAutoAcceptGarnisheeOverrideData(string appl_EnfSrv_Cd, string appl_CtrlCd);
 
-        Task<(bool, DateTime)> IsNewESDreceivedAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired);
-        Task InsertESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
-        Task UpdateESDrequiredAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
-        Task<ElectronicSummonsDocumentZipData> GetESDasync(string fileName);
-        Task<ElectronicSummonsDocumentZipData> CreateESDasync(int processId, string fileName, DateTime dateReceived);
+        Task<(bool, DateTime)> IsNewESDreceived(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired);
+        Task InsertESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, ESDrequired originalESDrequired, DateTime? esdReceivedDate = null);
+        Task UpdateESDrequired(string appl_EnfSrv_Cd, string appl_CtrlCd, DateTime? esdReceivedDate = null, bool resetUpdate = false);
+        Task<ElectronicSummonsDocumentZipData> GetESD(string fileName);
+        Task<ElectronicSummonsDocumentZipData> CreateESD(int processId, string fileName, DateTime dateReceived);
 
-        Task InsertBalanceSnapshotAsync(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
+        Task InsertBalanceSnapshot(string appl_EnfSrv_Cd, string appl_CtrlCd, decimal totalAmount,
                                    BalanceSnapshotChangeType changeType, int? summFAFR_id = null, DateTime? intFinH_Date = null);
 
-        Task<List<PaymentPeriodData>> GetPaymentPeriodsAsync();
-        Task<List<HoldbackTypeData>> GetHoldbackTypesAsync();
-        Task<ElectronicSummonsDocumentPdfData> CreateESDPDFasync(ElectronicSummonsDocumentPdfData newPDFentry);
-        Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplicationAsync(string appl_EnfSrv_Cd, string appl_CtrlCd);
-        Task<bool> IsSinBlockedAsync(string appl_Dbtr_Entrd_SIN);
-        Task<bool> IsRefNumberBlockedAsync(string appl_Source_RfrNr);
+        Task<List<PaymentPeriodData>> GetPaymentPeriods();
+        Task<List<HoldbackTypeData>> GetHoldbackTypes();
+        Task<ElectronicSummonsDocumentPdfData> CreateESDPDF(ElectronicSummonsDocumentPdfData newPDFentry);
+        Task<List<ElectronicSummonsDocumentData>> FindDocumentsForApplication(string appl_EnfSrv_Cd, string appl_CtrlCd);
+        Task<bool> IsSinBlocked(string appl_Dbtr_Entrd_SIN);
+        Task<bool> IsRefNumberBlocked(string appl_Source_RfrNr);
 
-        Task MessageBrokerCRAReconciliationAsync();
-        Task FTBatchNotification_CheckFTTransactionsAddedAsync();
+        Task MessageBrokerCRAReconciliation();
+        Task FTBatchNotification_CheckFTTransactionsAdded();
     }
 }

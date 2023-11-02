@@ -8,12 +8,13 @@ namespace FOAEA3.Model.Interfaces.Broker
         IAPIBrokerHelper ApiHelper { get; }
         string Token { get; set; }
 
-        Task<List<ApplicationEventData>> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd);
-        Task<List<ApplicationEventData>> GetRequestedSINEventDataForFileAsync(string fileName);
-        Task<List<ApplicationEventDetailData>> GetRequestedSINEventDetailDataForFileAsync(string fileName);
-        Task<List<SinInboundToApplData>> GetLatestSinEventDataSummaryAsync();
-        Task SaveEventAsync(ApplicationEventData eventData);
-        Task SaveEventDetailAsync(ApplicationEventDetailData activeTraceEventDetail);
-        Task UpdateOutboundEventDetailAsync(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds);
+        Task<ApplicationEventsList> GetEvents(string appl_EnfSrvCd, string appl_CtrlCd);
+        Task<ApplicationEventsList> GetRequestedSINEventDataForFile(string fileName);
+        Task<ApplicationEventDetailsList> GetRequestedSINEventDetailDataForFile(string fileName);
+        Task<List<SinInboundToApplData>> GetLatestSinEventDataSummary();
+        Task SaveEvent(ApplicationEventData eventData);
+        Task SaveEventDetail(ApplicationEventDetailData activeTraceEventDetail);
+        Task SaveEventDetails(ApplicationEventDetailsList eventDetails);
+        Task UpdateOutboundEventDetail(string actvSt_Cd, int appLiSt_Cd, string enfSrv_Cd, string newFilePath, List<int> eventIds);
     }
 }

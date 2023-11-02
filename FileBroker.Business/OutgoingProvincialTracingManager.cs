@@ -20,7 +20,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
         FoaeaAccess = new FoaeaSystemAccess(apis, config.FoaeaLogin);
     }
 
-    public async Task<(string, List<string>)> CreateOutputFileAsync(string fileBaseName)
+    public async Task<(string, List<string>)> CreateOutputFile(string fileBaseName)
     {
         var errors = new List<string>();
 
@@ -28,11 +28,11 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
         var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
-        string newCycle = fileTableData.Cycle.ToString("000000");
+        string newCycle = (fileTableData.Cycle+1).ToString("000000");
 
         try
         {
-            var processCodes = await DB.ProcessParameterTable.GetProcessCodesAsync(fileTableData.PrcId);
+            var processCodes = await DB.ProcessParameterTable.GetProcessCodes(fileTableData.PrcId);
 
             string newFilePath = fileTableData.Path + fileBaseName + "." + newCycle + ".xml";
             if (File.Exists(newFilePath))
@@ -48,25 +48,25 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
             }
             try
             {
-                var data = await GetOutgoingDataAsync(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
+                var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
                 string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent);
+                await File.WriteAllTextAsync(newFilePath, fileContent, Encoding.UTF8);
                 fileCreated = true;
 
                 string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
 
                 if (!string.IsNullOrEmpty(errorDoingBackup))
-                    await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {newFilePath}",
-                                                                        "Error creating backup of outbound file: " + errorDoingBackup);
+                    await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {newFilePath}",
+                                                                   "Error creating backup of outbound file: " + errorDoingBackup);
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                     "Outbound File created successfully.");
+                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                    "Outbound File created successfully.");
 
                 await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.TracingResponses.MarkTraceResultsAsViewedAsync(processCodes.EnfSrv_Cd);
+                await APIs.TracingResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
             }
             finally
             {
@@ -81,29 +81,27 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
             string error = "Error Creating Outbound Data File: " + e.Message;
             errors.Add(error);
 
-            await DB.OutboundAuditTable.InsertIntoOutboundAuditAsync(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
+            await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated, error);
 
-            await DB.ErrorTrackingTable.MessageBrokerErrorAsync($"File Error: {fileTableData.PrcId} {fileBaseName}",
+            await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {fileTableData.PrcId} {fileBaseName}",
                                                                        "Error creating outbound file", e, displayExceptionError: true);
 
             return (string.Empty, errors);
         }
     }
 
-    private async Task<TracingOutgoingProvincialData> GetOutgoingDataAsync(FileTableData fileTableData, string actvSt_Cd,
+    private async Task<TracingOutgoingProvincialData> GetOutgoingDataFromFoaea(FileTableData fileTableData, string actvSt_Cd,
                                                                 string recipientCode)
     {
-        var recMax = await DB.ProcessParameterTable.GetValueForParameterAsync(fileTableData.PrcId, "rec_max");
+        var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
         int maxRecords = string.IsNullOrEmpty(recMax) ? 0 : int.Parse(recMax);
 
-        var data = await APIs.TracingApplications.GetOutgoingProvincialTracingDataAsync(maxRecords, actvSt_Cd,
-                                                                                     recipientCode);
+        var data = await APIs.TracingApplications.GetOutgoingProvincialTracingData(maxRecords, actvSt_Cd, recipientCode);
         return data;
     }
 
 
-    private static string GenerateOutputFileContentFromData(TracingOutgoingProvincialData data,
-                                                            string newCycle)
+    private static string GenerateOutputFileContentFromData(TracingOutgoingProvincialData data, string newCycle)
     {
         var result = new StringBuilder();
 

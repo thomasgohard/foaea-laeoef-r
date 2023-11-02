@@ -2,7 +2,6 @@
 using FOAEA3.Model;
 using FOAEA3.Model.Interfaces;
 using FOAEA3.Model.Interfaces.Broker;
-using System.Threading.Tasks;
 using FileBrokerModel = FileBroker.Model;
 
 namespace FileBroker.Common.Brokers
@@ -18,22 +17,22 @@ namespace FileBroker.Common.Brokers
             Token = token;
         }
 
-        public async Task<string> GetVersionAsync()
+        public async Task<string> GetVersion()
         {
             string apiCall = $"api/v1/Tokens/Version";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<string> GetConnectionAsync()
+        public async Task<string> GetConnection()
         {
             string apiCall = $"api/v1/Tokens/DB";
-            return await ApiHelper.GetStringAsync(apiCall, maxAttempts: 1, token: Token);
+            return await ApiHelper.GetString(apiCall, maxAttempts: 1, token: Token);
         }
 
-        public async Task<TokenData> CreateTokenAsync(FileBrokerModel.FileBrokerLoginData loginData)
+        public async Task<TokenData> CreateToken(FileBrokerModel.FileBrokerLoginData loginData)
         {
             string apiCall = $"api/v1/Tokens";
-            return await ApiHelper.PostDataAsync<TokenData, FileBrokerModel.FileBrokerLoginData>(apiCall, loginData, token: Token);
+            return await ApiHelper.PostData<TokenData, FileBrokerModel.FileBrokerLoginData>(apiCall, loginData, token: Token);
         }
     }
 }

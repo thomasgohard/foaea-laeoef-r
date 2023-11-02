@@ -14,7 +14,7 @@ namespace FOAEA3.Data.DB
         {
 
         }
-        public async Task<List<SummonsSummaryData>> GetSummonsSummaryAsync(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
+        public async Task<List<SummonsSummaryData>> GetSummonsSummary(string appl_EnfSrv_Cd = "", string appl_CtrlCd = "", string debtorId = "")
         {
             var parameters = new Dictionary<string, object>();
             if (!string.IsNullOrEmpty(appl_EnfSrv_Cd)) parameters.Add("Appl_Enfsrv_Cd", appl_EnfSrv_Cd);
@@ -27,17 +27,17 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<List<SummonsSummaryData>> GetAmountOwedRecordsAsync()
+        public async Task<List<SummonsSummaryData>> GetAmountOwedRecords()
         {
             return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetAmountOwedRecords", FillDataFromReader);
         }
 
-         public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecordsAsync()
+         public async Task<List<SummonsSummaryData>> GetFixedAmountRecalcDateRecords()
         {
             return await MainDB.GetDataFromStoredProcAsync<SummonsSummaryData>("GetFixedAmountRecalcDateRecords", FillDataFromReader);
         }
 
-        public async Task<decimal> GetFeesOwedTotalAsync(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
+        public async Task<decimal> GetFeesOwedTotal(int yearsCount, DateTime finTermsEffectiveDate, bool isFeeCumulative)
         {
             var parameters = new Dictionary<string, object>
                 {
@@ -51,7 +51,7 @@ namespace FOAEA3.Data.DB
                 return await MainDB.GetDataFromStoredProcAsync<decimal>("GetFeesOwedTtlNonCumulative", parameters);
         }
 
-        public async Task CreateSummonsSummaryAsync(SummonsSummaryData summSmryData)
+        public async Task CreateSummonsSummary(SummonsSummaryData summSmryData)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -88,7 +88,7 @@ namespace FOAEA3.Data.DB
             _ = await MainDB.ExecProcAsync("SummSmry_Insert", parameters);
         }
 
-        public async Task UpdateSummonsSummaryAsync(SummonsSummaryData summSmryData)
+        public async Task UpdateSummonsSummary(SummonsSummaryData summSmryData)
         {
             var parameters = new Dictionary<string, object>
             {

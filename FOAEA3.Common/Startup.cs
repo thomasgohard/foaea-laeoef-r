@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Security.Claims;
@@ -110,6 +111,8 @@ namespace FOAEA3.Common
                 {
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", apiName + " v1");
                 });
+
+                IdentityModelEventSource.ShowPII = true;
             }
             else if (configuration.ProductionServers.Any(prodServer => prodServer.ToLower() == currentServer.ToLower()))
             {
@@ -172,18 +175,18 @@ namespace FOAEA3.Common
             var provider = serviceScope.ServiceProvider;
             var repositories = provider.GetRequiredService<IRepositories>();
 
-            var loadRefFoaEvents = ReferenceData.Instance().LoadFoaEventsAsync(new DBFoaMessage(repositories.MainDB));
-            var loadRefActiveStatus = ReferenceData.Instance().LoadActiveStatusesAsync(new DBActiveStatus(repositories.MainDB));
-            var loadRefGenders = ReferenceData.Instance().LoadGendersAsync(new DBGender(repositories.MainDB));
-            var loadRefProvinces = ReferenceData.Instance().LoadProvincesAsync(new DBProvince(repositories.MainDB));
-            var loadRefMediums = ReferenceData.Instance().LoadMediumsAsync(new DBMedium(repositories.MainDB));
-            var loadRefLanguages = ReferenceData.Instance().LoadLanguagesAsync(new DBLanguage(repositories.MainDB));
-            var loadRefDocTypes = ReferenceData.Instance().LoadDocumentTypesAsync(new DBDocumentType(repositories.MainDB));
-            var loadRefCountries = ReferenceData.Instance().LoadCountriesAsync(new DBCountry(repositories.MainDB));
-            var loadRefAppReasons = ReferenceData.Instance().LoadApplicationReasonsAsync(new DBApplicationReason(repositories.MainDB));
-            var loadRefAppCategories = ReferenceData.Instance().LoadApplicationCategoriesAsync(new DBApplicationCategory(repositories.MainDB));
-            var loadRefAppLifeStates = ReferenceData.Instance().LoadApplicationLifeStatesAsync(new DBApplicationLifeState(repositories.MainDB));
-            var loadRefAppComments = ReferenceData.Instance().LoadApplicationCommentsAsync(new DBApplicationComments(repositories.MainDB));
+            var loadRefFoaEvents = ReferenceData.Instance().LoadFoaEvents(new DBFoaMessage(repositories.MainDB));
+            var loadRefActiveStatus = ReferenceData.Instance().LoadActiveStatuses(new DBActiveStatus(repositories.MainDB));
+            var loadRefGenders = ReferenceData.Instance().LoadGenders(new DBGender(repositories.MainDB));
+            var loadRefProvinces = ReferenceData.Instance().LoadProvinces(new DBProvince(repositories.MainDB));
+            var loadRefMediums = ReferenceData.Instance().LoadMediums(new DBMedium(repositories.MainDB));
+            var loadRefLanguages = ReferenceData.Instance().LoadLanguages(new DBLanguage(repositories.MainDB));
+            var loadRefDocTypes = ReferenceData.Instance().LoadDocumentTypes(new DBDocumentType(repositories.MainDB));
+            var loadRefCountries = ReferenceData.Instance().LoadCountries(new DBCountry(repositories.MainDB));
+            var loadRefAppReasons = ReferenceData.Instance().LoadApplicationReasons(new DBApplicationReason(repositories.MainDB));
+            var loadRefAppCategories = ReferenceData.Instance().LoadApplicationCategories(new DBApplicationCategory(repositories.MainDB));
+            var loadRefAppLifeStates = ReferenceData.Instance().LoadApplicationLifeStates(new DBApplicationLifeState(repositories.MainDB));
+            var loadRefAppComments = ReferenceData.Instance().LoadApplicationComments(new DBApplicationComments(repositories.MainDB));
 
             await Task.WhenAll(loadRefFoaEvents, loadRefActiveStatus, loadRefGenders,
                                loadRefProvinces, loadRefMediums, loadRefLanguages,

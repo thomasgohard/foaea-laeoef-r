@@ -20,7 +20,7 @@ namespace FOAEA3.Data.DB
 
         }
 
-        public async Task<(List<ApplicationSearchResultData>, int)> QuickSearchAsync(QuickSearchData searchData,
+        public async Task<(List<ApplicationSearchResultData>, int)> QuickSearch(QuickSearchData searchData,
                                                              int page = 1, int perPage = 1000,
                                                              string orderBy = "EnforcementService, ControlCode")
         {
@@ -93,7 +93,7 @@ namespace FOAEA3.Data.DB
             if (!string.IsNullOrEmpty(searchData.SIN))
             {
                 parameters.Add("Appl_Dbtr_Entrd_SIN", searchData.SIN);
-                if (MainDB.Submitter.IsInternalUser())
+                if (MainDB.Submitter.IsInternalAgentSubmitter())
                 {
                     parameters.Add("IsInternalUser", true);
                     if (searchData.SearchOnlySinConfirmed) parameters.Add("OnlySINConfirmed", searchData.SearchOnlySinConfirmed);
@@ -137,7 +137,7 @@ namespace FOAEA3.Data.DB
             }
             else
             {
-                var searchRange = await BuildSearchRangeForSubmitterAsync(MainDB.Submitter);
+                var searchRange = await BuildSearchRangeForSubmitter(MainDB.Submitter);
                 if (!string.IsNullOrEmpty(searchRange))
                 {
                     parameters.Add("Subm_SubmCd", searchRange);
@@ -204,13 +204,13 @@ namespace FOAEA3.Data.DB
                 return sqlWhere += " AND " + clause;
         }
 
-        private async Task<string> BuildSearchRangeForSubmitterAsync(string submitter)
+        private async Task<string> BuildSearchRangeForSubmitter(string submitter)
         {
             var searchRange = "";
 
             var submitterDB = new DBSubmitterProfile(MainDB);
 
-            var submitterData = await submitterDB.GetSubmitterProfileAsync(submitter);
+            var submitterData = await submitterDB.GetSubmitterProfile(submitter);
             string submClass = submitterData.Subm_Class.ToLower();
 
             if (submClass == "sm")

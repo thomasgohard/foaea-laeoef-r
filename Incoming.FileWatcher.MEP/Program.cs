@@ -4,10 +4,10 @@ using FileBroker.Common;
 using FileBroker.Data.DB;
 using FileBroker.Model;
 using FileBroker.Model.Interfaces;
-using FOAEA3.Model.Structs;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static FOAEA3.Resources.Helpers.ColourConsole;
@@ -18,115 +18,133 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        var config = new FileBrokerConfigurationHelper(args);
-
-        var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
-        var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
-
-        await db.RequestLogTable.DeleteAllAsync();
-
-        string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
-        var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB));
-
-        if (!filesToProcess.Any())
+        var consoleOut = Console.Out;
+        using (var textOut = new StreamWriter(new FileStream("log.txt", FileMode.Append)))
         {
-            await GenerateError(db.ErrorTrackingTable, "No items found in FileTable?");
-            return;
-        }
+            args ??= Array.Empty<string>();
 
-        var provinces = GetProvinceListForIncomingMEPfiles(filesToProcess);
+            var config = new FileBrokerConfigurationHelper(args);
 
-        if ((string.IsNullOrEmpty(provinceCode) || !provinces.Contains(provinceCode)) && (provinceCode != "ALL"))
-        {
-            await GenerateError(db.ErrorTrackingTable, $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
-                                                       string.Join(", ", provinces + " or ALL"));
-            return;
-        }
+            if (config.LogConsoleOutputToFile)
+                Console.SetOut(textOut);
 
-        DateTime start = DateTime.Now;
-        WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
-        WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
+            Console.WriteLine($"*** Started {AppDomain.CurrentDomain.FriendlyName}.exe: {DateTime.Now}");
+            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
+            WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+            WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+            WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+            WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
-        int totalFilesFound = 0;
-        foreach (var itemProvince in provinces)
-        {
-            string provCode = itemProvince.ToUpper();
-            var searchFolders = GetFoldersToProcess(filesToProcess, provCode);
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+            var db = DataHelper.SetupFileBrokerRepositories(fileBrokerDB);
 
-            var fileTable = new DBFileTable(fileBrokerDB);
-            var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, config);
+            await db.RequestLogTable.DeleteAll();
 
-            bool foundZero = true;
+            string provinceCode = args.Any() ? args.First()?.ToUpper() : "ALL";
+            string option = args.Length > 1 ? args[1].ToUpper() : string.Empty;
+            var filesToProcess = await GetFileTableDataForIncomingMEPfiles(args, new DBFileTable(fileBrokerDB), option);
 
-            var processedFiles = new List<string>();
-            bool AlreadyProcessed(string f) => processedFiles.Contains(f);
-
-            bool finishedForProvince = false;
-            while (!finishedForProvince)
+            if (!filesToProcess.Any())
             {
-                var allNewExpectedFiles = await provincialFileManager.GetNextExpectedIncomingFilesFoundInFolder(searchFolders);
+                await GenerateError(db.ErrorTrackingTable, "No items found in FileTable?");
+                return;
+            }
 
-                if (allNewExpectedFiles.Any())
+            var provinces = GetProvinceListForIncomingMEPfiles(filesToProcess);
+
+            if ((string.IsNullOrEmpty(provinceCode) || !provinces.Contains(provinceCode)) && (provinceCode != "ALL"))
+            {
+                await GenerateError(db.ErrorTrackingTable, $"Invalid province argument on command line: [{provinceCode}]\nMust be one of: " +
+                                                           string.Join(", ", provinces + " or ALL"));
+                return;
+            }
+
+            DateTime start = DateTime.Now;
+            WriteEmbeddedColorLine($"Starting [cyan]{provinceCode}[/cyan] MEP File Monitor");
+            WriteEmbeddedColorLine($"Starting time [orange]{start}[/orange]");
+
+            var foaeaApis = FoaeaApiHelper.SetupFoaeaAPIs(config.ApiRootData);
+
+            int totalFilesFound = 0;
+            foreach (var itemProvince in provinces)
+            {
+                string provCode = itemProvince.ToUpper();
+                var searchFolders = GetFoldersToProcess(filesToProcess, provCode);
+
+                var fileTable = new DBFileTable(fileBrokerDB);
+                var provincialFileManager = new IncomingProvincialFile(db, foaeaApis, config);
+
+                bool foundZero = true;
+
+                var processedFiles = new List<string>();
+                bool AlreadyProcessed(string f) => processedFiles.Contains(f);
+
+                bool finishedForProvince = false;
+                while (!finishedForProvince)
                 {
-                    foundZero = false;
-                    string moreThanOne = allNewExpectedFiles.Count > 1 ? "s" : "";
+                    var allNewExpectedFiles = await provincialFileManager.GetNextExpectedIncomingFilesFoundInFolder(searchFolders, option);
 
-                    if (!AlreadyProcessed(allNewExpectedFiles.First()))
+                    if (allNewExpectedFiles.Any())
                     {
-                        WriteEmbeddedColorLine($"Found [green]{allNewExpectedFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
-                        totalFilesFound += allNewExpectedFiles.Count;
-                    }
+                        foundZero = false;
+                        string moreThanOne = allNewExpectedFiles.Count > 1 ? "s" : "";
 
-                    foreach (var thisfile in allNewExpectedFiles)
-                    {
-                        if (AlreadyProcessed(thisfile))
+                        if (!AlreadyProcessed(allNewExpectedFiles.First()))
                         {
-                            finishedForProvince = true;
-                            break;
+                            WriteEmbeddedColorLine($"Found [green]{allNewExpectedFiles.Count}[/green] file{moreThanOne} in [green]{itemProvince}[/green]");
+                            totalFilesFound += allNewExpectedFiles.Count;
                         }
 
-                        processedFiles.Add(thisfile);
-
-                        WriteEmbeddedColorLine($"Processing [green]{thisfile}[/green]...");
-
-                        var errors = new List<string>();
-
-                        errors = await provincialFileManager.ProcessWaitingFile(thisfile, errors);
-
-                        if (errors.Any())
+                        foreach (var thisfile in allNewExpectedFiles)
                         {
-                            foreach (var error in errors)
+                            if (AlreadyProcessed(thisfile))
                             {
-                                await db.ErrorTrackingTable.MessageBrokerErrorAsync($"{provinceCode} incoming file processing error", thisfile, new Exception(error), displayExceptionError: true);
-                                WriteEmbeddedColorLine($"[red]Error[/red]: [yellow]{error}[/yellow]");
+                                finishedForProvince = true;
+                                break;
                             }
-                            finishedForProvince = true;
+
+                            processedFiles.Add(thisfile);
+
+                            WriteEmbeddedColorLine($"Processing [green]{thisfile}[/green]...");
+
+                            var errors = await provincialFileManager.ProcessWaitingFile(thisfile);
+
+                            if (errors.Any())
+                            {
+                                foreach (var error in errors)
+                                {
+                                    await db.ErrorTrackingTable.MessageBrokerError($"{provinceCode} incoming file processing error", thisfile, new Exception(error), displayExceptionError: true);
+                                    WriteEmbeddedColorLine($"[red]Error[/red]: [yellow]{error}[/yellow]");
+                                }
+                                finishedForProvince = true;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    finishedForProvince = true;
-                    if (foundZero)
-                        WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
+                    else
+                    {
+                        finishedForProvince = true;
+                        if (foundZero)
+                            WriteEmbeddedColorLine($"Found [green]0[/green] file in [green]{itemProvince}[/green]");
+                    }
                 }
             }
+
+            WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
+
+            DateTime end = DateTime.Now;
+            var duration = end - start;
+
+            WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+            Console.WriteLine($"*** Ended: {DateTime.Now}\n");
         }
-
-        WriteEmbeddedColorLine($"Completed. [yellow]{totalFilesFound}[/yellow] processed.");
-
-        DateTime end = DateTime.Now;
-        var duration = end - start;
-
-        WriteEmbeddedColorLine($"Completion time [orange]{end}[/orange] (duration: [yellow]{duration.Minutes}[/yellow] minutes)");
+        Console.SetOut(consoleOut);
     }
 
     private static async Task GenerateError(IErrorTrackingRepository errorTrackingDB, string error)
     {
         WriteEmbeddedColorLine(error);
-        await errorTrackingDB.MessageBrokerErrorAsync($"Incoming MEP File Processing", "Error starting MEP File Monitor",
+        await errorTrackingDB.MessageBrokerError($"Incoming MEP File Processing", "Error starting MEP File Monitor",
                                                       new Exception(error), displayExceptionError: true);
     }
 
@@ -159,27 +177,28 @@ internal class Program
                             .ToList();
     }
 
-    private static async Task<List<FileTableData>> GetFileTableDataForIncomingMEPfiles(string[] args, DBFileTable fileTable)
+    private static async Task<List<FileTableData>> GetFileTableDataForIncomingMEPfiles(string[] args, 
+                                                                                       DBFileTable fileTable, string option)
     {
         var fileTableData = new List<FileTableData>();
 
         bool loadAllCategories = true;
         if (args.Length > 1)
         {
-            string option = args[1].ToUpper();
             switch (option)
             {
                 case "TRACE_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("TRCAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("TRCAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAFFDVTIN"));
                     loadAllCategories = false;
                     break;
                 case "INTERCEPTION_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("INTAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("ESD"));
                     loadAllCategories = false;
                     break;
                 case "LICENCE_ONLY":
-                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("LICAPPIN"));
+                    fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAPPIN"));
                     loadAllCategories = false;
                     break;
                 default:
@@ -188,10 +207,10 @@ internal class Program
         }
         if (loadAllCategories)
         {
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("TRCAPPIN"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("INTAPPIN"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("ESD"));
-            fileTableData.AddRange(await fileTable.GetFileTableDataForCategoryAsync("LICAPPIN"));
+            fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("TRCAPPIN"));
+            //fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("INTAPPIN"));
+            //fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("ESD"));
+            //fileTableData.AddRange(await fileTable.GetFileTableDataForCategory("LICAPPIN"));
         }
 
         fileTableData = fileTableData.Where(f => f.Active.HasValue && f.Active.Value).ToList();

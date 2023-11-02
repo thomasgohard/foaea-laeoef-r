@@ -12,7 +12,7 @@ namespace TestData.TestDB
 
         public MessageDataList Messages => new();
 
-        public Task<DataList<ApplicationCommentsData>> GetApplicationCommentsAsync()
+        public Task<DataList<ApplicationCommentsData>> GetApplicationComments()
         {
             var result = new DataList<ApplicationCommentsData>();
 

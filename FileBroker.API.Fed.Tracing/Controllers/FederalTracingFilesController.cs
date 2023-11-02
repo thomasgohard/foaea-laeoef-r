@@ -24,13 +24,13 @@ public class FederalTracingFilesController : ControllerBase
     {
         string fileName = partnerId + "3STSOT"; // e.g. RC3STSOT
 
-        int fileCycleLength = 6; // TODO: should come from FileTable
+        int fileCycleLength = 6; 
         if (partnerId == "RC")
             fileCycleLength = 3;
 
         string fileContent;
         string lastFileCycleString;
-        (fileContent, lastFileCycleString) = await LoadLatestFederalTracingFileAsync(fileName, fileTable, fileCycleLength);
+        (fileContent, lastFileCycleString) = await LoadLatestFederalTracingFile(fileName, fileTable, fileCycleLength);
 
         if (fileContent == null)
             return NotFound();
@@ -46,7 +46,7 @@ public class FederalTracingFilesController : ControllerBase
         return await FileHelper.ExtractAndSaveRequestBodyToFile(fileName, fileTable, Request);
     }
 
-    private static async Task<(string, string)> LoadLatestFederalTracingFileAsync(string fileName, IFileTableRepository fileTable,
+    private static async Task<(string, string)> LoadLatestFederalTracingFile(string fileName, IFileTableRepository fileTable,
                                                        int fileCycleLength)
     {
         var fileTableData = await fileTable.GetFileTableDataForFileName(fileName);

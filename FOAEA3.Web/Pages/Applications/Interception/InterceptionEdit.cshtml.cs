@@ -35,7 +35,7 @@ public class InterceptionEditModel : InterceptionFoaeaPageModel
             };
 
             var submitterProfileApi = new SubmitterProfileAPIBroker(BaseAPIs);
-            EnfServiceDescription = submitterProfileApi.GetSubmitterProfileAsync(submitter).Result.EnfSrv_Nme;
+            EnfServiceDescription = submitterProfileApi.GetSubmitterProfile(submitter).Result.EnfSrv_Nme;
 
             LoadReferenceData();
         }
@@ -44,7 +44,7 @@ public class InterceptionEditModel : InterceptionFoaeaPageModel
     public async Task OnGet([FromRoute] ApplKey id)
     {
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var application = await interceptionApi.GetApplicationAsync(id.EnfSrv, id.CtrlCd);
+        var application = await interceptionApi.GetApplication(id.EnfSrv, id.CtrlCd);
         if ((application != null) && (application.Appl_EnfSrv_Cd.Trim() == id.EnfSrv) &&
                                      (application.Appl_CtrlCd.Trim() == id.CtrlCd))
         {
@@ -125,7 +125,7 @@ public class InterceptionEditModel : InterceptionFoaeaPageModel
         }
 
         var interceptionApi = new InterceptionApplicationAPIBroker(InterceptionAPIs);
-        var newApplication = await interceptionApi.UpdateInterceptionApplicationAsync(InterceptionApplication);
+        var newApplication = await interceptionApi.UpdateInterceptionApplication(InterceptionApplication);
 
         SetDisplayMessages(newApplication.Messages);
 

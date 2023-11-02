@@ -6,6 +6,7 @@ using FOAEA3.Model;
 using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,17 +16,33 @@ public static class OutgoingFileCreatorFedTracing
 {
     public static async Task Run(string[] args = null)
     {
-        args ??= Array.Empty<string>();
+        var consoleOut = Console.Out;
+        using (var textOut = new StreamWriter(new FileStream("log.txt", FileMode.Append)))
+        {
+            args ??= Array.Empty<string>();
 
-        ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
+            var config = new FileBrokerConfigurationHelper(args);
 
-        var config = new FileBrokerConfigurationHelper(args);
+            if (config.LogConsoleOutputToFile)
+                Console.SetOut(textOut);
+            Console.WriteLine($"*** Started {AppDomain.CurrentDomain.FriendlyName}.exe: {DateTime.Now}");
+            ColourConsole.WriteEmbeddedColorLine("Starting Federal Outgoing Tracing Files Creator");
 
-        var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+            string aspnetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        await CreateOutgoingFederalTracingFiles(fileBrokerDB, config.ApiRootData, config);
+            ColourConsole.WriteEmbeddedColorLine($"Using Environment: [yellow]{aspnetCoreEnvironment}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"FTProot: [yellow]{config.FTProot}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"FTPbackupRoot: [yellow]{config.FTPbackupRoot}[/yellow]");
+            ColourConsole.WriteEmbeddedColorLine($"Audit Root Path: [yellow]{config.AuditConfig.AuditRootPath}[/yellow]");
 
-        ColourConsole.Write("Completed.");
+            var fileBrokerDB = new DBToolsAsync(config.FileBrokerConnection);
+
+            await CreateOutgoingFederalTracingFiles(fileBrokerDB, config.ApiRootData, config);
+
+            ColourConsole.WriteLine("Completed.");
+            Console.WriteLine($"*** Ended: {DateTime.Now}\n");
+        }
+        Console.SetOut(consoleOut);
     }
 
     private static async Task CreateOutgoingFederalTracingFiles(DBToolsAsync fileBrokerDB, ApiConfig apiRootData,
@@ -37,13 +54,13 @@ public static class OutgoingFileCreatorFedTracing
 
         var federalFileManager = new OutgoingFederalTracingManager(foaeaApis, db, config);
 
-        var federalTraceOutgoingSources = (await db.FileTable.GetFileTableDataForCategoryAsync("TRCOUT"))
+        var federalTraceOutgoingSources = (await db.FileTable.GetFileTableDataForCategory("TRCOUT"))
                                             .Where(s => s.Active == true);
 
         foreach (var federalTraceOutgoingSource in federalTraceOutgoingSources)
         {
             var errors = new List<string>();
-            (string filePath, errors) = await federalFileManager.CreateOutputFileAsync(federalTraceOutgoingSource.Name);
+            (string filePath, errors) = await federalFileManager.CreateOutputFile(federalTraceOutgoingSource.Name);
             if (errors.Count == 0)
             {
                 if (!string.IsNullOrEmpty(filePath))
@@ -55,8 +72,8 @@ public static class OutgoingFileCreatorFedTracing
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{federalTraceOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await db.ErrorTrackingTable.MessageBrokerErrorAsync("TRCOUT", federalTraceOutgoingSource.Name,
-                                                                               new Exception(error), displayExceptionError: true);
+                    await db.ErrorTrackingTable.MessageBrokerError("TRCOUT", federalTraceOutgoingSource.Name,
+                                                                   new Exception(error), displayExceptionError: true);
                 }
         }
 

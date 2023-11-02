@@ -41,7 +41,7 @@ namespace FileBroker.Business.Tests
             var netpTracingData = new FedTracingFileBase();
             netpTracingData.AddEmployerRecTypes("80", "81");
             var errors = new List<string>();
-            await fileLoader.FillTracingFileDataFromFlatFileAsync(netpTracingData, flatFile, errors);
+            await fileLoader.FillTracingFileDataFromFlatFile(netpTracingData, flatFile, errors);
 
             // Assert
 
@@ -51,7 +51,7 @@ namespace FileBroker.Business.Tests
                     Assert.True(false, error);
             }
             Assert.Equal<int>(1, netpTracingData.TRCIN01.Cycle);
-            Assert.Equal("D62990", netpTracingData.TRCIN02[0].dat_Appl_CtrlCd);
+            Assert.Equal("D62990", netpTracingData.TRCIN02[0].dat_Appl_CtrlCd.Trim());
 
         }
 
@@ -81,7 +81,7 @@ namespace FileBroker.Business.Tests
             craTracingData.AddEmployerRecTypes("04", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
                                                "33", "34", "35", "36");
             var errors = new List<string>();
-            await fileLoader.FillTracingFileDataFromFlatFileAsync(craTracingData, flatFile, errors);
+            await fileLoader.FillTracingFileDataFromFlatFile(craTracingData, flatFile, errors);
 
             // Assert
 
@@ -120,7 +120,7 @@ namespace FileBroker.Business.Tests
             eiTracingData.AddResidentialRecTypes("03");
             eiTracingData.AddEmployerRecTypes("04");
             var errors = new List<string>();
-            await fileLoader.FillTracingFileDataFromFlatFileAsync(eiTracingData, flatFile, errors);
+            await fileLoader.FillTracingFileDataFromFlatFile(eiTracingData, flatFile, errors);
 
             // Assert
 
