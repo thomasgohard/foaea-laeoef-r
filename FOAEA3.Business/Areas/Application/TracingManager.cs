@@ -326,7 +326,8 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
 
-            if (TracingApplication.AppLiSt_Cd != ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
+            if ((TracingApplication.Medium_Cd != "FTP") && 
+                (TracingApplication.AppLiSt_Cd != ApplicationState.PENDING_ACCEPTANCE_SWEARING_6))
             {
                 TracingApplication.Messages.AddError($"CertifyL02 is not available for state {TracingApplication.AppLiSt_Cd}.  It should be from state 6 (legal authorization pending) only.");
                 return false;
@@ -340,7 +341,8 @@ namespace FOAEA3.Business.Areas.Application
                     TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
                 }
 
-                await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                if (TracingApplication.AppLiSt_Cd != ApplicationState.SIN_CONFIRMATION_PENDING_3)
+                    await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
                 MakeUpperCase();
                 await UpdateApplicationNoValidation();
