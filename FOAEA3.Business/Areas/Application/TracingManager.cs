@@ -326,8 +326,7 @@ namespace FOAEA3.Business.Areas.Application
             TracingApplication.Appl_LastUpdate_Dte = DateTime.Now;
             TracingApplication.Appl_LastUpdate_Usr = lastUpdateUser;
 
-            if ((TracingApplication.Medium_Cd != "FTP") && 
-                (TracingApplication.AppLiSt_Cd != ApplicationState.PENDING_ACCEPTANCE_SWEARING_6))
+            if (TracingApplication.AppLiSt_Cd != ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
             {
                 TracingApplication.Messages.AddError($"CertifyL02 is not available for state {TracingApplication.AppLiSt_Cd}.  It should be from state 6 (legal authorization pending) only.");
                 return false;
@@ -341,8 +340,7 @@ namespace FOAEA3.Business.Areas.Application
                     TracingApplication.Appl_RecvAffdvt_Dte = DateTime.Now;
                 }
 
-                if (TracingApplication.AppLiSt_Cd != ApplicationState.SIN_CONFIRMATION_PENDING_3)
-                    await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
+                await SetNewStateTo(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
 
                 MakeUpperCase();
                 await UpdateApplicationNoValidation();
@@ -716,6 +714,19 @@ namespace FOAEA3.Business.Areas.Application
         public async Task InsertAffidavitData(AffidavitData data)
         {
             await DB.AffidavitTable.InsertAffidavitData(data);
+
+            var currentDataManager = new TracingManager(DB, Config, CurrentUser);
+            await currentDataManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            var currentState = currentDataManager.GetState();
+            if (currentState.In(ApplicationState.INVALID_APPLICATION_1,
+                                ApplicationState.SIN_CONFIRMATION_PENDING_3,
+                                ApplicationState.SIN_NOT_CONFIRMED_5,
+                                ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7))
+            {
+                currentDataManager.EventManager.AddSubmEvent(EventCode.C50773_APPLICATION_IS_NOT_AT_STATE_6_AND_CANNOT_BE_SWORN__SWEARING_HELD_FOR_90_DAYS);
+                await currentDataManager.EventManager.SaveEvents();
+            }
         }
 
     }

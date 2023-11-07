@@ -1,4 +1,5 @@
-﻿using FileBroker.Model.Enums;
+﻿using DBHelper;
+using FileBroker.Model.Enums;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
@@ -65,23 +66,35 @@ public class IncomingProvincialSwearingManager : IncomingProvincialManagerBase
                             if ((appl == null) || (string.IsNullOrEmpty(appl.Appl_CtrlCd)))
                             {
                                 errorCount++;
+
                                 fileAuditData.ApplicationMessage = $"Application {swearingDetails.EnfSrv_Cd.Trim()} {swearingDetails.Appl_CtrlCd.Trim()} does not exist. Swearing held for 90 days.";
 
-                                var swornDate = swearingDetails.Affdvt_Sworn_Dte.ConvertToDateTimeIgnoringTimeZone();
-                                if (swornDate.HasValue)
+                                await StoreSwearingAffidavitInfo(swearingDetails);
+                            }
+                            else if (appl.AppLiSt_Cd != ApplicationState.PENDING_ACCEPTANCE_SWEARING_6)
+                            {
+                                if ((appl.AppLiSt_Cd > ApplicationState.APPLICATION_REJECTED_9) &&
+                                    (appl.AppLiSt_Cd != ApplicationState.MANUALLY_TERMINATED_14))
                                 {
-                                    var affidavitData = new AffidavitData
-                                    {
-                                        EnfSrv_Cd = swearingDetails.EnfSrv_Cd,
-                                        Appl_CtrlCd = swearingDetails.Appl_CtrlCd,
-                                        Affdvt_Sworn_Dte = swornDate.Value,
-                                        Subm_Affdvt_SubmCd = swearingDetails.Subm_Affdvt_SubmCd,
-                                        Affdvt_FileRecv_Dte = DateTime.Now,
-                                        AppCtgy_Cd = "T01",
-                                        OriginalFileName = FileName + ".XML"
-                                    };
+                                    errorCount++;
+                                    fileAuditData.ApplicationMessage = $"Application {swearingDetails.EnfSrv_Cd.Trim()} {swearingDetails.Appl_CtrlCd.Trim()} has already been sworn.";
+                                }
+                                else if (appl.AppLiSt_Cd == ApplicationState.APPLICATION_REJECTED_9)
+                                {
+                                    errorCount++;
+                                    fileAuditData.ApplicationMessage = $"Application {swearingDetails.EnfSrv_Cd.Trim()} {swearingDetails.Appl_CtrlCd.Trim()} has been rejected.";
+                                }
+                                else if (appl.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14)
+                                {
+                                    errorCount++;
+                                    fileAuditData.ApplicationMessage = $"Application {swearingDetails.EnfSrv_Cd.Trim()} {swearingDetails.Appl_CtrlCd.Trim()} has been cancelled.";
+                                }
+                                else
+                                {
+                                    successCount++;
+                                    fileAuditData.ApplicationMessage = "Success";
 
-                                    await APIs.TracingApplications.InsertAffidavit(affidavitData);
+                                    await StoreSwearingAffidavitInfo(swearingDetails);
                                 }
                             }
                             else
@@ -138,6 +151,26 @@ public class IncomingProvincialSwearingManager : IncomingProvincialManagerBase
         }
 
         return result;
+    }
+
+    private async Task StoreSwearingAffidavitInfo(MEPSwearing_RecType61 swearingDetails)
+    {
+        var swornDate = swearingDetails.Affdvt_Sworn_Dte.ConvertToDateTimeIgnoringTimeZone();
+        if (swornDate.HasValue)
+        {
+            var affidavitData = new AffidavitData
+            {
+                EnfSrv_Cd = swearingDetails.EnfSrv_Cd,
+                Appl_CtrlCd = swearingDetails.Appl_CtrlCd,
+                Affdvt_Sworn_Dte = swornDate.Value,
+                Subm_Affdvt_SubmCd = swearingDetails.Subm_Affdvt_SubmCd,
+                Affdvt_FileRecv_Dte = DateTime.Now,
+                AppCtgy_Cd = "T01",
+                OriginalFileName = FileName + ".XML"
+            };
+
+            await APIs.TracingApplications.InsertAffidavit(affidavitData);
+        }
     }
 
     private async Task<AuditFileFormat> GetAuditOutputFormat(int prcId)
