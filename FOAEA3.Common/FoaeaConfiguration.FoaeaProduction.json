@@ -1,6 +1,6 @@
 {
   "RecipientsConfig": {
-    "EmailRecipients": "FLAS-IT-SO@justice.gc.ca",
+    "EmailRecipients": "FOAEA_AEOEF@justice.gc.ca",
     "ExGratiaRecipients": "FLAS-IT-SO@justice.gc.ca",
     "SystemErrorRecipients": "FLAS-IT-SO@justice.gc.ca"
   },

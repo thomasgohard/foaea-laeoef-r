@@ -714,6 +714,19 @@ namespace FOAEA3.Business.Areas.Application
         public async Task InsertAffidavitData(AffidavitData data)
         {
             await DB.AffidavitTable.InsertAffidavitData(data);
+
+            var currentDataManager = new TracingManager(DB, Config, CurrentUser);
+            await currentDataManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+
+            var currentState = currentDataManager.GetState();
+            if (currentState.In(ApplicationState.INVALID_APPLICATION_1,
+                                ApplicationState.SIN_CONFIRMATION_PENDING_3,
+                                ApplicationState.SIN_NOT_CONFIRMED_5,
+                                ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7))
+            {
+                currentDataManager.EventManager.AddSubmEvent(EventCode.C50773_APPLICATION_IS_NOT_AT_STATE_6_AND_CANNOT_BE_SWORN__SWEARING_HELD_FOR_90_DAYS);
+                await currentDataManager.EventManager.SaveEvents();
+            }
         }
 
     }
