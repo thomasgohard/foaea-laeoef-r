@@ -209,6 +209,9 @@ namespace FOAEA3.Business.Areas.Application
                         TracingApplication.Appl_LastUpdate_Usr = newLastUpdateUser;
                         TracingApplication.Appl_LastUpdate_Dte = newLastUpdateDate;
 
+                        if (TracingApplication.AppLiSt_Cd == ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7)
+                            TracingApplication.AppLiSt_Cd = ApplicationState.PENDING_ACCEPTANCE_SWEARING_6;
+
                         MakeUpperCase();
 
                         if (TracingApplication.Medium_Cd != "FTP") TracingApplication.Messages.AddInformation($"{LanguageResource.APPLICATION_REFERENCE_NUMBER}: {Application.Appl_EnfSrv_Cd}-{Application.Subm_SubmCd}-{Application.Appl_CtrlCd}");
