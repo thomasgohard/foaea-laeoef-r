@@ -113,7 +113,7 @@ namespace FOAEA3.Business.Areas.Application
             }
             else
             {
-                if (TracingValidation.IsC78())
+                if (TracingValidation.IsC78() || TracingApplication.Medium_Cd == "FTP")
                     await DB.TracingTable.CreateTracingData(TracingApplication);
             }
 
