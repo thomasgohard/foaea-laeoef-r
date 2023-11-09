@@ -27,6 +27,7 @@ namespace FOAEA3.API.Tracing.Controllers
         }
 
         [HttpGet("{id}/pdf")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetCRAform([FromRoute] ApplKey id, [FromServices] IRepositories repositories,
                                                    [FromQuery] short year, [FromQuery] string form, [FromQuery] short cycle)
         {
@@ -72,9 +73,26 @@ namespace FOAEA3.API.Tracing.Controllers
 
                     // TODO: send email to FLAS-IT-SO about missing fields?
 
-                    (var fileContent, var missingFields) = PdfHelper.FillPdf(template, values, formLanguage == "E");
+                    string error = string.Empty;
+                    try
+                    {
+                        (var fileContent, var missingFields) = PdfHelper.FillPdf(template, values, formLanguage == "E");
 
-                    return File(fileContent.ToArray(), "application/pdf", $"{templateName}-{year}-{cycle}.pdf");
+                        if (!string.IsNullOrEmpty(PdfHelper.LastError))
+                        {
+                            await repositories.NotificationService.SendEmail("GetCRAform API Error", 
+                                                                             config.Recipients.SystemErrorRecipients, 
+                                                                             $"Error: {PdfHelper.LastError}");
+                            return UnprocessableEntity();
+                        }
+                        else
+                            return File(fileContent.ToArray(), "application/pdf", $"{templateName}-{year}-{cycle}.pdf");
+                    }
+                    catch  
+                    {
+                        return UnprocessableEntity(); 
+                    }
+
                 }
             }
 

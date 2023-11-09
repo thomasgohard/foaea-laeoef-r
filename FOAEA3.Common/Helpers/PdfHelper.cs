@@ -7,8 +7,11 @@ namespace FOAEA3.Common.Helpers
 {
     public class PdfHelper
     {
+        public static string LastError { get; set; }
+
         public static List<string> FillPdf(string templatePath, string outputPath, Dictionary<string, string> values, bool isEnglish = true)
         {
+            LastError = string.Empty;
             var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields, isEnglish);
 
             if (File.Exists(outputPath))
@@ -22,6 +25,7 @@ namespace FOAEA3.Common.Helpers
 
         public static (MemoryStream, List<string>) FillPdf(string templatePath, Dictionary<string, string> values, bool isEnglish = true)
         {
+            LastError = string.Empty;
             var pdfDoc = CreatePdfFromTemplate(templatePath, values, out List<string> missingFields, out List<string> foundFields, isEnglish);
 
             var data = pdfDoc.SaveToStream(FileFormat.PDF);
@@ -92,7 +96,14 @@ namespace FOAEA3.Common.Helpers
                                                          bool isEnglish = true)
         {
             var pdfDoc = new PdfDocument();
-            pdfDoc.LoadFromFile(templatePath);
+            try
+            {
+                pdfDoc.LoadFromFile(templatePath);
+            }
+            catch
+            {
+                LastError = $"Failed to load {templatePath}";
+            }
 
             missingFields = new List<string>();
             foundFields = new List<string>();
