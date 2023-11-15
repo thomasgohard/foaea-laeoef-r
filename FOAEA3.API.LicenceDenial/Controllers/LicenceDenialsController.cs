@@ -15,6 +15,7 @@ namespace FOAEA3.API.LicenceDenial.Controllers;
 public class LicenceDenialsController : FoaeaControllerBase
 {
     [HttpGet("Version")]
+    [AllowAnonymous]
     public ActionResult<string> GetVersion() => Ok("LicenceDenialsFiles API Version 1.0");
 
     [HttpGet("DB")]

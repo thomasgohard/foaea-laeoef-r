@@ -17,7 +17,7 @@ public class InterceptionsController : FoaeaControllerBase
 {
     [HttpGet("Version")]
     [AllowAnonymous]
-    public ActionResult<string> Version()
+    public ActionResult<string> GetVersion()
     {
         return Ok("Interceptions API Version 1.0");
     }

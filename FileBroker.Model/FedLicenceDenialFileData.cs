@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace FileBroker.Model
@@ -29,6 +30,7 @@ namespace FileBroker.Model
     public struct FedLicenceDenial_DataSet
     {
         public FedLicenceDenial_RecType01 LICIN01;
+        [JsonConverter(typeof(SingleOrArrayConverter<FedLicenceDenial_RecType02>))]
         public List<FedLicenceDenial_RecType02> LICIN02;
         public FedLicenceDenial_RecType99 LICIN99;
     }
