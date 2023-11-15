@@ -18,6 +18,7 @@ namespace FileBroker.Common
             var loginAPIs = new LoginsAPIBroker(apiFoaeaHelper, token);
             var sinsAPIs = new SinAPIBroker(apiFoaeaHelper, token);
             var dataModAPIs = new DataModificationAPIBroker(apiFoaeaHelper, token);
+            var submittersAPIs = new SubmittersAPIBroker(apiFoaeaHelper, token);
 
             var apiTracingHelper = new APIBrokerHelper(apiRootData.FoaeaTracingRootAPI, currentSubmitter: LoginsAPIBroker.SYSTEM_SUBMITTER,
                                                        currentUser: LoginsAPIBroker.SYSTEM_SUBJECT);
@@ -47,6 +48,7 @@ namespace FileBroker.Common
                 Accounts = loginAPIs,
                 Sins = sinsAPIs,
                 DataModifications = dataModAPIs,
+                Submitters = submittersAPIs,
                 Financials = financialAPIs,
                 ControlBatches = controlBatchAPIs,
                 Transactions = transactionAPIs,

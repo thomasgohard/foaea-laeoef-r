@@ -36,6 +36,11 @@ namespace TestData.TestDB
             throw new NotImplementedException();
         }
 
+        public Task<string> GetFOAEAOfficersEmail()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> GetMaxSubmitterCode(string submCodePart)
         {
             return Task.FromResult("02");

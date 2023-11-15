@@ -100,8 +100,13 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                         int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags,
                                                                                                  errorCount, warningCount, successCount,
                                                                                                  outputFormat);
+                        string recipients = fileTableData.Address;
+                        if (!recipients.Trim().EndsWith(";"))
+                            recipients += ";";
+                        recipients += Config.AuditConfig.AuditRecipients;                        
+                        recipients = await APIs.Submitters.GetFOAEAOfficersEmails() + recipients;
 
-                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", fileTableData.Address,
+                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", recipients,
                                                                       errorCount, warningCount, successCount, unknownTags.Count,
                                                                       totalFilesCount, outputFormat);
                     }

@@ -63,6 +63,15 @@ public class SubmittersController : FoaeaControllerBase
         return Ok(submitterCodes);
     }
 
+    [HttpGet("FOAEAOfficersEmails")]
+    public async Task<ActionResult<string>> GetFOAEAOfficersEmails([FromServices] IRepositories db)
+    {
+        var submitterManager = new SubmitterManager(db);
+        var officerEmails = await submitterManager.GetFOAEAOfficersEmail();
+
+        return Ok(officerEmails);
+    }
+
     [HttpGet("{submCd}/Declarant")]
     public async Task<ActionResult<string>> GetDeclarant([FromRoute] string submCd, [FromServices] IRepositories repositories)
     {
