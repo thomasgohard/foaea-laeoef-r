@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace FileBroker.Model
@@ -35,6 +36,7 @@ namespace FileBroker.Model
     public class FedSinFileBase
     {
         public FedSin_RecType01 SININ01;
+        [JsonConverter(typeof(SingleOrArrayConverter<FedSin_RecType02>))]
         public List<FedSin_RecType02> SININ02;
         public FedSin_RecType99 SININ99;
 

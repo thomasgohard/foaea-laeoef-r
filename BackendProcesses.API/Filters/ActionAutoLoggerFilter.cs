@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using FOAEA3.Resources.Helpers;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using System;
 
@@ -17,17 +18,20 @@ namespace BackendProcess.API.Filters
             {
                 ILogger log = Log.ForContext("APIpath", context.HttpContext.Request.Path.Value);
 
-                //var context = HttpContext.ApplicationInstance.Context;
                 var verbMethod = context.HttpContext.Request.HttpContext.Request.Method;
                 var actionName = context.RouteData.Values["action"];
+                var controllerName = context.RouteData.Values["controller"];
 
-                log.Information($"({verbMethod}) method {actionName}()");
+                string info = $"({verbMethod,4}) controller {controllerName} action {actionName}";
+                log.Information(info);
+
+                string infoColour = $"([magenta]{verbMethod}[/magenta]) controller [cyan]{controllerName}[/cyan] action [cyan]{actionName}[/cyan]";
+                ColourConsole.WriteEmbeddedColorLine(infoColour);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // do nothing -- logging is not critical
+                ColourConsole.WriteLine("Error writing OnActionExecuting() to log: " + e.Message, ConsoleColor.Red);
             }
-
         }
     }
 }

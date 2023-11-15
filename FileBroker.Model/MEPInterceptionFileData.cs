@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace FileBroker.Model
 {
@@ -97,9 +98,13 @@ namespace FileBroker.Model
     public struct MEPInterception_InterceptionDataSet
     {
         public MEPInterception_RecType01 INTAPPIN01;
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPInterception_RecType10>))]
         public List<MEPInterception_RecType10> INTAPPIN10;
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPInterception_RecType11>))]
         public List<MEPInterception_RecType11> INTAPPIN11;
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPInterception_RecType12>))]
         public List<MEPInterception_RecType12> INTAPPIN12;
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPInterception_RecType13>))]
         public List<MEPInterception_RecType13> INTAPPIN13;
         public MEPInterception_RecType99 INTAPPIN99;
     }
@@ -110,6 +115,7 @@ namespace FileBroker.Model
         public MEPInterception_RecType10 INTAPPIN10;
         public MEPInterception_RecType11 INTAPPIN11;
         public MEPInterception_RecType12 INTAPPIN12;
+        [JsonConverter(typeof(SingleOrArrayConverter<MEPInterception_RecType13>))]
         public List<MEPInterception_RecType13> INTAPPIN13;
         public MEPInterception_RecType99 INTAPPIN99;
     }

@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using FOAEA3.Model;
+﻿using FOAEA3.Model;
 using FOAEA3.Model.Constants;
 using FOAEA3.Model.Enums;
 using FOAEA3.Model.Interfaces;
@@ -274,7 +273,7 @@ namespace FOAEA3.Common.Helpers
                     Thread.Sleep(GlobalConfiguration.TIME_BETWEEN_RETRIES); // wait half a second between each attempt
                     if (attemptCount == GlobalConfiguration.MAX_API_ATTEMPTS)
                     {
-                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);                        
+                        var errorMessageData = new MessageData(EventCode.UNDEFINED, "Error", api + ":" + e.Message, MessageType.Error);
                         ErrorData.Add(errorMessageData);
                     }
                 }
@@ -376,7 +375,7 @@ namespace FOAEA3.Common.Helpers
                                 content = await callResult.Content.ReadAsStringAsync();
                                 result = JsonConvert.DeserializeObject<T>(content);
                             }
-                            catch 
+                            catch
                             {
                                 // content could not be converted, so just return as is
                             }

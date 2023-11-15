@@ -50,6 +50,12 @@ namespace FOAEA3.Data.DB
             return data;
         }
 
+        public async Task<string> GetFOAEAOfficersEmail()
+        {
+            string officers = await MainDB.GetDataFromProcSingleValueAsync<string>("GetFOAEAOfficersEmails", null);
+            return officers;
+        }
+
         private void FillCodesFromReader(IDBHelperReader rdr, out string code)
         {
             code = rdr["SubmitterCode"] as string;
