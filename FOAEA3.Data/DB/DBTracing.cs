@@ -93,7 +93,7 @@ namespace FOAEA3.Data.DB
                         {"Trace_Breach_Text", (object) data.Trace_Breach_Text ?? DBNull.Value },
                         {"Trace_ReasGround_Text", (object) data.Trace_ReasGround_Text ?? DBNull.Value },
                         {"FamPro_Cd", data.FamPro_Cd },
-                        {"Statute_Cd", (object) data.Statute_Cd ?? DBNull.Value },
+                        {"Statute_Cd", string.IsNullOrEmpty(data.Statute_Cd) ? DBNull.Value : data.Statute_Cd},
                         {"Trace_Cycl_Qty", data.Trace_Cycl_Qty },
                         {"Trace_LstCyclStr_Dte", data.Trace_LstCyclStr_Dte == DateTime.MinValue ? DateTime.Now : data.Trace_LstCyclStr_Dte },
                         {"Trace_LstCyclCmp_Dte", data.Trace_LstCyclCmp_Dte.HasValue ? data.Trace_LstCyclCmp_Dte : DBNull.Value },
