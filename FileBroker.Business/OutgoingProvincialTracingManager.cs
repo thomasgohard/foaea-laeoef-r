@@ -105,8 +105,8 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
     {
         var result = new StringBuilder();
 
-        result.AppendLine("<?xml version='1.0' encoding='utf-8'?>");
-        result.AppendLine("<ProvincialOutboundXMLFileTraceResults>");
+        result.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        result.AppendLine("<ProvincialOutboundXMLFileTraceResults80>");
 
         result.AppendLine(GenerateHeaderLine(newCycle));
 
@@ -126,7 +126,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
 
         result.AppendLine(GenerateFooterLine(totalCount));
 
-        result.Append("</ProvincialOutboundXMLFileTraceResults>");
+        result.Append("</ProvincialOutboundXMLFileTraceResults80>");
 
         return result.ToString();
     }
