@@ -17,7 +17,7 @@ public class TracingsController : FoaeaControllerBase
 {
     [AllowAnonymous]
     [HttpGet("Version")]
-    public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.0");
+    public ActionResult<string> GetVersion() => Ok("Tracings API Version 1.1");
 
     [HttpGet("DB")]
     [Authorize(Roles = Roles.Admin)]
@@ -103,8 +103,10 @@ public class TracingsController : FoaeaControllerBase
 
         var tracingManager = new TracingManager(application, db, config, User);
 
-        if (application.Medium_Cd == "FTP")
+        if ((application.Medium_Cd == "FTP") && (tracingManager.CurrentUser.SubjectName?.ToLower() == "system_support"))
         {
+            // NOTE: when request came via FTP, the Appl_LastUpdate_Usr will contain the dat_Update_SubmCd code
+            //       that was sent in the FTP file
             var submitter = (await db.SubmitterTable.GetSubmitter(application.Appl_LastUpdate_Usr)).FirstOrDefault();
             if (submitter is not null)
             {
