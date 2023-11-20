@@ -120,9 +120,32 @@ namespace FileBroker.Model
         public MEPTracing_RecType99 TRCAPPIN99;
     }
 
+    public struct MEPTracing_TracingDataSetSingle
+    {
+        public MEPTracing_RecType01 TRCAPPIN01;
+
+        [DataMember(IsRequired = false)]
+        public MEPTracing_RecType20 TRCAPPIN20;
+
+        [DataMember(IsRequired = false)]
+        public MEPTracing_RecType21 TRCAPPIN21;
+
+        [DataMember(IsRequired = false)]
+        public MEPTracing_RecType22 TRCAPPIN22;
+
+        public MEPTracing_RecType99 TRCAPPIN99;
+    }
+
     public class MEPTracingFileData
     {
         public MEPTracing_TracingDataSet NewDataSet;
     }
+
+    public class MEPTracingFileDataSingle
+    {
+        public MEPTracing_TracingDataSetSingle NewDataSet;
+    }
+
+
 
 }
