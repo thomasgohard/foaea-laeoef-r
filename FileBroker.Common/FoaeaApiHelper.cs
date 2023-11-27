@@ -7,6 +7,14 @@ namespace FileBroker.Common
 {
     public static class FoaeaApiHelper
     {
+        public static void ClearErrors(APIBrokerList foaeaApis)
+        {
+            foaeaApis.Applications.ApiHelper.ErrorData.Clear();
+            foaeaApis.TracingApplications.ApiHelper.ErrorData.Clear();
+            foaeaApis.InterceptionApplications.ApiHelper.ErrorData.Clear();
+            foaeaApis.LicenceDenialApplications.ApiHelper.ErrorData.Clear();
+        }
+
         public static APIBrokerList SetupFoaeaAPIs(ApiConfig apiRootData)
         {
             string token = "";

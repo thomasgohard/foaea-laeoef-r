@@ -76,10 +76,6 @@ public partial class IncomingFederalTracingManager
         {
             errors.Add("An error occurred: " + e.Message);
         }
-        finally
-        {
-            await DB.FileTable.SetNextCycleForFileType(fileTableData, fileCycle.Length);
-        }
 
         return errors;
     }
