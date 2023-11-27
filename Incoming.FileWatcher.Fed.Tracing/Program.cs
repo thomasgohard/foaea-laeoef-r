@@ -78,6 +78,7 @@ class Program
                         }
 
                         federalFileManager.Errors.Clear();
+                        FoaeaApiHelper.ClearErrors(foaeaApis);
                     }
                 }
                 else
