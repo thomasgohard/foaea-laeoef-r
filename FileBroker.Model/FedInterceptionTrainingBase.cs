@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace FileBroker.Model
@@ -40,6 +41,7 @@ namespace FileBroker.Model
     public class FedInterceptionTrainingBase
     {
         public FedInterceptionTraining_RecType01 TRIN01;
+        [JsonConverter(typeof(SingleOrArrayConverter<FedInterceptionTraining_RecType02>))]
         public List<FedInterceptionTraining_RecType02> TRIN02;
         public FedInterceptionTraining_RecType99 TRIN99;
 

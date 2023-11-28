@@ -14,6 +14,7 @@ namespace FOAEA3.Model.Interfaces.Repository
                                                string submFName = null, string submMName = null,
                                                string prov = null);
         Task<List<string>> GetSubmitterCodesForOffice(string service, string office);
+        Task<string> GetFOAEAOfficersEmail();
         Task<string> GetMaxSubmitterCode(string submCodePart);
 
         Task CreateSubmitter(SubmitterData newSubmitter);

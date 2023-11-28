@@ -61,6 +61,7 @@ public class FoaeaSystemAccess
         if (APIs.ApplicationEvents is not null) APIs.ApplicationEvents.ApiHelper.GetRefreshedToken = RefreshToken;
         if (APIs.Applications is not null) APIs.Applications.ApiHelper.GetRefreshedToken = RefreshToken;
         if (APIs.DataModifications is not null) APIs.DataModifications.ApiHelper.GetRefreshedToken = RefreshToken;
+        if (APIs.Submitters is not null) APIs.Submitters.ApiHelper.GetRefreshedToken = RefreshToken;
 
         if (APIs.Sins is not null) APIs.Sins.ApiHelper.GetRefreshedToken = RefreshToken;
 
@@ -94,6 +95,7 @@ public class FoaeaSystemAccess
         if (APIs.ApplicationEvents is not null) APIs.ApplicationEvents.Token = CurrentToken;
         if (APIs.Applications is not null) APIs.Applications.Token = CurrentToken;
         if (APIs.DataModifications is not null) APIs.DataModifications.Token = CurrentToken;
+        if (APIs.Submitters is not null) APIs.Submitters.Token = CurrentToken;
 
         if (APIs.Sins is not null) APIs.Sins.Token = CurrentToken;
 

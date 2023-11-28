@@ -7,7 +7,6 @@ using FOAEA3.Resources.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace FOAEA3.Business.Areas.Administration
@@ -43,6 +42,11 @@ namespace FOAEA3.Business.Areas.Administration
         public async Task<List<string>> GetSubmitterCodesForOffice(string service, string office)
         {
             return await DB.SubmitterTable.GetSubmitterCodesForOffice(service, office);
+        }
+
+        public async Task<string> GetFOAEAOfficersEmail()
+        {
+            return await DB.SubmitterTable.GetFOAEAOfficersEmail();
         }
 
         public async Task<List<SubmitterData>> GetSubmittersForProvinceAndOffice(string provCd, string enfOff, string enfSrv, bool onlyActive)

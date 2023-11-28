@@ -282,7 +282,8 @@ namespace FOAEA3.Business.Areas.Application
             await current.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
 
             bool isCancelled = current.Application.ActvSt_Cd == "X";
-            bool isReset = current.Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5);
+            bool isReset = current.Application.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1, ApplicationState.SIN_NOT_CONFIRMED_5) &&
+                           Application.AppLiSt_Cd != ApplicationState.MANUALLY_TERMINATED_14;
 
             if (isReset && isCancelled)
             {

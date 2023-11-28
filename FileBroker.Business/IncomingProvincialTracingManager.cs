@@ -100,8 +100,13 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
                         int totalFilesCount = await fileAuditManager.GenerateProvincialAuditFile(FileName + ".XML", unknownTags,
                                                                                                  errorCount, warningCount, successCount,
                                                                                                  outputFormat);
+                        string recipients = fileTableData.Address;
+                        if (!recipients.Trim().EndsWith(";"))
+                            recipients += ";";
+                        recipients += Config.AuditConfig.AuditRecipients;                        
+                        recipients = await APIs.Submitters.GetFOAEAOfficersEmails() + recipients;
 
-                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", Config.AuditConfig.AuditRecipients,
+                        await fileAuditManager.SendStandardAuditEmail(FileName + ".XML", recipients,
                                                                       errorCount, warningCount, successCount, unknownTags.Count,
                                                                       totalFilesCount, outputFormat);
                     }
@@ -283,10 +288,41 @@ public class IncomingProvincialTracingManager : IncomingProvincialManagerBase
         {
             result = JsonConvert.DeserializeObject<MEPTracingFileData>(sourceTracingData);
         }
-        catch (Exception e)
+        catch
         {
-            error = e.Message;
-            result = new MEPTracingFileData();
+            try
+            {
+                var tempResult = JsonConvert.DeserializeObject<MEPTracingFileDataSingle>(sourceTracingData);
+
+                result = new MEPTracingFileData();
+
+                if (tempResult != null)
+                {
+                    result.NewDataSet.TRCAPPIN01 = tempResult.NewDataSet.TRCAPPIN01;
+                    result.NewDataSet.TRCAPPIN20 = new List<MEPTracing_RecType20>();
+                    if (tempResult.NewDataSet.TRCAPPIN20.RecType != null)
+                    {
+                        result.NewDataSet.TRCAPPIN20.Add(tempResult.NewDataSet.TRCAPPIN20);
+                    };
+                    result.NewDataSet.TRCAPPIN21 = new List<MEPTracing_RecType21>();
+                    if (tempResult.NewDataSet.TRCAPPIN21.RecType != null)
+                    {
+                        result.NewDataSet.TRCAPPIN21.Add(tempResult.NewDataSet.TRCAPPIN21);
+                    };
+                    result.NewDataSet.TRCAPPIN22 = new List<MEPTracing_RecType22>();
+                    if (tempResult.NewDataSet.TRCAPPIN22.RecType != null)
+                    {
+                        result.NewDataSet.TRCAPPIN22.Add(tempResult.NewDataSet.TRCAPPIN22);
+                    };
+                    result.NewDataSet.TRCAPPIN99 = tempResult.NewDataSet.TRCAPPIN99;
+                }
+
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+                result = new MEPTracingFileData();
+            }
         }
 
         return result;
