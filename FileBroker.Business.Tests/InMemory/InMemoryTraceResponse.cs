@@ -74,7 +74,7 @@ namespace FileBroker.Business.Tests.InMemory
             throw new NotImplementedException();
         }
 
-        public Task MarkResponsesAsViewed(string enfService)
+        public Task MarkResponsesAsViewed(string recipientSubmCd)
         {
             throw new NotImplementedException();
         }

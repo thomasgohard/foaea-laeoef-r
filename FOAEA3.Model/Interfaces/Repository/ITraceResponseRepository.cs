@@ -26,6 +26,6 @@ namespace FOAEA3.Model.Interfaces.Repository
         Task UpdateTraceResponseFinancial(TraceFinancialResponseData data);
 
         Task DeleteCancelledApplicationTraceResponseData(string applEnfSrvCd, string applCtrlCd, string enfSrvCd);
-        Task MarkResponsesAsViewed(string enfService);
+        Task MarkResponsesAsViewed(string recipientSubmCd);
     }
 }

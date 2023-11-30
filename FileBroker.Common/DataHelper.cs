@@ -8,6 +8,8 @@ namespace FileBroker.Common
 {
     public static class DataHelper
     {
+        public static string NO_DATA_FOUND = "No outgoing data found!";
+
         public static string ConfigureDBServices(IServiceCollection services, string fileBrokerConnectionString)
         {
             var fileBrokerDB = new DBToolsAsync(fileBrokerConnectionString);
