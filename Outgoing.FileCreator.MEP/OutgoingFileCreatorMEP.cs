@@ -62,11 +62,11 @@ public static class OutgoingFileCreatorMEP
         if (generateTracingFiles)
             await CreateOutgoingProvincialFiles(db, "TRCAPPOUT", new OutgoingProvincialTracingManager(foaeaApis, db, config));
 
-        if (generateLicencingFiles)
-            await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, config));
+        //if (generateLicencingFiles)
+        //    await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, config));
 
-        if (generateStatsFiles)
-            await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, config));
+        //if (generateStatsFiles)
+        //    await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, config));
     }
 
     private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
