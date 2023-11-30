@@ -55,11 +55,11 @@ public class TraceResponsesController : FoaeaControllerBase
 
     [HttpPut("MarkResultsAsViewed")]
     public async Task<ActionResult<int>> MarkTraceResponsesAsViewed([FromServices] IRepositories repositories,
-                                                                    [FromQuery] string enfService)
+                                                                    [FromQuery] string recipientSubmCd)
     {
         var tracingManager = new TracingManager(repositories, config, User);
 
-        await tracingManager.MarkResponsesAsViewed(enfService);
+        await tracingManager.MarkResponsesAsViewed(recipientSubmCd);
 
         return Ok();
     }

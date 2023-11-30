@@ -10,6 +10,6 @@ namespace FOAEA3.Model.Interfaces.Broker
 
         Task InsertBulkData(List<TraceResponseData> responseData);
         Task AddTraceFinancialResponseData(TraceFinancialResponseData traceFinancialResultData);
-        Task MarkTraceResultsAsViewed(string enfService);
+        Task MarkTraceResultsAsViewed(string recipientSubmCd);
     }
 }

@@ -684,10 +684,10 @@ namespace FOAEA3.Business.Areas.Application
                 }
         }
 
-        public async Task MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewed(string recipientSubmCd)
         {
             var responsesDB = DB.TraceResponseTable;
-            await responsesDB.MarkResponsesAsViewed(enfService);
+            await responsesDB.MarkResponsesAsViewed(recipientSubmCd);
         }
 
         public async Task CreateNETPevents()

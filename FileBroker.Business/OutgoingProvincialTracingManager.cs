@@ -50,23 +50,31 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
             {
                 var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
-                string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+                if (data.TracingData.Any())
+                {
+                    string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent, Encoding.UTF8);
-                fileCreated = true;
+                    await File.WriteAllTextAsync(newFilePath, fileContent, Encoding.UTF8);
+                    fileCreated = true;
 
-                string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
+                    string errorDoingBackup = await FileHelper.BackupFile(newFilePath, DB, Config);
 
-                if (!string.IsNullOrEmpty(errorDoingBackup))
-                    await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {newFilePath}",
-                                                                   "Error creating backup of outbound file: " + errorDoingBackup);
+                    if (!string.IsNullOrEmpty(errorDoingBackup))
+                        await DB.ErrorTrackingTable.MessageBrokerError($"File Error: {newFilePath}",
+                                                                       "Error creating backup of outbound file: " + errorDoingBackup);
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                    "Outbound File created successfully.");
+                    await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                        "Outbound File created successfully.");
 
-                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.TracingResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
+                    string recipientSubmCd = fileTableData.Name[..6];
+                    await APIs.TracingResponses.MarkTraceResultsAsViewed(recipientSubmCd);
+                }
+                else
+                {
+                    errors.Add(DataHelper.NO_DATA_FOUND);
+                }
             }
             finally
             {

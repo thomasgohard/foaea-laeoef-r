@@ -194,11 +194,11 @@ namespace FOAEA3.Data.DB
             await MainDB.ExecProcAsync("TrcRspFin_Update", parameters);
         }
 
-        public async Task MarkResponsesAsViewed(string enfService)
+        public async Task MarkResponsesAsViewed(string recipientSubmCd)
         {
             var parameters = new Dictionary<string, object>
             {
-                {"chrRecptCd", enfService }
+                {"chrRecptCd", recipientSubmCd }
             };
 
             await MainDB.ExecProcAsync("TrcAPPTraceUpdate", parameters);

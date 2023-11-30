@@ -43,17 +43,24 @@ public class OutgoingProvincialLicenceDenialManager : IOutgoingFileManager
             {
                 var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
-                string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+                if (data.Any())
+                {
+                    string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                await File.WriteAllTextAsync(newFilePath, fileContent);
-                fileCreated = true;
+                    await File.WriteAllTextAsync(newFilePath, fileContent);
+                    fileCreated = true;
 
-                await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                     "Outbound File created successfully.");
+                    await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                         "Outbound File created successfully.");
 
-                await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+                    await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
 
-                await APIs.LicenceDenialResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
+                    await APIs.LicenceDenialResponses.MarkTraceResultsAsViewed(processCodes.EnfSrv_Cd);
+                }
+                else
+                {
+                    errors.Add(DataHelper.NO_DATA_FOUND);
+                }
             }
             finally
             {

@@ -85,7 +85,8 @@ public static class OutgoingFileCreatorMEP
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
+                    if (error != DataHelper.NO_DATA_FOUND)
+                        await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
                                                                     new Exception(error), displayExceptionError: true);
                 }
         }
