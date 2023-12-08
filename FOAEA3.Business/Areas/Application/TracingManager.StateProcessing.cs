@@ -125,7 +125,7 @@ namespace FOAEA3.Business.Areas.Application
             if (TracingValidation.IsC78())
                 activatedDate = TracingApplication.Appl_Create_Dte;
             else if (TracingApplication.Appl_RecvAffdvt_Dte is not null)
-                activatedDate = TracingApplication.Appl_RecvAffdvt_Dte.Value.AddDays(-1);
+                activatedDate = TracingApplication.Appl_RecvAffdvt_Dte.Value;
             else
             {
                 await AddSystemError(DB, TracingApplication.Messages, Config.Recipients.SystemErrorRecipients,
@@ -164,31 +164,15 @@ namespace FOAEA3.Business.Areas.Application
 
             if (activatedDate.AddYears(1) > DateTime.Now)
             {
-                if (activatedDate.AddYears(1) > quarterDate)
+                if (ReinstateEffectiveDate < activatedDate.AddYears(1))
                 {
-                    if (eventTraceCount <= 3)
-                        await SetTracingForReinstate(quarterDate, quarterDate, EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
-                    else if (eventTraceCount == 4)
-                        await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
-                    else if (eventTraceCount == 5)
+                    if (activatedDate.AddYears(1) > quarterDate)
                     {
-                        TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
-                        EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
-                                                appState: ApplicationState.APPLICATION_REINSTATED_11,
-                                                effectiveDateTime: activatedDate.AddYears(1).AddDays(1));
-                    }
-                    else
-                    {
-                        await DB.NotificationService.SendEmail("Trace Cycle requests exceed yearly limit",
-                                                                      Config.Recipients.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
-                        await SetNewStateTo(ApplicationState.EXPIRED_15);
-                    }
-                }
-                else
-                {
-                    if (eventTraceCount > 4)
-                    {
-                        if (activatedDate.AddYears(1) > DateTime.Now)
+                        if (eventTraceCount <= 3)
+                            await SetTracingForReinstate(quarterDate, quarterDate, EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        else if (eventTraceCount == 4)
+                            await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        else if (eventTraceCount == 5)
                         {
                             TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
                             EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
@@ -196,16 +180,37 @@ namespace FOAEA3.Business.Areas.Application
                                                     effectiveDateTime: activatedDate.AddYears(1).AddDays(1));
                         }
                         else
+                        {
+                            await DB.NotificationService.SendEmail("Trace Cycle requests exceed yearly limit",
+                                                                          Config.Recipients.EmailRecipients, Appl_EnfSrv_Cd + " " + Appl_CtrlCd);
                             await SetNewStateTo(ApplicationState.EXPIRED_15);
+                        }
                     }
                     else
                     {
-                        if (activatedDate.AddYears(1) > DateTime.Now)
-                            await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                        if (eventTraceCount > 4)
+                        {
+                            if (activatedDate.AddYears(1) > DateTime.Now)
+                            {
+                                TracingApplication.AppLiSt_Cd = ApplicationState.PARTIALLY_SERVICED_12;
+                                EventManager.AddBFEvent(EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING,
+                                                        appState: ApplicationState.APPLICATION_REINSTATED_11,
+                                                        effectiveDateTime: activatedDate.AddYears(1).AddDays(1));
+                            }
+                            else
+                                await SetNewStateTo(ApplicationState.EXPIRED_15);
+                        }
                         else
-                            await SetNewStateTo(ApplicationState.EXPIRED_15);
+                        {
+                            if (activatedDate.AddYears(1) > DateTime.Now)
+                                await SetTracingForReinstate(quarterDate, activatedDate.AddYears(1).AddDays(1), EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING);
+                            else
+                                await SetNewStateTo(ApplicationState.EXPIRED_15);
+                        }
                     }
                 }
+                else
+                   await SetNewStateTo(ApplicationState.EXPIRED_15);
             }
             else
                 await SetNewStateTo(ApplicationState.EXPIRED_15);
