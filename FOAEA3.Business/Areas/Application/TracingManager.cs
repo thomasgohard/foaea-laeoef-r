@@ -63,6 +63,12 @@ namespace FOAEA3.Business.Areas.Application
                                                     ApplicationState.APPLICATION_ACCEPTED_10,
                                                     ApplicationState.MANUALLY_TERMINATED_14
                                                 });
+            StateEngine.ValidStateChange.Add(ApplicationState.APPLICATION_REINSTATED_11,
+                                                new List<ApplicationState> {
+                                                    ApplicationState.APPLICATION_ACCEPTED_10,
+                                                    ApplicationState.MANUALLY_TERMINATED_14,
+                                                    ApplicationState.EXPIRED_15
+                                                });
             StateEngine.ValidStateChange[ApplicationState.APPLICATION_ACCEPTED_10].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PARTIALLY_SERVICED_12].Add(ApplicationState.APPLICATION_REINSTATED_11);
             StateEngine.ValidStateChange[ApplicationState.PENDING_ACCEPTANCE_SWEARING_6].Add(ApplicationState.VALID_AFFIDAVIT_NOT_RECEIVED_7);
@@ -508,6 +514,7 @@ namespace FOAEA3.Business.Areas.Application
                                     AddNewBFevent();
                                 }
                             }
+                            closeEvent = true;
                             break;
 
                         case EventCode.C50804_SCHEDULED_TO_BE_REINSTATED:
@@ -516,6 +523,7 @@ namespace FOAEA3.Business.Areas.Application
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
                             }
+                            closeEvent = true;
                             break;
 
                         case EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING:
@@ -524,6 +532,7 @@ namespace FOAEA3.Business.Areas.Application
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                            bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
                             }
+                            closeEvent = true;
                             break;
 
                         case EventCode.C54001_BF_EVENT:
