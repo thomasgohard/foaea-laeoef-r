@@ -28,9 +28,9 @@ namespace FOAEA3.Common.Brokers
                                                                                          traceFinancialResultData, token: Token);
         }
 
-        public async Task MarkTraceResultsAsViewed(string enfService)
+        public async Task MarkTraceResultsAsViewed(string recipientSubmCd)
         {
-            await ApiHelper.SendCommand("api/v1/traceResponses/MarkResultsAsViewed?enfService=" + enfService, token: Token);
+            await ApiHelper.SendCommand("api/v1/traceResponses/MarkResultsAsViewed?recipientSubmCd=" + recipientSubmCd, token: Token);
         }
     }
 }

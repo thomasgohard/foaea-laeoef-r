@@ -9,7 +9,7 @@
     },
     "Incoming.FileWatcher.MEP ON": {
       "commandName": "Project",
-      "commandLineArgs": "ALL TRACE_ONLY"
+      "commandLineArgs": "ON"
     },
     "Incoming.FileWatcher.MEP BC": {
       "commandName": "Project",
@@ -18,6 +18,14 @@
     "Incoming.FileWatcher.MEP QC": {
       "commandName": "Project",
       "commandLineArgs": "QC"
+    },
+    "Incoming.FileWatcher.MEP ALL LICENCE_ONLY": {
+      "commandName": "Project",
+      "commandLineArgs": "ALL LICENCE_ONLY"
+    },
+    "Incoming.FileWatcher.MEP ALL TRACE_ONLY": {
+      "commandName": "Project",
+      "commandLineArgs": "ALL TRACE_ONLY"
     }
   }
 }

@@ -62,11 +62,11 @@ public static class OutgoingFileCreatorMEP
         if (generateTracingFiles)
             await CreateOutgoingProvincialFiles(db, "TRCAPPOUT", new OutgoingProvincialTracingManager(foaeaApis, db, config));
 
-        if (generateLicencingFiles)
-            await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, config));
+        //if (generateLicencingFiles)
+        //    await CreateOutgoingProvincialFiles(db, "LICAPPOUT", new OutgoingProvincialLicenceDenialManager(foaeaApis, db, config));
 
-        if (generateStatsFiles)
-            await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, config));
+        //if (generateStatsFiles)
+        //    await CreateOutgoingProvincialFiles(db, "STATAPPOUT", new OutgoingProvincialStatusManager(foaeaApis, db, config));
     }
 
     private static async Task CreateOutgoingProvincialFiles(RepositoryList repositories, string category,
@@ -85,7 +85,8 @@ public static class OutgoingFileCreatorMEP
                 foreach (var error in errors)
                 {
                     ColourConsole.WriteEmbeddedColorLine($"Error creating [cyan]{provincialOutgoingSource.Name}[/cyan]: [red]{error}[/red]");
-                    await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
+                    if (error != DataHelper.NO_DATA_FOUND)
+                        await repositories.ErrorTrackingTable.MessageBrokerError(category, provincialOutgoingSource.Name,
                                                                     new Exception(error), displayExceptionError: true);
                 }
         }

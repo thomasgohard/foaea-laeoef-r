@@ -10,6 +10,10 @@
     "Outgoing.FileCreator.MEP TRACE_ONLY": {
       "commandName": "Project",
       "commandLineArgs": "TRACE_ONLY"
+    },
+    "Outgoing.FileCreate_MEP LICENCE_ONLY": {
+      "commandName": "Project",
+      "commandLineArgs": "LICENCE_ONLY"
     }
   }
 }

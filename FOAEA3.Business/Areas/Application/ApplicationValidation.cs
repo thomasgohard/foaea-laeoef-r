@@ -413,8 +413,8 @@ namespace FOAEA3.Business.Areas.Application
                     {
                         EventManager.AddEvent(EventCode.C50930_THIS_DEBTOR_IS_ACTIVE_IN_ANOTHER_JURISDICTION_CONTACT_THE_JURISDICTION_CONCERNED,
                                               eventReasonText: errorMessage, 
-                                              enfSrv: confirmedAppl.Appl_EnfSrv_Cd, controlCode: confirmedAppl.Appl_CtrlCd,
-                                              submCd: confirmedAppl.Subm_SubmCd);
+                                              enfSrv: confirmedAppl.Appl_EnfSrv_Cd, controlCode: confirmedAppl.Appl_CtrlCd,                                              
+                                              submCd: confirmedAppl.Subm_SubmCd, recipientSubm: confirmedAppl.Subm_Recpt_SubmCd);
                     }
 
                 }
@@ -444,14 +444,14 @@ namespace FOAEA3.Business.Areas.Application
                         EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
                                               eventReasonText: originalApplicationErrorMessage,
                                               enfSrv: applicationFound.Appl_EnfSrv_Cd, controlCode: applicationFound.Appl_CtrlCd,
-                                              submCd: applicationFound.Subm_SubmCd);
+                                              submCd: applicationFound.Subm_SubmCd, recipientSubm: applicationFound.Subm_Recpt_SubmCd);
 
                     }
                 }
 
                 if (!string.IsNullOrEmpty(allMatchErrorMessage.ToString()))
                 {
-                    EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,
+                    EventManager.AddEvent(EventCode.C50932_THERE_EXISTS_ONE_OR_MORE_ACTIVE_APPLICATIONS_OF_THIS_TYPE_FOR_THE_SAME_DEBTOR___CREDITOR,                                          
                                           allMatchErrorMessage.ToString().Trim());
                 }
 

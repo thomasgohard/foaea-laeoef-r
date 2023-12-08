@@ -1,5 +1,4 @@
-﻿using FileBroker.Common.Helpers;
-using System.Text;
+﻿using System.Text;
 
 namespace FileBroker.Business
 {
@@ -24,7 +23,7 @@ namespace FileBroker.Business
 
             var fileTableData = await DB.FileTable.GetFileTableDataForFileName(fileBaseName);
 
-            string newCycle = (fileTableData.Cycle+1).ToString("000000");
+            string newCycle = (fileTableData.Cycle + 1).ToString("000000");
 
             try
             {
@@ -43,15 +42,22 @@ namespace FileBroker.Business
                 {
                     var data = await GetOutgoingDataFromFoaea(fileTableData, processCodes.ActvSt_Cd, processCodes.SubmRecptCd);
 
-                    string fileContent = GenerateOutputFileContentFromData(data, newCycle);
+                    if (data.Any())
+                    {
+                        string fileContent = GenerateOutputFileContentFromData(data, newCycle);
 
-                    await File.WriteAllTextAsync(newFilePath, fileContent);
-                    fileCreated = true;
+                        await File.WriteAllTextAsync(newFilePath, fileContent);
+                        fileCreated = true;
 
-                    await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
-                                                                             "Outbound File created successfully.");
+                        await DB.OutboundAuditTable.InsertIntoOutboundAudit(fileBaseName + "." + newCycle, DateTime.Now, fileCreated,
+                                                                                 "Outbound File created successfully.");
 
-                    await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+                        await DB.FileTable.SetNextCycleForFileType(fileTableData, newCycle.Length);
+                    }
+                    else
+                    {
+                        errors.Add(DataHelper.NO_DATA_FOUND);
+                    }
                 }
                 finally
                 {
@@ -76,7 +82,7 @@ namespace FileBroker.Business
 
         }
 
-        private async Task<List<StatsOutgoingProvincialData>> GetOutgoingDataFromFoaea(FileTableData fileTableData, 
+        private async Task<List<StatsOutgoingProvincialData>> GetOutgoingDataFromFoaea(FileTableData fileTableData,
                                                                                        string actvSt_Cd, string recipientCode)
         {
             var recMax = await DB.ProcessParameterTable.GetValueForParameter(fileTableData.PrcId, "rec_max");
