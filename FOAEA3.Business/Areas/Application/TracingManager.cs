@@ -167,9 +167,14 @@ namespace FOAEA3.Business.Areas.Application
             {
                 var currentDataManager = new TracingManager(DB, Config, CurrentUser);
                 await currentDataManager.LoadApplication(Appl_EnfSrv_Cd, Appl_CtrlCd);
+                var currentApplication = currentDataManager.TracingApplication;
 
-                if ((currentDataManager.TracingApplication.AppLiSt_Cd != TracingApplication.AppLiSt_Cd) &&
-                    (TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14))
+                bool isReset = currentApplication.AppLiSt_Cd.In(ApplicationState.INVALID_APPLICATION_1,
+                                                                ApplicationState.SIN_NOT_CONFIRMED_5);
+                bool isCancelled = TracingApplication.AppLiSt_Cd == ApplicationState.MANUALLY_TERMINATED_14;
+                bool hasStateChanged = currentDataManager.TracingApplication.AppLiSt_Cd != TracingApplication.AppLiSt_Cd;
+
+                if ((hasStateChanged && isCancelled) || isReset)
                 {
                     MakeUpperCase();
                     await base.UpdateApplication();
