@@ -1,4 +1,6 @@
-﻿namespace FileBroker.Business.Helpers;
+﻿using System.Drawing;
+
+namespace FileBroker.Business.Helpers;
 
 public class IncomingFederalTracingResponse
 {
@@ -257,16 +259,14 @@ public class IncomingFederalTracingResponse
     {
         foreach (var row in responseData)
         {
-            foreach (var cycleRow in cycles)
+            var data = cycles.Find(m => m.Appl_EnfSrv_Cd.Trim() == row.Appl_EnfSrv_Cd.Trim() &&
+                                        m.Appl_CtrlCd.Trim() == row.Appl_CtrlCd.Trim());
+            if ((data != null) && (data.Appl_EnfSrv_Cd != null))
             {
-                if ((cycleRow.Appl_CtrlCd == row.Appl_CtrlCd) && (cycleRow.Appl_EnfSrv_Cd == row.Appl_EnfSrv_Cd))
-                {
-                    if (row.EnfSrv_Cd == "EI02") // add 100 to the cycle for NETP
-                        row.TrcRsp_Trace_CyclNr = (short)(100 + cycleRow.Trace_Cycl_Qty);
-                    else
-                        row.TrcRsp_Trace_CyclNr = (short)cycleRow.Trace_Cycl_Qty;
-                    break;
-                }
+                if (row.EnfSrv_Cd == "EI02") // add 100 to the cycle for NETP
+                    row.TrcRsp_Trace_CyclNr = (short)(100 + data.Trace_Cycl_Qty);
+                else
+                    row.TrcRsp_Trace_CyclNr = (short)data.Trace_Cycl_Qty;
             }
         }
     }
