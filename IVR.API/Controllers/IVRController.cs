@@ -1,10 +1,11 @@
-﻿using FOAEA3.Business.Areas.IVR;
-using FOAEA3.Common.Helpers;
-using FOAEA3.Model;
-using FOAEA3.Model.Interfaces.Repository;
-using FOAEA3.Model.IVR;
+﻿using FOAEA3.IVR.Business;
+using FOAEA3.IVR.Helpers;
+using FOAEA3.Model.Constants;
+using FOAEA3.IVR.Interfaces.Repository;
+using FOAEA3.IVR.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FOAEA3.IVR.Model;
 
 namespace IVR.API.Controllers
 {
@@ -16,9 +17,19 @@ namespace IVR.API.Controllers
 
         public IVRController()
         {
-            var configHelper = new FoaeaConfigurationHelper();
+
+            var configHelper = new IVRConfigurationHelper();
             config = configHelper.Recipients;
         }
+
+        [AllowAnonymous]
+        [HttpGet("Version")]
+        public ActionResult<string> GetVersion() => Ok("IVR API Version 1.0");
+
+        //[AllowAnonymous]
+        //[HttpGet("DB")]
+        //public ActionResult<string> GetDatabase() => Ok(config.FoaeaConnection);
+
 
         [HttpGet("fpIVR_Check_Creditor_Id")]
         [AllowAnonymous]
