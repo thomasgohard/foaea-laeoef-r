@@ -6,6 +6,8 @@ public class XmlHelper
     {
         string trimmedValue = value?.Trim();
         trimmedValue = trimmedValue?.Replace("&", "&amp;");
+        trimmedValue = trimmedValue?.Replace("<", "&lt;");
+        trimmedValue = trimmedValue?.Replace(">", "&gt;");
         if (string.IsNullOrEmpty(trimmedValue))
             return $"   <{tagName} />";
         else
