@@ -180,7 +180,7 @@ public class OutgoingProvincialTracingManager : IOutgoingFileManager
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Province_Code", item.TrcRsp_Addr_PrvCd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Country_Code", item.TrcRsp_Addr_CtryCd));
         output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Address_Postal_Code", item.TrcRsp_Addr_PCd));
-        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Last_Update_Date ", xmlLastUpdateDate));
+        output.AppendLine(XmlHelper.GenerateXMLTagWithValue("Last_Update_Date", xmlLastUpdateDate));
         output.Append($"</Trace_Result>");
 
         return output.ToString();

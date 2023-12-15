@@ -133,7 +133,8 @@ namespace FOAEA3.Business.Areas.Application
                 return;
             }
 
-            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd, activatedDate,
+            int eventTraceCount = await EventManager.GetTraceEventCount(Appl_EnfSrv_Cd, Appl_CtrlCd, 
+                                                                        activatedDate.AddDays(-1),
                                                                         BFEventReasonCode, BFEvent_Id);
 
             switch (eventTraceCount)

@@ -38,8 +38,24 @@ namespace FileBroker.Model
         public MEPSwearing_RecType99 Trailer;
     }
 
+    public struct MEPSwearing_SwearingDataSetSingle
+    {
+        public MEPSwearing_RecType01 Header;
+
+        [DataMember(IsRequired = false)]
+        public MEPSwearing_RecType61 SwearingDetail;
+
+        public MEPSwearing_RecType99 Trailer;
+    }
+
     public class MEPSwearingFileData
     {
         public MEPSwearing_SwearingDataSet NewDataSet;
     }
+
+    public class MEPSwearingFileDataSingle
+    {
+        public MEPSwearing_SwearingDataSetSingle NewDataSet;
+    }
+
 }

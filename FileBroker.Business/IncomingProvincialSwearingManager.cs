@@ -252,10 +252,30 @@ public class IncomingProvincialSwearingManager : IncomingProvincialManagerBase
         {
             result = JsonConvert.DeserializeObject<MEPSwearingFileData>(sourceTracingData);
         }
-        catch (Exception e)
+        catch
         {
-            error = e.Message;
-            result = new MEPSwearingFileData();
+            try
+            {
+                var tempResult = JsonConvert.DeserializeObject<MEPSwearingFileDataSingle>(sourceTracingData);
+
+                result = new MEPSwearingFileData();
+
+                if (tempResult != null)
+                {
+                    result.NewDataSet.Header = tempResult.NewDataSet.Header;
+                    result.NewDataSet.SwearingDetail = new List<MEPSwearing_RecType61>();
+                    if (tempResult.NewDataSet.SwearingDetail.RecType != null)
+                    {
+                        result.NewDataSet.SwearingDetail.Add(tempResult.NewDataSet.SwearingDetail);
+                    };
+                    result.NewDataSet.Trailer = tempResult.NewDataSet.Trailer;
+                }
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+                result = new MEPSwearingFileData();
+            }
         }
 
         return result;
