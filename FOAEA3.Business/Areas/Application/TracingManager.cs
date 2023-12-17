@@ -432,17 +432,17 @@ namespace FOAEA3.Business.Areas.Application
 
             EventManager.AddEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: traceDate);
 
-            var eventBF = await EventManager.GetEventBF(TracingApplication.Subm_SubmCd, Appl_CtrlCd,
-                                                        EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
-
-            if (eventBF is not null)
-            {
-                var firstEventBF = eventBF.First();
-                firstEventBF.Event_Effctv_Dte = bfDate;
-                EventManager.UpdateEvent(firstEventBF);
-            }
-            else
-                EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
+            //var eventBF = await EventManager.GetEventBF(TracingApplication.Subm_SubmCd, Appl_CtrlCd,
+            //                                            EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING, "A");
+            //
+            //if (eventBF is not null)
+            //{
+            //    var firstEventBF = eventBF.First();
+            //    firstEventBF.Event_Effctv_Dte = bfDate;
+            //    EventManager.UpdateEvent(firstEventBF);
+            //}
+            //else
+            EventManager.AddBFEvent(eventReasonCode, appState: ApplicationState.APPLICATION_REINSTATED_11, effectiveDateTime: bfDate);
 
             await Validation.AddDuplicateCreditorWarningEvents();
         }
@@ -522,8 +522,8 @@ namespace FOAEA3.Business.Areas.Application
                             {
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                      bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
+                                closeEvent = true;
                             }
-                            closeEvent = true;
                             break;
 
                         case EventCode.C50806_SCHEDULED_TO_BE_REINSTATED__QUARTERLY_TRACING:
@@ -531,8 +531,9 @@ namespace FOAEA3.Business.Areas.Application
                             {
                                 await ReinstateApplication(Appl_EnfSrv_Cd, Appl_CtrlCd, DB.CurrentSubmitter,
                                                            bfEvent.Event_Effctv_Dte, bfEvent.Event_Reas_Cd.Value, bfEvent.Event_Id);
+                                TracingApplication.AppLiSt_Cd = ApplicationState.APPLICATION_REINSTATED_11; // to store correct value in event
+                                closeEvent = true;
                             }
-                            closeEvent = true;
                             break;
 
                         case EventCode.C54001_BF_EVENT:
